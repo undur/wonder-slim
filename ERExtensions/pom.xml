@@ -51,14 +51,14 @@
 			<artifactId>ERFoundation</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/Libraries/ERFoundation.jar</systemPath>
+			<systemPath>/Libraries/ERFoundation.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>wonder.core</groupId>
 			<artifactId>ERWebObjects</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/Libraries/ERWebObjects.jar</systemPath>
+			<systemPath>/Libraries/ERWebObjects.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>wonder.core</groupId>
