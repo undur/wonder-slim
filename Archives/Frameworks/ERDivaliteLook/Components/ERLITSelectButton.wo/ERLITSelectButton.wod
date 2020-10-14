@@ -1,4 +1,0 @@
-SelectEO: WOHyperlink {
-	action = selectObjectAction;
-	class = "ERDIVListPage_SelectButton";		// TODO: Change to ERDSelectButton
-}

@@ -1,5 +1,0 @@
-MetaViewport : WOGenericElement {
-  elementName = "meta";
-  name = "viewport";
-  content = content;
-}
