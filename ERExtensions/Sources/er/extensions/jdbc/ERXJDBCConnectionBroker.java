@@ -265,7 +265,7 @@ public class ERXJDBCConnectionBroker implements ERXJDBCAdaptor.ConnectionBroker 
              * thrown by that method.
              * 
              * @see #destroy(int)
-             */
+             *
             @Override
             public void destroy() {
                 try {
@@ -273,6 +273,7 @@ public class ERXJDBCConnectionBroker implements ERXJDBCAdaptor.ConnectionBroker 
                 } catch (SQLException e) {
                 }
             }
+            */
         };
 
         pinger = new Thread(new Runnable() {
