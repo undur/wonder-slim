@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="Sources"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/ERJars"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaWOExtensions"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaEOAccess"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaEOControl"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaEOProject"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaJDBCAdaptor"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaWebObjects"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaWOJSPServlet"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaXML"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaWebServicesSupport"/>
-	<classpathentry exported="true" kind="con" path="WOFramework/JavaFoundation"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
