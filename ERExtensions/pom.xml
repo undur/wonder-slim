@@ -15,13 +15,6 @@
 	</properties>
 
 	<build>
-		<sourceDirectory>${basedir}/Sources</sourceDirectory>
-		<testSourceDirectory>${basedir}/Tests/Sources</testSourceDirectory>
-		<testResources>
-			<testResource>
-				<directory>${basedir}/Tests/Resources</directory>
-			</testResource>
-		</testResources>
 		<plugins>
 			<plugin>
 				<groupId>org.wocommunity</groupId>
@@ -51,14 +44,14 @@
 			<artifactId>ERFoundation</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>/Libraries/ERFoundation.jar</systemPath>
+			<systemPath>${project.basedir}/Libraries/ERFoundation.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>wonder.core</groupId>
 			<artifactId>ERWebObjects</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>/Libraries/ERWebObjects.jar</systemPath>
+			<systemPath>${project.basedir}/Libraries/ERWebObjects.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>wonder.core</groupId>
