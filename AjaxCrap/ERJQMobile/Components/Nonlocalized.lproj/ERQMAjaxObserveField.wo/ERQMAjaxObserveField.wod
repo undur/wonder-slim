@@ -1,7 +1,0 @@
-InvSubBtn : AXSubmitButton {
-	id = invSubBtnId;
-	action = ^action;
-	disabled = true;
-	value = "1";
-	data-role = "none";
-}

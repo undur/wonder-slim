@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<wodefinitions>
-        <wo class="WXGenericContainer.java" wocomponentcontent="false">
-
-        <binding name="elementName"/>
-        <binding defaults="Boolean" name="ajax"/>
-    </wo>
-</wodefinitions>

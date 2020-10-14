@@ -1,9 +1,0 @@
-HASHEADER : WOConditional {
-	condition = ^withoutHeader;
-	negate = true;
-}
-
-HEADER : ERQMHeaderBar {
-	theme = ^theme;
-	string = ^title;
-}

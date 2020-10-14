@@ -1,9 +1,0 @@
-LnkItem : ERQMButton {
-	isButton = false;
-	action = ^action;
-	linkResource = ^linkResource;
-	href = ^href;
-	queryDictionary = ^queryDictionary;
-	data-rel = dataRel;
-	target = ^target;
-}
