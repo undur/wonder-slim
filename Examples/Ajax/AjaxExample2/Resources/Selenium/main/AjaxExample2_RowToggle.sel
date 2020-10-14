@@ -1,8 +1,0 @@
-Test for Row Toggle page
-
-|open|/|
-
-|click|link=Row Toggle|
-|pause|1200|
-|verifyTextPresent|You have selected 0 products.|
-

@@ -1,5 +1,0 @@
-#### loading Information
-er.extensions.load.Properties.WOOgnl=app
-
-ognl.inlineBindings=true
-ognl.helperFunctions=true

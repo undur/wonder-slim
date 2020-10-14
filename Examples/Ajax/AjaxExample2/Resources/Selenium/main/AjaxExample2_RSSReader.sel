@@ -1,8 +1,0 @@
-Test for RSS Reader page
-
-|open|/|
-
-|click|link=RSS Reader|
-|pause|1200|
-# |verifyTextPresent||
-

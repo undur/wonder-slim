@@ -1,5 +1,0 @@
-dbConnectURLGLOBAL=jdbc:postgresql://localhost/erindexingexample
-dbConnectUserGLOBAL=ak
-dbConnectPluginGLOBAL=Postgresql
-dbConnectDriverGLOBAL=org.postgresql.Driver
-dbEOPrototypesEntityGLOBAL=EOJDBCPostgresqlPrototypes

@@ -1,6 +1,0 @@
-MTAUC : MTAjaxUpdateContainer {
-	action = updateTime;
-	frequency = 4;
-	id = "MTPeriodicalUpdateContainer";
-	onSuccess = "$('MTPeriodicalUpdateContainer').highlight();";
-}

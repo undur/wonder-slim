@@ -1,9 +1,0 @@
-{
-    attributes = ({columnName = id; name = id; valueClassName = NSNumber; valueType = l; }); 
-    attributesUsedForLocking = (id); 
-    className = EOGenericRecord; 
-    externalName = Simple; 
-    fetchSpecificationDictionary = {}; 
-    name = Simple; 
-    primaryKeyAttributes = (id); 
-}

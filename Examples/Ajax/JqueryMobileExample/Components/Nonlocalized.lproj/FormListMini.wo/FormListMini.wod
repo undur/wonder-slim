@@ -1,6 +1,0 @@
-SAVE_ACTION : ERQMSubmitButton {
-	action = doSaveAction;
-	value = "SUBMIT";
-	data-theme = "b";
-	data-mini = "true";
-}
