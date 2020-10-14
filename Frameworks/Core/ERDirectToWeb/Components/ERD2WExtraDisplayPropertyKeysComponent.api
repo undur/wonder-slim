@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<wodefinitions>
-        <wo class="ERD2WExtraDisplayPropertyKeysComponent" wocomponentcontent="false">
-            <binding name="extraPropertiesKey"/>
-            <validation message="'extraPropertiesKey' is a required binding">
-                <unbound name="extraPropertiesKey"/>
-            </validation>
-        </wo>
-</wodefinitions>

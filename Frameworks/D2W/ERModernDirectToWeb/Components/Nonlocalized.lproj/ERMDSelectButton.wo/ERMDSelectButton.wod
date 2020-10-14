@@ -1,8 +1,0 @@
-SelectEOButton : CCSmartAjaxButton {
-  value = buttonLabel;
-  action = selectObjectAction;
-  alt = "Select this Item";
-  class = buttonClass;
-  updateContainerID = updateContainer;
-  useAjax = useAjax;
-}

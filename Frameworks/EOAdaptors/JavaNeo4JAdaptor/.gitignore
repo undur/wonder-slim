@@ -1,7 +1,0 @@
-target
-bin
-build
-doc
-*.xcodeproj
-*.pbxproj
-ant.*

@@ -1,8 +1,0 @@
-ComponentContent1: WOComponentContent {
-}
-
-Generic4: WOGenericContainer {
-	elementName = "range";
-	name = "range1";
-}
-

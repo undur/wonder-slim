@@ -1,8 +1,0 @@
-Selector: ERXBooleanSelector {
-	yesString = stringForYes;
-	noString = stringForNo;
-	noSelectionString = stringForNull;
-	selection = objectPropertyValue;
-	uiMode = uiMode;
-}
-

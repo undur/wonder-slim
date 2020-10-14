@@ -1,5 +1,0 @@
-{
-    EOModelVersion = "2.1"; 
-    adaptorName = JDBC; 
-    entities = ({className = "er.taggable.model.ERTag"; name = ERTag; }); 
-}

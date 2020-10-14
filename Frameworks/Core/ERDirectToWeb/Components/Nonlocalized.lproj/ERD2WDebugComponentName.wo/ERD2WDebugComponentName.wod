@@ -1,7 +1,0 @@
-IsDebugPropertyName: WOConditional {
-	condition = ^isDebug;
-}
-
-ComponentName: WOString {
-	value = d2wContext.componentName;
-}

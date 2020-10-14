@@ -1,7 +1,0 @@
-TagRepetition : WORepetition {
-	list = tagNames;
-	item = repetitionTag;
-}
-
-Tag : WOComponentContent {
-}

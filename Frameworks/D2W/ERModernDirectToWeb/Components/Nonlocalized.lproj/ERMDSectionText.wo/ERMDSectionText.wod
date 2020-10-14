@@ -1,7 +1,0 @@
-SectionText : WOString {
-	value = ^displayNameForSectionKey;
-}
-
-SectionContainer : WOGenericContainer {
-	elementName = sectionElementName;
-}
