@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<properties>
-		<wonder.version>7.2-SNAPSHOT</wonder.version>
+		<wonder.version>8.0.0-SNAPSHOT</wonder.version>
 		<webobjects.version>5.4.3</webobjects.version>
 	</properties>
 
