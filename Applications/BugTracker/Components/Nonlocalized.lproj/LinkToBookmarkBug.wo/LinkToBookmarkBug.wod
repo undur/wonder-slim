@@ -1,9 +1,0 @@
-Hyperlink1: WOHyperlink {
-	href = href;
-	disabled = object.isNewObject; //VALID
-}
-
-String1: WOString {
-	value = objectKeyPathValue;
-}
-

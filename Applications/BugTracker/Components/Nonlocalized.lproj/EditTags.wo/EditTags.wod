@@ -1,5 +1,0 @@
-Tags : ERTagField {
-	taggable = taggable;
-	limit = ^tagLimit;
-	minimum = ^tagMinimum;
-}

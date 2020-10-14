@@ -1,3 +1,0 @@
-something : WOString {
-	value = "Hi";
-}
