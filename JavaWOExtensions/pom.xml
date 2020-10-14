@@ -9,13 +9,11 @@
 	<packaging>woframework</packaging>
 
 	<properties>
-		<wonder.version>7.2-SNAPSHOT</wonder.version>
+		<wonder.version>8.0.0-SNAPSHOT</wonder.version>
 		<webobjects.version>5.4.3</webobjects.version>
-		<tambourine.version>8.0.0-SNAPSHOT</tambourine.version>
 	</properties>
 
 	<build>
-		<sourceDirectory>${basedir}/Sources</sourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.wocommunity</groupId>

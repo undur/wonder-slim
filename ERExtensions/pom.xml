@@ -9,9 +9,8 @@
 	<packaging>woframework</packaging>
 
 	<properties>
-		<wonder.version>7.2-SNAPSHOT</wonder.version>
+		<wonder.version>8.0.0-SNAPSHOT</wonder.version>
 		<webobjects.version>5.4.3</webobjects.version>
-		<tambourine.version>8.0.0-SNAPSHOT</tambourine.version>
 	</properties>
 
 	<build>
@@ -56,7 +55,7 @@
 		<dependency>
 			<groupId>wonder.core</groupId>
 			<artifactId>JavaWOExtensions</artifactId>
-			<version>${tambourine.version}</version>
+			<version>${wonder.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.webobjects</groupId>
