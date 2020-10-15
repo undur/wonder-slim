@@ -38,11 +38,13 @@
 	</build>
 
 	<dependencies>
+		<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 		<dependency>
 			<groupId>wonder.core</groupId>
 			<artifactId>ERFoundation</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 		<dependency>
 			<groupId>wonder.core</groupId>
 			<artifactId>ERWebObjects</artifactId>
