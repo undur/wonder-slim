@@ -137,5 +137,11 @@
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
 		</dependency>
+		<!-- Added to allow _WOApplicationWrapper to compile (uses servlet APIs). Might want o remove it later on? // Hugi 2020-10-15 -->
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>servlet-api-2.5</artifactId>
+			<version>6.1.6</version>
+		</dependency>
 	</dependencies>
 </project>
