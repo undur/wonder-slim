@@ -16,7 +16,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.eof.ERXEnterpriseObject;
 import er.extensions.localization.ERXLocalizer;
 
 /**
@@ -92,7 +91,7 @@ public class ERXErrorDictionaryPanel extends ERXStatelessComponent {
     public static String massageErrorMessage(String initialMessage, String displayErrorKey) {
         String result = StringUtils.replace(initialMessage, "EOValidationException:", "");
         if (displayErrorKey!=null) {
-        	result = StringUtils.replace(result, ERXEnterpriseObject.KEY_MARKER, displayErrorKey);
+        	result = StringUtils.replace(result, "** KEY_MARKER **", displayErrorKey);
         }
         
         if (result!=null) {
