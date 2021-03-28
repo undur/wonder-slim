@@ -28,9 +28,6 @@ import er.extensions.ERXExtensions;
 import er.extensions.components.ERXLocalizationEditor;
 import er.extensions.components.ERXRemoteShell;
 import er.extensions.components.ERXStringHolder;
-import er.extensions.eof.ERXDatabaseConsole;
-import er.extensions.eof.ERXEC;
-import er.extensions.eof.ERXObjectStoreCoordinator;
 import er.extensions.formatters.ERXUnitAwareDecimalFormat;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
@@ -41,7 +38,6 @@ import er.extensions.logging.ERXLog4JConfiguration;
 import er.extensions.logging.ERXLogger;
 import er.extensions.statistics.ERXStatisticsPage;
 import er.extensions.statistics.ERXStats;
-import er.testrunner.ERXWOTestInterface;
 
 /**
  * Basic collector for direct action additions. All of the actions are password protected, 
@@ -83,33 +79,6 @@ public class ERXDirectAction extends WODirectAction {
     	return password.equals(requestPassword);
     }
 
-    /**
-     * Action used for junit tests. This method is only active when WOCachingEnabled is
-     * disabled (we take this to mean that the application is not in production).
-     * <h3>Synopsis:</h3>
-     * pw=<i>aPassword</i>&amp;case=<i>classNameOfTestCase</i>
-     * <h3>Form Values:</h3>
-     * <b>pw</b> password to be checked against the system property <code>er.extensions.ERXJUnitPassword</code>.
-     * <b>case</b> class name for unit test to be performed.
-     * 
-     * @return {@link er.testrunner.ERXWOTestInterface ERXWOTestInterface} 
-     * with the results after performing the given test.
-     */
-    public WOActionResults testAction() {
-        if (canPerformActionWithPasswordKey("er.extensions.ERXJUnitPassword")) {
-        	ERXWOTestInterface result = pageWithName(ERXWOTestInterface.class);
-            session().setObjectForKey(Boolean.TRUE, "ERXWOTestInterface.enabled");
-            String testCase = request().stringFormValueForKey("case");
-            if(testCase != null) {
-                result.theTest = testCase;
-                // (ak:I wish we could return a direct test result...)
-                // return (WOComponent)result.valueForKey("performTest");
-            }
-            return result;
-        }
-        return forbiddenResponse();
-    }
-    
     /**
      * Flushes the component cache to allow reloading components even when WOCachingEnabled=true.
      * 
@@ -283,23 +252,6 @@ public class ERXDirectAction extends WODirectAction {
     }
 
     /**
-     * Action used for accessing the database console
-     * <h3>Synopsis:</h3>
-     * pw=<i>aPassword</i>
-     * <h3>Form Values:</h3>
-     * <b>pw</b> password to be checked against the system property <code>er.extensions.ERXRemoteShellPassword</code>.
-     * 
-     * @return {@link ERXLog4JConfiguration} for modifying current logging settings.
-     */
-    public WOActionResults databaseConsoleAction() {
-        if (canPerformActionWithPasswordKey("er.extensions.ERXDatabaseConsolePassword")) {
-        	session().setObjectForKey(Boolean.TRUE, "ERXDatabaseConsole.enabled");
-        	return pageWithName(ERXDatabaseConsole.class);
-        }
-        return forbiddenResponse();
-    }
-
-    /**
      * Action used for forcing garbage collection. If WOCachingEnabled is true (we take this to mean 
      * that the application is in production) you need to give a password to access it.
      * <h3>Synopsis:</h3>
@@ -339,35 +291,6 @@ public class ERXDirectAction extends WODirectAction {
             return result;
         }
         return forbiddenResponse();
-    }
-
-    /**
-     * Returns a list of the traces of open editing context locks.  This is only useful if
-     * er.extensions.ERXEC.traceOpenLocks is enabled and 
-     * er.extensions.ERXOpenEditingContextLocksPassword is set.
-     * 
-     * @return list of lock traces
-     */
-    public WOActionResults showOpenEditingContextLockTracesAction() {
-      if (canPerformActionWithPasswordKey("er.extensions.ERXOpenEditingContextLockTracesPassword")) {
-        ERXStringHolder result = pageWithName(ERXStringHolder.class);
-        result.setEscapeHTML(false);
-        try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
-            pw.println("<pre>");
-            pw.println(ERXEC.outstandingLockDescription());
-            pw.println("</pre>");
-            pw.println("<hr>");
-            pw.println("<pre>");
-            pw.println(ERXObjectStoreCoordinator.outstandingLockDescription());
-            pw.println("</pre>");
-            result.setValue(sw.toString());
-        }
-        catch (IOException e) {
-            // ignore
-        }
-        return result;
-      }
-      return forbiddenResponse();
     }
 
     /**
