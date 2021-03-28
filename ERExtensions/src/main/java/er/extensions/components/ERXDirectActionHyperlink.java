@@ -15,9 +15,9 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 
-import er.extensions.FIXMEException;
 import er.extensions.crypting.ERXCrypto;
 import er.extensions.foundation.ERXStringUtilities;
+import x.FIXMEException;
 
 /**
  * This component can be used for two things:

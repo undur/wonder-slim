@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import com.webobjects.eocontrol.EOEnterpriseObject;
 
-import er.extensions.FIXMEException;
+import x.FIXMEException;
 
 /**
  * This class is an abstract class that defines an API for determining if two objects are equal.
