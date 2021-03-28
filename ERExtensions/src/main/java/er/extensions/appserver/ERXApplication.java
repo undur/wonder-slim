@@ -2326,16 +2326,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		return Integer.valueOf(sessionTimeOut().intValue() / 60);
 	}
 
-	protected static final ERXFormatterFactory _formatterFactory = new ERXFormatterFactory();
-
-	/**
-	 * Getting formatters into KVC: bind to
-	 * <code>application.formatterFactory.(60/#,##0.00)</code>
-	 */
-	public ERXFormatterFactory formatterFactory() {
-		return _formatterFactory;
-	}
-
 	protected Boolean _responseCompressionEnabled;
 
 	/**
