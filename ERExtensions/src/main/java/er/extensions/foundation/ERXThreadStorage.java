@@ -24,7 +24,7 @@ import com.webobjects.foundation.NSSet;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.concurrency.ERXCloneableThreadLocal;
-import er.extensions.eof.ERXEOControlUtilities;
+
 /**
  * Provides a way to store objects for a particular thread. This can be especially handy for storing objects
  * like the current actor or the current form name within the scope of a thread handling a particular request.
@@ -179,35 +179,6 @@ public class ERXThreadStorage {
 		return result;
 	}
     
-    
-    /**
-     * Gets the object associated with the key in the storage
-     * map off of the current thread in the given editing context.
-	 * Throws a ClassCastException when the value is not an EO.
-     * @param ec editing context to retrieve the value into
-     * @param key key to be used to retrieve value from map.
-     * @return the value stored in the map for the given key.
-     */
-    public static Object valueForKey(EOEditingContext ec, String key) {
-        Object result = valueForKey(key);
-        if(result != null) {
-            if (result instanceof EOEnterpriseObject) {
-                EOEnterpriseObject eo = (EOEnterpriseObject) result;
-                if(eo.editingContext() != null && eo.editingContext() != ec) {
-                	eo.editingContext().lock();
-                	try {
-                		result = ERXEOControlUtilities.localInstanceOfObject(ec, eo);
-                	} finally {
-                		eo.editingContext().unlock();
-                	}
-                }
-            } else {
-               throw new ClassCastException("Expected EO, got : " + result.getClass().getName() + ", " + result);
-            }
-        }
-        return result;
-    }
-
     /**
      * Gets the storage map from the current thread.
      * At the moment this Map is syncronized for thread
