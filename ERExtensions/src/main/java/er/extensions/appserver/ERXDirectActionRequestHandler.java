@@ -73,27 +73,6 @@ public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler 
         Class actionClass = null;
         boolean shouldCacheResult = false;
         
-        if (ERXWOResponseCache.sharedInstance().isEnabled()) {
-            try {
-                // Caching scheme for 5.2 applications. Will uncomment once we are building 5.2 only ERExtensions
-            	// CHECKME
-                Object[] actionClassAndName = getRequestActionClassAndNameForPath(getRequestHandlerPathForRequest(request));
-                //Object[] actionClassAndName = null;
-                if (actionClassAndName != null && actionClassAndName.length == 3) {
-                    actionName = (String)actionClassAndName[1];
-                    actionClass = (Class)actionClassAndName[2];
-                    if (ERXWOResponseCache.Cacheable.class.isAssignableFrom(actionClass)) {
-                        response = ERXWOResponseCache.sharedInstance().cachedResponseForRequest(actionClass,
-                                actionName,
-                                request);
-                        // we need to cache only when there was no previous response in the cache
-                        shouldCacheResult = (response == null);
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Caught exception checking for cache. Leaving it up to the regular exception handler to cache. Request: {}", request, e);
-            } 
-        }
 		if (response == null) {
 			// ak: when addressed with a DA link with this instance's ID (and
 			// an expired session) and the app is refusing new sessions, the
@@ -130,13 +109,7 @@ public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler 
         	registerWillHandleActionRequest();
             registerDidHandleActionRequestWithActionNamed(actionName);
         }
-        if (shouldCacheResult && response != null) {
-            try {
-                ERXWOResponseCache.sharedInstance().cacheResponseForRequest(actionClass, actionName, request, response);
-            } catch (Exception e) {
-                log.error("Caught exception when caching response. Request: {}", request, e);
-            }
-        }
+
         if (automaticMessageEncodingEnabled()) {
             ERXMessageEncoding messageEncoding = null;
             
