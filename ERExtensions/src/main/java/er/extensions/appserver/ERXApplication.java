@@ -54,7 +54,6 @@ import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOCookie;
 import com.webobjects.appserver.WOMessage;
-import com.webobjects.appserver.WORedirect;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResourceManager;
@@ -73,7 +72,6 @@ import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSKeyValueCoding;
-import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -98,8 +96,6 @@ import er.extensions.components._private.ERXWORepetition;
 import er.extensions.components._private.ERXWOString;
 import er.extensions.components._private.ERXWOTextField;
 import er.extensions.eof.ERXConstant;
-import er.extensions.eof.ERXDatabaseContextDelegate;
-import er.extensions.eof.ERXEC;
 import er.extensions.formatters.ERXFormatterFactory;
 import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXCompressionUtilities;
@@ -112,7 +108,6 @@ import er.extensions.foundation.ERXRuntimeUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXTimestampUtilities;
 import er.extensions.localization.ERXLocalizer;
-import er.extensions.migration.ERXMigrator;
 import er.extensions.statistics.ERXStats;
 
 /**
@@ -1092,9 +1087,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		if (contextClassName().equals("WOContext")) {
 			setContextClassName(ERXWOContext.class.getName());
 		}
-		if (contextClassName().equals("WOServletContext") || contextClassName().equals("com.webobjects.jspservlet.WOServletContext")) {
-			setContextClassName(ERXWOServletContext.class.getName());
-		}
 
 		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
 		try {
@@ -1296,31 +1288,9 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 */
 	public final void finishInitialization(NSNotification n) {
 		finishInitialization();
-		if (ERXMigrator.shouldMigrateAtStartup()) {
-			ERXMigrator migrator = migrator();
-			migrationsWillRun(migrator);
-			migrator.migrateToLatest();
-			migrationsDidRun(migrator);
-		}
-    NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.ApplicationDidFinishInitializationNotification, this));
+		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.ApplicationDidFinishInitializationNotification, this));
 	}
 	
-	/**
-	 * Called prior to migrations running.
-	 * @param migrator the migrator that will be used
-	 */
-	protected void migrationsWillRun(ERXMigrator migrator) {
-		// DO NOTHING
-	}
-	
-	/**
-	 * Called after migrations finish running.
-	 * @param migrator the migrator that was used
-	 */
-	protected void migrationsDidRun(ERXMigrator migrator) {
-		// DO NOTHING
-	}
-
 	/**
 	 * Notification method called when the application posts the notification
 	 * {@link WOApplication#ApplicationDidFinishLaunchingNotification}. This
@@ -1830,22 +1800,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 */
 	@Override
 	public WOResponse handleException(Exception exception, WOContext context) {
-		if (ERXProperties.booleanForKey("er.extensions.ERXApplication.redirectOnMissingObjects")) {
-			// AK: the idea here is that you might have a stale object that was
-			// deleted from the DB
-			// while you weren't looking so the next time around your page might
-			// get a chance earlier to
-			// realize it isn't there anymore. Unfortunately, this doesn't work
-			// in all scenarios.
-			if (exception instanceof ERXDatabaseContextDelegate.ObjectNotAvailableException && context != null) {
-				String retryKey = context.request().stringFormValueForKey("ERXRetry");
-				if (retryKey == null) {
-					WORedirect page = new WORedirect(context);
-					page.setUrl(context.request().uri() + "?ERXRetry=1");
-					return page.generateResponse();
-				}
-			}
-		}
 		// We first want to test if we ran out of memory. If so we need to quit
 		// ASAP.
 		handlePotentiallyFatalException(exception);
@@ -2007,7 +1961,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		 */
 		EOObserverCenter.notifyObserversObjectWillChange(null);
 		// We *always* want to unlock left over ECs.
-		ERXEC.unlockAllContextsForCurrentThread();
+//		ERXEC.unlockAllContextsForCurrentThread();
 		// we don't want this hanging around
 		ERXRuntimeUtilities.clearThreadInterrupt(Thread.currentThread());
 	}
@@ -2413,14 +2367,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	}
 
 	/**
-	 * Returns an ERXMigrator with the lock owner name "appname-instancenumber".
-	 * @return migrator for this instance
-	 */
-	public ERXMigrator migrator() {
-		return new ERXMigrator(name() + "-" + host() + ":" + port());
-	}
-
-	/**
 	 * This method is called by ERXWOContext and provides the application a hook
 	 * to rewrite generated URLs.
 	 * 
@@ -2534,31 +2480,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
 		return (T)pageWithName(componentClass.getName(), ERXWOContext.currentContext());
-	}
-
-	/**
-	 * Makes ERXConstants available for binding in the UI. Bind to <code>application.constants.MyConstantClass</code>.
-	 */
-	public NSKeyValueCodingAdditions constants() {
-		return new NSKeyValueCodingAdditions() {
-
-			public void takeValueForKey(Object value, String key) {
-				throw new IllegalArgumentException("Can't set constant");
-			}
-
-			public Object valueForKey(String key) {
-				return ERXConstant.constantsForClassName(key);
-			}
-
-			public void takeValueForKeyPath(Object value, String keyPath) {
-				throw new IllegalArgumentException("Can't set constant");
-			}
-
-			public Object valueForKeyPath(String keyPath) {
-				return valueForKey(keyPath);
-			}
-
-		};
 	}
 
 	/**
