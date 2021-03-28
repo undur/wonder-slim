@@ -64,11 +64,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.webobjects</groupId>
-			<artifactId>JavaEOAccess</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.webobjects</groupId>
 			<artifactId>JavaWebObjects</artifactId>
 			<version>${webobjects.version}</version>
 			<exclusions>
@@ -77,26 +72,6 @@
 					<artifactId>JavaXML</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.webobjects</groupId>
-			<artifactId>JavaEOControl</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.webobjects</groupId>
-			<artifactId>JavaJDBCAdaptor</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.webobjects</groupId>
-			<artifactId>JavaWOJSPServlet</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.webobjects</groupId>
-			<artifactId>JavaWebServicesSupport</artifactId>
-			<version>${webobjects.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
