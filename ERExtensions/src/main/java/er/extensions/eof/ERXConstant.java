@@ -7,5 +7,6 @@ package er.extensions.eof;
 public class ERXConstant {
 
 	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
-
+    public static final Integer OneInteger = 1;
+    public static final Integer ZeroInteger = 0;
 }
