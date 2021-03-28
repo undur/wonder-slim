@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.CharUtils;
@@ -36,18 +35,13 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.eoaccess.EOAdaptorOperation;
 import com.webobjects.eoaccess.EOAttribute;
 import com.webobjects.eoaccess.EODatabaseOperation;
-import com.webobjects.eoaccess.EOUtilities;
-import com.webobjects.eocontrol.EOEditingContext;
-import com.webobjects.eocontrol.EOFetchSpecification;
 import com.webobjects.eocontrol.EOSortOrdering;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
-import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
-import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
@@ -98,96 +92,6 @@ public class ERXStringUtilities {
     // MOVEME: fuzzy matching stuff
     public static void setAdjustement(double newAdjustement) {
         adjustement = newAdjustement;
-    }
-
-    /**
-     * Fuzzy matching is useful for catching user entered typos. For example
-     * if a user is searching for a company named 'Aple' within your application
-     * they aren't going to find it. Thus the idea of fuzzy matching, meaning you
-     * can define a threshold of 'how close can they be' type of thing.
-     *
-     * @param name to be matched against
-     * @param entityName name of the entity to perform the match against.
-     * @param propertyKey to be matched against
-     * @param synonymsKey allows objects to have additional values to be matched
-     * 		against in addition to just the value of the propertyKey
-     * @param ec context to fetch data in
-     * @param cleaner object used to clean a string, for example the cleaner might
-     *		strip out the words 'The' and 'Inc.'
-     * @param sortOrderings can be either <code>SORT_ASCENDING</code> or <code>SORT_DESCENDING</code> 
-     *          to tell how the results should be sorted.
-     * @return an array of objects that match in a fuzzy manner the name passed in.
-     */
-    // FIXME: Should move all of fuzzy matching stuff in ERXFuzzyMatchCleaner and then add a static inner inerface
-    // IMPROVEME: too many parameters.
-    public static NSArray fuzzyMatch(String name,
-                                     String entityName,
-                                     String propertyKey,
-                                     String synonymsKey,
-                                     EOEditingContext ec,
-                                     ERXFuzzyMatchCleaner cleaner,
-                                     NSArray sortOrderings ){
-        String eoKey = "eo";
-        NSMutableArray<NSMutableDictionary<String, Object>> results = new NSMutableArray<NSMutableDictionary<String, Object>>();
-        EOFetchSpecification fs = new EOFetchSpecification( entityName, null, null );
-        fs.setFetchesRawRows( true );
-        NSArray<String> pks = EOUtilities.entityNamed( ec, entityName ).primaryKeyAttributeNames();
-        NSMutableArray<String> keyPaths = new NSMutableArray<>(pks);
-        keyPaths.addObject( propertyKey );
-        if( synonymsKey != null ) 
-            keyPaths.addObject( synonymsKey );
-        //we use only the strictly necessary keys.
-        fs.setRawRowKeyPaths( keyPaths );
-        NSArray<NSDictionary<String, Object>> rawRows = ec.objectsWithFetchSpecification( fs );
-        if(name == null)
-            name = "";
-        name = name.toUpperCase();
-        String cleanedName = cleaner.cleanStringForFuzzyMatching(name);
-        for(Enumeration e = rawRows.objectEnumerator(); e.hasMoreElements(); ){
-            NSMutableDictionary<String, Object> dico = ((NSDictionary)e.nextElement()).mutableClone();
-            Object value = dico.valueForKey(propertyKey);
-            boolean trySynonyms = true;
-            //First try to match with the name of the eo
-            if( value!=null && value instanceof String){
-                String comparedString = ((String)value).toUpperCase();
-                String cleanedComparedString = cleaner.cleanStringForFuzzyMatching(comparedString);
-                if( (StringUtils.getLevenshteinDistance(name, comparedString) <=
-                     Math.min((double)name.length(), (double)comparedString.length())*adjustement ) ||
-                    (StringUtils.getLevenshteinDistance(cleanedName, cleanedComparedString) <=
-                     Math.min((double)cleanedName.length(), (double)cleanedComparedString.length())*adjustement)){
-                    dico.setObjectForKey( Double.valueOf(StringUtils.getLevenshteinDistance(name, comparedString)), _DISTANCE );
-                    NSDictionary<String, Object> pkValues = new NSDictionary<>(dico.objectsForKeys(pks, NSKeyValueCoding.NullValue ), pks);
-                    dico.setObjectForKey( EOUtilities.faultWithPrimaryKey( ec, entityName, pkValues ), eoKey );
-                    results.addObject( dico );
-                    trySynonyms = false;
-                }
-            }
-            //Then try to match using the synonyms vector
-            if(trySynonyms && synonymsKey != null){
-                Object synonymsString = dico.valueForKey(synonymsKey);
-                if(synonymsString != null && synonymsString instanceof String){
-                    Object plist  = NSPropertyListSerialization.propertyListFromString((String)synonymsString);
-                    Vector v = (Vector)plist;
-                    for(int i = 0; i< v.size(); i++){
-                        String comparedString = ((String)v.elementAt(i)).toUpperCase();
-                        if((StringUtils.getLevenshteinDistance(name, comparedString) <=
-                            Math.min((double)name.length(), (double)comparedString.length())*adjustement) ||
-                           (StringUtils.getLevenshteinDistance(cleanedName, comparedString) <=
-                            Math.min((double)cleanedName.length(), (double)comparedString.length())*adjustement)){
-                            dico.setObjectForKey( Double.valueOf(StringUtils.getLevenshteinDistance(name, comparedString)), _DISTANCE );
-                            NSDictionary<String, Object> pkValues = new NSDictionary<>(dico.objectsForKeys(pks, NSKeyValueCoding.NullValue ), pks);
-                            dico.setObjectForKey( EOUtilities.faultWithPrimaryKey( ec, entityName, pkValues ), eoKey );
-                            results.addObject( dico );
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        if( sortOrderings != null ) {
-            results = (NSMutableArray<NSMutableDictionary<String, Object>>) EOSortOrdering.sortedArrayUsingKeyOrderArray(results, sortOrderings);
-        }
-        return (NSArray) results.valueForKey( eoKey );
     }
 
     /**
