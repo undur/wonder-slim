@@ -8,7 +8,6 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSMutableArray;
 
 import er.extensions.components.ERXArrayChooser;
-import er.extensions.eof.ERXEOControlUtilities;
 
 /**
  * Back port from WO 5 WOExtensions. This component is binding compatible, but not source compatible.
@@ -97,11 +96,14 @@ public class WOToManyRelationship extends ERXArrayChooser {
     public NSArray selections() {
     	if (_selections == null) {
     		NSArray oldValues = (NSArray) NSKeyValueCodingAdditions.Utility.valueForKeyPath(sourceObject(), relationshipKey());
+    		
+    		/* Disabled during EOF code deletion
     		if(oldValues != null) {
     			if(oldValues.lastObject() instanceof EOEnterpriseObject) {
     				oldValues = ERXEOControlUtilities.localInstancesOfObjects(editingContext(), oldValues);
     			}
     		}
+    		 */
     		setSelections(oldValues);
     		// deal with isMandatory
     		if ((_selections == null) && isMandatory()) {
