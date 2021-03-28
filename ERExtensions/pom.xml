@@ -2,14 +2,14 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>wonder.core</groupId>
+	<groupId>undur</groupId>
 	<artifactId>ERExtensions</artifactId>
 	<version>8.0.0-SNAPSHOT</version>
 	<name>ERExtensions Framework</name>
 	<packaging>woframework</packaging>
 
 	<properties>
-		<wonder.version>8.0.0-SNAPSHOT</wonder.version>
+		<undur.version>8.0.0-SNAPSHOT</undur.version>
 		<webobjects.version>5.4.3</webobjects.version>
 	</properties>
 
@@ -51,9 +51,9 @@
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>wonder.core</groupId>
+			<groupId>undur</groupId>
 			<artifactId>JavaWOExtensions</artifactId>
-			<version>${wonder.version}</version>
+			<version>${undur.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.webobjects</groupId>

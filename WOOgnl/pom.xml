@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<properties>
-		<wonder.version>8.0.0-SNAPSHOT</wonder.version>
+		<undur.version>8.0.0-SNAPSHOT</undur.version>
 		<webobjects.version>5.4.3</webobjects.version>
 	</properties>
 
-	<groupId>wonder.core</groupId>
+	<groupId>undur</groupId>
 	<artifactId>WOOgnl</artifactId>
 	<version>8.0.0-SNAPSHOT</version>
 	<name>WOOgnl Framework</name>
