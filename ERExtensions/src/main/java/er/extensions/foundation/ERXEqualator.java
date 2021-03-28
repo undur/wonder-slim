@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import com.webobjects.eocontrol.EOEnterpriseObject;
 
-import er.extensions.eof.ERXEOControlUtilities;
+import er.extensions.FIXMEException;
 
 /**
  * This class is an abstract class that defines an API for determining if two objects are equal.
@@ -68,6 +68,8 @@ public abstract class ERXEqualator {
 
         @Override
         public boolean objectIsEqualToObject(Object o1, Object o2) {
+        	throw new FIXMEException("Jesus christ");
+        	/*
             if ( (o1 != null && ! (o1 instanceof EOEnterpriseObject)) || (o2 != null && ! (o2 instanceof EOEnterpriseObject)) ) {
                 throw new RuntimeException("Unable to compare objects because both objects need to be EOEnterpriseObjects. " +
                                            "o1: " + o1 + (o1 != null ? " (class: " + o1.getClass() + ")" : "") +
@@ -77,6 +79,7 @@ public abstract class ERXEqualator {
             final EOEnterpriseObject eo2 = (EOEnterpriseObject)o2;
             
             return ERXEOControlUtilities.eoEquals(eo1, eo2);
+            */
         }
     }
 }
