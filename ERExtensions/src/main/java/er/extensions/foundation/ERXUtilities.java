@@ -10,30 +10,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
-import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.eoaccess.EOEntity;
-import com.webobjects.eoaccess.EOModelGroup;
-import com.webobjects.eoaccess.EORelationship;
-import com.webobjects.eoaccess.EOUtilities;
-import com.webobjects.eocontrol.EOEditingContext;
-import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSSet;
-import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.components.ERXStatelessComponent;
 import er.extensions.eof.ERXConstant;
-import er.extensions.eof.ERXEOAccessUtilities;
-import er.extensions.eof.ERXEnterpriseObject;
-import er.extensions.eof.ERXReplicableInterface;
 
 /**
  * Diverse collection of utility methods for handling everything from
@@ -42,101 +30,6 @@ import er.extensions.eof.ERXReplicableInterface;
  */
 public class ERXUtilities {
     private static final Logger log = LoggerFactory.getLogger(ERXUtilities.class);
-
-    /**
-     * Utility method for returning all of the primary keys for
-     * all of the objects that are marked for deletion in
-     * the editing context.
-     * @param ec editing context
-     * @return an array containing all of the dictionaries of
-     *		primary keys for all of the objects marked for
-     *		deletion
-     */
-    // CHECKME: I don't think this is a value add
-    public static NSArray deletedObjectsPKeys(EOEditingContext ec) {
-        NSMutableArray result = new NSMutableArray();
-        for (Enumeration e = ec.deletedObjects().objectEnumerator(); e.hasMoreElements();) {
-            EOEnterpriseObject eo=(EOEnterpriseObject)e.nextElement();
-            if (eo instanceof ERXEnterpriseObject)
-                result.addObject(((ERXEnterpriseObject)eo).primaryKeyInTransaction());
-            else
-                result.addObject(EOUtilities.primaryKeyForObject(ec, eo));
-        }
-        return result;
-    }
- 
-    /**
-     * Traverses a key path to return the last {@link EORelationship}
-     * object.
-     * <p>
-     * Note: that this method uses the object and not the model to traverse
-     * the key path, this has the added benefit of handling EOF inheritance
-     * @param object enterprise object to find the relationship off of
-     * @param keyPath key path used to find the relationship
-     * @return relationship object corresponding to the last property key of
-     * 		the key path.
-     */
-    public static EORelationship relationshipWithObjectAndKeyPath(EOEnterpriseObject object, String keyPath) {
-        EOEnterpriseObject lastEO = relationshipObjectWithObjectAndKeyPath(object, keyPath);
-        EORelationship relationship = null;
-        
-        if (lastEO!=null) {
-            EOEntity entity=ERXEOAccessUtilities.entityNamed(object.editingContext(), lastEO.entityName());
-            String lastKey=ERXStringUtilities.lastPropertyKeyInKeyPath(keyPath);
-            relationship=entity.relationshipNamed(lastKey);
-        }
-        return relationship;
-    }
-
-    
-    public static NSDictionary relationshipEntityWithEntityAndKeyPath(EOEntity srcentity, String keyPath) {
-        //keyPath is something like 'project.user.person.firstname'
-        //we will get the Person entity
-        if (keyPath.indexOf(".") == -1) {
-            NSDictionary d = new NSDictionary(new Object[]{srcentity, keyPath}, new Object[]{"entity", "keyPath"});
-            return d;
-        }
-
-        while (keyPath.indexOf(".") != -1) {
-            String key = ERXStringUtilities.firstPropertyKeyInKeyPath(keyPath);
-            EORelationship rel = srcentity.relationshipNamed(key);
-            if (rel == null) {
-                break;
-            }
-            srcentity = rel.destinationEntity();
-            keyPath = ERXStringUtilities.keyPathWithoutFirstProperty(keyPath);
-        }
-        NSDictionary d = new NSDictionary(new Object[]{srcentity, keyPath}, new Object[]{"entity", "keyPath"});
-        return d;
-    }
-    
-    public static EOEnterpriseObject relationshipObjectWithObjectAndKeyPath(EOEnterpriseObject object, String keyPath) {
-        if(object == null) {
-        	return null;
-        }
-    	EOEnterpriseObject lastEO=object;
-        if (keyPath.indexOf(".")!=-1) {
-            String partialKeyPath=ERXStringUtilities.keyPathWithoutLastProperty(keyPath);
-            Object rawLastEO=object.valueForKeyPath(partialKeyPath);
-            lastEO=rawLastEO instanceof EOEnterpriseObject ? (EOEnterpriseObject)rawLastEO : null;
-        }
-        return lastEO;
-    }
-
-    /**
-     * Simple utility method for deleting an array
-     * of objects from an editing context.
-     * @param ec editing context to have objects deleted from
-     * @param objects objects to be deleted.
-     */
-    public static void deleteObjects(EOEditingContext ec, NSArray objects) {
-        if (ec == null)
-            throw new RuntimeException("Attempting to delete objects with a null editing context!");
-        if (objects != null && objects.count() > 0) {
-            for (Enumeration e = objects.objectEnumerator(); e.hasMoreElements();)
-                ec.deleteObject((EOEnterpriseObject)e.nextElement());            
-        }
-    }
     
     /**
      * Utility method to get all of the framework names that
@@ -153,47 +46,6 @@ public class ERXUtilities {
                 log.warn("Null framework name for bundle: {}", bundle);
         }
         return frameworkNames;
-    }
-
-    /**
-     * Simple utility method for getting all of the
-     * entities for all of the models of a given
-     * model group.
-     * @param group eo model group
-     * @return array of all entities for a given model group.
-     */
-    public static NSArray entitiesForModelGroup(EOModelGroup group) {
-        return ERXArrayUtilities.flatten((NSArray)group.models().valueForKey("entities"));
-    }
-
-    /** entity name cache */
-    private static NSDictionary<String, EOEntity> _entityNameEntityCache;
-
-    /**
-     * Finds an entity given a case insensitive search
-     * of all the entity names.
-     * <p>
-     * Note: The current implementation caches the entity-entity name
-     * pair in an insensitive manner. This means that all of the
-     * models should be loaded before this method is called.
-     */
-    // FIXME: Should add an EOEditingContext parameter to get the right
-    //	      EOModelGroup. Should also have a way to clear the cache.
-    // CHECKME: Should this even be cached?
-    public static EOEntity caseInsensitiveEntityNamed(String entityName) {
-        EOEntity entity = null;
-        if (entityName != null) {
-            if (_entityNameEntityCache == null) {
-            	NSMutableDictionary<String, EOEntity>entityNameDict = new NSMutableDictionary<>();
-                for (Enumeration<EOEntity> e = entitiesForModelGroup(ERXEOAccessUtilities.modelGroup(null)).objectEnumerator(); e.hasMoreElements();) {
-                    EOEntity anEntity = e.nextElement();
-                    entityNameDict.setObjectForKey(anEntity, anEntity.name().toLowerCase());    
-                }
-                _entityNameEntityCache = entityNameDict;
-            }
-            entity = _entityNameEntityCache.objectForKey(entityName.toLowerCase());
-        }
-        return entity;
     }
    
     /**
@@ -288,36 +140,6 @@ public class ERXUtilities {
     public static String escapeApostrophe(String aString) {
         NSArray parts = NSArray.componentsSeparatedByString(aString,"'");
         return parts.componentsJoinedByString("");
-    }
-
-    /** Copies values from one EO to another using an array of Attributes */
-    public static void replicateDataFromEOToEO(EOEnterpriseObject r1, EOEnterpriseObject r2, NSArray attributeNames){
-        for(Enumeration e = attributeNames.objectEnumerator(); e.hasMoreElements();){
-            String attributeName = (String)e.nextElement();
-            r2.takeValueForKey(r1.valueForKey(attributeName), attributeName);
-        }
-    }
-
-    /** Copies a relationship from one EO to another using the name of the relationship */
-    public static void replicateRelationshipFromEOToEO(EOEnterpriseObject r1, EOEnterpriseObject r2, String relationshipName){
-        for(Enumeration e = ((NSArray)r1.valueForKey(relationshipName)).objectEnumerator(); e.hasMoreElements();){
-            ERXReplicableInterface replicableTarget = (ERXReplicableInterface)e.nextElement();
-            r2.addObjectToBothSidesOfRelationshipWithKey(replicableTarget.replicate(r2.editingContext()), relationshipName);
-        }
-    }
-
-    /** Copies a relationship from one EO to another using the name of the relationship */
-    public static void deplicateRelationshipFromEO(EOEnterpriseObject r1, String relationshipName){
-        //System.out.println("r1 "+r1);
-        //System.out.println("relationshipName "+relationshipName);
-        //System.out.println("array "+r1.valueForKey(relationshipName));
-        for(Enumeration e = ((NSArray)r1.valueForKey(relationshipName)).objectEnumerator(); e.hasMoreElements();){
-            ERXReplicableInterface replicableTarget = (ERXReplicableInterface)e.nextElement();
-            //System.out.println("replicableTarget "+replicableTarget);
-            r1.removeObjectFromBothSidesOfRelationshipWithKey((EOEnterpriseObject)replicableTarget,
-                                                              relationshipName);
-            replicableTarget.deplicate();
-        }
     }
 
     /**
