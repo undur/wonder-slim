@@ -18,7 +18,6 @@ import com.webobjects.foundation.NSNotificationCenter;
 
 import er.extensions.appserver.ajax.ERXAjaxContext;
 import er.extensions.foundation.ERXMutableURL;
-import er.extensions.foundation.ERXMutableUserInfoHolderInterface;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXRuntimeUtilities;
 import er.extensions.foundation.ERXSelectorUtilities;
@@ -29,7 +28,7 @@ import er.extensions.foundation.ERXThreadStorage;
  * Replacement of WOContext. This subclass is installed when the frameworks
  * loads.
  */
-public class ERXWOContext extends ERXAjaxContext implements ERXMutableUserInfoHolderInterface {
+public class ERXWOContext extends ERXAjaxContext {
 	private static Observer observer;
 	private boolean _generateCompleteURLs;
 	private boolean _generateCompleteResourceURLs;
