@@ -1,0 +1,11 @@
+package er.extensions.eof;
+
+/**
+ * FIXME: Introduced temporarily to serve as container for the public variables used from here. 
+ */
+
+public class ERXConstant {
+
+	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
+
+}
