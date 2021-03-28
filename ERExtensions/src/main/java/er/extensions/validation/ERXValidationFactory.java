@@ -26,7 +26,6 @@ import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSValidation.ValidationException;
 
 import er.extensions.eof.ERXConstant;
-import er.extensions.eof.ERXEntityClassDescription;
 import er.extensions.foundation.ERXMultiKey;
 import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXSystem;

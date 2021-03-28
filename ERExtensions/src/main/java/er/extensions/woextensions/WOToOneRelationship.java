@@ -11,7 +11,6 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
 
 import er.extensions.components.ERXArrayChooser;
-import er.extensions.eof.ERXEOControlUtilities;
 
 /**
  * Back port from WO 5 WOExtensions. This component is binding compatible, but not source compatible.
@@ -107,12 +106,15 @@ public class WOToOneRelationship extends ERXArrayChooser {
             Object object = realSourceObject();
             String key = realRelationshipKey();
             Object selection = NSKeyValueCoding.Utility.valueForKey(object,key);
+            
+            /* Disabled during EOF removal
             if (selection != null && selection instanceof EOEnterpriseObject) {
               EOEnterpriseObject eo = (EOEnterpriseObject)selection;
               if (eo.editingContext() != editingContext()) {
                 selection = ERXEOControlUtilities.localInstanceOfObject(editingContext(), eo);
               }
             }
+            */
 
             setSelection(selection);
         }
