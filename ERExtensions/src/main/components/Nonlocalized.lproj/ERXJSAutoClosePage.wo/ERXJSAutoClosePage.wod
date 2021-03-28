@@ -1,5 +1,0 @@
-Body : WOGenericContainer {
-	elementName = "body";
-	onLoad = onLoad;
-}
-
