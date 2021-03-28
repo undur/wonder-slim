@@ -144,11 +144,5 @@
 			<artifactId>servlet-api-2.5</artifactId>
 			<version>6.1.6</version>
 		</dependency>
-		<!-- Added to make ERXPropertyListSerialization happy // Hugi 2020-10-15 -->
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.12.0</version>
-		</dependency>
 	</dependencies>
 </project>
