@@ -42,8 +42,6 @@ import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSSet;
 
 import er.extensions.eof.ERXConstant;
-import er.extensions.eof.ERXGenericRecord;
-import er.extensions.eof.ERXKey;
 
 /**
  * Collection of {@link com.webobjects.foundation.NSArray NSArray} utilities.
@@ -112,31 +110,6 @@ public class ERXArrayUtilities {
     
     /**
      * Starting with an array of KeyValueCoding-compliant objects and a keyPath,
-     * this method calls valueForKey on each object in the array and groups the
-     * contents of the array, using the result of the valueForKey call as a key
-     * in a dictionary. If passed a null array, null is returned. If passed a null
-     * keyPath, an empty dictionary is returned. This is a typesafe variant of
-     * arrayGroupedByKeyPath(NSArray&lt;V&gt; objects, String keyPath).
-     * <p>
-     * See <code>arrayGroupedByKeyPath(NSArray&lt;V&gt; objects, String keyPath)</code> for examples.
-     * <p>
-     * This method calls
-     * <code>arrayGroupedByKeyPath(NSArray objects, String keyPath, Object nullGroupingKey, String valueKeyPath)</code>
-     * with includeNulls set to true and valueKeyPath set to null.
-     *
-     * @param objects array of objects to be grouped
-     * @param keyPath path into objects used to group the objects
-     * @return a dictionary where the keys are the grouped values and the
-     *          objects are arrays of the objects that have that value.
-     *          Objects for which the key path returns null will be grouped
-     *          with the key {@link #NULL_GROUPING_KEY}
-     */
-    public static <K, V> NSDictionary<K, NSArray<V>> arrayGroupedByKeyPath(Collection<V> objects, ERXKey<K> keyPath) {
-        return arrayGroupedByKeyPath(objects, (keyPath == null) ? null : keyPath.key());
-    }
-
-    /**
-     * Starting with an array of KeyValueCoding-compliant objects and a keyPath,
      * this method calls valueForKey on each object in the array and groups the 
      * contents of the array, using the result of the valueForKey call as a key
      * in a dictionary. If passed a null array, null is returned. If passed a null
@@ -175,36 +148,6 @@ public class ERXArrayUtilities {
      * in a dictionary. If passed a null array, null is returned. If passed a null
      * keyPath, an empty dictionary is returned. If valueKeyPath is not null, then
      * the grouped arrays each have valueForKey called with valueKeyPath and the
-     * grouped arrays are replaced with the results of those calls. This is a
-     * typesafe variant of
-     * <code>arrayGroupedByKeyPath(NSArray&lt;T&gt; objects, String keyPath, boolean includeNulls, String valueKeyPath).</code>
-     * <p>
-     * See <code>arrayGroupedByKeyPath(NSArray&lt;T&gt; objects, String keyPath, boolean includeNulls, String valueKeyPath)</code>
-     * for examples.
-     *
-     * @param objects array of objects to be grouped
-     * @param keyPath path into objects used to group the objects
-     * @param includeNulls determines if keyPaths that resolve to null
-     *        are included in the resulting dictionary
-     * @param valueKeyPath used to call valueForKey on the arrays in
-     *        the results dictionary, with the results of those calls each
-     *        replacing the corresponding array in the results dictionary.
-     * @return a dictionary where the keys are the grouped values and the
-     *          objects are arrays of the objects that have that value.
-     *          Objects for which the key path returns null will be grouped
-     *          with the key {@link #NULL_GROUPING_KEY}
-     */
-    public static <T, K, V> NSDictionary<K, NSArray<V>> arrayGroupedByKeyPath(Collection<T> objects, ERXKey<K> keyPath, boolean includeNulls, ERXKey<V> valueKeyPath) {
-        return arrayGroupedByKeyPath(objects, (keyPath == null) ? null : keyPath.key(), includeNulls, (valueKeyPath == null) ? null : valueKeyPath.key());
-    }
-
-    /**
-     * Starting with an array of KeyValueCoding-compliant objects and a keyPath,
-     * this method calls valueForKey on each object in the array and groups the
-     * contents of the array, using the result of the valueForKey call as a key
-     * in a dictionary. If passed a null array, null is returned. If passed a null
-     * keyPath, an empty dictionary is returned. If valueKeyPath is not null, then
-     * the grouped arrays each have valueForKey called with valueKeyPath and the
      * grouped arrays are replaced with the results of those calls.
      * <p>
      * If one starts with:
@@ -234,37 +177,6 @@ public class ERXArrayUtilities {
         return arrayGroupedByKeyPath(objects, keyPath, (includeNulls) ? (K)NULL_GROUPING_KEY : null, valueKeyPath);
     }
 
-    /**
-     * Starting with an array of KeyValueCoding-compliant objects and a keyPath,
-     * this method calls valueForKey on each object in the array and groups the
-     * contents of the array, using the result of the valueForKey call as a key
-     * in a dictionary. If passed a null array, null is returned. If passed a null
-     * keyPath, an empty dictionary is returned. If valueKeyPath is not null, then
-     * the grouped arrays each have valueForKey called with valueKeyPath and the
-     * grouped arrays are replaced with the results of those calls. This is a
-     * typesafe variant of
-     * <code>arrayGroupedByKeyPath(NSArray objects, String keyPath, Object nullGroupingKey, String valueKeyPath)</code>.
-     * <p>
-     * See <code>arrayGroupedByKeyPath(NSArray objects, String keyPath, Object nullGroupingKey, String valueKeyPath)</code>
-     * for examples.
-     *
-     * @param objects array of objects to be grouped
-     * @param keyPath path into objects used to group the objects
-     * @param nullGroupingKey used as the key in the results dictionary
-     *        for the array of objects for which the valueForKey with keyPath
-     *        result is null.
-     * @param valueKeyPath used to call valueForKey on the arrays in
-     *        the results dictionary, with the results of those calls each
-     *        replacing the corresponding array in the results dictionary.
-     * @return a dictionary where the keys are the grouped values and the
-     *          objects are arrays of the objects that have that value.
-     *          Objects for which the key path returns null will be grouped
-     *          with the key {@link #NULL_GROUPING_KEY}
-     */
-    public static <T, K, V> NSDictionary<K, NSArray<V>> arrayGroupedByKeyPath(Collection<T> objects, ERXKey<K> keyPath, K nullGroupingKey, ERXKey<V> valueKeyPath) {
-        return arrayGroupedByKeyPath(objects, (keyPath == null) ? null : keyPath.key(), nullGroupingKey, (valueKeyPath == null) ? null : valueKeyPath.key());
-    }
-    
     /**
      * Starting with an array of KeyValueCoding-compliant objects and a keyPath,
      * this method calls valueForKey on each object in the array and groups the
@@ -324,18 +236,6 @@ public class ERXArrayUtilities {
     }
     
     /**
-     * Typesafe variant of arrayGroupedByToManyKeyPath.
-     * 
-     * @param objects the objects to be grouped
-     * @param keyPath the key to group by
-     * @param includeNulls determines if the key paths that resolve to null should be allowed in the group
-     * @return the resulting dictionary
-     */
-	public static <K, V> NSDictionary<K, NSArray<V>> arrayGroupedByToManyKeyPath(Collection<V> objects, ERXKey<K> keyPath, boolean includeNulls) {
-    	return arrayGroupedByToManyKeyPath(objects, (keyPath == null) ? null : keyPath.key(), includeNulls);
-    }
-    
-    /**
      * Groups an array of objects by a given to-many key path, where every
      * single item in the to-many will put the object in the corresponding group. 
      * A typical example is an array of users with a roles relationship. The result to
@@ -364,22 +264,6 @@ public class ERXArrayUtilities {
     }
     
     /**
-     * Typesafe variant of arrayGroupedByToManyKeyPath.
-     * 
-     * @param objects array of objects to be grouped
-     * @param keyPath path used to group the objects.
-     * @param nullGroupingKey if not-null, determines if keyPaths that resolve to null
-     *      should be allowed into the group; if so, this key is used for them
-     * @return a dictionary where the keys are the grouped values and the
-     *      objects are arrays of the objects that have the grouped
-     *      characteristic. Note that if the key path returns null
-     *      then one of the keys will be the static ivar NULL_GROUPING_KEY
-     */
-	public static <K, V> NSDictionary<K, NSArray<V>> arrayGroupedByToManyKeyPath(Collection<V> objects, ERXKey<K> keyPath, K nullGroupingKey) {
-    	return arrayGroupedByToManyKeyPath(objects, (keyPath == null) ? null : keyPath.key(), nullGroupingKey);
-    }
-
-    /**
      * Groups an array of objects by a given to-many key path, where every
      * single item in the to-many will put the object in the corresponding group. 
      * The dictionary that is returned contains keys that correspond to the grouped
@@ -404,27 +288,6 @@ public class ERXArrayUtilities {
     	return arrayGroupedByToManyKeyPath(objects, keyPath, nullGroupingKey, null);
     }
     
-    /**
-     * Typesafe variant of arrayGroupedByToManyKeyPath.
-     * 
-     * @param objects array of objects to be grouped
-     * @param keyPath path used to group the objects.
-     * @param nullGroupingKey if not-null, determines if keyPaths that resolve to null
-     *      should be allowed into the group; if so, this key is used for them
-     * @param valueKeyPath allows the grouped objects in the result to be
-     *        derived from objects (by evaluating valueKeyPath), instead
-     *        of being members of the objects collection.  Objects that 
-     *        evaluate valueKeyPath to null have no value included in the
-     *        result
-     * @return a dictionary where the keys are the grouped values and the
-     *      objects are arrays of the objects that have the grouped
-     *      characteristic. Note that if the key path returns null
-     *      then one of the keys will be the static ivar NULL_GROUPING_KEY
-     */
-	public static <T, K, V> NSDictionary<K, NSArray<V>> arrayGroupedByToManyKeyPath(Collection<T> objects, ERXKey<K> keyPath, K nullGroupingKey, ERXKey<V> valueKeyPath) {
-    	return arrayGroupedByToManyKeyPath(objects, (keyPath == null) ? null : keyPath.key(), nullGroupingKey, (valueKeyPath == null) ? null : valueKeyPath.key());
-    }
-
     /**
      * Groups an array of objects by a given to-many key path, where every
      * single item in the to-many will put the object in the corresponding group. 
@@ -616,20 +479,6 @@ public class ERXArrayUtilities {
                 result.addObject(object);
         }
         return result;
-    }
-
-    /**
-     * Filters out duplicates of an array of objects
-     * based on the value of the given key path off of those objects.
-     * Objects with a null value will be skipped, too.
-     * 
-     * @param <T> class of array items
-     * @param objects array of objects
-     * @param keyPath key path to be evaluated off of every object
-     * @return filter array of objects based on the value of a key path
-     */
-    public static <T> NSArray<T> arrayWithoutDuplicateKeyValue(Iterable<T> objects, ERXKey<?> keyPath) {
-    	return arrayWithoutDuplicateKeyValue(objects, (keyPath == null) ? null : keyPath.key());
     }
 
     /**
@@ -921,21 +770,6 @@ public class ERXArrayUtilities {
      * Assumes that all objects in the array either are NSKeyValueCoding.NullValue or have the given key path.
      * 
      * @param <T> class of array items
-     * @param <V> class of value from key path
-     * @param array the array to search
-     * @param value the value to look for
-     * @param keyPath the key path to use to compare to value
-     * @return index of the first object with the qualification. -1 if none matches.
-     */
-    public static <T, V> int indexOfFirstObjectWithValueForKeyPath(Collection<T> array, V value, ERXKey<V> keyPath) {
-    	return indexOfFirstObjectWithValueForKeyPath(array, value, (keyPath == null) ? null : keyPath.key());
-    }
-
-    /**
-     * Finds the index of the first object in the array with a given value for a given key path.
-     * Assumes that all objects in the array either are NSKeyValueCoding.NullValue or have the given key path.
-     * 
-     * @param <T> class of array items
      * @param array the array to search
      * @param value the value to look for
      * @param keyPath the key path to use to compare to value
@@ -961,20 +795,6 @@ public class ERXArrayUtilities {
      * Finds the first object in the array with a given value for a given key path.
      * 
      * @param <T> class of array items
-     * @param <V> class of value from key path
-     * @param array the array to search
-     * @param value the value to look for
-     * @param keyPath the key path to use to compare to value
-     * @return first object in the array with the qualification. null if none matches.
-     */
-    public static <T, V> T firstObjectWithValueForKeyPath(List<T> array, V value, ERXKey<V> keyPath) {
-    	return firstObjectWithValueForKeyPath(array, value, (keyPath == null) ? null : keyPath.key());
-    }
-
-    /**
-     * Finds the first object in the array with a given value for a given key path.
-     * 
-     * @param <T> class of array items
      * @param array the array to search
      * @param value the value to look for
      * @param keyPath the key path to use to compare to value
@@ -984,23 +804,6 @@ public class ERXArrayUtilities {
         int index = indexOfFirstObjectWithValueForKeyPath(array, value, keyPath);
         
         return index >= 0 ? array.get(index) : null;
-    }
-
-    /**
-     * Walks over an array and returns an array of objects from that array that have a particular
-     * value for a particular key path. Treats null and NSKeyValueCoding.NullValue equivalently.
-     * Any NSKeyValueCoding.NullValue objects in the array are skipped. If array is null or empty,
-     * an empty array is returned.
-     * 
-     * @param <T> class of array items
-     * @param <V> class of value from key path
-     * @param array array to search
-     * @param value value to look for
-     * @param keyPath key path to apply on each object on the array to compare against valueToLookFor
-     * @return an array of matching objects
-     */
-    public static <T, V> NSArray<T> objectsWithValueForKeyPath(Collection<T> array, V value, ERXKey<V> keyPath) {
-        return objectsWithValueForKeyPath(array, value, (keyPath == null) ? null : keyPath.key());
     }
 
     /**
@@ -2185,26 +1988,6 @@ public class ERXArrayUtilities {
      * Given an array of objects, returns a dictionary mapping the value by performing valueForKeyPath on each object in
      * the array to the object in the array. This method assume that the value returned for the keyPath attribute will be unique for 
      * all the objects in the array. In case of duplicate entry, the new object will replace the previous one in the dictionary.
-	 * <p>
-     * This is a typesafe variant of dictionaryOfObjectsIndexedByKeyPath(NSArray&lt;V&gt; objects, String keyPath).
-     * <p>
-     * Calls <code>dictionaryOfObjectsIndexedByKeyPathThrowOnCollision()</code> passing <code>false</code> for throwOnCollision.
-     * 
-     * @param <K> class of key path value
-     * @param <T> class of array items
-     * @param array array to index
-     * @param keyPath keyPath to index. If any object returns <code>null</code> or NSKeyValueCoding.NullValue for this keyPath, the
-     *        object is not put into the resulting dictionary.
-     * @return a dictionary indexing the given array. If array is <code>null</code>, an empty dictionary is returned.
-     */
-    public static <K, T> NSDictionary<K, T> dictionaryOfObjectsIndexedByKeyPath(NSArray<T> array, ERXKey<K> keyPath) {
-        return dictionaryOfObjectsIndexedByKeyPath(array, keyPath, false);
-    }
-
-    /**
-     * Given an array of objects, returns a dictionary mapping the value by performing valueForKeyPath on each object in
-     * the array to the object in the array. This method assume that the value returned for the keyPath attribute will be unique for 
-     * all the objects in the array. In case of duplicate entry, the new object will replace the previous one in the dictionary.
      * <p>
      * Calls <code>dictionaryOfObjectsIndexedByKeyPathThrowOnCollision()</code> passing <code>false</code> for throwOnCollision.
      * 
@@ -2224,27 +2007,6 @@ public class ERXArrayUtilities {
      * the array to the object in the array. This method assume that the value returned for the keyPath attribute will be unique for 
      * all the objects in the array. In case of duplicate entry, if throwOnCollision is true, an exception is thrown, otherwise, the 
      * the new object will replace the previous one in the dictionary.
-     * <p>
-     * This is a typesafe variant of dictionaryOfObjectsIndexedByKeyPath(NSArray&lt;V&gt; objects, String keyPath, boolean throwOnCollision).
-     *
-     * @param array array to index
-     * @param keyPath keyPath to index. If any object returns <code>null</code> or NSKeyValueCoding.NullValue for this keyPath, the
-     *        object is not put into the resulting dictionary.
-     * @param throwOnCollision if <code>true</code> and two objects in the array have the same non-null (or non-NullValue) value for keyPath,
-     *        an exception is thrown. If <code>false</code>, the last object in the array wins.
-     * @return a dictionary indexing the given array. If array is <code>null</code>, an empty dictionary is returned.
-     * @deprecated use {@link #dictionaryOfObjectsIndexedByKeyPath(NSArray, ERXKey, boolean)} instead
-     */
-    @Deprecated
-    public static <K, T> NSDictionary<K, T> dictionaryOfObjectsIndexedByKeyPathThrowOnCollision(final NSArray<T> array, final ERXKey<K> keyPath, final boolean throwOnCollision) {
-    	return dictionaryOfObjectsIndexedByKeyPath(array, keyPath, throwOnCollision);
-    }
-    
-    /**
-     * Given an array of objects, returns a dictionary mapping the value by performing valueForKeyPath on each object in
-     * the array to the object in the array. This method assume that the value returned for the keyPath attribute will be unique for 
-     * all the objects in the array. In case of duplicate entry, if throwOnCollision is true, an exception is thrown, otherwise, the 
-     * the new object will replace the previous one in the dictionary.
      *
      * @param array array to index
      * @param keyPath keyPath to index. If any object returns <code>null</code> or NSKeyValueCoding.NullValue for this keyPath, the
@@ -2257,27 +2019,6 @@ public class ERXArrayUtilities {
     @Deprecated
     public static <K, T> NSDictionary<K, T> dictionaryOfObjectsIndexedByKeyPathThrowOnCollision(final NSArray<T> array, final String keyPath, final boolean throwOnCollision) {
         return dictionaryOfObjectsIndexedByKeyPath(array, keyPath, throwOnCollision);
-    }
-
-    /**
-     * Given an array of objects, returns a dictionary mapping the value by performing valueForKeyPath on each object in
-     * the array to the object in the array. This method assume that the value returned for the keyPath attribute will be unique for 
-     * all the objects in the array. In case of duplicate entry, if throwOnCollision is true, an exception is thrown, otherwise, the 
-     * the new object will replace the previous one in the dictionary.
-     * <p>
-     * This is a typesafe variant of dictionaryOfObjectsIndexedByKeyPath(NSArray&lt;V&gt; objects, String keyPath, boolean throwOnCollision).
-     * 
-     * @param <K> class of key path value
-     * @param <T> class of array items
-     * @param array array to index
-     * @param keyPath keyPath to index. If any object returns <code>null</code> or NSKeyValueCoding.NullValue for this keyPath, the
-     *        object is not put into the resulting dictionary.
-     * @param throwOnCollision if <code>true</code> and two objects in the array have the same non-null (or non-NullValue) value for keyPath,
-     *        an exception is thrown. If <code>false</code>, the last object in the array wins.
-     * @return a dictionary indexing the given array. If array is <code>null</code>, an empty dictionary is returned.
-     */
-    public static <K, T> NSDictionary<K, T> dictionaryOfObjectsIndexedByKeyPath(NSArray<T> array, ERXKey<K> keyPath, boolean throwOnCollision) {
-        return dictionaryOfObjectsIndexedByKeyPath(array, (keyPath == null) ? null : keyPath.key(), throwOnCollision);
     }
 
     /**
