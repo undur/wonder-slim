@@ -15,8 +15,8 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 
+import er.extensions.FIXMEException;
 import er.extensions.crypting.ERXCrypto;
-import er.extensions.eof.ERXEOEncodingUtilities;
 import er.extensions.foundation.ERXStringUtilities;
 
 /**
@@ -85,10 +85,13 @@ public class ERXDirectActionHyperlink extends ERXStatelessComponent {
      * @return returns the value for binding: <b>entityNameSeparator</b>
      */
     public String entityNameSeparator() {
+    	throw new FIXMEException();
+    	/*
         String separator = (String)valueForBinding("entityNameSeparator");
         if (separator == null)
             separator = ERXEOEncodingUtilities.entityNameSeparator();
         return separator;
+        */
     }
 
     /**
@@ -262,8 +265,11 @@ public class ERXDirectActionHyperlink extends ERXStatelessComponent {
         }
 
         if((eos != null) &&(eos.count() > 0)) {
+        	throw new FIXMEException();
+        	/*
             ERXStringUtilities.appendSeparatorIfLastNot('&', '?', result);
             result.append(ERXEOEncodingUtilities.encodeEnterpriseObjectsPrimaryKeyForUrl(eos, entityNameSeparator, encryptEos));
+            */
         }
 
         if(suffix != null)
