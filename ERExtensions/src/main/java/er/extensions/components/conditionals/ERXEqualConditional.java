@@ -10,10 +10,7 @@ import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver._private.WODynamicElementCreationException;
-import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSDictionary;
-
-import er.extensions.eof.ERXEOControlUtilities;
 
 /**
  * Conditional component that compares two objects using the <code>equals</code> method.
@@ -49,13 +46,6 @@ public class ERXEqualConditional extends ERXWOConditional {
     public boolean conditionInComponent(WOComponent component) {
         Object v1= _value1.valueInComponent(component);
         Object v2= _value2.valueInComponent(component);
-        boolean result;
-        if((v1 instanceof EOEnterpriseObject) && (v2 instanceof EOEnterpriseObject)) {
-        	result = ERXEOControlUtilities.eoEquals((EOEnterpriseObject)v1, (EOEnterpriseObject)v2);
-        } else {
-        	result = (v1==v2 || (v1!=null && v2!=null && v1.equals(v2)));
-        }
-        
-        return result;
+        return (v1==v2 || (v1!=null && v2!=null && v1.equals(v2)));
     }
 }
