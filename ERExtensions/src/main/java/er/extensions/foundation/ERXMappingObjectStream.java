@@ -28,9 +28,6 @@ public class ERXMappingObjectStream extends ObjectInputStream {
 		if(objectstreamclass.getName().equals("er.extensions.ERXMutableDictionary")) {
 			return ERXMutableDictionary.class;
 		}
-		if(objectstreamclass.getName().equals("er.extensions.ERXKeyGlobalID")) {
-			return ERXKeyGlobalID.class;
-		}
 		result = super.resolveClass(objectstreamclass);
 		return result;
 	}
