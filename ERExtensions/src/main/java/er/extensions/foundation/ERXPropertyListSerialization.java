@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,8 +37,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang3.CharEncoding;
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -64,6 +61,8 @@ import com.webobjects.foundation._NSBase64;
 import com.webobjects.foundation._NSStreamingOutputData;
 import com.webobjects.foundation._NSStringUtilities;
 import com.webobjects.foundation._NSUtilities;
+
+import er.extensions.FIXMEException;
 
 /**
  * This class provides static methods that convert between property lists and their string representations, which can be either strings or NSData objects. A property list is a structure that represents organized data. It can be built from a combination of NSArray, NSDictionary, String, and NSData
@@ -5837,6 +5836,8 @@ public class ERXPropertyListSerialization {
 	}
 
 	private static String convertDOMToString(org.w3c.dom.Document doc) {
+		throw new FIXMEException( "Method disabled until Java XML stuff has been looked into." );
+		/*
         if (doc == null) {
             return null;
         }
@@ -5851,5 +5852,6 @@ public class ERXPropertyListSerialization {
             throw new NSForwardException(e);
         }
         return stringOut.toString();
+        */
     }
 }
