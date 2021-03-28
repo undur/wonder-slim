@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>${project.artifactId}</string>
+	<key>CFBundleIconFile</key>
+	<string>WOAfile.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>${project.artifactId}</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>WOA</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>${project.version}</string>
+	<key>CFBundleVersion</key>
+	<string>${project.version}</string>
+	<key>CFBundleSignature</key>
+	<string>webo</string>
+	<key>CFBundleVersion</key>
+	<string>5.4</string>
+	<key>Has_WOComponents</key>
+	<true/>
+	<key>Java</key>
+	<dict>
+		<key>JVMVersion</key>
+		<string>11+</string>
+	</dict>
+	<key>NSExecutable</key>
+	<string>${project.artifactId}</string>
+	<key>NSJavaClientRoot</key>
+	<string>WebServerResources/Java</string>
+	<key>NSJavaNeeded</key>
+	<true/>
+	<key>NSJavaPath</key>
+	<array>
+		<string>${project.artifactId}.jar</string>
+	</array>
+	<key>NSJavaPathClient</key>
+	<string>${project.artifactId}.jar</string>
+	<key>NSJavaRoot</key>
+	<string>Resources/Java</string>
+	<key>NSPrincipalClass</key>
+	<string>undur.testapp.app.Application</string>
+</dict>
+</plist>
