@@ -24,7 +24,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSSelector;
-import com.webobjects.jdbcadaptor.JDBCAdaptorException;
 
 import er.extensions.appserver.ERXWOContext;
 
@@ -124,12 +123,6 @@ public class ERXRuntimeUtilities {
 				if (value != null) {
 					extraInfo.setObjectForKey(value.toString(), EOAdaptorChannel.FailedAdaptorOperationKey);
 				}
-				if (e instanceof JDBCAdaptorException) {
-					value = ((JDBCAdaptorException) e).sqlException();
-					if (value != null) {
-						extraInfo.setObjectForKey(value.toString(), "SQLException");
-					}
-				}
 			}
 		}
 		return extraInfo;
@@ -209,12 +202,6 @@ public class ERXRuntimeUtilities {
     	if (t instanceof NSForwardException) {
     		return originalThrowable(((NSForwardException)t).originalException());
     	}
-       	if (t instanceof JDBCAdaptorException) {
-       		JDBCAdaptorException ex = (JDBCAdaptorException)t; 
-    		if(ex.sqlException() != null) {
-    			return originalThrowable(ex.sqlException());
-    		}
-    	} 
        	if (t instanceof SQLException) {
     		SQLException ex = (SQLException)t; 
     		if(ex.getNextException() != null) {
