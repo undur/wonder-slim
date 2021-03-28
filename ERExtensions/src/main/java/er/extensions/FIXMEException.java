@@ -9,6 +9,10 @@ package er.extensions;
 
 public class FIXMEException extends RuntimeException {
 
+	public FIXMEException() {
+		super();
+	}
+
 	public FIXMEException(String string) {
 		super(string);
 	}
