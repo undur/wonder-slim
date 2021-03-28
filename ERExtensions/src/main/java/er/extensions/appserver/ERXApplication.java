@@ -96,7 +96,6 @@ import er.extensions.components._private.ERXWORepetition;
 import er.extensions.components._private.ERXWOString;
 import er.extensions.components._private.ERXWOTextField;
 import er.extensions.eof.ERXConstant;
-import er.extensions.formatters.ERXFormatterFactory;
 import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXCompressionUtilities;
 import er.extensions.foundation.ERXConfigurationManager;
