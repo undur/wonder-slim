@@ -35,7 +35,6 @@ import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.eof.ERXConstant;
-import er.extensions.eof.ERXEC;
 import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
@@ -689,11 +688,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
       toStr = superString + thisString;
     }
     return toStr;
-  }
-  
-  @Override
-  public EOEditingContext newDefaultEditingContext() {
-    return ERXEC.newEditingContext();
   }
 
   public static WOSession anySession() {
