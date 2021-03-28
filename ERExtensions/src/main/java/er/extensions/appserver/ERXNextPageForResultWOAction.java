@@ -8,11 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.eocontrol.EOEditingContext;
 import com.webobjects.eocontrol.EOGlobalID;
 import com.webobjects.foundation.NSMutableDictionary;
-
-import er.extensions.eof.ERXEC;
 
 /**
  * A useful general purpose nextPage delegate that can be configured and passed into a {@link CCAjaxLongResponsePage} for handling a result
@@ -86,16 +83,6 @@ public class ERXNextPageForResultWOAction extends ERXAbstractPerformWOAction imp
 	public WOActionResults performAction() {
 		log.debug("The result of the task was {}", _result);
 		if (_nextPage != null && _nextPageResultKey != null) {
-			if (_result instanceof EOGlobalID) {
-				
-				// Inflate it to a fault
-				EOEditingContext ec = ERXEC.newEditingContext();
-				// Let's ensure fresh ec since we are likely coming out of a background task
-				ec.setFetchTimestamp(System.currentTimeMillis());
-				
-				_result = ec.faultForGlobalID((EOGlobalID) _result, ec);
-				
-			}
 			_nextPage.takeValueForKey(_result, _nextPageResultKey);
 		}
 		
