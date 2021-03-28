@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 
-import er.extensions.foundation.ERXArrayUtilities;
-
 /**
  * <div class="en">
  * NSArray re-implementation to support JDK 1.5 templates. Use with
