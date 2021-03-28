@@ -1,7 +1,6 @@
 package er.extensions.foundation;
 
 import java.lang.reflect.Constructor;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +47,6 @@ import er.extensions.appserver.ERXWOContext;
 import er.extensions.components._private.ERXHyperlink;
 import er.extensions.components._private.ERXSubmitButton;
 import er.extensions.components._private.ERXSwitchComponent;
-import er.extensions.woextensions.WOToManyRelationship;
-import er.extensions.woextensions.WOToOneRelationship;
 
 /**
  * Wrapper around the WO-private NSUtilities which allows for some Objective-C-Style poseAs. Using these methods may or
@@ -111,11 +108,6 @@ public class ERXPatcher {
 		ERXPatcher.setClassForName(DynamicElementsPatches.PasswordField.class, "WOPasswordField");
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButton.class, "WORadioButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
-
-		// AK This is needed so we get our versions of the WOToXXRelationships installed even if the
-		// ones from WOExtensions are before us in the classpath
-		ERXPatcher.setClassForName(WOToManyRelationship.class, "WOToManyRelationship");
-		ERXPatcher.setClassForName(WOToOneRelationship.class, "WOToOneRelationship");
 
 		ERXPatcher.setClassForName(ERXHyperlink.class, "WOHyperlink");
 		if (ERXProperties.booleanForKeyWithDefault("er.extensions.WOSwitchComponent.patch", true)) {
