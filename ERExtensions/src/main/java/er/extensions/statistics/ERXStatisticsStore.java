@@ -23,8 +23,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.eof.ERXEC;
-import er.extensions.eof.ERXObjectStoreCoordinator;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.statistics.store.ERXDumbStatisticsStoreListener;
 import er.extensions.statistics.store.ERXEmptyRequestDescription;
@@ -325,10 +323,6 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 							sb.append(time);
 							sb.append(" ms ");
 							sb.append(stringFromTracesAndNames(traces, names));
-							sb.append("EC info:\n");
-							sb.append(ERXEC.outstandingLockDescription());
-							sb.append("OSC info:\n");
-							sb.append(ERXObjectStoreCoordinator.outstandingLockDescription());
 							log.error(sb.toString());
                             deadlocksCount++;
 						}
