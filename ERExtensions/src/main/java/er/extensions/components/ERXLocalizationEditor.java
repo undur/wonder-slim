@@ -18,7 +18,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSMutableSet;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
-import er.extensions.eof.ERXS;
 import er.extensions.foundation.ERXFileUtilities;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
@@ -53,7 +52,6 @@ public class ERXLocalizationEditor extends WOComponent {
     public ERXLocalizationEditor(WOContext context) {
         super(context);
         displayGroup = new WODisplayGroup();
-        displayGroup.setSortOrderings(ERXS.ascInsensitives("key"));
         displayGroup.setNumberOfObjectsPerBatch(20);
         displayGroup.setDefaultStringMatchFormat("*%@*");
         displayGroup.setDefaultStringMatchOperator(EOQualifier.QualifierOperatorCaseInsensitiveLike.name());
@@ -239,7 +237,6 @@ public class ERXLocalizationEditor extends WOComponent {
      * @return current page
      */
     public WOComponent sortEntries() {
-    	displayGroup.setSortOrderings(ERXS.ascs(currentLanguage));
     	displayGroup.qualifyDisplayGroup();
     	
     	return context().page();
