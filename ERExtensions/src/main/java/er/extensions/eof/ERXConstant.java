@@ -14,6 +14,7 @@ public class ERXConstant {
     public static final Class[] StringClassArray = new Class[] { String.class };
     public static final Object[] EmptyObjectArray = new Object[] {};
     public static final Class[] EmptyClassArray = new Class[0];
+    public static final Class[] ObjectClassArray = { Object.class };
 
     public static final int MAX_INT=2500;
 
