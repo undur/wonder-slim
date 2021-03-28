@@ -47,7 +47,6 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.crypting.ERXCrypto;
-import er.extensions.net.ERXTcpIp;
 
 /**
  * <div class="en">
@@ -2279,124 +2278,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 		public NSDictionary<String, String> compute(String key, String value, String parameters) {
 			String decryptedValue = ERXCrypto.defaultCrypter().decrypt(value);
 			return new NSDictionary<>(decryptedValue, key);
-		}
-	}
-
-	/**
-	 * <div class="ja">
-	 * 	InIpRangeOperator は指定IPレンジ内のあるプロパティーをセットする処理をサポートします。
-	 * <p>
-	 * 	各 IP アドレスの優先順の設定できます。
-	 * 	<code>er.erxtensions.ERXTcpIp.IpPriority.[[ip address]]</code>
-	 * 	優先順の設定 0 - 9999
-	 * 	例：er.erxtensions.ERXTcpIp.IpPriority.10.0.1.97 = 5
-	 * 
-	 * 	動作マシンのIPアドレス
-	 * 	<code>er.erxtensions.ERXTcpIp.UseThisIp</code>
-	 * 	直接IPを記述するとマシンのIPは読み取らず、記述されたIPを使用し、各設定値を読み込みます。
-	 * 	この指定が無ければ、自動設定が行われます。
-	 * 	例：er.erxtensions.ERXTcpIp.UseThisIp = 192.168.1.68
-	 * 
-	 * 	er.erxtensions.ERXTcpIp.UseThisIp アドレスが設定され、自動で IP 特定できない場合
-	 * 	<code>er.erxtensions.ERXTcpIp.NoIpAndNoNetwork</code>
-	 * 	（ネットワークに接続されていない状態）にこのIPをMachineIpとして使用します。
-	 * 	もし、このプロパティーも設定していなければ、ローカル・アドレスが使用されます：127.0.0.1
-	 * 	例：er.erxtensions.ERXTcpIp.NoIpAndNoNetwork = 192.168.1.220
-	 * 
-	 * 
-	 * 	InIpRangeOperator は次のようなキーをサポートしています：
-	 * 
-	 * 	<pre><code>sampleip1.@forIP.192.168.1.68 = avalue</code></pre>
-	 * 	IPアドレスが 192.168.1.68 になると "sampleip1" の値を "avalue" にセットします。
-	 * 
-	 * 	<pre><code>test.sampleip2.@forIP.192.168.1.67,192.168.1.68 = avalue</code></pre>
-	 * 	IPアドレスが 192.168.1.67 又は 192.168.1.68 の場合 "test.sampleip2" の値を "avalue" にセットします。
-	 * 
-	 * 	<pre><code>test.sampleip3.@forIP.192.168.1.50-192.168.1.90 = avalue</code></pre>
-	 * 	IPアドレスが 192.168.1.50 から 192.168.1.90 の間にある場合 "test.sampleip3" の値を "avalue" にセットします。
-	 * 
-	 * 	<pre><code>test.sampleip4.@forIP.192.168.1.50-192.168.1.90,127.0.0.1 = avalue</code></pre>
-	 * 	IPアドレスが 192.168.1.50 から 192.168.1.90 の間、又は 127.0.0.1 の場合 "test.sampleip4" の値を "avalue" にセットします。
-	 * <p>
-	 * 複数の処理が同じキーでヒットすると、最後のプロパティー（キー名でソートされて）が採用されます。
-	 * 結果として、オーバラップされる値をセットしないように、そうしないと思わない結果が得られます。
-	 * </div>
-	 * 
-	 * @property er.erxtensions.ERXTcpIp.UseThisIp
-	 * @property er.erxtensions.ERXTcpIp.NoIpAndNoNetwork
-	 * @property er.erxtensions.ERXTcpIp.IpPriority.{IP Address}
-	 * 
-	 * @author tani &amp; fukui &amp; ishimoto
-	 */
-	public static class InIpRangeOperator implements ERXProperties.Operator {
-
-		/** 
-		 * <div class="ja">InIpRangeオペレータのインスタンス・デフォルト・キー名</div>
-		 */
-		public static final String ForInstanceKey = "forIP";
-
-		/** 
-		 * <div class="ja">IP 配列：キャシュ用</div> 
-		 */
-		private NSArray<String> _ipAddress;
-
-		/**
-		 * <div class="ja">
-		 * 	新規 InIpRangeOperator を作成します。「コンストラクタ」
-		 * 
-		 * 	@param ipList - このマシンの IP 配列
-		 * </div>
-		 */
-		public InIpRangeOperator(NSArray<String> ipList) {
-			_ipAddress = ipList;
-		}
-
-		/**
-		 * この InIpRangeOperator の使用を登録します。A10Application 内より実行されます
-		 */
-		public static void register() {
-			ERXProperties.setOperatorForKey(new ERXProperties.InIpRangeOperator(ERXTcpIp.machineIpList()), ERXProperties.InIpRangeOperator.ForInstanceKey);
-		}
-
-		public NSDictionary<String, String> compute(String key, String value, String parameters) {
-			NSDictionary<String, String> computedProperties = null;
-
-			if (parameters != null && parameters.length() > 0) {
-				boolean ipNumberMatches = false;
-				String[] ranges = parameters.split(",");
-
-				for (String range : ranges) {
-					range = range.trim();
-					int dashIndex = range.indexOf('-');
-
-					if (dashIndex == -1) {
-						String singleIP = range;
-						if (_ipAddress.contains(singleIP)){
-							ipNumberMatches = true;
-							break;
-						}
-					}
-					else {
-						String lowValue = range.substring(0, dashIndex).trim();
-						String highValue = range.substring(dashIndex + 1).trim();
-
-						for(String obj: _ipAddress) {
-							if(ERXTcpIp.isInet4IPAddressWithinRange(lowValue, obj, highValue)) {
-								ipNumberMatches = true;
-								break;
-							}
-						}
-					}
-				}
-
-				if (ipNumberMatches) {
-					computedProperties = new NSDictionary<>(value, key);
-				}
-				else {
-					computedProperties = new NSDictionary<>();
-				}
-			}
-			return computedProperties;
 		}
 	}
 
