@@ -43,7 +43,6 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>${basedir}/Sources</sourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.wocommunity</groupId>
