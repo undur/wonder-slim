@@ -16,8 +16,6 @@ import com.webobjects.appserver.WOSession;
 import com.webobjects.eocontrol.EOEditingContext;
 import com.webobjects.eocontrol.EOEnterpriseObject;
 
-import er.extensions.eof.ERXEnterpriseObject;
-
 /**
  * Given an object displays a link to show information about the editing context of that object.
  * 
@@ -81,8 +79,6 @@ public class ERXDebugMarker extends WOComponent {
             result=debugPageForObject((EOEnterpriseObject)object(),session());
             if(result != null) {
                 result.takeValueForKey(object(),"object");
-            } else if(object() instanceof ERXEnterpriseObject) {
-                log.info("Object: {}", ((ERXEnterpriseObject)object()).toLongString());
             } else {
                 log.info("Object: {}", object());
             }
