@@ -21,9 +21,7 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
-import er.extensions.eof.ERXBatchFetchUtilities;
 import er.extensions.eof.ERXConstant;
-import er.extensions.eof.ERXDatabaseContextDelegate;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXValueUtilities;
@@ -419,6 +417,7 @@ public class ERXWORepetition extends WODynamicGroup {
 
 	protected Context createContext(WOComponent wocomponent) {
 		Object list = (_list != null ? _list.valueInComponent(wocomponent) : null);
+		/*
 		if(list instanceof NSArray) {
 			if (_batchFetch != null) {
 				String batchFetchKeyPaths = (String)_batchFetch.valueInComponent(wocomponent);
@@ -431,6 +430,7 @@ public class ERXWORepetition extends WODynamicGroup {
 			}
 			ERXDatabaseContextDelegate.setCurrentBatchObjects((NSArray)list);
 		}
+		*/
 		return new Context(list);
 	}
 
