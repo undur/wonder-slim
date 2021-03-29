@@ -4,6 +4,11 @@
 		<title>Hi there!</title>
     </head>
     <body>
-    	<p>Now isn't this nice? I'm <em><wo:str value="$name" /></em></p>
+    	<wo:form>
+    		<wo:textfield value="$username" /> <wo:submit action="$context.page" />
+    	</wo:form>
+    	<wo:if condition="$username.length">
+    		<p>Now isn't this nice? Hello <em><wo:str value="$username" /></em>!</p>
+    	</wo:if>
     </body>
 </html>

@@ -6,6 +6,8 @@ import er.extensions.components.ERXComponent;
 
 public class Main extends ERXComponent {
 
+	public String username;
+
 	public Main( WOContext context ) {
 		super( context );
 	}
