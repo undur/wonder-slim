@@ -1869,59 +1869,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		}
 	}
 
-	/** use the redirect feature */
-	protected Boolean useComponentActionRedirection;
-
-	/**
-	 * Set the
-	 * <code>er.extensions.ERXComponentActionRedirector.enabled=true</code>
-	 * property to actually the redirect feature.
-	 * 
-	 * @return flag if to use the redirect feature
-	 */
-	public boolean useComponentActionRedirection() {
-		if (useComponentActionRedirection == null) {
-			useComponentActionRedirection = ERXProperties.booleanForKey("er.extensions.ERXComponentActionRedirector.enabled") ? Boolean.TRUE : Boolean.FALSE;
-		}
-		return useComponentActionRedirection.booleanValue();
-	}
-
-	/**
-	 * Overridden to allow for redirected responses.
-	 * 
-	 * @param request
-	 *            object
-	 * @param context
-	 *            object
-	 */
-	@Override
-	public WOActionResults invokeAction(WORequest request, WOContext context) {
-		WOActionResults results = super.invokeAction(request, context);
-		if (useComponentActionRedirection()) {
-			ERXComponentActionRedirector.createRedirector(results);
-		}
-		return results;
-	}
-
-	/**
-	 * Overridden to allow for redirected responses.
-	 * 
-	 * @param response
-	 *            object
-	 * @param context
-	 *            object
-	 */
-	@Override
-	public void appendToResponse(WOResponse response, WOContext context) {
-		super.appendToResponse(response, context);
-		if (useComponentActionRedirection()) {
-			ERXComponentActionRedirector redirector = ERXComponentActionRedirector.currentRedirector();
-			if (redirector != null) {
-				redirector.setOriginalResponse(response);
-			}
-		}
-	}
-
 	/**
 	 * Initializes the current thread for a request.
 	 */
@@ -2002,23 +1949,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 			ERXApplication._startRequest();
 			ERXStats.initStatisticsIfNecessary();
 			checkMemory();
-			if (useComponentActionRedirection()) {
-				ERXComponentActionRedirector redirector = ERXComponentActionRedirector.redirectorForRequest(request);
-				if (redirector == null) {
-					response = super.dispatchRequest(request);
-					redirector = ERXComponentActionRedirector.currentRedirector();
-					if (redirector != null) {
-						response = redirector.redirectionResponse();
-					}
-				}
-				else {
-					response = redirector.originalResponse();
-				}
-			}
-			else {
-				response = super.dispatchRequest(request);
-			}
-
+			response = super.dispatchRequest(request);
 		}
 		finally {
 			ERXStats.logStatisticsForOperation(statsLog, "key");

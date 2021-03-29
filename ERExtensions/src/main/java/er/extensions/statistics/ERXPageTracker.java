@@ -3,7 +3,6 @@ package er.extensions.statistics;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOMessage;
 
-import er.extensions.appserver.ERXComponentActionRedirector;
 import er.extensions.components.ERXStatelessComponent;
 
 
@@ -33,15 +32,11 @@ public class ERXPageTracker extends ERXStatelessComponent {
     
     public String href() {
     	String result = stringValueForBinding("href");
-    	if(result == null) {
-    		if (context().page() instanceof ERXComponentActionRedirector.Restorable) {
-				ERXComponentActionRedirector.Restorable restorable = (ERXComponentActionRedirector.Restorable) context().page();
-				result = restorable.urlForCurrentState();
-			}
-    	}
-		if(result != null && !booleanValueForBinding("omitQuotes", false)) {
+
+    	if(result != null && !booleanValueForBinding("omitQuotes", false)) {
 			result = "\"" + WOMessage.stringByEscapingHTMLString(result) + "\"";
 		}
+
     	return result;
     }
     
