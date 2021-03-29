@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -15,7 +16,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.lang3.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,33 +96,17 @@ public class ERXCompressionUtilities {
 	}
 
 	public static String gunzipString(String source) {
-		try {
-			byte[] b = gunzipByteArray(source.getBytes(CharEncoding.UTF_8));
-			return new String(b, CharEncoding.UTF_8);
-		}
-		catch (UnsupportedEncodingException e) {
-			return null;
-		}
+		byte[] b = gunzipByteArray(source.getBytes(StandardCharsets.UTF_8));
+		return new String(b, StandardCharsets.UTF_8);
 	}
 
 	public static String gunzipByteArrayAsString(byte[] input) {
-		try {
-			byte[] b = gunzipByteArray(input);
-
-			return new String(b, CharEncoding.UTF_8);
-		}
-		catch (UnsupportedEncodingException e) {
-			return null;
-		}
+		byte[] b = gunzipByteArray(input);
+		return new String(b, StandardCharsets.UTF_8);
 	}
 
 	public static byte[] gzipStringAsByteArray(String source) {
-		try {
-			return gzipByteArray(source.getBytes(CharEncoding.UTF_8));
-		}
-		catch (UnsupportedEncodingException e) {
-			return null;
-		}
+		return gzipByteArray(source.getBytes(StandardCharsets.UTF_8));
 	}
 
 	public static byte[] zipByteArray(byte[] input) {
@@ -228,22 +212,11 @@ public class ERXCompressionUtilities {
 	}
 
 	public static String deflateString(String source) {
-		try {
-			return new String(deflateByteArray(source.getBytes(CharEncoding.UTF_8)), CharEncoding.UTF_8);
-		}
-		catch (UnsupportedEncodingException e) {
-			return null;
-		}
+		return new String(deflateByteArray(source.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
 	}
 
 	public static String inflateString(String source) {
-		try {
-			byte[] b = inflateByteArray(source.getBytes(CharEncoding.UTF_8));
-			return new String(b, CharEncoding.UTF_8);
-		}
-		catch (UnsupportedEncodingException e) {
-			return null;
-		}
+		byte[] b = inflateByteArray(source.getBytes(StandardCharsets.UTF_8));
+		return new String(b, StandardCharsets.UTF_8);
 	}
-
 }
