@@ -14,9 +14,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODynamicElementCreationException;
 import com.webobjects.appserver._private.WODynamicGroup;
-import com.webobjects.eocontrol.EOEditingContext;
-import com.webobjects.eocontrol.EOEnterpriseObject;
-import com.webobjects.eocontrol.EOGlobalID;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
@@ -250,24 +247,9 @@ public class ERXWORepetition extends WODynamicGroup {
 		if (object == null) {
 			hashCode = 0;
 		}
-		else if (eoSupport(component) && object instanceof EOEnterpriseObject) {
-			EOEnterpriseObject eo = (EOEnterpriseObject)object;
-			EOEditingContext editingContext = eo.editingContext();
-			EOGlobalID gid = null;
-			if (editingContext != null) {
-				gid = editingContext.globalIDForObject(eo);
-			}
-			// If the EO isn't in an EC, or it has a null GID, then just fall back to the hash code
-			if (gid == null) {
-				hashCode = System.identityHashCode(object);
-			}
-			else {
-				hashCode = gid.hashCode();
-			}
-		}
-		else {
-			hashCode = System.identityHashCode(object);
-		}
+
+		hashCode = System.identityHashCode(object);
+
 		// @see java.lang.Math#abs for an explanation of this
 		if (hashCode == Integer.MIN_VALUE) {
 			hashCode = 37; // MS: random prime number

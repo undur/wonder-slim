@@ -10,7 +10,6 @@ import org.apache.commons.lang3.CharEncoding;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WODisplayGroup;
-import com.webobjects.eocontrol.EOQualifier;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
@@ -54,7 +53,8 @@ public class ERXLocalizationEditor extends WOComponent {
         displayGroup = new WODisplayGroup();
         displayGroup.setNumberOfObjectsPerBatch(20);
         displayGroup.setDefaultStringMatchFormat("*%@*");
-        displayGroup.setDefaultStringMatchOperator(EOQualifier.QualifierOperatorCaseInsensitiveLike.name());
+        throw new x.FIXMEException( "Removed" );
+//        displayGroup.setDefaultStringMatchOperator(EOQualifier.QualifierOperatorCaseInsensitiveLike.name());
     }
 
     @Override
@@ -62,7 +62,8 @@ public class ERXLocalizationEditor extends WOComponent {
     	super.awake();
     	keyToAdd = null;
     	if (displayGroup != null) {
-    		displayGroup.setSelectedObject(null);
+    		throw new x.FIXMEException( "Removed" );
+//    		displayGroup.setSelectedObject(null);
     	}
     }
 
@@ -122,7 +123,8 @@ public class ERXLocalizationEditor extends WOComponent {
 				}
 			}
 		}
-    	displayGroup.setObjectArray(data);
+    	throw new x.FIXMEException( "Removed" );
+//    	displayGroup.setObjectArray(data);
     }
 
     public boolean isLargeEntry() {
@@ -258,10 +260,13 @@ public class ERXLocalizationEditor extends WOComponent {
 	    	}
 	    	
 	    	data.addObject(entry);
-	    	displayGroup.setObjectArray(data);
-	    	displayGroup.qualifyDataSource();
-	    	displayGroup.setSelectedObject(entry);
-	    	displayGroup.displayBatchContainingSelectedObject();
+	    	
+	    	throw new x.FIXMEException( "Removed" );
+	    	
+//	    	displayGroup.setObjectArray(data);
+//	    	displayGroup.qualifyDataSource();
+//	    	displayGroup.setSelectedObject(entry);
+//	    	displayGroup.displayBatchContainingSelectedObject();
     	}
     	return context().page();
     }
@@ -274,8 +279,9 @@ public class ERXLocalizationEditor extends WOComponent {
     public WOComponent removeEntry() {
     	if (currentEntry != null) {
     		data.removeObject(currentEntry);
-    		displayGroup.setObjectArray(data);
-    		displayGroup.qualifyDisplayGroup();
+    		throw new x.FIXMEException( "Removed" );
+//    		displayGroup.setObjectArray(data);
+//    		displayGroup.qualifyDisplayGroup();
     	}
     	return context().page();
     }

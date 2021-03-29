@@ -26,22 +26,6 @@ import org.apache.log4j.Logger;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOSession;
-import com.webobjects.eoaccess.EOAttribute;
-import com.webobjects.eoaccess.EODatabase;
-import com.webobjects.eoaccess.EODatabaseContext;
-import com.webobjects.eoaccess.EOEntity;
-import com.webobjects.eoaccess.EOModelGroup;
-import com.webobjects.eoaccess.EOQualifierSQLGeneration;
-import com.webobjects.eoaccess.EOQualifierSQLGeneration.Support;
-import com.webobjects.eoaccess.EORelationship;
-import com.webobjects.eoaccess.EOSQLExpression;
-import com.webobjects.eoaccess.EOUtilities;
-import com.webobjects.eocontrol.EOEnterpriseObject;
-import com.webobjects.eocontrol.EOFetchSpecification;
-import com.webobjects.eocontrol.EOKeyValueQualifier;
-import com.webobjects.eocontrol.EOQualifier;
-import com.webobjects.eocontrol.EOQualifierVariable;
-import com.webobjects.eocontrol.EOSharedEditingContext;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
@@ -69,6 +53,7 @@ import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.logging.ERXLogger;
 import er.extensions.validation.ERXValidationFactory;
+import x.FIXMEException;
 
 /**
  * Principal class of the ERExtensions framework. This class
@@ -134,7 +119,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
     		// its constructor so we need to modify it before calling
     		// the constructor.
     		ERXConfigurationManager.defaultManager().initialize();
-        	EOModelGroup.setClassDelegate(this);
         	ERXSystem.updateProperties();
  
     		// AK: enable this when we're ready
@@ -462,12 +446,15 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
         String pc=(String)context.valueForKey("pageConfiguration");
         if (pc==null || pc.length()==0) {
             String en="_All_";
+            throw new FIXMEException();
+            /*
             EOEntity e=(EOEntity)context.valueForKey("entity");
             if (e!=null) en=e.name();
             result.append("__");
             result.append(context.valueForKey("task"));
             result.append('_');
             result.append(en);
+            */
         } else {
             result.append(pc);
         }

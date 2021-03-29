@@ -63,9 +63,6 @@ import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOComponentDefinition;
 import com.webobjects.appserver._private.WODeployedBundle;
 import com.webobjects.appserver._private.WOProperties;
-import com.webobjects.eocontrol.EOEditingContext;
-import com.webobjects.eocontrol.EOObserverCenter;
-import com.webobjects.eocontrol.EOTemporaryGlobalID;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
@@ -1185,10 +1182,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		// AK: remove comment to get delayed request handling
 		// registerRequestHandler(new DelayedRequestHandler(), DelayedRequestHandler.KEY);
 
-		Long timestampLag = Long.getLong("EOEditingContextDefaultFetchTimestampLag");
-		if (timestampLag != null)
-			EOEditingContext.setDefaultFetchTimestampLag(timestampLag.longValue());
-
 		String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 		if (defaultEncoding != null) {
 			log.debug("Setting default encoding to \"" + defaultEncoding + "\"");
@@ -1217,11 +1210,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		if (ERXGracefulShutdown.isEnabled()) {
 			ERXGracefulShutdown.installHandler();
 		}
-		// AK: this makes it possible to retrieve the creating instance from an
-		// NSData PK.
-		// it should still be unique, as one host can only have one running
-		// instance to a port
-		EOTemporaryGlobalID._setProcessIdentificationBytesFromInt(port().intValue());
 
 		_memoryStarvedThreshold = ERXProperties.bigDecimalForKey("er.extensions.ERXApplication.memoryThreshold"); // MS: Kept around for backwards compat, replaced by memoryStarvedThreshold now
 		_memoryStarvedThreshold = ERXProperties.bigDecimalForKeyWithDefault("er.extensions.ERXApplication.memoryStarvedThreshold", _memoryStarvedThreshold);
@@ -1958,7 +1946,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		 * A more complete explanation available here:
 		 * http://www.mail-archive.com/webobjects-dev@lists.apple.com/msg25391.html
 		 */
-		EOObserverCenter.notifyObserversObjectWillChange(null);
 		// We *always* want to unlock left over ECs.
 //		ERXEC.unlockAllContextsForCurrentThread();
 		// we don't want this hanging around

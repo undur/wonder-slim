@@ -22,7 +22,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOSession;
 import com.webobjects.appserver.WOCookie.SameSite;
-import com.webobjects.eocontrol.EOEditingContext;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSMutableArray;
@@ -355,27 +354,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
   }
 
   private boolean _editingContextWasCreated = false;
-
-  /**
-   * Ensures that the returned editingContext was created with
-   * the {@link er.extensions.eof.ERXEC} factory.
-   * @return the session's default editing context with
-   * 		the default delegate set.
-   */
-  @Override
-  public EOEditingContext defaultEditingContext() {
-    if (!_editingContextWasCreated) {
-      setDefaultEditingContext(newDefaultEditingContext());
-      _editingContextWasCreated = true;
-    }
-    return super.defaultEditingContext();
-  }
-
-  @Override
-  public void setDefaultEditingContext(EOEditingContext ec) {
-    _editingContextWasCreated = true;
-    super.setDefaultEditingContext(ec);
-  }
 
   /**
    * Returns if this user has javascript enabled.

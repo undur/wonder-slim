@@ -8,7 +8,6 @@ package er.extensions.components;
 
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.eocontrol.EOSortOrdering;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 
@@ -44,8 +43,9 @@ public class ERXStringListPicker extends WOComponent {
     private NSArray _list;
     public NSArray list() {
         if (_list == null) {
-            _list = EOSortOrdering.sortedArrayUsingKeyOrderArray(choices.allKeys(),
-                                                         new NSArray(EOSortOrdering.sortOrderingWithKey("toString", EOSortOrdering.CompareAscending)));
+        	throw new x.FIXMEException( "Removed" );
+//            _list = EOSortOrdering.sortedArrayUsingKeyOrderArray(choices.allKeys(),
+//                                                         new NSArray(EOSortOrdering.sortOrderingWithKey("toString", EOSortOrdering.CompareAscending)));
         }
         return _list;
     }

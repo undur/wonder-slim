@@ -56,6 +56,16 @@
 			<groupId>undur</groupId>
 			<artifactId>JavaWOExtensions</artifactId>
 			<version>${undur.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.webobjects</groupId>
+					<artifactId>JavaEOAccess</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.webobjects</groupId>
+					<artifactId>JavaEOControl</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.webobjects</groupId>
@@ -70,6 +80,14 @@
 				<exclusion>
 					<groupId>com.webobjects</groupId>
 					<artifactId>JavaXML</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.webobjects</groupId>
+					<artifactId>JavaEOAccess</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.webobjects</groupId>
+					<artifactId>JavaEOControl</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
