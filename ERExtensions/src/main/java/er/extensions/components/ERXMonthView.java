@@ -3,6 +3,8 @@ package er.extensions.components;
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 
+import x.FIXMEException;
+
 /**
  * Class for Wonder Component ERXMonthView.
  *
@@ -50,8 +52,9 @@ public class ERXMonthView extends ERXStatelessComponent {
         String action = stringValueForBinding("action");
         WOActionResults nextPage = context().page();
         if(action == null) {
-            ERXDateGrouper grouper = (ERXDateGrouper)valueForBinding("grouper");
-            grouper.setSelectedDate(grouper.currentDate());
+        	throw new FIXMEException();
+//            ERXDateGrouper grouper = (ERXDateGrouper)valueForBinding("grouper");
+//            grouper.setSelectedDate(grouper.currentDate());
         } else {
             nextPage = performParentAction(action);
         }
