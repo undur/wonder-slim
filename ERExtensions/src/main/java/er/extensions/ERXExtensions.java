@@ -69,9 +69,6 @@ import x.FIXMEException;
  */
 public class ERXExtensions extends ERXFrameworkPrincipal {
 
-    /** logging support */
-    private static Logger _log;
-    
     private static boolean _initialized;
 
    /**
@@ -160,7 +157,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
         // name and port are resolved via WOApplication.application()
         // ERXLogger.configureLoggingWithSystemProperties();
         
-        _log = Logger.getLogger(ERXExtensions.class);
 		ERXProperties.pathsForUserAndBundleProperties(true);
     }
     
