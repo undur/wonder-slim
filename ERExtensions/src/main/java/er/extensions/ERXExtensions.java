@@ -194,29 +194,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
     }
     
     /**
-     * Determines if a given object implements a method given
-     * the name and the array of input parameters.
-     * Note that this doesn't quite check the method signature
-     * since the method return type is not checked.
-     *
-     * @param object to determine if it implements a method
-     * @param methodName name of the method
-     * @param parameters array of parameters
-     * @return if the object implements a method with the given name
-     * 		and class parameters
-     */
-    public static boolean objectImplementsMethod(Object object, String methodName, Class[] parameters) {
-        boolean implementsMethod = false;
-        for (Enumeration e = (new NSArray(object.getClass().getMethods())).objectEnumerator(); e.hasMoreElements();) {
-            Method m = (Method)e.nextElement();
-            if (m.getName().equals(methodName) && Arrays.equals(m.getParameterTypes(), parameters)) {
-                implementsMethod = true; break;
-            }
-        }
-        return implementsMethod;
-    }
-
-    /**
      * Initializes your WOApplication programmatically (for use in test cases and main methods) with
      * the assumption that the current directory is your main bundle URL.
      * 
