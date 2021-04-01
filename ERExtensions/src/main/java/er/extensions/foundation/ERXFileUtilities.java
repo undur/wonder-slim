@@ -929,7 +929,7 @@ public class ERXFileUtilities {
                                              throw new IOException("Unable to create link: " + err.readLine());
                                          }
                                      } finally {
-                                         ERXExtensions.freeProcessResources(task);
+                                         ERXRuntimeUtilities.freeProcessResources(task);
                                      }
                                  }
     /**

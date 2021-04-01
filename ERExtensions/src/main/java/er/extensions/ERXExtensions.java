@@ -192,24 +192,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
     	
     	return urlString;
     }
-
-    /**
-     * Frees all of the resources associated with a given
-     * process and then destroys the process.
-     * @param p process to destroy
-     * @deprecated use {@link ERXRuntimeUtilities#freeProcessResources(Process)} instead
-     */
-    @Deprecated
-    public static void freeProcessResources(Process p) {
-        if (p!=null) {
-            try {
-                if (p.getInputStream()!=null) p.getInputStream().close();
-                if (p.getOutputStream()!=null) p.getOutputStream().close();
-                if (p.getErrorStream()!=null) p.getErrorStream().close();
-                p.destroy();
-            } catch (IOException e) {}
-        }
-    }
     
     /**
      * Determines if a given object implements a method given
