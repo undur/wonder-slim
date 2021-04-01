@@ -194,44 +194,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
     }
 
     /**
-     * Uses the <code>setObjectForKey</code> method of the {@link WOSession}
-     * class to push a Boolean object onto the session for a given key.
-     * Note this is not using key value coding, meaning you don't need
-     * to have a boolean instance variable corresponding to the given
-     * key on your session object. This flag can be retrieved using
-     * the method <code>booleanFlagOnSessionForKeyWithDefault</code>.
-     * @param s session object on which to set the boolean flag 
-     * @param key to be used in the session's dictionary
-     * @param newValue boolean value to be set on the session
-     */
-    public static void setBooleanFlagOnSessionForKey(WOSession s,
-                                                     String key,
-                                                     boolean newValue) {
-        s.setObjectForKey(newValue ? Boolean.TRUE : Boolean.FALSE, key);
-    }
-
-    /**
-     * Retrieves a value from the session's dictionary and evaluates
-     * that object using the <code>booleanValue</code> method of
-     * {@link ERXValueUtilities}. If there is no object corresponding
-     * to the key passed in, then the default value is returned. The
-     * usual way in which boolean values are set on the session object
-     * is by using the method <code>setBooleanFlagOnSessionForKey</code>
-     * in this class.
-     * @param s session object to retrieve the boolean flag from
-     * @param key that the boolean is stored under
-     * @param defaultValue value to be returned if the object in the
-     *		dictionary is null
-     * @return boolean value of the object stored in the session's dictionary
-     *		for the given key.
-     */
-    public static boolean booleanFlagOnSessionForKeyWithDefault(WOSession s,
-                                                                String key,
-                                                                boolean defaultValue) {
-        return s.objectForKey(key) != null ? ERXValueUtilities.booleanValue(s.objectForKey(key)) : defaultValue;
-    }
-
-    /**
      * Constructs a unique key based on a context.
      * A method used by the preferences mechanism from ERDirectToWeb which
      * needs to be here because it is shared by ERDirectToWeb and ERCoreBusinessLogic.
