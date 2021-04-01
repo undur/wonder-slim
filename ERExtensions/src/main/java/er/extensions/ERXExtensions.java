@@ -194,37 +194,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
     }
 
     /**
-     * Constructs a unique key based on a context.
-     * A method used by the preferences mechanism from ERDirectToWeb which
-     * needs to be here because it is shared by ERDirectToWeb and ERCoreBusinessLogic.
-     * 
-     * @param key preference key
-     * @param context most likely a d2wContext object
-     * @return a unique preference key for storing and retrieving preferences
-     */
-    // FIXME: Needs to find a better home.
-    public static String userPreferencesKeyFromContext(String key, NSKeyValueCoding context) {
-        StringBuilder result = new StringBuilder(key);
-        result.append('.');
-        String pc=(String)context.valueForKey("pageConfiguration");
-        if (pc==null || pc.length()==0) {
-            String en="_All_";
-            throw new FIXMEException();
-            /*
-            EOEntity e=(EOEntity)context.valueForKey("entity");
-            if (e!=null) en=e.name();
-            result.append("__");
-            result.append(context.valueForKey("task"));
-            result.append('_');
-            result.append(en);
-            */
-        } else {
-            result.append(pc);
-        }
-        return result.toString();
-    }
-
-    /**
      * Frees all of the resources associated with a given
      * process and then destroys the process.
      * @param p process to destroy
