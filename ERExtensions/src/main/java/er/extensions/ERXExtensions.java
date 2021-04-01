@@ -165,35 +165,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
     }
     
     /**
-     * Adds the session ID for a given session to a given URL.
-     * 
-     * @param urlString
-     *            URL string to add session ID form value to
-     * @param session
-     *            session object
-     * @return URL with the addition of session ID form value
-     */
-    public static String addSessionIdFormValue(String urlString, WOSession session) {
-    	if (urlString == null || session == null) {
-    		_log.warn("not adding session ID: url=" + (urlString != null ? urlString : "<null>") + " session=" + (session != null ? session : "<null>"));
-    		return urlString;
-    	}
-    	String sessionIdKey = WOApplication.application().sessionIdKey();
-    	try {
-			ERXMutableURL url = new ERXMutableURL(urlString);
-			if (!url.containsQueryParameter(sessionIdKey)) {
-				url.setQueryParameter(sessionIdKey, session.sessionID());
-			}
-			return url.toExternalForm();
-		}
-		catch (MalformedURLException e) {
-			_log.error("invalid URL string: " + urlString, e);
-		}
-    	
-    	return urlString;
-    }
-    
-    /**
      * Initializes your WOApplication programmatically (for use in test cases and main methods) with
      * the assumption that the current directory is your main bundle URL.
      * 
