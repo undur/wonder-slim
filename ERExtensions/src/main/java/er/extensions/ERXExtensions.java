@@ -68,21 +68,12 @@ import x.FIXMEException;
  * for creating editing contexts with the default delegates set.
  */
 public class ERXExtensions extends ERXFrameworkPrincipal {
-    
-    /** Notification name, posted before object will change in an editing context */
-    public final static String objectsWillChangeInEditingContext= "ObjectsWillChangeInEditingContext";
 
-    /** Notification name, posted before EOAdaptor debug logging will change its setting. */
-    public final static String eoAdaptorLoggingWillChangeNotification = "EOAdaptorLoggingWillChange";
-    
     /** logging support */
     private static Logger _log;
     
     private static boolean _initialized;
 
-    public ERXExtensions() {
-    }
-   
    /**
      * Configures the framework. All the bits and pieces that need
      * to be configured are configured, those that need to happen
@@ -137,9 +128,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
         	}
         	
             ERXArrayUtilities.initialize();
-            
-			ERXExtensions.configureAdaptorContextRapidTurnAround(this);
-    		
     	} catch (Exception e) {
     		throw NSForwardException._runtimeExceptionForThrowable(e);
     	}
@@ -176,158 +164,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 		ERXProperties.pathsForUserAndBundleProperties(true);
     }
 
-    @Override
-    public void didFinishInitialization() {
-        super.didFinishInitialization();
-    }
-
-    /**
-     * This method is called every time the configuration file
-     * is changed. This allows for turning SQL debugging on and
-     * off at runtime.
-     * @param n notification posted when the configuration file
-     * 	changes.
-     */
-    public void configureAdaptorContext(NSNotification n) {
-        ERXExtensions.configureAdaptorContext();
-    }
-
-    /** logging support for the adaptor channel */
-    public static Logger adaptorLogger;
-
-    /** logging support for shared object loading */
-    public static Logger sharedEOadaptorLogger;
-
-    /** flag to indicate if adaptor channel logging is enabled */
-    private static Boolean adaptorEnabled;
-
-    /** 
-     * flag to indicate if rapid turn around is enabled for the
-     * adaptor channel logging. 
-     */
-    private static boolean _isConfigureAdaptorContextRapidTurnAround = false;
-
-    /**
-     * Configures the passed in observer to register a call back 
-     * when the configuration file is changed. This allows one to 
-     * change a logger's setting and have that changed value change
-     * the NSLog setting to log the generated SQL. This method is
-     * called as part of the framework initialization process.
-     * @param anObserver object to register the call back with.
-     */
-    // FIXME: This shouldn't be enabled when the application is in production.
-    // FIXME: Now that all of the logging has been centralized, we should just be able
-    //		to do something like this, but much more generic, i.e. have a mapping
-    //		between logger names and NSLog groups, for example
-    //		com.webobjects.logging.DebugGroupSQLGeneration we should
-    //		be able to get the last part of the logger name and look up that log group and turn 
-    public static void configureAdaptorContextRapidTurnAround(Object anObserver) {
-        if (!_isConfigureAdaptorContextRapidTurnAround) {
-            // This allows enabling from the log4j system.
-            adaptorLogger = Logger.getLogger("er.transaction.adaptor.EOAdaptorDebugEnabled");
-            
-            sharedEOadaptorLogger = Logger.getLogger("er.transaction.adaptor.EOSharedEOAdaptorDebugEnabled");
-            if ((adaptorLogger.isDebugEnabled() 
-            		&& !NSLog.debugLoggingAllowedForGroups(NSLog.DebugGroupSQLGeneration|NSLog.DebugGroupDatabaseAccess))
-            		|| ERXProperties.booleanForKey("EOAdaptorDebugEnabled")) {
-                NSLog.allowDebugLoggingForGroups(NSLog.DebugGroupSQLGeneration|NSLog.DebugGroupDatabaseAccess);
-                NSLog.setAllowedDebugLevel(NSLog.DebugLevelInformational);
-            }
-            adaptorEnabled = NSLog.debugLoggingAllowedForGroups(NSLog.DebugGroupSQLGeneration|NSLog.DebugGroupDatabaseAccess) ? Boolean.TRUE : Boolean.FALSE;
-                                          // Allows rapid turn-around of adaptor debugging.
-            NSNotificationCenter.defaultCenter().addObserver(anObserver,
-                                                             new NSSelector("configureAdaptorContext", ERXConstant.NotificationClassArray),
-                                                             ERXConfigurationManager.ConfigurationDidChangeNotification,
-                                                             null);
-            _isConfigureAdaptorContextRapidTurnAround = true;
-        }
-    }
-
-    /**
-     * This method is called by the delegate when the configuration
-     * file is changed. It's sole purpose is to map a logging logger
-     * to a debug group. Hopefully in the future we will have a more
-     * generic solution.
-     */
-    public static void configureAdaptorContext() {
-        Boolean targetState = null;
-        if (adaptorLogger != null) {
-	        if (adaptorLogger.isDebugEnabled() && !adaptorEnabled.booleanValue()) {
-	            targetState = Boolean.TRUE;
-	        } else if (!adaptorLogger.isDebugEnabled() && adaptorEnabled.booleanValue()) {
-	            targetState = Boolean.FALSE;
-	        }
-	        if (targetState != null) {
-	        	setAdaptorLogging(targetState.booleanValue());
-	        }
-        }
-    }
-
-    /**
-     * Returns the current state of EOAdaptor logging.
-     */
-	public static boolean adaptorLogging() {
-		return NSLog.debugLoggingAllowedForGroups(NSLog.DebugGroupSQLGeneration|NSLog.DebugGroupDatabaseAccess);
-	}
-
-    /**
-     * Turn EOAdaptor logging on and off.
-     * @param onOff
-     */
-    public static void setAdaptorLogging(boolean onOff) {
-    	Boolean targetState = Boolean.valueOf(onOff);
-    	if (NSLog.debugLoggingAllowedForGroups(NSLog.DebugGroupSQLGeneration|NSLog.DebugGroupDatabaseAccess) != targetState.booleanValue()) {
-			// Post a notification to give us a hook to perform other operations necessary to get logging going, e.g. change Logger settings, etc.
-			NSNotificationCenter.defaultCenter().postNotification(new NSNotification(eoAdaptorLoggingWillChangeNotification, targetState));
-    		if (targetState.booleanValue()) {
-    			NSLog.allowDebugLoggingForGroups(NSLog.DebugGroupSQLGeneration|NSLog.DebugGroupDatabaseAccess);
-    		} else {
-    			NSLog.refuseDebugLoggingForGroups(NSLog.DebugGroupSQLGeneration|NSLog.DebugGroupDatabaseAccess);
-    		}
-    	}
-    	if (adaptorLogger != null) {
-	    	if (targetState.booleanValue()) {
-	    		adaptorLogger.info("Adaptor debug on");
-	    	} else {
-	    		adaptorLogger.info("Adaptor debug off");
-	    	}
-    	}	
-    	adaptorEnabled = targetState;
-   }
-
-    /**
-     * Forces the garbage collector to run. The
-     * max loop parameter determines the maximum
-     * number of times to run the garbage collector
-     * if the memory footprint is still going down.
-     * In normal cases you would just need to call
-     * this method with the parameter 1. If called
-     * with the parameter 0 the garbage collector
-     * will continue to run until no more free memory
-     * is available to collect.
-     * <p>
-     * Note: This can be a very costly operation and
-     * should only be used in extreme circumstances.
-     * @param maxLoop maximum times to run the garbage
-     *		collector. Passing in 0 will cause the
-     *		collector to run until all free objects
-     *		have been collected.
-     */
-    public static void forceGC(int maxLoop) {
-        if (_log.isDebugEnabled()) _log.debug("Forcing full Garbage Collection");
-        Runtime runtime = Runtime.getRuntime();
-        long isFree = runtime.freeMemory();
-        long wasFree;
-        int i=0;
-        do {
-            wasFree = isFree;
-            runtime.gc();
-            isFree = runtime.freeMemory();
-            i++;
-        } while (isFree > wasFree && (maxLoop<=0 || i<maxLoop) );
-        runtime.runFinalization(); //TODO: should this be inside the loop?
-    }
-
     /**
      * This method can be used with Direct Action URLs to make sure
      * that the browser will reload the page. This is done by
@@ -342,6 +178,7 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 	    char c=daURL.indexOf('?')==-1 ? '?' : '&';
 	    return  daURL+c+"r="+r;
     }
+
     /**
      * This method can be used with Direct Action URLs to make sure
      * that the browser will reload the page. This is done by

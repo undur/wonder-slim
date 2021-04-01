@@ -30,6 +30,7 @@ import com.webobjects.foundation.NSMutableArray;
 
 import er.extensions.ERXExtensions;
 import er.extensions.foundation.ERXArrayUtilities;
+import x.FIXMEException;
 
 /**
  * Configures and manages the log4j logging system. Will also configure the system for rapid turn around, i.e. when
@@ -374,8 +375,9 @@ public class ERXLog4JConfiguration extends WOComponent {
     public WOComponent filter() { return null; }
     public WOComponent resetFilter() { _filterString = null; filterLevel = null; return null; }
     public WOComponent update() {
-        ERXExtensions.configureAdaptorContext();
-        return null;
+    	throw new FIXMEException();
+//        ERXExtensions.configureAdaptorContext();
+//        return null;
     }
 
     public String showAllLoggersSelection() { return showAll ? "all" : "explicit"; }
