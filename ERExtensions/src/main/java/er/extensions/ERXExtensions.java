@@ -163,42 +163,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
         _log = Logger.getLogger(ERXExtensions.class);
 		ERXProperties.pathsForUserAndBundleProperties(true);
     }
-
-    /**
-     * This method can be used with Direct Action URLs to make sure
-     * that the browser will reload the page. This is done by
-     * adding the parameter [? | &amp;]r=random_number to the end of the
-     * url.
-     * @param daURL a url to add the randomization to.
-     * @return url with the addition of the randomization key
-     */
-    // FIXME: Should check to make sure that the key 'r' isn't already present in the url.
-    public static String randomizeDirectActionURL(String daURL) {
-	    int r=ThreadLocalRandom.current().nextInt();
-	    char c=daURL.indexOf('?')==-1 ? '?' : '&';
-	    return  daURL+c+"r="+r;
-    }
-
-    /**
-     * This method can be used with Direct Action URLs to make sure
-     * that the browser will reload the page. This is done by
-     * adding the parameter [? | &amp;]r=random_number to the end of the
-     * url.
-     * @param daURL a url to add the randomization to.
-     */
-    // FIXME: Should check to make sure that the key 'r' isn't already present in the url.
-    public static void addRandomizeDirectActionURL(StringBuffer daURL) {
-	    int r=ThreadLocalRandom.current().nextInt();
-	    char c='?';
-	    for (int i=0; i<daURL.length(); i++) {
-		if (daURL.charAt(i)=='?') {
-		    c='&'; break;
-		}
-	    }
-	    daURL.append(c);
-	    daURL.append("r=");
-	    daURL.append(r);
-    }
     
     /**
      * Adds the session ID for a given session to a given URL.
