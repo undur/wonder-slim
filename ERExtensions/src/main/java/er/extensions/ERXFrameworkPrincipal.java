@@ -1,9 +1,3 @@
-//
-// ERXFrameworkPrincipal.java
-// Project ERExtensions
-//
-// Created by ak on Sat May 04 2002
-//
 package er.extensions;
 
 import java.lang.reflect.Field;
