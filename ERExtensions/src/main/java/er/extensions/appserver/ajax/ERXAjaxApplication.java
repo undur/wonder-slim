@@ -12,16 +12,10 @@ import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXProperties;
 
 /**
- * <div class="en">
  * ERXAjaxApplication is the part of ERXApplication that handles Ajax requests.
  * If you want to use the Ajax framework without using other parts of Project
  * Wonder (i.e. ERXSession or ERXApplication), you should steal all of the code
  * in ERXAjaxSession, ERXAjaxApplication, and ERXAjaxContext.
- * </div>
- * 
- * <div class="ja">
- * ERXAjaxApplication は Ajax リクエストをサポートします。
- * </div>
  * 
  * @property er.extensions.ERXAjaxApplication.allowContextPageResponse
  *
@@ -37,16 +31,9 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	private ERXAjaxResponseDelegate _responseDelegate;
 
 	/**
-	 * <div class="en">
 	 * Sets the response delegate for this application.
-	 * </div>
 	 * 
-	 * <div class="ja">
-	 * このアプリケーションのレスポンス・デリゲートをセットします。
-	 * </div>
-	 * 
-	 * @param responseDelegate <div class="en">the response delegate</div>
-	 *                         <div class="ja">レスポンス・デリゲート</div>
+	 * @param responseDelegate the response delegate
 	 */
 	public void setResponseDelegate(ERXAjaxResponseDelegate responseDelegate) {
 		_responseDelegate = responseDelegate;
@@ -98,18 +85,7 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	
 	
 	/**
-	 * <div class="en">
 	 * Overridden to allow for redirected responses.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * リダイレクト・リスポンスを許可するためにオーバライドします。
-	 * </div>
-	 * 
-	 * @param request <div class="en">WORequest</div>
-	 *                <div class="ja">リクエスト</div>
-	 * @param context <div class="en">WOContext</div>
-	 *                <div class="ja">コンテクスト</div>
 	 */
 	@Override
 	public WOActionResults invokeAction(WORequest request, WOContext context) {
@@ -141,8 +117,7 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	}
 	
 	/**
-	 * <div class="en">Allow for context.page() as a result to an ajax call. Currently for debugging.</div>
-	 * <div class="ja">デバッグ専用：ajax コールの context.page() 結果を許可する</div>
+	 * Allow for context.page() as a result to an ajax call. Currently for debugging.
 	 */
 	// AK: REMOVEME if WOGWT doesn't work out...
 	private Boolean _allowContextPageResponse;
@@ -153,29 +128,12 @@ public abstract class ERXAjaxApplication extends WOApplication {
 		return _allowContextPageResponse;
 	}
 
-	/**
-	 * <div class="ja">
-	 * ページを強制的にキャシュに登録します。
-	 * </div>
-	 * 
-	 * @param message WOMessage
-	 */
 	public static void setForceStorePage(WOMessage message) {
 		ERXWOContext.contextDictionary().setObjectForKey(Boolean.TRUE, ERXAjaxSession.FORCE_STORE_PAGE);
 	}
 	
 	/**
-	 * <div class="en">
 	 * Checks if the page should not be stored in the cache
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * ページを強制的にキャシュに登録する必要ああるかどうかをチェックします。
-	 * </div>
-	 * 
-	 * @param message WOMessage
-	 * @return <div class="en"></div>
-	 *         <div class="ja">true の場合は登録する必要がある</div>
 	 */
 	public static boolean forceStorePage(WOMessage message) {
 		NSDictionary userInfo = NSDictionary.EmptyDictionary;
@@ -186,17 +144,7 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	}
 
 	/**
-	 * <div class="en">
 	 * Checks if the page should not be stored in the cache
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * キャッシュ内にページを登録しないかどうかをチェックします。
-	 * </div>
-	 * 
-	 * @param message 
-	 * @return <div class="en">boolean</div>
-	 *         <div class="ja">true の場合は登録しないように</div>
 	 */
 	public static boolean shouldNotStorePage(WOMessage message) {
 		NSDictionary userInfo = NSDictionary.EmptyDictionary;
@@ -207,15 +155,9 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	}
 
 	/**
-	 * <div class="en">
 	 * Removes Ajax response headers that are no longer necessary.
-	 * </div>
-	 * <div class="ja">
-	 * 必要ない Ajax リスポンス・ヘッダーを削除します。
-	 * </div>
 	 * 
-	 * @param response <div class="en">the response to clean up</div>
-	 *                 <div class="ja">クリーンアップするリスポンス</div>
+	 * @param response the response to clean up
 	 */
 	public static void cleanUpHeaders(WOResponse response) {
 		if (response != null) {
@@ -225,17 +167,7 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	}
 
 	/**
-	 * <div class="en">
 	 * Checks if the page should not be stored in the cache
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * ページがキャッシュに登録する必要がないことをチェックします。
-	 * </div>
-	 * 
-	 * @param context 
-	 * @return <div class="en"></div>
-	 *         <div class="ja">true の場合は登録しないように</div>
 	 */
 	public static boolean shouldNotStorePage(WOContext context) {
 		WORequest request = context.request();
@@ -256,17 +188,9 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	}
 
 	/**
-	 * <div class="en">
 	 * Return whether or not the given request is an Ajax request.
-	 * </div>
 	 * 
-	 * <div class="en">
-	 * 指定リクエストが Ajax リクエストかどうかを戻します。
-	 * </div>
-	 * 
-	 * @param request <div class="en">the request to check</div>
-	 *                <div class="ja">チェックするリクエスト</div>
-	 * @return boolean
+	 * @param request the request to check
 	 */
 	public static boolean isAjaxRequest(WORequest request) {
 		String requestedWith = request.headerForKey("x-requested-with");
@@ -274,52 +198,27 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	}
 
 	/**
-	 * <div class="en">
 	 * Returns the form name of the partial form submission.
-	 * </div>
 	 * 
-	 * <div class="ja">
-	 * 部分フォーム・サブミットのフォーム名を戻します。
-	 * </div>
-	 * 
-	 * @param request <div class="en">the request</div>
-	 *                <div class="ja">リクエスト</div>
-	 * @return <div class="en">the form name of the partial form submission</div>
-	 *         <div class="ja">部分フォーム・サブミットのフォーム名</div>
+	 * @param request the request
+	 * @return the form name of the partial form submission
 	 */
 	public static String partialFormSenderID(WORequest request) {
 		return request.stringFormValueForKey(ERXAjaxApplication.KEY_PARTIAL_FORM_SENDER_ID);
 	}
 
 	/**
-	 * <div class="en">
 	 * Returns the form name of the submitting Ajax button.
-	 * </div>
 	 * 
-	 * <div class="ja">
-	 * サブミット Ajax ボタンのフォーム名を戻します。
-	 * </div>
-	 * 
-	 * @param request <div class="en">the request</div>
-	 *                <div class="ja">リクエスト</div>
-	 * @return <div class="en">the form name of the submitting Ajax button</div>
-	 *         <div class="ja">サブミット Ajax ボタンのフォーム名</div>
+	 * @param request the request
+	 * @return the form name of the submitting Ajax button
 	 */
 	public static String ajaxSubmitButtonName(WORequest request) {
 		return request.stringFormValueForKey(ERXAjaxApplication.KEY_AJAX_SUBMIT_BUTTON);
 	}
 
 	/**
-	 * <div class="en">
 	 * Returns true if this is an ajax submit.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * Ajax サブミットの場合には true が戻ります。
-	 * </div>
-	 * 
-	 * @param request 
-	 * @return boolean
 	 */
 	public static boolean isAjaxSubmit(WORequest request) {
 		return (ERXAjaxApplication.ajaxSubmitButtonName(request) != null);
@@ -327,10 +226,6 @@ public abstract class ERXAjaxApplication extends WOApplication {
 
 	/**
 	 * Returns true if this is an Ajax replacement (_r key is set).
-	 * 
-	 * @param request - WORequest
-	 * 
-	 * @return boolean
 	 */
 	public static boolean isAjaxReplacement(WORequest request) {
 		return request.formValueForKey(ERXAjaxApplication.KEY_REPLACED) != null;
@@ -338,46 +233,25 @@ public abstract class ERXAjaxApplication extends WOApplication {
 	
 	/**
 	 * Returns true if this request will update an AjaxUpdateContainer.
-	 * 
-	 * @param request - WORequest
-	 * 
-	 * @return boolean
 	 */
 	public static boolean isAjaxUpdate(WORequest request) {
 		return request.formValueForKey(KEY_UPDATE_CONTAINER_ID) != null;
 	}
 
 	/**
-	 * <div class="en">
-	 * ERXAjaxResponseDelegate receives callbacks from within the R-R loop when
-	 * certain situations occur.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * ERXAjaxResponseDelegate はリクエスト・リスポンス・ループよりコールバックされる。
-	 * </div>
+	 * ERXAjaxResponseDelegate receives callbacks from within the R-R loop when certain situations occur.
 	 * 
 	 * @author mschrag
 	 */
 	public static interface ERXAjaxResponseDelegate {
 		/**
-		 * <div class="en">
 		 * When an Ajax request generates a null result, this method is called
 		 * to provide an alternative response.
-		 * </div>
 		 * 
-		 * <div class="en">
-		 * Ajax リクエストが null 結果を生成した時に呼ばれ、換わりのリスポンスを提供します。
-		 * </div>
-		 * 
-		 * @param request <div class="en">the request</div>
-		 *                <div class="ja">リクエスト</div>
-		 * @param response <div class="en">the response</div>
-		 *                 <div class="ja">レスポンス</div>
-		 * @param context <div class="en">the context</div>
-		 *                <div class="ja">コンテクスト</div>
-		 * @return <div class="en">the replacement results to use</div>
-		 *         <div class="ja">換わりに使用するアクション</div>
+		 * @param request the request
+		 * @param response the response
+		 * @param context the context
+		 * @return the replacement results to use
 		 */
 		public WOActionResults handleNullActionResults(WORequest request, WOResponse response, WOContext context);
 	}
