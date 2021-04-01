@@ -29,16 +29,10 @@ import er.extensions.foundation.ERXKeyValueCodingUtilities;
 import er.extensions.foundation.ERXProperties;
 
 /**
- * <div class="en">
  * ERXAjaxSession is the part of ERXSession that handles Ajax requests.
  * If you want to use the Ajax framework without using other parts of Project
  * Wonder (i.e. ERXSession or ERXApplication), you should steal all of the code
  * in ERXAjaxSession, ERXAjaxApplication, and ERXAjaxContext.
- * </div>
- * 
- * <div class="ja">
- * ERXAjaxSession は ERXSession の Ajax 対応部分である。
- * </div>
  * 
  * @property er.extensions.maxPageReplacementCacheSize=30
  * @property er.extensions.appserver.ajax.ERXAjaxSession.storesPageInfo=false
@@ -55,36 +49,20 @@ public class ERXAjaxSession extends WOSession {
 	private static final long serialVersionUID = 1L;
 
   /**
-   * <div class="en">
    * Key that tells the session not to store the current page. Checks both the 
    * response userInfo and the response headers if this key is present. The value doesn't matter,
    * but you need to update the corresponding value in AjaxUtils.  This is to keep the dependencies
    * between the two frameworks independent.
-   * </div>
-   * 
-   * <div class="ja">
-   * カレント・ページをセッション内に保存しない、又は強制的に保存するキーです。
-   * レスポンスの userInfo もレスポンスの header の両方をチェックします。
-   * 値は関係ないのですが、キーが設定されていればだけでいいのです。
-   * </div>
    */
   public static final String DONT_STORE_PAGE = "erxsession.dont_store_page";
   public static final String FORCE_STORE_PAGE = "erxsession.force_store_page";
 
   /**
-   * <div class="en">
    * Key that is used to specify that a page should go in the replacement cache instead of
    * the backtrack cache.  This is used for Ajax components that actually generate component
    * actions in their output.  The value doesn't matter, but you need to update the 
    * corresponding value in AjaxUtils.  This is to keep the dependencies between the two
    * frameworks independent.
-   * </div>
-   * 
-   * <div class="ja">
-   * ページがバックトラック・キャシュではなく、独自の内部キャシュで処理します。なぜなら、 Ajax コンポーネントが
-   * 既にコンポーネント・アクションを出力している場合に有効です。
-   * 値は関係ないのですが、キーが設定されていればだけでいいのです。
-   * </div>
    */
   public static final String PAGE_REPLACEMENT_CACHE_LOOKUP_KEY = "page_cache_key";
 
@@ -114,15 +92,8 @@ public class ERXAjaxSession extends WOSession {
   }
   
   /**
-   * <div class="en">
    * ERTransactionRecord is a reimplementation of WOTransactionRecord for
    * use with Ajax background request page caching.
-   * </div>
-   * 
-   * <div class="ja">
-   * TransactionRecord は WOTransactionRecord のかわりのクラスです。
-   * Ajax バックグラウンド・リクエスト・ページ・キャッシュ使用
-   * </div>
    * 
    * @author mschrag
    */
@@ -205,7 +176,6 @@ public class ERXAjaxSession extends WOSession {
   }
   
   /**
-   * <div class="en">
    * Overridden so that Ajax requests are not saved in the page cache.  Checks both the 
    * response userInfo and the response headers if the DONT_STORE_PAGE key is present. The value doesn't matter.
    * <p>
@@ -238,42 +208,6 @@ public class ERXAjaxSession extends WOSession {
    * in the main cache.  It's only on a subsequent Ajax update that it uses page replacement cache.  So even though the cache
    * is keyed off of context ID, the explanation of the cache being components-per-page-sized works out because each component
    * is requesting in its own thread and generating their own non-overlapping context ids.
-   * </div>
-   * 
-   * <div class="ja">
-   * Ajax リクエストがページ・キャシュに保存されないようにオーバライドします。
-   * レスポンス・ユーザ・インフォメーション・ディクショナリーとレスポンス・ヘッダーを DONT_STORE_PAGE キーがあるかどうかをチェックします。
-   * 値は何でもいいのです。
-   * 
-   * <p>
-   * 独自ページ・キャシュは Ajax updates をコンポーネント・アクションでサポートする為に作成されました。Ajax のコンポーネント・アクションの
-   * 一番な問題は一般ページ・キャシュが使用されるので、バックトラック・キャシュ（30、設定によって違うかも）が一杯になります。
-   * Ajax の為にページ・キャシュが一杯になるとユーザが表示中のページをクリックし、コンポーネント・アクションを実行するとそのページがページ・キャシュにない為
-   * エラーが発生します。なぜなら、コンテクストが既にないからです。
-   * バックトラック・キャシュをレクエストの為にオフすると Ajax 更新エリアでのコンポーネント・アクションが使えなくなるのです。なぜなら、Ajax 更新でリンク生成される
-   * と生成されているリンクは保存されない。いつでも、バックトラック・エラーが発生します。</p>
-   * 
-   * <p> 
-   * 独自ページ・キャシュ。
-   * Ajax の振る舞いを見ると一番いい方法はハイブリッド・キャシュになります。
-   * ある Ajax コンポーネントの最後のバックトラックのみを保持します。その前の 29 の Ajax コンポーネント・アクションは必要ありません。
-   * ユーザがブラウザの戻りボタンをクリックすると戻ることはもっとも不可能です。
-   * ただし、最新のバックトラックがあれば、Ajax 更新エリアのリンクもクリックが可能になります。
-   * この独自ページ・キャシュは上記のロジックを使用しています。
-   * ページが更新する各 Ajax コンポーネントの最後の最新なバックトラック状態を保持します。（一般ページ・キャシュと振る舞いが違います）
-   * 一般ページ・キャシュは各ユーザ・バックトラック・リクエストを保持します。独自ページ・キャシュは各 ajax コンポーネントを保持します。
-   * （ページの replacement_page_cache_size 分を許可します）
-   * Ajax エリアはリフレッシュされる度、最後の状態が置き換わることです。
-   * restorePage ページ・レクエストが来ると独自ページ・キャシュを先に参照します。独自ページ・キャシュがそのページをリストアができれば、それで完了。
-   * 独自ページ・キャシュがリストアするページを見つからない場合には一般ページ・キャシュに処理を委託します。
-   * Ajax を使用しない場合、独自ページ・キャシュはセッション内に存在しないことになります。関連コードはスキップされます。</p>
-   * 
-   * <p>
-   * いろいろテストした結果で、最後の状態のみではなく、最後の二つの状態を保存するようになりました。なぜなら、まれに独自ページ・キャシュは
-   * コンテクスト2をコンテクスト3にアップデートし、ブラウザのHTMLはまだコンテクスト3でアップデートされていない場合。ユーザがページを
-   * 変わる前にコンテクスト2のリンクをクリックすることになります。ただしそのリンクもちょっど独自ページ・キャシュより削除した為に見つかりません。
-   * 二つの状態を保存することでトランスアクション内の問題を防ぐことが可能になります。</p>
-   * </div>
    */
   @Override
   public void savePage(WOComponent page) {
@@ -331,32 +265,17 @@ public class ERXAjaxSession extends WOSession {
   }
 
   /**
-   * <div class="en">
    * Iterates through the page replacement cache (if there is one) and removes expired records.
-   * </div>
-   * 
-   * <div class="ja">
-   * 独自の内部ページ・キャシュを Iterates し、有効期限切れのレコードを削除します。
-   * </div>
    */
   protected void cleanPageReplacementCacheIfNecessary() {
     cleanPageReplacementCacheIfNecessary(null);
   }
 
   /**
-   * <div class="en">
    * Iterates through the page replacement cache (if there is one) and removes expired records.
-   * </div>
    * 
-   * <div class="ja">
-   * 独自の内部ページ・キャシュを Iterates し、有効期限切れのレコードを削除します。
-   * </div>
-   * 
-   * @param _cacheKeyToAge <div class="en">optional cache key to age via setOldPage</div>
-   *                       <div class="ja">オプション・キャシュ・キー (setOldPage)</div>
-   * 
-   * @return <div class="en">whether or not a cache entry was removed</div>
-   *         <div class="ja">キャシュ・エントリが削除されているかどうか</div>
+   * @param _cacheKeyToAge optional cache key to age via setOldPage
+   * @return whether or not a cache entry was removed
    */
 protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
     boolean removedCacheEntry = false;
@@ -404,27 +323,17 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
   
 
   	/**
-	 * <div class="en">A dict of contextID/pages</div>
-	 * <div class="ja">contextID/pages のディクショナリー</div>
+	 * A dict of contextID/pages
 	 */
 	protected NSMutableDictionary _permanentPageCache;
 	
 	/**
-	 * <div class="en">The currently active contextIDs for the permanent pages.</div>
-	 * <div class="ja">永続ページのカレント・コンテクスト ID</div>
+	 * The currently active contextIDs for the permanent pages.
 	 */
 	protected NSMutableArray _permanentContextIDArray;
 
 	/**
-	 * <div class="en">
 	 * Returns the permanent page cache. Initializes it if needed.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * 永続ページ・キャシュを戻します。（なければ、初期化される）
-	 * </div>
-	 * 
-	 * @return NSMutableDictionary
 	 */
 	protected NSMutableDictionary _permanentPageCache() {
 		if (_permanentPageCache == null) {
@@ -435,19 +344,7 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
 	}
 
 	/**
-	 * <div class="en">
 	 * Returns the page for the given contextID, null if none is present.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * 指定コンテクスト ID を使って、ページをキャシュより戻します。
-	 * なければ、null が戻ります。
-	 * </div>
-	 * 
-	 * @param contextID <div class="en"></div>
-	 *                  <div class="ja">コンテクスト ID</div>
-	 * 
-	 * @return WOComponent
 	 */
 	protected WOComponent _permanentPageWithContextID(String contextID) {
 		WOComponent wocomponent = null;
@@ -457,15 +354,8 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
 	}
 
 	/**
-	 * <div class="en">
 	 * Semi-private method that saves the current page. Overridden to put the page in the
 	 * permanent page cache if it's already in there.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * カレント・ページを保存します。
-	 * 永続ページ・キャシュに登録する為にオーバライドされています。
-	 * </div>
 	 */
     @Override
 	public void _saveCurrentPage() {
@@ -501,18 +391,8 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
 	}
 
 	/**
-	 * <div class="en">
 	 * Reimplementation of the rather weird super imp which references an interface probably no
 	 * one has ever heard of...
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * スーパーの再実装！スーパーはだれも聞いたことがないインタフェースを搭載しているため
-	 * </div>
-	 * 
-	 * @param wocomponent - WOComponent
-	 * 
-	 * @return boolean
 	 */
 	protected boolean _shouldPutInPermanentCache(WOComponent wocomponent) {
 		boolean flag = true;
@@ -533,14 +413,7 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
 	
 	
 	/**
-	 * <div class="en">
 	 * Saves a page in the permanent cache. Overridden to not save in the super implementation's iVars but in our own.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * 永続ページ・キャシュにページを保存します。
-	 * スーパーの実装で保存されない用にオーバライドされています。独自で保存を行います。
-	 * </div>
 	 */
 	// FIXME: ak: as we save the perm pages under a lot of context IDs, we should have a way to actually limit the size...
 	// not sure how, though
@@ -568,15 +441,8 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
 	}
 	
 	/**
-	 * <div class="en">
 	 * Extension of restorePageForContextID that implements the other side of
 	 * Page Replacement Cache.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * restorePageForContextID の拡張。
-	 * 独自内部ページ・キャシュのサポート
-	 * </div>
 	 */
     @Override
   public WOComponent restorePageForContextID(String contextID) {
