@@ -1,28 +1,16 @@
 package er.extensions.foundation;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import java.util.zip.InflaterInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSData;
 
-
 public class ERXCompressionUtilities {
+
 	private static final Logger log = LoggerFactory.getLogger(ERXCompressionUtilities.class);
 
 	/**
@@ -33,9 +21,9 @@ public class ERXCompressionUtilities {
 	 * @return gzipped NSData
 	 */
 	public static NSData gzipInputStreamAsNSData(InputStream input, int length) {
-		try (ERXRefByteArrayOutputStream bos = new ERXRefByteArrayOutputStream(length)) {
+		try( ERXRefByteArrayOutputStream bos = new ERXRefByteArrayOutputStream(length)) {
 			if (input != null) {
-				try (GZIPOutputStream out = new GZIPOutputStream(bos)) {
+				try( GZIPOutputStream out = new GZIPOutputStream(bos)) {
 					ERXFileUtilities.writeInputStreamToOutputStream(input, true, out, false);
 				}
 			}
@@ -47,18 +35,10 @@ public class ERXCompressionUtilities {
 		}
 	}
 
-	public static NSData gzipNSDataAsNSData(NSData data) {
-		NSData gzippedData = null;
-		if (data != null) {
-			gzippedData = ERXCompressionUtilities.gzipByteArrayAsNSData(data._bytesNoCopy(), 0, data.length());
-		}
-		return gzippedData;
-	}
-	
 	public static NSData gzipByteArrayAsNSData(byte[] input, int offset, int length) {
-		try (ERXRefByteArrayOutputStream bos = new ERXRefByteArrayOutputStream(length)) {
+		try( ERXRefByteArrayOutputStream bos = new ERXRefByteArrayOutputStream(length)) {
 			if (input != null) {
-				try (GZIPOutputStream out = new GZIPOutputStream(bos)) {
+				try( GZIPOutputStream out = new GZIPOutputStream(bos)) {
 					out.write(input, offset, length);
 					out.finish();
 				}
@@ -69,154 +49,5 @@ public class ERXCompressionUtilities {
 			log.error("Failed to gzip byte array.", e);
 			return null;
 		}
-	}
-
-	public static byte[] gzipByteArray(byte[] input) {
-		try (ByteArrayOutputStream bos = new ByteArrayOutputStream(input.length); GZIPOutputStream out = new GZIPOutputStream(bos)) {
-			out.write(input, 0, input.length);
-			out.finish();
-
-			byte[] compressedData = bos.toByteArray();
-			return compressedData;
-		}
-		catch (IOException e) {
-			log.error("Failed to gzip byte array.", e);
-			return null;
-		}
-	}
-
-	public static byte[] gunzipByteArray(byte[] input) {
-		try (ByteArrayInputStream bos = new ByteArrayInputStream(input); GZIPInputStream in = new GZIPInputStream(bos)) {
-			byte[] uncompressedData = ERXFileUtilities.bytesFromInputStream(in);
-			return uncompressedData;
-		}
-		catch (IOException e) {
-			return null;
-		}
-	}
-
-	public static String gunzipString(String source) {
-		byte[] b = gunzipByteArray(source.getBytes(StandardCharsets.UTF_8));
-		return new String(b, StandardCharsets.UTF_8);
-	}
-
-	public static String gunzipByteArrayAsString(byte[] input) {
-		byte[] b = gunzipByteArray(input);
-		return new String(b, StandardCharsets.UTF_8);
-	}
-
-	public static byte[] gzipStringAsByteArray(String source) {
-		return gzipByteArray(source.getBytes(StandardCharsets.UTF_8));
-	}
-
-	public static byte[] zipByteArray(byte[] input) {
-		return ERXCompressionUtilities.zipByteArray(input, "tmp");
-	}
-
-	public static byte[] zipByteArray(byte[] input, String zipEntryName) {
-		try (ByteArrayOutputStream bos = new ByteArrayOutputStream(input.length); ZipOutputStream out = new ZipOutputStream(bos)) {
-			out.putNextEntry(new ZipEntry(zipEntryName));
-			out.write(input, 0, input.length);
-			out.closeEntry();
-			out.finish();
-
-			byte[] compressedData = bos.toByteArray();
-			return compressedData;
-		}
-		catch (IOException e) {
-			log.error("Caught exception zipping byte array: {}", e, e);
-			return null;
-		}
-	}
-
-	public static File unzipByteArrayIntoDirectory(byte[] input, File directory, boolean overwrite) {
-		try {
-			if (!directory.exists()) {
-				directory.mkdirs();
-				directory.mkdir();
-				if (!directory.exists()) {
-					throw new IllegalStateException("could not create directory " + directory);
-				}
-			}
-			else {
-				if (!overwrite) {
-					throw new IllegalStateException("overwrite is false and file " + directory + " does exist");
-				}
-				else if (!directory.isDirectory()) {
-					throw new IllegalArgumentException("file " + directory + " is NOT an directory");
-				}
-			}
-
-			long start = System.currentTimeMillis();
-			try (ByteArrayInputStream bos = new ByteArrayInputStream(input);
-				ZipInputStream in = new ZipInputStream(bos)) {
-				ZipEntry entry = null;
-				while ((entry = in.getNextEntry()) != null) {
-	
-					String oriName = entry.getName();
-					String filename = directory.getAbsolutePath() + File.separator + oriName;
-	
-					if (entry.isDirectory()) {
-						log.debug("creating directory {}", oriName);
-	
-						File f = new File(filename);
-						f.mkdirs();
-						f.mkdir();
-	
-					}
-					else {
-						int uncompressedSize = (int) entry.getSize();
-	
-						if (uncompressedSize > -1) {
-							byte[] b = new byte[uncompressedSize];
-							in.read(b);
-							try (FileOutputStream fis = new FileOutputStream(filename)) {
-								fis.write(b);
-							}
-	
-							log.debug("unzipped entry {}", filename);
-						}
-					}
-				}
-				long end = System.currentTimeMillis();
-				log.debug("whole decompression took {}ms", end - start);
-				return directory;
-			}
-		}
-		catch (IOException e) {
-			return null;
-		}
-	}
-
-	public static byte[] deflateByteArray(byte[] input) {
-		try (ByteArrayOutputStream bos = new ByteArrayOutputStream(input.length); DeflaterOutputStream out = new DeflaterOutputStream(bos)) {
-			out.write(input, 0, input.length);
-			out.finish();
-
-			byte[] compressedData = bos.toByteArray();
-			return compressedData;
-		}
-		catch (IOException e) {
-			return null;
-		}
-	}
-
-	public static byte[] inflateByteArray(byte[] input) {
-		try (ByteArrayInputStream bos = new ByteArrayInputStream(input); InflaterInputStream in = new InflaterInputStream(bos)) {
-			byte[] uncompressedData = ERXFileUtilities.bytesFromInputStream(in);
-			return uncompressedData;
-		}
-		catch (IOException e) {
-			return null;
-		}
-	}
-
-	public static String deflateString(String source) {
-		return new String(deflateByteArray(source.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-	}
-
-	public static String inflateString(String source) {
-		byte[] b = inflateByteArray(source.getBytes(StandardCharsets.UTF_8));
-		return new String(b, StandardCharsets.UTF_8);
 	}
 }
