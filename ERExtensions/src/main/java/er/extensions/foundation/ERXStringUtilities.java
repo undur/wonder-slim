@@ -33,7 +33,6 @@ public class ERXStringUtilities {
 	private static final Logger log = LoggerFactory.getLogger(ERXStringUtilities.class);
 
 	private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-	public static final String SpecialRegexCharacters = ".*[]{}()?\\+%$!^";
 
 	/**
 	 * Retrieves a given string for a given name, extension and bundle.
