@@ -123,8 +123,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 				// default behaviour:
 				ERXLogger.configureLoggingWithSystemProperties();
 			}
-
-			ERXArrayUtilities.initialize();
 		}
 		catch (Exception e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
