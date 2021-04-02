@@ -16,6 +16,7 @@ import com.webobjects.foundation.NSValidation;
 import com.webobjects.foundation.NSValidation.ValidationException;
 
 import er.extensions.localization.ERXLocalizer;
+import x.FIXMEException;
 
 /**
  * ERXValidationExceptions extends the regular
@@ -380,7 +381,8 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      *	       entity name.
      */
     public String displayNameForEntity() {
-        return eoObject() != null ? localizedDisplayNameForKey(eoObject().entityName()) : null;
+    	throw new FIXMEException( "EOControl removed");
+//        return eoObject() != null ? localizedDisplayNameForKey(eoObject().entityName()) : null;
     }
 
     /**
@@ -399,7 +401,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
         } else {
         	localizer = ERXLocalizer.currentLocalizer();
         }
-        return ERXValidation.localizedDisplayNameForKey(eoObject() != null ? eoObject().classDescription() : null, key, localizer);
+        return ERXValidation.localizedDisplayNameForKey(key, localizer);
     }
 
     @Override

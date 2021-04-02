@@ -1,7 +1,6 @@
 package er.extensions.localization;
 
 import com.webobjects.appserver.WOContext;
-import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
 import er.extensions.components.ERXStatelessComponent;
@@ -67,8 +66,6 @@ public class ERXLocalizedString extends ERXStatelessComponent {
         if(value != null) {
             if(value instanceof String)
                 string = (String)value;
-            else if(value instanceof EOEnterpriseObject)
-                string = ((EOEnterpriseObject)value).userPresentableDescription();
             else
                 string = value.toString();
         }

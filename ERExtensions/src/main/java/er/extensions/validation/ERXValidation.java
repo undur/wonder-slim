@@ -11,8 +11,6 @@ import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.eocontrol.EOClassDescription;
-import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -143,7 +141,7 @@ public class ERXValidation {
             key = keyPath;
         }
         if (key != null && newErrorMessage != null) {
-        	  String displayName = localizedDisplayNameForKey(null, key, localizer);
+        	  String displayName = localizedDisplayNameForKey(key, localizer);
             errorMessages.setObjectForKey(newErrorMessage, displayName);
         } else {
             if(key != null) {
@@ -163,20 +161,12 @@ public class ERXValidation {
      * @param localizer to use for localizing the content
      * @return the localized display name
      */
-	public static String localizedDisplayNameForKey(EOClassDescription ecd, String key, ERXLocalizer localizer) {
+	public static String localizedDisplayNameForKey( String key, ERXLocalizer localizer) {
 		String displayName;
 		if (localizer != null) {
-			if (ecd != null) {
-				displayName = localizer.localizedDisplayNameForKey(ecd, key);
-			} else {
-				displayName = localizer.localizedStringForKeyWithDefault(key);
-			}
+			displayName = localizer.localizedStringForKeyWithDefault(key);
 		} else {
-		    if (ecd != null) {
-		        displayName = ecd.displayNameForKey(key);
-		    } else {
-		    	displayName = ERXStringUtilities.displayNameForKey(key);
-		    }
+	    	displayName = ERXStringUtilities.displayNameForKey(key);
 		}
 		return displayName;
 	}
