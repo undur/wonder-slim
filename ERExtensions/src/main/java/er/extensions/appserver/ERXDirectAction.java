@@ -6,9 +6,6 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.appserver;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -24,15 +21,11 @@ import com.webobjects.woextensions.WOEventDisplayPage;
 import com.webobjects.woextensions.WOEventSetupPage;
 import com.webobjects.woextensions.WOStatsPage;
 
-import er.extensions.ERXExtensions;
 import er.extensions.components.ERXLocalizationEditor;
 import er.extensions.components.ERXRemoteShell;
-import er.extensions.components.ERXStringHolder;
-import er.extensions.formatters.ERXUnitAwareDecimalFormat;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
-import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.logging.ERXLog4JConfiguration;
 import er.extensions.logging.ERXLogger;
