@@ -65,8 +65,6 @@ public class ERXArrayUtilities {
 	 * @return sorted array.
 	 */
 	public static <T> NSArray<T> sortedArraySortedWithKey(NSArray<T> array, String key, NSSelector selector) {
-		ERXAssert.PRE.notNull("Attempting to sort null array of objects.", array);
-		ERXAssert.PRE.notNull("Attepting to sort array of objects with null key.", key);
 		NSArray<EOSortOrdering> order = new NSArray<>(new EOSortOrdering[] { EOSortOrdering.sortOrderingWithKey(key, selector == null ? EOSortOrdering.CompareCaseInsensitiveAscending : selector) });
 		return EOSortOrdering.sortedArrayUsingKeyOrderArray(array, order);
 	}
