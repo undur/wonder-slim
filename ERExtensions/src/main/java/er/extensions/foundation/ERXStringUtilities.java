@@ -160,48 +160,6 @@ public class ERXStringUtilities {
 	}
 
 	/**
-	 * This method runs about 20 times faster than java.lang.String.toLowerCase
-	 * (and doesn't waste any storage when the result is equal to the input).
-	 * Warning: Don't use this method when your default locale is Turkey.
-	 * java.lang.String.toLowerCase is slow because (a) it uses a StringBuffer
-	 * (which has synchronized methods), (b) it initializes the StringBuffer to
-	 * the default size, and (c) it gets the default locale every time to test
-	 * for name equal to "tr".
-	 * 
-	 * @see <a href="http://www.norvig.com/java-iaq.html#tolower">tolower</a>
-	 * @author Peter Norvig
-	 **/
-	private static String toLowerCase(String str) {
-		if (str == null)
-			return null;
-
-		int len = str.length();
-		int different = -1;
-		// See if there is a char that is different in lowercase
-		for (int i = len - 1; i >= 0; i--) {
-			char ch = str.charAt(i);
-			if (Character.toLowerCase(ch) != ch) {
-				different = i;
-				break;
-			}
-		}
-
-		// If the string has no different char, then return the string as is,
-		// otherwise create a lowercase version in a char array.
-		if (different == -1) {
-			return str;
-		}
-		char[] chars = new char[len];
-		str.getChars(0, len, chars, 0);
-		// (Note we start at different, not at len.)
-		for (int j = different; j >= 0; j--) {
-			chars[j] = Character.toLowerCase(chars[j]);
-		}
-
-		return new String(chars);
-	}
-
-	/**
 	 * Simple test if the string is either null or equal to "".
 	 * 
 	 * @param s
@@ -442,6 +400,9 @@ public class ERXStringUtilities {
 		return capital != null ? capital : value;
 	}
 
+	/*
+	 * FIXME: Isn't this just basically Objects.equals() ?
+	 */
 	public static boolean stringEqualsString(String s1, String s2) {
 		if (s1 == s2)
 			return true;
@@ -478,28 +439,6 @@ public class ERXStringUtilities {
 	 */
 	private static String stringFromInputStream(InputStream in) throws IOException {
 		return new String(ERXFileUtilities.bytesFromInputStream(in));
-	}
-
-	/**
-	 * Returns a String by invoking toString() on each object from the array.
-	 * After each toString() call the separator is appended to the buffer.
-	 * 
-	 * @param array
-	 *            an object array from which to get a nice String representation
-	 * @param separator
-	 *            a separator which is displayed between the objects toString()
-	 *            value
-	 *
-	 * @return a string representation from the array
-	 */
-	public static String toString(Object[] array, String separator) {
-		StringBuilder buf = new StringBuilder();
-		for (int i = 0; i < array.length; i++) {
-			Object o = array[i];
-			buf.append(o.toString());
-			buf.append(separator);
-		}
-		return buf.toString();
 	}
 
 	/**
@@ -687,8 +626,6 @@ public class ERXStringUtilities {
 
 	/**
 	 * Same as NSPropertySerialization except it sorts on keys first.
-	 * 
-	 * @param dict
 	 */
 	public static String stringFromDictionary(NSDictionary dict) {
 		NSArray orderedKeys = dict.allKeys();
