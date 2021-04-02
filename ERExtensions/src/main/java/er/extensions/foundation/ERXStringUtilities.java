@@ -140,34 +140,6 @@ public class ERXStringUtilities {
     }
 
     /**
-     * Reads the contents of a file given by a path
-     * into a string.
-     * @param file path to the file in the file system
-     *
-     * @return the contents of the file in a string
-     */
-    public static String stringWithContentsOfFile(File file) {
-        try {
-            if(file != null)
-                return ERXFileUtilities.stringFromFile(file);
-        } catch (IOException e) {
-            log.error("Could not read string from file {}", file, e);
-        }
-        return null;
-    }
-    /**
-     * Reads the contents of a file given by a path
-     * into a string.
-     * @param path to the file in the file system
-     * @return the contents of the file in a string
-     */
-    public static String stringWithContentsOfFile(String path) {
-        if(path != null)
-            return ERXStringUtilities.stringWithContentsOfFile(new File(path));
-        return null;
-    }
-
-    /**
      * Calculates an Integer for a given string. The
      * only advantage that this method has is to not
      * throw a number format exception if the string
@@ -1352,7 +1324,7 @@ public class ERXStringUtilities {
 	  		if(encoding == null) {
 	  			encoding = CharEncoding.UTF_8;
 	  		}
-			bytes = ERXFileUtilities.md5(new ByteArrayInputStream(str.getBytes(encoding)));
+			bytes = md5(new ByteArrayInputStream(str.getBytes(encoding)));
 		}
 		catch (UnsupportedEncodingException e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
@@ -1362,6 +1334,28 @@ public class ERXStringUtilities {
 		}
 	}
 	return bytes;
+  }
+
+  /**
+   * Generate an MD5 hash from an input stream.
+   *
+   * @param in the input stream to sum
+   * @return the MD5 sum of the bytes in file
+   * @exception IOException if the input stream could not be read
+   */
+  private static byte[] md5(InputStream in) throws IOException {
+      try {
+          java.security.MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");            
+          byte[] buf = new byte[50 * 1024];
+          int numRead;
+          
+          while ((numRead = in.read(buf)) != -1) {
+              md5.update(buf, 0, numRead);
+          }
+          return md5.digest();
+      } catch (java.security.NoSuchAlgorithmException e) {
+          throw new NSForwardException(e);
+      }
   }
 
   /**
