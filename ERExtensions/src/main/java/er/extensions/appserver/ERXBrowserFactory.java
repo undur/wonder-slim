@@ -6,6 +6,7 @@
 //
 package er.extensions.appserver;
 
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
@@ -199,7 +200,7 @@ public class ERXBrowserFactory {
      * <div class="en">Mapping of UAs to browsers</div>
      * <div class="ja">ブラウザと user-agent マップ：キャシュ用</div>
      */
-    private static final NSMutableDictionary _cache = ERXMutableDictionary.synchronizedDictionary();
+    private static final Map _cache = ERXMutableDictionary.synchronizedDictionary();
 
     /**
      * <div class="en">
@@ -367,7 +368,7 @@ public class ERXBrowserFactory {
             		ERXBrowser.UNKNOWN_VERSION, ERXBrowser.UNKNOWN_PLATFORM, null);
         }
         
-       	ERXBrowser result = (ERXBrowser) _cache.objectForKey(ua);
+       	ERXBrowser result = (ERXBrowser) _cache.get(ua);
        	if (result == null) {
        		String browserName 		= parseBrowserName(ua);
        		String version 			= parseVersion(ua);
@@ -378,7 +379,7 @@ public class ERXBrowserFactory {
        				new Object[] {"cpu", "geckoRevision"});
        		
         	result = getBrowserInstance(browserName, version, mozillaVersion, platform, userInfo);
-        	_cache.setObjectForKey(result, ua);
+        	_cache.put(ua,result);
         }
         return result;
     }
