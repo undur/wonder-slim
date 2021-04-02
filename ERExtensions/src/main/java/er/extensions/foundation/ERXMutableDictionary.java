@@ -45,7 +45,7 @@ public class ERXMutableDictionary<K,V> extends NSMutableDictionary<K,V> {
 
 	@SuppressWarnings("unchecked")
 	public static NSDictionary fromBlob(NSData d) {
-		try (ByteArrayInputStream bis = new ByteArrayInputStream(d.bytes()); ObjectInputStream ois = new ERXMappingObjectStream(bis)) {
+		try (ByteArrayInputStream bis = new ByteArrayInputStream(d.bytes()); ObjectInputStream ois = new ObjectInputStream(bis)) {
 			NSDictionary<?,?> dd = (NSDictionary<?,?>) ois.readObject();
 			return dd;
 		}
