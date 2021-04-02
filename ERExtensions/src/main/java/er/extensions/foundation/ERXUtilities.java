@@ -9,9 +9,6 @@ package er.extensions.foundation;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import er.extensions.components.ERXStatelessComponent;
 
 /**
