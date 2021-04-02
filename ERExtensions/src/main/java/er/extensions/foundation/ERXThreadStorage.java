@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOSession;
-import com.webobjects.eocontrol.EOEditingContext;
-import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSSet;
 
@@ -60,9 +58,7 @@ public class ERXThreadStorage {
     	_problematicTypes = new NSSet<Class<?>>(
     			new Class[] {
     				WOSession.class, 
-    				WOContext.class, 
-    				EOEnterpriseObject.class, 
-    				EOEditingContext.class
+    				WOContext.class
     			}
     	);
     	
