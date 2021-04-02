@@ -45,6 +45,11 @@
 		</dependency>
 		<dependency>
 			<groupId>undur</groupId>
+			<artifactId>Ajax</artifactId>
+			<version>${undur.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>undur</groupId>
 			<artifactId>WOOgnl</artifactId>
 			<version>${undur.version}</version>
 		</dependency>
