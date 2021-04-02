@@ -55,16 +55,6 @@ public class ERXValidationFactory {
     /** holds the value 'ValidationTemplate.' */
     public static final String VALIDATION_TEMPLATE_PREFIX = "ValidationTemplate.";
 
-    /** holds the method name 'messageForException' */
-    // FIXME: This is better done with an NSSelector and using the method: implementedByObject
-    private static final String EDI_MFE_METHOD_NAME = "messageForException";
-    
-    /** holds the method name 'templateForException' */
-    private static final String EDI_TFE_METHOD_NAME = "templateForException";
-    
-    /** holds the class argument array for delegate validation exception messages */    
-    private static final Class[] EDI_FE_ARGS = new Class[] { ERXValidationException.class };
-
     /** Regular ERXValidationException constructor parameters */
     private static Class[] _regularConstructor = new Class[] { String.class, Object.class, String.class, Object.class };
 
