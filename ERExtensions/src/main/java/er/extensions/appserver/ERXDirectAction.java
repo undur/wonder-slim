@@ -31,7 +31,6 @@ import er.extensions.logging.ERXLog4JConfiguration;
 import er.extensions.logging.ERXLogger;
 import er.extensions.statistics.ERXStatisticsPage;
 import er.extensions.statistics.ERXStats;
-import x.FIXMEException;
 
 /**
  * Basic collector for direct action additions. All of the actions are password
@@ -39,6 +38,8 @@ import x.FIXMEException;
  * system property for the action.
  */
 public class ERXDirectAction extends WODirectAction {
+
+	private Logger log = LoggerFactory.getLogger( ERXDirectAction.class );
 
 	/** holds a reference to the current browser used for this session */
 	private ERXBrowser browser;
@@ -55,12 +56,13 @@ public class ERXDirectAction extends WODirectAction {
 	 * @return <code>true</code> if action is allowed to be invoked
 	 */
 	protected boolean canPerformActionWithPasswordKey(String passwordKey) {
-		throw new FIXMEException( "Disabled dut eo ERXCrypto no longer being there" );
-		/*
+
 		if (ERXApplication.isDevelopmentModeSafe()) {
 			return true;
 		}
-		String password = ERXProperties.decryptedStringForKey(passwordKey);
+
+//		String password = ERXProperties.decryptedStringForKey(passwordKey); // FIXME: This password used to be encrypted. Can't we just eliminate this DA instead?
+		String password = passwordKey;
 		if (password == null || password.length() == 0) {
 			log.error("Attempt to use action when key is not set: {}", passwordKey);
 			return false;
@@ -76,7 +78,6 @@ public class ERXDirectAction extends WODirectAction {
 			return false;
 		}
 		return password.equals(requestPassword);
-		*/
 	}
 
 	/**
