@@ -9,9 +9,6 @@ package er.extensions.validation;
 import java.util.Objects;
 
 import com.webobjects.appserver.WOMessage;
-import com.webobjects.eoaccess.EOAttribute;
-import com.webobjects.eoaccess.EOEntity;
-import com.webobjects.eoaccess.EOUtilities;
 import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCoding;
@@ -226,22 +223,6 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * @return the key of the validation exception
      */
     public String propertyKey() { return key(); }
-
-    /**
-     * Cover method for getting the attribute corresponding
-     * to the <b>propertyKey</b> and <b>entity</b> off of
-     * the object.
-     * @return EOAttribute corresponding to the propertyKey
-     *		and entity.
-     */
-    public EOAttribute attribute() {
-        EOAttribute attribute = null;
-        if (eoObject() != null) {
-            EOEntity entity = EOUtilities.entityForObject(eoObject().editingContext(), eoObject());
-            attribute = entity != null ? entity.attributeNamed(propertyKey()) : null;
-        }
-        return attribute;
-    }
     
     /**
      * Cover method to return the type of the validation

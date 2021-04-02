@@ -1763,7 +1763,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 * @return dictionary containing extra information for the current context.
 	 */
 	public NSMutableDictionary extraInformationForExceptionInContext(Exception e, WOContext context) {
-		NSMutableDictionary<String, Object> extraInfo = ERXRuntimeUtilities.informationForException(e);
+		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
 		extraInfo.addEntriesFromDictionary(ERXRuntimeUtilities.informationForContext(context));
 		extraInfo.addEntriesFromDictionary(ERXRuntimeUtilities.informationForBundles());
 		return extraInfo;

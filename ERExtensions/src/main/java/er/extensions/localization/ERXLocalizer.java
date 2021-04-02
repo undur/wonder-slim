@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
-import com.webobjects.eoaccess.EOEntity;
-import com.webobjects.eoaccess.EOEntityClassDescription;
 import com.webobjects.eocontrol.EOClassDescription;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
@@ -1316,19 +1314,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 	 * @return the localized string
 	 */
 	public String localizedDisplayNameForKey(EOClassDescription classDescription, String key) {
-		String result = null;
-		if (classDescription instanceof EOEntityClassDescription) {
-			EOEntity entity = ((EOEntityClassDescription) classDescription).entity();
-			while (entity != null && result == null) {
-				result = localizedStringForKey(entity.name() + "." + key);
-				entity = entity.parentEntity();
-			}
-		}
-		if (result == null) {
-			// fallback
-			result = localizedDisplayNameForKey(classDescription.entityName(), key);
-		}
-		return result;
+		return localizedDisplayNameForKey(classDescription.entityName(), key);
 	}
 
   /**

@@ -6,9 +6,9 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.foundation;
 
+import java.util.Arrays;
 import java.util.Vector;
 
-import com.webobjects.eoaccess.EOEntity;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation._NSCollectionPrimitives;
 
@@ -176,20 +176,8 @@ public class ERXMultiKey {
     	return false;
     }
 
-    /**
-     * String representation of the multi-key.
-     * @return string representation of key.
-     */
-    @Override
-    public String toString() {
-        StringBuilder result = new StringBuilder("(");
-        for (short i=0; i<_keys.length; i++) {
-            Object o=_keys[i];
-            result.append(o instanceof EOEntity ? ((EOEntity)o).name() : o != null ? o.toString() : "<NULL>");
-            if(i != _keys.length-1)
-                result.append(", ");
-        }
-        result.append(')');
-        return result.toString();
-    }
+	@Override
+	public String toString() {
+		return "ERXMultiKey [_keys=" + Arrays.toString(_keys) + ", _keyCount=" + _keyCount + ", _hashCode=" + _hashCode + "]";
+	}
 }

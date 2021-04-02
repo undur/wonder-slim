@@ -32,9 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.eoaccess.EOAdaptorOperation;
-import com.webobjects.eoaccess.EOAttribute;
-import com.webobjects.eoaccess.EODatabaseOperation;
 import com.webobjects.eocontrol.EOSortOrdering;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
@@ -1482,65 +1479,6 @@ public class ERXStringUtilities {
     	sb.append('}');
     }
 
-    private static NSDictionary<String, Object> databaseOperationAsDictionary(EODatabaseOperation op) {
-    	NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>(8);
-    	int operator = op.databaseOperator();
-    	if(operator == 0) {
-    		dict.setObjectForKey("EODatabaseNothingOperator", "_databaseOperator");
-     	} else if(operator == 1) {
-    		dict.setObjectForKey("EODatabaseInsertOperator", "_databaseOperator");
-     	} else if(operator == 3) {
-    		dict.setObjectForKey("EODatabaseDeleteOperator", "_databaseOperator");
-     	} else if(operator == 2) {
-    		dict.setObjectForKey("EODatabaseUpdateOperator", "_databaseOperator");
-    	} else {
-    		dict.setObjectForKey("<unrecognized value>", "_databaseOperator");
-    	}
-    	if(op.newRow() != null)
-    		dict.setObjectForKey(op.newRow(), "_newRow");
-    	if(op.dbSnapshot() != null)
-    		dict.setObjectForKey(op.dbSnapshot(), "_dbSnapshot");
-    	if(op.globalID() != null)
-    		dict.setObjectForKey(op.globalID(), "_globalID");
-    	if(op.entity() != null)
-    		dict.setObjectForKey(op.entity().name(), "_entity");
-    	if(op.adaptorOperations() != null)
-    		dict.setObjectForKey(op.adaptorOperations(), "_adaptorOps");
-    	if(op.object() != null)
-    		dict.setObjectForKey(op.object().toString(), "_object");
-       return dict;
-    }
-
-    /**
-     * Debug method to get the EOAdaptorOperation as a dictionary that can be pretty-printed later.
-     * The output from a EOGeneralAdaptorException.userInfo.toString is pretty much unreadable.
-     * @param op
-     */
-    private static NSDictionary<String, Object> adaptorOperationAsDictionary(EOAdaptorOperation op) {
-    	NSMutableDictionary<String, Object> dict = new NSMutableDictionary<>();
-    	int operator = op.adaptorOperator();
-    	if(operator == 0) {
-    		dict.setObjectForKey("EOAdaptorLockOperator", "_adaptorOperator");
-       	} else if (operator == 1) {
-    		dict.setObjectForKey("EOAdaptorInsertOperator", "_adaptorOperator");
-       	} else if (operator == 3) {
-    		dict.setObjectForKey("EOAdaptorDeleteOperator", "_adaptorOperator");
-       	} else if (operator == 2) {
-    		dict.setObjectForKey("EOAdaptorUpdateOperator", "_adaptorOperator");
-       	} else {
-    		dict.setObjectForKey("<unrecognized value>", "_adaptorOperator");
-    	}
-    	if(op.entity() != null)
-    		dict.setObjectForKey(op.entity(), "_entity");
-    	if(op.qualifier() != null)
-    		dict.setObjectForKey(op.qualifier().toString(), "_qualifier");
-    	if(op.changedValues() != null)
-    		dict.setObjectForKey(op.changedValues(), "_changedValues");
-    	if(op.exception() != null)
-    		dict.setObjectForKey(op.exception(), "_exception");
-    	return dict;
-    }
-
     private static void dumpObject(StringBuffer sb, Object value, int level) {
     	if(value instanceof NSDictionary) {
     		dumpDictionary(sb, (NSDictionary)value, level);
@@ -1549,10 +1487,6 @@ public class ERXStringUtilities {
     	} else if (value instanceof NSData) {
     		NSData data = (NSData)value;
 			sb.append(byteArrayToHexString(data.bytes()));
-    	} else if (value instanceof EODatabaseOperation) {
-    		dumpDictionary(sb, databaseOperationAsDictionary((EODatabaseOperation)value), level);
-    	} else if (value instanceof EOAdaptorOperation) {
-    		dumpDictionary(sb, adaptorOperationAsDictionary((EOAdaptorOperation)value), level);
      	} else {
        		indent(sb, level);
     		sb.append(value);
@@ -2012,181 +1946,7 @@ public class ERXStringUtilities {
         }
         return result.toString();
     }
-
-	/**
-	 * Attempts to convert string values for attributes into the appropriate
-	 * value class for the attribute. If the method is unable to convert the
-	 * value, it returns null.
-	 * 
-	 * @param attr The attribute for the value in question.
-	 * @param strVal The string value to be coerced.
-	 * @param encoding The encoding used if the attribute value class is custom
-	 * and the factory method does not accept a string.
-	 * @param formatter The formatter used if the value class is NSTimestamp.
-	 * @return The coerced object value or null.
-	 */
-	public static Object attributeValueFromString(EOAttribute attr, String strVal, String encoding, Format formatter) {
-		Object val = null;
-		Class attrValueClass = null;
-		try {
-			attrValueClass = Class.forName(attr.className());
-		} catch (ClassNotFoundException cnfe) {
-			//An attribute has a className that is not in the classpath
-			throw NSForwardException._runtimeExceptionForThrowable(cnfe);
-		}
-		
-    	// If value is a date, parse using the formatter.
-    	if(NSTimestamp.class.equals(attrValueClass)) {
-
-    		Date parseResult = null;
-    		try {
-    			parseResult = (Date)formatter.parseObject(strVal);
-        		val = new NSTimestamp(parseResult);
-    		} catch(ParseException pe) {
-    			// If the user mangles the date format in the URL, we probably 
-    			// want to feed them an error page rather than handle it here.
-    			throw NSForwardException._runtimeExceptionForThrowable(pe);
-    		}
-    		    		
-    	// If number, convert string to number type with reflection.
-    	} else if(Number.class.isAssignableFrom(attrValueClass)) {
-    		val = attributeNumberValueFromString(attr, strVal);
-				
-    	// If string, it's a direct assignment
-    	} else if (String.class.equals(attrValueClass)) {
-    		val = strVal;
-    	
-    	// If none of the above, check for a custom factory method.
-    	} else if(attr.valueFactoryMethod()!=null) {
-    		val = attributeCustomValueFromString(attr, strVal, encoding);
-    	}
-		
-		return val;
-	}
-
-	/**
-	 * Attempts to convert string values for attributes into the appropriate
-	 * value class for the attribute. If the method is unable to convert the
-	 * value, it returns null.
-	 * 
-	 * @param attr The attribute for the value in question.
-	 * @param strVal The string value to be coerced.
-	 * @return The coerced object value or null.
-	 */
-	public static Number attributeNumberValueFromString(EOAttribute attr, String strVal) {
-		Number val = null;
-		// Determine the date class required
-		String typeString = attr.valueType();
-		if (typeString != null) {
-    		char key = typeString.charAt(0);
-			String numberType = null;
-
-			switch (key) {
-			case EOAttribute._VTByte:
-				numberType = Byte.class.getName();
-				break;
-			
-			case EOAttribute._VTShort:
-				numberType = Short.class.getName();
-				break;
-			
-			case EOAttribute._VTInteger:
-				numberType = Integer.class.getName();
-				break;
-				
-			case EOAttribute._VTLong:
-				numberType = Long.class.getName();
-				break;
-				
-			case EOAttribute._VTFloat:
-				numberType = Float.class.getName();
-				break;
-				
-			case EOAttribute._VTDouble:
-				numberType = Double.class.getName();
-				break;
-				
-			case EOAttribute._VTBigDecimal:
-				numberType = BigDecimal.class.getName();
-				break;
-				
-			case EOAttribute._VTBoolean:
-				numberType = Boolean.class.getName();
-				break;
-				
-			default:
-				break;
-			}
-    		
-			// Generate value through reflection
-			if(numberType!=null) {
-	    		try {
-	    			Class numberClass = Class.forName(numberType);
-	    			Constructor numberConstructor = numberClass.getConstructor(new Class[] {String.class});
-	    			val = (Number)numberConstructor.newInstance(strVal);
-	    		} catch(Exception e) {
-	    			throw NSForwardException._runtimeExceptionForThrowable(e);
-	    		}
-			}
-		}
-		return val;
-	}
 	
-
-	/**
-	 * Attempts to convert string values for attributes into the appropriate
-	 * value class for the attribute. If the method is unable to convert the
-	 * value, it returns null.
-	 * 
-	 * @param attr The attribute for the value in question.
-	 * @param strVal The string value to be coerced.
-	 * @param encoding The encoding used if the attribute value class is custom
-	 * and the factory method does not accept a string.
-	 * @return The coerced object value or null.
-	 */
-	public static Object attributeCustomValueFromString(EOAttribute attr, String strVal, String encoding) {
-		Object val = null;
-		Class attrValueClass = null;
-		try {
-			attrValueClass = Class.forName(attr.className());
-		} catch (ClassNotFoundException cnfe) {
-			//An attribute has a className that is not in the classpath
-			NSForwardException._runtimeExceptionForThrowable(cnfe);
-		}
-		NSSelector sel = attr.valueFactoryMethod();
-		
-		try {
-			Method m = sel.methodOnClass(attrValueClass);
-			
-    		switch (attr.factoryMethodArgumentType()) {
-			case EOAttribute.FactoryMethodArgumentIsBytes:
-				if(encoding==null){throw new NullPointerException();}
-				byte[] b = strVal.getBytes(encoding);
-				val = m.invoke(null, new Object[] {b});
-				break;
-
-			case EOAttribute.FactoryMethodArgumentIsData:
-				if(encoding==null){throw new NullPointerException();}
-				NSData d = new NSData(strVal, encoding);
-				val = m.invoke(null, new Object[] {d});
-				break;
-				
-			case EOAttribute.FactoryMethodArgumentIsString:
-				val = m.invoke(null, new Object[] {strVal});
-				break;
-				
-			default:
-				break;
-			}
-		} catch (NullPointerException npe) {
-			throw npe;
-		} catch (Exception e) {
-			throw NSForwardException._runtimeExceptionForThrowable(e);
-		}
-
-		return val;
-	}
-
 	/**
 	 * Returns whether the given value falls in a range defined by the given string, which is 
 	 * in the format "1-5,100,500,800-1000".

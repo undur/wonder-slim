@@ -11,8 +11,6 @@ import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.eoaccess.EOEntity;
-import com.webobjects.eoaccess.EOUtilities;
 import com.webobjects.eocontrol.EOClassDescription;
 import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSArray;
@@ -97,8 +95,8 @@ public class ERXValidation {
                                                      NSMutableDictionary errorMessages,
                                                      String displayPropertyKeyPath,
                                                      ERXLocalizer localizer,
-                                                     EOEntity entity) {
-        validationFailedWithException(e,value,keyPath,errorMessages, displayPropertyKeyPath, localizer, entity, pushChangesDefault);
+                                                     Object oldEntity /* FIXME: This used to be an EOEntity */ ) {
+        validationFailedWithException(e,value,keyPath,errorMessages, displayPropertyKeyPath, localizer, pushChangesDefault);
     }
 
     /**
@@ -123,7 +121,7 @@ public class ERXValidation {
                                                      NSMutableDictionary errorMessages,
                                                      String displayPropertyKeyPath,
                                                      ERXLocalizer localizer,
-                                                     EOEntity entity,
+                                                     Object oldEntity /* FIXME: This used to be an EOEntity */,
                                                      boolean pushChanges) {
         if (log.isDebugEnabled())
             log.debug("ValidationFailedWithException: {} message: {}", e.getClass(), e.getMessage());
@@ -138,33 +136,14 @@ public class ERXValidation {
             // strip the exception name
             //newErrorMessage=newErrorMessage.substring(newErrorMessage.indexOf(":")+1);
             //newErrorMessage=newErrorMessage.substring(newErrorMessage.indexOf(":")+1);
-            if (eo instanceof EOEnterpriseObject) {
-                // the exception is coming from EREnterpriseObject
-                // WE PUSH THE WRONG VALUE INTO THE EO ANYWAY!
-                if (pushChanges)  {
-                    try {
-                        ((EOEnterpriseObject)eo).takeValueForKeyPath(value, key);
-                    } catch(NSKeyValueCoding.UnknownKeyException  ex) {
-                        // AK: as we could have custom components that have non-existant keys
-                        // we of course can't push a value, so we discard the resulting exception
-                    } catch(NoSuchElementException  ex) {
-                        // AK: as we could have custom components that have non-existant keys
-                        // we of course can't push a value, so we discard the resulting exception
-                    } catch(Exception ex) {
-                        log.error("Can't push value to key '{}': {}", key, value, ex);
-                    }
-                }
-                entity = EOUtilities.entityForObject(((EOEnterpriseObject)eo).editingContext(),(EOEnterpriseObject)eo);
-            } else {
-                //the exception is coming from a formatter
-                key = NSArray.componentsSeparatedByString(displayPropertyKeyPath,".").lastObject();
-                newErrorMessage="<b>"+key+"</b>:"+newErrorMessage;
-            }
+            //the exception is coming from a formatter
+            key = NSArray.componentsSeparatedByString(displayPropertyKeyPath,".").lastObject();
+            newErrorMessage="<b>"+key+"</b>:"+newErrorMessage;
         } else {
             key = keyPath;
         }
         if (key != null && newErrorMessage != null) {
-        	  String displayName = localizedDisplayNameForKey(entity != null ? entity.classDescriptionForInstances() : null, key, localizer);
+        	  String displayName = localizedDisplayNameForKey(null, key, localizer);
             errorMessages.setObjectForKey(newErrorMessage, displayName);
         } else {
             if(key != null) {

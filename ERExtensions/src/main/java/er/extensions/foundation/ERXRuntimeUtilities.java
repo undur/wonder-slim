@@ -15,9 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOContext;
-import com.webobjects.eoaccess.EOAdaptorChannel;
-import com.webobjects.eoaccess.EODatabaseContext;
-import com.webobjects.eoaccess.EOGeneralAdaptorException;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
@@ -96,36 +93,6 @@ public class ERXRuntimeUtilities {
 		catch (IOException e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
 		}
-    }
-    
-    /**
-     * Returns a dictionary with useful stuff.
-     * @param e
-     */
-    public static NSMutableDictionary<String, Object> informationForException(Exception e) {
-		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
-		if (e instanceof EOGeneralAdaptorException) {
-			// AK NOTE: you might have sensitive info in your failed ops...
-			NSDictionary dict = ((EOGeneralAdaptorException) e).userInfo();
-			if (dict != null) {
-				Object value;
-				// this one is a little bit heavyweight...
-				// value = NSPropertyListSerialization.stringFromPropertyList(dict);
-				value = dict.objectForKey(EODatabaseContext.FailedDatabaseOperationKey);
-				if (value != null) {
-					extraInfo.setObjectForKey(value.toString(), EODatabaseContext.FailedDatabaseOperationKey);
-				}
-				value = dict.objectForKey(EOAdaptorChannel.AdaptorFailureKey);
-				if (value != null) {
-					extraInfo.setObjectForKey(value.toString(), EOAdaptorChannel.AdaptorFailureKey);
-				}
-				value = dict.objectForKey(EOAdaptorChannel.FailedAdaptorOperationKey);
-				if (value != null) {
-					extraInfo.setObjectForKey(value.toString(), EOAdaptorChannel.FailedAdaptorOperationKey);
-				}
-			}
-		}
-		return extraInfo;
     }
 
     public static NSMutableDictionary<String, Object> informationForBundles() {

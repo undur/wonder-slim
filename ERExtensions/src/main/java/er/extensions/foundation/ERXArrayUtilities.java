@@ -20,11 +20,6 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.eoaccess.EOEntity;
-import com.webobjects.eoaccess.EOModelGroup;
-import com.webobjects.eocontrol.EOEnterpriseObject;
-import com.webobjects.eocontrol.EOFetchSpecification;
-import com.webobjects.eocontrol.EOQualifier;
 import com.webobjects.eocontrol.EOQualifierEvaluation;
 import com.webobjects.eocontrol.EOSortOrdering;
 import com.webobjects.foundation.NSArray;
@@ -1018,43 +1013,6 @@ public class ERXArrayUtilities {
 
     /**
      * Define an {@link com.webobjects.foundation.NSArray.Operator NSArray.Operator} 
-     * for the key <b>fetchSpec</b>.
-     * <p>
-     * This allows for key value paths like:
-     * <pre><code>myArray.valueForKey("@fetchSpec.fetchUsers");</code></pre>
-     * Which in this case would return myArray filtered and sorted by the
-     * EOFetchSpecification named "fetchUsers" which must be a model-based fetchspec 
-     * in the first object's entity.
-     * 
-     * @see BaseOperator
-     */
-    public static class FetchSpecOperator extends BaseOperator {
-        public FetchSpecOperator() {
-        }
-        
-        /**
-         * Filters and sorts the given array by the named fetchspecification.
-         * @param array array to be filtered.
-         * @param keypath name of fetch specification.
-         * @return immutable filtered array.
-         */
-        public Object compute(NSArray array, String keypath) {
-            if(array.count() == 0) {
-                return array;
-            }
-            EOEnterpriseObject eo = (EOEnterpriseObject)array.objectAtIndex(0);
-            String fetchSpec = ERXStringUtilities.firstPropertyKeyInKeyPath(keypath);
-            keypath = ERXStringUtilities.keyPathWithoutFirstProperty(keypath);
-            if(keypath == null) {
-                return filteredArrayWithEntityFetchSpecification(array, eo.entityName(), fetchSpec);
-            }
-			array = filteredArrayWithEntityFetchSpecification(array, eo.entityName(), fetchSpec);
-			return contents(array, keypath);
-        }
-    }
-
-    /**
-     * Define an {@link com.webobjects.foundation.NSArray.Operator NSArray.Operator} 
      * for the key <b>flatten</b>.
      * <p>
      * This allows for key value paths like:
@@ -1474,7 +1432,6 @@ public class ERXArrayUtilities {
             NSArray.setOperatorForKey("sortInsensitiveAsc", new SortOperator(EOSortOrdering.CompareCaseInsensitiveAscending));
             NSArray.setOperatorForKey("sortInsensitiveDesc", new SortOperator(EOSortOrdering.CompareCaseInsensitiveDescending));
             NSArray.setOperatorForKey("flatten", new FlattenOperator());
-            NSArray.setOperatorForKey("fetchSpec", new FetchSpecOperator());
             NSArray.setOperatorForKey("unique", new UniqueOperator());
             NSArray.setOperatorForKey("isEmpty", new IsEmptyOperator());
             NSArray.setOperatorForKey("subarrayWithRange", new SubarrayWithRangeOperator());
@@ -1638,58 +1595,6 @@ public class ERXArrayUtilities {
             batchedArray.add(array.subarrayWithRange(new NSRange(i, length)));
         }
         return batchedArray;
-    }
-
-    /**
-     * Filters a given array with a named fetch specification and bindings.
-     *
-     * @param array array to be filtered.
-     * @param fetchSpec name of the {@link com.webobjects.eocontrol.EOQualifierEvaluation EOQualifierEvaluation}.
-     * @param entity name of the {@link com.webobjects.eoaccess.EOEntity EOEntity} 
-     * to which the fetch specification is associated.
-     * @param bindings bindings dictionary for qualifier variable substitution.
-     * @return array filtered and sorted by the named fetch specification.
-     */    
-    public static <T> NSArray<T> filteredArrayWithEntityFetchSpecification(NSArray<T> array, String entity, String fetchSpec, NSDictionary<String, ?> bindings) {
-        EOEntity wrongParamEntity = EOModelGroup.defaultGroup().entityNamed(fetchSpec);
-        if (wrongParamEntity != null) {
-        	fetchSpec = entity;
-			entity = wrongParamEntity.name();
-			log.error("filteredArrayWithEntityFetchSpecification Calling conventions have changed from fetchSpec, entity to entity, fetchSpec");
-		}
-        EOFetchSpecification spec = EOFetchSpecification.fetchSpecificationNamed(fetchSpec, entity);
-        NSArray<EOSortOrdering> sortOrderings;
-        NSArray<T> result;
-        EOQualifier qualifier;
-
-        if (bindings != null) {
-            spec = spec.fetchSpecificationWithQualifierBindings(bindings);
-        }
-
-        result = new NSArray<>(array);
-
-        if ((qualifier = spec.qualifier()) != null) {
-            result = EOQualifier.filteredArrayWithQualifier(result, qualifier);
-        }
-
-        if ((sortOrderings = spec.sortOrderings()) != null) {
-            result = EOSortOrdering.sortedArrayUsingKeyOrderArray(result,sortOrderings);
-        }
-
-        return result;
-    }
-
-    /**
-     * Filters a given array with a named fetch specification.
-     *
-     * @param array array to be filtered.
-     * @param fetchSpec name of the {@link com.webobjects.eocontrol.EOQualifierEvaluation EOQualifierEvaluation}.
-     * @param entity name of the {@link com.webobjects.eoaccess.EOEntity EOEntity} 
-     * to which the fetch specification is associated.
-     * @return array filtered and sorted by the named fetch specification.
-     */
-    public static <T> NSArray<T> filteredArrayWithEntityFetchSpecification(NSArray<T> array, String entity, String fetchSpec) {
-        return filteredArrayWithEntityFetchSpecification(array, entity,  fetchSpec, null);
     }
     
     /**
