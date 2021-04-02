@@ -10,24 +10,27 @@ import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 
 /**
- * ERXSecureDefaultAdaptor is a subclass of ERXDefaultAdaptor that
- * enables SSL support in the WODefaultAdaptor so that it can be
- * assigned as an application additionalAdaptor and used in
- * DirectConnect mode.
- *  
+ * ERXSecureDefaultAdaptor is a subclass of ERXDefaultAdaptor that enables SSL
+ * support in the WODefaultAdaptor so that it can be assigned as an application
+ * additionalAdaptor and used in DirectConnect mode.
+ * 
  * @author mschrag
  */
+
 public class ERXSecureDefaultAdaptor extends ERXDefaultAdaptor {
 	/**
 	 * Constructs an ERXSecureAdaptor.
 	 * 
-	 * @param name the name of the adaptor
-	 * @param parameters the adaptor parameters (see WODefaultAdaptor's)
+	 * @param name
+	 *            the name of the adaptor
+	 * @param parameters
+	 *            the adaptor parameters (see WODefaultAdaptor's)
 	 */
 	public ERXSecureDefaultAdaptor(String name, NSDictionary parameters) {
 		super(name, parameters, true);
-		
-		// This is completely lame, but there's no API to get back to the secure socket to determine what
+
+		// This is completely lame, but there's no API to get back to the secure
+		// socket to determine what
 		// port number was selected!
 		if (parameters != null && Integer.valueOf(0).equals(parameters.objectForKey(WOProperties._PortKey))) {
 			try {
