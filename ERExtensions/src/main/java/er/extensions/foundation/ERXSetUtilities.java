@@ -120,32 +120,4 @@ public class ERXSetUtilities {
 		}
 		return new NSSet<>(array);
 	}
-
-	/**
-	 * Returns a deep clone of the given set.  A deep clone will attempt
-	 * to clone the values of this set as well as the set itself.
-	 * 
-	 * @param <T> class of set elements
-	 * @param set the set to clone
-	 * @param onlyCollections if true, only collections in this array will be cloned, not individual values
-	 * @return a deep clone of set
-	 */
-	public static <T> NSSet<T> deepClone(NSSet<T> set, boolean onlyCollections) {
-		if (set == null) {
-			return null;
-		}
-		NSMutableSet<T> clonedSet = set.mutableClone();
-		for (T value : set) {
-			T clonedValue = ERXUtilities.deepClone(value, onlyCollections);
-			if (clonedValue != null) {
-				if (clonedValue != value) {
-					clonedSet.remove(value);
-					clonedSet.add(clonedValue);
-				}
-			} else {
-				clonedSet.remove(value);
-			}
-		}
-		return clonedSet;
-	}
 }

@@ -276,40 +276,6 @@ public class ERXDictionaryUtilities {
             return ((Comparable<Object>)value1).compareTo(value2);
         }
      }
-
-     /**
-      * Returns a deep clone of the given dictionary.  A deep clone will attempt to 
-      * clone the keys and values (deeply) of this dictionary as well as the 
-      * dictionary itself.
-      * 
-      * @param dict the dictionary to clone
-      * @param onlyCollections if true, only collections in this dictionary will be cloned, not individual values
-      * @return a deep clone of dict
-      */
-     public static <K, V> NSDictionary<K, V> deepClone(NSDictionary<K, V> dict, boolean onlyCollections) {
-    	 NSMutableDictionary<K, V> clonedDict = null;
-    	 if (dict != null) {
-    		 clonedDict = dict.mutableClone();
-	    	 for (K key : dict.allKeys()) {
-	    		 V value = dict.objectForKey(key);
-	    		 K cloneKey = ERXUtilities.deepClone(key, onlyCollections);
-	    		 V cloneValue = ERXUtilities.deepClone(value, onlyCollections);
-	    		 if (cloneKey != key) {
-	    			 clonedDict.removeObjectForKey(key);
-	    			 if (cloneValue != null) {
-	    				 clonedDict.setObjectForKey(cloneValue, cloneKey);
-	    			 }
-	    		 } else if (cloneValue != null) {
-	    			 if (cloneValue != value) {
-	    				 clonedDict.setObjectForKey(cloneValue, cloneKey);
-	    			 }
-	    		 } else {
-	    			 clonedDict.removeObjectForKey(key);
-	    		 }
-	    	 }
-    	 }
-    	 return clonedDict;
-     }
      
      /**
 	 * Encodes a dictionary into a string that can be used in a request uri.

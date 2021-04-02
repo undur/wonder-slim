@@ -67,22 +67,6 @@ public class ERXArrayUtilities {
     });
 
     /**
-     * Simply utility method to create a concrete set object from an array.
-     *
-     * @param array of elements
-     * @return set created from given array
-     * @deprecated use {@link ERXSetUtilities#setFromArray(Collection)} instead
-     */
-    // CHECKME: Is this a value add?
-    @Deprecated
-    public static <T> NSSet<T> setFromArray(NSArray<T> array) {
-        if (array == null || array.count() == 0) {
-            return NSSet.EmptySet;
-        }
-        return new NSSet<T>(array);
-    }
-
-    /**
      * The qualifiers EOSortOrdering.CompareAscending and friends are
      * actually 'special' and processed in a different/faster way when
      * sorting than a selector that would be created by:
@@ -2256,64 +2240,6 @@ public class ERXArrayUtilities {
 		int indexB = array.indexOf(b);
 		return swapObjects(array, indexA, indexB);
 	}
-
-     /**
-      * Returns a deep clone of the given array.  A deep clone will attempt 
-      * to clone the values of this array as well as the array itself.
-      * 
-      * @param <T> class of array elements
-      * @param array the array to clone
-      * @param onlyCollections if true, only collections in this array will be cloned, not individual values
-      * @return a deep clone of array
-      */
-	public static <T> NSArray<T> deepClone(NSArray<T> array, boolean onlyCollections) {
-		if (array == null) {
-			return null;
-		}
-		NSMutableArray<T> clonedArray = array.mutableClone();
-		for (int i = array.size() - 1; i >= 0; i--) {
-			T value = array.get(i);
-			T clonedValue = ERXUtilities.deepClone(value, onlyCollections);
-			if (clonedValue != null) {
-				if (clonedValue != value) {
-					clonedArray.set(i, clonedValue);
-				}
-			} else {
-				clonedArray.remove(i);
-			}
-		}
-		return clonedArray;
-    }
-
-     /**
-      * Returns a deep clone of the given set.  A deep clone will attempt 
-      * to clone the values of this set as well as the set itself.
-      * 
-      * @param set the set to clone
-      * @param onlyCollections if true, only collections in this array will be cloned, not individual values
-      * @return a deep clone of set
-      * @deprecated user {@link ERXSetUtilities#deepClone(NSSet, boolean)} instead
-      */
-	@Deprecated
-	public static <T> NSSet<T> deepClone(NSSet<T> set, boolean onlyCollections) {
-		NSMutableSet<T> clonedSet = null;
-		if (set != null) {
-			clonedSet = set.mutableClone();
-			for (T value : set) {
-				T clonedValue = ERXUtilities.deepClone(value, onlyCollections);
-				if (clonedValue != null) {
-					if (clonedValue != value) {
-						clonedSet.removeObject(value);
-						clonedSet.addObject(clonedValue);
-					}
-				}
-				else {
-					clonedSet.removeObject(value);
-				}
-			}
-		}
-		return clonedSet;
-    }
 	
 	/**
 	 * <div class="en">
