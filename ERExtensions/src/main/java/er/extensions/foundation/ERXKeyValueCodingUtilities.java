@@ -65,7 +65,7 @@ public class ERXKeyValueCodingUtilities {
 		return f;
 	}
 
-	public static Field fieldForKey(Object target, String key) {
+	private static Field fieldForKey(Object target, String key) {
 		Field result = null;
 		Class c = target.getClass();
 		while (c != null) {
@@ -85,7 +85,7 @@ public class ERXKeyValueCodingUtilities {
 		return null;
 	}
 
-	public static Method methodForKey(Object target, String key) {
+	private static Method methodForKey(Object target, String key) {
 		Method result = null;
 		Class c = target.getClass();
 		while (c != null) {
