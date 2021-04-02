@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
+import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
@@ -237,7 +238,7 @@ public class ERXDelayedRequestHandler extends WORequestHandler {
 					if (url == null) {
 						return createErrorResponse(request);
 					}
-					response = new ERXResponse(ERXHttpStatusCodes.FOUND);
+					response = new ERXResponse(WOMessage.HTTP_STATUS_FOUND);
 					response.setHeader(url, "location");
 					// refresh entry, so it doesn't time out
 					_urls.setObjectForKey(url, id);

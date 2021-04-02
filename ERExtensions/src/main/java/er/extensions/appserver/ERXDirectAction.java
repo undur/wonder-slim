@@ -15,6 +15,7 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WODirectAction;
+import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.woextensions.WOEventDisplayPage;
@@ -340,6 +341,6 @@ public class ERXDirectAction extends WODirectAction {
 	 * @return 403 response
 	 */
 	protected WOResponse forbiddenResponse() {
-		return new ERXResponse(null, ERXHttpStatusCodes.FORBIDDEN);
+		return new ERXResponse(null, WOMessage.HTTP_STATUS_FORBIDDEN);
 	}
 }
