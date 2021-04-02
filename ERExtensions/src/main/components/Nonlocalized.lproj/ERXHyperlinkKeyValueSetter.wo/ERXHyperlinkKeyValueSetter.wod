@@ -1,7 +1,0 @@
-Hyperlink1: WOHyperlink {
-	action = action;
-	disabled = disabled;
-	class = ^class;
-	string = ^string;
-	onclick = ^onclick;
-}
