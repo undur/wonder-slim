@@ -22,7 +22,6 @@ import com.webobjects.woextensions.WOEventDisplayPage;
 import com.webobjects.woextensions.WOEventSetupPage;
 import com.webobjects.woextensions.WOStatsPage;
 
-import er.extensions.components.ERXLocalizationEditor;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
@@ -252,18 +251,6 @@ public class ERXDirectAction extends WODirectAction {
 			return r;
 		}
 		return forbiddenResponse();
-	}
-
-	/**
-	 * Opens the localizer edit page if the app is in development mode.
-	 * 
-	 * @return localizer editor
-	 */
-	public WOActionResults editLocalizedFilesAction() {
-		if (ERXApplication.isDevelopmentModeSafe()) {
-			return pageWithName(ERXLocalizationEditor.class);
-		}
-		return null;
 	}
 
 	/**
