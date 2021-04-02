@@ -1251,16 +1251,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 			ERXGracefulShutdown.installHandler();
 		}
 
-		_memoryStarvedThreshold = ERXProperties.bigDecimalForKey("er.extensions.ERXApplication.memoryThreshold"); // MS:
-																													// Kept
-																													// around
-																													// for
-																													// backwards
-																													// compat,
-																													// replaced
-																													// by
-																													// memoryStarvedThreshold
-																													// now
+		_memoryStarvedThreshold = ERXProperties.bigDecimalForKey("er.extensions.ERXApplication.memoryThreshold"); // MS: Kept around for backwards compat, replaced by memoryStarvedThreshold now
 		_memoryStarvedThreshold = ERXProperties.bigDecimalForKeyWithDefault("er.extensions.ERXApplication.memoryStarvedThreshold", _memoryStarvedThreshold);
 		_memoryLowThreshold = ERXProperties.bigDecimalForKeyWithDefault("er.extensions.ERXApplication.memoryLowThreshold", _memoryLowThreshold);
 
