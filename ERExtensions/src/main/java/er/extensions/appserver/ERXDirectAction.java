@@ -33,311 +33,326 @@ import er.extensions.statistics.ERXStatisticsPage;
 import er.extensions.statistics.ERXStats;
 
 /**
- * Basic collector for direct action additions. All of the actions are password protected, 
- * you need to give an argument "pw" that matches the corresponding system property for the action.
+ * Basic collector for direct action additions. All of the actions are password
+ * protected, you need to give an argument "pw" that matches the corresponding
+ * system property for the action.
  */
 public class ERXDirectAction extends WODirectAction {
-    private final static Logger log = LoggerFactory.getLogger(ERXDirectAction.class);
 
-    /** holds a reference to the current browser used for this session */
-    private ERXBrowser browser;
+	private final static Logger log = LoggerFactory.getLogger(ERXDirectAction.class);
 
-    public ERXDirectAction(WORequest r) { super(r); }
+	/** holds a reference to the current browser used for this session */
+	private ERXBrowser browser;
 
+	public ERXDirectAction(WORequest r) {
+		super(r);
+	}
 
-    /**
-     * Checks if the action can be executed.
-     * 
-     * @param passwordKey the password to test
-     * @return <code>true</code> if action is allowed to be invoked
-     */
-    protected boolean canPerformActionWithPasswordKey(String passwordKey) {
-    	if(ERXApplication.isDevelopmentModeSafe()) {
-    		return true;
-    	}
-    	String password = ERXProperties.decryptedStringForKey(passwordKey);
-    	if(password == null || password.length() == 0) {
-    		log.error("Attempt to use action when key is not set: {}", passwordKey);
-    		return false;
-    	}
-    	String requestPassword = request().stringFormValueForKey("pw");
-    	if(requestPassword == null) {
-    		requestPassword = (String) context().session().objectForKey("ERXDirectAction." + passwordKey);
-    	} else {
-    		context().session().setObjectForKey(requestPassword, "ERXDirectAction." + passwordKey);
-    	}
-    	if(requestPassword == null || requestPassword.length() == 0) {
-    		return false;
-    	}
-    	return password.equals(requestPassword);
-    }
+	/**
+	 * Checks if the action can be executed.
+	 * 
+	 * @param passwordKey
+	 *            the password to test
+	 * @return <code>true</code> if action is allowed to be invoked
+	 */
+	protected boolean canPerformActionWithPasswordKey(String passwordKey) {
+		if (ERXApplication.isDevelopmentModeSafe()) {
+			return true;
+		}
+		String password = ERXProperties.decryptedStringForKey(passwordKey);
+		if (password == null || password.length() == 0) {
+			log.error("Attempt to use action when key is not set: {}", passwordKey);
+			return false;
+		}
+		String requestPassword = request().stringFormValueForKey("pw");
+		if (requestPassword == null) {
+			requestPassword = (String) context().session().objectForKey("ERXDirectAction." + passwordKey);
+		}
+		else {
+			context().session().setObjectForKey(requestPassword, "ERXDirectAction." + passwordKey);
+		}
+		if (requestPassword == null || requestPassword.length() == 0) {
+			return false;
+		}
+		return password.equals(requestPassword);
+	}
 
-    /**
-     * Flushes the component cache to allow reloading components even when WOCachingEnabled=true.
-     * 
-     * @return "OK"
-     */
-    public WOActionResults flushComponentCacheAction() {
-    	if (canPerformActionWithPasswordKey("er.extensions.ERXFlushComponentCachePassword")) {
-    		WOApplication.application()._removeComponentDefinitionCacheContents();
-    		return new ERXResponse("OK");
-    	}
-    	return forbiddenResponse();
-    }
-
-    /**
-     * Direct access to WOStats by giving over the password in the "pw" parameter.
-     * 
-     * @return statistics page
-     */
-    public WOActionResults statsAction() {
-        WOStatsPage nextPage = pageWithName(ERXStatisticsPage.class);
-        nextPage.password = context().request().stringFormValueForKey("pw");
-        return nextPage.submit();
-    }
-    
-    /**
-     * Direct access to reset the stats by giving over the password in the "pw" parameter.  This
-     * calls ERXStats.reset();
-     * 
-     * @return statistics page
-     */
-    public WOActionResults resetStatsAction() {
-        if (canPerformActionWithPasswordKey("WOStatisticsPassword")) {
-        	ERXStats.reset();
-        	ERXRedirect redirect = pageWithName(ERXRedirect.class);
-        	redirect.setDirectActionName("stats");
-        	redirect.setDirectActionClass("ERXDirectAction");
-        	return redirect;
-        }
-        return forbiddenResponse();
-    }
-    
-    /**
-     * Direct access to WOEventDisplay by giving over the password in the "pw" parameter.
-     * 
-     * @return event page
-     */
-    public WOActionResults eventsAction() {
-        WOEventDisplayPage nextPage = pageWithName(WOEventDisplayPage.class);
-        nextPage.password = context().request().stringFormValueForKey("pw");
-        nextPage.submit();
-        return nextPage;
-    }
-
-    
-    /**
-     * Direct access to WOEventDisplay by giving over the password in the "pw" 
-     * parameter and turning on all events.
-     * 
-     * @return event setup page
-     */
-    public WOActionResults eventsSetupAction() {
-        WOEventSetupPage nextPage = pageWithName(WOEventSetupPage.class);
-        nextPage.password = context().request().stringFormValueForKey("pw");
-        nextPage.submit();
-        nextPage.selectAll();
-        return eventsAction();
-    }
-    
-    /**
-     * Action used for changing logging settings at runtime. This method is only active
-     * when WOCachingEnabled is disabled (we take this to mean that the application is
-     *                                    not in production).
-     * <h3>Synopsis:</h3>
-     * pw=<i>aPassword</i>
-     * <h3>Form Values:</h3>
-     * <b>pw</b> password to be checked against the system property <code>er.extensions.ERXLog4JPassword</code>.
-     * 
-     * @return {@link ERXLog4JConfiguration} for modifying current logging settings.
-     */
-    public WOActionResults log4jAction() {
-        if (canPerformActionWithPasswordKey("er.extensions.ERXLog4JPassword")) {
-        	session().setObjectForKey(Boolean.TRUE, "ERXLog4JConfiguration.enabled");
-            return pageWithName(ERXLog4JConfiguration.class);
-        }
-        return forbiddenResponse();
-    }
-
-    /**
-     * Action used for sending shell commands to the server and receive the result
-     * <h3>Synopsis:</h3>
-     * pw=<i>aPassword</i>
-     * <h3>Form Values:</h3>
-     * <b>pw</b> password to be checked against the system property <code>er.extensions.ERXRemoteShellPassword</code>.
-     * 
-     * @return {@link ERXLog4JConfiguration} for modifying current logging settings.
-     */
-    public WOActionResults remoteShellAction() {
-        if (canPerformActionWithPasswordKey("er.extensions.ERXRemoteShellPassword")) {
-        	session().setObjectForKey(Boolean.TRUE, "ERXRemoteShell.enabled");
-            return pageWithName(ERXRemoteShell.class);
-        }
-        return forbiddenResponse();
-    }
-
-    /**
-     * Will terminate an existing session and redirect to the default action.
-     * 
-     * @return redirect to default action
-     */
-    public WOActionResults logoutAction() {
-        if (existingSession()!=null) {
-            existingSession().terminate();
-        }
-        ERXRedirect r = pageWithName(ERXRedirect.class);
-        r.setDirectActionName("default");
-        return r;
-    }
-    
-    /**
-     * Returns the browser object representing the web 
-     * browser's "user-agent" string. You can obtain 
-     * browser name, version, platform and Mozilla version, etc. 
-     * through this object. <br>
-     * Good for WOConditional's condition binding to deal 
-     * with different browser versions. 
-     * @return browser object
-     */
-    public ERXBrowser browser() { 
-        if (browser == null  &&  request() != null) {
-            ERXBrowserFactory browserFactory = ERXBrowserFactory.factory();
-            browser = browserFactory.browserMatchingRequest(request());
-            browserFactory.retainBrowser(browser);
-        }
-        return browser; 
-    }
-
-    @Override
-    public WOActionResults performActionNamed(String actionName) {
-        WOActionResults actionResult = super.performActionNamed(actionName);
-        if (browser != null) 
-            ERXBrowserFactory.factory().releaseBrowser(browser);
-        return actionResult;
-    }
-    
-    /**
-     * Sets a System property. This is also active in deployment mode because one might want to change a System property
-     * at runtime.
-     * <h3>Synopsis:</h3>
-     * pw=<i>aPassword</i>&amp;key=<i>someSystemPropertyKey</i>&amp;value=<i>someSystemPropertyValue</i>
-     * 
-     * @return either null when the password is wrong or a new page showing the System properties
-     */
-    public WOActionResults systemPropertyAction() {
-    	if (canPerformActionWithPasswordKey("er.extensions.ERXDirectAction.ChangeSystemPropertyPassword")) {
-    		String key = request().stringFormValueForKey("key");
-    		ERXResponse r = new ERXResponse();
-    		if (ERXStringUtilities.stringIsNullOrEmpty(key) ) {
-        		String user = request().stringFormValueForKey("user");
-        		Properties props = ERXConfigurationManager.defaultManager().defaultProperties();
-        		if(user != null) {
-        			System.setProperty("user.name", user);
-        			props = ERXConfigurationManager.defaultManager().applyConfiguration(props);
-        		}
-    			r.appendContentString(ERXProperties.logString(props));
-    		} else {
-        		String value = request().stringFormValueForKey("value");
-    			value = ERXStringUtilities.stringIsNullOrEmpty(value) ? "" : value;
-    			java.util.Properties p = System.getProperties();
-    			p.put(key, value);
-    			System.setProperties(p);
-                ERXLogger.configureLoggingWithSystemProperties();
-    			for (java.util.Enumeration e = p.keys(); e.hasMoreElements();) {
-    				Object k = e.nextElement();
-    				if (k.equals(key)) {
-    					r.appendContentString("<b>'"+k+"="+p.get(k)+"'     <= you changed this</b><br>");
-    				} else {
-    					r.appendContentString("'"+k+"="+p.get(k)+"'<br>");
-    				}
-    			}
-    			r.appendContentString("</body></html>");
-    		}
-    		return r;
-    	}
+	/**
+	 * Flushes the component cache to allow reloading components even when
+	 * WOCachingEnabled=true.
+	 * 
+	 * @return "OK"
+	 */
+	public WOActionResults flushComponentCacheAction() {
+		if (canPerformActionWithPasswordKey("er.extensions.ERXFlushComponentCachePassword")) {
+			WOApplication.application()._removeComponentDefinitionCacheContents();
+			return new ERXResponse("OK");
+		}
 		return forbiddenResponse();
-    }
-    
-    /**
-     * Opens the localizer edit page if the app is in development mode.
-     * 
-     * @return localizer editor
-     */
-    public WOActionResults editLocalizedFilesAction() {
-    	if (ERXApplication.isDevelopmentModeSafe()) {
-    		return pageWithName(ERXLocalizationEditor.class);
-    	}
+	}
+
+	/**
+	 * Direct access to WOStats by giving over the password in the "pw"
+	 * parameter.
+	 * 
+	 * @return statistics page
+	 */
+	public WOActionResults statsAction() {
+		WOStatsPage nextPage = pageWithName(ERXStatisticsPage.class);
+		nextPage.password = context().request().stringFormValueForKey("pw");
+		return nextPage.submit();
+	}
+
+	/**
+	 * Direct access to reset the stats by giving over the password in the "pw"
+	 * parameter. This calls ERXStats.reset();
+	 * 
+	 * @return statistics page
+	 */
+	public WOActionResults resetStatsAction() {
+		if (canPerformActionWithPasswordKey("WOStatisticsPassword")) {
+			ERXStats.reset();
+			ERXRedirect redirect = pageWithName(ERXRedirect.class);
+			redirect.setDirectActionName("stats");
+			redirect.setDirectActionClass("ERXDirectAction");
+			return redirect;
+		}
+		return forbiddenResponse();
+	}
+
+	/**
+	 * Direct access to WOEventDisplay by giving over the password in the "pw"
+	 * parameter.
+	 * 
+	 * @return event page
+	 */
+	public WOActionResults eventsAction() {
+		WOEventDisplayPage nextPage = pageWithName(WOEventDisplayPage.class);
+		nextPage.password = context().request().stringFormValueForKey("pw");
+		nextPage.submit();
+		return nextPage;
+	}
+
+	/**
+	 * Direct access to WOEventDisplay by giving over the password in the "pw"
+	 * parameter and turning on all events.
+	 * 
+	 * @return event setup page
+	 */
+	public WOActionResults eventsSetupAction() {
+		WOEventSetupPage nextPage = pageWithName(WOEventSetupPage.class);
+		nextPage.password = context().request().stringFormValueForKey("pw");
+		nextPage.submit();
+		nextPage.selectAll();
+		return eventsAction();
+	}
+
+	/**
+	 * Action used for changing logging settings at runtime. This method is only
+	 * active when WOCachingEnabled is disabled (we take this to mean that the
+	 * application is not in production).
+	 * <h3>Synopsis:</h3> pw=<i>aPassword</i>
+	 * <h3>Form Values:</h3> <b>pw</b> password to be checked against the system
+	 * property <code>er.extensions.ERXLog4JPassword</code>.
+	 * 
+	 * @return {@link ERXLog4JConfiguration} for modifying current logging
+	 *         settings.
+	 */
+	public WOActionResults log4jAction() {
+		if (canPerformActionWithPasswordKey("er.extensions.ERXLog4JPassword")) {
+			session().setObjectForKey(Boolean.TRUE, "ERXLog4JConfiguration.enabled");
+			return pageWithName(ERXLog4JConfiguration.class);
+		}
+		return forbiddenResponse();
+	}
+
+	/**
+	 * Action used for sending shell commands to the server and receive the
+	 * result
+	 * <h3>Synopsis:</h3> pw=<i>aPassword</i>
+	 * <h3>Form Values:</h3> <b>pw</b> password to be checked against the system
+	 * property <code>er.extensions.ERXRemoteShellPassword</code>.
+	 * 
+	 * @return {@link ERXLog4JConfiguration} for modifying current logging
+	 *         settings.
+	 */
+	public WOActionResults remoteShellAction() {
+		if (canPerformActionWithPasswordKey("er.extensions.ERXRemoteShellPassword")) {
+			session().setObjectForKey(Boolean.TRUE, "ERXRemoteShell.enabled");
+			return pageWithName(ERXRemoteShell.class);
+		}
+		return forbiddenResponse();
+	}
+
+	/**
+	 * Will terminate an existing session and redirect to the default action.
+	 * 
+	 * @return redirect to default action
+	 */
+	public WOActionResults logoutAction() {
+		if (existingSession() != null) {
+			existingSession().terminate();
+		}
+		ERXRedirect r = pageWithName(ERXRedirect.class);
+		r.setDirectActionName("default");
+		return r;
+	}
+
+	/**
+	 * Returns the browser object representing the web browser's "user-agent"
+	 * string. You can obtain browser name, version, platform and Mozilla
+	 * version, etc. through this object. <br>
+	 * Good for WOConditional's condition binding to deal with different browser
+	 * versions.
+	 * 
+	 * @return browser object
+	 */
+	public ERXBrowser browser() {
+		if (browser == null && request() != null) {
+			ERXBrowserFactory browserFactory = ERXBrowserFactory.factory();
+			browser = browserFactory.browserMatchingRequest(request());
+			browserFactory.retainBrowser(browser);
+		}
+		return browser;
+	}
+
+	@Override
+	public WOActionResults performActionNamed(String actionName) {
+		WOActionResults actionResult = super.performActionNamed(actionName);
+		if (browser != null)
+			ERXBrowserFactory.factory().releaseBrowser(browser);
+		return actionResult;
+	}
+
+	/**
+	 * Sets a System property. This is also active in deployment mode because
+	 * one might want to change a System property at runtime.
+	 * <h3>Synopsis:</h3>
+	 * pw=<i>aPassword</i>&amp;key=<i>someSystemPropertyKey</i>&amp;value=<i>someSystemPropertyValue</i>
+	 * 
+	 * @return either null when the password is wrong or a new page showing the
+	 *         System properties
+	 */
+	public WOActionResults systemPropertyAction() {
+		if (canPerformActionWithPasswordKey("er.extensions.ERXDirectAction.ChangeSystemPropertyPassword")) {
+			String key = request().stringFormValueForKey("key");
+			ERXResponse r = new ERXResponse();
+			if (ERXStringUtilities.stringIsNullOrEmpty(key)) {
+				String user = request().stringFormValueForKey("user");
+				Properties props = ERXConfigurationManager.defaultManager().defaultProperties();
+				if (user != null) {
+					System.setProperty("user.name", user);
+					props = ERXConfigurationManager.defaultManager().applyConfiguration(props);
+				}
+				r.appendContentString(ERXProperties.logString(props));
+			}
+			else {
+				String value = request().stringFormValueForKey("value");
+				value = ERXStringUtilities.stringIsNullOrEmpty(value) ? "" : value;
+				java.util.Properties p = System.getProperties();
+				p.put(key, value);
+				System.setProperties(p);
+				ERXLogger.configureLoggingWithSystemProperties();
+				for (java.util.Enumeration e = p.keys(); e.hasMoreElements();) {
+					Object k = e.nextElement();
+					if (k.equals(key)) {
+						r.appendContentString("<b>'" + k + "=" + p.get(k) + "'     <= you changed this</b><br>");
+					}
+					else {
+						r.appendContentString("'" + k + "=" + p.get(k) + "'<br>");
+					}
+				}
+				r.appendContentString("</body></html>");
+			}
+			return r;
+		}
+		return forbiddenResponse();
+	}
+
+	/**
+	 * Opens the localizer edit page if the app is in development mode.
+	 * 
+	 * @return localizer editor
+	 */
+	public WOActionResults editLocalizedFilesAction() {
+		if (ERXApplication.isDevelopmentModeSafe()) {
+			return pageWithName(ERXLocalizationEditor.class);
+		}
 		return null;
-    }
-    
-    /**
-     * Will dump all created keys of the current localizer via log4j and
-     * returns an empty response.
-     * 
-     * @return empty response
-     */
-    public WOActionResults dumpCreatedKeysAction() {
-    	if (ERXApplication.isDevelopmentModeSafe()) {
-    		session();
-            ERXLocalizer.currentLocalizer().dumpCreatedKeys();
-            return new ERXResponse();
-    	}
-    	return null;
-    }
-    
-    /**
-     * Returns an empty response.
-     * 
-     * @return nothing
-     */
-    public WOActionResults emptyAction() {
-    	return new ERXResponse();
-    }
+	}
 
-    /**
-     * To use this, include this line in appendToResponse on any pages with uploads:
-     * <code>
-     * AjaxUtils.addScriptResourceInHead(context, response, "Ajax", "prototype.js");
-     * AjaxUtils.addScriptResourceInHead(context, response, "Ajax", "SafariUploadHack.js");
-     * </code>
-     *
-     * <p>To be called before multi-form submits to get past Safari 3.2.1 and 4.x intermittent hang-ups
-     * when posting binary data.  A nice succinct description and solution is posted here:
-     * http://blog.airbladesoftware.com/2007/8/17/note-to-self-prevent-uploads-hanging-in-safari
-     * The radar ticket is here: https://bugs.webkit.org/show_bug.cgi?id=5760</p>
-     *
-     * @return simple response to close the connection
-     */
-    public WOActionResults closeHTTPSessionAction() { 
-    	ERXResponse response = new ERXResponse("");
-    	response.setHeader("close", "Connection"); 
-    	return response; 
-    }
-        
-    @SuppressWarnings("unchecked")
-    public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
-      return (T) super.pageWithName(componentClass.getName());
-    }
+	/**
+	 * Will dump all created keys of the current localizer via log4j and returns
+	 * an empty response.
+	 * 
+	 * @return empty response
+	 */
+	public WOActionResults dumpCreatedKeysAction() {
+		if (ERXApplication.isDevelopmentModeSafe()) {
+			session();
+			ERXLocalizer.currentLocalizer().dumpCreatedKeys();
+			return new ERXResponse();
+		}
+		return null;
+	}
 
-    /**
-     * Terminates the application when in development.
-     * 
-     * @return "OK" if application has been shut down
-     */
+	/**
+	 * Returns an empty response.
+	 * 
+	 * @return nothing
+	 */
+	public WOActionResults emptyAction() {
+		return new ERXResponse();
+	}
+
+	/**
+	 * To use this, include this line in appendToResponse on any pages with
+	 * uploads: <code>
+	 * AjaxUtils.addScriptResourceInHead(context, response, "Ajax", "prototype.js");
+	 * AjaxUtils.addScriptResourceInHead(context, response, "Ajax", "SafariUploadHack.js");
+	 * </code>
+	 *
+	 * <p>
+	 * To be called before multi-form submits to get past Safari 3.2.1 and 4.x
+	 * intermittent hang-ups when posting binary data. A nice succinct
+	 * description and solution is posted here:
+	 * http://blog.airbladesoftware.com/2007/8/17/note-to-self-prevent-uploads-hanging-in-safari
+	 * The radar ticket is here: https://bugs.webkit.org/show_bug.cgi?id=5760
+	 * </p>
+	 *
+	 * @return simple response to close the connection
+	 */
+	public WOActionResults closeHTTPSessionAction() {
+		ERXResponse response = new ERXResponse("");
+		response.setHeader("close", "Connection");
+		return response;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
+		return (T) super.pageWithName(componentClass.getName());
+	}
+
+	/**
+	 * Terminates the application when in development.
+	 * 
+	 * @return "OK" if application has been shut down
+	 */
 	public WOActionResults stopAction() {
-    	ERXResponse response = new ERXResponse();
-    	response.setHeader("text/plain", "Content-Type");
+		ERXResponse response = new ERXResponse();
+		response.setHeader("text/plain", "Content-Type");
 
 		if (ERXApplication.isDevelopmentModeSafe()) {
-	    	WOApplication.application().terminate();
+			WOApplication.application().terminate();
 			response.setContent("OK");
-		} else {
+		}
+		else {
 			response.setStatus(401);
 		}
-		
-    	return response;
+
+		return response;
 	}
-	
+
 	/**
 	 * Creates a response object with HTTP status code 403.
 	 * 
