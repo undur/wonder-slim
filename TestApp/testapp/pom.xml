@@ -53,10 +53,5 @@
 			<artifactId>JavaWebObjects</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.webobjects</groupId>
-			<artifactId>JavaFoundation</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
 	</dependencies>
 </project>
