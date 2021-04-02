@@ -442,60 +442,6 @@ public class ERXFileUtilities {
     }
 
     /**
-     * Copy a file across hosts using scp.
-     * @param srcHost host to send from (<code>null</code> if file is local)
-     * @param srcPath path on srcHost to read from
-     * @param dstHost host to send to (<code>null</code> if file is local)
-     * @param dstPath path on srcHost to write to
-     * @throws IOException if things go wrong
-     */
-    public static void remoteCopyFile(String srcHost, String srcPath, String dstHost, String dstPath) throws IOException {
-        if (srcPath == null) throw new IllegalArgumentException("null source path not allowed");
-        if (dstPath == null) throw new IllegalArgumentException("null source path not allowed");
-
-        NSMutableArray<String> args = new NSMutableArray<>(7);
-        args.addObject("/usr/bin/scp");
-        args.addObject("-B");
-        args.addObject("-q");
-        args.addObject("-o"); 
-        args.addObject("StrictHostKeyChecking=no");
-        args.addObject(((srcHost != null) ? (srcHost + ":") : "") + srcPath);
-        args.addObject(((dstHost != null) ? (dstHost + ":") : "") + dstPath);
-
-        String[] cmd = ERXArrayUtilities.toStringArray(args);
-        try {
-            Result result = ERXRuntimeUtilities.execute(cmd, null, null, 0L);
-            if(result.getExitValue() != 0) {
-                throw new IOException("Unable to remote copy file: (exit status = " + result.getExitValue() + ") " + result.getErrorAsString() + "\n");
-            }
-        } catch (TimeoutException e) {
-            throw new IOException("Command timed out");
-        }
-   }
-
-    /**
-     * Copy a file across hosts using scp.
-     * @param srcFile local file to send
-     * @param dstHost host to send to (<code>null</code> if file is local)
-     * @param dstPath path on srcHost to write to
-     * @throws IOException if things go wrong
-     */
-    public static void remoteCopyFile(File srcFile, String dstHost, String dstPath) throws IOException {
-        remoteCopyFile(null, srcFile.getPath(), dstHost, dstPath);
-    }
-
-    /**
-     * Copy a file across hosts using scp.
-     * @param srcHost host to send from (<code>null</code> if file is local)
-     * @param srcPath path on srcHost to read from
-     * @param dstFile local file to write to
-     * @throws IOException if things go wrong
-     */
-    public static void remoteCopyFile(String srcHost, String srcPath, File dstFile) throws IOException {
-        remoteCopyFile(srcHost, srcPath, null, dstFile.getPath());
-    }
-    
-    /**
      * Returns a string from the gzipped file using the default
      * encoding.
      * @param f file to read

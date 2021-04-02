@@ -107,15 +107,6 @@ public class ERXArrayUtilities {
 		return !intersectingElements.isEmpty() ? intersectingElements : NSArray.emptyArray();
 	}
 
-	public static String[] toStringArray(List<?> array) {
-		int size = array.size();
-		String[] b = new String[size];
-		for (int i = size; i > 0; i--) {
-			b[i - 1] = array.get(i - 1).toString();
-		}
-		return b;
-	}
-
 	/**
 	 * Just like the method
 	 * {@link com.webobjects.foundation.NSArray#sortedArrayUsingComparator(NSComparator)},
