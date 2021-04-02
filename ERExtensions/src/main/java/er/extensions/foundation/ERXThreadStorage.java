@@ -23,7 +23,6 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSSet;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.concurrency.ERXCloneableThreadLocal;
 
 /**
  * Provides a way to store objects for a particular thread. This can be especially handy for storing objects

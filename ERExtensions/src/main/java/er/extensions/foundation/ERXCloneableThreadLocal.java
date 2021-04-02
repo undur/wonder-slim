@@ -4,7 +4,7 @@
  * This software is published under the terms of the NetStruxr
  * Public Software License version 0.5, a copy of which has been
  * included with this distribution in the LICENSE.NPL file.  */
-package er.extensions.concurrency;
+package er.extensions.foundation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import er.extensions.eof.ERXConstant;
-import er.extensions.foundation.ERXUtilities;
 
 /**
  * <code>ERXClonableThreadLocal</code> extends {@link InheritableThreadLocal}
