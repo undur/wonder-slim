@@ -833,32 +833,6 @@ public class ERXArrayUtilities {
     }
 
     /**
-     * Locates an object within an array using a custom equality check provided as an ERXEqualator. This
-     * is useful if you have an array of EOs and want to find a particular EO in it without regard to editing
-     * contexts.
-     * 
-     * @param <T> class of array items
-     * @param array the array to search
-     * @param object the object to look for
-     * @param equalator the equalator to use for performing the equality check between object and each object
-     *        in the array
-     * @return index of first occurring object in the array that is defined as equal by the equalator. -1
-     *         if no such object is found.
-     */
-    public static <T> int indexOfObjectUsingEqualator(Collection<T> array, T object, ERXEqualator equalator) {
-        int i = 0;
-        
-        for (T item : array) {
-            if (equalator.objectIsEqualToObject(item, object)) {
-                return i;
-            }
-            i++;
-        }
-        
-        return -1;
-    }
-
-    /**
      * Sorts a given array with a key in ascending fashion and returns a mutable clone of the result.
      * 
      * @param array array to be sorted.
