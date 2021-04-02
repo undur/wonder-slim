@@ -15,46 +15,53 @@ import org.slf4j.LoggerFactory;
 import er.extensions.ERXConstant;
 
 /**
- * <code>ERXClonableThreadLocal</code> extends {@link InheritableThreadLocal}
- * to bequeath a cloned copy of the parent object to the child thread.
+ * <code>ERXClonableThreadLocal</code> extends {@link InheritableThreadLocal} to
+ * bequeath a cloned copy of the parent object to the child thread.
  * <p>
- * Note: Objects used with this thread local must implement the {@link Cloneable}
- * interface and have a public <code>clone</code> method.
+ * Note: Objects used with this thread local must implement the
+ * {@link Cloneable} interface and have a public <code>clone</code> method.
  */
-public class ERXCloneableThreadLocal extends InheritableThreadLocal {
-    private static final Logger log = LoggerFactory.getLogger(ERXCloneableThreadLocal.class);
 
-    /**
-     * Clones a copy of the parent object for the child thread.
-     * The parentValue must implement the {@link Cloneable}
-     * interface and have a public <code>clone</code> method.
-     * @param parentValue local object to the parent thread.
-     * @return a cloned value of the parent if not null.
-     */
-    @Override
-    protected Object childValue(Object parentValue) {
-        Object child = null;
-        if (parentValue != null) {
-            if (!(parentValue instanceof Cloneable)) {
-                throw new IllegalStateException("Using a ERXCloneableThreadLocal with an object: " 
-                    + parentValue.getClass() + " " + parentValue.toString() 
-                    + " that does not implement the Cloneable interface ");
-            }
-            // This is very lame. clone() is a protected method off of object and the Cloneable
-            // interface doesn't specify any methods.
-            try {
-                Method m = parentValue.getClass().getMethod("clone", ERXConstant.EmptyClassArray);
-                child = m.invoke(parentValue, ERXConstant.EmptyObjectArray);
-            } catch (InvocationTargetException ite) {
-                log.error("Invocation exception occurred when invoking clone in ERXClonableThreadLocal: {} backtrace: {}",
-                        ite.getTargetException(), ERXUtilities.stackTrace(ite.getTargetException()));
-            } catch (NoSuchMethodException nsme) {
-                log.error("No clone method for the class: {} very strange.", parentValue.getClass());
-            } catch (IllegalAccessException iae) {
-                log.error("Clone method has protected or private access for the object: {} {}",
-                        parentValue.getClass(), parentValue, iae);
-            }
-        }            
-        return child;
-    }
+public class ERXCloneableThreadLocal extends InheritableThreadLocal {
+	private static final Logger log = LoggerFactory.getLogger(ERXCloneableThreadLocal.class);
+
+	/**
+	 * Clones a copy of the parent object for the child thread. The parentValue
+	 * must implement the {@link Cloneable} interface and have a public
+	 * <code>clone</code> method.
+	 * 
+	 * @param parentValue
+	 *            local object to the parent thread.
+	 * @return a cloned value of the parent if not null.
+	 */
+	@Override
+	protected Object childValue(Object parentValue) {
+		Object child = null;
+		if (parentValue != null) {
+			if (!(parentValue instanceof Cloneable)) {
+				throw new IllegalStateException("Using a ERXCloneableThreadLocal with an object: "
+						+ parentValue.getClass() + " " + parentValue.toString()
+						+ " that does not implement the Cloneable interface ");
+			}
+			// This is very lame. clone() is a protected method off of object
+			// and the Cloneable
+			// interface doesn't specify any methods.
+			try {
+				Method m = parentValue.getClass().getMethod("clone", ERXConstant.EmptyClassArray);
+				child = m.invoke(parentValue, ERXConstant.EmptyObjectArray);
+			}
+			catch (InvocationTargetException ite) {
+				log.error("Invocation exception occurred when invoking clone in ERXClonableThreadLocal: {} backtrace: {}",
+						ite.getTargetException(), ERXUtilities.stackTrace(ite.getTargetException()));
+			}
+			catch (NoSuchMethodException nsme) {
+				log.error("No clone method for the class: {} very strange.", parentValue.getClass());
+			}
+			catch (IllegalAccessException iae) {
+				log.error("Clone method has protected or private access for the object: {} {}",
+						parentValue.getClass(), parentValue, iae);
+			}
+		}
+		return child;
+	}
 }

@@ -2,7 +2,6 @@ package er.extensions.foundation;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.webobjects.eocontrol.EOSortOrdering;
