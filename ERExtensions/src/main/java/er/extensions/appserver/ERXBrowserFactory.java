@@ -8,6 +8,7 @@ package er.extensions.appserver;
 
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -20,7 +21,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.foundation.ERXMutableDictionary;
 import er.extensions.foundation.ERXMutableInteger;
 import er.extensions.foundation.ERXStringUtilities;
 
@@ -200,7 +200,7 @@ public class ERXBrowserFactory {
      * <div class="en">Mapping of UAs to browsers</div>
      * <div class="ja">ブラウザと user-agent マップ：キャシュ用</div>
      */
-    private static final Map _cache = ERXMutableDictionary.synchronizedDictionary();
+    private static final Map _cache = new ConcurrentHashMap<>();
 
     /**
      * <div class="en">
