@@ -64,7 +64,7 @@ public class ERXArrayUtilities {
 	 *            insensitive ascending.
 	 * @return sorted array.
 	 */
-	public static <T> NSArray<T> sortedArraySortedWithKey(NSArray<T> array, String key, NSSelector selector) {
+	private static <T> NSArray<T> sortedArraySortedWithKey(NSArray<T> array, String key, NSSelector selector) {
 		NSArray<EOSortOrdering> order = new NSArray<>(new EOSortOrdering[] { EOSortOrdering.sortOrderingWithKey(key, selector == null ? EOSortOrdering.CompareCaseInsensitiveAscending : selector) });
 		return EOSortOrdering.sortedArrayUsingKeyOrderArray(array, order);
 	}
