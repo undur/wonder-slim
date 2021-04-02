@@ -6,7 +6,6 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.foundation;
 
-import com.webobjects.eocontrol.EOEditingContext;
 import com.webobjects.foundation.NSMutableSet;
 
 /**
