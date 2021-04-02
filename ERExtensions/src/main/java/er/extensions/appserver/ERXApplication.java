@@ -1236,8 +1236,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 
 		log.info("Wonder version: " + ERXProperties.wonderVersion());
 
-		// Configure the WOStatistics CLFF logging since it can't be controlled
-		// by a property, grrr.
+		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
 		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("finishInitialization", ERXConstant.NotificationClassArray), WOApplication.ApplicationWillFinishLaunchingNotification, null);
