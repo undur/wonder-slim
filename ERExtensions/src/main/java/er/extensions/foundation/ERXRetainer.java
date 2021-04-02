@@ -32,7 +32,6 @@ import com.webobjects.foundation.NSMutableSet;
  */
 // ENHANCEME: Should implement reference counting.
 public class ERXRetainer {
-	private static EOEditingContext ec;
 
 	/** set used to retain references to objects */
 	private static NSMutableSet _retainerSet = new NSMutableSet();
