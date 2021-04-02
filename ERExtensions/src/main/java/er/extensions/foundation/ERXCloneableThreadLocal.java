@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import er.extensions.eof.ERXConstant;
+import er.extensions.ERXConstant;
 
 /**
  * <code>ERXClonableThreadLocal</code> extends {@link InheritableThreadLocal}

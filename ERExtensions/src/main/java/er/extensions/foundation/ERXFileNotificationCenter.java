@@ -20,8 +20,8 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
 
+import er.extensions.ERXConstant;
 import er.extensions.appserver.ERXApplication;
-import er.extensions.eof.ERXConstant;
 
 /**
  * The file notification center is only used in development systems. It provides a nice repository about

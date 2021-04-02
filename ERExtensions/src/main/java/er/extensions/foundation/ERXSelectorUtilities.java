@@ -10,7 +10,7 @@ package er.extensions.foundation;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSSelector;
 
-import er.extensions.eof.ERXConstant;
+import er.extensions.ERXConstant;
 
 /**
  * NSSelector utilities.  These exist mostly to allow selector invocation without explicitly

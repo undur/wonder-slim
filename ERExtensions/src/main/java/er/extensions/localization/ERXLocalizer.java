@@ -45,8 +45,8 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSTimestampFormatter;
 
+import er.extensions.ERXConstant;
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.eof.ERXConstant;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 import er.extensions.foundation.ERXDictionaryUtilities;

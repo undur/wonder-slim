@@ -40,7 +40,6 @@ import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation._NSStringUtilities;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.eof.ERXConstant;
 import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXMutableURL;

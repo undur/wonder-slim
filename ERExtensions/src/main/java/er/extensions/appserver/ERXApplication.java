@@ -82,6 +82,7 @@ import com.webobjects.foundation.NSSet;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.development.NSBundleFactory;
 
+import er.extensions.ERXConstant;
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
@@ -92,7 +93,6 @@ import er.extensions.components._private.ERXWOForm;
 import er.extensions.components._private.ERXWORepetition;
 import er.extensions.components._private.ERXWOString;
 import er.extensions.components._private.ERXWOTextField;
-import er.extensions.eof.ERXConstant;
 import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXCompressionUtilities;
 import er.extensions.foundation.ERXConfigurationManager;

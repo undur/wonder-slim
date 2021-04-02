@@ -32,8 +32,8 @@ import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSTimestamp;
 
+import er.extensions.ERXConstant;
 import er.extensions.appserver.ajax.ERXAjaxSession;
-import er.extensions.eof.ERXConstant;
 import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;

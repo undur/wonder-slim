@@ -29,7 +29,7 @@ package er.extensions.woextensions;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 
-import er.extensions.eof.ERXConstant;
+import er.extensions.ERXConstant;
 
 /**
  * (Back port from WO 5 WOExtensions)

@@ -15,9 +15,9 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.ERXConstant;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.components.ERXStatelessComponent;
-import er.extensions.eof.ERXConstant;
 
 /** 
  * Will render its embedded content only once during the RR loop.

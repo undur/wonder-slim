@@ -1,4 +1,4 @@
-package er.extensions.eof;
+package er.extensions;
 
 import java.util.Collections;
 import java.util.HashMap;

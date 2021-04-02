@@ -36,8 +36,8 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
+import er.extensions.ERXConstant;
 import er.extensions.appserver.ERXMessageEncoding;
-import er.extensions.eof.ERXConstant;
 
 /**
  * Collection of {@link java.lang.String String} utilities. Contains
@@ -177,7 +177,7 @@ public class ERXStringUtilities {
      * @param s string to caclulate an Integer from
      * @return parsed Integer from the string or null
      *		if the string is not correctly formed.
-     * @see er.extensions.eof.ERXConstant#integerForString(String)
+     * @see er.extensions.ERXConstant#integerForString(String)
      */
     public static Integer integerWithString(String s) {
         try {
