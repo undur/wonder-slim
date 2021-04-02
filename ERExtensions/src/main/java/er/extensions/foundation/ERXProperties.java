@@ -46,7 +46,6 @@ import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.crypting.ERXCrypto;
 
 /**
  * <div class="en">
@@ -949,98 +948,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         return stringValue == UndefinedMarker ? null : stringValue;
     }
     
-    /**
-     * <div class="en">
-     * Returns the decrypted value for the given property name using
-     * the default crypter if the property propertyName.encrypted=true.  For
-     * instance, if you are requesting my.password, if my.password.encrypted=true
-     * the value of my.password will be passed to the default crypter's decrypt
-     * method.
-     * </div>
-     * 
-     * <div class="ja">
-     * 	指定プロパティー名とデフォルト暗号化方法 (propertyName.encrypted=true) を使って復元されている値を戻します。
-     * 	例えば、my.password を取得する場合、my.password.encrypted=true も設定されていれば、
-     * 	my.password は復元する時にデフォルト暗号化方法 {@link er.extensions.crypting.ERXCrypto#defaultCrypter()} を使用します。
-     * </div>
-     * 
-     * @param propertyName <div class="en">the property name to retrieve and optionally decrypt</div>
-     *                     <div class="ja">プロパティー名</div>
-     * 
-     * @return <div class="en">the decrypted property value</div>
-     *         <div class="ja">復元されている値</div>
-     */
-    public static String decryptedStringForKey(String propertyName) {
-    	return ERXProperties.decryptedStringForKeyWithDefault(propertyName, null);
-    }
-    
-    /**
-     * <div class="en">
-     * If the <code>propertyName.encrypted</code> property is set to true, returns
-     * the plain text value of the given property name, after decrypting it with the
-     * {@link er.extensions.crypting.ERXCrypto#defaultCrypter()}. For instance, if you are requesting
-     * my.password and <code>my.password.encrypted</code> is set to true,
-     * the value of <code>my.password</code> will be sent to the default crypter's
-     * decrypt() method.
-     * </div>
-     * 
-     * <div class="ja">
-     * 	指定プロパティー名とデフォルト暗号化方法 (propertyName.encrypted=true) を使って復元されている値を戻します。
-     * 	例えば、my.password を取得する場合、my.password.encrypted=true も設定されていれば、
-     * 	my.password は復元する時にデフォルト暗号化方法 {@link er.extensions.crypting.ERXCrypto#defaultCrypter()} を使用します。
-     * </div>
-     * 
-     * @param propertyName <div class="en">the property name to retrieve and optionally decrypt</div>
-     *                     <div class="ja">プロパティー名</div>
-     * @param defaultValue <div class="en">the default value to return if there is no password</div>
-     *                     <div class="ja">プロパティーが無ければ、デフォルト値</div>
-     * 
-     * @return <div class="en">the decrypted property value</div>
-     *         <div class="ja">復元されている値</div>
-     */
-	public static String decryptedStringForKeyWithDefault(String propertyName, String defaultValue) {
-		boolean propertyNameEncrypted = ERXProperties.booleanForKeyWithDefault(propertyName + ".encrypted", false);
-		String decryptedPassword;
-		if (propertyNameEncrypted) {
-			String encryptedPassword = ERXProperties.stringForKey(propertyName);
-			decryptedPassword = ERXCrypto.defaultCrypter().decrypt(encryptedPassword);
-		}
-		else {
-			decryptedPassword = ERXProperties.stringForKey(propertyName);
-		}
-		if (decryptedPassword == null) {
-			decryptedPassword = defaultValue;
-		}
-		return decryptedPassword;
-    }
-
-    /**
-     * <div class="en">
-     * Returns the decrypted value for the given property name using the
-     * {@link er.extensions.crypting.ERXCrypto#defaultCrypter()}. This is slightly different than
-     * decryptedStringWithKeyWithDefault in that it does not require  the encrypted
-     * property to be set.
-     * </div>
-     * 
-     * <div class="ja">
-     * 	指定プロパティー名とデフォルト暗号化方法 (propertyName.encrypted=true) を使って復元されている値を戻します。
-     * 	例えば、my.password を取得する場合、my.password.encrypted=true も設定されていれば、
-     * 	my.password は復元する時にデフォルト暗号化方法 {@link er.extensions.crypting.ERXCrypto#defaultCrypter()} を使用します。
-     * </div>
-     * 
-     * @param propertyName <div class="en">the name of the property to decrypt</div>
-     *                     <div class="ja">プロパティー名</div>
-     * @param defaultValue <div class="en">the default encrypted value</div>
-     *                     <div class="ja">プロパティーが無ければ、暗号化されているデフォルト値</div>
-     * 
-     * @return <div class="en">the decrypted value</div>
-     *         <div class="ja">復元されている値</div>
-     */
-	public static String decryptedStringForKeyWithEncryptedDefault(String propertyName, String defaultValue) {
-    	String encryptedPassword = ERXProperties.stringForKeyWithDefault(propertyName, defaultValue);
-    	return ERXCrypto.defaultCrypter().decrypt(encryptedPassword);
-    }
-
     /**
      * <div class="en">
      * Returns an array of strings separated with the given separator string.
@@ -2238,46 +2145,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 				}
 			}
 			return computedProperties;
-		}
-	}
-
-	/**
-	 * <div class="en">
-	 * Encrypted operator supports decrypting values using the default crypter. To register this
-	 * operator, add the following static block to your Application class:
-	 * <pre><code>
-	 * static {
-	 *   ERXProperties.setOperatorForKey(new ERXProperties.EncryptedOperator(), ERXProperties.EncryptedOperator.Key);
-	 * }
-	 * </code></pre>
-	 * 
-	 * Call er.extensions.ERXProperties.EncryptedOperator.register() in an Application static
-	 * block to register this operator.
-	 * </div>
-	 * 
-	 * <div class="ja">
-	 * 暗号オペレータ・サポート。デフォルト暗号化処理が使用されます。
-	 * <pre><code>
-	 * static {
-	 *   ERXProperties.setOperatorForKey(new ERXProperties.EncryptedOperator(), ERXProperties.EncryptedOperator.Key);
-	 * }
-	 * </code></pre>
-	 * 
-	 * er.extensions.ERXProperties.EncryptedOperator.register() をスタティック・ブロック内で呼ぶことで登録できます。
-	 * </div>
-	 * 
-	 * @author mschrag
-	 */
-	public static class EncryptedOperator implements ERXProperties.Operator {
-		public static final String Key = "encrypted";
-
-		public static void register() {
-			ERXProperties.setOperatorForKey(new ERXProperties.EncryptedOperator(), ERXProperties.EncryptedOperator.Key);
-		}
-
-		public NSDictionary<String, String> compute(String key, String value, String parameters) {
-			String decryptedValue = ERXCrypto.defaultCrypter().decrypt(value);
-			return new NSDictionary<>(decryptedValue, key);
 		}
 	}
 

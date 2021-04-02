@@ -31,6 +31,7 @@ import er.extensions.logging.ERXLog4JConfiguration;
 import er.extensions.logging.ERXLogger;
 import er.extensions.statistics.ERXStatisticsPage;
 import er.extensions.statistics.ERXStats;
+import x.FIXMEException;
 
 /**
  * Basic collector for direct action additions. All of the actions are password
@@ -38,8 +39,6 @@ import er.extensions.statistics.ERXStats;
  * system property for the action.
  */
 public class ERXDirectAction extends WODirectAction {
-
-	private final static Logger log = LoggerFactory.getLogger(ERXDirectAction.class);
 
 	/** holds a reference to the current browser used for this session */
 	private ERXBrowser browser;
@@ -56,6 +55,8 @@ public class ERXDirectAction extends WODirectAction {
 	 * @return <code>true</code> if action is allowed to be invoked
 	 */
 	protected boolean canPerformActionWithPasswordKey(String passwordKey) {
+		throw new FIXMEException( "Disabled dut eo ERXCrypto no longer being there" );
+		/*
 		if (ERXApplication.isDevelopmentModeSafe()) {
 			return true;
 		}
@@ -75,6 +76,7 @@ public class ERXDirectAction extends WODirectAction {
 			return false;
 		}
 		return password.equals(requestPassword);
+		*/
 	}
 
 	/**
