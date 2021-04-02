@@ -22,7 +22,6 @@ import com.webobjects.woextensions.WOEventSetupPage;
 import com.webobjects.woextensions.WOStatsPage;
 
 import er.extensions.components.ERXLocalizationEditor;
-import er.extensions.components.ERXRemoteShell;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
@@ -162,24 +161,6 @@ public class ERXDirectAction extends WODirectAction {
 		if (canPerformActionWithPasswordKey("er.extensions.ERXLog4JPassword")) {
 			session().setObjectForKey(Boolean.TRUE, "ERXLog4JConfiguration.enabled");
 			return pageWithName(ERXLog4JConfiguration.class);
-		}
-		return forbiddenResponse();
-	}
-
-	/**
-	 * Action used for sending shell commands to the server and receive the
-	 * result
-	 * <h3>Synopsis:</h3> pw=<i>aPassword</i>
-	 * <h3>Form Values:</h3> <b>pw</b> password to be checked against the system
-	 * property <code>er.extensions.ERXRemoteShellPassword</code>.
-	 * 
-	 * @return {@link ERXLog4JConfiguration} for modifying current logging
-	 *         settings.
-	 */
-	public WOActionResults remoteShellAction() {
-		if (canPerformActionWithPasswordKey("er.extensions.ERXRemoteShellPassword")) {
-			session().setObjectForKey(Boolean.TRUE, "ERXRemoteShell.enabled");
-			return pageWithName(ERXRemoteShell.class);
 		}
 		return forbiddenResponse();
 	}
