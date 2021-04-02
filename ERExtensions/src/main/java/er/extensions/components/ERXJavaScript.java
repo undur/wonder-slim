@@ -1,4 +1,4 @@
-package er.extensions.components.javascript;
+package er.extensions.components;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
