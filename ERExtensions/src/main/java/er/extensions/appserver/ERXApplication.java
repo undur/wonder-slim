@@ -86,7 +86,6 @@ import er.extensions.ERXConstant;
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.components.ERXAnyField;
 import er.extensions.components.ERXGracefulShutdown;
 import er.extensions.components._private.ERXActiveImage;
 import er.extensions.components._private.ERXWOForm;
@@ -1118,12 +1117,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		}
 
 		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
-		try {
-			ERXPatcher.setClassForName(ERXAnyField.class, "WOAnyField");
-		}
-		catch (NoClassDefFoundError e) {
-			ERXApplication.log.info("JavaWOExtensions is not loaded, so WOAnyField will not be patched.");
-		}
 		ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition");
 		ERXPatcher.setClassForName(ERXActiveImage.class, "WOActiveImage");
 
