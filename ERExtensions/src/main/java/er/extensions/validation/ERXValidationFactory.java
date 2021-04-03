@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCoding;
@@ -105,8 +104,8 @@ public class ERXValidationFactory {
     public interface FactoryInterface {
         public Class validationExceptionClass();
         public void setValidationExceptionClass(Class class1);
-        public ERXValidationException createException(EOEnterpriseObject eo, String property, Object value, String type);
-        public ERXValidationException createCustomException(EOEnterpriseObject eo, String method);
+        public ERXValidationException createException(Object /* FIXME: Was EOEeterpriseObject */eo, String property, Object value, String type);
+        public ERXValidationException createCustomException(Object /* FIXME: Was EOEeterpriseObject */ eo, String method);
     }
 
     /**
@@ -211,7 +210,7 @@ public class ERXValidationFactory {
      * @param type of the validation exception
      * @return validation exception for the given information
      */
-    public ERXValidationException createException(EOEnterpriseObject eo, String property, Object value, String type) {
+    public ERXValidationException createException(Object /* FIXME: Was EOEeterpriseObject */ eo, String property, Object value, String type) {
         ERXValidationException erve = null;
         try {
             log.debug("Creating exception for type: {} validationExceptionClass: {}", type, validationExceptionClass());
@@ -247,7 +246,7 @@ public class ERXValidationFactory {
      *		exception template, for instance "FirstNameCanNotMatchLastNameValidationException"
      * @return a custom validation exception for the given criteria
      */
-    public ERXValidationException createCustomException(EOEnterpriseObject eo, String method) {
+    public ERXValidationException createCustomException(Object /* FIXME: Was EOEeterpriseObject */ eo, String method) {
         return createCustomException(eo, null, null, method);
     }
 
@@ -261,7 +260,7 @@ public class ERXValidationFactory {
      *		method name to pick up the validation template
      * @return custom validation exception
      */
-    public ERXValidationException createCustomException(EOEnterpriseObject eo, String property, Object value, String method) {
+    public ERXValidationException createCustomException(Object /* FIXME: Was EOEeterpriseObject */ eo, String property, Object value, String method) {
         ERXValidationException erv = createException(eo, property, value, ERXValidationException.CustomMethodException);
         if (erv != null)
             erv.setMethod(method);
@@ -297,7 +296,11 @@ public class ERXValidationFactory {
         if (!(eov instanceof ERXValidationException)) {
             String message = eov.getMessage();
             Object o = eov.object();
-            EOEnterpriseObject eo = ((o instanceof EOEnterpriseObject) ? (EOEnterpriseObject) o: null);
+            
+            // FIXME: This was diabled to get EOControl out of the way
+//            EOEnterpriseObject eo = ((o instanceof EOEnterpriseObject) ? (EOEnterpriseObject) o: null);
+            Object eo = null;
+
             //NSDictionary userInfo = eov.userInfo() != null ? (NSDictionary)eov.userInfo() : NSDictionary.EmptyDictionary;
             for (String key : _mappings.allKeys()) {
                 //EOEnterpriseObject eo = (EOEnterpriseObject)userInfo.objectForKey(ValidationException.ValidatedObjectUserInfoKey);
@@ -415,7 +418,10 @@ public class ERXValidationFactory {
             template = ((ExceptionDelegateInterface)erv.delegate()).templateForException(erv);
         }
         if (template == null) {
-            String entityName = erv.eoObject() == null ? null : erv.eoObject().entityName();
+        	/* FIXME: Was to get EOEnterpriseObject out of the way */
+//            String entityName = erv.eoObject() == null ? null : erv.eoObject().entityName();
+            String entityName = null;
+
             String property = erv.isCustomMethodException() ? erv.method() : erv.propertyKey();
             String type = erv.type();
             String targetLanguage = erv.targetLanguage();

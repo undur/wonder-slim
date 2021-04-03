@@ -24,7 +24,6 @@ import org.apache.log4j.spi.LoggerRepository;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.eocontrol.EOSortOrdering;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSMutableArray;
 
@@ -132,9 +131,6 @@ public class ERXLog4JConfiguration extends WOComponent {
     public PageSection aPageSection;
     private PageSection _activeSection = PageSection.LOGGERS;
 
-    public final static EOSortOrdering NAME_SORT_ORDERING = new EOSortOrdering("name", EOSortOrdering.CompareAscending);
-    public final static NSMutableArray SORT_BY_NAME = new NSMutableArray(NAME_SORT_ORDERING);
-
     public ERXLog4JConfiguration(WOContext aContext) {
         super(aContext);
     }
@@ -191,7 +187,7 @@ public class ERXLog4JConfiguration extends WOComponent {
                 log = (Logger)log.getParent();
             }
         }
-        EOSortOrdering.sortArrayUsingKeyOrderArray(otherLoggers, SORT_BY_NAME);
+//        EOSortOrdering.sortArrayUsingKeyOrderArray(otherLoggers, SORT_BY_NAME); // FIXME: Missing sorting after we disabled JavaEOControl
         result.addObjectsFromArray(otherLoggers);
 
         return result;

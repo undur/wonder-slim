@@ -9,7 +9,6 @@ package er.extensions.validation;
 import java.util.Objects;
 
 import com.webobjects.appserver.WOMessage;
-import com.webobjects.eocontrol.EOEnterpriseObject;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSValidation;
@@ -204,7 +203,8 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * the validation exception to an EOEnterpriseObject.
      * @return object cast as an enterprise object.
      */
-    public EOEnterpriseObject eoObject() { return object() instanceof EOEnterpriseObject ? (EOEnterpriseObject)object() : null; }
+//    public EOEnterpriseObject eoObject() { return object() instanceof EOEnterpriseObject ? (EOEnterpriseObject)object() : null; }
+    public Object eoObject() { throw new FIXMEException("Disabled instead of deleting"); }
 
 
     /**
