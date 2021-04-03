@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxUpdateContainer" wocomponentcontent="true">
+    
+		<binding name="elementName"/>
+		<binding name="observeFieldID"/>
+		<binding name="observeFieldFrequency"/>
+		<binding name="action"/>
+		<binding name="fullSubmit"/>
+		<binding name="skipFunction"/>
+		
+		<binding name="frequency"/>
+		<binding name="decay"/>
+		<binding name="evalScripts"/>
+		<binding name="onLoading"/>
+		<binding name="onComplete"/>
+		<binding name="onSuccess"/>
+		<binding name="onFailure"/>
+		<binding name="onException"/>
+		<binding name="onRefreshComplete"/>
+
+		<binding name="insertion"/>
+		<binding name="insertionDuration"/>
+		<binding name="beforeInsertionDuration"/>
+		<binding name="afterInsertionDuration"/>
+
+    
+	<binding name="id"/>
+        <binding name="asynchronous"/>
+    <binding defaults="Boolean" name="stopped"/>
+    <binding name="class"/>
+    <binding name="style"/>
+    </wo>
+</wodefinitions>
