@@ -12,6 +12,7 @@
         <module>ERExtensions</module>
         <module>JavaWOExtensions</module>
         <module>WOOgnl</module>
+        <module>Ajax</module>
     </modules>
 	<properties>
 		<undur.version>8.0.0-SNAPSHOT</undur.version>
