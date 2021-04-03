@@ -46,6 +46,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.webobjects</groupId>
+			<artifactId>JavaEOControl</artifactId>
+			<version>${webobjects.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.webobjects</groupId>
 			<artifactId>JavaWebObjects</artifactId>
 			<version>${webobjects.version}</version>
 			<exclusions>

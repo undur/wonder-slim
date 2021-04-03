@@ -4,12 +4,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.webobjects.eocontrol.EOSortOrdering;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSComparator;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSSelector;
-
-import x.FIXMEException;
 
 /**
  * Collection of {@link com.webobjects.foundation.NSArray NSArray} utilities.
@@ -65,11 +64,8 @@ public class ERXArrayUtilities {
 	 * @return sorted array.
 	 */
 	private static <T> NSArray<T> sortedArraySortedWithKey(NSArray<T> array, String key, NSSelector selector) {
-		throw new FIXMEException( "Disabled to get JavaEOControl out" );
-		/*
 		NSArray<EOSortOrdering> order = new NSArray<>(new EOSortOrdering[] { EOSortOrdering.sortOrderingWithKey(key, selector == null ? EOSortOrdering.CompareCaseInsensitiveAscending : selector) });
 		return EOSortOrdering.sortedArrayUsingKeyOrderArray(array, order);
-		*/
 	}
 
 	/**
