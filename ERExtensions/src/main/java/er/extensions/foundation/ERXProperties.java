@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -23,15 +22,9 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
@@ -46,6 +39,7 @@ import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
 import er.extensions.appserver.ERXApplication;
+import x.FIXMEException;
 
 /**
  * <div class="en">
@@ -285,6 +279,13 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
      * @return version string
      */
     public static String wonderVersion() {
+    	try {
+    		throw new FIXMEException( "Disabled so we can run without JavaXML framework stuff" );
+    	}
+    	catch( Exception e ) {
+    		return "8.0.0-SNAPSHOT";
+    	}
+    	/*
         String wonderVersion = null;
         NSBundle bundle = NSBundle.bundleForName("ERExtensions");
         if (bundle != null) {
@@ -327,6 +328,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
             wonderVersion = UNKNOWN_WONDER_VERSION;
         }
         return wonderVersion;
+        */
     }
 
     
