@@ -2,51 +2,23 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>undur</groupId>
+	<parent>
+		<groupId>undur</groupId>
+		<artifactId>undur-reactor</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
+	</parent>
 	<artifactId>ERExtensions</artifactId>
-	<version>8.0.0-SNAPSHOT</version>
 	<name>ERExtensions Framework</name>
 	<packaging>woframework</packaging>
 
-	<properties>
-		<undur.version>8.0.0-SNAPSHOT</undur.version>
-		<webobjects.version>5.4.3</webobjects.version>
-	</properties>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.wocommunity</groupId>
-				<artifactId>wolifecycle-maven-plugin</artifactId>
-				<version>2.4-SNAPSHOT</version>
-				<extensions>true</extensions>
-				<configuration>
-					<skipAppleProvidedFrameworks>true</skipAppleProvidedFrameworks>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>11</source>
-					<target>11</target>
-					<encoding>utf8</encoding>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
 	<dependencies>
-		<!-- FIXME: Black box closed source code. We must lose this eventually 
-			// Hugi 2020-10-15 -->
+		<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 		<dependency>
 			<groupId>wonder.core</groupId>
 			<artifactId>ERFoundation</artifactId>
 			<version>1.0</version>
 		</dependency>
-		<!-- FIXME: Black box closed source code. We must lose this eventually 
-			// Hugi 2020-10-15 -->
+		<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 		<dependency>
 			<groupId>wonder.core</groupId>
 			<artifactId>ERWebObjects</artifactId>
