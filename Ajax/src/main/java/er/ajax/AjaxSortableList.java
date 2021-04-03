@@ -6,14 +6,14 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.eocontrol.EOKeyValueQualifier;
-import com.webobjects.eocontrol.EOQualifier;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSRange;
+
+import x.FIXMEException;
 
 // PROTOTYPE FUNCTIONS (WRAPPER)
 /**
@@ -240,8 +240,15 @@ public class AjaxSortableList extends AjaxComponent {
         itemPageRange = new NSRange(startIndex, listItemIDCount);
       }
       NSArray<Object> itemPageArray = list.subarrayWithRange(itemPageRange);
-      EOQualifier itemIDQualifier = new EOKeyValueQualifier(listItemIDKeyPath, EOQualifier.QualifierOperatorEqual, itemID);
-      NSArray<Object> matchingItems = EOQualifier.filteredArrayWithQualifier(itemPageArray, itemIDQualifier);
+
+      try {
+    	  throw new FIXMEException("Fisabled forJavaEOControl reasons" );
+      }
+      catch( Exception e ) {}
+//      EOQualifier itemIDQualifier = new EOKeyValueQualifier(listItemIDKeyPath, EOQualifier.QualifierOperatorEqual, itemID);
+//      NSArray<Object> matchingItems = EOQualifier.filteredArrayWithQualifier(itemPageArray, itemIDQualifier);
+      NSArray<Object> matchingItems = null;
+
       if (matchingItems.count() == 0) {
         throw new NoSuchElementException("There was no item that matched the ID '" + itemID + "' in " + list + ".");
       }

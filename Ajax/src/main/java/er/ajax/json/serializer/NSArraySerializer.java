@@ -12,8 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.webobjects.eocontrol._EOCheapCopyArray;
-import com.webobjects.eocontrol._EOCheapCopyMutableArray;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
@@ -32,7 +30,7 @@ public class NSArraySerializer extends AbstractSerializer {
 	/**
 	 * Classes that this can serialise.
 	 */
-	private static Class[] _serializableClasses = new Class[] { NSArray.class, NSMutableArray.class, _EOCheapCopyArray.class, _EOCheapCopyMutableArray.class };
+	private static Class[] _serializableClasses = new Class[] { NSArray.class, NSMutableArray.class };
 
 	/**
 	 * Classes that this can serialise to.
