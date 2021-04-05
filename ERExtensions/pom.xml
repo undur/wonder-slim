@@ -5,8 +5,9 @@
 	<parent>
 		<groupId>undur</groupId>
 		<artifactId>undur-reactor</artifactId>
-		<version>8.0.0-SNAPSHOT</version>
+		<version>8.0.0.slim-SNAPSHOT</version>
 	</parent>
+	<groupId>wonder.core</groupId>
 	<artifactId>ERExtensions</artifactId>
 	<name>ERExtensions Framework</name>
 	<packaging>woframework</packaging>
@@ -25,45 +26,45 @@
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>undur</groupId>
+			<groupId>${wonder.core.group}</groupId>
 			<artifactId>JavaWOExtensions</artifactId>
-			<version>${undur.version}</version>
+			<version>${wonder.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>com.webobjects</groupId>
+					<groupId>${webobjects.group}</groupId>
 					<artifactId>JavaEOAccess</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>com.webobjects</groupId>
+					<groupId>${webobjects.group}</groupId>
 					<artifactId>JavaEOControl</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.webobjects</groupId>
+			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaFoundation</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.webobjects</groupId>
+			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaEOControl</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.webobjects</groupId>
+			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaWebObjects</artifactId>
 			<version>${webobjects.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>com.webobjects</groupId>
+					<groupId>${webobjects.group}</groupId>
 					<artifactId>JavaXML</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>com.webobjects</groupId>
+					<groupId>${webobjects.group}</groupId>
 					<artifactId>JavaEOAccess</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>com.webobjects</groupId>
+					<groupId>${webobjects.group}</groupId>
 					<artifactId>JavaEOControl</artifactId>
 				</exclusion>
 			</exclusions>

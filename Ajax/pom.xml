@@ -5,25 +5,26 @@
 	<parent>
 		<groupId>undur</groupId>
 		<artifactId>undur-reactor</artifactId>
-		<version>8.0.0-SNAPSHOT</version>
+		<version>8.0.0.slim-SNAPSHOT</version>
 	</parent>
+	<groupId>wonder.ajax</groupId>
 	<artifactId>Ajax</artifactId>
 	<name>Ajax Framework</name>
 	<packaging>woframework</packaging>
 
 	<dependencies>
 		<dependency>
-			<groupId>undur</groupId>
+			<groupId>${wonder.core.group}</groupId>
 			<artifactId>ERExtensions</artifactId>
-			<version>${undur.version}</version>
+			<version>${wonder.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.webobjects</groupId>
+			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaFoundation</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.webobjects</groupId>
+			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaWebObjects</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>

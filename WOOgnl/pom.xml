@@ -5,20 +5,21 @@
 	<parent>
 		<groupId>undur</groupId>
 		<artifactId>undur-reactor</artifactId>
-		<version>8.0.0-SNAPSHOT</version>
+		<version>8.0.0.slim-SNAPSHOT</version>
 	</parent>
+	<groupId>wonder.core</groupId>
 	<artifactId>WOOgnl</artifactId>
 	<name>WOOgnl Framework</name>
 	<packaging>woframework</packaging>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.webobjects</groupId>
+			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaFoundation</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.webobjects</groupId>
+			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaWebObjects</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>
@@ -30,7 +31,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.25</version>
+			<version>1.7.30</version>
 		</dependency>
 	</dependencies>
 
