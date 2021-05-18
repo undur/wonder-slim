@@ -24,6 +24,8 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1037,7 +1039,10 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		private void reportErrors() {
 			StringBuilder sb = new StringBuilder();
 			String message = null;
-			NSArray<String> keys = ERXArrayUtilities.sortedArraySortedWithKey(packages.allKeys(), "toString");
+
+			NSMutableArray<String> keys = new NSMutableArray<>( packages.allKeys() );
+			Collections.sort(keys);
+
 			for (Enumeration<String> enumerator = keys.objectEnumerator(); enumerator.hasMoreElements();) {
 				String packageName = enumerator.nextElement();
 				NSMutableArray<String> bundles = packages.objectForKey(packageName);
@@ -1051,7 +1056,9 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 			}
 			sb = new StringBuilder();
 			NSMutableSet<String> classPackages = new NSMutableSet<>();
-			keys = ERXArrayUtilities.sortedArraySortedWithKey(classes.allKeys(), "toString");
+			keys = new NSMutableArray<>( classes.allKeys());
+			Collections.sort(keys);
+			
 			for (Enumeration<String> enumerator = keys.objectEnumerator(); enumerator.hasMoreElements();) {
 				String className = enumerator.nextElement();
 				String packageName = className.replaceAll("/[^/]+?$", "");

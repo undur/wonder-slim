@@ -342,7 +342,8 @@ public class ERXStats {
 			NSMutableDictionary statistics = ERXStats.statistics();
 			if (statistics != null) {
 				synchronized (statistics) {
-					NSArray values = ERXArrayUtilities.sortedArraySortedWithKey(statistics.allValues(), operation);
+//					NSArray values = ERXArrayUtilities.sortedArraySortedWithKey(statistics.allValues(), operation);
+					NSArray values = statistics.allValues(); // FIXME: This used to be sorted. Does it matter? Do I care?
 					if (values.count() > 0) {
 						Long startTime = (Long) ERXThreadStorage.valueForKey(ERXStats.STATS_START_TIME_KEY);
 						Long lastTime = (Long) ERXThreadStorage.valueForKey(ERXStats.STATS_LAST_TIME_KEY);

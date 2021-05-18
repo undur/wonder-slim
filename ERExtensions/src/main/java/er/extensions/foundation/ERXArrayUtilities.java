@@ -4,11 +4,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.webobjects.eocontrol.EOSortOrdering;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSComparator;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSSelector;
 
 /**
  * Collection of {@link com.webobjects.foundation.NSArray NSArray} utilities.
@@ -36,36 +34,6 @@ public class ERXArrayUtilities {
 			removed = result.remove(object);
 		}
 		return result.immutableClone();
-	}
-
-	/**
-	 * Sorts a given array with a key in ascending fashion.
-	 * 
-	 * @param array
-	 *            array to be sorted.
-	 * @param key
-	 *            sort key.
-	 * @return sorted array.
-	 */
-	public static <T> NSArray<T> sortedArraySortedWithKey(NSArray<T> array, String key) {
-		return sortedArraySortedWithKey(array, key, null);
-	}
-
-	/**
-	 * Sorts a given array with a key in ascending fashion.
-	 * 
-	 * @param array
-	 *            array to be sorted.
-	 * @param key
-	 *            sort key.
-	 * @param selector
-	 *            sort order selector to use, if null, then sort will be case
-	 *            insensitive ascending.
-	 * @return sorted array.
-	 */
-	private static <T> NSArray<T> sortedArraySortedWithKey(NSArray<T> array, String key, NSSelector selector) {
-		NSArray<EOSortOrdering> order = new NSArray<>(new EOSortOrdering[] { EOSortOrdering.sortOrderingWithKey(key, selector == null ? EOSortOrdering.CompareCaseInsensitiveAscending : selector) });
-		return EOSortOrdering.sortedArrayUsingKeyOrderArray(array, order);
 	}
 
 	/**
