@@ -384,8 +384,8 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      *	       entity name.
      */
     public String displayNameForEntity() {
-    	throw new FIXMEException( "EOControl removed");
-//        return eoObject() != null ? localizedDisplayNameForKey(eoObject().entityName()) : null;
+    	// FIXME: This used to be based on the entity name. That's no longer an option (since we don't want a dependency on an ORM)
+        return eoObject() != null ? localizedDisplayNameForKey(eoObject().getClass().getSimpleName()) : null;
     }
 
     /**
