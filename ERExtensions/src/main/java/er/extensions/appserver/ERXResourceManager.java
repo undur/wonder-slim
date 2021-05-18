@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.apache.commons.lang3.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -473,7 +472,7 @@ public class ERXResourceManager extends WOResourceManager {
 	}
 	
 	private static NSDictionary<String, String> _additionalMimeTypes() {
-		NSDictionary<String, String> plist = (NSDictionary<String, String>)ERXFileUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, CharEncoding.UTF_8);
+		NSDictionary<String, String> plist = (NSDictionary<String, String>)ERXFileUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
 		return plist;
 	}
 }
