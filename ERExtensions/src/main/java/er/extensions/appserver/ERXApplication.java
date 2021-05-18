@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -37,7 +38,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
@@ -774,13 +774,10 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 
 						if (mainBundleJarPattern.matcher(urlAsString.toLowerCase()).find()) {
 							try {
-								propertiesPath = new URL(URLDecoder.decode(urlAsString, CharEncoding.UTF_8));
+								propertiesPath = new URL(URLDecoder.decode(urlAsString, StandardCharsets.UTF_8));
 								userPropertiesPath = new URL(propertiesPath.toExternalForm() + userName);
 							}
 							catch (MalformedURLException exception) {
-								exception.printStackTrace();
-							}
-							catch (UnsupportedEncodingException exception) {
 								exception.printStackTrace();
 							}
 
@@ -857,7 +854,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 						bout.write(buf, 0, read);
 					}
 
-					String content = new String(bout.toByteArray(), CharEncoding.UTF_8);
+					String content = new String(bout.toByteArray(), StandardCharsets.UTF_8);
 					return content;
 				}
 				return null;
