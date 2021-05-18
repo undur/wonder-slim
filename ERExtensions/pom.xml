@@ -50,6 +50,12 @@
 			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaEOAccess</artifactId>
 			<version>${webobjects.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>${webobjects.group}</groupId>
+					<artifactId>JavaEOControl</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>${webobjects.group}</groupId>
