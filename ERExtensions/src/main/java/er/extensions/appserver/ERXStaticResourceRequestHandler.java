@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 
 import org.apache.commons.lang3.CharEncoding;
 import org.slf4j.Logger;

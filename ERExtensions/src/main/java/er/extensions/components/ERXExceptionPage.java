@@ -19,7 +19,6 @@ import com.webobjects.woextensions.WOExceptionParser;
 import com.webobjects.woextensions.WOParsedErrorLine;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.components.ERXComponent;
 
 /**
  * A nicer version of WOExceptionPage.

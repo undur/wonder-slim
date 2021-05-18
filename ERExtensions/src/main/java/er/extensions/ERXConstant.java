@@ -4,11 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSMutableArray;
-
-import er.extensions.foundation.ERXArrayUtilities;
-
 /**
  * FIXME: Everything here is stupid.
  * 

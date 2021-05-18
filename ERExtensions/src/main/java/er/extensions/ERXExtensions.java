@@ -9,50 +9,20 @@ package er.extensions;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-
-import com.webobjects.appserver.WOApplication;
-import com.webobjects.appserver.WOSession;
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSBundle;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
-import com.webobjects.foundation.NSKeyValueCoding;
-import com.webobjects.foundation.NSLog;
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
-import com.webobjects.foundation._NSStringUtilities;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXConfigurationManager;
-import er.extensions.foundation.ERXMutableURL;
-import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXRuntimeUtilities;
-import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXSystem;
-import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.logging.ERXLogger;
 import er.extensions.validation.ERXValidationFactory;
-import x.FIXMEException;
 
 /**
  * Principal class of the ERExtensions framework. This class will be loaded at

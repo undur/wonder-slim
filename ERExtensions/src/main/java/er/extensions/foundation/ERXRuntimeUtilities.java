@@ -1,21 +1,13 @@
 package er.extensions.foundation;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Enumeration;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOContext;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;

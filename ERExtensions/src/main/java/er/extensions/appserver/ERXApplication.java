@@ -47,7 +47,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.webobjects.appserver.WOAction;
-import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;

@@ -11,14 +11,13 @@ import java.util.Enumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
-
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 /**
  * Graceful shutdown adds signal handling support for gracefully

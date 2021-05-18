@@ -6,13 +6,10 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.validation;
 
-import java.util.NoSuchElementException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSValidation;
 
