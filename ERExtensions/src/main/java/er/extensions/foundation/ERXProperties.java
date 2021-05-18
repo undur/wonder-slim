@@ -41,7 +41,6 @@ import er.extensions.appserver.ERXApplication;
 import x.FIXMEException;
 
 /**
- * <div class="en">
  * Collection of simple utility methods used to get and set properties
  * in the system properties. The only reason this class is needed is
  * because all of the methods in NSProperties have been deprecated.
@@ -59,12 +58,6 @@ import x.FIXMEException;
  * </ul>
  * </div>
  * 
- * <div class="ja">
- * 	システム・プロパティーのセットや取得するユーティリティー・メソッド集です。
- * 	このクラスが作成されている理由は、NSPropertiesの全メソッドが廃止になったからです。
- * 	普通はシステム・プロパティーの Boolean オブジェクトを扱う為に <code>getBoolean</code> などがあればいいのです。
- * </div>
- * 
  * @property er.extensions.ERXProperties.RetainDefaultsEnabled
  * @property NSProperties.useLoadtimeAppSpecifics Default is true.
  * @property er.extensions.ERXProperties.loadOptionalProperties Default is true. When false loads only the standard properties. 
@@ -75,8 +68,8 @@ import x.FIXMEException;
  * TODO - What character sets can you use in property names? Only ISO-8859-1? UTF-8?
  * 
  * TODO - If this would fallback to calling the System getProperty, we could ask that Project Wonder frameworks only use this class.
- * 
  */
+
 public class ERXProperties extends Properties implements NSKeyValueCoding {
 	/**
 	 * Do I need to update serialVersionUID?
@@ -97,13 +90,10 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     private static final Map<String, String> AppSpecificPropertyNames = new HashMap<>(128);
 
     /** 
-    * <div class="en">Internal cache of type converted values to avoid reconverting attributes that are asked for frequently</div> 
-    * 
-    * <div class="ja">タイプ変換されている値を内部でキャシュし、何回も同じ変換をする必要なくなります</div>
+    * Internal cache of type converted values to avoid reconverting attributes that are asked for frequently 
     */
     private static Map<String, Object> _cache = Collections.synchronizedMap(new HashMap<>());
 
-    
     /**
      * This boolean controls the behavior of application specific properties. Setting this to
      * false makes the old behavior active, true activates the new behavior. The value of this
@@ -131,13 +121,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
        _useLoadtimeAppSpecifics = ERXValueUtilities.booleanValueWithDefault(System.getProperty("NSProperties.useLoadtimeAppSpecifics"), true);
     }
 
-    /**
-     * <div class="ja">
-     * 	デフォルト値を保持するかどかをセットします
-     * 
-     * 	@return boolean - true の場合には保持する
-     * </div>
-     */
     private static boolean retainDefaultsEnabled() {
         if (RetainDefaultsEnabled == null) {
             final String propertyValue = ERXSystem.getProperty("er.extensions.ERXProperties.RetainDefaultsEnabled", "false");
@@ -148,38 +131,21 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     }
 
     /**
-     * <div class="en">
      * Puts handy properties such as <code>com.webobjects.version</code> 
      * into the system properties. This method is called when 
      * the framework is initialized  
      * (when WOApplication.ApplicationWillFinishLaunchingNotification 
      * is posted.)
-     * </div>
-     * 
-     * <div class="ja">
-     * <code>com.webobjects.version</code> をシステム・プロパティーへセットします。
-     * フレームワークが初期化される時に呼ばれます。
-     * 
-     * (WOApplication.ApplicationWillFinishLaunchingNotification 発行時)
-     * </div>
      */
     public static void populateSystemProperties() {
         System.setProperty("com.webobjects.version", "5.4");
     }
 
     /** 
-     * <div class="en">
      * Returns the version string of the application.  
      * It checks <code>CFBundleShortVersionString</code> property 
      * in the <code>info.plist</code> resource and returns 
      * a trimmed version of the value. 
-     * </div>
-     * 
-     * <div class="ja">
-     * アプリケーションのバージョンを取得します
-     * 
-     * CustomInfo.plist 内の CFBundleShortVersionString プロパティーを調べ、Trimした結果を戻します
-     * </div>
      * 
      * @return <div class="en">version number as string; can be a null-string when the application doesn't have the value of <code>CFBundleShortVersionString</code> in its <code>info.plist</code> resource.</div>
      *         <div class="ja">バージョン番号を文字列として戻ります。見つからない場合には null-string が戻ります。</div>
