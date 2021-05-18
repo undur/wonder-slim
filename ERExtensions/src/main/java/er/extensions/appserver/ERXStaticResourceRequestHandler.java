@@ -8,8 +8,8 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.lang3.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,7 +155,7 @@ public class ERXStaticResourceRequestHandler extends WORequestHandler {
 				if (request.userInfo() != null && !request.userInfo().containsKey("HttpServletRequest")) {
 					/* PATH_INFO is already decoded by the servlet container */
 					path = path.replace('+', ' ');
-					path = URLDecoder.decode(path, CharEncoding.UTF_8);
+					path = URLDecoder.decode(path, StandardCharsets.UTF_8);
 				}
 
 				file = new File(path);
