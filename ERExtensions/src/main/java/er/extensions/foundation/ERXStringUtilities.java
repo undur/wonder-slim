@@ -9,7 +9,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Enumeration;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -269,7 +268,7 @@ public class ERXStringUtilities {
 	public static String removeExtraDotsFromVersionString(String version) {
 		int floatingPointIndex = version.indexOf(".");
 		if (floatingPointIndex >= 0 && floatingPointIndex + 1 < version.length()) {
-			String minorVersion = StringUtils.replace(version.substring(floatingPointIndex + 1), ".", "");
+			String minorVersion = version.substring(floatingPointIndex + 1).replace( ".", "");
 			version = version.substring(0, floatingPointIndex + 1) + minorVersion;
 		}
 		return version;
