@@ -6,6 +6,7 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.logging;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -186,7 +187,8 @@ public class ERXLog4JConfiguration extends WOComponent {
                 log = (Logger)log.getParent();
             }
         }
-//        EOSortOrdering.sortArrayUsingKeyOrderArray(otherLoggers, SORT_BY_NAME); // FIXME: Missing sorting after we disabled JavaEOControl
+
+        Collections.sort(otherLoggers, Comparator.comparing(Logger::getName));
         result.addObjectsFromArray(otherLoggers);
 
         return result;
