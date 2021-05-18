@@ -22,7 +22,6 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -2445,7 +2444,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 	 * @author A10 nettani
 	 */
 	public static String stringForManyKeysWithDefault(final String[] ss, final String defaultValue) {
-		if(ArrayUtils.isEmpty(ss)) return defaultValue;	// 文字列配列が無いならdefaultValue
+		if(isEmpty(ss)) return defaultValue;	// 文字列配列が無いならdefaultValue
 		int count = ss.length;
 		for(int loop = 0; loop < count; loop++){
 			if(!ERXStringUtilities.stringIsNullOrEmpty(ss[loop])){
@@ -2457,4 +2456,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 		return defaultValue;
 	}
 
+    private static boolean isEmpty(Object[] array) {
+        return array == null || array.length == 0;
+    }
 }
