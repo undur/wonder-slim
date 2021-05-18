@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -12,8 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
-import org.apache.commons.lang3.CharEncoding;
 
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
@@ -295,29 +294,24 @@ public class ERXMutableURL {
 			while (queryStringTokenizer.hasMoreTokens()) {
 				String queryStringToken = queryStringTokenizer.nextToken();
 				int equalsIndex = queryStringToken.indexOf('=');
-				try {
-					String key;
-					String value;
-					if (equalsIndex == -1) {
-						key = queryStringToken.trim();
-						value = null;
-					}
-					else {
-						key = queryStringToken.substring(0, equalsIndex).trim();
-						value = queryStringToken.substring(equalsIndex + 1);
-					}
-					if (key == null || key.length() == 0) {
-						throw new MalformedURLException("The query string parameter '" + queryStringToken + " has an empty key in '" + queryParameters + "'.");
-					}
-					key = URLDecoder.decode(key, CharEncoding.UTF_8);
-					if (value != null) {
-						value = URLDecoder.decode(value, CharEncoding.UTF_8);
-					}
-					addQueryParameter(key, value);
+				String key;
+				String value;
+				if (equalsIndex == -1) {
+					key = queryStringToken.trim();
+					value = null;
 				}
-				catch (UnsupportedEncodingException e) {
-					throw new RuntimeException("Every VM is supposed to support UTF-8 encoding.", e);
+				else {
+					key = queryStringToken.substring(0, equalsIndex).trim();
+					value = queryStringToken.substring(equalsIndex + 1);
 				}
+				if (key == null || key.length() == 0) {
+					throw new MalformedURLException("The query string parameter '" + queryStringToken + " has an empty key in '" + queryParameters + "'.");
+				}
+				key = URLDecoder.decode(key, StandardCharsets.UTF_8);
+				if (value != null) {
+					value = URLDecoder.decode(value, StandardCharsets.UTF_8);
+				}
+				addQueryParameter(key, value);
 			}
 		}
 	}
@@ -585,35 +579,30 @@ public class ERXMutableURL {
 	}
 	
 	protected void queryParametersAsString(StringBuffer sb) {
-		try {
-			Iterator<Map.Entry<String, List<String>>> queryParameterIter = _queryParameters.entrySet().iterator();
-			while (queryParameterIter.hasNext()) {
-				Map.Entry<String, List<String>> queryParameter = queryParameterIter.next();
-				String key = queryParameter.getKey();
-				Iterator<String> valuesIter = queryParameter.getValue().iterator();
-				if (!valuesIter.hasNext()) {
-					sb.append(URLEncoder.encode(key, CharEncoding.UTF_8));
-				}
-				while (valuesIter.hasNext()) {
-					String value = valuesIter.next();
-					sb.append(URLEncoder.encode(key, CharEncoding.UTF_8));
-					if (value != null) {
-						if (key.length() > 0) {
-							sb.append('=');
-						}
-						sb.append(URLEncoder.encode(value, CharEncoding.UTF_8));
+		Iterator<Map.Entry<String, List<String>>> queryParameterIter = _queryParameters.entrySet().iterator();
+		while (queryParameterIter.hasNext()) {
+			Map.Entry<String, List<String>> queryParameter = queryParameterIter.next();
+			String key = queryParameter.getKey();
+			Iterator<String> valuesIter = queryParameter.getValue().iterator();
+			if (!valuesIter.hasNext()) {
+				sb.append(URLEncoder.encode(key, StandardCharsets.UTF_8));
+			}
+			while (valuesIter.hasNext()) {
+				String value = valuesIter.next();
+				sb.append(URLEncoder.encode(key, StandardCharsets.UTF_8));
+				if (value != null) {
+					if (key.length() > 0) {
+						sb.append('=');
 					}
-					if (valuesIter.hasNext()) {
-						sb.append('&');
-					}
+					sb.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
 				}
-				if (queryParameterIter.hasNext()) {
+				if (valuesIter.hasNext()) {
 					sb.append('&');
 				}
 			}
-		}
-		catch (UnsupportedEncodingException e) {
-			throw new RuntimeException("Every VM is supposed to support UTF-8 encoding.", e);
+			if (queryParameterIter.hasNext()) {
+				sb.append('&');
+			}
 		}
 	}
 	
