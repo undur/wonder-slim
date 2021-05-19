@@ -84,10 +84,10 @@ public class ERXOncePerRequestConditional extends ERXStatelessComponent {
         String key = keyName() + "--" + currentStage;
 
         if(displayCountDict().objectForKey(key) == null) {
-            displayCountDict().setObjectForKey(ERXConstant.integerForInt(-1), key);
+            displayCountDict().setObjectForKey(-1, key);
         }
         int count = ((Integer)displayCountDict().objectForKey(key)).intValue() + 1;
-        displayCountDict().setObjectForKey(ERXConstant.integerForInt(count), key);
+        displayCountDict().setObjectForKey(count, key);
     }
 
     @Override

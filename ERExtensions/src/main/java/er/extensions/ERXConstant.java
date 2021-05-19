@@ -20,22 +20,6 @@ public class ERXConstant {
     public static final Class[] EmptyClassArray = new Class[0];
     public static final Class[] ObjectClassArray = { Object.class };
 
-    public static final int MAX_INT=2500;
-
-    protected static Integer[] INTEGERS=new Integer[MAX_INT];
-
-    static {
-        for (int i=0; i<MAX_INT; i++) INTEGERS[i]=Integer.valueOf(i);
-    }
-
-    /**
-     * Returns an Integer for a given int
-     * @return potentially cache Integer for a given int
-     */
-    public static Integer integerForInt(int i) {
-        return (i>=0 && i<MAX_INT) ? INTEGERS[i] : Integer.valueOf(i);
-    }
-    
     public static interface Constant {
 		public int sortOrder();
 		public String name();

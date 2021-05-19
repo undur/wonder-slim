@@ -292,8 +292,7 @@ public class ERXWORepetition extends WODynamicGroup {
 			_item._setValueNoValidation(object, wocomponent);
 		}
 		if (_index != null) {
-			Integer integer = ERXConstant.integerForInt(index);
-			_index._setValueNoValidation(integer, wocomponent);
+			_index._setValueNoValidation(index, wocomponent);
 		}
 		boolean didAppend = false;
 		if (checkHashCodes) {
@@ -341,8 +340,7 @@ public class ERXWORepetition extends WODynamicGroup {
 			_item._setValueNoValidation(null, wocomponent);
 		}
 		if (_index != null) {
-			Integer integer = ERXConstant.integerForInt(i);
-			_index._setValueNoValidation(integer, wocomponent);
+			_index._setValueNoValidation(i, wocomponent);
 		}
 		wocontext.deleteLastElementIDComponent();
 	}
@@ -517,8 +515,7 @@ public class ERXWORepetition extends WODynamicGroup {
 				_item._setValueNoValidation(object, wocomponent);
 			}
 			if (_index != null) {
-				Integer integer = ERXConstant.integerForInt(index);
-				_index._setValueNoValidation(integer, wocomponent);
+				_index._setValueNoValidation(index, wocomponent);
 			}
 			wocontext.appendElementIDComponent(indexString);
 			log.debug("invokeAction: {}", wocontext.elementID());
