@@ -5,20 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * FIXME: Everything here is stupid.
- * 
- * This class was introduced temporarily to serve as container for the public variables previously used from here, until they get replaced on-site. 
+ * FIXME: Everything here is stupid. Stays temporarily to serve as container for public variables previously used from here, until they get replaced on-site. 
  */
 
 public class ERXConstant {
 
 	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
-    public static final Integer OneInteger = 1;
-    public static final Integer ZeroInteger = 0;
     public static final Class[] StringClassArray = new Class[] { String.class };
     public static final Object[] EmptyObjectArray = new Object[] {};
     public static final Class[] EmptyClassArray = new Class[0];
-    public static final Class[] ObjectClassArray = { Object.class };
 
     public static interface Constant {
 		public int sortOrder();
