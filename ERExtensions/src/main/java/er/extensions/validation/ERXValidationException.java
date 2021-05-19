@@ -15,7 +15,6 @@ import com.webobjects.foundation.NSValidation;
 import com.webobjects.foundation.NSValidation.ValidationException;
 
 import er.extensions.localization.ERXLocalizer;
-import x.FIXMEException;
 
 /**
  * ERXValidationExceptions extends the regular
