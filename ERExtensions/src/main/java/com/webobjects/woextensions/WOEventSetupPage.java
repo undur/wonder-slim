@@ -17,6 +17,7 @@ import com.webobjects.foundation.NSComparator;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableArray;
+import com.webobjects.foundation.NSSelector;
 
 public class WOEventSetupPage extends WOEventPage {
 	/**
@@ -106,4 +107,31 @@ public class WOEventSetupPage extends WOEventPage {
         return (currentIndex == 0);
     }
 
+    private static class _ClassNameComparator extends NSComparator {
+    	protected boolean _compareAscending;
+
+    	public _ClassNameComparator(NSSelector comparator) {
+    		super();
+    		_compareAscending = (comparator == EOSortOrdering.CompareAscending);
+    	}
+
+    	@Override
+    	public int compare(Object c1, Object c2) throws NSComparator.ComparisonException {
+    		if (!(c1 instanceof Class) || !(c2 instanceof Class) || (c1 == null) || (c2 == null))
+    			throw new NSComparator.ComparisonException("<" + getClass().getName() + " Unable to compare classes. Either one of the arguments is not a Class or is null. Comparison was made with " + c1 + " and " + c2 + ".");
+
+    		Class class1, class2;
+    		class1 = (Class) c1;
+    		class2 = (Class) c2;
+
+    		int result = class1.getName().compareTo(class2.getName());
+    		if (result == 0) {
+    			return result;
+    		}
+    		if (!_compareAscending) {
+    			result = 0 - result;
+    		}
+    		return result > 0 ? 1 : -1;
+    	}
+    }
 }
