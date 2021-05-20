@@ -11,7 +11,6 @@ import er.ajax.json.localarg.WOContextArgResolver;
 import er.ajax.json.localarg.WORequestArgResolver;
 import er.ajax.json.localarg.WOResponseArgResolver;
 import er.ajax.json.localarg.WOSessionArgResolver;
-import er.ajax.json.serializer.ERXConstantSerializer;
 import er.ajax.json.serializer.NSArraySerializer;
 import er.ajax.json.serializer.NSDataSerializer;
 import er.ajax.json.serializer.NSDictionarySerializer;
@@ -47,7 +46,6 @@ public class JSONBridge extends JSONRPCBridge {
 			JSONRPCBridge.getSerializer().registerSerializer(new NSDictionarySerializer());
 			JSONRPCBridge.getSerializer().registerSerializer(new NSTimestampSerializer());
 			JSONRPCBridge.getSerializer().registerSerializer(new NSDataSerializer());
-			JSONRPCBridge.getSerializer().registerSerializer(new ERXConstantSerializer());
 			isInitialized = true;
 		}
 		catch (Exception e) {

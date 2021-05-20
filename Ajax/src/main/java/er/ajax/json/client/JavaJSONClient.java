@@ -7,7 +7,6 @@ import org.jabsorb.client.Client;
 import org.jabsorb.client.HTTPSession;
 import org.jabsorb.client.TransportRegistry;
 
-import er.ajax.json.serializer.ERXConstantSerializer;
 import er.ajax.json.serializer.JSONEnterpriseObjectSerializer;
 import er.ajax.json.serializer.NSArraySerializer;
 import er.ajax.json.serializer.NSDataSerializer;
@@ -46,7 +45,6 @@ public class JavaJSONClient {
 		serializer.registerSerializer(new NSDictionarySerializer());
 		serializer.registerSerializer(new NSTimestampSerializer());
 		serializer.registerSerializer(new NSDataSerializer());
-		serializer.registerSerializer(new ERXConstantSerializer());
 		return client;
 	}
 }
