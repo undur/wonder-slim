@@ -45,7 +45,6 @@ import er.extensions.appserver.ERXResponse;
 import er.extensions.appserver.ERXSession;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.components._private.ERXHyperlink;
-import er.extensions.components._private.ERXSubmitButton;
 import er.extensions.components._private.ERXSwitchComponent;
 
 /**
@@ -86,12 +85,8 @@ public class ERXPatcher {
 
 	public static synchronized void installPatches() {
 		DynamicElementsPatches.cleanupXHTML = ERXValueUtilities.booleanValueWithDefault(System.getProperty("er.extensions.ERXPatcher.cleanupXHTML"), false);
-		DynamicElementsPatches.useButtonTag = ERXProperties.booleanForKeyWithDefault("er.extensions.foundation.ERXPatcher.DynamicElementsPatches.SubmitButton.useButtonTag", false);
 		DynamicElementsPatches.suppressValueBindingSlow = ERXValueUtilities.booleanValueWithDefault(System.getProperty("er.extensions.ERXPatcher.suppressValueBindingSlow"), false);
-		
-		if (DynamicElementsPatches.useButtonTag) {
-			ERXPatcher.setClassForName(ERXSubmitButton.class, "WOSubmitButton");
-		} else ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
+		ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
 		ERXPatcher.setClassForName(DynamicElementsPatches.GenericElement.class, "WOGenericElement");
@@ -129,7 +124,6 @@ public class ERXPatcher {
 	 */
 	public static class DynamicElementsPatches {
 		public static boolean cleanupXHTML = false;
-		private static boolean useButtonTag = false;
 		private static Boolean appendComponentIdentifier;
 		public static boolean suppressValueBindingSlow = false;
 		
