@@ -14,7 +14,6 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.development.NSMavenProjectBundle;
 import com.webobjects.woextensions.WOExceptionParser;
 import com.webobjects.woextensions.WOParsedErrorLine;
 
@@ -114,7 +113,7 @@ public class ERXExceptionPage extends ERXComponent {
 
 		String path = null;
 
-		if( NSBundle.mainBundle() instanceof NSMavenProjectBundle ) {
+		if( NSBundle.mainBundle().getClass().getName().contains( "NSMavenProjectBundle" ) ) { // FIXME: We should probably be referencing the real class once that exists again // Hugi 2021-05-21
 			path = bundle.bundlePath() + pathModifier + "/src/main/java/" + nameOfThrowingClass.replace( ".", "/" ) + ".java";
 		}
 		else {
