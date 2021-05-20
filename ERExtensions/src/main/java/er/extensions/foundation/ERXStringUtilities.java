@@ -20,7 +20,6 @@ import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
 import er.extensions.appserver.ERXMessageEncoding;
-import x.FIXMEException;
 
 /**
  * Collection of {@link java.lang.String String} utilities. Contains the base
@@ -545,33 +544,6 @@ public class ERXStringUtilities {
 			indent(sb, level);
 			sb.append(value);
 		}
-	}
-
-	/**
-	 * Same as NSPropertySerialization except it sorts on keys first.
-	 */
-	public static String stringFromDictionary(NSDictionary dict) {
-		throw new FIXMEException("This wanted to use EOSortOrdering. We all know how that ends" );
-		/*
-		NSArray orderedKeys = dict.allKeys();
-		orderedKeys = ERXArrayUtilities.sortedArraySortedWithKey(orderedKeys, "toString.toLowerCase");
-		StringBuilder result = new StringBuilder();
-		for (Enumeration keys = orderedKeys.objectEnumerator(); keys.hasMoreElements();) {
-			Object key = keys.nextElement();
-			Object value = dict.objectForKey(key);
-			String stringValue = NSPropertyListSerialization.stringFromPropertyList(value);
-			String stringKey = NSPropertyListSerialization.stringFromPropertyList(key);
-			if (!(value instanceof String)) {
-				stringValue = stringValue.replaceAll("\n", "\n\t");
-			}
-			result.append('\t');
-			result.append(stringKey);
-			result.append(" = ");
-			result.append(stringValue);
-			result.append(";\n");
-		}
-		return "{\n" + result + "}\n";
-		*/
 	}
 
 	/**
