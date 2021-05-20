@@ -10,7 +10,6 @@
 	<name>Wonder reactor</name>
     <modules>
         <module>ERExtensions</module>
-        <module>JavaWOExtensions</module>
         <module>WOOgnl</module>
         <module>Ajax</module>
     </modules>
