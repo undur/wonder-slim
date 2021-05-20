@@ -30,23 +30,6 @@
 			<artifactId>JavaFoundation</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>
-		<!-- This is left here solely to allow Wonder to pull this dependency in for us. It's unused by the framework // Hugi 2021-04-05 -->
-		<dependency>
-			<groupId>${webobjects.group}</groupId>
-			<artifactId>JavaEOControl</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${webobjects.group}</groupId>
-			<artifactId>JavaEOAccess</artifactId>
-			<version>${webobjects.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>${webobjects.group}</groupId>
-					<artifactId>JavaEOControl</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<dependency>
 			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaWebObjects</artifactId>
@@ -60,6 +43,23 @@
 					<groupId>${webobjects.group}</groupId>
 					<artifactId>JavaEOAccess</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>${webobjects.group}</groupId>
+					<artifactId>JavaEOControl</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- This is left here solely to allow Wonder to pull this dependency in for us. It's unused by the framework // Hugi 2021-04-05 -->
+		<dependency>
+			<groupId>${webobjects.group}</groupId>
+			<artifactId>JavaEOControl</artifactId>
+			<version>${webobjects.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${webobjects.group}</groupId>
+			<artifactId>JavaEOAccess</artifactId>
+			<version>${webobjects.version}</version>
+			<exclusions>
 				<exclusion>
 					<groupId>${webobjects.group}</groupId>
 					<artifactId>JavaEOControl</artifactId>
