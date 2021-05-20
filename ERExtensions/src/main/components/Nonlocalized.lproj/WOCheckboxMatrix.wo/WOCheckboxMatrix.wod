@@ -1,0 +1,44 @@
+isDisabledConditional : WOConditional {
+	condition = ^disabled;
+}
+
+isEnabledConditional : WOConditional {
+	condition = ^disabled;
+	negate = true;
+}
+
+CheckBox: WOGenericElement {
+	elementName = "input";
+	name = wrapperElementID;
+	otherTagString = isCurrentItemChecked;
+	type = "checkbox";
+	value = index;
+}
+
+disabledCheckBox: WOGenericElement {
+	elementName = "input";
+	name = wrapperElementID;
+	otherTagString = isCurrentItemChecked;
+	type = "checkbox";
+	value = index;
+	disabled = "disabled";
+}
+
+CheckBoxRepetition: WOTable {
+	cellpadding = 0;
+	cellspacing = 0;
+	index = index;
+	item = currentItem;
+	list = ^list;
+	maxColumns = ^maxColumns;
+}
+
+CheckBoxWrapper: WOGenericContainer {
+	elementID = wrapperElementID;
+	formValues = selections;
+	name = context.elementID;
+	elementName=nullValue;
+}
+
+Content: WOComponentContent {
+}
