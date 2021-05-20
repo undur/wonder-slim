@@ -13,6 +13,7 @@ import com.webobjects.foundation.NSSelector;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXStringUtilities;
+import x.ERXDeprecatedConstant;
 
 /** 
  * Designated starter class for frameworks, adds support for dependency management.
@@ -141,12 +142,12 @@ public abstract class ERXFrameworkPrincipal {
                 observer = new Observer();
                 NSNotificationCenter center = NSNotificationCenter.defaultCenter();
                 center.addObserver(observer,
-                        new NSSelector("willFinishInitialization",  ERXConstant.NotificationClassArray),
+                        new NSSelector("willFinishInitialization",  ERXDeprecatedConstant.NotificationClassArray),
                         // WOApplication.ApplicationWillFinishLaunchingNotification,
                         ERXApplication.ApplicationDidCreateNotification,
                         null);
                 center.addObserver(observer,
-                        new NSSelector("didFinishInitialization",  ERXConstant.NotificationClassArray),
+                        new NSSelector("didFinishInitialization",  ERXDeprecatedConstant.NotificationClassArray),
                         // WOApplication.ApplicationWillFinishLaunchingNotification,
                         ERXApplication.ApplicationDidFinishInitializationNotification,
                         null);

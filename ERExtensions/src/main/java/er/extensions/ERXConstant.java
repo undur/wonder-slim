@@ -4,18 +4,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * FIXME: Everything here is stupid. Stays temporarily to serve as container for public variables previously used from here, until they get replaced on-site. 
- */
-
 public class ERXConstant {
 
-	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
-    public static final Class[] StringClassArray = new Class[] { String.class };
-    public static final Object[] EmptyObjectArray = new Object[] {};
-    public static final Class[] EmptyClassArray = new Class[0];
-
-    public static interface Constant {
+	public static interface Constant {
 		public int sortOrder();
 		public String name();
 		public Object value();

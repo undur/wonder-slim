@@ -20,9 +20,9 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSSelector;
 
-import er.extensions.ERXConstant;
 import er.extensions.ERXExtensions;
 import er.extensions.logging.ERXLogger;
+import x.ERXDeprecatedConstant;
 
 /**
  * Handles rapid turnaround for system configuration as well as swizzling of the
@@ -265,7 +265,7 @@ public class ERXConfigurationManager {
 	private void registerForFileNotification(String path, String callbackMethod) {
 		try {
 			ERXFileNotificationCenter.defaultCenter().addObserver(this,
-					new NSSelector(callbackMethod, ERXConstant.NotificationClassArray),
+					new NSSelector(callbackMethod, ERXDeprecatedConstant.NotificationClassArray),
 					path);
 			log.debug("Registered: {}", path);
 		}

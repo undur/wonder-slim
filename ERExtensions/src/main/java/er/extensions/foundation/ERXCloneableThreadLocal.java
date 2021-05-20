@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import er.extensions.ERXConstant;
+import x.ERXDeprecatedConstant;
 
 /**
  * <code>ERXClonableThreadLocal</code> extends {@link InheritableThreadLocal} to
@@ -47,8 +47,8 @@ public class ERXCloneableThreadLocal extends InheritableThreadLocal {
 			// and the Cloneable
 			// interface doesn't specify any methods.
 			try {
-				Method m = parentValue.getClass().getMethod("clone", ERXConstant.EmptyClassArray);
-				child = m.invoke(parentValue, ERXConstant.EmptyObjectArray);
+				Method m = parentValue.getClass().getMethod("clone", ERXDeprecatedConstant.EmptyClassArray);
+				child = m.invoke(parentValue, ERXDeprecatedConstant.EmptyObjectArray);
 			}
 			catch (InvocationTargetException ite) {
 				log.error("Invocation exception occurred when invoking clone in ERXClonableThreadLocal: {} backtrace: {}",

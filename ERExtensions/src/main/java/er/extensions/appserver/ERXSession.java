@@ -32,7 +32,6 @@ import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSTimestamp;
 
-import er.extensions.ERXConstant;
 import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXProperties;
@@ -40,6 +39,7 @@ import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
+import x.ERXDeprecatedConstant;
 
 /**
  * The ERXSession arguments the regular WOSession object
@@ -167,7 +167,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
      * {@link er.extensions.localization.ERXLocalizer#LocalizationDidResetNotification}
      */
     protected void registerForLocalizationDidResetNotification() {
-      NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("localizationDidReset", ERXConstant.NotificationClassArray), ERXLocalizer.LocalizationDidResetNotification, null);
+      NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("localizationDidReset", ERXDeprecatedConstant.NotificationClassArray), ERXLocalizer.LocalizationDidResetNotification, null);
     }
   }
 

@@ -2,7 +2,7 @@ package er.extensions.foundation;
 
 import com.webobjects.foundation.NSSelector;
 
-import er.extensions.ERXConstant;
+import x.ERXDeprecatedConstant;
 
 public class ERXSelectorUtilities {
 
@@ -14,6 +14,6 @@ public class ERXSelectorUtilities {
 	 * @return A selector suitable for firing a notification
 	 */
 	public static NSSelector<Void> notificationSelector(String methodName) {
-		return new NSSelector<Void>(methodName, ERXConstant.NotificationClassArray);
+		return new NSSelector<Void>(methodName, ERXDeprecatedConstant.NotificationClassArray);
 	}
 }

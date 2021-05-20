@@ -23,6 +23,7 @@ import er.extensions.foundation.ERXSystem;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.logging.ERXLogger;
 import er.extensions.validation.ERXValidationFactory;
+import x.ERXDeprecatedConstant;
 
 /**
  * Principal class of the ERExtensions framework. This class will be loaded at
@@ -56,7 +57,7 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 	@Override
 	protected void initialize() {
 		NSNotificationCenter.defaultCenter().addObserver(this,
-				new NSSelector("bundleDidLoad", ERXConstant.NotificationClassArray),
+				new NSSelector("bundleDidLoad", ERXDeprecatedConstant.NotificationClassArray),
 				ERXApplication.AllBundlesLoadedNotification,
 				null);
 	}

@@ -44,7 +44,6 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSTimestampFormatter;
 
-import er.extensions.ERXConstant;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
@@ -56,6 +55,7 @@ import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.validation.ERXValidationFactory;
+import x.ERXDeprecatedConstant;
 
 /**
  * <div class="en">
@@ -665,7 +665,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		}
 		try {
 			Class localizerClass = Class.forName(className);
-			Constructor constructor = localizerClass.getConstructor(ERXConstant.StringClassArray);
+			Constructor constructor = localizerClass.getConstructor(ERXDeprecatedConstant.StringClassArray);
 			localizer = (ERXLocalizer) constructor.newInstance(new Object[] { language });
 		}
 		catch (Exception e) {
@@ -789,7 +789,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 						if (!WOApplication.application().isCachingEnabled()) {
 							synchronized (monitoredFiles) {
 								if (!monitoredFiles.contains(path)) {
-									ERXFileNotificationCenter.defaultCenter().addObserver(observer, new NSSelector("fileDidChange", ERXConstant.NotificationClassArray), path.getFile());
+									ERXFileNotificationCenter.defaultCenter().addObserver(observer, new NSSelector("fileDidChange", ERXDeprecatedConstant.NotificationClassArray), path.getFile());
 									monitoredFiles.add(path);
 								}
 							}

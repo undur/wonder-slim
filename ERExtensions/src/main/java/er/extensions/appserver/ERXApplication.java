@@ -81,7 +81,6 @@ import com.webobjects.foundation.NSSet;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.development.NSBundleFactory;
 
-import er.extensions.ERXConstant;
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
@@ -102,6 +101,7 @@ import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXTimestampUtilities;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.statistics.ERXStats;
+import x.ERXDeprecatedConstant;
 
 /**
  * ERXApplication is the abstract superclass of WebObjects applications built
@@ -603,7 +603,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 					}
 				}
 			}
-			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("bundleDidLoad", ERXConstant.NotificationClassArray), "NSBundleDidLoadNotification", null);
+			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("bundleDidLoad", ERXDeprecatedConstant.NotificationClassArray), "NSBundleDidLoadNotification", null);
 		}
 
 		// for logging before logging has been setup and configured by loading
@@ -1232,9 +1232,9 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("finishInitialization", ERXConstant.NotificationClassArray), WOApplication.ApplicationWillFinishLaunchingNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("finishInitialization", ERXDeprecatedConstant.NotificationClassArray), WOApplication.ApplicationWillFinishLaunchingNotification, null);
 
-		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("didFinishLaunching", ERXConstant.NotificationClassArray), WOApplication.ApplicationDidFinishLaunchingNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("didFinishLaunching", ERXDeprecatedConstant.NotificationClassArray), WOApplication.ApplicationDidFinishLaunchingNotification, null);
 
 		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("addBalancerRouteCookieByNotification", new Class[] { NSNotification.class }), WORequestHandler.DidHandleRequestNotification, null);
 
