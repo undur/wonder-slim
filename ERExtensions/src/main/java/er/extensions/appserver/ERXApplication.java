@@ -79,6 +79,7 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSSet;
 import com.webobjects.foundation.NSTimestamp;
+import com.webobjects.foundation.development.NSBundleFactory;
 
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
@@ -634,8 +635,8 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 						ERXConfigurationManager.defaultManager().isDeployedAsServlet()) {
 					// bundle-less builds do not appear to work when running in
 					// servlet mode, so make it prefer the legacy bundle style
-//					NSBundleFactory.registerBundleFactory(new com.webobjects.foundation.development.NSLegacyBundle.Factory());
-					throw new RuntimeException( "This was using code from ERFoundation. Killed." );
+					NSBundleFactory.registerBundleFactory(new com.webobjects.foundation.development.NSLegacyBundle.Factory());
+//					throw new RuntimeException( "This was using code from ERFoundation. Killed." );
 				}
 
 				try {
