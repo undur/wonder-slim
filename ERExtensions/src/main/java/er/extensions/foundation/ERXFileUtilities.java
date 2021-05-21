@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
@@ -25,12 +24,6 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 public class ERXFileUtilities {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXFileUtilities.class);
-
-	private static Charset _charset = Charset.forName("utf-8");
-
-	private static Charset charset() {
-		return _charset;
-	}
 
 	/**
 	 * Returns the byte array for a given stream.
