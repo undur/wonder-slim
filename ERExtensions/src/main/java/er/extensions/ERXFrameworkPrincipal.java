@@ -70,6 +70,8 @@ import x.ERXDeprecatedConstant;
  */
 public abstract class ERXFrameworkPrincipal {
 
+	private static final Logger log = Logger.getLogger(ERXFrameworkPrincipal.class);
+
     /** holds the mapping between framework principals classes and ERXFrameworkPrincipal objects */
     private static final NSMutableDictionary<String, ERXFrameworkPrincipal> initializedFrameworks = new NSMutableDictionary<>();
     private static final NSMutableArray<ERXFrameworkPrincipal> launchingFrameworks = new NSMutableArray<>();
@@ -90,7 +92,7 @@ public abstract class ERXFrameworkPrincipal {
             NSNotificationCenter.defaultCenter().removeObserver(this, ERXApplication.ApplicationDidCreateNotification, null);
             for (ERXFrameworkPrincipal principal : launchingFrameworks) {
                 principal.finishInitialization();
-                ERXApplication.log.debug("Finished initialization after launch: " + principal);
+                log.debug("Finished initialization after launch: " + principal);
             }
         }
         
@@ -165,7 +167,7 @@ public abstract class ERXFrameworkPrincipal {
                     // nothing
                     // NSLog.debug.appendln("No requirements: " + c.getName());
                 } catch (IllegalAccessException e) {
-                    ERXApplication.log.error("Can't read field REQUIRES from " + c.getName() + ", check if it is 'public static Class[] REQUIRES= new Class[] {...}' in this class");
+                    log.error("Can't read field REQUIRES from " + c.getName() + ", check if it is 'public static Class[] REQUIRES= new Class[] {...}' in this class");
                     throw NSForwardException._runtimeExceptionForThrowable(e);
                 }
                 if(initializedFrameworks.objectForKey(c.getName()) == null) {
@@ -173,11 +175,11 @@ public abstract class ERXFrameworkPrincipal {
                 	initializedFrameworks.setObjectForKey(principal,c.getName());
                 	principal.initialize();
                 	launchingFrameworks.addObject(principal);
-                	ERXApplication.log.debug("Initialized : " + c.getName());
+                	log.debug("Initialized : " + c.getName());
                 }
 
             } else {
-            	ERXApplication.log.debug("Was already inited: " + c.getName());
+            	log.debug("Was already inited: " + c.getName());
             }
         } catch (InstantiationException e) {
             throw NSForwardException._runtimeExceptionForThrowable(e);
