@@ -212,7 +212,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	/**
 	 * Property to control whether to exit on an OutOfMemoryError.
 	 */
-	public static final String AppShouldExitOnOutOfMemoryError = "er.extensions.AppShouldExitOnOutOfMemoryError";
+	private static final String AppShouldExitOnOutOfMemoryError = "er.extensions.AppShouldExitOnOutOfMemoryError";
 
 	/**
 	 * Notification to post when all bundles were loaded but before their
