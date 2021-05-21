@@ -71,8 +71,8 @@ import x.ERXDeprecatedConstant;
 public abstract class ERXFrameworkPrincipal {
 
     /** holds the mapping between framework principals classes and ERXFrameworkPrincipal objects */
-    protected static final NSMutableDictionary<String, ERXFrameworkPrincipal> initializedFrameworks = new NSMutableDictionary<>();
-    protected static final NSMutableArray<ERXFrameworkPrincipal> launchingFrameworks = new NSMutableArray<>();
+    private static final NSMutableDictionary<String, ERXFrameworkPrincipal> initializedFrameworks = new NSMutableDictionary<>();
+    private static final NSMutableArray<ERXFrameworkPrincipal> launchingFrameworks = new NSMutableArray<>();
 
     public static class Observer {
         
