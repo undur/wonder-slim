@@ -240,7 +240,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 */
 	private static ThreadLocal<Boolean> isInRequest = new ThreadLocal<>();
 
-	protected static NSDictionary propertiesFromArgv;
+	private static NSDictionary propertiesFromArgv;
 
 	/**
 	 * Time that garbage collection was last called when checking memory.
@@ -251,39 +251,39 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 * Holds the value of the property
 	 * er.extensions.ERXApplication.memoryStarvedThreshold
 	 */
-	protected BigDecimal _memoryStarvedThreshold;
+	private BigDecimal _memoryStarvedThreshold;
 
 	/**
 	 * Holds the value of the property
 	 * er.extensions.ERXApplication.memoryLowThreshold
 	 */
-	protected BigDecimal _memoryLowThreshold;
+	private BigDecimal _memoryLowThreshold;
 
 	/**
 	 * The path rewriting pattern to match (@see _rewriteURL)
 	 */
-	protected String _replaceApplicationPathPattern;
+	private String _replaceApplicationPathPattern;
 
 	/**
 	 * The path rewriting replacement to apply to the matched pattern (@see
 	 * _rewriteURL)
 	 */
-	protected String _replaceApplicationPathReplace;
+	private String _replaceApplicationPathReplace;
 
 	/**
 	 * The SSL host used by this application.
 	 */
-	protected String _sslHost;
+	private String _sslHost;
 
 	/**
 	 * The SSL port used by this application.
 	 */
-	protected Integer _sslPort;
+	private Integer _sslPort;
 
 	/**
 	 * Tracks whether or not _addAdditionalAdaptors has been called yet.
 	 */
-	protected boolean _initializedAdaptors = false;
+	private boolean _initializedAdaptors = false;
 
 	/**
 	 * To support load balancing with mod_proxy
