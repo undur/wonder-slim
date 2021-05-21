@@ -70,46 +70,37 @@ public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler 
     public WOResponse handleRequest(WORequest request) {
         WOResponse response = null;
         
-        String actionName = null;
-        Class actionClass = null;
-        boolean shouldCacheResult = false;
-        
-		if (response == null) {
-			// ak: when addressed with a DA link with this instance's ID (and
-			// an expired session) and the app is refusing new sessions, the
-			// default implementation will create a session anyway, which will
-			// wreak havoc if the app is memory starved.
-			// Search engines are a nuisance in that regard
-			WOApplication app = WOApplication.application();
-			if (app.isRefusingNewSessions() && request.isUsingWebServer() && !isSystemRequest(request)) {
-        		if (isSessionIDInRequest(request)) {
-					// we know the imp of the server session store simply
-					// looks up the ID in the registered sessions,
-					// so we don't need to do the check-out/check-in
-					// yadda-yadda.
-					if (app.sessionStore().getClass() == WOServerSessionStore.class) {
-						if (app.sessionStore().restoreSessionWithID(request.sessionID(), request) == null) {
-        					response = generateRequestRefusal(request);
-        					// AK: should be a permanent redirect, as the session is gone for good. 
-        					// However, the adaptor checks explicitly on 302 so we return that...
-        					// It shouldn't matter which instance we go to now.
-        					response.setStatus(302);
-        				}
-        			}
-        		} else {
-        			// if no session was supplied, what are we doing here in the
-					// first place? The adaptor shouldn't have linked to us as
-					// we are refusing new sessions.
-					response = generateRequestRefusal(request);
-        		}
-        	}
-        	if(response == null) {
-        		response = super.handleRequest(request);
-        	}
-        } else {
-        	registerWillHandleActionRequest();
-            registerDidHandleActionRequestWithActionNamed(actionName);
-        }
+		// ak: when addressed with a DA link with this instance's ID (and
+		// an expired session) and the app is refusing new sessions, the
+		// default implementation will create a session anyway, which will
+		// wreak havoc if the app is memory starved.
+		// Search engines are a nuisance in that regard
+		WOApplication app = WOApplication.application();
+		if (app.isRefusingNewSessions() && request.isUsingWebServer() && !isSystemRequest(request)) {
+    		if (isSessionIDInRequest(request)) {
+				// we know the imp of the server session store simply
+				// looks up the ID in the registered sessions,
+				// so we don't need to do the check-out/check-in
+				// yadda-yadda.
+				if (app.sessionStore().getClass() == WOServerSessionStore.class) {
+					if (app.sessionStore().restoreSessionWithID(request.sessionID(), request) == null) {
+    					response = generateRequestRefusal(request);
+    					// AK: should be a permanent redirect, as the session is gone for good. 
+    					// However, the adaptor checks explicitly on 302 so we return that...
+    					// It shouldn't matter which instance we go to now.
+    					response.setStatus(302);
+    				}
+    			}
+    		} else {
+    			// if no session was supplied, what are we doing here in the
+				// first place? The adaptor shouldn't have linked to us as
+				// we are refusing new sessions.
+				response = generateRequestRefusal(request);
+    		}
+    	}
+    	if(response == null) {
+    		response = super.handleRequest(request);
+    	}
 
         if (automaticMessageEncodingEnabled()) {
             ERXMessageEncoding messageEncoding = null;
@@ -117,6 +108,7 @@ public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler 
             // This should retrieve the session object belonging to the same
             // worker thread that's been calling the current handleRequest method.
             WOSession session;
+
             if(false) {
                 // ak only enable when fixed
                 // as we will create deadlocks checking out the session this early.
