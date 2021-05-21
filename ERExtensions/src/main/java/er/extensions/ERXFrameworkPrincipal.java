@@ -70,9 +70,6 @@ import x.ERXDeprecatedConstant;
  */
 public abstract class ERXFrameworkPrincipal {
 
-    /** logging support */
-    protected final Logger log = Logger.getLogger(getClass());
-
     /** holds the mapping between framework principals classes and ERXFrameworkPrincipal objects */
     protected static final NSMutableDictionary<String, ERXFrameworkPrincipal> initializedFrameworks = new NSMutableDictionary<>();
     protected static final NSMutableArray<ERXFrameworkPrincipal> launchingFrameworks = new NSMutableArray<>();
