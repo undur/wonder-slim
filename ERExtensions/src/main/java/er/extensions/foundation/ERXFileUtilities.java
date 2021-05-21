@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.channels.FileChannel;
-import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,14 +61,6 @@ public class ERXFileUtilities {
 	 */
 	private static String stringFromInputStream(InputStream in, String encoding) throws IOException {
 		return new String(bytesFromInputStream(in), encoding);
-	}
-
-	private static void writeInputStreamToGZippedFile(InputStream stream, File file) throws IOException {
-		if (file == null)
-			throw new IllegalArgumentException("Attempting to write to a null file!");
-		try( GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(file))) {
-			ERXFileUtilities.writeInputStreamToOutputStream(stream, false, out, true);
-		}
 	}
 
 	/**
