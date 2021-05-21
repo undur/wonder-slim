@@ -24,6 +24,8 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
 
+import er.extensions.browser.ERXBrowser;
+import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.localization.ERXLocalizer;
 

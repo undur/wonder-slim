@@ -4,12 +4,14 @@
 //
 // Created by tatsuya on Mon Jul 22 2002
 //
-package er.extensions.appserver;
+package er.extensions.browser;
 
 import com.webobjects.appserver.WORequest;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCoding;
+
+import er.extensions.appserver.ERXMessageEncoding;
 
 /** 
  * <div class="en">
