@@ -124,17 +124,6 @@ public class ERXFileUtilities {
 		}
 	}
 
-	public static void stringToGZippedFile(String s, File f) throws IOException {
-		if (s == null)
-			throw new NullPointerException("string argument cannot be null");
-		if (f == null)
-			throw new NullPointerException("file argument cannot be null");
-
-		byte[] bytes = s.getBytes(charset().name());
-		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		writeInputStreamToGZippedFile(bais, f);
-	}
-
 	/**
 	 * Writes the contents of <code>s</code> to <code>f</code> using the
 	 * platform's default encoding.
