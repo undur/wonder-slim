@@ -20,9 +20,9 @@ import er.extensions.appserver.ajax.ERXAjaxContext;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXRuntimeUtilities;
-import er.extensions.foundation.ERXSelectorUtilities;
 import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Replacement of WOContext. This subclass is installed when the frameworks
@@ -74,7 +74,7 @@ public class ERXWOContext extends ERXAjaxContext {
 				if (observer == null) {
 					observer = new Observer();
 
-					NSNotificationCenter.defaultCenter().addObserver(observer, ERXSelectorUtilities.notificationSelector("applicationDidHandleRequest"), WOApplication.ApplicationDidDispatchRequestNotification, null);
+					NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector("applicationDidHandleRequest"), WOApplication.ApplicationDidDispatchRequestNotification, null);
 				}
 			}
 		}

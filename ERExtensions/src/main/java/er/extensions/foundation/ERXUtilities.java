@@ -9,7 +9,10 @@ package er.extensions.foundation;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import com.webobjects.foundation.NSSelector;
+
 import er.extensions.components.ERXStatelessComponent;
+import x.ERXDeprecatedConstant;
 
 /**
  * Diverse collection of utility methods for handling everything from EOF to
@@ -81,5 +84,16 @@ public class ERXUtilities {
 	 */
 	public static interface Operation {
 		public Object value();
+	}
+
+	/**
+	 * Utility that returns a selector you can use with the
+	 * NSNotificationCenter.
+	 * 
+	 * @param methodName
+	 * @return A selector suitable for firing a notification
+	 */
+	public static NSSelector<Void> notificationSelector(String methodName) {
+		return new NSSelector<Void>(methodName, ERXDeprecatedConstant.NotificationClassArray);
 	}
 }

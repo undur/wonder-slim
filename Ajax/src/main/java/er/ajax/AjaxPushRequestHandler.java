@@ -12,7 +12,7 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
 import er.extensions.appserver.ERXKeepAliveResponse;
-import er.extensions.foundation.ERXSelectorUtilities;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Request handler that offers push-style notifications. <br>
@@ -40,7 +40,7 @@ public class AjaxPushRequestHandler extends WORequestHandler {
 	private static ConcurrentHashMap<String, ConcurrentHashMap<String, ERXKeepAliveResponse>> responses = new ConcurrentHashMap<String, ConcurrentHashMap<String, ERXKeepAliveResponse>>();
 
 	public AjaxPushRequestHandler() {
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXSelectorUtilities.notificationSelector("sessionDidTimeOut"), WOSession.SessionDidTimeOutNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("sessionDidTimeOut"), WOSession.SessionDidTimeOutNotification, null);
 	}
 
 	/**

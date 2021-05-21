@@ -23,8 +23,8 @@ import com.webobjects.foundation.NSNotificationCenter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.components.ERXStyleSheet;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXSelectorUtilities;
 import er.extensions.foundation.ERXStringUtilities;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * ERXResponseRewriter provides several utilities for manipulating a WOResponse
@@ -378,7 +378,7 @@ public class ERXResponseRewriter {
 				ContextObserver contextObserver = new ContextObserver();
 				NSNotificationCenter.defaultCenter().addObserver(
 						contextObserver, 
-						ERXSelectorUtilities.notificationSelector("didHandleRequest"), 
+						ERXUtilities.notificationSelector("didHandleRequest"), 
 						WORequestHandler.DidHandleRequestNotification, 
 						context);
 				//Stick the observer in the pageInfo dictionary so it isn't garbage collected
