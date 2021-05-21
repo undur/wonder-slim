@@ -1397,10 +1397,14 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 			if (timeToDie > 0) {
 				log.info("Instance will not live past " + timeToDie + ":00.");
 				NSLog.out.appendln("Instance will not live past " + timeToDie + ":00.");
+
 				NSTimestamp now = new NSTimestamp();
+
 				int s = (timeToDie - ERXTimestampUtilities.hourOfDay(now)) * 3600 - ERXTimestampUtilities.minuteOfHour(now) * 60;
-				if (s < 0)
+
+				if (s < 0) {
 					s += 24 * 3600; // how many seconds to the deadline
+				}
 
 				// deliberately randomize this so that not all instances restart
 				// at
@@ -1409,6 +1413,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 				s += (Math.random() * 3600);
 
 				NSTimestamp stopDate = now.timestampByAddingGregorianUnits(0, 0, 0, 0, 0, s);
+
 				WOTimer t = new WOTimer(stopDate, 0, this, "startRefusingSessions", null, null, false);
 				t.schedule();
 			}
