@@ -146,16 +146,16 @@ import x.ERXDeprecatedConstant;
  */
 public abstract class ERXApplication extends ERXAjaxApplication implements ERXGracefulShutdown.GracefulApplication {
 	/** logging support */
-	public static final Logger log = Logger.getLogger(ERXApplication.class);
+	private static final Logger log = Logger.getLogger(ERXApplication.class);
 
 	/** request logging support */
-	public static final Logger requestHandlingLog = Logger.getLogger("er.extensions.ERXApplication.RequestHandling");
+	private static final Logger requestHandlingLog = Logger.getLogger("er.extensions.ERXApplication.RequestHandling");
 
 	/** statistic logging support */
-	public static final Logger statsLog = Logger.getLogger("er.extensions.ERXApplication.Statistics");
+	private static final Logger statsLog = Logger.getLogger("er.extensions.ERXApplication.Statistics");
 
 	/** startup logging support */
-	public static final Logger startupLog = Logger.getLogger("er.extensions.ERXApplication.Startup");
+	private static final Logger startupLog = Logger.getLogger("er.extensions.ERXApplication.Startup");
 
 	private static boolean wasERXApplicationMainInvoked = false;
 
