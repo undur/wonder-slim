@@ -213,20 +213,4 @@ public abstract class ERXFrameworkPrincipal {
     public String toString() {
       return ERXStringUtilities.lastPropertyKeyInKeyPath(getClass().getName());
     }
-    
-  public static boolean hasFrameworkInstalled(String frameworkName) {
-    if(ERXStringUtilities.stringIsNullOrEmpty(frameworkName)) {
-      return false;
-    }
-
-    for (ERXFrameworkPrincipal frameworkPrincipal : ERXFrameworkPrincipal.launchingFrameworks) {
-      String s = frameworkPrincipal.toString();
-      if(frameworkName.equalsIgnoreCase(s)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
 }
