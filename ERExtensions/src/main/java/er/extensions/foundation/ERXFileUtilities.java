@@ -125,21 +125,6 @@ public class ERXFileUtilities {
 	}
 
 	/**
-	 * Writes the contents of <code>s</code> to <code>f</code> using the
-	 * platform's default encoding.
-	 * 
-	 * @param s
-	 *            the string to be written to file
-	 * @param f
-	 *            the destination file
-	 * @throws IOException
-	 *             if things go wrong
-	 */
-	public static void stringToFile(String s, File f) throws IOException {
-		stringToFile(s, f, System.getProperty("file.encoding"));
-	}
-
-	/**
 	 * Writes the contents of <code>s</code> to <code>f</code> using specified
 	 * encoding.
 	 * 
