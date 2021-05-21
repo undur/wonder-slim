@@ -1971,39 +1971,11 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	}
 
 	/**
-	 * Returns the delayedRequestHandler, if any is registered.
-	 */
-	public ERXDelayedRequestHandler delayedRequestHandler() {
-		return (ERXDelayedRequestHandler) requestHandlerForKey(ERXDelayedRequestHandler.KEY);
-	}
-
-	/**
-	 * Overridden to allow for redirected responses and null the thread local
-	 * storage.
-	 * 
-	 * @param request
-	 *            object
-	 * @return response
-	 */
-	@Override
-	public WOResponse dispatchRequest(WORequest request) {
-		WOResponse response = null;
-		ERXDelayedRequestHandler delayedRequestHandler = delayedRequestHandler();
-		if (delayedRequestHandler == null) {
-			response = dispatchRequestImmediately(request);
-		}
-		else {
-			response = delayedRequestHandler.handleRequest(request);
-		}
-		return response;
-	}
-
-	/**
 	 * Dispatches the request without checking for the delayedRequestHandler()
 	 * 
 	 * @param request
 	 */
-	public WOResponse dispatchRequestImmediately(WORequest request) {
+	public WOResponse dispatchRequest(WORequest request) {
 		WOResponse response;
 		if (ERXApplication.requestHandlingLog.isDebugEnabled()) {
 			ERXApplication.requestHandlingLog.debug(request);
