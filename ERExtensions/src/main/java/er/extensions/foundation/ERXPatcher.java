@@ -950,7 +950,6 @@ public class ERXPatcher {
 		}
 		
 		public static class JavaScript extends WOJavaScript {
-			public static boolean removeLanguageAttribute = ERXProperties.booleanForKeyWithDefault("er.extensions.foundation.ERXPatcher.DynamicElementsPatches.Javascript.removeLanguageAttribute", false);
 			private WOAssociation _language;
 			
 			public JavaScript(String aName, NSDictionary associations, WOElement element) {
@@ -967,29 +966,6 @@ public class ERXPatcher {
 					_language = new WOConstantValueAssociation(s);
 				}
 			}
-			
-			@Override
-			public void appendAttributesToResponse(WOResponse woresponse, WOContext wocontext) {
-				if (woresponse instanceof ERXResponse && JavaScript.removeLanguageAttribute) {
-					// 5.3 + 5.4 hackaround to pop the language attribute off of the script tag 
-					ERXResponse response = (ERXResponse)woresponse;
-					response.pushContent();
-					super.appendAttributesToResponse(woresponse, wocontext);
-					String contentString = response.contentString();
-					String language = (String)_language.valueInComponent(wocontext.component());
-					Pattern pattern = Pattern.compile("\\s*language\\s*=\\s*\"?" + language + "\"?", Pattern.CASE_INSENSITIVE);
-					contentString = pattern.matcher(contentString).replaceFirst("");
-					response.setContent(contentString);
-					response.popContent(true);
-				}
-				else {
-					super.appendAttributesToResponse(woresponse, wocontext);
-				}
-			}
-			
-//		    public void _appendTagAttributeAndValueToResponse(WOResponse response, String tagName, String tagValue, boolean escapeHTML) {
-//		    	if (!tagName.equals("language")) super._appendTagAttributeAndValueToResponse(response, tagName, tagValue, escapeHTML);	// RM: Hack to void the language attribute
-//		    }
 		}
 
 		/**
