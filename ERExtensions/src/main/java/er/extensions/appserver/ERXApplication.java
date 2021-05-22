@@ -1125,8 +1125,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 			ERXPatcher.setClassForName(ERXWOString.class, "WOString");
 			ERXPatcher.setClassForName(ERXWOTextField.class, "WOTextField");
 		}
-
-		// ERXPatcher.setClassForName(ERXSubmitButton.class, "WOSubmitButton");
 	}
 
 	@Override
