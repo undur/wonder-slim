@@ -86,7 +86,6 @@ import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.components.ERXGracefulShutdown;
-import er.extensions.components._private.ERXActiveImage;
 import er.extensions.components._private.ERXWOForm;
 import er.extensions.components._private.ERXWORepetition;
 import er.extensions.components._private.ERXWOString;
@@ -1119,7 +1118,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 
 		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
 		ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition");
-		ERXPatcher.setClassForName(ERXActiveImage.class, "WOActiveImage");
 
 		// use our localizing string class
 		// works around #3574558
