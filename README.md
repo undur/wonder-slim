@@ -46,7 +46,7 @@ For this reason, Slim's frameworks (notably ERExtensions) no longer uses any cod
 
 `ERExtensions` only pulls in two external dependencies `slf4j-api` and `log4j`.  The other two frameworks are unchanged from wonder; `WOOGNL ` pulls in `ognl` and `Ajax` pulls in `jabsorb`.
 
-### Reduce the amount of code used from closed frameworks
+### Reduce usage of code and APIs in closed frameworks
 
 This might sound ironic since Slim is based on a closed framework. But we still reduce the usage of closed WO APIs as much as possible. This includes not using NS* collection classes, foundation utility classes etc.
 
