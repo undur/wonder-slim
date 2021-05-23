@@ -1065,7 +1065,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 * Patches ERXWOForm, ERXWOFileUpload, ERXWOText to be used instead of
 	 * WOForm, WOFileUpload, WOText.
 	 */
-	public void installPatches() {
+	protected void installPatches() {
 		ERXPatcher.installPatches();
 		if (contextClassName().equals("WOContext")) {
 			setContextClassName(ERXWOContext.class.getName());
@@ -1107,8 +1107,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 
 		ERXStats.initStatisticsIfNecessary();
 
-		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in
-		// 5.4.
+		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4.
 		// This is the workaround.
 		frameworksBaseURL();
 		applicationBaseURL();
@@ -1138,8 +1137,8 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
 			throw new RuntimeException("Your main bundle is \"JavaFoundation\".  You are not launching this WO application properly.  If you are using Eclipse, most likely you launched your WOA as a \"Java Application\" instead of a \"WO Application\".");
 		}
-		// ak: telling Log4J to re-init the Console appenders so we get logging
-		// into WOOutputPath again
+
+		// ak: telling Log4J to re-init the Console appenders so we get logging into WOOutputPath again
 		for (Enumeration e = Logger.getRootLogger().getAllAppenders(); e.hasMoreElements();) {
 			Appender appender = (Appender) e.nextElement();
 			if (appender instanceof ConsoleAppender) {
@@ -1147,10 +1146,12 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 				app.activateOptions();
 			}
 		}
+
 		if (_loader != null) {
 			_loader._checker.reportErrors();
 			_loader._checker = null;
 		}
+
 		didCreateApplication();
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
 		installPatches();
@@ -1163,9 +1164,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 			registerRequestHandler(new ERXStaticResourceRequestHandler(), "_wr_");
 		}
 		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
-		// AK: remove comment to get delayed request handling
-		// registerRequestHandler(new DelayedRequestHandler(),
-		// DelayedRequestHandler.KEY);
 
 		String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 		if (defaultEncoding != null) {
@@ -1488,7 +1486,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 * 
 	 * @author ak
 	 */
-	protected void checkMemory() {
+	private void checkMemory() {
 		boolean memoryLow = checkMemory(_memoryLowThreshold, false);
 		if (memoryLow != _isMemoryLow) {
 			if (!memoryLow) {
