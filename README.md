@@ -79,7 +79,3 @@ Yes. I now use Slim in all of my active projects instead of Project Wonder. It's
 ### Can I use it?
 
 Sure. But be aware that the real question is probably "should I use it". I'm moving fast and breaking things at the moment and I'm not doing any releases, stable or otherwise. If there's interest in the project I might consider changing that.
-
-### How do I use it?
-
-Sure. But be aware that the real question is probably "should I use it". I'm moving fast and breaking things at the moment and I'm not doing any releases, stable or otherwise. If there's interest in the project I might consider changing that.
