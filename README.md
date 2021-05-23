@@ -82,7 +82,7 @@ In a perfect world, this effort might work it's way directly into Wonder itself.
 
 ### Do you use it?
 
-Yes. I now use Slim in all of my active projects instead of Project Wonder. It's very nice to have an understandable, easily modifiable and (comparably) small base of framework code with a limited set of dependencies.
+Yes. I've used Slim in all of my active projects instead of Project Wonder for a while now. It's very nice to have an understandable, easily modifiable and (comparably) small base of framework code with a limited set of dependencies.
 
 ### Can I use it?
 
