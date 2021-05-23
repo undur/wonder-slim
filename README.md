@@ -32,7 +32,7 @@ Below I enumerate a few primary goals of wonder-slim (from here on called just "
 
 Project Wonder has a multitude of features and frameworks. This project is about the minimal subset that's required to create and run a modern basic WO application, nothing more, nothing less.
 
-For this reason, the project picks only four frameworks from Project Wonder as baseline for the work, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. I've also combined `JavaWOExtensions` and `ERExtensions`, since they both serve pretty much the same purpose.
+For this reason, the project picks only four frameworks from Project Wonder as baseline for the work, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. I've also combined `JavaWOExtensions` and `ERExtensions`, since they serve similar purposes in many ways.
 
 ### **Loosen the ties between WOF and EOF**
 
