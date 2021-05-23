@@ -6,10 +6,7 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URL;
 
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSNotification;
