@@ -103,46 +103,9 @@ import er.extensions.statistics.ERXStats;
 import x.ERXDeprecatedConstant;
 
 /**
- * ERXApplication is the abstract superclass of WebObjects applications built
- * with the ER frameworks.
- *
- * Useful enhancements include the ability to change the deployed name of the
- * application, support for automatic application restarting at given intervals
- * and more context information when handling exceptions.
- * 
- * @property AppShouldExitOnOutOfMemoryError
- * @property ERApplicationName
- * @property ERApplicationNameSuffix
- * @property ERTimeToDie
- * @property ERTimeToKill
- * @property ERTimeToLive
- * @property NSProjectBundleEnabled
- * @property WOIDE
- * @property _DisableClasspathReorder
- * @property er.extensions.ERXApplication.DefaultEncoding
- * @property er.extensions.ERXApplication.DefaultMessageEncoding
- * @property er.extensions.ERXApplication.StatisticsBaseLogPath
- * @property er.extensions.ERXApplication.StatisticsLogRotationFrequency
- * @property er.extensions.ERXApplication.developmentMode
- * @property er.extensions.ERXApplication.enableERXShutdownHook
- * @property er.extensions.ERXApplication.fixCachingEnabled
- * @property er.extensions.ERXApplication.lowMemBufferSize
- * @property er.extensions.ERXApplication.memoryLowThreshold
- * @property er.extensions.ERXApplication.memoryStarvedThreshold
- * @property er.extensions.ERXApplication.memoryThreshold
- * @property er.extensions.ERXApplication.redirectOnMissingObjects
- * @property er.extensions.ERXApplication.replaceApplicationPath.pattern
- * @property er.extensions.ERXApplication.replaceApplicationPath.replace
- * @property er.extensions.ERXApplication.responseCompressionEnabled
- * @property er.extensions.ERXApplication.responseCompressionTypes
- * @property er.extensions.ERXApplication.rewriteDirectConnect
- * @property er.extensions.ERXApplication.ssl.enabled
- * @property er.extensions.ERXApplication.ssl.host
- * @property er.extensions.ERXApplication.ssl.port
- * @property er.extensions.ERXApplication.useSessionStoreDeadlockDetection
- * @property er.extensions.ERXComponentActionRedirector.enabled
- * @property er.extensions.ERXApplication.allowMultipleDevInstances
+ * Improvements and fixes for WOApplication
  */
+
 public abstract class ERXApplication extends ERXAjaxApplication implements ERXGracefulShutdown.GracefulApplication {
 	/** logging support */
 	private static final Logger log = Logger.getLogger(ERXApplication.class);

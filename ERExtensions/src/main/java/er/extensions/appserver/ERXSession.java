@@ -43,14 +43,9 @@ import er.extensions.localization.ERXLocalizer;
 import x.ERXDeprecatedConstant;
 
 /**
- * The ERXSession arguments the regular WOSession object by adding a few nice
- * additions. Of interest, notifications are now posted when a session when a
- * session goes to sleep, David Neumann's browser backtracking detection has
- * been added from his security framework, a somewhat comprehensive user-agent
- * parsing is provided to know what type of browser is being used, flags have
- * also been added to tell if javascript has been enabled, and enhanced
- * localization support has been added.
+ * Improvements and fixes for WOSession 
  */
+
 public class ERXSession extends ERXAjaxSession implements Serializable {
 	/**
 	 * Do I need to update serialVersionUID? See section 5.6 <cite>Type Changes
