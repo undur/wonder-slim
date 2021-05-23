@@ -54,7 +54,9 @@ This makes it easier to integrate with the java ecosystem when using and contrib
 
 ### **Standardize on modern conventions**
 
-One of WO's strengths is convention over configuration. Over the years a lot of things have changed and progressed in Wonder and WO and those changes have often been made "easier" by Wonder, often by keeping old code around and activating it conditionally by looking at the project to try to see if it's "old" or by setting a property, reducing the "convention" part and adding to the "configuration part". This complicates things, so "old" code is being removed and with it goes the option of doing things "the old way". It's been 13 years since we've had a WO release, we should be ready to standardize on a set of practices.
+One of WO's strengths is convention over configuration. Over the years a lot of things have changed in Wonder and WO and those changes have been hidden or made "easier" by Wonder, for example by keeping deprecated code around and activating it conditionally by looking at the project to try to see if it's "old" or by setting a property. This reduces the "convention" part and adds to the "configuration part" and makes the overall codebase larger and harder to understand.
+
+To simplify development, "old" code is being removed and with it the option of doing things "the old way" whatever that may be. It's been 13 years since we've had a WO release so we should be ready to standardize on a set of practices by now.
 
 ### Use Maven only
 
