@@ -74,7 +74,7 @@ Development on this project will move fast and break stuff, which is difficult t
 
 *Ok "FAQ" might be something of an overstatement, I haven't received a single question about this. But "potential questions" just sounds stupid.*
 
-### So, are you just leaving Project Wonder behind?
+### So, this just leaves Project Wonder behind?
 
 No. While this is a usable framework in and off itself, it's also something of an exercise to just learn to navigate the Wonder Sources and WO's architecture, understand what's there, what's actually used, what can be improved etc. Hopefully, some of the refactorings and cleanups can be backported to Wonder itself, so everyone benefits. 
 
