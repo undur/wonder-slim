@@ -1936,6 +1936,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 */
 	public WOResponse dispatchRequest(WORequest request) {
 		WOResponse response;
+
 		if (ERXApplication.requestHandlingLog.isDebugEnabled()) {
 			ERXApplication.requestHandlingLog.debug(request);
 		}
@@ -1950,50 +1951,59 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 			ERXStats.logStatisticsForOperation(statsLog, "key");
 			ERXApplication._endRequest();
 		}
+
 		if (requestHandlingLog.isDebugEnabled()) {
 			requestHandlingLog.debug("Returning, encoding: " + response.contentEncoding() + " response: " + response);
 		}
 
 		if (responseCompressionEnabled()) {
-			String contentType = response.headerForKey("content-type");
-			if (!"gzip".equals(response.headerForKey("content-encoding")) && (contentType != null) && (contentType.startsWith("text/") || responseCompressionTypes().containsObject(contentType))) {
-				String acceptEncoding = request.headerForKey("accept-encoding");
-				if ((acceptEncoding != null) && (acceptEncoding.toLowerCase().indexOf("gzip") != -1)) {
-					long start = System.currentTimeMillis();
-					long inputBytesLength;
-					InputStream contentInputStream = response.contentInputStream();
-					NSData compressedData;
-					if (contentInputStream != null) {
-						inputBytesLength = response.contentInputStreamLength();
-						compressedData = ERXCompressionUtilities.gzipInputStreamAsNSData(contentInputStream, (int) inputBytesLength);
-						response.setContentStream(null, 0, 0);
+			return compressResponse( request, response );
+		}
+
+		return response;
+	}
+
+	private static WOResponse compressResponse( final WORequest request, final WOResponse response ) {
+		final String contentType = response.headerForKey("content-type");
+
+		if (!"gzip".equals(response.headerForKey("content-encoding")) && (contentType != null) && (contentType.startsWith("text/") || responseCompressionTypes().containsObject(contentType))) {
+			String acceptEncoding = request.headerForKey("accept-encoding");
+			if ((acceptEncoding != null) && (acceptEncoding.toLowerCase().indexOf("gzip") != -1)) {
+				long start = System.currentTimeMillis();
+				long inputBytesLength;
+				InputStream contentInputStream = response.contentInputStream();
+				NSData compressedData;
+				if (contentInputStream != null) {
+					inputBytesLength = response.contentInputStreamLength();
+					compressedData = ERXCompressionUtilities.gzipInputStreamAsNSData(contentInputStream, (int) inputBytesLength);
+					response.setContentStream(null, 0, 0);
+				}
+				else {
+					NSData input = response.content();
+					inputBytesLength = input.length();
+					if (inputBytesLength > 0) {
+						compressedData = ERXCompressionUtilities.gzipByteArrayAsNSData(input._bytesNoCopy(), 0, (int) inputBytesLength);
 					}
 					else {
-						NSData input = response.content();
-						inputBytesLength = input.length();
-						if (inputBytesLength > 0) {
-							compressedData = ERXCompressionUtilities.gzipByteArrayAsNSData(input._bytesNoCopy(), 0, (int) inputBytesLength);
-						}
-						else {
-							compressedData = NSData.EmptyData;
-						}
+						compressedData = NSData.EmptyData;
 					}
-					if (inputBytesLength > 0) {
-						if (compressedData == null) {
-							// something went wrong
-						}
-						else {
-							response.setContent(compressedData);
-							response.setHeader(String.valueOf(compressedData.length()), "content-length");
-							response.setHeader("gzip", "content-encoding");
-							if (log.isDebugEnabled()) {
-								log.debug("before: " + inputBytesLength + ", after " + compressedData.length() + ", time: " + (System.currentTimeMillis() - start));
-							}
+				}
+				if (inputBytesLength > 0) {
+					if (compressedData == null) {
+						// something went wrong
+					}
+					else {
+						response.setContent(compressedData);
+						response.setHeader(String.valueOf(compressedData.length()), "content-length");
+						response.setHeader("gzip", "content-encoding");
+						if (log.isDebugEnabled()) {
+							log.debug("before: " + inputBytesLength + ", after " + compressedData.length() + ", time: " + (System.currentTimeMillis() - start));
 						}
 					}
 				}
 			}
 		}
+		
 		return response;
 	}
 
@@ -2237,21 +2247,21 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		return Integer.valueOf(sessionTimeOut().intValue() / 60);
 	}
 
-	protected Boolean _responseCompressionEnabled;
+	private static Boolean _responseCompressionEnabled;
 
 	/**
 	 * checks the value of
 	 * <code>er.extensions.ERXApplication.responseCompressionEnabled</code> and
 	 * if true turns on response compression by gzip
 	 */
-	public boolean responseCompressionEnabled() {
+	private static boolean responseCompressionEnabled() {
 		if (_responseCompressionEnabled == null) {
 			_responseCompressionEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.responseCompressionEnabled", false) ? Boolean.TRUE : Boolean.FALSE;
 		}
 		return _responseCompressionEnabled.booleanValue();
 	}
 
-	protected NSSet<String> _responseCompressionTypes;
+	private static NSSet<String> _responseCompressionTypes;
 
 	/**
 	 * checks the value of
@@ -2261,7 +2271,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 * 
 	 * @return an array of mime type strings
 	 */
-	public NSSet<String> responseCompressionTypes() {
+	private static NSSet<String> responseCompressionTypes() {
 		if (_responseCompressionTypes == null) {
 			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault("er.extensions.ERXApplication.responseCompressionTypes", new NSArray<String>("application/x-javascript")));
 		}
