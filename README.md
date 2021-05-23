@@ -8,7 +8,7 @@ Project Wonder is an old and storied collection of frameworks that's had many co
 
 This is an experimental project to see how Wonder can be improved, not by adding stuff but by removing stuff.
 
-Below I enumerate a few primary goals of wonder-slim (from here on called just "Slim"), they all share the same **ultimate goal**, to make Wonder smaller, more manageable and maintainable, enabling faster development.
+Below I enumerate a few primary goals of wonder-slim (from here on called just "Slim"), they all share the same **ultimate goal**, to make Wonder smaller, more manageable and maintainable, enabling faster development and delivery of features and improvements.
 
 ## Primary goals
 
