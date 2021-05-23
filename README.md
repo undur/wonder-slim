@@ -64,6 +64,10 @@ The frameworks can only be built using maven, are only tested on maven and assum
 
 Slim targets Java 11 and does not support older JDKs. This is a part of the simplification of the development and environment through standardization.
 
+#### Bonus goal: Backport improvements to the real Project Wonder
+
+Development on this project will move fast and break stuff, which is difficult in Wonder, due to the large and complex user base and complexity of the framework. But whatever is learned from the cleanup and is usable and API-compatible will be backported to Project Wonder.
+
 ## FAQ
 
 *Ok "FAQ" might be something of an overstatement, I haven't received a single question about this. But "potential questions" just sounds stupid.*
