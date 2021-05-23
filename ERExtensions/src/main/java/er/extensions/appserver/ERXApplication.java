@@ -1957,7 +1957,7 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		}
 
 		if (responseCompressionEnabled()) {
-			return compressResponse( request, response );
+			response = compressResponse( request, response );
 		}
 
 		return response;
