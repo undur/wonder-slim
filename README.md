@@ -1,5 +1,7 @@
 # wonder-slim
 
+The basics required to create run a modern WO application.
+
 ## Installation
 
 *To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part here: https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has a different version than the real Project Wonder and thus lives fine alongside Project Wonder on your computer without disturbing anything else*
@@ -58,9 +60,9 @@ One of WO's strengths is convention over configuration. Over the years a lot of 
 
 The frameworks can only be built using maven, are only tested on maven and assume a maven project layout for projects that are built using it.
 
-### **Run on modern java**
+### **Run on (relatively) modern java**
 
-Slim targets Java 11 and will not run on older JDKs.
+Slim targets Java 11 and does not support older JDKs. This is a part of the simplification of the development and environment through standardization.
 
 ## FAQ
 
