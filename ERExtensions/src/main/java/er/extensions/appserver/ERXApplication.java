@@ -194,14 +194,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	 */
 	public static final String ApplicationDidFinishInitializationNotification = "NSApplicationDidFinishInitializationNotification";
 
-	/**
-	 * ThreadLocal that designates that the given thread is currently
-	 * dispatching a request. This is not stored in ERXThreadStorage, because it
-	 * defaults to an inheritable thread local, which would defeat the purpose
-	 * of this check.
-	 */
-	private static ThreadLocal<Boolean> isInRequest = new ThreadLocal<>();
-
 	private static NSDictionary propertiesFromArgv;
 
 	/**
@@ -1889,34 +1881,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	}
 
 	/**
-	 * Initializes the current thread for a request.
-	 */
-	public static void _startRequest() {
-		ERXApplication.isInRequest.set(Boolean.TRUE);
-	}
-
-	/**
-	 * Cleans up the current thread after a request is complete.
-	 */
-	// CHECKME: as one can call dispatchRequest() in normal code, it may not be
-	// such a good
-	// to clean everything...
-	public static void _endRequest() {
-		ERXApplication.isInRequest.remove();
-		// Clean up thread storage so it doesn't end up on someone else's thread by accident
-		ERXThreadStorage.reset();
-	}
-
-	/**
-	 * Returns true if the current thread is dispatching a request.
-	 * 
-	 * @return true if the current thread is dispatching a request
-	 */
-	public static boolean isInRequest() {
-		return ERXApplication.isInRequest.get() != null;
-	}
-
-	/**
 	 * Dispatches the request without checking for the delayedRequestHandler()
 	 * 
 	 * @param request
@@ -1929,14 +1893,13 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		}
 
 		try {
-			ERXApplication._startRequest();
 			ERXStats.initStatisticsIfNecessary();
 			checkMemory();
 			response = super.dispatchRequest(request);
 		}
 		finally {
 			ERXStats.logStatisticsForOperation(statsLog, "key");
-			ERXApplication._endRequest();
+			ERXThreadStorage.reset();
 		}
 
 		if (requestHandlingLog.isDebugEnabled()) {
