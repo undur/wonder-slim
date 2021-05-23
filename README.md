@@ -1,8 +1,22 @@
 # wonder-slim
 
-*Before you start reading, I should mention that this is not my own project. It's merely an organization of over two decades of work of dozens, even hundreds of people. To emphasize this, I've chosen to go the way of cloning the existing Wonder repository and keep attribution and history of the source files in question as much as possible. I have much love and respect for past contributors, many of whom I consider friends and colleagues.*
+## Installation
+
+*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part here: https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has a different version than the real Project Wonder and thus lives fine alongside Project Wonder on your computer without disturbing anything else*
+
+1. Clone the repository
+2. Run `mvn clean install` in the cloned repository's root **or**
+3. …alternatively, Import the projects into your Eclipse workspace (using `Import existing projects into workspace`).
+
+## Usage
+
+If you just want to play around, you can import the "testapp" in the repository's root into Eclipse and run it.
+
+To use in an existing project you can just change the version for `ERExtensions`, `Ajax`  and `WOOGNL` in your own project to 8.0.0.slim-SNAPSHOT in your `pom.xml` file. Note that these are the only frameworks included in Slim and if you're using other Wonder frameworks or EOF, compatibility will be hit and miss.
 
 ## Motivation
+
+*Before you start reading, I should mention that this is not my own project. It's merely an organization of over two decades of work of dozens, even hundreds of people. To emphasize this, I've chosen to go the way of cloning the existing Wonder repository and keep attribution and history of the source files in question as much as possible. I have much love and respect for past contributors, many of whom I consider friends and colleagues.*
 
 Project Wonder is an old and storied collection of frameworks that's had many contributors. Over the years, it's accumulated a *lot* of cruft and it's been a while since it's seen something like an overarching design philosophy.
 
@@ -63,5 +77,9 @@ In a perfect world, this effort might work it's way directly into Wonder itself.
 Yes. I now use Slim in all of my active projects instead of Project Wonder. It's very nice to have an understandable, easily modifiable and (comparably) small base of framework code with a limited set of dependencies.
 
 ### Can I use it?
+
+Sure. But be aware that the real question is probably "should I use it". I'm moving fast and breaking things at the moment and I'm not doing any releases, stable or otherwise. If there's interest in the project I might consider changing that.
+
+### How do I use it?
 
 Sure. But be aware that the real question is probably "should I use it". I'm moving fast and breaking things at the moment and I'm not doing any releases, stable or otherwise. If there's interest in the project I might consider changing that.
