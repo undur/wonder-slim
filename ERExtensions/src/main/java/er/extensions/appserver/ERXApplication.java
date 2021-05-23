@@ -1903,20 +1903,8 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	// to clean everything...
 	public static void _endRequest() {
 		ERXApplication.isInRequest.remove();
-		// We always want to clean up the thread storage variables, so they
-		// don't end up on
-		// someone else's thread by accident
+		// Clean up thread storage so it doesn't end up on someone else's thread by accident
 		ERXThreadStorage.reset();
-		/*
-		 * Clear the _ThreadInfo in the EOObserverCenter for this thread to
-		 * prevent a bug which results in ECs loosing track of change state on
-		 * multiple worker threads. A more complete explanation available here:
-		 * http://www.mail-archive.com/webobjects-dev@lists.apple.com/msg25391.
-		 * html
-		 */
-		// We *always* want to unlock left over ECs.
-//		ERXEC.unlockAllContextsForCurrentThread();
-		// we don't want this hanging around
 	}
 
 	/**
