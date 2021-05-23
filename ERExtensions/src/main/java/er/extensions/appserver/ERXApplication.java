@@ -1917,7 +1917,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 		// We *always* want to unlock left over ECs.
 //		ERXEC.unlockAllContextsForCurrentThread();
 		// we don't want this hanging around
-		ERXRuntimeUtilities.clearThreadInterrupt(Thread.currentThread());
 	}
 
 	/**

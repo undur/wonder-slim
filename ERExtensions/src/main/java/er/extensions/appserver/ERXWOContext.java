@@ -19,7 +19,6 @@ import com.webobjects.foundation.NSNotificationCenter;
 import er.extensions.appserver.ajax.ERXAjaxContext;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXRuntimeUtilities;
 import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
@@ -101,17 +100,6 @@ public class ERXWOContext extends ERXAjaxContext {
 
 	public ERXWOContext(WORequest worequest) {
 		super(worequest);
-	}
-
-	/**
-	 * Implemented so that the thread checks if it should get interrupted.
-	 * 
-	 * @param component the current component
-	 */
-	@Override
-	public void _setCurrentComponent(WOComponent component) {
-		ERXRuntimeUtilities.checkThreadInterrupt();
-		super._setCurrentComponent(component);
 	}
 	
 	@Override
