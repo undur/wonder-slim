@@ -85,7 +85,6 @@ import com.webobjects.foundation.development.NSBundleFactory;
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.components.ERXGracefulShutdown;
 import er.extensions.components._private.ERXWOForm;
 import er.extensions.components._private.ERXWORepetition;
 import er.extensions.components._private.ERXWOString;
@@ -106,7 +105,8 @@ import x.ERXDeprecatedConstant;
  * Improvements and fixes for WOApplication
  */
 
-public abstract class ERXApplication extends ERXAjaxApplication implements ERXGracefulShutdown.GracefulApplication {
+public abstract class ERXApplication extends ERXAjaxApplication {
+
 	/** logging support */
 	private static final Logger log = Logger.getLogger(ERXApplication.class);
 
@@ -1188,11 +1188,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 
 		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("addBalancerRouteCookieByNotification", new Class[] { NSNotification.class }), WORequestHandler.DidHandleRequestNotification, null);
 
-		// Signal handling support
-		if (ERXGracefulShutdown.isEnabled()) {
-			ERXGracefulShutdown.installHandler();
-		}
-
 		_memoryStarvedThreshold = ERXProperties.bigDecimalForKey("er.extensions.ERXApplication.memoryThreshold"); // MS: Kept around for backwards compat, replaced by memoryStarvedThreshold now
 		_memoryStarvedThreshold = ERXProperties.bigDecimalForKeyWithDefault("er.extensions.ERXApplication.memoryStarvedThreshold", _memoryStarvedThreshold);
 		_memoryLowThreshold = ERXProperties.bigDecimalForKeyWithDefault("er.extensions.ERXApplication.memoryLowThreshold", _memoryLowThreshold);
@@ -1979,16 +1974,6 @@ public abstract class ERXApplication extends ERXAjaxApplication implements ERXGr
 	public WOResponse createResponseInContext(WOContext context) {
 		WOResponse response = new ERXResponse(context);
 		return response;
-	}
-
-	/**
-	 * Override to perform any last minute cleanup before the application
-	 * terminates. See {@link er.extensions.components.ERXGracefulShutdown
-	 * ERXGracefulShutdown} for where this is called if signal handling is
-	 * enabled. Default implementation calls terminate.
-	 */
-	public void gracefulTerminate() {
-		terminate();
 	}
 
 	/**
