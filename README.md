@@ -1,6 +1,6 @@
 # wonder-slim
 
-The basics required to create run a modern WO application.
+The basics required to create and run a modern WO application. A playground for experimenting with Project Wonder improvements.
 
 ## Installation
 
