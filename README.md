@@ -40,9 +40,9 @@ This makes it easier to integrate with the java ecosystem, for example using and
 
 One of WO's strengths is convention over configuration. Over the years a lot of things has changed and changes have often been made "easier" by Wonder, by keeping old code around and activating it conditionally by looking at the project or by setting a property, reducing the "convention" part and adding to the "configuration part". This complicates things, so "old" code is being removed and with it goes the option of doing things "the old way". It's been 13 years since we've had a WO release, we should be ready to standardize on a set of practices.
 
-### Use Maven
+### Use Maven only
 
-The frameworks are only tested on maven and assume a maven project layout.
+The frameworks can only be built using maven, are only tested on maven and assume a maven project layout for projects that are built using it.
 
 ### **Run on modern java**
 
