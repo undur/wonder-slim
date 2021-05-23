@@ -4,7 +4,7 @@ The basics required to create and run a modern WO application. A playground for 
 
 ## Installation
 
-*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part here: https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has a different version than the real Project Wonder and thus lives fine alongside Project Wonder on your computer without disturbing anything else*
+*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part here: https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has different versioning from the real Project Wonder and will not disturb any other Project Wonder installations on your computer*
 
 1. Clone the repository
 2. Run `mvn clean install` in the cloned repository's root **or**
