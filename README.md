@@ -52,9 +52,9 @@ This might sound ironic since Slim is based on a closed framework. But we still 
 
 This makes it easier to integrate with the java ecosystem when using and contributing code and also makes our code more reusable and future proof. That applies to both framework code and the resulting application code.
 
-### **Standardize**
+### **Standardize on modern conventions**
 
-One of WO's strengths is convention over configuration. Over the years a lot of things has changed and changes have often been made "easier" by Wonder, by keeping old code around and activating it conditionally by looking at the project or by setting a property, reducing the "convention" part and adding to the "configuration part". This complicates things, so "old" code is being removed and with it goes the option of doing things "the old way". It's been 13 years since we've had a WO release, we should be ready to standardize on a set of practices.
+One of WO's strengths is convention over configuration. Over the years a lot of things have changed and progressed in Wonder and WO and those changes have often been made "easier" by Wonder, often by keeping old code around and activating it conditionally by looking at the project to try to see if it's "old" or by setting a property, reducing the "convention" part and adding to the "configuration part". This complicates things, so "old" code is being removed and with it goes the option of doing things "the old way". It's been 13 years since we've had a WO release, we should be ready to standardize on a set of practices.
 
 ### Use Maven only
 
