@@ -4,29 +4,27 @@
 
 ## Motivation
 
-Project Wonder is an old and storied collection of frameworks that's had many contributors with differing goals. Over the years, it's accumulated a *lot* of cruft and it's been a while since it's seen something like an overarching design philosophy.
+Project Wonder is an old and storied collection of frameworks that's had many contributors. Over the years, it's accumulated a *lot* of cruft and it's been a while since it's seen something like an overarching design philosophy.
 
-This is an experimental project to see how it can be improved, not by adding stuff but by removing stuff.
+This is an experimental project to see how Wonder can be improved, not by adding stuff but by removing stuff.
 
-Below I enumerate a few primary goals of wonder-slim (from here on called just "Slim"), they all share the same **ultimate goal**, to make Wonder manageable and maintainable, lean and mean and a lot more readable and understandable. The derived goal of this is to make Wonder maintainable.
+Below I enumerate a few primary goals of wonder-slim (from here on called just "Slim"), they all share the same **ultimate goal**, to make Wonder smaller, more manageable and maintainable, enabling faster development.
 
 ## Primary goals
 
-### Separate concerns and only include the basics
+### Separate concerns and include only the basics
 
-Project Wonder has a multitude of frameworks. This project focuses on the minimal subset that's required to create and run a modern basic WebObjects web application, nothing more, nothing less.
+Project Wonder has a multitude of frameworks. This project is about the minimal subset that's required to create and run a modern basic WO application, nothing more, nothing less.
 
-For this reason, the project picked only four frameworks from Project Wonder to work on, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. I've also chosen the route of combining `JavaWOExtensions` and `ERExtensions`, since they both currently serve pretty much the same purpose.
-
-The the project therefore currently only contains three frameworks.
+For this reason, the project picks only four frameworks from Project Wonder to work on, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. I've also combined `JavaWOExtensions` and `ERExtensions`, since they both serve pretty much the same purpose.
 
 ### **Loosen the ties between WOF and EOF**
 
 This is really an extensions of "separate concerns", but since EOF is a huge part of many users' projects, it merits a separate mention.
 
-A Web framework and a persistence frameworks really are separate things. As mentioned previously, this project focuses only on the "Web" part of WO, and removes everything related to EOF. Note that although EOF is not *part* of this project, that does not mean EOF cannot *integrate* well with the project. But EOF integration is not a priority at this stage.
+A Web framework and a persistence frameworks are separate things and this project focuses only on the "Web" part of WO. Therefore, everything EOF-related has been removed. Note that this does not preclude EOF usage, because although EOF is not *part* of the project it doesn't mean EOF can't *integrate* well with the project, but I consider that a separate effort.
 
-Slim's ERExtensions no longer uses any code from JavaEOControl or JavaEOAccess, although a WO application will still have to import these frameworks (due to JavaWebObjects referencing some classes there).
+Slim's ERExtensions no longer uses any code from JavaEOControl or JavaEOAccess, although a WO application will still have to import these frameworks (due to JavaWebObjects referencing some classes there, such as WOEvent inheriting from EOEvent, WOSession having an EOEditingContext etc.)
 
 ### Reduce the number of external dependencies
 
