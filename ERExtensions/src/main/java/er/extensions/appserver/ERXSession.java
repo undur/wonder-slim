@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -294,10 +296,13 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
    * @see      er.extensions.localization.ERXLocalizer#availableLanguages
    */
   public NSArray availableLanguagesForThisSession() {
-    NSArray browserLanguages = null;
-    if (context() != null && context().request() != null)
-      browserLanguages = context().request().browserLanguages();
-    return ERXArrayUtilities.intersectingElements(browserLanguages, ERXLocalizer.availableLanguages());
+	  final HashSet<String> languages = new HashSet<> ( ERXLocalizer.availableLanguages() );
+	  
+	  if( context() != null && context().request() != null) {
+		  languages.retainAll( context().request().browserLanguages() );
+	  }
+	  
+	  return new NSArray<>( languages );
   }
 
   /**

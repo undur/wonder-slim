@@ -37,44 +37,6 @@ public class ERXArrayUtilities {
 	}
 
 	/**
-	 * Intersects the elements of two arrays. This has the effect of stripping
-	 * out duplicates.
-	 * 
-	 * @param <T>
-	 *            class of array items
-	 * @param array1
-	 *            the first array
-	 * @param array2
-	 *            the second array
-	 * @return the intersecting elements
-	 */
-	public static <T> NSArray<T> intersectingElements(Collection<? extends T> array1, Collection<? extends T> array2) {
-		if (array1 == null || array1.isEmpty() || array2 == null || array2.isEmpty()) {
-			return NSArray.emptyArray();
-		}
-		Collection<? extends T> smaller, larger;
-		if (array1.size() > array2.size()) {
-			smaller = array2;
-			larger = array1;
-		}
-		else {
-			smaller = array1;
-			larger = array2;
-		}
-		Set<T> set = new HashSet<>(smaller);
-		NSMutableArray<T> intersectingElements = new NSMutableArray<>();
-
-		for (T object : larger) {
-			if (set.contains(object)) {
-				intersectingElements.add(object);
-				set.remove(object);
-			}
-		}
-
-		return !intersectingElements.isEmpty() ? intersectingElements : NSArray.emptyArray();
-	}
-
-	/**
 	 * Just like the method
 	 * {@link com.webobjects.foundation.NSArray#sortedArrayUsingComparator(NSComparator)},
 	 * except it catches the NSComparator.ComparisonException and, if thrown, it
