@@ -2438,6 +2438,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return additionalAdaptors;
 	}
 
+	/**
+	 * Overridden to check for (and optionally kill) an existing running instance on the same port
+	 */
 	@Override
 	public WOAdaptor adaptorWithName(String aClassName, NSDictionary<String, Object> anArgsDictionary) {
 		try {
