@@ -8,16 +8,16 @@
 	<version>8.0.0.slim-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Wonder reactor</name>
-    <modules>
-        <module>ERExtensions</module>
-        <module>WOOgnl</module>
-        <module>Ajax</module>
-    </modules>
+	<modules>
+		<module>ERExtensions</module>
+		<module>WOOgnl</module>
+		<module>Ajax</module>
+	</modules>
 	<properties>
 		<wonder.core.group>wonder.core</wonder.core.group>
 		<wonder.ajax.group>wonder.ajax</wonder.ajax.group>
 		<wonder.version>8.0.0.slim-SNAPSHOT</wonder.version>
-		
+
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
 	</properties>
