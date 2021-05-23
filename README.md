@@ -36,11 +36,11 @@ For this reason, the project picks only four frameworks from Project Wonder as b
 
 ### **Loosen the ties between WOF and EOF**
 
-This is really an extensions of "separate concerns", but since EOF is a huge part of many users' projects, it merits a separate mention.
+This is really just an extension of "separate concerns", but since EOF is a huge part of many projects it merits a separate mention.
 
-A Web framework and a persistence frameworks are separate things and this project focuses only on the "Web" part of WO. Therefore, everything EOF-related has been removed. Note that this does not preclude EOF usage, because although EOF is not *part* of *this* project it doesn't mean EOF can't *integrate* well with it. But I consider that a separate effort.
+A web framework and a persistence framework are separate things and this project focuses only on the "web" part. Therefore, everything EOF-related has been removed. Note that this does not preclude EOF usage, because although EOF is not *part* of *this* project it doesn't mean EOF can't *integrate* well with it. But I consider that a separate effort.
 
-For this reason, Slim's frameworks (notably ERExtensions) no longer uses any code from JavaEOControl or JavaEOAccess, although a WO application will still have to import these frameworks (due to JavaWebObjects referencing some classes there, such as WOEvent inheriting from EOEvent, WOSession having an EOEditingContext etc.)
+For this reason, Slim's frameworks (notably ERExtensions) no longer does anything EOF-related nor does it use any code from JavaEOControl or JavaEOAccess. A WO application using it will still have to import these frameworks (due to JavaWebObjects referencing some classes there, such as WOEvent inheriting from EOEvent, WOSession having an EOEditingContext etc.)
 
 ### Reduce the number of external dependencies
 
