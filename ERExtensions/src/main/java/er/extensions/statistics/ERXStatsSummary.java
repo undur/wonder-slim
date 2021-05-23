@@ -1,6 +1,9 @@
 package er.extensions.statistics;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 
 import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
@@ -65,7 +68,9 @@ public class ERXStatsSummary extends ERXStatelessComponent {
      */
     public NSArray statsTypes() {
         if (null == _statsTypes) {
-            _statsTypes = ERXArrayUtilities.sortedArrayUsingComparator(statsByType().allKeys(), NSComparator.AscendingCaseInsensitiveStringComparator);
+            final NSMutableArray<String> keys = new NSMutableArray<>( statsByType().allKeys() );
+            Collections.sort( keys );
+			_statsTypes = keys.immutableClone();
         }
         return _statsTypes;
     }
