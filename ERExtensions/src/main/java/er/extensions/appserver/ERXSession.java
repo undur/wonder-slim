@@ -11,7 +11,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -27,7 +26,6 @@ import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSPathUtilities;
@@ -37,7 +35,6 @@ import com.webobjects.foundation.NSTimestamp;
 import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.browser.ERXBrowser;
 import er.extensions.browser.ERXBrowserFactory;
-import er.extensions.foundation.ERXArrayUtilities;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
@@ -97,9 +94,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 
   /** flag for if java script is enabled */
   protected Boolean _javaScriptEnabled; // most people have JS by now
-
-  /** holds a debugging store for a given session. */
-  protected NSMutableDictionary _debuggingStore;
 
   /** the receiver of the various notifications */
   transient private Observer _observer;
@@ -348,21 +342,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
   }
 
   /**
-   * Simple mutable dictionary that can be used at
-   * runtime to stash objects that can be useful for
-   * debugging.
-   * @return debugging store dictionary
-   */
-  // ENHANCEME: Should perform a check to make sure that the app is not in production mode when this is being used.
-  public NSMutableDictionary debuggingStore() {
-    if (_debuggingStore == null)
-      _debuggingStore = new NSMutableDictionary();
-    return _debuggingStore;
-  }
-
-  private boolean _editingContextWasCreated = false;
-
-  /**
    * Returns if this user has javascript enabled.
    * This checks a form value "javaScript" and a cookie "js"
    * if the value is 1.
@@ -415,12 +394,14 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
     NSNotificationCenter.defaultCenter().postNotification(SessionDidRestoreNotification, this);
 
     WORequest request = context() != null ? context().request() : null;
+
     if (request != null && log.isDebugEnabled() && request.headerForKey("content-type") != null) {
       if ((request.headerForKey("content-type")).toLowerCase().indexOf("multipart/form-data") == -1)
         log.debug("Form values {}", request.formValues());
       else
         log.debug("Multipart Form values found");
     }
+
     _originalThreadName = Thread.currentThread().getName();
     Thread.currentThread().setName(threadName());
 
@@ -464,7 +445,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
    * meaning they hit the back button and then clicked on a
    * link.
    */
-  protected Boolean _didBacktrack = null;
+  private Boolean _didBacktrack = null;
 
   /** flag to indicate if the last action was a direct action */
   public boolean lastActionWasDA = false;
@@ -475,8 +456,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
    * @param aRequest request to get the context id from
    * @return the context id as a string
    */
-  // MOVEME: ERXWOUtilities
-  public String requestsContextID(WORequest aRequest) {
+  private String requestsContextID(WORequest aRequest) {
     String uri = aRequest.uri();
     int idx = uri.indexOf('?');
     if (idx != -1)
@@ -495,6 +475,9 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
    * the user backtracked. If the context ID for the request is 2 clicks
    * less than the context ID for the current WOContext, we know
    * the backtracked.
+   * 
+   * FIXME: I find this highly sus. ERXDirectActionRequestHandler sets "lastActionWasDA to true for the session, but it's never set to false again? // Hugi 2021-05-23
+   * 
    * @return if the user has backtracked or not.
    */
   public boolean didBacktrack() {
@@ -654,6 +637,9 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
     log.debug("Session has been deserialized: {}", this);
   }
 
+  /**
+   * Overridden to make method public
+   */
   @Override
   public NSTimestamp _birthDate() {
 	  return super._birthDate();
