@@ -28,8 +28,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSMutableArray;
 
-import x.FIXMEException;
-
 /**
  * Configures and manages the log4j logging system. Will also configure the system for rapid turn around, i.e. when
  * WOCaching is disabled when the conf file changes it will get reloaded.
@@ -374,9 +372,9 @@ public class ERXLog4JConfiguration extends WOComponent {
     public WOComponent filter() { return null; }
     public WOComponent resetFilter() { _filterString = null; filterLevel = null; return null; }
     public WOComponent update() {
-    	throw new FIXMEException();
-//        ERXExtensions.configureAdaptorContext();
-//        return null;
+    	// In old MegaWonder, this configured logging for some EOEAdaptor stuff. Removed.
+    	return null;
+    	
     }
 
     public String showAllLoggersSelection() { return showAll ? "all" : "explicit"; }
