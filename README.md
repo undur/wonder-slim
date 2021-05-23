@@ -34,9 +34,9 @@ Slim's ERExtensions no longer uses any code from JavaEOControl or JavaEOAccess, 
 
 ### Reduce the amount of code used from closed frameworks
 
-Although not using WO is not realistic, I'd like to reduce the amount of usage of WO apis as much as possible. This includes not using NS* collection classes, avoiding property list serialization.
+Although not using WO is not realistic, I reduce the amount of usage of closed WO apis as much as possible. This includes not using NS* collection classes etc.
 
-This makes it easier to integrate with the java ecosystem, i.e. use code and contribute code from it. And it even allows for some exciting development in the future, who knows.
+This makes it easier to integrate with the java ecosystem, for example using and contributing code from it. It also makes code written more reusable and future proof, this applies to both framework code and application code.
 
 ### **Standardize**
 
