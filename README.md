@@ -1,6 +1,6 @@
 # wonder-slim
 
-*Before you start reading, I must mention that this is really not my projec., It's merely an organization of over two decades of work of dozens, even hundreds of people. To emphasize this, I've chosen to go the way of cloning the existing Wonder repository and keep attribution and history of the source files in question as much as possible. Much love and respect for past contributors.*
+*Before you start reading, I should mention that this is not my own project. It's merely an organization of over two decades of work of dozens, even hundreds of people. To emphasize this, I've chosen to go the way of cloning the existing Wonder repository and keep attribution and history of the source files in question as much as possible. Much love and respect for past contributors.*
 
 ## Motivation
 
@@ -31,6 +31,12 @@ Slim's ERExtensions no longer uses any code from JavaEOControl or JavaEOAccess, 
 ### Reduce the number of external dependencies
 
 `ERExtensions` only pulls in two external dependencies `slf4j-api` and `log4j`.  The other two frameworks are unchanged from wonder; `WOOGNL ` pulls in `ognl` and `Ajax` pulls in `jabsorb`.
+
+### Reduce the amount of code used from closed frameworks
+
+Although not using WO is not realistic, I'd like to reduce the amount of usage of WO apis as much as possible. This includes not using NS* collection classes, avoiding property list serialization.
+
+This makes it easier to integrate with the java ecosystem, i.e. use code and contribute code from it. And it even allows for some exciting development in the future, who knows.
 
 ### **Standardize**
 
