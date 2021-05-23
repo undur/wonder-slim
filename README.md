@@ -68,7 +68,7 @@ Slim targets Java 11 and does not support older JDKs. This is a part of the simp
 
 #### Bonus goal: Backport improvements to the real Project Wonder
 
-Development on this project will move fast and break stuff, which is difficult in Wonder, due to the large and complex user base and complexity of the framework. But whatever is learned from the cleanup and is usable and API-compatible will be backported to Project Wonder.
+Development on this project will move fast and break stuff, which is difficult to do in Wonder itself due to the diverse user base and the complexity of the framework. However, whatever is learned from the cleanup and code that's usable and API-compatible will be considered for contribution to Project Wonder.
 
 ## FAQ
 
