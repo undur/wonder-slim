@@ -56,13 +56,13 @@ Slim targets Java 11 and will not run on older JDKs.
 
 ### So, are you just leaving Project Wonder behind?
 
-No. While this is a usable framework in and off itself, it's also meant to serve as an exercise to learn to navigate the Wonder Sources and WO's architecture, what's actually used, what can be improved etc. Hopefully, some of the refacorings and cleanups can be backported to Wonder itself, so everyone benefits. 
+No. While this is a usable framework in and off itself, it's also something of an exercise to just learn to navigate the Wonder Sources and WO's architecture, understand what's there, what's actually used, what can be improved etc. Hopefully, some of the refactorings and cleanups can be backported to Wonder itself, so everyone benefits. 
 
-In a perfect world, this effort could replace the Frameworks we're working on in Wonder. But that would require a huge effort, due to the highly interconnected nature of the current Project Wonder.
+In a perfect world, this effort might work it's way directly into Wonder itself. But that would require a huge effort, due to the huge amount of (highly interconnected) code in current Project Wonder.
 
 ### Do you use it?
 
-Yes. I now use Slim in all of my active projects instead of Project Wonder.
+Yes. I now use Slim in all of my active projects instead of Project Wonder. It's very nice to have an understandable, easily modifiable and (comparably) small base of framework code with a limited set of dependencies.
 
 ### Can I use it?
 
