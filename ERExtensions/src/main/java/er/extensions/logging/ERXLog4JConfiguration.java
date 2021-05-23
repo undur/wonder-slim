@@ -258,7 +258,9 @@ public class ERXLog4JConfiguration extends WOComponent {
     }
 
     public NSArray loggerLevelsWithoutUnset() {
-        return ERXArrayUtilities.arrayMinusObject(new NSArray(LoggerLevel.values()), LoggerLevel.UNSET);
+    	NSMutableArray<LoggerLevel> levels = new NSMutableArray<>( LoggerLevel.values() );
+    	levels.remove(LoggerLevel.UNSET);
+    	return levels;
     }
 
     public LoggerRepository loggerRepository() {
@@ -325,9 +327,10 @@ public class ERXLog4JConfiguration extends WOComponent {
         return _appenders;
     }
 
-    public NSArray levelsWithoutUnset() {
-        NSArray applicableLevels = ERXArrayUtilities.arrayMinusObject(new NSArray(LoggerLevel.values()), LoggerLevel.UNSET);
-        return (NSArray)applicableLevels.valueForKey("level");
+    public NSArray<LoggerLevel> levelsWithoutUnset() {
+    	NSMutableArray<LoggerLevel> levels = new NSMutableArray<>( LoggerLevel.values() );
+    	levels.remove( LoggerLevel.UNSET );
+    	return (NSArray)levels.valueForKey( "level" );
     }
 
     public LoggerLevel currentAppenderLevel() {
