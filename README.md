@@ -4,7 +4,7 @@ The basics required to create and run a modern WO application. A playground for 
 
 ## Installation
 
-*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part here: https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has different versioning from the real Project Wonder and will not disturb any other Project Wonder installations on your computer*
+*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part [here]( https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has different versioning from the real Project Wonder and will not interfere with other Project Wonder installations*
 
 1. Clone the repository
 2. Run `mvn clean install` in the cloned repository's root **or**
@@ -52,23 +52,17 @@ This might sound ironic since Slim is based on a closed framework. But we still 
 
 This makes it easier to integrate with the java ecosystem when using and contributing code and also makes our code more reusable and future proof. That applies to both framework code and the resulting application code.
 
-### **Standardize on modern conventions**
+### Standardize on modern conventions
 
-One of WO's strengths is convention over configuration. Over the years a lot of things have changed in Wonder and WO and those changes have been hidden or made "easier" by Wonder, for example by keeping deprecated code around and activating it conditionally by looking at the project to try to see if it's "old" or by setting a property. This reduces the "convention" part and adds to the "configuration part" and makes the overall codebase larger and harder to understand.
-
-To simplify development, "old" code is being removed and with it the option of doing things "the old way" whatever that may be. It's been 13 years since we've had a WO release so we should be ready to standardize on a set of practices by now.
+Over the years a lot of things have changed in Wonder and WO. To keep compatibility, newer releases often hide changes, for example by keeping deprecated code around and activating it conditionally by looking at projects to see if they're "old" or by setting a property. This makes the codebase larger, harder to understand and harder to maintain. So to simplify development, "old" code is being removed and with it the option of doing things "the old way", whatever that may be.
 
 ### Use Maven only
 
-The frameworks can only be built using maven, are only tested on maven and assume a maven project layout for projects that are built using it.
+To keep the build simple, Slim is only built using maven.
 
-### **Run on (relatively) modern java**
+### Run on (relatively) modern java
 
 Slim targets Java 11 and does not support older JDKs. This is a part of the simplification of the development and environment through standardization.
-
-#### Bonus goal: Backport improvements to the real Project Wonder
-
-Development on this project will move fast and break stuff, which is difficult to do in Wonder itself due to the diverse user base and the complexity of the framework. However, whatever is learned from the cleanup and code that's usable and API-compatible will be considered for contribution to Project Wonder.
 
 ## FAQ
 
