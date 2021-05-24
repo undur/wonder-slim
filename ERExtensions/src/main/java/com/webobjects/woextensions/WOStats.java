@@ -8,17 +8,18 @@
 package com.webobjects.woextensions;
 
 import com.webobjects.appserver.WOActionResults;
-import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WORequest;
 
-public class WOStats extends WODirectAction {
+import er.extensions.appserver.ERXDirectAction;
 
-    public WOStats(WORequest aRequest)  {
-        super(aRequest);
-    }
-    
-    @Override
-    public WOActionResults defaultAction()  {
-        return pageWithName("WOStatsPage");
-    }
+public class WOStats extends ERXDirectAction {
+
+	public WOStats(WORequest aRequest) {
+		super(aRequest);
+	}
+
+	@Override
+	public WOActionResults defaultAction() {
+		return pageWithName( WOStatsPage.class );
+	}
 }
