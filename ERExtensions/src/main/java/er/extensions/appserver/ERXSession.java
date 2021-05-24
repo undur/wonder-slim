@@ -38,7 +38,6 @@ import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
-import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
 import x.ERXDeprecatedConstant;
 
@@ -86,9 +85,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 
 	/** holds a reference to the current browser used for this session */
 	transient private ERXBrowser _browser;
-
-	/** flag for if java script is enabled */
-	protected Boolean _javaScriptEnabled; // most people have JS by now
 
 	/** the receiver of the various notifications */
 	transient private Observer _observer;
@@ -334,50 +330,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 			}
 		}
 		return _browser;
-	}
-
-	/**
-	 * Returns if this user has javascript enabled. This checks a form value
-	 * "javaScript" and a cookie "js" if the value is 1.
-	 * 
-	 * @return if js is enabled, defaults to true.
-	 */
-	// CHECKME: (ak) I don't understand this? Having a default of TRUE makes no
-	// sense. At least not without some ERXJSCheckJavaScript component that
-	// would set a value on &lt;NOSCRIPT&gt; or sth like this.
-	public boolean javaScriptEnabled() {
-		WORequest request = context() != null ? context().request() : null;
-		if (_javaScriptEnabled == null && request != null) {
-			// FIXME: Shouldn't be hardcoded form value.
-			String js = request.stringFormValueForKey("javaScript");
-			if (js != null) {
-				log.debug("Received javascript form value {}", js);
-			}
-			else {
-				try {
-					js = request.cookieValueForKey(JAVASCRIPT_ENABLED_COOKIE_NAME);
-				}
-				catch (StringIndexOutOfBoundsException e) {
-					// malformed cookies cause WO 5.1.3 to raise here
-				}
-			}
-			if (js != null) {
-				_javaScriptEnabled = (ERXValueUtilities.booleanValue(js) && (browser().browserName().equals(ERXBrowser.UNKNOWN_BROWSER) || browser().isMozilla40Compatible() || browser().isMozilla50Compatible())) ? Boolean.TRUE : Boolean.FALSE;
-			}
-		}
-		// defaults to true as most browsers have javascript
-		return _javaScriptEnabled == null ? true : _javaScriptEnabled.booleanValue();
-	}
-
-	/**
-	 * Sets if javascript is enabled for this session. crafty entry pages can
-	 * set form values via javascript to test if it is enabled.
-	 * 
-	 * @param newValue
-	 *            says if javascript is enabled
-	 */
-	public void setJavaScriptEnabled(boolean newValue) {
-		_javaScriptEnabled = newValue ? Boolean.TRUE : Boolean.FALSE;
 	}
 
 	/**
