@@ -6,6 +6,10 @@
   Makes the code easier on the eyes. Still considering full removal of response compression since that tends to be handled by the web server in most environments I know of. 
 - **Moved ERXCompressionUtilities class into ERXResponseCompression and made it private.**
   Slim is not a generic compression framework, so it's reasonable that the only user of the code keeps it.
+- **Renamed ERXHyperlink to ERXWOHyperlink**
+  Naming conventions are good.
+- **Renamed ERXSwitchComponent to ERXWOSwitchComponent**
+  Naming conventions are good.
 - 
 
 ## 2021-05-23

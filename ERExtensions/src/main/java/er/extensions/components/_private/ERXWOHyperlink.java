@@ -31,7 +31,7 @@ import er.extensions.foundation.ERXProperties;
  * @author david Logging
  * @author ak WONoContentElement fix, senderID fix, double-quote fix
  */
-public class ERXHyperlink extends WOHyperlink {
+public class ERXWOHyperlink extends WOHyperlink {
     /**
      * Defines if the hyperlink adds a default <code>rel="nofollow"</code> if an action is bound.
      */
@@ -42,7 +42,7 @@ public class ERXHyperlink extends WOHyperlink {
      * @param arg1
      * @param arg2
      */
-    public ERXHyperlink(String arg0, NSDictionary arg1, WOElement arg2) {
+    public ERXWOHyperlink(String arg0, NSDictionary arg1, WOElement arg2) {
         super(arg0, arg1, arg2);
     }
 

@@ -44,8 +44,8 @@ import com.webobjects.foundation._NSUtilities;
 import er.extensions.appserver.ERXResponse;
 import er.extensions.appserver.ERXSession;
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.components._private.ERXHyperlink;
-import er.extensions.components._private.ERXSwitchComponent;
+import er.extensions.components._private.ERXWOHyperlink;
+import er.extensions.components._private.ERXWOSwitchComponent;
 
 /**
  * Wrapper around the WO-private NSUtilities which allows for some Objective-C-Style poseAs. Using these methods may or
@@ -104,9 +104,9 @@ public class ERXPatcher {
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButton.class, "WORadioButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
 
-		ERXPatcher.setClassForName(ERXHyperlink.class, "WOHyperlink");
+		ERXPatcher.setClassForName(ERXWOHyperlink.class, "WOHyperlink");
 		if (ERXProperties.booleanForKeyWithDefault("er.extensions.WOSwitchComponent.patch", true)) {
-			ERXPatcher.setClassForName(ERXSwitchComponent.class, "WOSwitchComponent");
+			ERXPatcher.setClassForName(ERXWOSwitchComponent.class, "WOSwitchComponent");
 		}
 		
 		// RM XHTML strict compliance

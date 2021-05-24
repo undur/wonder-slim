@@ -20,14 +20,14 @@ import com.webobjects.foundation.NSMutableDictionary;
  * Gets installed automatically by ERXPatcher.
  * @author ak
  */
-public class ERXSwitchComponent extends WODynamicElement {
+public class ERXWOSwitchComponent extends WODynamicElement {
 	WOAssociation componentName;
 	public NSMutableDictionary componentAttributes;
 	NSMutableDictionary componentCache;
 	private NSMutableDictionary<String, String> elementIDByName;
 	WOElement template;
 
-	public ERXSwitchComponent(String paramString, NSDictionary paramNSDictionary, WOElement paramWOElement) {
+	public ERXWOSwitchComponent(String paramString, NSDictionary paramNSDictionary, WOElement paramWOElement) {
 		super(null, null, null);
 		componentName = ((WOAssociation) paramNSDictionary.objectForKey("WOComponentName"));
 		if (componentName == null) {
