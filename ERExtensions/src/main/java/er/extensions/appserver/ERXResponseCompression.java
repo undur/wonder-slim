@@ -56,12 +56,18 @@ public class ERXResponseCompression {
 
 		return _responseCompressionEnabled.booleanValue();
 	}
-	
+
+	/**
+	 * Checks headers on the request and response
+	 * 
+	 * FIXME: clean up those checks a bit to make it easier to see what's happening.
+	 */
 	public static boolean shouldCompress( final WORequest request, final WOResponse response ) {
 		final String contentType = response.headerForKey("content-type");
-		String acceptEncoding = request.headerForKey("accept-encoding");
+		final String contentEncoding = response.headerForKey("content-encoding");
+		final String acceptEncoding = request.headerForKey("accept-encoding");
 
-		final boolean contentTypeCheck = !"gzip".equals(response.headerForKey("content-encoding")) && (contentType != null) && (contentType.startsWith("text/") || responseCompressionTypes().containsObject(contentType));
+		final boolean contentTypeCheck = !"gzip".equals(contentEncoding) && (contentType != null) && (contentType.startsWith("text/") || responseCompressionTypes().containsObject(contentType));
 		final boolean acceptEncodingCheck = (acceptEncoding != null) && (acceptEncoding.toLowerCase().indexOf("gzip") != -1);
 		
 		return contentTypeCheck && acceptEncodingCheck;
