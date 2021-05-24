@@ -20,7 +20,10 @@ import er.extensions.appserver.ERXWOContext;
  * @author ak
  * @binding condition
  * @binding negate
+ * 
+ * FIXME: Shouldn't this be patched in for WOConditional by ERXPatcher? 
  */
+
 public class ERXWOConditional extends WODynamicGroup {
 	public static final String LAST_CONDITION_KEY = "er.extensions.ERXWOConditional.lastCondition";
 
