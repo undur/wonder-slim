@@ -78,7 +78,6 @@ import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
-import com.webobjects.foundation.NSSet;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.development.NSBundleFactory;
 
@@ -89,7 +88,6 @@ import er.extensions.components._private.ERXWOForm;
 import er.extensions.components._private.ERXWORepetition;
 import er.extensions.components._private.ERXWOString;
 import er.extensions.components._private.ERXWOTextField;
-import er.extensions.foundation.ERXCompressionUtilities;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXMutableURL;
@@ -1899,54 +1897,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			requestHandlingLog.debug("Returning, encoding: " + response.contentEncoding() + " response: " + response);
 		}
 
-		if (responseCompressionEnabled()) {
-			response = compressResponse( request, response );
-		}
-
-		return response;
-	}
-
-	private static WOResponse compressResponse( final WORequest request, final WOResponse response ) {
-		final String contentType = response.headerForKey("content-type");
-
-		if (!"gzip".equals(response.headerForKey("content-encoding")) && (contentType != null) && (contentType.startsWith("text/") || responseCompressionTypes().containsObject(contentType))) {
-			String acceptEncoding = request.headerForKey("accept-encoding");
-			if ((acceptEncoding != null) && (acceptEncoding.toLowerCase().indexOf("gzip") != -1)) {
-				long start = System.currentTimeMillis();
-				long inputBytesLength;
-				InputStream contentInputStream = response.contentInputStream();
-				NSData compressedData;
-				if (contentInputStream != null) {
-					inputBytesLength = response.contentInputStreamLength();
-					compressedData = ERXCompressionUtilities.gzipInputStreamAsNSData(contentInputStream, (int) inputBytesLength);
-					response.setContentStream(null, 0, 0);
-				}
-				else {
-					NSData input = response.content();
-					inputBytesLength = input.length();
-					if (inputBytesLength > 0) {
-						compressedData = ERXCompressionUtilities.gzipByteArrayAsNSData(input._bytesNoCopy(), 0, (int) inputBytesLength);
-					}
-					else {
-						compressedData = NSData.EmptyData;
-					}
-				}
-				if (inputBytesLength > 0) {
-					if (compressedData == null) {
-						// something went wrong
-					}
-					else {
-						response.setContent(compressedData);
-						response.setHeader(String.valueOf(compressedData.length()), "content-length");
-						response.setHeader("gzip", "content-encoding");
-						if (log.isDebugEnabled()) {
-							log.debug("before: " + inputBytesLength + ", after " + compressedData.length() + ", time: " + (System.currentTimeMillis() - start));
-						}
-					}
-				}
+		if( ERXResponseCompression.responseCompressionEnabled() ) {
+			if( ERXResponseCompression.shouldCompress( request, response ) ) {
+				response = ERXResponseCompression.compressResponse( response );
 			}
 		}
-		
+
 		return response;
 	}
 
@@ -2178,37 +2134,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	public Number sessionTimeOutInMinutes() {
 		return Integer.valueOf(sessionTimeOut().intValue() / 60);
-	}
-
-	private static Boolean _responseCompressionEnabled;
-
-	/**
-	 * checks the value of
-	 * <code>er.extensions.ERXApplication.responseCompressionEnabled</code> and
-	 * if true turns on response compression by gzip
-	 */
-	private static boolean responseCompressionEnabled() {
-		if (_responseCompressionEnabled == null) {
-			_responseCompressionEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.responseCompressionEnabled", false) ? Boolean.TRUE : Boolean.FALSE;
-		}
-		return _responseCompressionEnabled.booleanValue();
-	}
-
-	private static NSSet<String> _responseCompressionTypes;
-
-	/**
-	 * checks the value of
-	 * <code>er.extensions.ERXApplication.responseCompressionTypes</code> for
-	 * mime types that allow response compression in addition to text/* types.
-	 * The default is ("application/x-javascript")
-	 * 
-	 * @return an array of mime type strings
-	 */
-	private static NSSet<String> responseCompressionTypes() {
-		if (_responseCompressionTypes == null) {
-			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault("er.extensions.ERXApplication.responseCompressionTypes", new NSArray<String>("application/x-javascript")));
-		}
-		return _responseCompressionTypes;
 	}
 
 	/**
