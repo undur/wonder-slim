@@ -10,7 +10,8 @@
   Naming conventions are good.
 - **Renamed ERXSwitchComponent to ERXWOSwitchComponent**
   Naming conventions are good.
-- 
+- **Removed ERXSession.javascriptEnabled**
+  If you need this sort of functionality, do it yourself
 
 ## 2021-05-23
 
@@ -21,8 +22,8 @@
 
   If you need to do stuff before and after requests, override `dispatchRequest()`.
 
-- **Moved the ERExtensions.initApp(...) methods to new class ERXAppRunner**
-  ERExtensions should serve only as ERExtensions' principal class
+- **Moved the ERXExtensions.initApp(...) methods to new class ERXAppRunner**
+  ERXExtensions should serve only as the ERExtensions framework's principal/initialization class
 
 - **Removed threadInterrupt stuff from ERXRuntimeUtilities**
   Logic not actually used by any code inside the frameworks.
