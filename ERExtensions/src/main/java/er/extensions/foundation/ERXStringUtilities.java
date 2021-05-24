@@ -372,7 +372,10 @@ public class ERXStringUtilities {
 	 *            MD5 operates on byte arrays, so we need to know the encoding
 	 *            to getBytes as
 	 * @return the MD5 sum of the bytes
+	 * 
+	 * FIXME: Replace with standard Java methods
 	 */
+	@Deprecated
 	private static byte[] md5(String str, String encoding) {
 		byte[] bytes;
 		if (str == null) {
@@ -403,7 +406,10 @@ public class ERXStringUtilities {
 	 * @return the MD5 sum of the bytes in file
 	 * @exception IOException
 	 *                if the input stream could not be read
+	 *                
+	 * FIXME: Replace with Java methods
 	 */
+	@Deprecated
 	private static byte[] md5(InputStream in) throws IOException {
 		try {
 			java.security.MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");
@@ -429,7 +435,10 @@ public class ERXStringUtilities {
 	 *            MD5 operates on byte arrays, so we need to know the encoding
 	 *            to getBytes as
 	 * @return the MD5 sum of the bytes in a hex string
+	 * 
+	 * FIXME: Replace with Java methods
 	 */
+	@Deprecated
 	public static String md5Hex(String str, String encoding) {
 		String hexStr;
 		if (str == null) {
