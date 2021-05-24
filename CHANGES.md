@@ -12,6 +12,8 @@
   Naming conventions are good.
 - **Removed ERXSession.javascriptEnabled**
   If you need this sort of functionality, do it yourself
+- **Deleted ERXDirectAction.browser()**
+  ERXRequest already holds a browser object and a direct action holds a request.
 
 ## 2021-05-23
 

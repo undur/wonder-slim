@@ -22,7 +22,6 @@ import com.webobjects.woextensions.WOEventDisplayPage;
 import com.webobjects.woextensions.WOEventSetupPage;
 import com.webobjects.woextensions.WOStatsPage;
 
-import er.extensions.browser.ERXBrowser;
 import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
@@ -41,9 +40,6 @@ import er.extensions.statistics.ERXStats;
 public class ERXDirectAction extends WODirectAction {
 
 	private Logger log = LoggerFactory.getLogger( ERXDirectAction.class );
-
-	/** holds a reference to the current browser used for this session */
-	private ERXBrowser browser;
 
 	public ERXDirectAction(WORequest r) {
 		super(r);
@@ -182,32 +178,6 @@ public class ERXDirectAction extends WODirectAction {
 		ERXRedirect r = pageWithName(ERXRedirect.class);
 		r.setDirectActionName("default");
 		return r;
-	}
-
-	/**
-	 * Returns the browser object representing the web browser's "user-agent"
-	 * string. You can obtain browser name, version, platform and Mozilla
-	 * version, etc. through this object. <br>
-	 * Good for WOConditional's condition binding to deal with different browser
-	 * versions.
-	 * 
-	 * @return browser object
-	 */
-	public ERXBrowser browser() {
-		if (browser == null && request() != null) {
-			ERXBrowserFactory browserFactory = ERXBrowserFactory.factory();
-			browser = browserFactory.browserMatchingRequest(request());
-			browserFactory.retainBrowser(browser);
-		}
-		return browser;
-	}
-
-	@Override
-	public WOActionResults performActionNamed(String actionName) {
-		WOActionResults actionResult = super.performActionNamed(actionName);
-		if (browser != null)
-			ERXBrowserFactory.factory().releaseBrowser(browser);
-		return actionResult;
 	}
 
 	/**
