@@ -21,4 +21,18 @@
 - **Removed threadInterrupt stuff from ERXRuntimeUtilities**
   Logic not actually used by any code inside the frameworks.
 
+- **Deleted ERXArrayUtilities**
+
+- **Deleted ERXActiveImage**
+  Doesn't seem to serve any purpose
+
+- **Deleted ERXWOPasswordField**
+  The improvements offered by it are negligible in the age of ubiquitous https
+
+- **Deleted userInfo() stuff from ERXResponse**
+  It seems to have been there mostly to keep comptibility with older WO versions.
+
+- **Removed pushContent(), popContent(), __setContent() etc. from ERXWOContext**
+  Looks like the vestiges of a 13 year old experiment by mschrag.
+
 - 
