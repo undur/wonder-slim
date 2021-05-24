@@ -1,4 +1,4 @@
-package undur.testapp.app;
+package testapp;
 
 import er.extensions.appserver.ERXApplication;
 

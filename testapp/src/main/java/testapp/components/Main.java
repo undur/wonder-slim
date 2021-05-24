@@ -1,4 +1,4 @@
-package undur.testapp.components;
+package testapp.components;
 
 import com.webobjects.appserver.WOContext;
 

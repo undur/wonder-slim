@@ -1,4 +1,4 @@
-package undur.testapp.app;
+package testapp;
 
 import com.webobjects.appserver.WORequest;
 
