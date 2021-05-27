@@ -265,6 +265,8 @@ public class ERXDirectAction extends WODirectAction {
 	 * </p>
 	 *
 	 * @return simple response to close the connection
+	 * 
+	 * FIXME: This ancient workaround can probably be deleted. Needs to be looked at in tndem with AjaxFlexibleFileUpload.
 	 */
 	public WOActionResults closeHTTPSessionAction() {
 		ERXResponse response = new ERXResponse("");
