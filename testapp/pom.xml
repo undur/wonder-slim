@@ -53,6 +53,12 @@
 			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaWebObjects</artifactId>
 			<version>${webobjects.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>${webobjects.group}</groupId>
+					<artifactId>JavaXML</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>${webobjects.group}</groupId>
