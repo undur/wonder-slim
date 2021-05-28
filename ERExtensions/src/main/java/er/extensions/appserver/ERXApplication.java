@@ -2497,18 +2497,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Workaround for method missing in 5.3. Misnamed because static methods
-	 * can't override client methods.
-	 * 
-	 * @return the request handler key for ajax.
-	 * @deprecated use {@link #ajaxRequestHandlerKey()} instead
-	 */
-	@Deprecated
-	public static String erAjaxRequestHandlerKey() {
-		return "ja";
-	}
-
-	/**
 	 * Sends out a ApplicationWillTerminateNotification before actually starting
 	 * to terminate.
 	 */
