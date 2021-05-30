@@ -1786,6 +1786,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @param context
 	 *            current context
 	 * @return the WOResponse of the generic exception page.
+	 * 
+	 * FIXME: Why does this method exist? It's not invoked from anywhere // Hugi 2021-05-30
 	 */
 	public WOResponse genericHandleException(Exception exception, WOContext context) {
 		return super.handleException(exception, context);
