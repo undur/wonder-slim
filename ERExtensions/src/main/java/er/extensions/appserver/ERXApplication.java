@@ -1701,26 +1701,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Reports an exception. This method only logs the error and could be
-	 * overridden to return a valid error page.
-	 * 
-	 * @param exception
-	 *            to be reported
-	 * @param context
-	 *            for the exception
-	 * @param extraInfo
-	 *            dictionary of extra information about what was happening when
-	 *            the exception was thrown.
-	 * @return a valid response to display or null. In that case the
-	 *         superclasses {@link #handleException(Exception, WOContext)} is
-	 *         called
-	 */
-	public WOResponse reportException(Throwable exception, WOContext context, NSDictionary extraInfo) {
-		log.error("Exception caught: " + exception.getMessage() + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
-		return null;
-	}
-
-	/**
 	 * Workaround for WO 5.2 DirectAction lock-ups. As the super-implementation
 	 * is empty, it is fairly safe to override here to call the normal exception
 	 * handling earlier than usual.
@@ -1789,16 +1769,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	@Override
 	public WOResponse handleException(Exception exception, WOContext context) {
-		// We first want to test if we ran out of memory. If so we need to quit
-		// ASAP.
+		// We first want to test if we ran out of memory. If so we need to quit ASAP.
 		handlePotentiallyFatalException(exception);
 
 		// Not a fatal exception, business as usual.
-		NSDictionary extraInfo = extraInformationForExceptionInContext(exception, context);
-		WOResponse response = reportException(exception, context, extraInfo);
-		if (response == null)
-			response = super.handleException(exception, context);
-		return response;
+		final NSDictionary extraInfo = extraInformationForExceptionInContext(exception, context);
+		log.error("Exception caught: " + exception.getMessage() + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
+		return super.handleException(exception, context);
 	}
 
 	/**
