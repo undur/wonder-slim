@@ -58,7 +58,6 @@ import er.extensions.appserver.ERXApplication;
  * </div>
  * 
  * @property er.extensions.ERXProperties.RetainDefaultsEnabled
- * @property NSProperties.useLoadtimeAppSpecifics Default is true.
  * @property er.extensions.ERXProperties.loadOptionalProperties Default is true. When false loads only the standard properties. 
  * 			 This will improve application startup  time due to not looking for all files repeatedly.
  * 
@@ -92,33 +91,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     * Internal cache of type converted values to avoid reconverting attributes that are asked for frequently 
     */
     private static Map<String, Object> _cache = Collections.synchronizedMap(new HashMap<>());
-
-    /**
-     * This boolean controls the behavior of application specific properties. Setting this to
-     * false makes the old behavior active, true activates the new behavior. The value of this
-     * boolean is controlled by the property "NSProperties.useLoadtimeAppSpecifics" and defaults
-     * to true. Please note this property MUST be defined with a -D argument on the application
-     * launch command.
-     * <p>
-     * The old behavior will retain the original property names (including the application name),
-     * and will search for an application specific version of each property every time someone
-     * reads a property.
-     * <p>
-     * The new behavior will analyze all properties after being loaded from their source, and create
-     * (or update) generic properties for each application specific one. So, if we are MyApp,
-     * foo.bar.MyApp=4 will originate a new property foo.bar=4 (or, if foo.bar already exists,
-     * update its value to 4). foo.bar.MyApp is also kept, because we cannot be sure foo.bar.MyApp
-     * is an app specific property or a regular property with an ambiguous name.
-     * <p>
-     * The advantage of the new method is getting rid of the performance hit each time an app
-     * accesses a property, and making application specific properties work for code that uses
-     * the native Java System.getProperty call.
-     */
-    public static final boolean _useLoadtimeAppSpecifics;
-
-    static {
-       _useLoadtimeAppSpecifics = ERXValueUtilities.booleanValueWithDefault(System.getProperty("NSProperties.useLoadtimeAppSpecifics"), true);
-    }
 
     private static boolean retainDefaultsEnabled() {
         if (RetainDefaultsEnabled == null) {
@@ -284,33 +256,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
      *         <div class="ja">アプリケーション専用のプロパティー名</div>
      */
 	private static String getApplicationSpecificPropertyName(final String propertyName) {
-    	if (_useLoadtimeAppSpecifics) {
     		return propertyName;
-    	}
-    		
-    	synchronized(AppSpecificPropertyNames) {
-            // only keep 128 of these around
-            if (AppSpecificPropertyNames.size() > 128) {
-                AppSpecificPropertyNames.clear();
-            }
-            String appSpecificPropertyName = AppSpecificPropertyNames.get(propertyName);
-            if (appSpecificPropertyName == null) {
-                final WOApplication application = WOApplication.application();
-                if (application != null) {
-                    final String appName = application.name();
-                    appSpecificPropertyName = propertyName + "." + appName;
-                }
-                else {
-                    appSpecificPropertyName = propertyName;
-                }
-                final String propertyValue = ERXSystem.getProperty(appSpecificPropertyName);
-                if (propertyValue == null) {
-                    appSpecificPropertyName = propertyName;
-                }
-                AppSpecificPropertyNames.put(propertyName, appSpecificPropertyName);
-            }
-            return appSpecificPropertyName;
-        }
     }
 
     /**
@@ -2145,9 +2091,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 // This is more complex than it needs to be. Can just use endsWith....
 //
 	public static void flattenPropertyNames(Properties properties) {
-	    if (_useLoadtimeAppSpecifics == false) {
-	        return;
-	    }
 	    
 	    WOApplication application = WOApplication.application();
 	    if (application == null) {

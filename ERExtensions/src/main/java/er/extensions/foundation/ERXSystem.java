@@ -92,13 +92,7 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 		for (Enumeration e = originalProperties.propertyNames(); e.hasMoreElements();) {
 			String key = (String) e.nextElement();
 			if (key != null && key.length() > 0) {
-				String value;
-				if (ERXProperties._useLoadtimeAppSpecifics) {
-					value = ERXSystem.getProperty(key, originalProperties);
-				}
-				else {
-					value = ERXSystem.getProperty(key);
-				}
+				String value = ERXSystem.getProperty(key, originalProperties);
 				destinationProperties.put(key, value);
 			}
 		}
