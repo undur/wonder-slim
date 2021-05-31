@@ -259,6 +259,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private String _publicHost;
 
 	/**
+	 * The time taken from invoking main, until the end of the application constructor
+	 */
+	private static long _startupTimeInMilliseconds;
+
+	/**
 	 * Copies the props from the command line to the static dict
 	 * propertiesFromArgv.
 	 * 
@@ -842,6 +847,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @see WOApplication#main(String[], Class)
 	 */
 	public static void main(String argv[], Class applicationClass) {
+		_startupTimeInMilliseconds = System.currentTimeMillis();
+
 		setup(argv);
 
 		if (enableERXShutdownHook()) {
@@ -1272,6 +1279,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		if (isDevelopmentMode() && !autoOpenInBrowser()) {
 			log.warn("You are running in development mode with WOAutoOpenInBrowser = false.  No browser will open and it will look like the application is hung, but it's not.  There's just not a browser opening automatically.");
 		}
+		
+		_startupTimeInMilliseconds = System.currentTimeMillis() - _startupTimeInMilliseconds;
+		log.info( String.format( "Startup time %s ms: ", _startupTimeInMilliseconds ) );
 	}
 
 	/**
