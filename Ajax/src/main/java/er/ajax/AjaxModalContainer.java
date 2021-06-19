@@ -3,6 +3,7 @@ package er.ajax;
 //http://jquery.com/demo/thickbox/
 
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
@@ -15,6 +16,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.appserver.ERXMessageEncoding;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXMutableURL;
@@ -130,13 +132,13 @@ public class AjaxModalContainer extends AjaxDynamicElement {
 		Object width = valueForBinding("width", component);
 		Object closeLabel = valueForBinding("closeLabel", component);
 		if (height != null) {
-			relAttributeValue += "&height=" +  ERXStringUtilities.urlEncode(height.toString());
+			relAttributeValue += "&height=" +  URLEncoder.encode(height.toString(), ERXMessageEncoding.defaultEncodingAsCharset());
 		}
 		if (width != null) {
-			relAttributeValue += "&width=" +  ERXStringUtilities.urlEncode(width.toString());
+			relAttributeValue += "&width=" +  URLEncoder.encode(width.toString(), ERXMessageEncoding.defaultEncodingAsCharset());
 		}
 		if (closeLabel != null) {
-			relAttributeValue += "&closeLabel=" + ERXStringUtilities.urlEncode(closeLabel.toString());
+			relAttributeValue += "&closeLabel=" + URLEncoder.encode(closeLabel.toString(), ERXMessageEncoding.defaultEncodingAsCharset());
 		}
 		if (booleanValueForBinding("locked", false, component)) {
 			relAttributeValue += "&locked=true";

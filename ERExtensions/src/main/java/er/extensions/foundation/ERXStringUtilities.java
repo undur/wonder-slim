@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
-
-import er.extensions.appserver.ERXMessageEncoding;
 
 /**
  * Collection of {@link java.lang.String String} utilities. Contains the base
@@ -604,22 +601,6 @@ public class ERXStringUtilities {
 	 */
 	public static String safeIdentifierName(String source) {
 		return safeIdentifierName(source, "_", '_');
-	}
-
-	/**
-	 * Utility to encode an URL without the try/catch. Throws an
-	 * NSForwardException in the unlikely case that
-	 * ERXMessageEncoding.defaultEncoding() can't be found.
-	 * 
-	 * @param string
-	 */
-	public static String urlEncode(String string) {
-		try {
-			return URLEncoder.encode(string, ERXMessageEncoding.defaultEncoding());
-		}
-		catch (UnsupportedEncodingException e) {
-			throw NSForwardException._runtimeExceptionForThrowable(e);
-		}
 	}
 
 	/**

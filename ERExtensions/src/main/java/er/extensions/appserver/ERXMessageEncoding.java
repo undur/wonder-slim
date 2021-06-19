@@ -7,6 +7,7 @@
 package er.extensions.appserver;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 
 import com.webobjects.appserver.WOMessage;
@@ -116,6 +117,13 @@ public class ERXMessageEncoding implements Serializable {
             throw createIllegalArgumentException(newDefaultEncoding, "encoding", "availableEncodings()");
 
         _defaultEncoding = newDefaultEncoding;
+    }
+
+    /**
+     * @return The defaultEncoding() as a Charset
+     */
+    public static Charset defaultEncodingAsCharset() {
+    	return Charset.forName( defaultEncoding() );
     }
 
     public static void setDefaultEncodingForAllLanguages(String newDefaultEncoding) {
