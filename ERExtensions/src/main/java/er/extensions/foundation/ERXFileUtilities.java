@@ -193,6 +193,8 @@ public class ERXFileUtilities {
 	 * @param languageList
 	 *            language list search order
 	 * @return de-serialized object from the plist formatted file specified.
+	 * 
+	 * FIXME: Eliminate this encoding guesswork horror
 	 */
 	public static Object readPropertyListFromFileInFramework(String fileName, String aFrameWorkName, NSArray<String> languageList) {
 		Object plist = null;
