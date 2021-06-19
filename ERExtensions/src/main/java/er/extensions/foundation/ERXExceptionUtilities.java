@@ -283,7 +283,7 @@ public class ERXExceptionUtilities {
 
 		StackTraceElement[] elements = t.getStackTrace();
 
-		ERXStringUtilities.indent(writer, exceptionDepth);
+		indent(writer, exceptionDepth);
 		if (exceptionDepth > 0) {
 			writer.print("Caused by a ");
 		}
@@ -320,11 +320,11 @@ public class ERXExceptionUtilities {
 			}
 			else {
 				if (skippedCount > 0) {
-					ERXStringUtilities.indent(writer, exceptionDepth + 1);
+					indent(writer, exceptionDepth + 1);
 					writer.println("   ... skipped " + skippedCount + " stack elements");
 					skippedCount = 0;
 				}
-				ERXStringUtilities.indent(writer, exceptionDepth + 1);
+				indent(writer, exceptionDepth + 1);
 				writer.print("at ");
 				writer.print(element.getClassName());
 				writer.print(".");
@@ -350,11 +350,17 @@ public class ERXExceptionUtilities {
 		}
 
 		if (skippedCount > 0) {
-			ERXStringUtilities.indent(writer, exceptionDepth + 1);
+			indent(writer, exceptionDepth + 1);
 			writer.println("... skipped " + skippedCount + " stack elements");
 		}
 	}
 	
+	private static void indent(PrintWriter writer, int level) {
+		for (int i = 0; i < level; i++) {
+			writer.append("  ");
+		}
+	}
+
 	/**
 	 * Prints the given throwable to the given writer with an indent.
 	 * 

@@ -443,12 +443,6 @@ public class ERXStringUtilities {
 		return hexStr;
 	}
 
-	public static void indent(PrintWriter writer, int level) {
-		for (int i = 0; i < level; i++) {
-			writer.append("  ");
-		}
-	}
-
 	/**
 	 * Converts source to be suitable for use as an identifier in JavaScript.
 	 * prefix is prefixed to source if the first character of source is not
