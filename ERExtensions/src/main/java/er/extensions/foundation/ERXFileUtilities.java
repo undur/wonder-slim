@@ -136,23 +136,6 @@ public class ERXFileUtilities {
 	}
 
 	/**
-	 * Get the input stream from the specified Resource.
-	 * 
-	 * @param fileName
-	 *            name of the file
-	 * @param frameworkName
-	 *            name of the framework, <code>null</code> or "app" for the
-	 *            application bundle
-	 * @param languages
-	 *            array of languages to get localized resource or
-	 *            <code>null</code>
-	 * @return the absolutePath method off of the file object
-	 */
-	private static InputStream inputStreamForResourceNamed(String fileName, String frameworkName, NSArray<String> languages) {
-		return WOApplication.application().resourceManager().inputStreamForResourceNamed(fileName, frameworkName, languages);
-	}
-
-	/**
 	 * Determines the path URL of the specified Resource. This is done to get a
 	 * single entry point due to the deprecation of pathForResourceNamed. In a
 	 * later version this will call out to the resource managers new methods
@@ -234,7 +217,7 @@ public class ERXFileUtilities {
 	 */
 	public static Object readPropertyListFromFileInFramework(String fileName, String aFrameWorkName, NSArray<String> languageList, String encoding) {
 		Object result = null;
-		try( InputStream stream = inputStreamForResourceNamed(fileName, aFrameWorkName, languageList)) {
+		try( InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(fileName, aFrameWorkName, languageList)) {
 			if (stream != null) {
 				String stringFromFile = stringFromInputStream(stream, encoding);
 				result = NSPropertyListSerialization.propertyListFromString(stringFromFile);
