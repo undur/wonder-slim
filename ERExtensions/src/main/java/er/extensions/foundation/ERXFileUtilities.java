@@ -3,13 +3,10 @@ package er.extensions.foundation;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.nio.channels.FileChannel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -246,72 +243,6 @@ public class ERXFileUtilities {
 			log.error("ConfigurationManager: Error reading file <{}> from framework {}", fileName, aFrameWorkName);
 		}
 		return result;
-	}
-
-	/**
-	 * Copies the source file to the destination. Automatically creates parent
-	 * directory or directories of {@code dstFile} if they are missing.
-	 *
-	 * @param srcFile
-	 *            source file
-	 * @param dstFile
-	 *            destination file which may or may not exist already. If it
-	 *            exists, its contents will be overwritten.
-	 * @param deleteOriginals
-	 *            if {@code true} then {@code srcFile} will be deleted. Note
-	 *            that if the appuser has no write rights on {@code srcFile} it
-	 *            is NOT deleted unless {@code forceDelete} is true
-	 * @param forceDelete
-	 *            if {@code true} then missing write rights are ignored and the
-	 *            file is deleted.
-	 * @throws IOException
-	 *             if things go wrong
-	 */
-	private static void copyFileToFile(File srcFile, File dstFile, boolean deleteOriginals, boolean forceDelete) throws IOException {
-		if (srcFile.exists() && srcFile.isFile()) {
-			boolean copied = false;
-			if (deleteOriginals && (!forceDelete || srcFile.canWrite())) {
-				copied = srcFile.renameTo(dstFile);
-			}
-			if (!copied) {
-				File parent = dstFile.getParentFile();
-				if (!parent.exists() && !parent.mkdirs()) {
-					throw new IOException("Failed to create the directory " + parent + ".");
-				}
-
-				try( FileInputStream in = new FileInputStream(srcFile) ;
-						FileChannel srcChannel = in.getChannel() ;
-						FileOutputStream out = new FileOutputStream(dstFile) ;
-						FileChannel dstChannel = out.getChannel()) {
-					// Copy file contents from source to destination
-					dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
-				}
-				finally {
-					if (deleteOriginals && (srcFile.canWrite() || forceDelete)) {
-						if (!srcFile.delete()) {
-							throw new IOException("Failed to delete " + srcFile + ".");
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Moves a file from one location to another one. This works different than
-	 * java.io.File.renameTo as renameTo does not work across partitions
-	 * 
-	 * @param source
-	 *            the file to move
-	 * @param destination
-	 *            the destination to move the source to
-	 * @throws IOException
-	 *             if things go wrong
-	 */
-	public static void renameTo(File source, File destination) throws IOException {
-		if (!source.renameTo(destination)) {
-			ERXFileUtilities.copyFileToFile(source, destination, true, true);
-		}
 	}
 
 	/**
