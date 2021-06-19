@@ -7,15 +7,11 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Enumeration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
-import com.webobjects.foundation.NSData;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
@@ -510,48 +506,6 @@ public class ERXStringUtilities {
 	private static void indent(StringBuffer sb, int level) {
 		for (int i = 0; i < level; i++) {
 			sb.append("  ");
-		}
-	}
-
-	private static void dumpArray(StringBuffer sb, NSArray array, int level) {
-		sb.append("(\n");
-		for (Enumeration e = array.objectEnumerator(); e.hasMoreElements();) {
-			Object value = e.nextElement();
-			dumpObject(sb, value, level + 1);
-			sb.append(",\n");
-		}
-		indent(sb, level);
-		sb.append(')');
-	}
-
-	private static void dumpDictionary(StringBuffer sb, NSDictionary dict, int level) {
-		sb.append("{\n");
-		for (Enumeration e = dict.keyEnumerator(); e.hasMoreElements();) {
-			Object key = e.nextElement();
-			Object value = dict.objectForKey(key);
-			indent(sb, level + 1);
-			sb.append(key).append(" = ");
-			dumpObject(sb, value, level + 1);
-			sb.append(";\n");
-		}
-		indent(sb, level);
-		sb.append('}');
-	}
-
-	private static void dumpObject(StringBuffer sb, Object value, int level) {
-		if (value instanceof NSDictionary) {
-			dumpDictionary(sb, (NSDictionary) value, level);
-		}
-		else if (value instanceof NSArray) {
-			dumpArray(sb, (NSArray) value, level);
-		}
-		else if (value instanceof NSData) {
-			NSData data = (NSData) value;
-			sb.append(byteArrayToHexString(data.bytes()));
-		}
-		else {
-			indent(sb, level);
-			sb.append(value);
 		}
 	}
 
