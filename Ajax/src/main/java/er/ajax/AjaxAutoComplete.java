@@ -1,5 +1,6 @@
 package er.ajax;
 
+import java.util.Objects;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -317,7 +318,7 @@ public class AjaxAutoComplete extends AjaxComponent {
 		            Object value = e.nextElement();
 	                setValueForBinding(value, "item");
 	            	String displayString = displayStringForValue(value);
-	            	if (ERXStringUtilities.stringEqualsString(displayString, strValue)) {
+	            	if (Objects.equals(displayString, strValue)) {
 	            		selection = value;
 	            		break;
 	            	}

@@ -314,19 +314,6 @@ public class ERXStringUtilities {
 		return capital != null ? capital : value;
 	}
 
-	/*
-	 * FIXME: Isn't this just basically Objects.equals() ?
-	 */
-	public static boolean stringEqualsString(String s1, String s2) {
-		if (s1 == s2)
-			return true;
-		if (s1 != null && s2 != null && s1.equals(s2))
-			return true;
-		if (s1 == null && s2 == null)
-			return true;
-		return false;
-	}
-
 	/**
 	 * Returns a string from the contents of the given URL.
 	 * 
