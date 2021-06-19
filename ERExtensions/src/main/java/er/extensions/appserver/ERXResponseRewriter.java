@@ -23,7 +23,6 @@ import com.webobjects.foundation.NSNotificationCenter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.components.ERXStyleSheet;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXUtilities;
 
 /**
@@ -362,7 +361,7 @@ public class ERXResponseRewriter {
 					insertIndex = scriptIndex;
 				}
 			}
-			response.setContent(ERXStringUtilities.insertString(responseContent, content, insertIndex));
+			response.setContent(insertString(responseContent, content, insertIndex));
 			inserted = true;
 		}
 		else if (tagMissingBehavior == TagMissingBehavior.Inline) {
@@ -384,7 +383,7 @@ public class ERXResponseRewriter {
 				//Stick the observer in the pageInfo dictionary so it isn't garbage collected
 				pageInfo.setObjectForKey(contextObserver, CONTEXT_OBSERVER_KEY);
 			}
-			response.setContent(ERXStringUtilities.insertString(responseContent, content, topIndex));
+			response.setContent(insertString(responseContent, content, topIndex));
 			pageInfo.setObjectForKey(Integer.valueOf(topIndex.intValue() + content.length()), ERXResponseRewriter.TOP_INDEX_KEY);
 			inserted = true;
 		}
@@ -400,6 +399,35 @@ public class ERXResponseRewriter {
 		return inserted;
 	}
 	
+	/**
+	 * Inserts the a string into another string at a particular offset.
+	 * 
+	 * @param destinationString
+	 *            the string to insert into
+	 * @param contentToInsert
+	 *            the string to insert
+	 * @param insertOffset
+	 *            the offset in destinationString to insert
+	 * @return the resulting string
+	 */
+	private static String insertString(String destinationString, String contentToInsert, int insertOffset) {
+		String result;
+		if (destinationString == null) {
+			if (insertOffset > 0) {
+				throw new IndexOutOfBoundsException("You attempted to insert '" + contentToInsert + "' into an empty string at the offset " + insertOffset + ".");
+			}
+			result = contentToInsert;
+		}
+		else {
+			StringBuilder sb = new StringBuilder(destinationString.length() + contentToInsert.length());
+			sb.append(destinationString.substring(0, insertOffset));
+			sb.append(contentToInsert);
+			sb.append(destinationString.substring(insertOffset));
+			result = sb.toString();
+		}
+		return result;
+	}
+
 	/**
 	 * Adds a script tag with a correct resource URL into the HTML head tag if
 	 * it isn't already present in the response, or inserts an Ajax OnDemand tag

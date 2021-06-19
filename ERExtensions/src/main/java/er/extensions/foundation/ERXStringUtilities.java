@@ -3,7 +3,6 @@ package er.extensions.foundation;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 
@@ -507,35 +506,6 @@ public class ERXStringUtilities {
 	 */
 	public static String safeIdentifierName(String source) {
 		return safeIdentifierName(source, "_", '_');
-	}
-
-	/**
-	 * Inserts the a string into another string at a particular offset.
-	 * 
-	 * @param destinationString
-	 *            the string to insert into
-	 * @param contentToInsert
-	 *            the string to insert
-	 * @param insertOffset
-	 *            the offset in destinationString to insert
-	 * @return the resulting string
-	 */
-	public static String insertString(String destinationString, String contentToInsert, int insertOffset) {
-		String result;
-		if (destinationString == null) {
-			if (insertOffset > 0) {
-				throw new IndexOutOfBoundsException("You attempted to insert '" + contentToInsert + "' into an empty string at the offset " + insertOffset + ".");
-			}
-			result = contentToInsert;
-		}
-		else {
-			StringBuilder sb = new StringBuilder(destinationString.length() + contentToInsert.length());
-			sb.append(destinationString.substring(0, insertOffset));
-			sb.append(contentToInsert);
-			sb.append(destinationString.substring(insertOffset));
-			result = sb.toString();
-		}
-		return result;
 	}
 
 	/**
