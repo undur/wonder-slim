@@ -246,35 +246,6 @@ public class ERXFileUtilities {
 	}
 
 	/**
-	 * Returns the file name portion of a browser submitted path.
-	 * 
-	 * @param path
-	 *            the full path from the browser
-	 * @return the file name portion
-	 */
-	public static String fileNameFromBrowserSubmittedPath(String path) {
-		String fileName = path;
-		if (path != null) {
-			// Windows
-			int separatorIndex = path.lastIndexOf("\\");
-			// Unix
-			if (separatorIndex == -1) {
-				separatorIndex = path.lastIndexOf("/");
-			}
-			// MacOS 9
-			if (separatorIndex == -1) {
-				separatorIndex = path.lastIndexOf(":");
-			}
-			if (separatorIndex != -1) {
-				fileName = path.substring(separatorIndex + 1);
-			}
-			// ... A tiny security check here ... Just in case.
-			fileName = fileName.replaceAll("\\.\\.", "_");
-		}
-		return fileName;
-	}
-
-	/**
 	 * Reserves a unique file on the filesystem based on the given file name. If
 	 * the given file cannot be reserved, then "-1", "-2", etc will be appended
 	 * to the filename in front of the extension until a unique file name is

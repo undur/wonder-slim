@@ -335,7 +335,7 @@ public class AjaxFileUpload extends WOComponent {
 					boolean overwrite = ERXComponentUtilities.booleanValueForBinding(this, "overwrite");
 					if (streamToFile.isDirectory()) {
 						File parentDir = streamToFile;
-						String fileName = ERXFileUtilities.fileNameFromBrowserSubmittedPath(progress.fileName());
+						String fileName = fileNameFromBrowserSubmittedPath(progress.fileName());
 						streamToFile = ERXFileUtilities.reserveUniqueFile(new File(parentDir, fileName), overwrite);
 						renameFile = true;
 					}
@@ -461,5 +461,34 @@ public class AjaxFileUpload extends WOComponent {
 		if (!source.renameTo(destination)) {
 			copyFileToFile(source, destination, true, true);
 		}
+	}
+	
+	/**
+	 * Returns the file name portion of a browser submitted path.
+	 * 
+	 * @param path
+	 *            the full path from the browser
+	 * @return the file name portion
+	 */
+	private static String fileNameFromBrowserSubmittedPath(String path) {
+		String fileName = path;
+		if (path != null) {
+			// Windows
+			int separatorIndex = path.lastIndexOf("\\");
+			// Unix
+			if (separatorIndex == -1) {
+				separatorIndex = path.lastIndexOf("/");
+			}
+			// MacOS 9
+			if (separatorIndex == -1) {
+				separatorIndex = path.lastIndexOf(":");
+			}
+			if (separatorIndex != -1) {
+				fileName = path.substring(separatorIndex + 1);
+			}
+			// ... A tiny security check here ... Just in case.
+			fileName = fileName.replaceAll("\\.\\.", "_");
+		}
+		return fileName;
 	}
 }
