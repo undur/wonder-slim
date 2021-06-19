@@ -1378,7 +1378,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 				}
 			}
 			if (converted) {
-				result = ERXStringUtilities.matchCase(str, result);
+				result = matchCase(str, result);
 			}
 		}
 		return result;
@@ -1610,5 +1610,56 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 			_fallbackToDefaultLanguage = ERXProperties.booleanForKey("er.extensions.ERXLocalizer.fallbackToDefaultLanguage") ? Boolean.TRUE : Boolean.FALSE;
 		}
 		return _fallbackToDefaultLanguage.booleanValue();
+	}
+	
+	/**
+	 * Returns a string case-matched against the original string. For instance,
+	 * if originalString is "Mike" and newString is "john", this returns "John".
+	 * If originalString is "HTTP" and newString is "something", this returns
+	 * "SOMETHING".
+	 * 
+	 * @param originalString
+	 *            the original string to analyze the case of
+	 * @param newString
+	 *            the new string
+	 * @return the case-matched variant of newString
+	 */
+	private static String matchCase(String originalString, String newString) {
+		String matchedCase = newString;
+		if (matchedCase != null) {
+			int length = originalString.length();
+			if (length > 0) {
+				boolean uppercase = true;
+				boolean lowercase = true;
+				boolean capitalize = true;
+
+				for (int i = 0; i < length; i++) {
+					char ch = originalString.charAt(i);
+					if (Character.isUpperCase(ch)) {
+						lowercase = false;
+						if (i > 0) {
+							capitalize = false;
+						}
+					}
+					else {
+						uppercase = false;
+						if (i == 0) {
+							capitalize = false;
+						}
+					}
+				}
+
+				if (capitalize) {
+					matchedCase = ERXStringUtilities.capitalize(newString);
+				}
+				else if (uppercase) {
+					matchedCase = newString.toUpperCase();
+				}
+				else if (lowercase) {
+					matchedCase = newString.toLowerCase();
+				}
+			}
+		}
+		return matchedCase;
 	}
 }
