@@ -2,7 +2,6 @@ package er.extensions.foundation;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -243,66 +242,5 @@ public class ERXFileUtilities {
 			log.error("ConfigurationManager: Error reading file <{}> from framework {}", fileName, aFrameWorkName);
 		}
 		return result;
-	}
-
-	/**
-	 * Reserves a unique file on the filesystem based on the given file name. If
-	 * the given file cannot be reserved, then "-1", "-2", etc will be appended
-	 * to the filename in front of the extension until a unique file name is
-	 * found. This will also ensure that the parent folder is created.
-	 * 
-	 * @param desiredFile
-	 *            the desired destination file to write
-	 * @param overwrite
-	 *            if true, this will immediately return desiredFile
-	 * @return a unique, reserved, filename
-	 * @throws IOException
-	 *             if the file cannot be created
-	 */
-	public static File reserveUniqueFile(File desiredFile, boolean overwrite) throws IOException {
-		File destinationFile = desiredFile;
-
-		// ... make sure the destination folder exists. This code runs twice
-		// here
-		// in case there was a race condition.
-		File destinationFolder = destinationFile.getParentFile();
-		if (!destinationFolder.exists()) {
-			if (!destinationFolder.mkdirs()) {
-				if (!destinationFolder.exists()) {
-					throw new IOException("Unable to create the destination folder '" + destinationFolder + "'.");
-				}
-			}
-		}
-
-		if (!overwrite) {
-			// try to reserve file name
-			if (!desiredFile.createNewFile()) {
-				File parentFolder = desiredFile.getParentFile();
-				String fileName = desiredFile.getName();
-				// didn't work, so try new name consisting of
-				// prefix + number + suffix
-				int dotIndex = fileName.lastIndexOf('.');
-				String prefix, suffix;
-
-				if (dotIndex < 0) {
-					prefix = fileName;
-					suffix = "";
-				}
-				else {
-					prefix = fileName.substring(0, dotIndex);
-					suffix = fileName.substring(dotIndex);
-				}
-
-				int counter = 1;
-				// try until we can reserve a file
-				do {
-					destinationFile = new File(parentFolder, prefix + "-" + counter + suffix);
-					counter++;
-				}
-				while (!destinationFile.createNewFile());
-			}
-		}
-
-		return destinationFile;
 	}
 }
