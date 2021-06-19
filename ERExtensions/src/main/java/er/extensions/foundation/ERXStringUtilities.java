@@ -503,12 +503,6 @@ public class ERXStringUtilities {
 		}
 	}
 
-	private static void indent(StringBuffer sb, int level) {
-		for (int i = 0; i < level; i++) {
-			sb.append("  ");
-		}
-	}
-
 	/**
 	 * It's ridiculous that StringBuffer doesn't have a .regionMatches like
 	 * String. This is stolen from String and re-implemented on top of
