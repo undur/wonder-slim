@@ -501,43 +501,6 @@ public class ERXStringUtilities {
 	}
 
 	/**
-	 * It's ridiculous that StringBuffer doesn't have a .regionMatches like
-	 * String. This is stolen from String and re-implemented on top of
-	 * StringBuffer. It's slightly slower than String's because we have to call
-	 * charAt instead of just accessing the underlying array, but so be it.
-	 * 
-	 * @param str
-	 *            the StringBuffer to compare a region of
-	 * @param toffset
-	 *            the starting offset of the sub-region in this string.
-	 * @param other
-	 *            the string argument.
-	 * @param ooffset
-	 *            the starting offset of the sub-region in the string argument.
-	 * @param len
-	 *            the number of characters to compare.
-	 * @return <code>true</code> if the specified sub-region of this string
-	 *         exactly matches the specified sub-region of the string argument;
-	 *         <code>false</code> otherwise.
-	 */
-	public static boolean regionMatches(StringBuffer str, int toffset, String other, int ooffset, int len) {
-		int to = toffset;
-		int po = ooffset;
-		// Note: toffset, ooffset, or len might be near -1>>>1.
-		int count = str.length();
-		int otherCount = other.length();
-		if ((ooffset < 0) || (toffset < 0) || (toffset > (long) count - len) || (ooffset > (long) otherCount - len)) {
-			return false;
-		}
-		while (len-- > 0) {
-			if (str.charAt(to++) != other.charAt(po++)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * Converts source to be suitable for use as an identifier in JavaScript.
 	 * prefix is prefixed to source if the first character of source is not
 	 * suitable to start an identifier (e.g. a number). Any characters in source
