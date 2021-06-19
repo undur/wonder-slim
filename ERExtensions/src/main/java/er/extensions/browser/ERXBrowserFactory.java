@@ -691,7 +691,7 @@ public class ERXBrowserFactory {
             versionString = versionString.substring(startpos + netscape6.length());
         
         // Find first numeric in the string such as "MSIE 5.21; Mac_PowerPC)"
-        startpos = ERXStringUtilities.indexOfNumericInString(versionString);
+        startpos = indexOfNumericInString(versionString);
 
         if (startpos > -1) {
             StringTokenizer st = new StringTokenizer(versionString.substring(startpos), " ;"); 
@@ -708,6 +708,42 @@ public class ERXBrowserFactory {
 		}
         return version;
     }
+    
+ 	/**
+ 	 * Locate the the first numeric character in the given string.
+ 	 * 
+ 	 * @param str
+ 	 *            string to scan
+ 	 * @return position in string or -1 if no numeric found
+ 	 */
+ 	private static int indexOfNumericInString(String str) {
+ 		return indexOfNumericInString(str, 0);
+ 	}
+
+ 	/**
+ 	 * Locate the the first numeric character after <code>fromIndex</code> in
+ 	 * the given string.
+ 	 * 
+ 	 * @param str
+ 	 *            string to scan
+ 	 * @param fromIndex
+ 	 *            index position from where to start
+ 	 * @return position in string or -1 if no numeric found
+ 	 */
+ 	private static int indexOfNumericInString(String str, int fromIndex) {
+ 		if (str == null)
+ 			throw new IllegalArgumentException("String cannot be null.");
+
+ 		int pos = -1;
+ 		for (int i = fromIndex; i < str.length(); i++) {
+ 			char c = str.charAt(i);
+ 			if ('0' <= c && c <= '9') {
+ 				pos = i;
+ 				break;
+ 			}
+ 		}
+ 		return pos;
+ 	}
 
     /**
      * <div class="ja">
