@@ -25,8 +25,6 @@ import er.extensions.appserver.ERXWOContext;
 
 public class ERXRuntimeUtilities {
 
-	private static final Logger log = LoggerFactory.getLogger(ERXRuntimeUtilities.class);
-
 	public static NSMutableDictionary<String, Object> informationForBundles() {
 		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
 		NSMutableDictionary<String, Object> bundleVersions = new NSMutableDictionary<String, Object>();
