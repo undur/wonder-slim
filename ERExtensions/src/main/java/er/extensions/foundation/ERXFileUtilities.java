@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
 public class ERXFileUtilities {
@@ -95,44 +94,6 @@ public class ERXFileUtilities {
 				out.close();
 			}
 		}
-	}
-
-	/**
-	 * Determines the path of the specified Resource. This is done to get a
-	 * single entry point due to the deprecation of pathForResourceNamed
-	 * 
-	 * @param fileName
-	 *            name of the file
-	 * @param frameworkName
-	 *            name of the framework, <code>null</code> or "app" for the
-	 *            application bundle
-	 * @param languages
-	 *            array of languages to get localized resource or
-	 *            <code>null</code>
-	 * @return the absolutePath method off of the file object
-	 */
-	public static String pathForResourceNamed(String fileName, String frameworkName, NSArray<String> languages) {
-		String path = null;
-		NSBundle bundle = "app".equals(frameworkName) ? NSBundle.mainBundle() : NSBundle.bundleForName(frameworkName);
-		if (bundle != null && bundle.isJar()) {
-			log.warn("Can't get path when run as jar: {} - {}", frameworkName, fileName);
-		}
-		else {
-			WOApplication application = WOApplication.application();
-			if (application != null) {
-				URL url = application.resourceManager().pathURLForResourceNamed(fileName, frameworkName, languages);
-				if (url != null) {
-					path = url.getFile();
-				}
-			}
-			else if (bundle != null) {
-				URL url = bundle.pathURLForResourcePath(fileName);
-				if (url != null) {
-					path = url.getFile();
-				}
-			}
-		}
-		return path;
 	}
 
 	/**

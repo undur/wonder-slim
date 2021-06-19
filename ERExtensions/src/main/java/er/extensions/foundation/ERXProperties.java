@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -1144,7 +1145,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         while (e.hasMoreElements()) {
         	String frameworkName = (String) e.nextElement();
 
-        	String propertyPath = ERXFileUtilities.pathForResourceNamed("Properties", frameworkName, null);
+        	String propertyPath = pathForResourceNamed("Properties", frameworkName, null);
         	addIfPresent(frameworkName + ".framework", propertyPath, propertiesPaths, projectsInfo);
 
         	/** Properties.dev -- per-Framework-dev properties 
@@ -1163,7 +1164,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 		if( mainBundle != null ) {
 	        String mainBundleName = mainBundle.name();
 	
-	        String appPath = ERXFileUtilities.pathForResourceNamed("Properties", "app", null);
+	        String appPath = pathForResourceNamed("Properties", "app", null);
 	    	addIfPresent(mainBundleName + ".app", appPath, propertiesPaths, projectsInfo);
 		}
 
@@ -1519,7 +1520,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     public static String variantPropertiesInBundle(String userName, String bundleName) {
     	String applicationUserPropertiesPath = null;
         if (userName != null  &&  userName.length() > 0) { 
-        	String resourceApplicationUserPropertiesPath = ERXFileUtilities.pathForResourceNamed("Properties." + userName, bundleName, null);
+        	String resourceApplicationUserPropertiesPath = pathForResourceNamed("Properties." + userName, bundleName, null);
             if (resourceApplicationUserPropertiesPath != null) {
             	applicationUserPropertiesPath = ERXProperties.getActualPath(resourceApplicationUserPropertiesPath);
             }
@@ -1620,7 +1621,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 	    	for (int i = 0; i < optionalConfigurationFiles.count(); i ++) {
 	    		String optionalConfigurationFile = (String)optionalConfigurationFiles.objectAtIndex(i);
 	    		if (!new File(optionalConfigurationFile).exists()) {
-		        	String resourcePropertiesPath = ERXFileUtilities.pathForResourceNamed(optionalConfigurationFile, "app", null);
+		        	String resourcePropertiesPath = pathForResourceNamed(optionalConfigurationFile, "app", null);
 		        	if (resourcePropertiesPath != null) {
 		            	optionalConfigurationFiles.replaceObjectAtIndex(ERXProperties.getActualPath(resourcePropertiesPath), i);
 		        	}
@@ -2354,4 +2355,42 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     private static boolean isEmpty(Object[] array) {
         return array == null || array.length == 0;
     }
+    
+	/**
+	 * Determines the path of the specified Resource. This is done to get a
+	 * single entry point due to the deprecation of pathForResourceNamed
+	 * 
+	 * @param fileName
+	 *            name of the file
+	 * @param frameworkName
+	 *            name of the framework, <code>null</code> or "app" for the
+	 *            application bundle
+	 * @param languages
+	 *            array of languages to get localized resource or
+	 *            <code>null</code>
+	 * @return the absolutePath method off of the file object
+	 */
+	private static String pathForResourceNamed(String fileName, String frameworkName, NSArray<String> languages) {
+		String path = null;
+		NSBundle bundle = "app".equals(frameworkName) ? NSBundle.mainBundle() : NSBundle.bundleForName(frameworkName);
+		if (bundle != null && bundle.isJar()) {
+			log.warn("Can't get path when run as jar: {} - {}", frameworkName, fileName);
+		}
+		else {
+			WOApplication application = WOApplication.application();
+			if (application != null) {
+				URL url = application.resourceManager().pathURLForResourceNamed(fileName, frameworkName, languages);
+				if (url != null) {
+					path = url.getFile();
+				}
+			}
+			else if (bundle != null) {
+				URL url = bundle.pathURLForResourcePath(fileName);
+				if (url != null) {
+					path = url.getFile();
+				}
+			}
+		}
+		return path;
+	}
 }
