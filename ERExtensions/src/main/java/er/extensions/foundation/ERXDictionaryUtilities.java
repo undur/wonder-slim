@@ -12,28 +12,6 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 public class ERXDictionaryUtilities {
 
 	/**
-	 * Creates an immutable dictionary containing all of the keys and objects
-	 * from two dictionaries.
-	 * 
-	 * @param dict1
-	 *            the first dictionary
-	 * @param dict2
-	 *            the second dictionary
-	 * @return immutbale dictionary containing the union of the two
-	 *         dictionaries.
-	 */
-	public static <K, V> NSDictionary<K, V> dictionaryWithDictionaryAndDictionary(NSDictionary<? extends K, ? extends V> dict1, NSDictionary<? extends K, ? extends V> dict2) {
-		if (dict1 == null || dict1.allKeys().count() == 0)
-			return (NSDictionary<K, V>) dict2;
-		if (dict2 == null || dict2.allKeys().count() == 0)
-			return (NSDictionary<K, V>) dict1;
-
-		NSMutableDictionary<K, V> result = new NSMutableDictionary<K, V>(dict2);
-		result.addEntriesFromDictionary(dict1);
-		return new NSDictionary<K, V>(result);
-	}
-
-	/**
 	 * Creates an NSDictionary from a resource associated with a given bundle
 	 * that is in property list format.
 	 * 
