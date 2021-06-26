@@ -27,34 +27,10 @@ import er.extensions.components.ERXStatelessComponent;
  * @binding valueWhenEmpty display this value if value evaluates to <code>null</code>. The binding 
  *            <i>omitWhenEmpty</i> will prevent this.
  * </div>
- * 
- * <div class="ja">
- * サンプル：
- * <ol>
- * <li>value = "Localize me" -&gt; "Localize me" のローカライズ済み文字列</li>
- * <li>keyPath = "componentName" (文字列であるべき) -&gt; 親コンポーネントのローカライズ名</li>
- * <li>object = bug, （ EO　です ） -&gt; bug.userPresentableDescription のローカライズ名 (必要かどうかは不明 ^^)</li>
- * <li>object = bug, keyPath = "state" -&gt; bugs state のローカライズ名</li>
- * <li>templateString = "You have @assignedBugs.count@ Bug(s) assigned to you", object = session.user -&gt; ローカライズ済みテンプレート</li>
- * </ol>
- * バインディング：
- * @binding escapeHTML when <code>true</code> will escape the value
- * @binding keyPath - ローカライズ対応オブジェクトへのキーパス
- * @binding object - 値を取り出すオブジェクト、指定されていない場合とキーパスがセットされていると parent() が使用される
- * @binding omitWhenEmpty outputs an empty string if <code>true</code> when it would be <code>null</code>
- * @binding otherObject - テンプレートと使用する第二のオブジェクト
- * @binding templateString - object と otherObject で使用するテンプレート
- * @binding value - ローカライズする文字列
- * @binding valueWhenEmpty display this value if value evaluates to <code>null</code>. The binding 
- *         <i>omitWhenEmpty</i> will prevent this.
- * </div>
  */
+
 public class ERXLocalizedString extends ERXStatelessComponent {
-	/**
-	 * Do I need to update serialVersionUID?
-	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
-	 * <a href="http://java.sun.com/j2se/1.4/pdf/serial-spec.pdf">Java Object Serialization Spec</a>
-	 */
+
 	private static final long serialVersionUID = 1L;
 
     public ERXLocalizedString(WOContext context) {
