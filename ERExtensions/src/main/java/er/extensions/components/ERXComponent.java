@@ -122,31 +122,9 @@ public abstract class ERXComponent extends WOComponent {
 	@Override
 	public void appendToResponse(WOResponse response, WOContext context) {
 		_checkAccess();
-
-		boolean clickToOpenEnabled = clickToOpenEnabled(response, context);
-		ERXClickToOpenSupport.preProcessResponse(response, context, clickToOpenEnabled);
-		try {
-			super.appendToResponse(response, context);
-		}
-		finally {
-			ERXClickToOpenSupport.postProcessResponse(getClass(), response, context, clickToOpenEnabled);
-		}
-
+		super.appendToResponse(response, context);
 		_includeCSSResources(response, context);
 		_includeJavascriptResources(response, context);
-	}
-
-	/**
-	 * Returns whether or not click-to-open should be enabled for this
-	 * component. By default this returns ERXClickToOpenSupport.isEnabled().
-	 * 
-	 * @param response the response
-	 * @param context the context
-	 * 
-	 * @return whether or not click-to-open is enabled for this component
-	 */
-	public boolean clickToOpenEnabled(WOResponse response, WOContext context) {
-		return ERXClickToOpenSupport.isEnabled();
 	}
 
 	/**
