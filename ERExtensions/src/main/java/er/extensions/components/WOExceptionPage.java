@@ -25,9 +25,9 @@ import er.extensions.appserver.ERXApplication;
  * When in development mode, it will show java code where exception occurred (highlighting the exact line)  
  */
 
-public class ERXExceptionPage extends ERXComponent {
+public class WOExceptionPage extends ERXComponent {
 
-	private static final Logger logger = LoggerFactory.getLogger( ERXExceptionPage.class );
+	private static final Logger logger = LoggerFactory.getLogger( WOExceptionPage.class );
 
 	private static final int NUMBER_OF_LINES_BEFORE_ERROR_LINE = 7;
 	private static final int NUMBER_OF_LINES_AFTER_ERROR_LINE = 7;
@@ -63,7 +63,7 @@ public class ERXExceptionPage extends ERXComponent {
 	 */
 	private String pathModifier;
 	
-	public ERXExceptionPage( WOContext aContext ) {
+	public WOExceptionPage( WOContext aContext ) {
 		super( aContext );
 		pathModifier = "";
 	}
@@ -211,7 +211,7 @@ public class ERXExceptionPage extends ERXComponent {
 	 * }
 	 */
 	public static WOResponse reportException( Throwable exception, WOContext context, NSDictionary extraInfo ) {
-		ERXExceptionPage nextPage = ERXApplication.erxApplication().pageWithName( ERXExceptionPage.class, context );
+		WOExceptionPage nextPage = ERXApplication.erxApplication().pageWithName( WOExceptionPage.class, context );
 		nextPage.setException( exception );
 		return nextPage.generateResponse();
 	}
