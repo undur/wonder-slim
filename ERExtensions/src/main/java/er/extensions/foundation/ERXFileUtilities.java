@@ -14,6 +14,7 @@ import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
+@Deprecated
 public class ERXFileUtilities {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXFileUtilities.class);
@@ -32,6 +33,7 @@ public class ERXFileUtilities {
 	 * @throws IOException
 	 *             if there is any failure
 	 */
+	@Deprecated
 	public static void writeInputStreamToOutputStream(InputStream in, boolean closeInputStream, OutputStream out, boolean closeOutputStream) throws IOException {
 		try {
 			BufferedInputStream bis = new BufferedInputStream(in);
@@ -72,6 +74,7 @@ public class ERXFileUtilities {
 	 *            <code>null</code>
 	 * @return the absolutePath method off of the file object
 	 */
+	@Deprecated
 	public static URL pathURLForResourceNamed(String fileName, String frameworkName, NSArray<String> languages) {
 		URL url = null;
 		WOApplication application = WOApplication.application();
@@ -100,6 +103,7 @@ public class ERXFileUtilities {
 	 * 
 	 * FIXME: Eliminate this encoding guesswork horror
 	 */
+	@Deprecated
 	public static Object readPropertyListFromFileInFramework(String fileName, String aFrameWorkName, NSArray<String> languageList) {
 		Object plist = null;
 		try {
@@ -136,6 +140,7 @@ public class ERXFileUtilities {
 	 *            the encoding used with <code>fileName</code>
 	 * @return de-serialized object from the plist formatted file specified.
 	 */
+	@Deprecated
 	public static Object readPropertyListFromFileInFramework(String fileName, String aFrameWorkName, NSArray<String> languageList, String encoding) {
 		Object result = null;
 		try( InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(fileName, aFrameWorkName, languageList)) {

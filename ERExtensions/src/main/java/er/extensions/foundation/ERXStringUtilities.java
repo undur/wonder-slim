@@ -15,6 +15,8 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
  * Collection of {@link java.lang.String String} utilities. Contains the base
  * localization support.
  */
+
+@Deprecated
 public class ERXStringUtilities {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXStringUtilities.class);
