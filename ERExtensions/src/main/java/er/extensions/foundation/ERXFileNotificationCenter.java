@@ -327,4 +327,62 @@ public class ERXFileNotificationCenter {
 					((_ObserverSelectorHolder) osh).observer.equals(observer);
 		}
 	}
+	
+	/**
+	 * Used as a generic way to retain a reference to an object so that it will not
+	 * be collected by the garbage collector. This class is most often used to
+	 * retain objects used to observe {link @NSNotification}s.
+	 * <p>
+	 * Note that the current implementation does not implement reference counting so
+	 * calling retain multiple times on the same object does not have any effect
+	 * after the first call.
+	 * 
+	 * FIXME: This class used to live in it's own file, but it's been made private since it's only used here. Can probably be deleted
+	 */
+
+	private static class ERXRetainer {
+
+		/**
+		 * Set used to retain references to objects
+		 */
+		private static NSMutableSet _retainerSet = new NSMutableSet();
+
+		/**
+		 * Retains a reference to the object.
+		 * 
+		 * @param object
+		 *            object to be retained.
+		 */
+		public static void retain(Object object) {
+			synchronized (_retainerSet) {
+				_retainerSet.addObject(object);
+			}
+		}
+
+		/**
+		 * Releases the reference to the object.
+		 * 
+		 * @param object
+		 *            object to be released.
+		 */
+		public static void release(Object object) {
+			synchronized (_retainerSet) {
+				_retainerSet.removeObject(object);
+			}
+		}
+
+		/**
+		 * Tests if the given object is being retained by the ERXRetainer class.
+		 * 
+		 * @param object
+		 *            object to be tested.
+		 * @return returns if the given object is currently retained.
+		 */
+		public static boolean isObjectRetained(Object object) {
+			synchronized (_retainerSet) {
+
+				return _retainerSet.containsObject(object);
+			}
+		}
+	}
 }
