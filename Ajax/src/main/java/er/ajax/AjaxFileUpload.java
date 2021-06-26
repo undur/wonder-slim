@@ -20,7 +20,6 @@ import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.components.ERXComponentUtilities;
 import er.extensions.formatters.ERXUnitAwareDecimalFormat;
-import er.extensions.foundation.ERXFileUtilities;
 
 /**
  * AjaxFileUpload provides an Ajax wrapper around the file upload process. This works pretty differently than
