@@ -4,9 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Enumeration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;

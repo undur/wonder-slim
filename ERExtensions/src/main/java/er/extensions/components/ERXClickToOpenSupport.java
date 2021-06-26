@@ -8,7 +8,6 @@ import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXStringUtilities;
 
 /**
  * ERXClickToOpenSupport provides the component-side implementation of

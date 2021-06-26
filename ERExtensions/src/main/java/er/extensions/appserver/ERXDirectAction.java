@@ -22,7 +22,6 @@ import com.webobjects.woextensions.events.WOEventDisplayPage;
 import com.webobjects.woextensions.events.WOEventSetupPage;
 import com.webobjects.woextensions.stats.WOStatsPage;
 
-import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
