@@ -9,6 +9,10 @@ package com.webobjects.woextensions;
 
 import com.webobjects.appserver.WOComponent;
 
+/**
+ * FIXME: At first sight this class seems absolutely bananas. Remove // Hugi 2021-06-26 
+ */
+
 public class _WOJExtensionsUtil {
 
 	public static Object valueForBindingOrNull(String binding, WOComponent component) {
