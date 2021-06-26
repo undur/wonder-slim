@@ -1,17 +1,17 @@
 /*
- * WOSessionCreationError.java
+ * WOSessionRestorationError.java
  * (c) Copyright 2001 Apple Computer, Inc. All rights reserved.
  * This a modified version.
  * Original license: http://www.opensource.apple.com/apsl/
  */
 
-package com.webobjects.woextensions;
+package com.webobjects.woextensions.error;
 
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 
-public class WOSessionCreationError extends WOComponent {
+public class WOSessionRestorationError extends WOComponent {
 	/**
 	 * Do I need to update serialVersionUID?
 	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
@@ -19,7 +19,7 @@ public class WOSessionCreationError extends WOComponent {
 	 */
 	private static final long serialVersionUID = 1L;
 
-    public WOSessionCreationError(WOContext aContext)  {
+    public WOSessionRestorationError(WOContext aContext)  {
         super(aContext);
     }
 

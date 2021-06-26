@@ -5,7 +5,7 @@
  * Original license: http://www.opensource.apple.com/apsl/
  */
 
-package com.webobjects.woextensions;
+package com.webobjects.woextensions.error;
 
 /**
  * WOParsedErrorLine is the class that will parse an exception line. After

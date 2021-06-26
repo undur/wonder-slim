@@ -5,7 +5,7 @@
  * Original license: http://www.opensource.apple.com/apsl/
  */
 
-package com.webobjects.woextensions;
+package com.webobjects.woextensions.error;
 
 /**
  * WOExceptionParser parse the stack trace of a Java exception (in fact the parse is really

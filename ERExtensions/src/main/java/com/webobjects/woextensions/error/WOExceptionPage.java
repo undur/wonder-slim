@@ -1,4 +1,4 @@
-package er.extensions.components;
+package com.webobjects.woextensions.error;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,10 +14,9 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.woextensions.WOExceptionParser;
-import com.webobjects.woextensions.WOParsedErrorLine;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.components.ERXComponent;
 
 /**
  * A nicer version of WOExceptionPage.
