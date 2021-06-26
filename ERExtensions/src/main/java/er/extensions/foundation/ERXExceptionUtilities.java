@@ -249,7 +249,7 @@ public class ERXExceptionUtilities {
 					URL path = WOApplication.application().resourceManager().pathURLForResourceNamed(skipPatternsFile, framework, null);
 					if (path != null) {
 						try {
-							NSArray<String> skipPatternStrings = (NSArray<String>) ERXFileUtilities.readPropertyListFromFileInFramework(skipPatternsFile, framework, (NSArray)null);
+							NSArray<String> skipPatternStrings = (NSArray<String>) ERXUtilities.readPropertyListFromFileInFramework(skipPatternsFile, framework, (NSArray)null);
 							if (skipPatternStrings != null) {
 								for (String skipPatternString : skipPatternStrings) {
 									try {

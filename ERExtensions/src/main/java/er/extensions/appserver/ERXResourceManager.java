@@ -26,9 +26,9 @@ import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation._NSStringUtilities;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 
-import er.extensions.foundation.ERXFileUtilities;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Replacement of the WOResourceManager which adds:
@@ -493,7 +493,7 @@ public class ERXResourceManager extends WOResourceManager {
 	}
 	
 	private static NSDictionary<String, String> _additionalMimeTypes() {
-		NSDictionary<String, String> plist = (NSDictionary<String, String>)ERXFileUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
+		NSDictionary<String, String> plist = (NSDictionary<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
 		return plist;
 	}
 }
