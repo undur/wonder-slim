@@ -1,5 +1,6 @@
 package er.extensions.foundation;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -37,7 +38,7 @@ public class ERXStringUtilities {
 		path = bundle.resourcePathForLocalizedResourceNamed(name + (extension == null || extension.length() == 0 ? "" : "." + extension), null);
 		if (path != null) {
 			try( InputStream stream = bundle.inputStreamForResourcePath(path)) {
-				byte bytes[] = ERXFileUtilities.bytesFromInputStream(stream);
+				byte bytes[] = bytesFromInputStream(stream);
 				return new String(bytes);
 			}
 			catch (IOException e) {
@@ -211,7 +212,46 @@ public class ERXStringUtilities {
 	 *             if things go wrong
 	 */
 	private static String stringFromInputStream(InputStream in) throws IOException {
-		return new String(ERXFileUtilities.bytesFromInputStream(in));
+		return new String(bytesFromInputStream(in));
+	}
+
+	/**
+	 * Returns a string from the input stream using the specified encoding.
+	 * 
+	 * @param in
+	 *            stream to read
+	 * @param encoding
+	 *            to be used, <code>null</code> will use the default
+	 * @return string representation of the stream
+	 * @throws IOException
+	 *             if things go wrong
+	 */
+	public static String stringFromInputStream(InputStream in, String encoding) throws IOException {
+		return new String(bytesFromInputStream(in), encoding);
+	}
+
+	/**
+	 * Returns the byte array for a given stream.
+	 * 
+	 * @param in
+	 *            stream to get the bytes from
+	 * @throws IOException
+	 *             if things go wrong
+	 * @return byte array of the stream.
+	 */
+	private static byte[] bytesFromInputStream(InputStream in) throws IOException {
+		if (in == null)
+			throw new IllegalArgumentException("null input stream");
+
+		try( ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
+			int read;
+			byte[] buf = new byte[1024 * 50];
+			while ((read = in.read(buf)) != -1) {
+				bout.write(buf, 0, read);
+			}
+
+			return bout.toByteArray();
+		}
 	}
 
 	/**
