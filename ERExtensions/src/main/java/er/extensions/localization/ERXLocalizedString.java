@@ -6,7 +6,6 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import er.extensions.components.ERXStatelessComponent;
 
 /**
- * <div class="en">
  * Examples:
  * <ol>
  * <li>value = "Localize me" -&gt; the localized value of "Localize me"</li>
@@ -16,6 +15,7 @@ import er.extensions.components.ERXStatelessComponent;
  * <li>templateString = "You have @assignedBugs.count@ Bug(s) assigned to you", object = session.user
  * -&gt; localized template is evaluated</li>
  * </ol>
+ * 
  * Bindings:
  * @binding escapeHTML when <code>true</code> will escape the value
  * @binding keyPath the keyPath to get of the object which is to be localized
@@ -24,9 +24,7 @@ import er.extensions.components.ERXStatelessComponent;
  * @binding otherObject second object to use with templateString
  * @binding templateString the key to the template to evaluate with object and otherObject
  * @binding value string to localize
- * @binding valueWhenEmpty display this value if value evaluates to <code>null</code>. The binding 
- *            <i>omitWhenEmpty</i> will prevent this.
- * </div>
+ * @binding valueWhenEmpty display this value if value evaluates to <code>null</code>. The binding <i>omitWhenEmpty</i> will prevent this.
  */
 
 public class ERXLocalizedString extends ERXStatelessComponent {
