@@ -84,7 +84,7 @@ public class ERXStringUtilities {
 	 */
 	public static String displayNameForKey(String key) {
 		StringBuilder finalString = null;
-		if (!stringIsNullOrEmpty(key) && !key.trim().equals("")) {
+		if (!isNullOrEmpty(key) && !key.trim().equals("")) {
 			finalString = new StringBuilder();
 			String lastHop = key.indexOf(".") == -1 ? key : key.endsWith(".") ? "" : key.substring(key.lastIndexOf(".") + 1);
 			StringBuilder tempString = new StringBuilder();
@@ -108,17 +108,6 @@ public class ERXStringUtilities {
 			finalString.append(nextChar);
 		}
 		return finalString == null ? "" : finalString.toString();
-	}
-
-	/**
-	 * Simple test if the string is either null or equal to "".
-	 * 
-	 * @param s
-	 *            string to test
-	 * @return result of the above test
-	 */
-	public static boolean stringIsNullOrEmpty(String s) {
-		return ((s == null) || (s.length() == 0));
 	}
 
 	/**
@@ -320,6 +309,17 @@ public class ERXStringUtilities {
 	 */
 	public static String safeIdentifierName(String source) {
 		return safeIdentifierName(source, "_", '_');
+	}
+
+	/**
+	 * Simple test if the string is either null or equal to "".
+	 * 
+	 * @param s
+	 *            string to test
+	 * @return result of the above test
+	 */
+	public static boolean isNullOrEmpty(String s) {
+		return ((s == null) || (s.length() == 0));
 	}
 
 	public static boolean isBlank(String value) {

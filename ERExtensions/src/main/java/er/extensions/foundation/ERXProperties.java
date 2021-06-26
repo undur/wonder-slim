@@ -2343,9 +2343,9 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 		if(isEmpty(ss)) return defaultValue;	// 文字列配列が無いならdefaultValue
 		int count = ss.length;
 		for(int loop = 0; loop < count; loop++){
-			if(!ERXStringUtilities.stringIsNullOrEmpty(ss[loop])){
+			if(!ERXStringUtilities.isNullOrEmpty(ss[loop])){
 				String value = stringForKey(ss[loop]);
-				if(!ERXStringUtilities.stringIsNullOrEmpty(value))
+				if(!ERXStringUtilities.isNullOrEmpty(value))
 					return value;
 			}
 		}

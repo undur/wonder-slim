@@ -566,7 +566,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 							key += ".";
 						}
 						while (theObject == null && oriKey.indexOf(".") > -1);
-						if (theObject != null && !ERXStringUtilities.stringIsNullOrEmpty(oriKey)) {
+						if (theObject != null && !ERXStringUtilities.isNullOrEmpty(oriKey)) {
 							theObject = NSKeyValueCodingAdditions.Utility.valueForKeyPath(theObject, oriKey);
 						}
 					}
