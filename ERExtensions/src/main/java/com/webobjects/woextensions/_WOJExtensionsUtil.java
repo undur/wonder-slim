@@ -11,7 +11,7 @@ import com.webobjects.appserver.WOComponent;
 
 public class _WOJExtensionsUtil {
 
-	protected static Object valueForBindingOrNull(String binding, WOComponent component) {
+	public static Object valueForBindingOrNull(String binding, WOComponent component) {
 		// wod bindings of the type binding = null are converted to False
 		// Boolean
 		// associations, which isn't always what we want. This utility method
