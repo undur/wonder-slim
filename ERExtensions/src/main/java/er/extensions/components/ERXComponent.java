@@ -6,7 +6,6 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXResponseRewriter;
@@ -26,8 +25,6 @@ public abstract class ERXComponent extends WOComponent {
 
 	private static final long serialVersionUID = 1L;
 
-	protected NSMutableDictionary _dynamicBindings = null;
-	
 	/**
 	 * Constructs a new ERXComponent.
 	 * 
@@ -51,14 +48,6 @@ public abstract class ERXComponent extends WOComponent {
 	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
 		return (T) super.pageWithName(componentClass.getName());
-	}
-
-	@Override
-	public void _awakeInContext(WOContext aArg0) {
-		super._awakeInContext(aArg0);
-		if (isStateless()) {
-			_dynamicBindings = null;
-		}
 	}
 
 	/**
@@ -300,29 +289,6 @@ public abstract class ERXComponent extends WOComponent {
 	public ERXBrowser browser() {
 		ERXRequest request = (ERXRequest) context().request();
 		return request.browser();
-	}
-
-	/**
-	 * Lazily initialized dictionary which can be used for the 'item' binding in
-	 * a repetition for example: 'item = dynamicBindings.myVariable'. Useful in
-	 * rapid turnaround modes where adding a iVar would cause hot code swapping
-	 * to stop working.
-	 * 
-	 * @return a dictionay for use with dynamic bindings
-	 */
-	public NSMutableDictionary dynamicBindings() {
-		if (_dynamicBindings == null) {
-			_dynamicBindings = new NSMutableDictionary();
-		}
-		return _dynamicBindings;
-	}
-
-	@Override
-	public void reset() {
-		super.reset();
-		if (_dynamicBindings != null) {
-			_dynamicBindings.removeAllObjects();
-		}
 	}
 
 	/**

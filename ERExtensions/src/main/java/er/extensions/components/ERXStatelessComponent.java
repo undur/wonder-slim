@@ -8,34 +8,14 @@ package er.extensions.components;
 
 import com.webobjects.appserver.WOContext;
 
-/**
- * Abstract stateless component used as the super class for a number
- * of components within the ER frameworks. Adds a number of nice binding resolution
- * methods.
- */
 public abstract class ERXStatelessComponent extends ERXNonSynchronizingComponent {
-	/**
-	 * Do I need to update serialVersionUID?
-	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
-	 * <a href="http://java.sun.com/j2se/1.4/pdf/serial-spec.pdf">Java Object Serialization Spec</a>
-	 */
+
 	private static final long serialVersionUID = 1L;
 
     public ERXStatelessComponent(WOContext context) {
         super(context);
     }
 
-    /**
-     * Component is stateless.
-     * 
-     * @return <code>true</code>
-     */
     @Override
     public boolean isStateless() { return true; }
-
-    @Override
-    public void reset() {
-        super.reset();
-        _dynamicBindings = null;
-    }
 }
