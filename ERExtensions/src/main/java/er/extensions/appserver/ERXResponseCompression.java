@@ -131,7 +131,10 @@ public class ERXResponseCompression {
 			try( ERXRefByteArrayOutputStream bos = new ERXRefByteArrayOutputStream(length)) {
 				if (input != null) {
 					try( GZIPOutputStream out = new GZIPOutputStream(bos)) {
-						ERXFileUtilities.writeInputStreamToOutputStream(input, true, out, false);
+						input.transferTo(out);
+					}
+					finally {
+						input.close();
 					}
 				}
 				return bos.toNSData();

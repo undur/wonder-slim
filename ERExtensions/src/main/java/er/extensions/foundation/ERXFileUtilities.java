@@ -1,9 +1,7 @@
 package er.extensions.foundation;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 
 import org.slf4j.Logger;
@@ -18,45 +16,6 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 public class ERXFileUtilities {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXFileUtilities.class);
-
-	/**
-	 * Copies the contents of the input stream to the given output stream.
-	 * 
-	 * @param in
-	 *            the input stream to copy from
-	 * @param closeInputStream
-	 *            if true, the input stream will be closed
-	 * @param out
-	 *            the output stream to copy to
-	 * @param closeOutputStream
-	 *            if true, the output stream will be closed
-	 * @throws IOException
-	 *             if there is any failure
-	 */
-	@Deprecated
-	public static void writeInputStreamToOutputStream(InputStream in, boolean closeInputStream, OutputStream out, boolean closeOutputStream) throws IOException {
-		try {
-			BufferedInputStream bis = new BufferedInputStream(in);
-			try {
-				byte buf[] = new byte[1024 * 50]; // 64 KBytes buffer
-				int read = -1;
-				while ((read = bis.read(buf)) != -1) {
-					out.write(buf, 0, read);
-				}
-			}
-			finally {
-				if (closeInputStream) {
-					bis.close();
-				}
-			}
-			out.flush();
-		}
-		finally {
-			if (closeOutputStream) {
-				out.close();
-			}
-		}
-	}
 
 	/**
 	 * Determines the path URL of the specified Resource. This is done to get a

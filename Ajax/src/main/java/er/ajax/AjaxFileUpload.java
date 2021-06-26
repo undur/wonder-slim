@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.NumberFormat;
@@ -320,9 +321,12 @@ public class AjaxFileUpload extends WOComponent {
 			}
 
 			if (hasBinding("outputStream")) {
-				OutputStream outputStream = (OutputStream) valueForBinding("outputStream");
-				if (outputStream != null) {
-					ERXFileUtilities.writeInputStreamToOutputStream(new FileInputStream(progress.tempFile()), true, outputStream, true);
+				try( OutputStream outputStream = (OutputStream) valueForBinding("outputStream") ) {
+					if (outputStream != null) {
+						try( InputStream inputStream = new FileInputStream(progress.tempFile()) ) {
+							inputStream.transferTo(outputStream);
+						}
+					}
 				}
 			}
 
