@@ -16,7 +16,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestampFormatter;
 
 import er.extensions.appserver.ERXResponseRewriter;
-import er.extensions.formatters.ERXDateTimeFormatter;
 import er.extensions.localization.ERXLocalizer;
 
 /**
@@ -139,12 +138,6 @@ public class AjaxDatePicker extends AjaxComponent {
     		}
     		else if (formatter instanceof SimpleDateFormat) {
     			format = ((SimpleDateFormat)formatter).toPattern();
-    		}
-    		else if (formatter instanceof ERXDateTimeFormatter) {
-    			format = ((ERXDateTimeFormatter)formatter).pattern();
-    			if (format == null) {
-    				throw new RuntimeException("ERXDateTimeFormatter is missing pattern information: " + formatter);
-    			}
     		}
     		else {
     			throw new RuntimeException("Can't handle formatter of class " + formatter.getClass().getCanonicalName());
