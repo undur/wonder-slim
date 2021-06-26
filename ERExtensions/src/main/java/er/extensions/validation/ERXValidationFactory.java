@@ -8,8 +8,10 @@ package er.extensions.validation;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +24,9 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
+import com.webobjects.foundation._NSCollectionPrimitives;
 import com.webobjects.foundation.NSValidation.ValidationException;
 
-import er.extensions.foundation.ERXMultiKey;
 import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXSystem;
 import er.extensions.foundation.ERXUtilities;
@@ -555,5 +557,177 @@ public class ERXValidationFactory {
      */
     public String templateForKeyPath(String key, String language) {
         return (String)ERXLocalizer.localizerForLanguage(language).valueForKey(VALIDATION_TEMPLATE_PREFIX + key);
+    }
+    
+    /**
+     * FIXME: This class was previously a public class with it's own file. Demoted to here, since that's the only usage.
+     * 
+     * Simple class to use multiple objects as
+     * a single key for a dictionary or HashMap.
+     * The goal of this class is to be very fast.
+     */
+    private static class ERXMultiKey {
+
+        /** holds the object array of keys */
+        private Object[] _keys;
+        /** caches the number of keys */
+        private short _keyCount;
+
+        private int _hashCode;
+        
+        /**
+         * Constructs a multi-key for a given
+         * number.
+         * @param keyCount number of keys
+         */
+        private ERXMultiKey(short keyCount) {
+            _keyCount=keyCount;
+            _keys=new Object[keyCount];
+        }
+
+        /**
+         * Constructs a multi-key.
+         */
+        public ERXMultiKey() {
+            _keyCount=0;
+            _keys=_NSCollectionPrimitives.EmptyArray;
+            recomputeHashCode();
+        }
+
+        /**
+         * Constructs a multi-key for a given
+         * object array.
+         * @param keys object array
+         */
+        public ERXMultiKey(Object[] keys) {
+            this((short)keys.length);
+            System.arraycopy(keys,0,_keys,0,_keyCount);
+            recomputeHashCode();
+        }
+
+        /**
+         * Constructs a multi-key for a given
+         * array.
+         * @param keys array of keys
+         */    
+        public ERXMultiKey(NSArray<Object> keys) {
+            this((short)keys.count());
+            for (int i=0; i<keys.count(); i++) _keys[i]=keys.objectAtIndex(i);
+            recomputeHashCode();
+       }
+
+        /**
+         * Constructs a multi-key for a given
+         * vector.
+         * @param keys vector of keys
+         */
+        public ERXMultiKey(Vector<Object> keys) {
+            this ((short)keys.size());
+            for (int i=0; i<keys.size(); i++) _keys[i]=keys.elementAt(i);
+            recomputeHashCode();
+        }
+        
+        /**
+         * Constructs a multi-key for a given
+         * list of keys.
+         * @param key one key
+         * @param keys additional keys
+         */
+        public ERXMultiKey(Object key, Object ... keys) {
+            this((short)(keys.length + 1));
+            _keys[0] = key;
+            System.arraycopy(keys,0,_keys,1,_keyCount-1);
+            recomputeHashCode();
+        }
+
+        /**
+         * Method used to return a copy of the object array
+         * of keys for the current multi-key.
+         * @return object array of keys
+         */    
+        public final Object[] keys() {
+        	Object[] keys;
+        	if (_keyCount == 0) {
+        		keys = _keys;
+        	} else {
+        		keys = new Object[_keyCount];
+        		System.arraycopy(_keys, 0, keys, 0, _keyCount);
+        	}
+        	return keys;
+        }
+        
+        /**
+         * Method used to return the object array
+         * of keys for the current multi-key.<br>
+         * DO NOT MODIFY!
+         * @return object array of keys
+         */  
+        public final Object[] keysNoCopy() {
+    		return _keys;
+    	}
+
+        /**
+         * Calculates a unique hash code for
+         * the given array of keys.
+         * @return unique hash code for the array
+         *		of keys.
+         */
+        @Override
+        public final int hashCode() {
+            return _hashCode;
+        }
+        
+        /**
+         * Recomputes the hash code if you ever changes the keys array directly 
+         */
+        public final void recomputeHashCode() {
+            int result = 0;
+
+            for (int i=0; i<_keyCount; i++) {
+    		    final Object theKey = _keys[i];
+
+                if ( theKey != null ) {
+                    result ^= theKey.hashCode();
+                    result = ( result << 1 ) | ( result >>> 31 );
+                }
+            }
+
+            _hashCode = result;
+        }
+
+        /**
+         * Method used to compare two ERXMultiKeys.
+         * A multi key is equal to another multi key
+         * if the number of keys are equal and all
+         * of the keys are either both null or <code>
+         * equals</code>.
+         * @param o object to be compared
+         * @return result of comparison
+         */
+        @Override
+        public final boolean equals(Object o) {
+        	if (o instanceof ERXMultiKey) {
+        		ERXMultiKey o2 = (ERXMultiKey) o;
+        		if (this == o2)
+        			return true;
+        		if (_keyCount!=o2._keyCount)
+        			return false;
+        		if (hashCode()!=o2.hashCode())
+        			return false;
+        		for (int i=0; i<_keyCount; i++) {
+        			Object k=o2._keys[i];
+        			Object m=_keys[i];
+        			if (m!=k && (m==null || k==null || !m.equals(k)))
+        				return false;
+        		}
+        		return true;
+        	}
+        	return false;
+        }
+
+    	@Override
+    	public String toString() {
+    		return "ERXMultiKey [_keys=" + Arrays.toString(_keys) + ", _keyCount=" + _keyCount + ", _hashCode=" + _hashCode + "]";
+    	}
     }
 }
