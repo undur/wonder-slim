@@ -12,7 +12,6 @@ import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXUtilities;
 
 /** 
@@ -213,6 +212,6 @@ public abstract class ERXFrameworkPrincipal {
     
     @Override
     public String toString() {
-      return ERXStringUtilities.lastPropertyKeyInKeyPath(getClass().getName());
+      return getClass().getSimpleName();
     }
 }
