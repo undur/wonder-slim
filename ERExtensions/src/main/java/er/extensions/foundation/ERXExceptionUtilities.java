@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableArray;
@@ -245,7 +246,7 @@ public class ERXExceptionUtilities {
 				Enumeration<String> frameworksEnum = ERXLocalizer.frameworkSearchPath().reverseObjectEnumerator();
 				while (frameworksEnum.hasMoreElements()) {
 					String framework = frameworksEnum.nextElement();
-					URL path = ERXFileUtilities.pathURLForResourceNamed(skipPatternsFile, framework, null);
+					URL path = WOApplication.application().resourceManager().pathURLForResourceNamed(skipPatternsFile, framework, null);
 					if (path != null) {
 						try {
 							NSArray<String> skipPatternStrings = (NSArray<String>) ERXFileUtilities.readPropertyListFromFileInFramework(skipPatternsFile, framework, (NSArray)null);

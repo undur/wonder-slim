@@ -767,7 +767,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 			while (fr.hasMoreElements()) {
 				String framework = fr.nextElement();
 
-				URL path = ERXFileUtilities.pathURLForResourceNamed(fileName, framework, languages);
+				URL path = WOApplication.application().resourceManager().pathURLForResourceNamed(fileName, framework, languages);
 				if (path != null) {
 					try {
 						framework = "app".equals(framework) ? null : framework;
