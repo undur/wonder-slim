@@ -122,7 +122,6 @@ public abstract class ERXComponent extends WOComponent {
 	@Override
 	public void appendToResponse(WOResponse response, WOContext context) {
 		_checkAccess();
-		preAppendToResponse(response, context);
 
 		boolean clickToOpenEnabled = clickToOpenEnabled(response, context);
 		ERXClickToOpenSupport.preProcessResponse(response, context, clickToOpenEnabled);
@@ -132,8 +131,6 @@ public abstract class ERXComponent extends WOComponent {
 		finally {
 			ERXClickToOpenSupport.postProcessResponse(getClass(), response, context, clickToOpenEnabled);
 		}
-
-		postAppendToResponse(response, context);
 
 		_includeCSSResources(response, context);
 		_includeJavascriptResources(response, context);
@@ -594,26 +591,5 @@ public abstract class ERXComponent extends WOComponent {
 	 * @throws SecurityException if the security check fails
 	 */
 	protected void checkAccess() throws SecurityException {
-	}
-
-	/**
-	 * Override to hook into appendToResponse after security checks but before
-	 * the super.appendToResponse. It is not necessary to call super on this
-	 * method.
-	 * 
-	 * @param response the current response
-	 * @param context the current context
-	 */
-	protected void preAppendToResponse(WOResponse response, WOContext context) {
-	}
-
-	/**
-	 * Override to hook into appendToResponse after super.appendToResponse. It
-	 * is not necessary to call super on this method.
-	 * 
-	 * @param response the current response
-	 * @param context the current context
-	 */
-	protected void postAppendToResponse(WOResponse response, WOContext context) {
 	}
 }
