@@ -47,8 +47,8 @@ public class ERXCloneableThreadLocal extends InheritableThreadLocal {
 			// and the Cloneable
 			// interface doesn't specify any methods.
 			try {
-				Method m = parentValue.getClass().getMethod("clone", ERXDeprecatedConstant.EmptyClassArray);
-				child = m.invoke(parentValue, ERXDeprecatedConstant.EmptyObjectArray);
+				Method m = parentValue.getClass().getMethod("clone", new Class[0]);
+				child = m.invoke(parentValue, new Object[] {});
 			}
 			catch (InvocationTargetException ite) {
 				log.error("Invocation exception occurred when invoking clone in ERXClonableThreadLocal: {} backtrace: {}",

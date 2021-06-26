@@ -665,7 +665,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		}
 		try {
 			Class localizerClass = Class.forName(className);
-			Constructor constructor = localizerClass.getConstructor(ERXDeprecatedConstant.StringClassArray);
+			Constructor constructor = localizerClass.getConstructor(new Class[] { String.class });
 			localizer = (ERXLocalizer) constructor.newInstance(new Object[] { language });
 		}
 		catch (Exception e) {
