@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSPropertyListSerialization;
@@ -24,6 +27,8 @@ import er.extensions.components.ERXStatelessComponent;
  * meaning full groups of utility methods.
  */
 public class ERXUtilities {
+
+	private static final Logger log = LoggerFactory.getLogger(ERXUtilities.class);
 
 	@Deprecated
 	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
@@ -167,7 +172,7 @@ public class ERXUtilities {
 			}
 		}
 		catch (IOException ioe) {
-			ERXFileUtilities.log.error("ConfigurationManager: Error reading file <{}> from framework {}", fileName, aFrameWorkName);
+			log.error("ConfigurationManager: Error reading file <{}> from framework {}", fileName, aFrameWorkName);
 		}
 		return result;
 	}

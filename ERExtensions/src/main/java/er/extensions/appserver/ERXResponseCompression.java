@@ -16,7 +16,6 @@ import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSRange;
 import com.webobjects.foundation.NSSet;
 
-import er.extensions.foundation.ERXFileUtilities;
 import er.extensions.foundation.ERXProperties;
 
 /**
