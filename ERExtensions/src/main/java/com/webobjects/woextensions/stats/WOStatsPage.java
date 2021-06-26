@@ -5,7 +5,7 @@
  * Original license: http://www.opensource.apple.com/apsl/
  */
 
-package com.webobjects.woextensions;
+package com.webobjects.woextensions.stats;
 
 import java.net.UnknownHostException;
 import java.util.Enumeration;

@@ -5,11 +5,12 @@
  * Original license: http://www.opensource.apple.com/apsl/
  */
 
-package com.webobjects.woextensions;
+package com.webobjects.woextensions.stats;
 
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.woextensions._WOJExtensionsUtil;
 
 // This component should be made stateless
 

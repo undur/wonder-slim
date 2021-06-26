@@ -18,9 +18,9 @@ import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.woextensions.WOStatsPage;
 import com.webobjects.woextensions.events.WOEventDisplayPage;
 import com.webobjects.woextensions.events.WOEventSetupPage;
+import com.webobjects.woextensions.stats.WOStatsPage;
 
 import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXConfigurationManager;
