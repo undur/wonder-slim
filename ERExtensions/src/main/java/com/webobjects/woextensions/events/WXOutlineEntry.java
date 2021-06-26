@@ -5,7 +5,7 @@
  * Original license: http://www.opensource.apple.com/apsl/
  */
 
-package com.webobjects.woextensions;
+package com.webobjects.woextensions.events;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOComponent;
@@ -14,6 +14,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSRange;
+import com.webobjects.woextensions._WOJExtensionsUtil;
 
 public class WXOutlineEntry extends WOComponent {
 	/**

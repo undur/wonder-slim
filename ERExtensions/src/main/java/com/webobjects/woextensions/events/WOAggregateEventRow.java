@@ -5,11 +5,12 @@
  * Original license: http://www.opensource.apple.com/apsl/
  */
 
-package com.webobjects.woextensions;
+package com.webobjects.woextensions.events;
 
 import com.webobjects.appserver.WOContext;
 import com.webobjects.eocontrol.EOAggregateEvent;
 import com.webobjects.eocontrol.EOEvent;
+import com.webobjects.woextensions._WOJExtensionsUtil;
 
 public class WOAggregateEventRow extends WOEventRow {
 	/**

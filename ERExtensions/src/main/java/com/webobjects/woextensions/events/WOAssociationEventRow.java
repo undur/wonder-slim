@@ -5,7 +5,7 @@
  * Original license: http://www.opensource.apple.com/apsl/
  */
 
-package com.webobjects.woextensions;
+package com.webobjects.woextensions.events;
 
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOContext;
