@@ -38,8 +38,8 @@ import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
+import er.extensions.foundation.ERXUtilities;
 import er.extensions.localization.ERXLocalizer;
-import x.ERXDeprecatedConstant;
 
 /**
  * Improvements and fixes for WOSession 
@@ -152,7 +152,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 		 * {@link er.extensions.localization.ERXLocalizer#LocalizationDidResetNotification}
 		 */
 		protected void registerForLocalizationDidResetNotification() {
-			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("localizationDidReset", ERXDeprecatedConstant.NotificationClassArray), ERXLocalizer.LocalizationDidResetNotification, null);
+			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("localizationDidReset", ERXUtilities.NotificationClassArray), ERXLocalizer.LocalizationDidResetNotification, null);
 		}
 	}
 

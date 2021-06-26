@@ -12,8 +12,6 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import x.ERXDeprecatedConstant;
-
 /**
  * <code>ERXClonableThreadLocal</code> extends {@link InheritableThreadLocal} to
  * bequeath a cloned copy of the parent object to the child thread.

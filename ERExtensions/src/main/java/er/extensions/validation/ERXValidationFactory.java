@@ -27,9 +27,9 @@ import com.webobjects.foundation.NSValidation.ValidationException;
 import er.extensions.foundation.ERXMultiKey;
 import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXSystem;
+import er.extensions.foundation.ERXUtilities;
 import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
-import x.ERXDeprecatedConstant;
 
 /**
  * The validation factory controls creating validation
@@ -501,7 +501,7 @@ public class ERXValidationFactory {
         if (WOApplication.application()!=null && !WOApplication.application().isCachingEnabled()) {
             NSNotificationCenter center = NSNotificationCenter.defaultCenter();
             center.addObserver(this,
-                               new NSSelector("resetTemplateCache",  ERXDeprecatedConstant.NotificationClassArray),
+                               new NSSelector("resetTemplateCache",  ERXUtilities.NotificationClassArray),
                                ERXLocalizer.LocalizationDidResetNotification,
                                null);
         }

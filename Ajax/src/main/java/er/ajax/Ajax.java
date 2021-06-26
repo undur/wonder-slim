@@ -10,7 +10,7 @@ import com.webobjects.foundation.NSSelector;
 
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import x.ERXDeprecatedConstant;
+import er.extensions.foundation.ERXUtilities;
 
 public class Ajax extends ERXFrameworkPrincipal {
 	public static Class[] REQUIRES = new Class[0];
@@ -24,7 +24,7 @@ public class Ajax extends ERXFrameworkPrincipal {
     	NSNotificationCenter center = NSNotificationCenter.defaultCenter();
     	// This is needed when ERXAjaxApplication is sub-classed
     	center.addObserver(this,
-    			new NSSelector("finishAjaxInitialization", ERXDeprecatedConstant.NotificationClassArray),
+    			new NSSelector("finishAjaxInitialization", ERXUtilities.NotificationClassArray),
     			WOApplication.ApplicationWillFinishLaunchingNotification,
     			null);
 	}

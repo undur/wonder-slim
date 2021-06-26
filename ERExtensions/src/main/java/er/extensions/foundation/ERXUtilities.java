@@ -12,7 +12,6 @@ import java.io.PrintStream;
 import com.webobjects.foundation.NSSelector;
 
 import er.extensions.components.ERXStatelessComponent;
-import x.ERXDeprecatedConstant;
 
 /**
  * Diverse collection of utility methods for handling everything from EOF to
@@ -20,6 +19,9 @@ import x.ERXDeprecatedConstant;
  * meaning full groups of utility methods.
  */
 public class ERXUtilities {
+
+	@Deprecated
+	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
 
 	/**
 	 * Generates a string representation of the current stacktrace.
@@ -94,6 +96,6 @@ public class ERXUtilities {
 	 * @return A selector suitable for firing a notification
 	 */
 	public static NSSelector<Void> notificationSelector(String methodName) {
-		return new NSSelector<Void>(methodName, ERXDeprecatedConstant.NotificationClassArray);
+		return new NSSelector<Void>(methodName, ERXUtilities.NotificationClassArray);
 	}
 }

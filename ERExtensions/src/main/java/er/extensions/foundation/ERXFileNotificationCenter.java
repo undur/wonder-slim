@@ -21,7 +21,6 @@ import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
 
 import er.extensions.appserver.ERXApplication;
-import x.ERXDeprecatedConstant;
 
 /**
  * The file notification center is only used in development systems. It provides
@@ -90,7 +89,7 @@ public class ERXFileNotificationCenter {
 		if (developmentMode || checkFilesPeriod() > 0) {
 			ERXRetainer.retain(this);
 			log.debug("Caching disabled.  Registering for notification: {}", WOApplication.ApplicationWillDispatchRequestNotification);
-			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("checkIfFilesHaveChanged", ERXDeprecatedConstant.NotificationClassArray), WOApplication.ApplicationWillDispatchRequestNotification, null);
+			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("checkIfFilesHaveChanged", ERXUtilities.NotificationClassArray), WOApplication.ApplicationWillDispatchRequestNotification, null);
 		}
 
 		// MS: In case we are touching properties before they're fully
