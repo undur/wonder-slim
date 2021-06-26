@@ -45,18 +45,6 @@ public class ERXStringUtilities {
 		return null;
 	}
 
-	public static final String firstPropertyKeyInKeyPath(String keyPath) {
-		String part = null;
-		if (keyPath != null) {
-			int index = keyPath.indexOf(NSKeyValueCodingAdditions.KeyPathSeparator);
-			if (index != -1)
-				part = keyPath.substring(0, index);
-			else
-				part = keyPath;
-		}
-		return part;
-	}
-
 	public static final String lastPropertyKeyInKeyPath(String keyPath) {
 		String part = null;
 		if (keyPath != null) {

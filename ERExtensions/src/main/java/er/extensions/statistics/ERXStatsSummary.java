@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
@@ -44,7 +45,7 @@ public class ERXStatsSummary extends ERXStatelessComponent {
                 NSMutableDictionary dict = new NSMutableDictionary();
                 NSArray<ERXStats.LogEntry> entries = ERXStats.aggregateLogEntries();
                 for (ERXStats.LogEntry logEntry : entries) {
-                    String group = ERXStringUtilities.firstPropertyKeyInKeyPath(logEntry.key());
+                    String group = firstPropertyKeyInKeyPath(logEntry.key());
                     NSMutableArray eventsForType = (NSMutableArray)dict.objectForKey(group);
                     if (null == eventsForType) {
                         eventsForType = new NSMutableArray();
@@ -57,6 +58,21 @@ public class ERXStatsSummary extends ERXStatelessComponent {
         }
         return _statsByType;
     }
+
+    /**
+     * FYI, this was moved here from the old ERXString Utilities 
+     */
+	private static final String firstPropertyKeyInKeyPath(String keyPath) {
+		String part = null;
+		if (keyPath != null) {
+			int index = keyPath.indexOf(NSKeyValueCodingAdditions.KeyPathSeparator);
+			if (index != -1)
+				part = keyPath.substring(0, index);
+			else
+				part = keyPath;
+		}
+		return part;
+	}
 
     /**
      * Gets the array of stats event types.
