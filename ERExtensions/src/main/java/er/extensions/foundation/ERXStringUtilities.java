@@ -11,11 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
-/**
- * Collection of {@link java.lang.String String} utilities. Contains the base
- * localization support.
- */
-
 @Deprecated
 public class ERXStringUtilities {
 
