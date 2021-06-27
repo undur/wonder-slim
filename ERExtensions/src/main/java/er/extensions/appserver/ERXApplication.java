@@ -261,7 +261,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * The time taken from invoking main, until the end of the application constructor
 	 */
-	private static long _startupTimeInMilliseconds;
+	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
 
 	/**
 	 * Copies the props from the command line to the static dict
@@ -847,7 +847,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @see WOApplication#main(String[], Class)
 	 */
 	public static void main(String argv[], Class applicationClass) {
-		_startupTimeInMilliseconds = System.currentTimeMillis();
 
 		setup(argv);
 
