@@ -1781,7 +1781,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Not a fatal exception, business as usual.
 		final NSDictionary extraInfo = extraInformationForExceptionInContext(exception, context);
 		log.error("Exception caught: " + exception.getMessage() + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
-		return super.handleException(exception, context);
+		WOResponse response = super.handleException(exception, context);
+		response.setStatus(500);
+		return response;
 	}
 
 	/**
