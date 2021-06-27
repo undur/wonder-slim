@@ -76,9 +76,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 			ERXConfigurationManager.defaultManager().initialize();
 			ERXSystem.updateProperties();
 
-			// AK: enable this when we're ready
-			// WOEncodingDetector.sharedInstance().setFallbackEncoding(CharEncoding.UTF_8);
-
 			// GN: configure logging with optional custom subclass of ERXLogger
 			String className = ERXProperties.stringForKey("er.extensions.erxloggerclass");
 			if (className != null) {
