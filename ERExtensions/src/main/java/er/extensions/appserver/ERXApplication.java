@@ -1054,9 +1054,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @return true if the application is deployed as servlet.
 	 */
 	public boolean isDeployedAsServlet() {
-		return contextClassName().contains("Servlet"); // i.e one of
-														// WOServletContext or
-														// ERXWOServletContext
+		return contextClassName().contains("Servlet");
 	}
 
 	/**
@@ -1071,6 +1069,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
+		
+		// FIXME: WTF is an NSPropertiesCoordinator? // Hugi 2021-06-27
 		// NSPropertiesCoordinator.loadProperties();
 
 		if (enableERXShutdownHook()) {
