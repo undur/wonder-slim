@@ -1787,21 +1787,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Standard exception page. Also logs error to standard out.
-	 * 
-	 * @param exception
-	 *            to be handled
-	 * @param context
-	 *            current context
-	 * @return the WOResponse of the generic exception page.
-	 * 
-	 * FIXME: Why does this method exist? It's not invoked from anywhere // Hugi 2021-05-30
-	 */
-	public WOResponse genericHandleException(Exception exception, WOContext context) {
-		return super.handleException(exception, context);
-	}
-
-	/**
 	 * Handles the potentially fatal OutOfMemoryError by quitting the
 	 * application ASAP. Broken out into a separate method to make custom error
 	 * handling easier, ie. generating your own error pages in production, etc.
