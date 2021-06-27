@@ -167,7 +167,7 @@ public class ERXUtilities {
 		Object result = null;
 		try( InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(fileName, aFrameWorkName, languageList)) {
 			if (stream != null) {
-				String stringFromFile = ERXStringUtilities.stringFromInputStream(stream, encoding);
+				String stringFromFile = stringFromInputStream(stream, encoding);
 				result = NSPropertyListSerialization.propertyListFromString(stringFromFile);
 			}
 		}
@@ -175,5 +175,20 @@ public class ERXUtilities {
 			log.error("ConfigurationManager: Error reading file <{}> from framework {}", fileName, aFrameWorkName);
 		}
 		return result;
+	}
+	
+	/**
+	 * Returns a string from the input stream using the specified encoding.
+	 * 
+	 * @param in
+	 *            stream to read
+	 * @param encoding
+	 *            to be used, <code>null</code> will use the default
+	 * @return string representation of the stream
+	 * @throws IOException
+	 *             if things go wrong
+	 */
+	private static String stringFromInputStream(InputStream in, String encoding) throws IOException {
+		return new String(in.readAllBytes(), encoding);
 	}
 }
