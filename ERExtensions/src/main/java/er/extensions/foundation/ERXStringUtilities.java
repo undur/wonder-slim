@@ -137,7 +137,7 @@ public class ERXStringUtilities {
 	 * @return result of the above test
 	 */
 	public static boolean isNullOrEmpty(String string) {
-		return string == null || string.length() == 0;
+		return string == null || string.isEmpty();
 	}
 
 	/**
