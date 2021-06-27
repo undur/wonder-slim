@@ -1815,11 +1815,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 	}
 
-	/**
-	 * Dispatches the request without checking for the delayedRequestHandler()
-	 * 
-	 * @param request
-	 */
 	public WOResponse dispatchRequest(WORequest request) {
 		WOResponse response;
 
