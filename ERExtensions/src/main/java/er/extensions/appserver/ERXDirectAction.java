@@ -240,15 +240,6 @@ public class ERXDirectAction extends WODirectAction {
 		return null;
 	}
 
-	/**
-	 * Returns an empty response.
-	 * 
-	 * @return nothing
-	 */
-	public WOActionResults emptyAction() {
-		return new ERXResponse();
-	}
-
 	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
 		return (T) super.pageWithName(componentClass.getName());
