@@ -134,34 +134,6 @@ public class ERXStringUtilities {
 	}
 
 	/**
-	 * Uncapitalizes a given string.
-	 * 
-	 * @param value
-	 *            to be uncapitalized
-	 * @return capitalized string
-	 */
-	public static String uncapitalize(String value) {
-		String capital = null;
-		if (value != null) {
-			int length = value.length();
-			if (length > 0) {
-				StringBuilder buffer = new StringBuilder(value);
-				for (int i = 0; i < length; i++) {
-					char ch = value.charAt(i);
-					if (i == 0 || i == length - 1 || (i < length - 1 && Character.isUpperCase(value.charAt(i + 1)))) {
-						buffer.setCharAt(i, Character.toLowerCase(ch));
-					}
-					else {
-						break;
-					}
-				}
-				capital = buffer.toString();
-			}
-		}
-		return capital != null ? capital : value;
-	}
-
-	/**
 	 * Returns a string from the contents of the given URL.
 	 * 
 	 * @param url
