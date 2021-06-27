@@ -35,7 +35,7 @@ public class ERXStringUtilities {
 		path = bundle.resourcePathForLocalizedResourceNamed(name + (extension == null || extension.length() == 0 ? "" : "." + extension), null);
 		if (path != null) {
 			try( InputStream stream = bundle.inputStreamForResourcePath(path)) {
-				byte bytes[] = bytesFromInputStream(stream);
+				byte bytes[] = stream.readAllBytes();
 				return new String(bytes);
 			}
 			catch (IOException e) {
@@ -118,8 +118,7 @@ public class ERXStringUtilities {
 	 * example, for the input string "{@code you have a dog}", this method would
 	 * return "{@code You have a dog}".
 	 * 
-	 * @param value
-	 *            to be capitalized
+	 * @param value to be capitalized
 	 * @return capitalized string
 	 */
 	public static String capitalize(String value) {
@@ -134,70 +133,21 @@ public class ERXStringUtilities {
 	}
 
 	/**
-	 * Returns a string from the contents of the given URL.
+	 * Simple test if the string is either null or equal to "".
 	 * 
-	 * @param url
-	 *            the URL to read from
-	 * @return the string that was read
-	 * @throws IOException
-	 *             if the connection fails
+	 * @param string string to test
+	 * @return result of the above test
 	 */
-	public static String stringFromURL(URL url) throws IOException {
-		try( InputStream is = url.openStream()) {
-			return ERXStringUtilities.stringFromInputStream(is);
-		}
+	public static boolean isNullOrEmpty(String string) {
+		return string == null || string.length() == 0;
 	}
 
-	/**
-	 * Returns a string from the input stream using the default encoding.
-	 * 
-	 * @param in
-	 *            stream to read
-	 * @return string representation of the stream.
-	 * @throws IOException
-	 *             if things go wrong
-	 */
-	private static String stringFromInputStream(InputStream in) throws IOException {
-		return new String(bytesFromInputStream(in));
+	public static boolean isBlank(String string) {
+		return string == null || string.isBlank();
 	}
 
-	/**
-	 * Returns a string from the input stream using the specified encoding.
-	 * 
-	 * @param in
-	 *            stream to read
-	 * @param encoding
-	 *            to be used, <code>null</code> will use the default
-	 * @return string representation of the stream
-	 * @throws IOException
-	 *             if things go wrong
-	 */
-	public static String stringFromInputStream(InputStream in, String encoding) throws IOException {
-		return new String(bytesFromInputStream(in), encoding);
-	}
-
-	/**
-	 * Returns the byte array for a given stream.
-	 * 
-	 * @param in
-	 *            stream to get the bytes from
-	 * @throws IOException
-	 *             if things go wrong
-	 * @return byte array of the stream.
-	 */
-	private static byte[] bytesFromInputStream(InputStream in) throws IOException {
-		if (in == null)
-			throw new IllegalArgumentException("null input stream");
-
-		try( ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
-			int read;
-			byte[] buf = new byte[1024 * 50];
-			while ((read = in.read(buf)) != -1) {
-				bout.write(buf, 0, read);
-			}
-
-			return bout.toByteArray();
-		}
+	public static boolean isNotBlank(String string) {
+		return !isBlank(string);
 	}
 
 	/**
@@ -264,28 +214,5 @@ public class ERXStringUtilities {
 	 */
 	public static String safeIdentifierName(String source) {
 		return safeIdentifierName(source, "_", '_');
-	}
-
-	/**
-	 * Simple test if the string is either null or equal to "".
-	 * 
-	 * @param s
-	 *            string to test
-	 * @return result of the above test
-	 */
-	public static boolean isNullOrEmpty(String s) {
-		return ((s == null) || (s.length() == 0));
-	}
-
-	public static boolean isBlank(String value) {
-		boolean isBlank = false;
-		if (value == null || value.trim().length() == 0) {
-			isBlank = true;
-		}
-		return isBlank;
-	}
-
-	public static boolean isNotBlank(String value) {
-		return !isBlank(value);
 	}
 }
