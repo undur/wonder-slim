@@ -1,9 +1,7 @@
 package er.extensions.foundation;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
