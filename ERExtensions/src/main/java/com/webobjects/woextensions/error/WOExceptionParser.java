@@ -13,9 +13,9 @@ package com.webobjects.woextensions.error;
  * 
  * The stack trace is set in an NSArray that will be used in the UI in the exception page.
  */
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Enumeration;
