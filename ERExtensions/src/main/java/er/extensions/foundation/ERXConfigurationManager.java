@@ -220,7 +220,8 @@ public class ERXConfigurationManager {
 		_isRapidTurnAroundInitialized = true;
 
 		if (WOApplication.application() != null && WOApplication.application().isCachingEnabled()) {
-			log.info("WOCachingEnabled is true. Disabling the rapid turnaround for Properties files");
+			// In the original Wonder, this logged as "info". For some reason, I feel compelled to mention this before changing it
+			log.debug("WOCachingEnabled is true. Disabling the rapid turnaround for Properties files");
 			registerPropertiesTouchFiles();
 			return;
 		}
