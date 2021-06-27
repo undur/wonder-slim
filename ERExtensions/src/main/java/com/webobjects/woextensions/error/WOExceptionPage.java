@@ -14,6 +14,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.woextensions.error.WOExceptionParser.WOParsedErrorLine;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.components.ERXComponent;
