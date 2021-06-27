@@ -2,9 +2,12 @@ package er.extensions.components;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 import com.webobjects.appserver.WOApplication;
@@ -24,7 +27,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXValueUtilities;
 
 /**
@@ -279,11 +281,27 @@ public class ERXComponentUtilities {
 			template = null;
 		}
 		else {
-			template = ERXStringUtilities.stringFromURL(templateUrl);
+			template = stringFromURL(templateUrl,StandardCharsets.UTF_8);
 		}
 		return template;
 	}
 	
+	/**
+	 * Returns a string from the contents of the given URL.
+	 * 
+	 * @param url
+	 *            the URL to read from
+	 * @return the string that was read
+	 * @throws IOException
+	 *             if the connection fails
+	 */
+	private static String stringFromURL(URL url, Charset charset ) throws IOException {
+		try( InputStream is = url.openStream()) {
+			byte[] bytes = is.readAllBytes();
+			return new String( bytes, charset );
+		}
+	}
+
    /**
     * Allows a component to "inherit" the template (.html and .wod files) from another component.
     * <p>Usage in your WOComponent subclass:</p>
