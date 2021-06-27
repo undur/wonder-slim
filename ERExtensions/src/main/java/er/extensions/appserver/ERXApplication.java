@@ -1123,8 +1123,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		if (!ERXConfigurationManager.defaultManager().isDeployedAsServlet() && (!wasERXApplicationMainInvoked || _loader == null)) {
-			_displayMainMethodWarning();
+			log.warn("\n\nIt seems that your application class " + application().getClass().getName() + " did not call " + ERXApplication.class.getName() + ".main(argv[], applicationClass) method. " + "Please modify your Application.java as the followings so that " + ERXConfigurationManager.class.getName() + " can provide its " + "rapid turnaround feature completely. \n\n" + "Please change Application.java like this: \n" + "public static void main(String argv[]) { \n" + "    ERXApplication.main(argv, Application.class); \n" + "}\n\n");
 		}
+
 		// try {
 		// NSBundle.mainBundle().versionString();
 		// } catch (NoSuchMethodError e) {
@@ -1869,14 +1870,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public WOResponse createResponseInContext(WOContext context) {
 		WOResponse response = new ERXResponse(context);
 		return response;
-	}
-
-	/**
-	 * Logs the warning message if the main method was not called during the
-	 * startup.
-	 */
-	private void _displayMainMethodWarning() {
-		log.warn("\n\nIt seems that your application class " + application().getClass().getName() + " did not call " + ERXApplication.class.getName() + ".main(argv[], applicationClass) method. " + "Please modify your Application.java as the followings so that " + ERXConfigurationManager.class.getName() + " can provide its " + "rapid turnaround feature completely. \n\n" + "Please change Application.java like this: \n" + "public static void main(String argv[]) { \n" + "    ERXApplication.main(argv, Application.class); \n" + "}\n\n");
 	}
 
 	/** improved streaming support */
