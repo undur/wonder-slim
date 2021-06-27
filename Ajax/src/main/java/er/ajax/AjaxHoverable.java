@@ -73,7 +73,7 @@ public class AjaxHoverable extends WOComponent {
 	public String hoverAreaClasses() {
 		String classes = "erxHoverArea";
 		String userDefined = (String) valueForBinding("additionalClassHoverArea");
-		if (ERXStringUtilities.isNotBlank(userDefined)) {
+		if (!ERXStringUtilities.isBlank(userDefined)) {
 			classes += " " + userDefined;
 		}
 		
@@ -89,7 +89,7 @@ public class AjaxHoverable extends WOComponent {
 			classes = "erxToolTipJS";
 		}
 		String userDefined = (String) valueForBinding("additionalClassToolTip");
-		if (ERXStringUtilities.isNotBlank(userDefined)) {
+		if (!ERXStringUtilities.isBlank(userDefined)) {
 			classes += " " + userDefined;
 		}
 		return classes;
@@ -168,7 +168,7 @@ public class AjaxHoverable extends WOComponent {
 		String inlineStyle = "width: " + toolTipWidth() + "; ";
 		
 		String toolTipHeight = (String) valueForBinding("toolTipHeight");
-		if (ERXStringUtilities.isNotBlank(toolTipHeight)) {
+		if (!ERXStringUtilities.isBlank(toolTipHeight)) {
 			inlineStyle += "height: " + toolTipHeight + "; ";
 		}
 		
@@ -211,19 +211,19 @@ public class AjaxHoverable extends WOComponent {
 				inlineStyle += "right: 30px; ";
 			}
 		} else {
-			if (ERXStringUtilities.isNotBlank(advancedToolTipLeft)) {
+			if (!ERXStringUtilities.isBlank(advancedToolTipLeft)) {
 				inlineStyle += "left: " + advancedToolTipLeft + "; ";
 			}
 			
-			if (ERXStringUtilities.isNotBlank(advancedToolTipRight)) {
+			if (!ERXStringUtilities.isBlank(advancedToolTipRight)) {
 				inlineStyle += "right: " + advancedToolTipRight + "; ";
 			}
 			
-			if (ERXStringUtilities.isNotBlank(advancedToolTipTop)) {
+			if (!ERXStringUtilities.isBlank(advancedToolTipTop)) {
 				inlineStyle += "top: " + advancedToolTipTop + "; ";
 			}
 			
-			if (ERXStringUtilities.isNotBlank(advancedToolTipBottom)) {
+			if (!ERXStringUtilities.isBlank(advancedToolTipBottom)) {
 				inlineStyle += "bottom: " + advancedToolTipBottom + "; ";
 			}
 		}
