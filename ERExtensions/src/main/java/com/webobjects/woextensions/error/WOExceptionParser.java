@@ -181,46 +181,4 @@ public class WOExceptionParser {
             return null;
         return new String(data);
     }
-
-    /**
-     * Return a string for a file, or return an exception.
-     */
-    // TODO Are any sub-classes using this? Do they catch exceptions?
-    protected static String _stringFromFile(String path) {
-        File f = new File(path);
-        FileInputStream fis = null;
-        byte[] data = null;
-
-        if (!f.exists()) {
-            return null;
-        }
-
-        try {
-            int size = (int) f.length();
-            fis = new FileInputStream(f);
-            data = new byte[size];
-            int bytesRead = 0;
-
-            while (bytesRead < size) {
-                bytesRead += fis.read(data, bytesRead, size - bytesRead);
-            }
-
-        } catch (IOException e) {
-            throw NSForwardException._runtimeExceptionForThrowable(e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    if (NSLog.debugLoggingAllowedForLevelAndGroups(NSLog.DebugLevelInformational, NSLog.DebugGroupIO)) {
-                        NSLog.debug.appendln("Exception while closing file input stream: " + e.getMessage());
-                        NSLog.debug.appendln(e);
-                    }
-                }
-            }
-
-        }
-
-        return new String(data);
-    }
-}
+   }
