@@ -28,7 +28,6 @@ import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.logging.ERXLog4JConfiguration;
 import er.extensions.logging.ERXLogger;
-import er.extensions.statistics.ERXStatisticsPage;
 import er.extensions.statistics.ERXStats;
 
 /**
@@ -95,9 +94,11 @@ public class ERXDirectAction extends WODirectAction {
 	 * parameter.
 	 * 
 	 * @return statistics page
+	 * 
+	 * FIXME: This is now just a copy of WOStats/defaultAction() // Hugi 2021-06-27
 	 */
 	public WOActionResults statsAction() {
-		WOStatsPage nextPage = pageWithName(ERXStatisticsPage.class);
+		WOStatsPage nextPage = pageWithName(WOStatsPage.class);
 		nextPage.password = context().request().stringFormValueForKey("pw");
 		return nextPage.submit();
 	}
