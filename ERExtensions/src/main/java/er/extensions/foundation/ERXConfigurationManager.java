@@ -403,12 +403,12 @@ public class ERXConfigurationManager {
 	 * against <code>JavaWOJSPServlet.framework</code>.
 	 * 
 	 * @return true if the application is deployed as a servlet
+	 * 
+	 * FIXME: Disabled this code due to it, well, being wrong. See https://github.com/wocommunity/wonder/issues/951
 	 */
 	public boolean isDeployedAsServlet() {
 //		NSArray frameworkNames = (NSArray) NSBundle.frameworkBundles().valueForKey("name");
 //		return frameworkNames.containsObject("JavaWOJSPServlet");
-		log.warn( "Just so you know, I'm telling you that I'm not a servlet. I might be lying" ); // See https://github.com/wocommunity/wonder/issues/951
 		return false;
 	}
-
 }
