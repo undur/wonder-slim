@@ -8,9 +8,11 @@
 package com.webobjects.woextensions.stats;
 
 import java.net.UnknownHostException;
+import java.text.Format;
 import java.util.Enumeration;
 import java.util.Map;
 
+import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
@@ -19,6 +21,10 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
+
+import er.extensions.formatters.ERXUnitAwareDecimalFormat;
+import er.extensions.statistics.ERXStats;
+import er.extensions.statistics.ERXStats.LogEntry;
 
 public class WOStatsPage extends WOComponent {
 	/**
@@ -102,6 +108,7 @@ public class WOStatsPage extends WOComponent {
         // ** This should probably be somewhere else.
         _initIvars();
         super.appendToResponse(aResponse, aContext);
+        _aggregateLogEntries = null;
     }
 
     public long pageCount() {
@@ -254,5 +261,42 @@ public class WOStatsPage extends WOComponent {
     public String operatingSystem() {
         return System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
     }
-    
+
+	private NSArray<ERXStats.LogEntry> _aggregateLogEntries;
+	private ERXStats.LogEntry _aggregateLogEntry;
+
+
+	public Format byteFormat() {
+		return new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE);
+	}
+	
+	public Format timeFormat() {
+		return new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.SECOND);
+	}
+
+	public NSArray<LogEntry> aggregateLogEntries() {
+		if (_aggregateLogEntries == null) {
+			_aggregateLogEntries = ERXStats.aggregateLogEntries();
+			// AK: should be stored in session...
+			String key = context().request().stringFormValueForKey("sort");
+			if(key == null) {
+				key = "avg";
+			}
+			_aggregateLogEntries = (NSArray<LogEntry>) _aggregateLogEntries.valueForKeyPath("@sortDesc."+key);
+		}
+		return _aggregateLogEntries;
+	}
+
+	public void setAggregateLogEntry(ERXStats.LogEntry aggregateLogEntry) {
+		_aggregateLogEntry = aggregateLogEntry;
+	}
+
+	public ERXStats.LogEntry aggregateLogEntry() {
+		return _aggregateLogEntry;
+	}
+	
+	public WOActionResults resetStats() {
+		ERXStats.reset();
+		return this;
+	}
 }
