@@ -144,10 +144,6 @@ public class ERXStringUtilities {
 		return string == null || string.isBlank();
 	}
 
-	public static boolean isNotBlank(String string) {
-		return !isBlank(string);
-	}
-
 	/**
 	 * Converts source to be suitable for use as an identifier in JavaScript.
 	 * prefix is prefixed to source if the first character of source is not
