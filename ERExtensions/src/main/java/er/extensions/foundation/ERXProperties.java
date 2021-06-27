@@ -2374,7 +2374,11 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 		String path = null;
 		NSBundle bundle = "app".equals(frameworkName) ? NSBundle.mainBundle() : NSBundle.bundleForName(frameworkName);
 		if (bundle != null && bundle.isJar()) {
-			log.warn("Can't get path when run as jar: {} - {}", frameworkName, fileName);
+			// FIXME: Changed log level to debug
+			// This was emitting at every application startup, seemingly without purpose.
+			// Since property loading seems to work fine anyway, I turned it to debug
+			// and we're going to have to have a look at property loading in general later.
+			log.debug("Can't get path when run as jar: {} - {}", frameworkName, fileName);
 		}
 		else {
 			WOApplication application = WOApplication.application();
