@@ -282,7 +282,9 @@ public class WOStatsPage extends WOComponent {
 			if(key == null) {
 				key = "avg";
 			}
-			_aggregateLogEntries = (NSArray<LogEntry>) _aggregateLogEntries.valueForKeyPath("@sortDesc."+key);
+			// FIXME: Temporarily disabled sorting since we no longer have @sort operators // Hugi 2021-06-27
+//			_aggregateLogEntries = (NSArray<LogEntry>) _aggregateLogEntries.valueForKeyPath("@sortDesc."+key);
+			
 		}
 		return _aggregateLogEntries;
 	}
