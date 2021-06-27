@@ -105,6 +105,21 @@ import er.extensions.statistics.ERXStats;
 
 public abstract class ERXApplication extends ERXAjaxApplication {
 
+	/**
+	 * FIXME: Find a better location for this // Hugi 2021-06-27
+	 */
+	static {
+		try {
+			final Class<?> clazz = Class.forName( "com.webobjects._ideservices._PBXProjectWatcher" );
+			final Field field = clazz.getDeclaredField("_communicationDisabled" );
+			field.setAccessible(true);
+			field.set(null, true);
+		}
+		catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			throw new RuntimeException( e );
+		}
+	}
+
 	/** logging support */
 	private static final Logger log = Logger.getLogger(ERXApplication.class);
 
