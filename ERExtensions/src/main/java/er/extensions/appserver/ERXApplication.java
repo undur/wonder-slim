@@ -1275,10 +1275,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		didFinishLaunching();
 		ERXStats.logStatisticsForOperation(statsLog, "sum");
 
-		if (isDevelopmentMode() && !autoOpenInBrowser()) {
-			log.warn("You are running in development mode with WOAutoOpenInBrowser = false.  No browser will open and it will look like the application is hung, but it's not.  There's just not a browser opening automatically.");
-		}
-		
 		// FIXME: Is this being handled by ERXStats? Check out. 
 		_startupTimeInMilliseconds = System.currentTimeMillis() - _startupTimeInMilliseconds;
 		log.info( String.format( "Startup time %s ms: ", _startupTimeInMilliseconds ) );
