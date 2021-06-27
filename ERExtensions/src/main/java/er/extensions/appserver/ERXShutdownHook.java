@@ -49,7 +49,6 @@ public abstract class ERXShutdownHook extends Thread {
 	static final Set<ERXShutdownHook> ALL_HOOKS = new HashSet<>();
 	
 	public static void initERXShutdownHook() {
-		System.out.println( "WILL ADD SHUTDOWNHOOK" );
 		Runtime.getRuntime().addShutdownHook( new Thread( "shutdown_complete_message_writer" ) {
 			@Override
 			public void run() {
