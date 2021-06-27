@@ -1679,34 +1679,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Puts together a dictionary with a bunch of useful information relative to
-	 * the current state when the exception occurred. Potentially added
-	 * information:
-	 * <ol>
-	 * <li>the current page name</li>
-	 * <li>the current component</li>
-	 * <li>the complete hierarchy of nested components</li>
-	 * <li>the requested uri</li>
-	 * <li>the D2W page configuration</li>
-	 * <li>the previous page list (from the WOStatisticsStore)</li>
-	 * </ol>
-	 * Also, in case the top-level exception was a EOGeneralAdaptorException,
-	 * then you also get the failed ops and the sql exception.
-	 * 
-	 * @param e
-	 *            exception
-	 * @param context
-	 *            the current context
-	 * @return dictionary containing extra information for the current context.
-	 */
-	public NSMutableDictionary extraInformationForExceptionInContext(Exception e, WOContext context) {
-		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
-		extraInfo.addEntriesFromDictionary(ERXRuntimeUtilities.informationForContext(context));
-		extraInfo.addEntriesFromDictionary(ERXRuntimeUtilities.informationForBundles());
-		return extraInfo;
-	}
-
-	/**
 	 * Workaround for WO 5.2 DirectAction lock-ups. As the super-implementation
 	 * is empty, it is fairly safe to override here to call the normal exception
 	 * handling earlier than usual.
@@ -1779,7 +1751,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		handlePotentiallyFatalException(exception);
 
 		// Not a fatal exception, business as usual.
-		final NSDictionary extraInfo = extraInformationForExceptionInContext(exception, context);
+		final NSDictionary extraInfo = ERXRuntimeUtilities.extraInformationForExceptionInContext(exception, context);
 		log.error("Exception caught: " + exception.getMessage() + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
 		WOResponse response = super.handleException(exception, context);
 		response.setStatus(500);
