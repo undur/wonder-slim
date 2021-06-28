@@ -1754,9 +1754,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				developmentMode = ERXProperties.booleanForKey("NSProjectBundleEnabled");
 			}
 		}
-		// AK: these are for quickly uncommenting while testing
-		// if(true) return false;
-		// if(true) return true;
+
 		return developmentMode;
 	}
 
