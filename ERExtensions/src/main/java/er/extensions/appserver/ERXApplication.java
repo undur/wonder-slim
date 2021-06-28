@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.net.BindException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -99,30 +98,22 @@ import er.extensions.foundation.ERXUtilities;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.statistics.ERXStats;
 
-/**
- * Improvements and fixes for WOApplication
- */
-
 public abstract class ERXApplication extends ERXAjaxApplication {
 
-	private final ERXLowMemoryHandler _lowMemoryHandler;
 
-	/** logging support */
 	private static final Logger log = Logger.getLogger(ERXApplication.class);
-
-	/** request logging support */
 	private static final Logger requestHandlingLog = Logger.getLogger("er.extensions.ERXApplication.RequestHandling");
-
-	/** statistic logging support */
 	private static final Logger statsLog = Logger.getLogger("er.extensions.ERXApplication.Statistics");
-
-	/** startup logging support */
 	private static final Logger startupLog = Logger.getLogger("er.extensions.ERXApplication.Startup");
 
 	private static boolean wasERXApplicationMainInvoked = false;
 
-	/** empty array for adaptorExtensions */
-	private static String[] myAppExtensions = {};
+	private final ERXLowMemoryHandler _lowMemoryHandler;
+
+	/**
+	 * Empty array for adaptorExtensions
+	 */
+	private static String[] EMPTY_STRING_ARRAY = {};
 
 	/**
 	 * Notification to get posted when terminate() is called.
@@ -147,6 +138,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public static final String ApplicationDidFinishInitializationNotification = "NSApplicationDidFinishInitializationNotification";
 
+	/**
+	 * Comand line arguments passed to the main method
+	 */
 	private static NSDictionary propertiesFromArgv;
 
 	/**
@@ -2247,12 +2241,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Override default implementation that returns {".dll", ".exe"} and
-	 * therefor prohibits IIS as WebServer.
+	 * Override default implementation WHICH returns {".dll", ".exe"} and therefore prohibits IIS as WebServer.
 	 */
 	@Override
 	public String[] adaptorExtensions() {
-		return myAppExtensions;
+		return EMPTY_STRING_ARRAY;
 	}
 
 	public void addBalancerRouteCookieByNotification(NSNotification notification) {
