@@ -7,9 +7,9 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 
+import er.extensions.appserver.ERXBrowser;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXResponseRewriter;
-import er.extensions.browser.ERXBrowser;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;

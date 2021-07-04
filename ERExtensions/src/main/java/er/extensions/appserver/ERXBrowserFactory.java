@@ -4,7 +4,7 @@
 //
 // Created by tatsuya on Mon Jul 22 2002
 //
-package er.extensions.browser;
+package er.extensions.appserver;
 
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -21,8 +21,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.appserver.ERXDirectAction;
-import er.extensions.appserver.ERXSession;
 import er.extensions.foundation.ERXStringUtilities;
 
 /**

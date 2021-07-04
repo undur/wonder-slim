@@ -16,7 +16,6 @@ import com.webobjects.appserver.WOSession;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.appserver._private.WOServerSessionStore;
 
-import er.extensions.browser.ERXBrowser;
 import er.extensions.foundation.ERXProperties;
 
 /**

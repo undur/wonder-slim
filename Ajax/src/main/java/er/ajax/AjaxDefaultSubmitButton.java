@@ -7,8 +7,8 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.browser.ERXBrowser;
-import er.extensions.browser.ERXBrowserFactory;
+import er.extensions.appserver.ERXBrowser;
+import er.extensions.appserver.ERXBrowserFactory;
 import er.extensions.components._private.ERXWOForm;
 
 /**

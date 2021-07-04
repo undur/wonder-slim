@@ -4,7 +4,7 @@
 //
 // Created by tatsuya on Tue Jul 23 2002
 //
-package er.extensions.browser;
+package er.extensions.appserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.appserver.ERXDirectAction;
-import er.extensions.appserver.ERXSession;
 import er.extensions.foundation.ERXStringUtilities;
 
 /**
