@@ -28,9 +28,6 @@
 				<artifactId>wolifecycle-maven-plugin</artifactId>
 				<version>2.4-SNAPSHOT</version>
 				<extensions>true</extensions>
-				<configuration>
-					<skipAppleProvidedFrameworks>true</skipAppleProvidedFrameworks>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
