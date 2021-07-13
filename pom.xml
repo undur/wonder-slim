@@ -23,6 +23,7 @@
 	</properties>
 	<build>
 		<plugins>
+			<!--
 			<plugin>
 				<groupId>is.rebbi</groupId>
 				<artifactId>vermilingua-maven-plugin</artifactId>
@@ -31,6 +32,13 @@
 				<configuration>
 					<woresourcesFolderName>resources</woresourcesFolderName>
 				</configuration>
+			</plugin>
+			-->
+			<plugin>
+				<groupId>org.wocommunity</groupId>
+				<artifactId>wolifecycle-maven-plugin</artifactId>
+				<version>2.4-SNAPSHOT</version>
+				<extensions>true</extensions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
