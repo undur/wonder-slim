@@ -337,7 +337,7 @@ public class ERXResourceManager extends WOResourceManager {
 		if (dict2 == null || dict2.allKeys().count() == 0)
 			return (NSDictionary<K, V>) dict1;
 
-		NSMutableDictionary<K, V> result = new NSMutableDictionary<K, V>(dict2);
+		NSMutableDictionary<K, V> result = new NSMutableDictionary(dict2);
 		result.addEntriesFromDictionary(dict1);
 		return new NSDictionary<K, V>(result);
 	}
