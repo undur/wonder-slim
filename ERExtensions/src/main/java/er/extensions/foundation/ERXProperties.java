@@ -14,9 +14,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
@@ -1474,10 +1476,10 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
      */
 	public static String pathForPropertiesUnderProjectPath(String projectPath) {
         String path = null; 
-        final NSArray<String> supportedPropertiesPaths = new NSArray<>("/Properties", "/Resources/Properties");
-        Enumeration e = supportedPropertiesPaths.objectEnumerator();
-        while (e.hasMoreElements()) {
-            File file = new File(projectPath + (String) e.nextElement());
+        final List<String> supportedPropertiesPaths = Arrays.asList( "/Properties", "/Resources/Properties");
+
+        for( String s : supportedPropertiesPaths ) {
+            File file = new File(projectPath + s);
             if (file.exists()  &&  file.isFile()  &&  file.canRead()) {
                 try {
                     path = file.getCanonicalPath();
