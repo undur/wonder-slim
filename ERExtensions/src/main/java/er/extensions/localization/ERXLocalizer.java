@@ -118,6 +118,11 @@ import er.extensions.validation.ERXValidationFactory;
  * <code>Table</code> any other number. <b>Note:</b> unlike all other keys, you need to give the translated value
  * ("Tisch" for "Table" in German) as the key, not the untranslated one. This is because this method is mainly called
  * via d2wContext.displayNameForProperty which is already localized.
+<<<<<<< HEAD
+=======
+ * </div>
+ * 
+>>>>>>> branch 'master' of git@github.com:undur/wonder-slim.git
  */
 
 public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions {
