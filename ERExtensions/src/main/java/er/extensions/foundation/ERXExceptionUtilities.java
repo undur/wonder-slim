@@ -1,8 +1,6 @@
 package er.extensions.foundation;
 
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -33,32 +31,7 @@ public class ERXExceptionUtilities {
 	 * 
 	 * @author mschrag
 	 */
-	public static interface WeDontNeedAStackTraceException {
-	}
-
-	/**
-	 * Wraps a root cause, but does not render a stack trace to the given
-	 * writer. This is used to intercept old code that handles exceptions in
-	 * undesirable ways.
-	 * 
-	 * @author mschrag
-	 */
-	public static class HideStackTraceException extends NSForwardException {
-		/**
-		 * Do I need to update serialVersionUID?
-		 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
-		 * <a href="http://java.sun.com/j2se/1.4/pdf/serial-spec.pdf">Java Object Serialization Spec</a>
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public HideStackTraceException(Throwable cause) {
-			super(cause);
-		}
-
-		@Override
-		public void printStackTrace(PrintWriter s) {
-			s.println("[stack trace already printed]");
-		}
+	private static interface WeDontNeedAStackTraceException {
 	}
 
 	/**
@@ -67,7 +40,7 @@ public class ERXExceptionUtilities {
 	 * @param t the original exception
 	 * @return the cause of the exception or null of there isn't one
 	 */
-	protected static Throwable getCause(Throwable t) {
+	private static Throwable getCause(Throwable t) {
 		Throwable cause = null;
 		if (t != null) {
 			cause = t.getCause();
@@ -98,7 +71,7 @@ public class ERXExceptionUtilities {
 	 *            the throwable to convert to paragraph form
 	 * @return the paragraph string
 	 */
-	public static String toParagraph(Throwable t) {
+	private static String toParagraph(Throwable t) {
 		return ERXExceptionUtilities.toParagraph(t, true);
 	}
 
@@ -110,7 +83,7 @@ public class ERXExceptionUtilities {
 	 * @param removeHtmlTags if true, html tags will be filtered from the error messages (to remove, for instance, bold tags from validation messages)
 	 * @return the paragraph string
 	 */
-	public static String toParagraph(Throwable t, boolean removeHtmlTags) {
+	private static String toParagraph(Throwable t, boolean removeHtmlTags) {
 		StringBuilder messageBuffer = new StringBuilder();
 		boolean foundInternalError = false;
 		Throwable throwable = t;
@@ -171,58 +144,6 @@ public class ERXExceptionUtilities {
 	}
 
 	/**
-	 * Prints a debug stack trace to the console.
-	 */
-	public static void printStackTrace() {
-		Exception e = new Exception("DEBUG");
-		e.fillInStackTrace();
-		ERXExceptionUtilities.printStackTrace(e);
-	}
-
-	/**
-	 * Logs a debug stack trace.
-	 */
-	public static void logStackTrace() {
-		Exception e = new Exception("DEBUG");
-		e.fillInStackTrace();
-		log.error("", e);
-	}
-
-	/**
-	 * Prints the given throwable to the console (stdout).
-	 * 
-	 * @param t
-	 *            the throwable to print
-	 */
-	public static void printStackTrace(Throwable t) {
-		ERXExceptionUtilities.printStackTrace(t, System.out);
-	}
-
-	/**
-	 * Prints the given throwable to the given outputstream.
-	 * 
-	 * @param t
-	 *            the throwable to print
-	 * @param os
-	 *            the stream to print to
-	 */
-	public static void printStackTrace(Throwable t, OutputStream os) {
-		ERXExceptionUtilities.printStackTrace(t, new PrintWriter(os, true), 0);
-	}
-
-	/**
-	 * Prints the given throwable to the given printwriter.
-	 * 
-	 * @param t
-	 *            the throwable to print
-	 * @param writer
-	 *            the writer to print to
-	 */
-	public static void printStackTrace(Throwable t, Writer writer) {
-		ERXExceptionUtilities.printStackTrace(t, new PrintWriter(writer, true), 0);
-	}
-
-	/**
 	 * Prints the given throwable to the given printwriter.
 	 * 
 	 * @param t
@@ -236,7 +157,7 @@ public class ERXExceptionUtilities {
 
 	private static NSArray<Pattern> _skipPatterns;
 
-	protected static void _printSingleStackTrace(Throwable t, PrintWriter writer, int exceptionDepth, boolean cleanupStackTrace) {
+	private static void _printSingleStackTrace(Throwable t, PrintWriter writer, int exceptionDepth, boolean cleanupStackTrace) {
 		NSArray<Pattern> skipPatterns = ERXExceptionUtilities._skipPatterns;
 		if (cleanupStackTrace && skipPatterns == null) {
 			String skipPatternsFile = ERXProperties.stringForKey("er.extensions.stackTrace.skipPatternsFile");
@@ -377,7 +298,7 @@ public class ERXExceptionUtilities {
 	 *           that contains an array of class name and method regexes to skip
 	 *           in stack traces
 	 */
-	public static void printStackTrace(Throwable t, PrintWriter writer, int exceptionDepth) {
+	private static void printStackTrace(Throwable t, PrintWriter writer, int exceptionDepth) {
 		try {
 			boolean cleanupStackTrace = ERXProperties.booleanForKeyWithDefault("er.extensions.stackTrace.cleanup", false);
 			Throwable actualThrowable;
@@ -405,5 +326,4 @@ public class ERXExceptionUtilities {
 			thisSucks.printStackTrace(writer);
 		}
 	}
-
 }
