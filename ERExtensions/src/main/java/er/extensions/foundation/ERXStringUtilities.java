@@ -43,18 +43,6 @@ public class ERXStringUtilities {
 		return null;
 	}
 
-	public static final String lastPropertyKeyInKeyPath(String keyPath) {
-		String part = null;
-		if (keyPath != null) {
-			int index = keyPath.lastIndexOf(NSKeyValueCodingAdditions.KeyPathSeparator);
-			if (index != -1)
-				part = keyPath.substring(index + 1);
-			else
-				part = keyPath;
-		}
-		return part;
-	}
-
 	/**
 	 * Calculates a default display name for a given key path. For instance for
 	 * the key path: "foo.bar" the display name would be "Bar".
