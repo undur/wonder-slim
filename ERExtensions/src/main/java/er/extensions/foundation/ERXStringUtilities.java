@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSBundle;
-import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
 @Deprecated
 public class ERXStringUtilities {
