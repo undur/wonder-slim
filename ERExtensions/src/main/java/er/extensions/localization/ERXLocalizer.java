@@ -1060,10 +1060,6 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		cache.addEntriesFromDictionary(dict);
 	}
 
-	protected NSDictionary readPropertyListFromFileInFramework(String fileName, String framework, NSArray<String> languages) {
-		return (NSDictionary) ERXUtilities.readPropertyListFromFileInFramework(fileName, framework, languages);
-	}
-
 	/**
 	 * Cover method that calls <code>localizedStringForKey</code>.
 	 * 
