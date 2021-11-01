@@ -77,7 +77,7 @@ public class ERXThreadStorage {
      */
     private static boolean useInheritableThreadLocal() {
     	if (_useInheritableThreadLocal == null) {
-    		_useInheritableThreadLocal = Boolean.valueOf(ERXProperties.booleanForKeyWithDefault("er.extensions.ERXThreadStorage.useInheritableThreadLocal", true));
+    		_useInheritableThreadLocal = Boolean.valueOf(ERXProperties.booleanForKeyWithDefault("er.extensions.ERXThreadStorage.useInheritableThreadLocal", false));
     	}
     	return _useInheritableThreadLocal.booleanValue();
     }
