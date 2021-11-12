@@ -2,8 +2,8 @@ package er.extensions.components;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.Objects;
 
@@ -200,7 +200,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 				wocontext._setResponse( originalResponse );
 				cachedResponse.setHeader( "text/css", "content-type" );
 				cache.setObjectForKey( cachedResponse, key );
-				md5 = DeprecatedMD5FromERXStringUtilities.md5Hex( cachedResponse.contentString() );
+				md5 = md5Hex( cachedResponse.contentString() );
 				cachedResponse.setHeader( md5, "checksum" );
 			}
 			md5 = cachedResponse.headerForKey( "checksum" );
@@ -251,54 +251,31 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 	public static boolean shouldCloseLinkTags() {
 		return ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXStyleSheet.xhtml", true );
 	}
-
+	
 	/**
-	 * FIXME: Replace with Java methods
+	 * Partial rip from ERXStringUtilities
+	 * 
+	 * FIXME: Could use cleanup // Hugi 2021-11-12 
 	 */
 	@Deprecated
-	private static class DeprecatedMD5FromERXStringUtilities {
-		
-		@Deprecated
-		private static byte[] md5(String str) {
-			byte[] bytes;
-			if (str == null) {
-				bytes = new byte[0];
+	private static String md5Hex(String str) {
+		Objects.requireNonNull(str);
+
+		try {
+			MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");
+			byte[] buf = new byte[50 * 1024];
+			int numRead;
+
+			final ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
+
+			while ((numRead = in.read(buf)) != -1) {
+				md5.update(buf, 0, numRead);
 			}
-			else {
-				try {
-					bytes = md5(new ByteArrayInputStream(str.getBytes("UTF-8")));
-				}
-				catch (IOException e) {
-					throw NSForwardException._runtimeExceptionForThrowable(e);
-				}
-			}
-			return bytes;
+
+			return HexFormat.of().formatHex(md5.digest() );
 		}
-
-		@Deprecated
-		private static byte[] md5(InputStream in) throws IOException {
-			Objects.requireNonNull(in);
-
-			try {
-				java.security.MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");
-				byte[] buf = new byte[50 * 1024];
-				int numRead;
-
-				while ((numRead = in.read(buf)) != -1) {
-					md5.update(buf, 0, numRead);
-				}
-
-				return md5.digest();
-			}
-			catch (java.security.NoSuchAlgorithmException e) {
-				throw new NSForwardException(e);
-			}
-		}
-
-		@Deprecated
-		private static String md5Hex(String str) {
-			Objects.requireNonNull(str);
-			return HexFormat.of().formatHex(md5(str));
+		catch (java.security.NoSuchAlgorithmException | IOException e) {
+			throw new NSForwardException(e);
 		}
 	}
 }
