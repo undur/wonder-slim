@@ -81,14 +81,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 
 		@Override
 		public WOActionResults performActionNamed( String name ) {
-			WOResponse response = ERXStyleSheet.cache( session() ).objectForKey( name );
-			String md5 = DeprecatedMD5FromERXStringUtilities.md5Hex( response.contentString(), null );
-			String queryMd5 = response.headerForKey( "checksum" );
-			if (Objects.equals(md5, queryMd5)) {
-				// FIXME: WTF!? looks like all these md5 exercises don't do anything at all? // Hugi 2021-11-06 
-				//TODO check for last-whatever time and return not modified if not changed
-			}
-			return response;
+			return ERXStyleSheet.cache( session() ).objectForKey( name );
 		}
 	}
 
