@@ -17,10 +17,7 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
  * like the current actor or the current form name within the scope of a thread handling a particular request.
  */
 public class ERXThreadStorage {
-	
-	public static final String KEYS_ADDED_IN_CURRENT_THREAD_KEY = "ERXThreadStorage.keysAddedInCurrentThread";
-	public static final String WAS_CLONED_MARKER = "ERXThreadStorage.wasCloned";
-	
+
     /**
      * Holds the single instance of the thread map.
      */
@@ -57,9 +54,7 @@ public class ERXThreadStorage {
     }
 
     /**
-     * Gets the object associated with the keypath in the storage
-     * map off of the current thread.
-     *
+     * Gets the object associated with the keypath in the storage map off of the current thread.
      * @param keyPath key path to be used to retrieve value from map.
      * @return the value stored in the map for the given key.
      */
