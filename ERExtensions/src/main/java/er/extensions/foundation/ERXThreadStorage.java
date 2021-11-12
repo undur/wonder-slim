@@ -21,11 +21,7 @@ public class ERXThreadStorage {
     /**
      * Holds the single instance of the thread map.
      */
-    private static ThreadLocal threadMap;
-
-    static {
-   		threadMap = new ThreadLocal();
-    }
+    private static ThreadLocal<Map> threadMap = new ThreadLocal<>();
 
     /**
      * Holds the default initialization value of the hash map.
@@ -34,6 +30,7 @@ public class ERXThreadStorage {
 
     /**
      * Sets a value for a particular key for a particular thread.
+     * 
      * @param object value
      * @param key key
      */
@@ -44,9 +41,9 @@ public class ERXThreadStorage {
 
     /**
      * Removes the value in the map for a given key.
+     * 
      * @param key key to be removed from the map.
-     * @return the object corresponding to the key that
-     *         was removed, null if nothing is found.
+     * @return the object corresponding to the key that was removed, null if nothing is found.
      */
     public static Object removeValueForKey(String key) {
         Map map = storageMap(false);
@@ -55,6 +52,7 @@ public class ERXThreadStorage {
 
     /**
      * Gets the object associated with the keypath in the storage map off of the current thread.
+     * 
      * @param keyPath key path to be used to retrieve value from map.
      * @return the value stored in the map for the given key.
      */
@@ -73,8 +71,8 @@ public class ERXThreadStorage {
     }
     
     /**
-     * Gets the object associated with the key in the storage
-     * map off of the current thread.
+     * Gets the object associated with the key in the storage map off of the current thread.
+     * 
      * @param key key to be used to retrieve value from map.
      * @return the value stored in the map for the given key.
      */
@@ -93,8 +91,8 @@ public class ERXThreadStorage {
      * safety. This might not be necessary in which case
      * users of this method would need to make sure that
      * they take the appropriate precautions.
-     * @return Map object associated with this particular
-     *         thread.
+     * 
+     * @return Map object associated with this particular thread.
      */
     public static Map map() {
         return storageMap(true);
@@ -115,11 +113,12 @@ public class ERXThreadStorage {
      * Gets the {@link Map} from the thread map. Has the option to
      * to create the map if it hasn't been created yet for this thread.
      * Only used internally.
+     * 
      * @param create should create the map storage if it isn't found.
      * @return the map for the current thread or null
      */
     private static Map storageMap(boolean create) {
-        Map map = (Map)threadMap.get();
+        Map map = threadMap.get();
         if (map == null && create) {
             map = new HashMap(DefaultHashMapSize);
             threadMap.set(map);
