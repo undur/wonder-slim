@@ -100,7 +100,6 @@ import er.extensions.statistics.ERXStats;
 
 public abstract class ERXApplication extends ERXAjaxApplication {
 
-
 	private static final Logger log = Logger.getLogger(ERXApplication.class);
 	private static final Logger requestHandlingLog = Logger.getLogger("er.extensions.ERXApplication.RequestHandling");
 	private static final Logger statsLog = Logger.getLogger("er.extensions.ERXApplication.Statistics");
@@ -121,20 +120,17 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public static final String ApplicationWillTerminateNotification = "ApplicationWillTerminateNotification";
 
 	/**
-	 * Notification to post when all bundles were loaded but before their
-	 * principal was called
+	 * Notification to post when all bundles were loaded but before their principal was called
 	 */
 	public static final String AllBundlesLoadedNotification = "NSBundleAllBundlesLoaded";
 
 	/**
-	 * Notification to post when all bundles were loaded but before their
-	 * principal was called
+	 * Notification to post when all bundles were loaded but before their principal was called
 	 */
 	public static final String ApplicationDidCreateNotification = "NSApplicationDidCreateNotification";
 
 	/**
-	 * Notification to post when all application initialization processes are
-	 * complete (including migrations)
+	 * Notification to post when all application initialization processes are complete (including migrations)
 	 */
 	public static final String ApplicationDidFinishInitializationNotification = "NSApplicationDidFinishInitializationNotification";
 
@@ -1058,13 +1054,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			log.warn("\n\nIt seems that your application class " + application().getClass().getName() + " did not call " + ERXApplication.class.getName() + ".main(argv[], applicationClass) method. " + "Please modify your Application.java as the followings so that " + ERXConfigurationManager.class.getName() + " can provide its " + "rapid turnaround feature completely. \n\n" + "Please change Application.java like this: \n" + "public static void main(String argv[]) { \n" + "    ERXApplication.main(argv, Application.class); \n" + "}\n\n");
 		}
 
-		// try {
-		// NSBundle.mainBundle().versionString();
-		// } catch (NoSuchMethodError e) {
-		// throw new RuntimeException("No versionString() method in NSBundle
-		// found. \nThis means your class path is incorrect. Adjust it so that
-		// ERJars comes before JavaFoundation.");
-		// }
 		if (_loader == null) {
 			System.out.println("No loader: " + System.getProperty("java.class.path"));
 		}
