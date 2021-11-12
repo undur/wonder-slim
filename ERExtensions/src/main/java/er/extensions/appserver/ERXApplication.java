@@ -79,7 +79,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static final Logger statsLog = Logger.getLogger("er.extensions.ERXApplication.Statistics");
 
 	/**
-	 * Set by Loader to indicate that main was invoked // FIXME: Do we _really_ need this? // Hugi 2021-11-12
+	 * Indicates that ERXApplication.main was invoked
 	 */
 	public static boolean wasERXApplicationMainInvoked = false;
 
@@ -87,6 +87,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Watches the state of the application's memory heap and handles low memory situations
 	 */
 	private final ERXLowMemoryHandler _lowMemoryHandler;
+
+	/**
+	 * The horrible thing that does horrible things // FIXME: Get rid of this? // Hugi 2021-11-12
+	 */
+	private static Loader _loader;
 
 	/**
 	 * Empty array for adaptorExtensions
@@ -162,11 +167,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * The time taken from invoking main, until the end of the application constructor
 	 */
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
-
-	/**
-	 * The horrible thing that does horrible things // FIXME: Get rid of this? // Hugi 2021-11-12
-	 */
-	private static Loader _loader;
 
 	static class AppClassLoader extends URLClassLoader {
 
