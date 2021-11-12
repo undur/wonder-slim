@@ -149,8 +149,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private String _replaceApplicationPathPattern;
 
 	/**
-	 * The path rewriting replacement to apply to the matched pattern (@see
-	 * _rewriteURL)
+	 * The path rewriting replacement to apply to the matched pattern (@see _rewriteURL)
 	 */
 	private String _replaceApplicationPathReplace;
 
@@ -185,8 +184,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private String _proxyBalancerCookiePath = null;
 
 	/**
-	 * The public host to use for complete url without request from a server (in
-	 * background tasks)
+	 * The public host to use for complete url without request from a server (in background tasks)
 	 */
 	private String _publicHost;
 

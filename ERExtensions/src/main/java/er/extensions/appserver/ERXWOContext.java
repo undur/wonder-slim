@@ -24,9 +24,9 @@ import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 
 /**
- * Replacement of WOContext. This subclass is installed when the frameworks
- * loads.
+ * Replacement of WOContext. This subclass is installed when the frameworks loads.
  */
+
 public class ERXWOContext extends ERXAjaxContext {
 	private static Observer observer;
 	private boolean _generateCompleteURLs;
