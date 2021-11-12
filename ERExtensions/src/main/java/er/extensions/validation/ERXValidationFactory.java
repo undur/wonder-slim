@@ -24,8 +24,8 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
-import com.webobjects.foundation._NSCollectionPrimitives;
 import com.webobjects.foundation.NSValidation.ValidationException;
+import com.webobjects.foundation._NSCollectionPrimitives;
 
 import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXSystem;

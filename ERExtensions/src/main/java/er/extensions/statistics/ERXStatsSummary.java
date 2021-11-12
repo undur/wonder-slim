@@ -11,7 +11,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.components.ERXStatelessComponent;
-import er.extensions.foundation.ERXStringUtilities;
 
 /**
  * A component to display a summary of collected stats.
