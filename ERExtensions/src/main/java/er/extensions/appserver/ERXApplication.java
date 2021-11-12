@@ -167,7 +167,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * The time taken from invoking main, until the end of the application constructor
 	 */
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
-
+/*
 	static class AppClassLoader extends URLClassLoader {
 
 		public static ClassLoader getAppClassLoader() {
@@ -213,7 +213,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			super(aurl, classloader);
 		}
 	}
-
+*/
 	/**
 	 * You should not use ERXShutdownHook when deploying as servlet.
 	 */
@@ -310,10 +310,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public static void setup(String[] argv) {
 		_loader = new Loader(argv);
-		if (System.getProperty("_DisableClasspathReorder") == null) {
-			ClassLoader loader = AppClassLoader.getAppClassLoader();
-			Thread.currentThread().setContextClassLoader(loader);
-		}
+//		if (System.getProperty("_DisableClasspathReorder") == null) {
+//			ClassLoader loader = AppClassLoader.getAppClassLoader();
+//			Thread.currentThread().setContextClassLoader(loader);
+//		}
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
 
