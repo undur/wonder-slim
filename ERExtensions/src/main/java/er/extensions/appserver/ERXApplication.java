@@ -243,8 +243,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return false;
 	}
 
-
-
 	/**
 	 * This heuristic to determine if an application is deployed as servlet
 	 * relays on the fact, that contextClassName() is set WOServletContext or
@@ -299,9 +297,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return new ERXResourceManager();
 	}
 
-	/**
-	 * The ERXApplication constructor.
-	 */
 	public ERXApplication() {
 		super();
 
