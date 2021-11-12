@@ -107,8 +107,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 	}
 
 	/**
-	 * Returns the style sheet framework name either resolved via the binding
-	 * <b>framework</b>.
+	 * Returns the style sheet framework name either resolved via the binding <b>framework</b>.
 	 * 
 	 * @return style sheet framework name
 	 */
@@ -130,8 +129,8 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 	}
 
 	/**
-	 * Returns key under which the stylesheet should be placed in the cache. If
-	 * no key is given, the session id is used.
+	 * Returns key under which the stylesheet should be placed in the cache.
+	 * If no key is given, the session id is used.
 	 * 
 	 * @return cache key
 	 */
@@ -145,6 +144,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 
 	/**
 	 * Specifies on what device the linked document will be displayed.
+	 * 
 	 * @return media string
 	 */
 	public String mediaType() {
