@@ -190,9 +190,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
 
 	/**
-	 * Copies the props from the command line to the static dict
-	 * propertiesFromArgv.
-	 * 
+	 * Copies the props from the command line to the static dict propertiesFromArgv.
 	 */
 	private static void insertCommandLineArguments() {
 		NSArray keys = propertiesFromArgv.allKeys();
@@ -339,8 +337,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		/**
-		 * Called prior to actually initializing the app. Defines framework load
-		 * order, class path order, checks patches etc.
+		 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 		 */
 		public Loader(String[] argv) {
 			wasERXApplicationMainInvoked = true;
@@ -489,8 +486,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("bundleDidLoad", ERXUtilities.NotificationClassArray), "NSBundleDidLoadNotification", null);
 		}
 
-		// for logging before logging has been setup and configured by loading
-		// the properties files
+		// for logging before logging has been setup and configured by loading the properties files
 		private void debugMsg(String msg) {
 			if ("DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"))) {
 				System.out.println(msg);
@@ -511,11 +507,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				mainBundle = NSBundle.mainBundle();
 			}
 			if (mainBundle == null) {
-				// AK: when we get here, the main bundle wasn't inited yet
-				// so we do it ourself...
+				// AK: when we get here, the main bundle wasn't inited yet so we do it ourself...
 
-				if (isDevelopmentModeSafe() &&
-						ERXConfigurationManager.defaultManager().isDeployedAsServlet()) {
+				if (isDevelopmentModeSafe() && ERXConfigurationManager.defaultManager().isDeployedAsServlet()) {
 					// bundle-less builds do not appear to work when running in
 					// servlet mode, so make it prefer the legacy bundle style
 					NSBundleFactory.registerBundleFactory(new com.webobjects.foundation.development.NSLegacyBundle.Factory());
@@ -761,7 +755,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 	}
 
-	// You should not use ERXShutdownHook when deploying as servlet.
+	/**
+	 * You should not use ERXShutdownHook when deploying as servlet.
+	 */
 	protected static boolean enableERXShutdownHook() {
 		return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.enableERXShutdownHook", true);
 	}
@@ -786,15 +782,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * <p>
-	 * Terminates a different instance of the same application that may already
-	 * be running.<br>
+	 * Terminates a different instance of the same application that may already be running.<br>
 	 * Only in dev mode.
-	 * </p>
-	 * <p>
+	 * 
 	 * Set the property "er.extensions.ERXApplication.allowMultipleDevInstances"
 	 * to "true" if you need to run multiple instances in dev mode.
-	 * </p>
 	 * 
 	 * @return true if a previously running instance was stopped.
 	 */
@@ -999,6 +991,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	protected void installPatches() {
 		ERXPatcher.installPatches();
+
 		if (contextClassName().equals("WOContext")) {
 			setContextClassName(ERXWOContext.class.getName());
 		}
@@ -1006,8 +999,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
 		ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition");
 
-		// use our localizing string class
-		// works around #3574558
+		// use our localizing string class works around #3574558
 		if (ERXLocalizer.isLocalizationEnabled()) {
 			ERXPatcher.setClassForName(ERXWOString.class, "WOString");
 			ERXPatcher.setClassForName(ERXWOTextField.class, "WOTextField");
@@ -1608,8 +1600,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public WOResponse dispatchRequest(WORequest request) {
 		WOResponse response;
 
-		if (ERXApplication.requestHandlingLog.isDebugEnabled()) {
-			ERXApplication.requestHandlingLog.debug(request);
+		if (requestHandlingLog.isDebugEnabled()) {
+			requestHandlingLog.debug(request);
 		}
 
 		try {
@@ -1639,8 +1631,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * When a context is created we push it into thread local storage. This
 	 * handles the case for direct actions.
 	 * 
-	 * @param request
-	 *            the request
+	 * @param request the request
 	 * @return the newly created context
 	 */
 	@Override
@@ -1876,8 +1867,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [P,L]
 	 * </code>
 	 *
-	 * @param url
-	 *            the URL to rewrite
+	 * @param url the URL to rewrite
 	 * @return the rewritten URL
 	 */
 	public String _rewriteURL(String url) {
@@ -1892,10 +1882,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * This method is called by ERXResourceManager and provides the application
 	 * a hook to rewrite generated URLs for resources.
 	 *
-	 * @param url
-	 *            the URL to rewrite
-	 * @param bundle
-	 *            the bundle the resource is located in
+	 * @param url the URL to rewrite
+	 * @param bundle the bundle the resource is located in
 	 * @return the rewritten URL
 	 */
 	public String _rewriteResourceURL(String url, WODeployedBundle bundle) {
@@ -1940,12 +1928,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * example: MyPage page =
 	 * ERXApplication.erxApplication().pageWithName(MyPage.class, context);
 	 * 
-	 * @param <T>
-	 *            the type of component to
-	 * @param componentClass
-	 *            the component class to lookup
-	 * @param context
-	 *            the context
+	 * @param <T> the type of component to
+	 * @param componentClass the component class to lookup
+	 * @param context the context
 	 * @return the created component
 	 */
 	@SuppressWarnings("unchecked")
@@ -1957,10 +1942,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Calls pageWithName with ERXWOContext.currentContext() for the current
 	 * thread.
 	 * 
-	 * @param <T>
-	 *            the type of component to
-	 * @param componentClass
-	 *            the component class to lookup
+	 * @param <T> the type of component to
+	 * @param componentClass the component class to lookup
 	 * @return the created component
 	 */
 	@SuppressWarnings("unchecked")
@@ -1998,8 +1981,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Sets an SSL host override.
 	 * 
-	 * @param sslHost
-	 *            an SSL host override
+	 * @param sslHost an SSL host override
 	 */
 	public void _setSslHost(String sslHost) {
 		_sslHost = sslHost;
@@ -2026,8 +2008,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Sets an SSL port override (called back by the ERXSecureAdaptor)
 	 * 
-	 * @param sslPort
-	 *            an ssl port override
+	 * @param sslPort an ssl port override
 	 */
 	public void _setSslPort(int sslPort) {
 		_sslPort = sslPort;
@@ -2038,8 +2019,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Subclasses can extend this method, but should call
 	 * super._addAdditionalAdaptors.
 	 * 
-	 * @param additionalAdaptors
-	 *            the mutable adaptors array
+	 * @param additionalAdaptors the mutable adaptors array
 	 */
 	protected void _addAdditionalAdaptors(NSMutableArray<NSDictionary<String, Object>> additionalAdaptors) {
 		if (sslEnabled()) {
@@ -2065,8 +2045,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Returns the additionalAdaptors, but calls _addAdditionalAdaptors to give
-	 * the runtime an opportunity to programmatically force adaptors into the
-	 * list.
+	 * the runtime an opportunity to programmatically force adaptors into the list.
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
@@ -2181,10 +2160,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * requires using the WOOgnl template parser and setting
 	 * ognl.debugSupport=true.
 	 * 
-	 * @param debugEnabled
-	 *            whether or not to enable debugging
-	 * @param componentName
-	 *            the component name to enable debugging for
+	 * @param debugEnabled whether or not to enable debugging
+	 * @param componentName the component name to enable debugging for
 	 */
 	public void setDebugEnabledForComponent(boolean debugEnabled, String componentName) {
 		if (debugEnabled) {
@@ -2199,10 +2176,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Returns whether or not binding debugging is enabled for the given
 	 * component
 	 * 
-	 * @param componentName
-	 *            the component name
-	 * @return whether or not binding debugging is enabled for the given
-	 *         component
+	 * @param componentName the component name
+	 * @return whether or not binding debugging is enabled for the given component
 	 */
 	public boolean debugEnabledForComponent(String componentName) {
 		return _debugComponents.containsObject(componentName);
@@ -2216,8 +2191,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Sends out a ApplicationWillTerminateNotification before actually starting
-	 * to terminate.
+	 * Sends out a ApplicationWillTerminateNotification before actually starting to terminate.
 	 */
 	@Override
 	public void terminate() {
