@@ -17,9 +17,9 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
  * like the current actor or the current form name within the scope of a thread handling a particular request.
  */
 public class ERXThreadStorage {
-
+	
 	public static final String KEYS_ADDED_IN_CURRENT_THREAD_KEY = "ERXThreadStorage.keysAddedInCurrentThread";
-    public static final String WAS_CLONED_MARKER = "ERXThreadStorage.wasCloned";
+	public static final String WAS_CLONED_MARKER = "ERXThreadStorage.wasCloned";
 	
     /**
      * Holds the single instance of the thread map.
