@@ -3,6 +3,7 @@ package er.extensions.appserver;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -356,7 +357,7 @@ public class ERXBrowserFactory {
      */
     public synchronized void releaseBrowser(ERXBrowser browser) {
         String key = _computeKey(browser);
-        ERXMutableInteger count = _decrementReferenceCounterForKey(key);
+        AtomicInteger count = _decrementReferenceCounterForKey(key);
         if (count == null) {
             // Perhaps forgot to call registerBrowser() but try to remove the browser for sure
             _browserPool().removeObjectForKey(key);
@@ -597,22 +598,25 @@ public class ERXBrowserFactory {
         return _referenceCounters;
     }
 
-    private ERXMutableInteger _incrementReferenceCounterForKey(String key) {
-        ERXMutableInteger count = (ERXMutableInteger)_referenceCounters().objectForKey(key);
-        if (count != null) 
-            count.increment();
+    private AtomicInteger _incrementReferenceCounterForKey(String key) {
+        AtomicInteger count = (AtomicInteger)_referenceCounters().objectForKey(key);
+        if (count != null) {
+        	count.incrementAndGet();
+        }
         else {
-            count = new ERXMutableInteger(1);
+            count = new AtomicInteger(1);
             _referenceCounters().setObjectForKey(count, key);
         }
         log.debug("_incrementReferenceCounterForKey() - count = {}, key = {}", count, key);
         return count;
     }
 
-    private ERXMutableInteger _decrementReferenceCounterForKey(String key) {
-        ERXMutableInteger count = (ERXMutableInteger)_referenceCounters().objectForKey(key);
-        if (count != null)  
-            count.decrement();
+    private AtomicInteger _decrementReferenceCounterForKey(String key) {
+    	AtomicInteger count = (AtomicInteger)_referenceCounters().objectForKey(key);
+    	
+        if (count != null) {
+        	count.decrementAndGet();
+        }
         
         log.debug("_decrementReferenceCounterForKey() - count = {}, key = {}", count, key);
         return count;
@@ -657,131 +661,4 @@ public class ERXBrowserFactory {
 
     	return versionString;
     }
-
-    /*
- // Original Author:
-//       Ian F. Darwin   (Author of "Java Coolbook" ISBN: 0-596-00170-3)
- //
- // Original Javadoc from "com.darwinsys.util.MutableInteger.java"
-//  	A MutableInteger is like an Integer but mutable, to avoid the
-//   	excess object creation involved in 
-//   	c = new Integer(c.getInt()+1)
-//   	which can get expensive if done a lot.
-//   	Not subclassed from Integer, since Integer is final (for performance :-))
-
-  * <code>ERXMutableInteger</code> is like {@link java.lang.Integer Integer}
-  * but mutable, to avoid the excess object creation involved in 
-  * <code>i = new Integer(i.getInt() + 1)</code>
-  * which can get expensive if done a lot.
-  * <p>
-  * Not subclassed from <code>Integer</code>, since <code>Integer</code> 
-  * is final (for performance.) 
-  * <p>
-  * Original Author: Ian F. Darwin   (Author of "Java Coolbook" <code>ISBN: 0-596-00170-3</code>)
-  * 
-  *   FIXME: Can't we delete this class and just use an int or AtomicInteger instead? Is the performance increase actual?
-  */
- private static class ERXMutableInteger {
-     private int _value = 0;
-
-     /**
-      * Constructs a newly allocated <code>ERXMutableInteger</code> object that represents the primitive int argument.
-      *
-      * @param value the int value to be represented by the <code>ERXMutableInteger</code> object
-      */
-     public ERXMutableInteger(int value) { 
-         _value = value; 
-     }
-
-     /**
-      * Increments the int value of this <code>ERXMutalbleInteger</code> object by 1. 
-      */
-     public void increment() {
-         _value++;
-     }
-
-     /**
-      * Increments the int value of this <code>ERXMutalbleInteger</code> object by the int argument.
-      * 
-      * @param amount the int amount to increment
-      */
-     public void increment(int amount) {
-         _value += amount;
-     }
-
-     /**
-      * Decrements the int value of this <code>ERXMutalbleInteger</code> object by 1. 
-      */
-     public void decrement() {
-         _value--;
-     }
-
-     /**
-      * Decrements the int value of this <code>ERXMutalbleInteger</code> object by the int argument.
-      * 
-      * @param amount the int amount to decrement
-      */
-     public void decrement(int amount) {
-         _value -= amount;
-     }
-     
-     /**
-      * Updates the int value of this <code>ERXMutalbleInteger</code> object to 
-      * the int argument. 
-      * 
-      * @param value the int value to set
-      */ 
-     public void setIntValue(int value) {
-         _value = value;
-     }
-
-     /**
-      * Returns the int value represented by this <code>ERXMutalbleInteger</code> object.
-      *
-      * @return the int value of this object
-      */
-     public int intValue() {
-         return _value;
-     }
-
-     /**
-      * Returns a string object representing this <code>ERXMutalbeInteger</code>'s 
-      * value. The value is converted to signed decimal representation and 
-      * returned as a string, exactly as if the integer value were given 
-      * as an argument to the {@link #toString(int)} method.
-      *
-      * @return a string representation of the value of this object.
-      */
-     @Override
-     public String toString() {
-         return Integer.toString(_value);
-     }
-
-     /** 
-      * Creates a string representation of the int argument.
-      *
-      * @param value the int value to convert
-      * @return a string representation of the int argument
-      */ 
-     public static String toString(int value) {
-         return Integer.toString(value);
-     }
-
-     /**
-      * Parses the string argument as a signed decimal integer. 
-      * The characters in the string must all be decimal digits, 
-      * except that the first character may be an ASCII minus sign '-' 
-      * to indicate a negative value. The resulting integer value 
-      * is returned, exactly as if the argument was given as 
-      * arguments to the {@link java.lang.Integer#parseInt(java.lang.String, int)
-      * Integer.parseInt} method.
-      *
-      * @param stt the string to parse
-      * @return the int represented by the argument in decimal
-      * @throws NumberFormatException 	if the String cannot be parsed as an int.
-      */ 
-     public static int parseInt(String str) throws NumberFormatException {
-         return Integer.parseInt(str);
-     }
- }
 }
