@@ -1125,10 +1125,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return session;
 	}
 
-	public Number sessionTimeOutInMinutes() {
-		return Integer.valueOf(sessionTimeOut().intValue() / 60);
-	}
-
 	/**
 	 * This method is called by ERXWOContext and provides the application a hook
 	 * to rewrite generated URLs.
