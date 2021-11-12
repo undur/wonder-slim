@@ -90,8 +90,8 @@ import er.extensions.components._private.ERXWOTextField;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXMutableURL;
-import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
+import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXRuntimeUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
@@ -268,8 +268,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		private Properties allBundleProps;
 		private Properties defaultProperties;
-
-		private List<URL> allBundlePropURLs = new ArrayList<>();
 
 		private Properties readProperties(File file) {
 			if (!file.exists()) {
@@ -717,7 +715,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			InputStream is = null;
 			try {
 				if (!new File(jar).exists()) {
-					ERXApplication.log.warn("Will not process jar '" + jar + "' because it cannot be found ...");
+					log.warn("Will not process jar '" + jar + "' because it cannot be found ...");
 					return null;
 				}
 				f = new JarFile(jar);
@@ -791,8 +789,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @return true if a previously running instance was stopped.
 	 */
 	private static boolean stopPreviousDevInstance() {
-		if (!isDevelopmentModeSafe() ||
-				ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.allowMultipleDevInstances", false)) {
+		if (!isDevelopmentModeSafe() || ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.allowMultipleDevInstances", false)) {
 			return false;
 		}
 
@@ -2157,8 +2154,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Turns on/off binding debugging for the given component. Binding debugging
-	 * requires using the WOOgnl template parser and setting
-	 * ognl.debugSupport=true.
+	 * requires using the WOOgnl template parser and setting ognl.debugSupport=true.
 	 * 
 	 * @param debugEnabled whether or not to enable debugging
 	 * @param componentName the component name to enable debugging for
@@ -2173,8 +2169,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns whether or not binding debugging is enabled for the given
-	 * component
+	 * Returns whether or not binding debugging is enabled for the given component
 	 * 
 	 * @param componentName the component name
 	 * @return whether or not binding debugging is enabled for the given component
