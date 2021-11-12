@@ -853,9 +853,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
-		
-		// FIXME: WTF is an NSPropertiesCoordinator? // Hugi 2021-06-27
-		// NSPropertiesCoordinator.loadProperties();
 
 		if (enableERXShutdownHook()) {
 			ERXShutdownHook.useMe();
