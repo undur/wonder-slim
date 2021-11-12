@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.HexFormat;
+import java.util.Objects;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
@@ -198,7 +200,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 				wocontext._setResponse( originalResponse );
 				cachedResponse.setHeader( "text/css", "content-type" );
 				cache.setObjectForKey( cachedResponse, key );
-				md5 = DeprecatedMD5FromERXStringUtilities.md5Hex( cachedResponse.contentString(), null );
+				md5 = DeprecatedMD5FromERXStringUtilities.md5Hex( cachedResponse.contentString() );
 				cachedResponse.setHeader( md5, "checksum" );
 			}
 			md5 = cachedResponse.headerForKey( "checksum" );
@@ -249,60 +251,22 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 	public static boolean shouldCloseLinkTags() {
 		return ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXStyleSheet.xhtml", true );
 	}
-	
+
+	/**
+	 * FIXME: Replace with Java methods
+	 */
 	@Deprecated
 	private static class DeprecatedMD5FromERXStringUtilities {
-
-		@Deprecated
-		private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-
-		/**
-		 * Converts a byte array to hex string.
-		 * 
-		 * @param block
-		 *            byte array
-		 * @return hex string
-		 */
-		@Deprecated
-		private static String byteArrayToHexString(byte[] block) {
-			int len = block.length;
-			StringBuilder buf = new StringBuilder(2 * len);
-			for (int i = 0; i < len; ++i) {
-				int high = ((block[i] & 0xf0) >> 4);
-				int low = (block[i] & 0x0f);
-				buf.append(HEX_CHARS[high]);
-				buf.append(HEX_CHARS[low]);
-			}
-			return buf.toString();
-		}
 		
-		/**
-		 * Generate an MD5 hash from a String.
-		 *
-		 * @param str
-		 *            the string to hash
-		 * @param encoding
-		 *            MD5 operates on byte arrays, so we need to know the encoding
-		 *            to getBytes as
-		 * @return the MD5 sum of the bytes
-		 * 
-		 * FIXME: Replace with standard Java methods
-		 */
 		@Deprecated
-		private static byte[] md5(String str, String encoding) {
+		private static byte[] md5(String str) {
 			byte[] bytes;
 			if (str == null) {
 				bytes = new byte[0];
 			}
 			else {
 				try {
-					if (encoding == null) {
-						encoding = "UTF-8";
-					}
-					bytes = md5(new ByteArrayInputStream(str.getBytes(encoding)));
-				}
-				catch (UnsupportedEncodingException e) {
-					throw NSForwardException._runtimeExceptionForThrowable(e);
+					bytes = md5(new ByteArrayInputStream(str.getBytes("UTF-8")));
 				}
 				catch (IOException e) {
 					throw NSForwardException._runtimeExceptionForThrowable(e);
@@ -311,19 +275,10 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 			return bytes;
 		}
 
-		/**
-		 * Generate an MD5 hash from an input stream.
-		 *
-		 * @param in
-		 *            the input stream to sum
-		 * @return the MD5 sum of the bytes in file
-		 * @exception IOException
-		 *                if the input stream could not be read
-		 *                
-		 * FIXME: Replace with Java methods
-		 */
 		@Deprecated
 		private static byte[] md5(InputStream in) throws IOException {
+			Objects.requireNonNull(in);
+
 			try {
 				java.security.MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");
 				byte[] buf = new byte[50 * 1024];
@@ -332,6 +287,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 				while ((numRead = in.read(buf)) != -1) {
 					md5.update(buf, 0, numRead);
 				}
+
 				return md5.digest();
 			}
 			catch (java.security.NoSuchAlgorithmException e) {
@@ -339,28 +295,10 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 			}
 		}
 
-		/**
-		 * Generate an MD5 hash as hex from a String.
-		 *
-		 * @param str
-		 *            the string to hash
-		 * @param encoding
-		 *            MD5 operates on byte arrays, so we need to know the encoding
-		 *            to getBytes as
-		 * @return the MD5 sum of the bytes in a hex string
-		 * 
-		 * FIXME: Replace with Java methods
-		 */
 		@Deprecated
-		private static String md5Hex(String str, String encoding) {
-			String hexStr;
-			if (str == null) {
-				hexStr = null;
-			}
-			else {
-				hexStr = byteArrayToHexString(md5(str, encoding));
-			}
-			return hexStr;
+		private static String md5Hex(String str) {
+			Objects.requireNonNull(str);
+			return HexFormat.of().formatHex(md5(str));
 		}
 	}
 }
