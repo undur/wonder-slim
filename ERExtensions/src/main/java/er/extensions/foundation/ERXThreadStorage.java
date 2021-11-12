@@ -8,95 +8,31 @@
 package er.extensions.foundation;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.webobjects.appserver.WOContext;
-import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
-import com.webobjects.foundation.NSSet;
-
-import er.extensions.appserver.ERXApplication;
 
 /**
  * Provides a way to store objects for a particular thread. This can be especially handy for storing objects
  * like the current actor or the current form name within the scope of a thread handling a particular request.
- * <p>
- * The system property <code>er.extensions.ERXThreadStorage.useInheritableThreadLocal</code> defines if the
- * thread storage can be either inherited by client threads (default) or get used only by the current thread.
- * The usage of some types of objects inherited from the parent thread can cause problems.
- * </p><p>
- * The system property <code>er.extensions.ERXThreadStorage.logUsageOfProblematicInheritedValues</code>
- * defines, if potential problems should be logged. This defaults to <code>true</code> when running in development mode
- * and to <code>false</code> when running a deployed application.
  */
 public class ERXThreadStorage {
-	private static final Logger log = LoggerFactory.getLogger(ERXThreadStorage.class);
+
 	public static final String KEYS_ADDED_IN_CURRENT_THREAD_KEY = "ERXThreadStorage.keysAddedInCurrentThread";
     public static final String WAS_CLONED_MARKER = "ERXThreadStorage.wasCloned";
-
-	private static Set<Class<?>> _problematicTypes ;
-	private static Set<String> _problematicKeys;
 	
-    /** Holds the single instance of the thread map. */
+    /**
+     * Holds the single instance of the thread map.
+     */
     private static ThreadLocal threadMap;
-    
-    private static Boolean _useInheritableThreadLocal;
-    private static Boolean _logUsageOfProblematicInheritedValues;
 
     static {
-    	if(useInheritableThreadLocal()) {
-    		threadMap = new ERXThreadStorageCloneableThreadLocal();
-    	} else {
-    		threadMap = new ThreadLocal();
-    	}
-    	
-    	_problematicTypes = new NSSet<Class<?>>(
-    			new Class[] {
-    				WOSession.class, 
-    				WOContext.class
-    			}
-    	);
-    	
-    	_problematicKeys = new NSSet<>(
-    			new String[] {
-    					// already handled by "_problematcTypes"
-    					// ERXWOContext.CONTEXT_DICTIONARY_KEY
-    			}
-    	);
+   		threadMap = new ThreadLocal();
     }
 
     /**
-     * Checks the system property <code>er.extensions.ERXThreadStorage.useInheritableThreadLocal</code> 
-     * to decide whether to use inheritable thread variables or not.
-     * @return true if set (default)
+     * Holds the default initialization value of the hash map.
      */
-    private static boolean useInheritableThreadLocal() {
-    	if (_useInheritableThreadLocal == null) {
-    		_useInheritableThreadLocal = Boolean.valueOf(ERXProperties.booleanForKeyWithDefault("er.extensions.ERXThreadStorage.useInheritableThreadLocal", false));
-    	}
-    	return _useInheritableThreadLocal.booleanValue();
-    }
-    
-    /**
-     * Checks the system property <code>er.extensions.ERXThreadStorage.logUsageOfProblematicInheritedValues</code> 
-     * to decide whether to log potential problems when using certain values inherited by the parent thread.
-     * Only applies if using inheritable thread variables.
-     * @return true if set (default)
-     */
-	private static boolean logUsageOfProblematicInheritedValues() {
-		if (_logUsageOfProblematicInheritedValues == null) {
-			boolean devMode = ERXApplication.isDevelopmentModeSafe();
-			_logUsageOfProblematicInheritedValues = Boolean.valueOf(useInheritableThreadLocal() && ERXProperties.booleanForKeyWithDefault("er.extensions.ERXThreadStorage.logUsageOfProblematicInheritedValues", devMode));
-		}
-		return _logUsageOfProblematicInheritedValues.booleanValue();
-	}
-    
-    /** Holds the default initialization value of the hash map. */
     private static int DefaultHashMapSize = 10;
 
     /**
@@ -105,10 +41,8 @@ public class ERXThreadStorage {
      * @param key key
      */
     public static void takeValueForKey(Object object, String key) {
-    	// log.debug("{} <- {}", key, object);
     	Map map = storageMap(true);
     	map.put(key, object);
-    	markKeyAddedInCurrentThread(key);
     }
 
     /**
@@ -155,22 +89,6 @@ public class ERXThreadStorage {
 		if (map != null) {
 			result = map.get(key);
 		}
-		
-		// warn if the storageMap was inherited from another thread and it is
-		// possibly problematic to use an object of this type in a background thread
-		if (result != null && logUsageOfProblematicInheritedValues() && !wasKeyAddedInCurrentThread(key)) {
-			for(Class<?> type: problematicTypes()) {
-				if(type.isAssignableFrom(result.getClass())) {
-					log.warn("The object for key '{}' was inherited from the parent thread. " +
-							"The usage of inherited objects that are a subclass of '{}' can cause problems.",
-							key, type.getSimpleName(), new Exception("DEBUG"));
-				}
-			}
-			if(problematicKeys().contains(key)) {
-				log.warn("The object for key '{}' was inherited from the parent thread. " +
-						"The usage of inherited objects for this key can cause problems.", key, new Exception("DEBUG"));
-			}
-		}
 		return result;
 	}
     
@@ -192,8 +110,10 @@ public class ERXThreadStorage {
      */
     public static void reset() {
         Map map = storageMap(false);
-        if (map != null)
-            map.clear();
+
+        if (map != null) {
+        	map.clear();
+        }
     }
 
     /**
@@ -211,111 +131,4 @@ public class ERXThreadStorage {
         }
         return map;
     }
-    
-    /**
-     * Registers that a key was added in the current thread.
-     * Only applies if the storageMap was inherited from the parent thread.
-     * @param key to bless
-     */
-    private static void markKeyAddedInCurrentThread(String key) {
-		if (wasInheritedFromParentThread()) {
-			Map map = storageMap(false);
-			Set blessedKeys = (Set<String>) map.get(KEYS_ADDED_IN_CURRENT_THREAD_KEY);
-			if (blessedKeys == null) {
-				blessedKeys = new HashSet<>();
-				map.put(KEYS_ADDED_IN_CURRENT_THREAD_KEY, blessedKeys);
-			}
-			blessedKeys.add(key);
-		}
-	}
-    
-    /**
-     * Checks if a key was added in the current thread.
-     * Only applies if the storageMap was inherited from the parent thread.
-     * @param key to check
-     * @return boolean indicating if the key was added in the current thread
-     */
-    private static boolean wasKeyAddedInCurrentThread(String key) {
-    	if(!wasInheritedFromParentThread()) {
-    		return true;
-    	}
-    	Map map = storageMap(false);
-    	Set blessedKeys = (Set<String>) map.get(KEYS_ADDED_IN_CURRENT_THREAD_KEY);
-    	return blessedKeys != null && blessedKeys.contains(key);
-    }
-    
-    /**
-     * Checks if the storageMap was inherited from the parent thread.
-     * @return boolean indicating if the storageMap was inherited from another thread
-     */
-    public static boolean wasInheritedFromParentThread() {
-		boolean result = false;
-		if (useInheritableThreadLocal()) {
-			Map map = storageMap(false);
-			if (map != null) {
-				result = ERXValueUtilities.booleanValue(map.get(ERXThreadStorage.WAS_CLONED_MARKER));
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Set the Set of classes for which a warning is issued when the storageMap
-	 * was inherited from another Thread and the object retrieved from the map
-	 * is a subclass of one of the classes in the set.
-	 * 
-	 * @param problematicTypes
-	 *            a set of classes to check
-	 */
-	public static void setProblematicTypes(NSSet<Class<?>> problematicTypes) {
-		_problematicTypes = problematicTypes == null ? NSSet.EmptySet : problematicTypes;
-	}
-
-	/**
-	 * Retrieve the Set of classes for which a warning is issued when the
-	 * storageMap was inherited from another Thread and the object retrieved
-	 * from the map is a subclass of one of the classes in the set. Defaults to
-	 * a Set containing WOSession.class, WOContext.class,
-	 * EOEnterpriseObject.class and EOEditingContext.class
-	 * 
-	 * @return the set of classes to check
-	 */
-	public static Set<Class<?>> problematicTypes() {
-		return _problematicTypes;
-	}
-
-	/**
-	 * Set the Set of keys for which a warning is issued when the storageMap
-	 * was inherited from another Thread and the key is accessed. 
-	 * 
-	 * @param problematicKeys
-	 *            a set of keys to check
-	 */
-	public static void setProblematicKeys(Set<String> problematicKeys) {
-		_problematicKeys = problematicKeys == null ? NSSet.EmptySet : problematicKeys;
-	}
-
-	/**
-	 * Retrieve the Set of keys for which a warning is issued when the storageMap
-	 * was inherited from another Thread and the key is accessed. Defaults to a
-	 * set containing ERXWOContext.CONTEXT_DICTIONARY_KEY
-	 * @return the set of keys to check
-	 */
-	public static Set<String> problematicKeys() {
-		return _problematicKeys;
-	}
-	
-	protected static class ERXThreadStorageCloneableThreadLocal extends ERXCloneableThreadLocal {
-		@Override
-		protected Object childValue(Object parentValue) {
-			Map map = (Map) super.childValue(parentValue);
-	        if (map != null) {
-				// set marker indicating that the map was inherited from the parent thread
-				map.put(ERXThreadStorage.WAS_CLONED_MARKER, Boolean.TRUE);
-				// reset set of blessed keys
-				map.remove(ERXThreadStorage.KEYS_ADDED_IN_CURRENT_THREAD_KEY);
-			}
-			return map;
-		}
-	}
 }
