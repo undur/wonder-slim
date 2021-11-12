@@ -9,9 +9,7 @@ package er.extensions.appserver;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.BindException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
@@ -167,53 +165,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * The time taken from invoking main, until the end of the application constructor
 	 */
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
-/*
-	static class AppClassLoader extends URLClassLoader {
 
-		public static ClassLoader getAppClassLoader() {
-			String classPath = System.getProperty("java.class.path");
-			if (System.getProperty("com.webobjects.classpath") != null) {
-				classPath += File.pathSeparator + System.getProperty("com.webobjects.classpath");
-			}
-			String files[] = classPath.split(File.pathSeparator);
-			URL urls[] = new URL[files.length];
-			for (int i = 0; i < files.length; i++) {
-				String string = files[i];
-				try {
-					urls[i] = new File(string).toURI().toURL();
-				}
-				catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			return new AppClassLoader(urls, Thread.currentThread().getContextClassLoader());
-		}
-
-		@Override
-		public synchronized Class<?> loadClass(String s, boolean flag) throws ClassNotFoundException {
-			SecurityManager securitymanager = System.getSecurityManager();
-			if (securitymanager != null) {
-				String s1 = s.replace('/', '.');
-				if (s1.startsWith("[")) {
-					int i = s1.lastIndexOf('[') + 2;
-					if (i > 1 && i < s1.length()) {
-						s1 = s1.substring(i);
-					}
-				}
-				int j = s1.lastIndexOf('.');
-				if (j != -1) {
-					securitymanager.checkPackageAccess(s1.substring(0, j));
-				}
-			}
-			return super.loadClass(s, flag);
-		}
-
-		AppClassLoader(URL aurl[], ClassLoader classloader) {
-			super(aurl, classloader);
-		}
-	}
-*/
 	/**
 	 * You should not use ERXShutdownHook when deploying as servlet.
 	 */
@@ -310,10 +262,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public static void setup(String[] argv) {
 		_loader = new Loader(argv);
-//		if (System.getProperty("_DisableClasspathReorder") == null) {
-//			ClassLoader loader = AppClassLoader.getAppClassLoader();
-//			Thread.currentThread().setContextClassLoader(loader);
-//		}
+
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
 
