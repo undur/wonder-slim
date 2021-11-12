@@ -1677,39 +1677,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 		}
 	}
 
-	public static String stringFor2Keys(String s1, String s2) {
-		return stringForManyKeys(ERXValueUtilities.stringsToStringArray(s1, s2));
-	}
-
-	public static String stringFor2KeysWithDefault(String s1, String s2, final String defaultValue) {
-		return stringForManyKeysWithDefault(ERXValueUtilities.stringsToStringArray(s1, s2), defaultValue);
-	}
-
-	public static String stringFor3Keys(String s1, String s2, String s3) {
-		return stringForManyKeys(ERXValueUtilities.stringsToStringArray(s1, s2, s3));
-	}
-
-	public static String stringFor3KeysWithDefault(String s1, String s2, String s3, final String defaultValue) {
-		return stringForManyKeysWithDefault(ERXValueUtilities.stringsToStringArray(s1, s2, s3), defaultValue);
-	}
-
-	public static String stringForManyKeys(String[] ss) {
-		return stringForManyKeysWithDefault(ss,null);
-	}
-
-	public static String stringForManyKeysWithDefault(final String[] ss, final String defaultValue) {
-		if(isEmpty(ss)) return defaultValue;	// 文字列配列が無いならdefaultValue
-		int count = ss.length;
-		for(int loop = 0; loop < count; loop++){
-			if(!ERXStringUtilities.isNullOrEmpty(ss[loop])){
-				String value = stringForKey(ss[loop]);
-				if(!ERXStringUtilities.isNullOrEmpty(value))
-					return value;
-			}
-		}
-		return defaultValue;
-	}
-
     private static boolean isEmpty(Object[] array) {
         return array == null || array.length == 0;
     }
