@@ -89,7 +89,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * The horrible thing that does horrible things // FIXME: Get rid of this? // Hugi 2021-11-12
 	 */
-	private static Loader _loader;
+//	private static Loader _loader; // FIXME: Disabled Loader // Hugi 2021-11-13
 
 	/**
 	 * Empty array for adaptorExtensions
@@ -259,7 +259,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * order, class path order, checks patches etc.
 	 */
 	public static void setup(String[] argv) {
-		_loader = new Loader(argv);
+//		_loader = new Loader(argv); // FIXME: Disabled Loader // Hugi 2021-11-13
 
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
@@ -325,16 +325,19 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			setApplicationBaseURL(System.getProperty("WOApplicationBaseURL"));
 		}
 
-		if (!ERXConfigurationManager.defaultManager().isDeployedAsServlet() && (!wasERXApplicationMainInvoked || _loader == null)) {
+		if (!ERXConfigurationManager.defaultManager().isDeployedAsServlet() && (!wasERXApplicationMainInvoked /*  // FIXME: Disabled Loader // Hugi 2021-11-13 || _loader == null */)) {
 			log.warn("\n\nIt seems that your application class " + application().getClass().getName() + " did not call " + ERXApplication.class.getName() + ".main(argv[], applicationClass) method. " + "Please modify your Application.java as the followings so that " + ERXConfigurationManager.class.getName() + " can provide its " + "rapid turnaround feature completely. \n\n" + "Please change Application.java like this: \n" + "public static void main(String argv[]) { \n" + "    ERXApplication.main(argv, Application.class); \n" + "}\n\n");
 		}
 
-		if (_loader == null) {
-			System.out.println("No loader: " + System.getProperty("java.class.path"));
-		}
-		else if (!_loader.didLoad()) {
-			throw new RuntimeException("ERXExtensions have not been initialized. Debugging information can be enabled by adding the JVM argument: '-Der.extensions.appserver.projectBundleLoading=DEBUG'. Please report the classpath and the rest of the bundles to the Wonder mailing list: " + "\nRemaining frameworks: " + (_loader == null ? "none" : _loader.allFrameworks) + "\nClasspath: " + System.getProperty("java.class.path"));
-		}
+// 		FIXME: Disabled Loader // Hugi 2021-11-13
+//		if (_loader == null) {
+//			System.out.println("No loader: " + System.getProperty("java.class.path"));
+//		}
+//		else if (!_loader.didLoad()) {
+//			throw new RuntimeException("ERXExtensions have not been initialized. Debugging information can be enabled by adding the JVM argument: '-Der.extensions.appserver.projectBundleLoading=DEBUG'. Please report the classpath and the rest of the bundles to the Wonder mailing list: " + "\nRemaining frameworks: " + (_loader == null ? "none" : _loader.allFrameworks) + "\nClasspath: " + System.getProperty("java.class.path"));
+//		}
+		
+
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
 			throw new RuntimeException("Your main bundle is \"JavaFoundation\".  You are not launching this WO application properly.  If you are using Eclipse, most likely you launched your WOA as a \"Java Application\" instead of a \"WO Application\".");
 		}
@@ -348,10 +351,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			}
 		}
 
-		if (_loader != null) {
-			_loader._checker.reportErrors();
-			_loader._checker = null;
-		}
+		 // FIXME: Disabled Loader // Hugi 2021-11-13
+//		if (_loader != null) {
+//			_loader._checker.reportErrors();
+//			_loader._checker = null;
+//		}
 
 		didCreateApplication();
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
