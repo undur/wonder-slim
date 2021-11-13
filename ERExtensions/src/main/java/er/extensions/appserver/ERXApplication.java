@@ -13,7 +13,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -1002,48 +1001,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public boolean isDevelopmentMode() {
 		return ERXApplication._defaultIsDevelopmentMode();
-	}
-
-	/** holds the info on checked-out sessions */
-	private Map<String, SessionInfo> _sessions = new HashMap<>();
-
-	/** Holds info about where and who checked out */
-	private class SessionInfo {
-		Exception _trace = new Exception();
-		WOContext _context;
-
-		public SessionInfo(WOContext wocontext) {
-			_context = wocontext;
-		}
-
-		public Exception trace() {
-			return _trace;
-		}
-
-		public WOContext context() {
-			return _context;
-		}
-
-		public String exceptionMessageForCheckout(WOContext wocontext) {
-			String contextDescription = null;
-			if (_context != null) {
-				contextDescription = "contextId: " + _context.contextID() + " request: " + _context.request();
-			}
-			else {
-				contextDescription = "<NULL>";
-			}
-
-			log.error("There is an error in the session check-out: old context: " + contextDescription, trace());
-			if (_context == null) {
-				return "Original context was null";
-			}
-			else if (_context.equals(wocontext)) {
-				return "Same context did check out twice";
-			}
-			else {
-				return "Context with id '" + wocontext.contextID() + "' did check out again";
-			}
-		}
 	}
 
 	/**
