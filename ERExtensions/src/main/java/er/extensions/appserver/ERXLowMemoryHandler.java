@@ -84,9 +84,7 @@ public class ERXLowMemoryHandler {
 	 * application ASAP. Broken out into a separate method to make custom error
 	 * handling easier, ie. generating your own error pages in production, etc.
 	 * 
-	 * @param throwable
-	 *            to check if it is a fatal exception.
-	 *            
+	 * @param throwable to check if it is a fatal exception.
 	 * @return true if we should quit
 	 */
 	public boolean shouldQuit(Throwable throwable) {

@@ -77,7 +77,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static final Logger statsLog = Logger.getLogger("er.extensions.ERXApplication.Statistics");
 
 	/**
-	 * Indicates that ERXApplication.main was invoked
+	 * Indicates if ERXApplication.main() has been invoked (so we can check that application actually did so)
 	 */
 	public static boolean wasERXApplicationMainInvoked = false;
 
@@ -847,10 +847,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Logs extra information about the current state.
 	 * 
-	 * @param exception
-	 *            to be handled
-	 * @param context
-	 *            current context
+	 * @param exception to be handled
+	 * @param context current context
 	 * @return the WOResponse of the generated exception page.
 	 */
 	@Override
@@ -871,8 +869,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * application ASAP. Broken out into a separate method to make custom error
 	 * handling easier, ie. generating your own error pages in production, etc.
 	 * 
-	 * @param exception
-	 *            to check if it is a fatal exception.
+	 * @param exception to check if it is a fatal exception.
 	 */
 	public void handlePotentiallyFatalException(Exception exception) {
 		Throwable throwable = ERXRuntimeUtilities.originalThrowable(exception);
