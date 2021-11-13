@@ -17,30 +17,24 @@ import com.webobjects.foundation.NSProperties;
 /**
  * ERXSystem provides support for variable replacement in Properties with
  * 
- * {@literal @}{@literal @}key{@literal @}{@literal @} references in values. Additionally, it provides an NSKVC
- *         implementation on top of System properties.
+ * {@literal @}{@literal @}key{@literal @}{@literal @} references in values. Additionally, it provides an NSKVC implementation on top of System properties.
  * 
  * @author david teran
  */
 public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
+
 	/**
 	 * The singleton instance to share.
 	 */
 	private static ERXSystem sharedInstance = new ERXSystem();
 
-	/**
-	 * Constructs an ERXSystem
-	 */
-	private ERXSystem() {
-		super();
-	}
+	private ERXSystem() {}
 
 	/**
 	 * Looks up the given key in the ERXSystem properties, converts any property
 	 * variables, and returns the converted value.
 	 * 
-	 * @param key
-	 *            the key to lookup
+	 * @param key the key to lookup
 	 * @return the converted value
 	 */
 	public static String getProperty(String key) {
@@ -52,10 +46,8 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 	 * Looks up the given key in the given properties, converts any property
 	 * variables, and returns the converted value.
 	 * 
-	 * @param key
-	 *            the key to lookup
-	 * @param properties
-	 *            The given properties
+	 * @param key the key to lookup
+	 * @param properties The given properties
 	 * @return the converted value
 	 */
 	public static String getProperty(String key, Properties properties) {
@@ -64,13 +56,10 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 	}
 
 	/**
-	 * Retrieves the value of the given key from the ERXSystem properties store,
-	 * return defaultValue if the key does not exist.
+	 * Retrieves the value of the given key from the ERXSystem properties store, return defaultValue if the key does not exist.
 	 * 
-	 * @param key
-	 *            the key to lookup
-	 * @param defaultValue
-	 *            the default value to return
+	 * @param key the key to lookup
+	 * @param defaultValue the default value to return
 	 * @return the corresponding value or defaultValue if the key doesn't exist
 	 */
 	public static String getProperty(String key, String defaultValue) {
@@ -83,10 +72,8 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 	 * ERXSystem.getProperty(..) method and puts the resulting values into the
 	 * destinationProperties.
 	 * 
-	 * @param originalProperties
-	 *            the properties to convert
-	 * @param destinationProperties
-	 *            the properties to copy into
+	 * @param originalProperties the properties to convert
+	 * @param destinationProperties the properties to copy into
 	 */
 	public static void convertProperties(Properties originalProperties, Properties destinationProperties) {
 		for (Enumeration e = originalProperties.propertyNames(); e.hasMoreElements();) {
@@ -99,8 +86,7 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 	}
 
 	/**
-	 * Returns a copy of NSProperties._getProperties() that has been passed
-	 * variable evaluation.
+	 * Returns a copy of NSProperties._getProperties() that has been passed variable evaluation.
 	 * 
 	 * @return a converted copy of NSProperties._getProperties()
 	 */
@@ -111,8 +97,7 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 	}
 
     /**
-     * Converts and evaluates the properties from NSProperties._getProperties() and replaces
-     * the converted values in-place.
+     * Converts and evaluates the properties from NSProperties._getProperties() and replaces the converted values in-place.
      */
     public static void updateProperties() {
     	ERXSystem.updateProperties(NSProperties._getProperties());
@@ -130,40 +115,18 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 		ERXProperties.flattenPropertyNames(properties);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.webobjects.foundation.NSKeyValueCoding#valueForKey(java.lang.String)
-	 */
 	public Object valueForKey(String key) {
 		return NSProperties.getProperty(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.webobjects.foundation.NSKeyValueCoding#takeValueForKey(java.lang.Object,
-	 *      java.lang.String)
-	 */
 	public void takeValueForKey(Object value, String key) {
 		throw new RuntimeException("not implemented");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.webobjects.foundation.NSKeyValueCodingAdditions#valueForKeyPath(java.lang.String)
-	 */
 	public Object valueForKeyPath(String key) {
 		return NSProperties.getProperty(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.webobjects.foundation.NSKeyValueCodingAdditions#takeValueForKeyPath(java.lang.Object,
-	 *      java.lang.String)
-	 */
 	public void takeValueForKeyPath(Object value, String key) {
 		throw new RuntimeException("not implemented");
 	}
