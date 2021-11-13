@@ -32,7 +32,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.appserver.WOSession;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOComponentDefinition;
 import com.webobjects.appserver._private.WODeployedBundle;
@@ -947,30 +946,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return _streamingRequestHandlerKeys.containsObject(s);
 	}
 
-	/** use the redirect feature */
-	protected Boolean _useSessionStoreDeadlockDetection;
-
-	/**
-	 * Deadlock in session-store detection. Note that the detection only work in
-	 * single-threaded mode, and is mostly useful to find cases when a session
-	 * is checked out twice in a single RR-loop, which will lead to a session
-	 * store lockup. Set the
-	 * <code>er.extensions.ERXApplication.useSessionStoreDeadlockDetection=true</code>
-	 * property to actually the this feature.
-	 * 
-	 * @return flag if to use the this feature
-	 */
-	public boolean useSessionStoreDeadlockDetection() {
-		if (_useSessionStoreDeadlockDetection == null) {
-			_useSessionStoreDeadlockDetection = ERXProperties.booleanForKey("er.extensions.ERXApplication.useSessionStoreDeadlockDetection") ? Boolean.TRUE : Boolean.FALSE;
-			if (isConcurrentRequestHandlingEnabled() && _useSessionStoreDeadlockDetection.booleanValue()) {
-				log.error("Sorry, useSessionStoreDeadlockDetection does not work with concurrent request handling enabled.");
-				_useSessionStoreDeadlockDetection = Boolean.FALSE;
-			}
-		}
-		return _useSessionStoreDeadlockDetection.booleanValue();
-	}
-
 	/**
 	 * Returns whether or not this application is in development mode. This one
 	 * is named "Safe" because it does not require you to be running an
@@ -1069,59 +1044,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				return "Context with id '" + wocontext.contextID() + "' did check out again";
 			}
 		}
-	}
-
-	/** Overridden to check the sessions */
-	@Override
-	public WOSession createSessionForRequest(WORequest worequest) {
-		WOSession wosession = super.createSessionForRequest(worequest);
-		if (wosession != null && useSessionStoreDeadlockDetection()) {
-			_sessions.put(wosession.sessionID(), new SessionInfo(null));
-		}
-		return wosession;
-	}
-
-	/** Overridden to check the sessions */
-	@Override
-	public void saveSessionForContext(WOContext wocontext) {
-		if (useSessionStoreDeadlockDetection()) {
-			WOSession wosession = wocontext._session();
-			if (wosession != null) {
-				String sessionID = wosession.sessionID();
-				SessionInfo sessionInfo = _sessions.get(sessionID);
-				if (sessionInfo == null) {
-					log.error("Check-In of session that was not checked out, most likely diue to an exception in session.awake(): " + sessionID);
-				}
-				else {
-					_sessions.remove(sessionID);
-				}
-			}
-		}
-		super.saveSessionForContext(wocontext);
-	}
-
-	/** Overridden to check the sessions */
-	@Override
-	public WOSession restoreSessionWithID(String sessionID, WOContext wocontext) {
-		if (sessionID != null && ERXSession.session() != null && sessionID.equals(ERXSession.session().sessionID())) {
-			// AK: I have no idea how this can happen
-			throw new IllegalStateException("Trying to check out a session twice in one RR loop: " + sessionID);
-		}
-		WOSession session = null;
-		if (useSessionStoreDeadlockDetection()) {
-			SessionInfo sessionInfo = _sessions.get(sessionID);
-			if (sessionInfo != null) {
-				throw new IllegalStateException(sessionInfo.exceptionMessageForCheckout(wocontext));
-			}
-			session = super.restoreSessionWithID(sessionID, wocontext);
-			if (session != null) {
-				_sessions.put(session.sessionID(), new SessionInfo(wocontext));
-			}
-		}
-		else {
-			session = super.restoreSessionWithID(sessionID, wocontext);
-		}
-		return session;
 	}
 
 	/**

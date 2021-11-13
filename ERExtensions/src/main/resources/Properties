@@ -457,12 +457,6 @@ er.extensions.concurrency.ERXTaskObjectStoreCoordinatorPool.maxCoordinators = 1
 ## ERXDirectAction.  Defaults to false.
 # er.extensions.ERXEC.traceOpenLocks = true
 
-## decides if the session store deadlock detection (session can't get 
-## checked out because it already was) should be enabled. This is useful 
-## for debugging, experimental and doesn't work when concurrent request
-## handling is enabled
-# er.extensions.ERXApplication.useSessionStoreDeadlockDetection=false
-
 ## Base directory for statistics logging
 # er.extensions.ERXApplication.StatisticsBaseLogPath = 
 ## When the logs get rotated [24 hours in ms]
