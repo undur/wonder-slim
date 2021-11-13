@@ -83,7 +83,7 @@ public class ERXConfigurationManager {
 	/**
 	 * Configuration manager singleton
 	 */
-	static ERXConfigurationManager defaultManager = null;
+	private static ERXConfigurationManager defaultManager = null;
 
 	private String[] _commandLineArguments;
 	private NSArray _monitoredProperties;
@@ -95,7 +95,7 @@ public class ERXConfigurationManager {
 	/**
 	 * Holds the hostName
 	 */
-	protected String _hostName;
+	private String _hostName;
 
 	/**
 	 * Private constructor to prevent instantiation from outside the class
