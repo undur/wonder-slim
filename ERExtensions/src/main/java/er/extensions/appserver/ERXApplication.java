@@ -324,7 +324,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			setApplicationBaseURL(System.getProperty("WOApplicationBaseURL"));
 		}
 
-		if (!ERXConfigurationManager.defaultManager().isDeployedAsServlet() && (!wasERXApplicationMainInvoked || _loader == null )) {
+		if (!isDeployedAsServlet() && (!wasERXApplicationMainInvoked || _loader == null )) {
 			log.warn("\n\nIt seems that your application class " + application().getClass().getName() + " did not call " + ERXApplication.class.getName() + ".main(argv[], applicationClass) method. " + "Please modify your Application.java as the followings so that " + ERXConfigurationManager.class.getName() + " can provide its " + "rapid turnaround feature completely. \n\n" + "Please change Application.java like this: \n" + "public static void main(String argv[]) { \n" + "    ERXApplication.main(argv, Application.class); \n" + "}\n\n");
 		}
 
