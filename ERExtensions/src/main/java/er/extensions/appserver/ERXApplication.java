@@ -669,33 +669,27 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	@Override
 	public synchronized void refuseNewSessions(boolean value) {
 		boolean success = false;
+
 		try {
 			Field f = WOApplication.class.getDeclaredField("_refusingNewClients");
 			f.setAccessible(true);
 			f.set(this, value);
 			success = true;
 		}
-		catch (SecurityException e) {
+		catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
 			log.error(e, e);
 		}
-		catch (NoSuchFieldException e) {
-			log.error(e, e);
-		}
-		catch (IllegalArgumentException e) {
-			log.error(e, e);
-		}
-		catch (IllegalAccessException e) {
-			log.error(e, e);
-		}
+
 		if (!success) {
 			super.refuseNewSessions(value);
 		}
-		// #81712. App will terminate immediately if the right conditions are
-		// met.
+
+		// #81712. App will terminate immediately if the right conditions are met.
 		if (value && (activeSessionsCount() <= minimumActiveSessionsCount())) {
 			log.info("Refusing new clients and below min active session threshold, about to terminate...");
 			terminate();
 		}
+
 		resetKillTimer(isRefusingNewSessions());
 	}
 
