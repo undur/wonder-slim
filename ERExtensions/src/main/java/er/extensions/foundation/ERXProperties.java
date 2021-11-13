@@ -205,7 +205,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
      * strings frequently, but may be overkill since most usage of this system doesn't involve frequent access.
      */
 	private static String getApplicationSpecificPropertyName(final String propertyName) {
-    		return propertyName;
+    	return propertyName;
     }
 
     /**
@@ -1676,10 +1676,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 			}
 		}
 	}
-
-    private static boolean isEmpty(Object[] array) {
-        return array == null || array.length == 0;
-    }
     
 	/**
 	 * Determines the path of the specified Resource. This is done to get a
