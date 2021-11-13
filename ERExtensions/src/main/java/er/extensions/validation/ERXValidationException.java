@@ -14,6 +14,7 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSValidation;
 import com.webobjects.foundation.NSValidation.ValidationException;
 
+import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.localization.ERXLocalizer;
 
 /**
@@ -403,8 +404,25 @@ public class ERXValidationException extends NSValidation.ValidationException imp
         } else {
         	localizer = ERXLocalizer.currentLocalizer();
         }
-        return ERXValidation.localizedDisplayNameForKey(key, localizer);
+        return localizedDisplayNameForKey(key, localizer);
     }
+
+    /**
+     * Calculates a localized display name for a given entity and key using the supplied localizer
+     * @param ecd class description the key belongs to
+     * @param key to localize
+     * @param localizer to use for localizing the content
+     * @return the localized display name
+     */
+	public static String localizedDisplayNameForKey( String key, ERXLocalizer localizer) {
+		String displayName;
+		if (localizer != null) {
+			displayName = localizer.localizedStringForKeyWithDefault(key);
+		} else {
+	    	displayName = ERXStringUtilities.displayNameForKey(key);
+		}
+		return displayName;
+	}
 
     @Override
     public int hashCode() {

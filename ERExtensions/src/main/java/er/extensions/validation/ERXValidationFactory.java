@@ -28,9 +28,7 @@ import com.webobjects.foundation.NSValidation.ValidationException;
 import com.webobjects.foundation._NSCollectionPrimitives;
 
 import er.extensions.foundation.ERXSimpleTemplateParser;
-import er.extensions.foundation.ERXSystem;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
 
 /**
@@ -497,9 +495,6 @@ public class ERXValidationFactory {
      * finished launching.
      */
     public void configureFactory() {
-        // CHECKME: This might be better configured in a static init block of ERXValidationFactory.        
-        ERXValidation.setPushChangesDefault(ERXValueUtilities.booleanValueWithDefault(ERXSystem.getProperty("er.extensions.ERXValidationShouldPushChangesToObject"), ERXValidation.DO_NOT_PUSH_INCORRECT_VALUE_ON_EO));
-
         if (WOApplication.application()!=null && !WOApplication.application().isCachingEnabled()) {
             NSNotificationCenter center = NSNotificationCenter.defaultCenter();
             center.addObserver(this,
