@@ -9,6 +9,7 @@ package er.extensions.appserver;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.Map;
 
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
@@ -17,7 +18,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.foundation.ERXDictionaryUtilities;
 import er.extensions.foundation.ERXSimpleTemplateParser;
 
 /**
@@ -67,38 +67,38 @@ public class ERXMessageEncoding implements Serializable {
     }   
 
     public static NSArray availableEncodings() { 
-        return _encodings().allKeys();
+        return new NSArray<>( _encodings().keySet() );
     }
 
     public static NSArray availableLanguages() { 
-        return _languagesAndDefaultEncodings().allKeys();
+        return new NSArray<>( _languagesAndDefaultEncodings().keySet() );
     }
 
-    private static NSDictionary _encodings;
-    private static NSDictionary _encodings() { 
+    private static Map<String,String> _encodings;
+    private static Map<String,String> _encodings() { 
         if (_encodings == null) {
-            _encodings = ERXDictionaryUtilities.dictionaryWithObjectsAndKeys(
-                new Object [] { "ISO-8859-1",  "ISO8859_1",
-                                "ISO-8859-1",  "ISO-8859-1",
-                                "Shift_JIS",   "SJIS", 
-                                "Shift_JIS",   "SHIFT_JIS", 
-                                "EUC-JP",      "EUC_JP", 	//Note: dash and underscore
-                                "EUC-JP",      "EUC-JP",
-                                "iso-2022-jp", "ISO2022JP", 
-                                "iso-2022-jp", "ISO-2022-JP", 
-                                "UTF-8",       "UTF8",
-                                "UTF-8",       "UTF-8" });
+            _encodings = Map.of(
+				"ISO-8859-1",  "ISO8859_1",
+	            "ISO-8859-1",  "ISO-8859-1",
+	            "Shift_JIS",   "SJIS", 
+	            "Shift_JIS",   "SHIFT_JIS", 
+	            "EUC-JP",      "EUC_JP", 	//Note: dash and underscore
+	            "EUC-JP",      "EUC-JP",
+	            "iso-2022-jp", "ISO2022JP", 
+	            "iso-2022-jp", "ISO-2022-JP", 
+	            "UTF-8",       "UTF8",
+	            "UTF-8",       "UTF-8" );
         }
         return _encodings;
     }
 
-    private static NSDictionary _languagesAndDefaultEncodings;
-    private static NSDictionary _languagesAndDefaultEncodings() {
+    private static Map<String,String> _languagesAndDefaultEncodings;
+    private static Map<String,String> _languagesAndDefaultEncodings() {
         if (_languagesAndDefaultEncodings == null) {
-            _languagesAndDefaultEncodings = ERXDictionaryUtilities.dictionaryWithObjectsAndKeys(
-                new Object [] { "ISO8859_1", "English", 
-                                "ISO8859_1", "German", 
-                                "SJIS",      "Japanese" });
+            _languagesAndDefaultEncodings = Map.of(
+				"ISO8859_1", "English", 
+                "ISO8859_1", "German", 
+                "SJIS",      "Japanese" );
         }
         return _languagesAndDefaultEncodings;
     }
@@ -142,7 +142,7 @@ public class ERXMessageEncoding implements Serializable {
     public static String defaultEncodingForLanguage(String language) {
         String defaultEncoding = null;
         if (availableLanguages().containsObject(language)) 
-            defaultEncoding = (String)_languagesAndDefaultEncodings.objectForKey(language);
+            defaultEncoding = _languagesAndDefaultEncodings.get(language);
         if (defaultEncoding == null) 
             defaultEncoding = defaultEncoding();
         return defaultEncoding; 
@@ -166,7 +166,7 @@ public class ERXMessageEncoding implements Serializable {
         String mimeType = response.headerForKey("Content-Type");
         if (mimeType != null && (mimeType.equals("text/html") || mimeType.equals("text/xml"))) {
             response.setContentEncoding (encoding); 
-            response.setHeader(mimeType + "; charset=" + _encodings().objectForKey(encoding), "Content-Type");
+            response.setHeader(mimeType + "; charset=" + _encodings().get(encoding), "Content-Type");
         }
     }
 
@@ -188,10 +188,10 @@ public class ERXMessageEncoding implements Serializable {
     }
     
     protected static IllegalArgumentException createIllegalArgumentException(String value, String target, String listingMethod) {
-        NSDictionary d = ERXDictionaryUtilities.dictionaryWithObjectsAndKeys(
-                new Object [] { value,		"value", 
+        Map d = Map.of(
+        						value,		"value", 
                                 target, 	"target", 
-                                listingMethod,	"listingMethod" });
+                                listingMethod,	"listingMethod" );
         ERXSimpleTemplateParser parser = ERXSimpleTemplateParser.sharedInstance();
         String message = parser.parseTemplateWithObject(
                     "@@value@@ isn't a supported @@target@@. (Not listed under @@listingMethod@@)", null, d, null);

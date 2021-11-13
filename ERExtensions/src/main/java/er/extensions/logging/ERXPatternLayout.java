@@ -7,6 +7,7 @@
 package er.extensions.logging;
 
 import java.util.Enumeration;
+import java.util.Map;
 
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.helpers.FormattingInfo;
@@ -23,7 +24,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.formatters.ERXUnitAwareDecimalFormat;
-import er.extensions.foundation.ERXDictionaryUtilities;
 import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
@@ -377,7 +377,7 @@ class ERXPatternParser extends PatternParser {
 		 * Holds the default labels for the values. Note that the template
 		 * parser will put "-" for undefined values by defauilt.
 		 */
-		private final NSDictionary _defaultLabels = ERXDictionaryUtilities.dictionaryWithObjectsAndKeys(new Object[] { "@@sessionCount@@", "sessionCount" });
+		private final Map<String,String> _defaultLabels = Map.of( "@@sessionCount@@", "sessionCount" );
 
 		/**
 		 * Default package level constructor
