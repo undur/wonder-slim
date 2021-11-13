@@ -47,7 +47,6 @@ import com.webobjects.foundation.NSTimestampFormatter;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
-import er.extensions.foundation.ERXDictionaryUtilities;
 import er.extensions.foundation.ERXFileNotificationCenter;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXSimpleTemplateParser;
@@ -479,7 +478,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 
 		// Let's go fishing
 		if (shortLanguage == null) {
-			NSDictionary<String, Object> dict = ERXDictionaryUtilities.dictionaryFromPropertyList("Languages", NSBundle.bundleForName("JavaWebObjects"));
+			NSDictionary<String, Object> dict = ERXStringUtilities.dictionaryFromPropertyList("Languages", NSBundle.bundleForName("JavaWebObjects"));
 			if (dict != null) {
 				NSArray<String> keys = dict.allKeysForObject(aLanguage);
 				if (keys.count() > 0) {

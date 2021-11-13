@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSBundle;
+import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSPropertyListSerialization;
 
 @Deprecated
 public class ERXStringUtilities {
@@ -191,4 +193,19 @@ public class ERXStringUtilities {
 	 */
 	public static String safeIdentifierName(String source) {
 		return safeIdentifierName(source, "_", '_');
-	}}
+	}
+
+	/**
+	 * Creates an NSDictionary from a resource associated with a given bundle that is in property list format.
+	 * 
+	 * @param name name of the file or resource.
+	 * @param bundle NSBundle to which the resource belongs.
+	 * @return NSDictionary de-serialized from the property list.
+	 */
+	@SuppressWarnings("unchecked")
+	@Deprecated
+	public static NSDictionary dictionaryFromPropertyList(String name, NSBundle bundle) {
+		String string = stringFromResource(name, "plist", bundle);
+		return (NSDictionary<?, ?>) NSPropertyListSerialization.propertyListFromString(string);
+	}
+}
