@@ -1,14 +1,10 @@
-/*
- * Created on 28.09.2004
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
 package er.extensions.foundation;
 
 import java.util.Enumeration;
 import java.util.Properties;
 
+import com.webobjects.foundation.NSKeyValueCoding;
+import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSProperties;
 
 
@@ -19,7 +15,7 @@ import com.webobjects.foundation.NSProperties;
  * 
  * @author david teran
  */
-public class ERXSystem {
+public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 
 	/**
 	 * The singleton instance to share.
@@ -35,7 +31,7 @@ public class ERXSystem {
 	 * @return the converted value
 	 */
 	public static String getProperty(String key) {
-		String originalValue = NSProperties.getProperty(key);
+		String originalValue = (String) ERXSystem.sharedInstance.valueForKey(key);
 		return ERXSimpleTemplateParser.parseTemplatedStringWithObject(originalValue, ERXSystem.sharedInstance);
 	}
 	
@@ -106,5 +102,21 @@ public class ERXSystem {
 		ERXSystem.convertProperties(properties, properties);
 		ERXProperties.evaluatePropertyOperators(properties, properties);
 		ERXProperties.flattenPropertyNames(properties);
+	}
+
+	public Object valueForKey(String key) {
+		return NSProperties.getProperty(key);
+	}
+
+	public void takeValueForKey(Object value, String key) {
+		throw new RuntimeException("not implemented");
+	}
+
+	public Object valueForKeyPath(String key) {
+		return NSProperties.getProperty(key);
+	}
+
+	public void takeValueForKeyPath(Object value, String key) {
+		throw new RuntimeException("not implemented");
 	}
 }
