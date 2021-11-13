@@ -13,8 +13,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSRange;
 
-import x.FIXMEException;
-
 // PROTOTYPE FUNCTIONS (WRAPPER)
 /**
  * 
@@ -242,9 +240,9 @@ public class AjaxSortableList extends AjaxComponent {
       NSArray<Object> itemPageArray = list.subarrayWithRange(itemPageRange);
 
       try {
-    	  throw new FIXMEException("Fisabled forJavaEOControl reasons" );
+    	  throw new RuntimeException("Fisabled forJavaEOControl reasons" ); // FIXME: This is disabled because we no longer have EOControl (and thus not EOQualifier) // Hugi 2021-11-13
       }
-      catch( Exception e ) {}
+      catch( Exception e ) { e.printStackTrace();}
 //      EOQualifier itemIDQualifier = new EOKeyValueQualifier(listItemIDKeyPath, EOQualifier.QualifierOperatorEqual, itemID);
 //      NSArray<Object> matchingItems = EOQualifier.filteredArrayWithQualifier(itemPageArray, itemIDQualifier);
       NSArray<Object> matchingItems = null;

@@ -20,7 +20,6 @@ import er.extensions.appserver.ERXMessageEncoding;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXMutableURL;
-import er.extensions.foundation.ERXStringUtilities;
 
 /**
  * Shows a link and wraps an area that is later presented as a modal window. Alternately, when you bind <b>action</b> then the content is used as the link.

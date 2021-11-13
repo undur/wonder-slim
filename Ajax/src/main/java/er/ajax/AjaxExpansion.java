@@ -7,7 +7,6 @@ import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.components.conditionals.ERXWOTemplate;
-import er.extensions.foundation.ERXStringUtilities;
 
 /**
  * <p>

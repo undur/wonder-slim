@@ -17,7 +17,6 @@ import com.webobjects.appserver._private.WOFormatterRepository;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSValidation.ValidationException;
 
 import er.extensions.appserver.ERXWOContext;

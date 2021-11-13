@@ -11,7 +11,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ERXWOContext;
-import x.FIXMEException;
 
 /**
  * AjaxHighlight provides a convenient way to queue up an object as highlighted so that it gets a highlight effect when

@@ -23,8 +23,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import er.extensions.foundation.ERXStringUtilities;
-
 /**
  * ERXBeanSerializer is a rip-off of BeanSerializer except that it supports
  * WO-style naming (i.e. missing "get").
