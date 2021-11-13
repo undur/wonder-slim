@@ -66,17 +66,27 @@ public class Loader {
 	private static final Logger log = Logger.getLogger(Loader.class);
 
 	/**
-	 * Comand line arguments passed to the main method
+	 * Command line arguments passed to the main method
 	 */
-	static NSDictionary propertiesFromArgv;
+	private static NSDictionary propertiesFromArgv;
 
 	JarChecker _checker;
 
-	/** Holds the framework names during startup */
+	/**
+	 * Holds the framework names during startup
+	 */
 	Set<String> allFrameworks;
 
 	private Properties allBundleProps;
+	
+	/**
+	 * Looks like this is never used?
+	 */
 	private Properties defaultProperties;
+
+	private List<URL> urls = new ArrayList<>();
+	private Properties mainProps;
+	private Properties mainUserProps;
 
 	private Properties readProperties(File file) {
 		if (!file.exists()) {
@@ -411,10 +421,6 @@ public class Loader {
 		}
 	}
 
-	private List<URL> urls = new ArrayList<>();
-	private Properties mainProps;
-	private Properties mainUserProps;
-
 	private String propertyFromCommandLineFirst(String key) {
 		String result = (String) propertiesFromArgv.valueForKey(key);
 		if (result == null) {
@@ -483,10 +489,14 @@ public class Loader {
 	}
 
 	private void applyIfUnset(Properties bundleProps) {
-		if (bundleProps == null)
+
+		if (bundleProps == null) {
 			return;
+		}
+
 		for (Iterator iter = bundleProps.entrySet().iterator(); iter.hasNext();) {
 			Map.Entry entry = (Map.Entry) iter.next();
+
 			if (!allBundleProps.containsKey(entry.getKey())) {
 				allBundleProps.setProperty((String) entry.getKey(), (String) entry.getValue());
 			}
@@ -494,8 +504,10 @@ public class Loader {
 	}
 
 	private boolean isSystemJar(String jar) {
+
 		// check system path
 		String systemRoot = System.getProperty("WORootDirectory");
+
 		if (systemRoot != null) {
 			if (jar.startsWith(systemRoot)) {
 				return true;
@@ -517,6 +529,7 @@ public class Loader {
 		if (jar.matches("Frameworks[/\\\\]Java(Foundation|EOControl|EOAccess|WebObjects).*")) {
 			return true;
 		}
+
 		return false;
 	}
 
