@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSBundle;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSSelector;
@@ -299,35 +297,6 @@ public class ERXConfigurationManager {
 
 	public synchronized void updateAllSystemProperties(NSNotification notification) {
 		loadConfiguration();
-	}
-
-	protected String documentRoot;
-
-	/**
-	 * Path to the web server's document root. This implementation tries first
-	 * to resolve the <code>application.name()+ "DocumentRoot"</code> property
-	 * value, then the <code>ERXDocumentRoot</code> property before getting the
-	 * <code>DocumentRoot</code> key in your WebServerConfig.plist in the
-	 * JavaWebObjects bundle.
-	 * 
-	 * @return to the web server's document root.
-	 */
-	public String documentRoot() {
-		if (documentRoot == null) {
-			// for WebObjects.properties
-			documentRoot = ERXProperties.stringForKey(WOApplication.application().name() + "DocumentRoot");
-			if (documentRoot == null) {
-				// for command line and Properties
-				documentRoot = ERXProperties.stringForKey("ERXDocumentRoot");
-				if (documentRoot == null) {
-					// default value
-					NSDictionary dict = ERXDictionaryUtilities.dictionaryFromPropertyList("WebServerConfig", NSBundle.bundleForName("JavaWebObjects"));
-					if (dict != null)
-						documentRoot = (String) dict.objectForKey("DocumentRoot");
-				}
-			}
-		}
-		return documentRoot;
 	}
 
 	/**
