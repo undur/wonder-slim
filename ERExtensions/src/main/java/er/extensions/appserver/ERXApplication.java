@@ -495,8 +495,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * The ERXApplication singleton.
 	 * 
-	 * @return returns the <code>WOApplication.application()</code> cast as an
-	 *         ERXApplication
+	 * @return returns the <code>WOApplication.application()</code> cast as an ERXApplication
 	 */
 	public static ERXApplication erxApplication() {
 		return (ERXApplication) WOApplication.application();
@@ -544,10 +543,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 					s += 24 * 3600; // how many seconds to the deadline
 				}
 
-				// deliberately randomize this so that not all instances restart
-				// at
-				// the same time
-				// adding up to 1 hour
+				// deliberately randomize this so that not all instances restart at the same time adding up to 1 hour
 				s += (Math.random() * 3600);
 
 				NSTimestamp stopDate = new NSTimestamp().timestampByAddingGregorianUnits(0, 0, 0, 0, 0, s);
@@ -560,7 +556,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		catch (RuntimeException t) {
 			if (ERXApplication._wasMainInvoked) {
 				ERXApplication.log.error(name() + " failed to start.", t);
-				// throw new ERXExceptionUtilities.HideStackTraceException(t);
 			}
 			throw t;
 		}
@@ -593,11 +588,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Used to instantiate a WOComponent when no context is available, typically
-	 * outside of a session
+	 * Used to instantiate a WOComponent when no context is available, typically outside of a session
 	 * 
-	 * @param pageName
-	 *            - The name of the WOComponent that must be instantiated.
+	 * @param pageName The name of the WOComponent to instantiate
 	 * @return created WOComponent with the given name
 	 */
 	public static WOComponent instantiatePage(String pageName) {
@@ -606,8 +599,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Stops the application from handling any new requests. Will still handle
-	 * requests from existing sessions.
+	 * Stops the application from handling any new requests. Will still handle requests from existing sessions.
 	 */
 	public void startRefusingSessions() {
 		log.info("Refusing new sessions");
