@@ -205,7 +205,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
 //    public EOEnterpriseObject eoObject() { return object() instanceof EOEnterpriseObject ? (EOEnterpriseObject)object() : null; }
     public Object eoObject() {
     	return null;
-//    	throw new FIXMEException("Disabled instead of deleting");
+//    	throw new RuntimeException("Disabled instead of deleting");
     }
 
 
