@@ -24,10 +24,10 @@ import er.extensions.ERXExtensions;
 import er.extensions.logging.ERXLogger;
 
 /**
- * Handles rapid turnaround for system configuration as well as swizzling of the
- * EOModel connection dictionaries.
- * <h3>Placing configuration parameters</h3> You can provide the system
- * configuration by the following ways:
+ * Handles rapid turnaround for system configuration
+ * 
+ * <h3>Placing configuration parameters</h3>
+ * You can provide the system configuration by the following ways:
  * <p>
  * Note: This is the standard way for WebObjects 5.x applications.
  * <ul>
@@ -67,44 +67,24 @@ import er.extensions.logging.ERXLogger;
  * framework Properties are loaded. You can safely override parameters on the
  * frameworks from the applications Properties.
  * 
- * <h3>Changing the connection dictionary</h3> To do this for Oracle you can
- * either specify on a per model basis or on a global basis.
- * 
- * <pre>
- * <strong>Global:</strong>
- *      dbConnectServerGLOBAL = myDatabaseServer
- *      dbConnectUserGLOBAL = me
- *      dbConnectPasswordGLOBAL = secret
- *      dbConnectPluginGLOBAL = Oracle
- * <strong>Per Model for say model ER:</strong>
- *      ER.DBServer = myDatabaseServer
- *      ER.DBUser = me
- *      ER.DBPassword = secret
- *      ER.DBPlugin = Oracle
- * 
- * <strong>Openbase:</strong> same, with DBDatabase and DBHostname
- * 
- * <strong>JDBC:</strong> same with dbConnectURLGLOBAL, or ER.DBURL
- * </pre>
- * <p>
- * Prototypes can be swapped globally or per model either by hydrating an
- * archived prototype entity for a file or from another entity.
- * 
  * @property er.extensions.ERXConfigurationManager.PropertiesTouchFile if this
  *           property is set to a file name, the application will register for
  *           notifications of changes to that file and when that file is
  *           touched, the application will re-load properties.
  */
+
 public class ERXConfigurationManager {
+
 	private static final Logger log = LoggerFactory.getLogger(ERXConfigurationManager.class);
 
 	/**
-	 * Notification posted when the configuration is updated. The Java system
-	 * properties is the part of the configuration.
+	 * Notification posted when the configuration is updated. The Java system properties is the part of the configuration.
 	 */
 	public static final String ConfigurationDidChangeNotification = "ConfigurationDidChangeNotification";
 
-	/** Configuration manager singleton */
+	/**
+	 * Configuration manager singleton
+	 */
 	static ERXConfigurationManager defaultManager = null;
 
 	private String[] _commandLineArguments;
@@ -114,14 +94,18 @@ public class ERXConfigurationManager {
 	private boolean _isInitialized = false;
 	private boolean _isRapidTurnAroundInitialized = false;
 
-	/** Private constructor to prevent instantiation from outside the class */
-	private ERXConfigurationManager() {
-		/* empty */
-	}
+	/**
+	 * Holds the hostName
+	 */
+	protected String _hostName;
 
 	/**
-	 * If set, touching this path will be used to signal a change to properties
-	 * files.
+	 * Private constructor to prevent instantiation from outside the class
+	 */
+	private ERXConfigurationManager() {}
+
+	/**
+	 * If set, touching this path will be used to signal a change to properties files.
 	 */
 	private static String propertiesTouchFile() {
 		return ERXProperties.stringForKey("er.extensions.ERXConfigurationManager.PropertiesTouchFile");
@@ -133,15 +117,16 @@ public class ERXConfigurationManager {
 	 * @return the configuration manager
 	 */
 	public static ERXConfigurationManager defaultManager() {
-		if (defaultManager == null)
+		if (defaultManager == null) {
 			defaultManager = new ERXConfigurationManager();
+		}
+
 		return defaultManager;
 	}
 
 	/**
 	 * Returns the command line arguments.
-	 * {@link er.extensions.appserver.ERXApplication#main(String[], Class)} sets
-	 * this value.
+	 * {@link er.extensions.appserver.ERXApplication#main(String[], Class)} sets this value.
 	 * 
 	 * @return the command line arguments as a String[]
 	 * @see #setCommandLineArguments
@@ -152,8 +137,7 @@ public class ERXConfigurationManager {
 
 	/**
 	 * Returns the command line arguments as Properties.
-	 * {@link er.extensions.appserver.ERXApplication#main(String[], Class)} sets
-	 * this value.
+	 * {@link er.extensions.appserver.ERXApplication#main(String[], Class)} sets this value.
 	 * 
 	 * @return the command line arguments as a String[]
 	 * @see #setCommandLineArguments(String[])
@@ -164,8 +148,7 @@ public class ERXConfigurationManager {
 
 	/**
 	 * Returns the command line arguments as Properties.
-	 * {@link er.extensions.appserver.ERXApplication#main(String[], Class)} sets
-	 * this value.
+	 * {@link er.extensions.appserver.ERXApplication#main(String[], Class)} sets this value.
 	 * 
 	 * @return the command line arguments as a String[]
 	 * @see #setCommandLineArguments(String[])
@@ -189,8 +172,7 @@ public class ERXConfigurationManager {
 
 	/**
 	 * Initializes the configuration manager. The framework principal
-	 * {@link ERXExtensions} calls this method when the ERExtensions framework
-	 * is loaded.
+	 * {@link ERXExtensions} calls this method when the ERExtensions framework is loaded.
 	 */
 	public void initialize() {
 		if (!_isInitialized) {
@@ -203,6 +185,7 @@ public class ERXConfigurationManager {
 		if (_monitoredProperties == null) {
 			_monitoredProperties = ERXProperties.pathsForUserAndBundleProperties();
 		}
+
 		return _monitoredProperties;
 	}
 
@@ -214,8 +197,9 @@ public class ERXConfigurationManager {
 	 * WOCaching disabled.
 	 */
 	public void configureRapidTurnAround() {
-		if (_isRapidTurnAroundInitialized)
+		if (_isRapidTurnAroundInitialized) {
 			return;
+		}
 
 		_isRapidTurnAroundInitialized = true;
 
@@ -264,20 +248,16 @@ public class ERXConfigurationManager {
 
 	private void registerForFileNotification(String path, String callbackMethod) {
 		try {
-			ERXFileNotificationCenter.defaultCenter().addObserver(this,
-					new NSSelector(callbackMethod, ERXUtilities.NotificationClassArray),
-					path);
+			ERXFileNotificationCenter.defaultCenter().addObserver(this, new NSSelector(callbackMethod, ERXUtilities.NotificationClassArray), path);
 			log.debug("Registered: {}", path);
 		}
 		catch (Exception ex) {
-			log.error("An exception occured while registering the observer for the "
-					+ "logging configuration file: {} {}", ex.getClass().getName(), ex.getMessage(), ex);
+			log.error("An exception occured while registering the observer for the " + "logging configuration file: {} {}", ex.getClass().getName(), ex.getMessage(), ex);
 		}
 	}
 
 	/**
-	 * This will overlay the current system config files. It will then re-load
-	 * the command line args.
+	 * This will overlay the current system config files. It will then re-load the command line args.
 	 */
 	public void loadConfiguration() {
 		Properties systemProperties = System.getProperties();
@@ -290,8 +270,7 @@ public class ERXConfigurationManager {
 	}
 
 	/**
-	 * This will overlay the current system config files. It will then re-load
-	 * the command line args.
+	 * This will overlay the current system config files. It will then re-load the command line args.
 	 */
 	public Properties applyConfiguration(Properties systemProperties) {
 		return ERXProperties.applyConfiguration(systemProperties, commandLineArgumentProperties());
@@ -312,9 +291,7 @@ public class ERXConfigurationManager {
 	 * This method is called when rapid turnaround is enabled and one of the
 	 * configuration files changes.
 	 * 
-	 * @param n
-	 *            NSNotification object for the event (null means load all
-	 *            files)
+	 * @param n NSNotification object for the event (null means load all files)
 	 */
 	public synchronized void updateSystemProperties(NSNotification n) {
 		loadConfiguration();
@@ -374,9 +351,6 @@ public class ERXConfigurationManager {
 		}
 		return documentRoot;
 	}
-
-	/** holds the host name */
-	protected String _hostName;
 
 	/**
 	 * Gets the default host name for the current local host.
