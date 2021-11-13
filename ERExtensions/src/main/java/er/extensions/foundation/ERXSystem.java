@@ -31,8 +31,7 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 	private ERXSystem() {}
 
 	/**
-	 * Looks up the given key in the ERXSystem properties, converts any property
-	 * variables, and returns the converted value.
+	 * Looks up the given key in the ERXSystem properties, converts any property variables, and returns the converted value.
 	 * 
 	 * @param key the key to lookup
 	 * @return the converted value
@@ -43,8 +42,7 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 	}
 	
 	/**
-	 * Looks up the given key in the given properties, converts any property
-	 * variables, and returns the converted value.
+	 * Looks up the given key in the given properties, converts any property variables, and returns the converted value.
 	 * 
 	 * @param key the key to lookup
 	 * @param properties The given properties
@@ -68,9 +66,7 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
 	}
 
 	/**
-	 * Converts the property names defined in originalProperties with the
-	 * ERXSystem.getProperty(..) method and puts the resulting values into the
-	 * destinationProperties.
+	 * Converts the property names defined in originalProperties with the ERXSystem.getProperty(..) method and puts the resulting values into the destinationProperties.
 	 * 
 	 * @param originalProperties the properties to convert
 	 * @param destinationProperties the properties to copy into
@@ -104,8 +100,7 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
     }
 
     /**
-     * Converts and evaluates the properties from the given properties and replaces
-     * the converted values in-place.
+     * Converts and evaluates the properties from the given properties and replaces the converted values in-place.
      *
      * @param properties the properties to convert and evaluate
      */
