@@ -78,16 +78,16 @@ public class ERXMessageEncoding implements Serializable {
     private static Map<String,String> _encodings() { 
         if (_encodings == null) {
             _encodings = Map.of(
-				"ISO-8859-1",  "ISO8859_1",
-	            "ISO-8859-1",  "ISO-8859-1",
-	            "Shift_JIS",   "SJIS", 
-	            "Shift_JIS",   "SHIFT_JIS", 
-	            "EUC-JP",      "EUC_JP", 	//Note: dash and underscore
-	            "EUC-JP",      "EUC-JP",
-	            "iso-2022-jp", "ISO2022JP", 
-	            "iso-2022-jp", "ISO-2022-JP", 
-	            "UTF-8",       "UTF8",
-	            "UTF-8",       "UTF-8" );
+				"ISO8859_1", "ISO-8859-1",
+				"ISO-8859-1", "ISO-8859-1",
+				"SJIS", "Shift_JIS",
+				"SHIFT_JIS", "Shift_JIS",
+				"EUC_JP", "EUC-JP", // Note: dash and underscore
+				"EUC-JP", "EUC-JP",
+				"ISO2022JP", "iso-2022-jp",
+				"ISO-2022-JP", "iso-2022-jp",  
+				"UTF8", "UTF-8",       
+				"UTF-8", "UTF-8" );
         }
         return _encodings;
     }
@@ -96,9 +96,9 @@ public class ERXMessageEncoding implements Serializable {
     private static Map<String,String> _languagesAndDefaultEncodings() {
         if (_languagesAndDefaultEncodings == null) {
             _languagesAndDefaultEncodings = Map.of(
-				"ISO8859_1", "English", 
-                "ISO8859_1", "German", 
-                "SJIS",      "Japanese" );
+            	"English", "ISO8859_1",  
+                "German", "ISO8859_1", 
+                "Japanese", "SJIS" );
         }
         return _languagesAndDefaultEncodings;
     }
@@ -189,9 +189,9 @@ public class ERXMessageEncoding implements Serializable {
     
     protected static IllegalArgumentException createIllegalArgumentException(String value, String target, String listingMethod) {
         Map d = Map.of(
-        						value,		"value", 
-                                target, 	"target", 
-                                listingMethod,	"listingMethod" );
+        		"value", value,		 
+        		"target", target, 	 
+        		"listingMethod", listingMethod );
         ERXSimpleTemplateParser parser = ERXSimpleTemplateParser.sharedInstance();
         String message = parser.parseTemplateWithObject(
                     "@@value@@ isn't a supported @@target@@. (Not listed under @@listingMethod@@)", null, d, null);

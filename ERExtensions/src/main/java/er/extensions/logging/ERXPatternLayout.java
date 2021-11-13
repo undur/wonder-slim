@@ -377,7 +377,7 @@ class ERXPatternParser extends PatternParser {
 		 * Holds the default labels for the values. Note that the template
 		 * parser will put "-" for undefined values by defauilt.
 		 */
-		private final Map<String,String> _defaultLabels = Map.of( "@@sessionCount@@", "sessionCount" );
+		private final Map<String,String> _defaultLabels = Map.of( "sessionCount", "@@sessionCount@@" );
 
 		/**
 		 * Default package level constructor
