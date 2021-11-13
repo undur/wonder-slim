@@ -301,28 +301,6 @@ public class ERXConfigurationManager {
 		loadConfiguration();
 	}
 
-	public final static int WindowsOperatingSystem = 1;
-	public final static int MacOSXOperatingSystem = 2;
-	public final static int SolarisOperatingSystem = 3;
-	public final static int UnknownOperatingSystem = 3;
-
-	private int _operatingSystem = 0;
-
-	public int operatingSystem() {
-		if (_operatingSystem == 0) {
-			String osName = ERXSystem.getProperty("os.name").toLowerCase();
-			if (osName.indexOf("windows") != -1)
-				_operatingSystem = WindowsOperatingSystem;
-			else if (osName.indexOf("solaris") != -1)
-				_operatingSystem = SolarisOperatingSystem;
-			else if (osName.indexOf("macos") != -1 || osName.indexOf("mac os") != -1)
-				_operatingSystem = MacOSXOperatingSystem;
-			else
-				_operatingSystem = UnknownOperatingSystem;
-		}
-		return _operatingSystem;
-	}
-
 	protected String documentRoot;
 
 	/**
