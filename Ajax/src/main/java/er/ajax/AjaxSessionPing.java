@@ -11,8 +11,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 
-import er.extensions.appserver.ERXResponse;
-
 /**
  * Simple component to ping the session in the background.  It can do two things.  The first is
  * to execute JavaScript if the session is no longer valid. The default action is to close the window
@@ -111,7 +109,7 @@ public class AjaxSessionPing extends AjaxDynamicElement {
          * @return bare HTTP response with status set
          */
         public WOActionResults pingSessionAction() {
-            ERXResponse response = new ERXResponse();
+            WOResponse response = new WOResponse();
             if (existingSession() != null) {
                 session();
             } else {

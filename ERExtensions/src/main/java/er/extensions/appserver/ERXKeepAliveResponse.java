@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSForwardException;
 
 /**
@@ -18,7 +19,7 @@ import com.webobjects.foundation.NSForwardException;
  * 
  * @author ak
  */
-public class ERXKeepAliveResponse extends ERXResponse {
+public class ERXKeepAliveResponse extends WOResponse {
 	private static final Logger log = LoggerFactory.getLogger(ERXKeepAliveResponse.class);
 
 	/**

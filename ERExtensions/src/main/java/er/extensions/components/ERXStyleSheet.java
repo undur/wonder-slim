@@ -19,7 +19,6 @@ import com.webobjects.foundation.NSForwardException;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXResourceManager;
-import er.extensions.appserver.ERXResponse;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXExpiringCache;
@@ -182,7 +181,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 		}
 		// default to inline for ajax requests
 		boolean inline = booleanValueForBinding( "inline", ERXAjaxApplication.isAjaxRequest( wocontext.request() ) );
-		WOResponse response = inline ? originalResponse : new ERXResponse();
+		WOResponse response = inline ? originalResponse : new WOResponse();
 
 		String href = styleSheetUrl();
 		if( href == null ) {
@@ -191,7 +190,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 			String md5;
 			WOResponse cachedResponse = cache.objectForKey( key );
 			if( cache.isStale( key ) || ERXApplication.isDevelopmentModeSafe() ) {
-				cachedResponse = new ERXResponse();
+				cachedResponse = new WOResponse();
 				super.appendToResponse( cachedResponse, wocontext );
 				// appendToResponse above will change the response of
 				// "wocontext" to "newresponse". When this happens during an

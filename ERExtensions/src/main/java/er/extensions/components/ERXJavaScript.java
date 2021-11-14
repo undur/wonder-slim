@@ -162,7 +162,7 @@ public class ERXJavaScript extends WOHTMLDynamicElement {
 				boolean render = cache.isStale(key);
 				render |= ERXApplication.isDevelopmentModeSafe();
 				if(render) {
-					WOResponse newresponse = new ERXResponse();
+					WOResponse newresponse = new WOResponse();
 					super.appendChildrenToResponse(newresponse, wocontext);
 					newresponse.setHeader("application/x-javascript", "content-type");
 					cache.setObjectForKey(newresponse, key);

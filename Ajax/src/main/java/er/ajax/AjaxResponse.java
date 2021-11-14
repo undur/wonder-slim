@@ -13,7 +13,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.appserver.ERXResponse;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.appserver.ajax.ERXAjaxApplication.ERXAjaxResponseDelegate;
@@ -24,7 +23,7 @@ import er.extensions.appserver.ajax.ERXAjaxApplication.ERXAjaxResponseDelegate;
  * 
  * @author mschrag
  */
-public class AjaxResponse extends ERXResponse {
+public class AjaxResponse extends WOResponse {
 	private static final Logger log = LoggerFactory.getLogger(Ajax.class);
 	public static final String AJAX_UPDATE_PASS = "_ajaxUpdatePass";
 	private static NSMutableArray _responseAppenders; 

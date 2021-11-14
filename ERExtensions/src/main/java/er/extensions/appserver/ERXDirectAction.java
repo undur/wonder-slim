@@ -192,7 +192,7 @@ public class ERXDirectAction extends WODirectAction {
 	public WOActionResults systemPropertyAction() {
 		if (canPerformActionWithPasswordKey("er.extensions.ERXDirectAction.ChangeSystemPropertyPassword")) {
 			String key = request().stringFormValueForKey("key");
-			ERXResponse r = new ERXResponse();
+			WOResponse r = new WOResponse();
 			if (ERXStringUtilities.isNullOrEmpty(key)) {
 				String user = request().stringFormValueForKey("user");
 				Properties props = ERXConfigurationManager.defaultManager().defaultProperties();
@@ -235,7 +235,7 @@ public class ERXDirectAction extends WODirectAction {
 		if (ERXApplication.isDevelopmentModeSafe()) {
 			session();
 			ERXLocalizer.currentLocalizer().dumpCreatedKeys();
-			return new ERXResponse();
+			return new WOResponse();
 		}
 		return null;
 	}
@@ -251,7 +251,7 @@ public class ERXDirectAction extends WODirectAction {
 	 * @return "OK" if application has been shut down
 	 */
 	public WOActionResults stopAction() {
-		ERXResponse response = new ERXResponse();
+		WOResponse response = new WOResponse();
 		response.setHeader("text/plain", "Content-Type");
 
 		if (ERXApplication.isDevelopmentModeSafe()) {

@@ -108,7 +108,7 @@ public class AjaxRemoteLogging extends AjaxDynamicElement {
 			else if ("debug".equalsIgnoreCase(level)) {
 				log.debug(msg);
 			}
-			return new ERXResponse();
+			return new WOResponse();
 		}
 	}
 

@@ -17,7 +17,6 @@ import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestampFormatter;
 
-import er.extensions.appserver.ERXResponse;
 import er.extensions.appserver.ERXSession;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
@@ -272,7 +271,7 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 	 */
     @Override
     public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-        WOResponse newResponse = ERXPatcher.DynamicElementsPatches.cleanupXHTML ? new ERXResponse() : woresponse;
+        WOResponse newResponse = ERXPatcher.DynamicElementsPatches.cleanupXHTML ? new WOResponse() : woresponse;
         super.appendToResponse(newResponse, wocontext);
         
         ERXPatcher.DynamicElementsPatches.processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
