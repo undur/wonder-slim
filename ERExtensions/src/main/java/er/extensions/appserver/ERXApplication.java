@@ -914,7 +914,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	@Override
 	public WOResponse createResponseInContext(WOContext context) {
-		WOResponse response = new ERXResponse(context);
+		WOResponse response = new ERXResponse();
 		return response;
 	}
 

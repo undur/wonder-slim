@@ -53,7 +53,7 @@ public class AjaxResponse extends ERXResponse {
 	private WOContext _context;
 
 	public AjaxResponse(WORequest request, WOContext context) {
-		super(context);
+		super();
 		_request = request;
 		_context = context;
 	}
