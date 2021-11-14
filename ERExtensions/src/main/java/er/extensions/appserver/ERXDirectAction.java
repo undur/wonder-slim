@@ -84,7 +84,9 @@ public class ERXDirectAction extends WODirectAction {
 	public WOActionResults flushComponentCacheAction() {
 		if (canPerformActionWithPasswordKey("er.extensions.ERXFlushComponentCachePassword")) {
 			WOApplication.application()._removeComponentDefinitionCacheContents();
-			return new ERXResponse("OK");
+			WOResponse response = new WOResponse();
+			response.setContent("OK");
+			return response;
 		}
 		return forbiddenResponse();
 	}
@@ -271,6 +273,8 @@ public class ERXDirectAction extends WODirectAction {
 	 * @return 403 response
 	 */
 	protected WOResponse forbiddenResponse() {
-		return new ERXResponse(null, WOMessage.HTTP_STATUS_FORBIDDEN);
+		WOResponse response = new WOResponse();
+		response.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
+		return response;
 	}
 }
