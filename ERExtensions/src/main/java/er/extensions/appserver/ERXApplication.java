@@ -912,12 +912,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return context;
 	}
 
-	@Override
-	public WOResponse createResponseInContext(WOContext context) {
-		WOResponse response = new WOResponse();
-		return response;
-	}
-
 	/** improved streaming support */
 	protected NSMutableArray<String> _streamingRequestHandlerKeys = new NSMutableArray<>(streamActionRequestHandlerKey());
 
