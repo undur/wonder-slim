@@ -12,7 +12,6 @@ import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXDirectAction;
-import er.extensions.appserver.ERXResponse;
 
 /**
  * Allows you to log <code>window.console</code> JS messages from the browser to

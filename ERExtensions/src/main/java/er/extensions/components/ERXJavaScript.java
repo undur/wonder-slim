@@ -21,7 +21,6 @@ import com.webobjects.foundation._NSStringUtilities;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXResourceManager;
-import er.extensions.appserver.ERXResponse;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.foundation.ERXExpiringCache;
 import er.extensions.foundation.ERXProperties;
