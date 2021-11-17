@@ -17,10 +17,8 @@ public class ERXAppRunner {
 	 * and main methods) with the assumption that the current directory is your
 	 * main bundle URL.
 	 * 
-	 * @param applicationSubclass
-	 *            your Application subclass
-	 * @param args
-	 *            the commandline arguments for your application
+	 * @param applicationSubclass your Application subclass
+	 * @param args the commandline arguments for your application
 	 */
 	public static void initApp(Class applicationSubclass, String[] args) {
 		try {
@@ -53,32 +51,23 @@ public class ERXAppRunner {
 	}
 
 	/**
-	 * Initializes your WOApplication programmatically (for use in test cases
-	 * and main methods).
+	 * Initializes your WOApplication programmatically (for use in test cases and main methods).
 	 * 
-	 * @param mainBundleName
-	 *            the name of your main bundle
-	 * @param applicationSubclass
-	 *            your Application subclass
-	 * @param args
-	 *            the commandline arguments for your application
+	 * @param mainBundleName the name of your main bundle
+	 * @param applicationSubclass your Application subclass
+	 * @param args the commandline arguments for your application
 	 */
 	public static void initApp(String mainBundleName, Class applicationSubclass, String[] args) {
 		initApp(mainBundleName, null, applicationSubclass, args);
 	}
 
 	/**
-	 * Initializes your WOApplication programmatically (for use in test cases
-	 * and main methods).
+	 * Initializes your WOApplication programmatically (for use in test cases and main methods).
 	 * 
-	 * @param mainBundleName
-	 *            the name of your main bundle (or null to use mainBundleURL)
-	 * @param mainBundleURL
-	 *            the URL to your main bundle (ignored if mainBundleName is set)
-	 * @param applicationSubclass
-	 *            your Application subclass
-	 * @param args
-	 *            the commandline arguments for your application
+	 * @param mainBundleName the name of your main bundle (or null to use mainBundleURL)
+	 * @param mainBundleURL the URL to your main bundle (ignored if mainBundleName is set)
+	 * @param applicationSubclass your Application subclass
+	 * @param args the commandline arguments for your application
 	 */
 	public static void initApp(String mainBundleName, URL mainBundleURL, Class applicationSubclass, String[] args) {
 		if (_appInitialized) {
