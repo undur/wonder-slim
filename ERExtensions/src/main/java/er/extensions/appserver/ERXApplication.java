@@ -927,35 +927,21 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns whether or not this application is in development mode. This one
-	 * is named "Safe" because it does not require you to be running an
-	 * ERXApplication (and because you can't have a static and not-static method
-	 * of the same name. bah). If you are using ERXApplication, this will call
-	 * isDevelopmentMode on your application. If not, it will call
-	 * ERXApplication_defaultIsDevelopmentMode() which checks for the system
-	 * properties "er.extensions.ERXApplication.developmentMode" and/or "WOIDE".
+	 * Returns whether or not this application is in development mode.
 	 * 
 	 * @return whether or not the current application is in development mode
 	 */
 	public static boolean isDevelopmentModeSafe() {
-		boolean developmentMode;
-		WOApplication application = WOApplication.application();
-		if (application instanceof ERXApplication) {
-			ERXApplication erxApplication = (ERXApplication) application;
-			developmentMode = erxApplication.isDevelopmentMode();
-		}
-		else {
-			developmentMode = ERXApplication._defaultIsDevelopmentMode();
-		}
-		return developmentMode;
+		return erxApplication().isDevelopmentMode();
 	}
 
 	/**
 	 * Returns whether or not this application is running in development-mode.
-	 * If you are using Xcode, you should add a WOIDE=Xcode setting to your
-	 * launch parameters.
+	 * If you are using Xcode, you should add a WOIDE=Xcode setting to your launch parameters.
+	 * 
+	 * @return <code>true</code> if application is in dev mode
 	 */
-	protected static boolean _defaultIsDevelopmentMode() {
+	public boolean isDevelopmentMode() {
 		boolean developmentMode = false;
 		if (ERXProperties.stringForKey("er.extensions.ERXApplication.developmentMode") != null) {
 			developmentMode = ERXProperties.booleanForKey("er.extensions.ERXApplication.developmentMode");
@@ -971,17 +957,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		return developmentMode;
-	}
-
-	/**
-	 * Returns whether or not this application is running in development-mode.
-	 * If you are using Xcode, you should add a WOIDE=Xcode setting to your
-	 * launch parameters.
-	 * 
-	 * @return <code>true</code> if application is in dev mode
-	 */
-	public boolean isDevelopmentMode() {
-		return ERXApplication._defaultIsDevelopmentMode();
 	}
 
 	/**
