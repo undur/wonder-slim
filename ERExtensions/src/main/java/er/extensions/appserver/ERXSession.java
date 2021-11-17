@@ -419,17 +419,12 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * the context ID for the request is 2 clicks less than the context ID for
 	 * the current WOContext, we know the backtracked.
 	 * 
-	 * FIXME: I find this highly sus. ERXDirectActionRequestHandler sets
-	 * "lastActionWasDA to true for the session, but it's never set to false
-	 * again? // Hugi 2021-05-23
-	 * 
 	 * @return if the user has backtracked or not.
 	 */
 	public boolean didBacktrack() {
 		if (_didBacktrack == null) {
 			_didBacktrack = Boolean.FALSE;
-			// If the current request is a direct action, no way the user could
-			// have backtracked.
+			// If the current request is a direct action, no way the user could have backtracked.
 			if (!context().request().requestHandlerKey().equals(WOApplication.application().directActionRequestHandlerKey())) {
 				int reqCID = Integer.parseInt(requestsContextID(context().request()));
 				int cid = Integer.parseInt(context().contextID());
@@ -438,11 +433,9 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 					_didBacktrack = Boolean.TRUE;
 				}
 				else if (delta > 1) {
-					// Might not have backtracked if their last
-					// action was a direct action.
+					// Might not have backtracked if their last action was a direct action.
 					// ERXDirectActionRequestHandler, which is the framework
-					// built-in default direct action handler, sets this
-					// variable
+					// built-in default direct action handler, sets this variable
 					// to true at the end of its handleRequest method.
 					if (!lastActionWasDA) {
 						_didBacktrack = Boolean.TRUE;

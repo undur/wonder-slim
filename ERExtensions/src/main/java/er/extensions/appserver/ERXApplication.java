@@ -165,18 +165,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
 
 	/**
-	 * Called when the application starts up and saves the command line
-	 * arguments for {@link ERXConfigurationManager}.
+	 * Called when the application starts up and saves the command line arguments for {@link ERXConfigurationManager}.
 	 * 
 	 * @see WOApplication#main(String[], Class)
 	 */
 	public static void main(String argv[], Class applicationClass) {
 		wasERXApplicationMainInvoked = true;
-
 		ERXHacks.disablePBXProjectWatcher();
-
 		setup(argv);
-
 		WOApplication.main(argv, applicationClass);
 	}
 
@@ -224,7 +220,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		else if (!_loader.didLoad()) {
 			throw new RuntimeException("ERXExtensions have not been initialized. Debugging information can be enabled by adding the JVM argument: '-Der.extensions.appserver.projectBundleLoading=DEBUG'. Please report the classpath and the rest of the bundles to the Wonder mailing list: " + "\nRemaining frameworks: " + (_loader == null ? "none" : _loader.allFrameworks) + "\nClasspath: " + System.getProperty("java.class.path"));
 		}
-		
 
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
 			throw new RuntimeException("Your main bundle is \"JavaFoundation\".  You are not launching this WO application properly.  If you are using Eclipse, most likely you launched your WOA as a \"Java Application\" instead of a \"WO Application\".");
@@ -294,8 +289,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Installs several bugfixes and enhancements to WODynamicElements. Sets the Context class name to "er.extensions.ERXWOContext" if it is "WOContext".
-	 * Patches ERXWOForm, ERXWOFileUpload, ERXWOText to be used instead of WOForm, WOFileUpload, WOText.
+	 * Installs several bugfixes and enhancements to WODynamicElements.
 	 */
 	protected void installPatches() {
 		ERXPatcher.installPatches();
@@ -312,119 +306,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			ERXPatcher.setClassForName(ERXWOString.class, "WOString");
 			ERXPatcher.setClassForName(ERXWOTextField.class, "WOTextField");
 		}
-	}
-
-	@Override
-	public WOResourceManager createResourceManager() {
-		return new ERXResourceManager();
-	}
-
-	/**
-	 * Determines if an application is deployed as servlet (contextClassName() is set WOServletContext or ERXWOServletContext)
-	 * 
-	 * @return true if the application is deployed as servlet.
-	 */
-	public boolean isDeployedAsServlet() {
-		return contextClassName().contains("Servlet");
-	}
-
-	/**
-	 * Called, for example, when refuse new sessions is enabled and the request
-	 * contains an expired session. If mod_rewrite is being used we don't want
-	 * the adaptor prefix being part of the redirect.
-	 * 
-	 * @see com.webobjects.appserver.WOApplication#_newLocationForRequest(com.webobjects.appserver.WORequest)
-	 */
-	@Override
-	public String _newLocationForRequest(WORequest aRequest) {
-		return _rewriteURL(super._newLocationForRequest(aRequest));
-	}
-
-	/**
-	 * Configures the statistics logging for a given application. By default
-	 * will log to a file &lt;base log directory&gt;/&lt;WOApp
-	 * Name&gt;-&lt;host&gt;-&lt;port&gt;.log if the base log path is defined.
-	 * The base log path is defined by the property
-	 * <code>er.extensions.ERXApplication.StatisticsBaseLogPath</code> The
-	 * default log rotation frequency is 24 hours, but can be changed by setting
-	 * in milliseconds the property
-	 * <code>er.extensions.ERXApplication.StatisticsLogRotationFrequency</code>
-	 */
-	public void configureStatisticsLogging() {
-		String statisticsBasePath = System.getProperty("er.extensions.ERXApplication.StatisticsBaseLogPath");
-		if (statisticsBasePath != null) {
-			// Defaults to a single day
-			int rotationFrequency = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.StatisticsLogRotationFrequency", 24 * 60 * 60 * 1000);
-			String logPath = statisticsBasePath + File.separator + name() + "-" + ERXConfigurationManager.defaultManager().hostName() + "-" + port() + ".log";
-			if (log.isDebugEnabled()) {
-				log.debug("Configured statistics logging to file path \"" + logPath + "\" with rotation frequency: " + rotationFrequency);
-			}
-			statisticsStore().setLogFile(logPath, rotationFrequency);
-		}
-	}
-
-	/**
-	 * Notification method called when the application posts the notification
-	 * {@link WOApplication#ApplicationWillFinishLaunchingNotification}. This
-	 * method calls subclasses' {@link #finishInitialization} method.
-	 * 
-	 * @param n
-	 *            notification that is posted after the WOApplication has been
-	 *            constructed, but before the application is ready for accepting
-	 *            requests.
-	 */
-	public final void finishInitialization(NSNotification n) {
-		finishInitialization();
-		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.ApplicationDidFinishInitializationNotification, this));
-	}
-
-	/**
-	 * Notification method called when the application posts the notification
-	 * {@link WOApplication#ApplicationDidFinishLaunchingNotification}. This
-	 * method calls subclasse's {@link #didFinishLaunching} method.
-	 * 
-	 * @param n
-	 *            notification that is posted after the WOApplication has
-	 *            finished launching and is ready for accepting requests.
-	 */
-	public final void didFinishLaunching(NSNotification n) {
-		didFinishLaunching();
-		ERXStats.logStatisticsForOperation(statsLog, "sum");
-
-		// FIXME: Is this being handled by ERXStats? Check out. 
-		_startupTimeInMilliseconds = System.currentTimeMillis() - _startupTimeInMilliseconds;
-		log.info( String.format( "Startup time %s ms: ", _startupTimeInMilliseconds ) );
-	}
-
-	/**
-	 * Called when the application posts
-	 * {@link WOApplication#ApplicationWillFinishLaunchingNotification}.
-	 * Override this to perform application initialization. (optional)
-	 */
-	public void finishInitialization() {
-		// empty
-	}
-
-	protected void didCreateApplication() {
-		// empty
-	}
-
-	/**
-	 * Called when the application posts
-	 * {@link WOApplication#ApplicationDidFinishLaunchingNotification}. Override
-	 * this to perform application specific tasks after the application has been
-	 * initialized. THis is a good spot to perform batch application tasks.
-	 */
-	public void didFinishLaunching() {
-	}
-
-	/**
-	 * The ERXApplication singleton.
-	 * 
-	 * @return returns the <code>WOApplication.application()</code> cast as an ERXApplication
-	 */
-	public static ERXApplication erxApplication() {
-		return (ERXApplication) WOApplication.application();
 	}
 
 	/**
@@ -488,6 +369,31 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	@Override
+	public WOResourceManager createResourceManager() {
+		return new ERXResourceManager();
+	}
+
+	/**
+	 * When a context is created we push it into thread local storage. This
+	 * handles the case for direct actions.
+	 * 
+	 * @param request the request
+	 * @return the newly created context
+	 */
+	@Override
+	public WOContext createContextForRequest(WORequest request) {
+		WOContext context = super.createContextForRequest(request);
+
+		// We only want to push in the context the first time it is created, ie we don't
+		// want to lose the current context when we create a context for an error page.
+		if (ERXWOContext.currentContext() == null) {
+			ERXWOContext.setCurrentContext(context);
+		}
+
+		return context;
+	}
+
+	@Override
 	public ERXRequest createRequest(String aMethod, String aURL, String anHTTPVersion, Map<String, ? extends List<String>> someHeaders, NSData aContent, Map<String, Object> someInfo) {
 		// Workaround for #3428067 (Apache Server Side Include module will feed
 		// "INCLUDED" as the HTTP version, which causes a request object not to
@@ -511,6 +417,100 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		return new ERXRequest(aMethod, aURL, anHTTPVersion, someHeaders, aContent, someInfo);
+	}
+
+	/**
+	 * Determines if an application is deployed as servlet (contextClassName() is set WOServletContext or ERXWOServletContext)
+	 * 
+	 * @return true if the application is deployed as servlet.
+	 */
+	public boolean isDeployedAsServlet() {
+		return contextClassName().contains("Servlet");
+	}
+
+	/**
+	 * Called, for example, when refuse new sessions is enabled and the request contains an expired session.
+	 * If mod_rewrite is being used we don't want the adaptor prefix being part of the redirect.
+	 * 
+	 * @see com.webobjects.appserver.WOApplication#_newLocationForRequest(com.webobjects.appserver.WORequest)
+	 */
+	@Override
+	public String _newLocationForRequest(WORequest aRequest) {
+		return _rewriteURL(super._newLocationForRequest(aRequest));
+	}
+
+	/**
+	 * Configures the statistics logging for a given application. By default
+	 * will log to a file &lt;base log directory&gt;/&lt;WOApp
+	 * Name&gt;-&lt;host&gt;-&lt;port&gt;.log if the base log path is defined.
+	 * The base log path is defined by the property
+	 * <code>er.extensions.ERXApplication.StatisticsBaseLogPath</code> The
+	 * default log rotation frequency is 24 hours, but can be changed by setting
+	 * in milliseconds the property
+	 * <code>er.extensions.ERXApplication.StatisticsLogRotationFrequency</code>
+	 */
+	public void configureStatisticsLogging() {
+		String statisticsBasePath = System.getProperty("er.extensions.ERXApplication.StatisticsBaseLogPath");
+		if (statisticsBasePath != null) {
+			// Defaults to a single day
+			int rotationFrequency = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.StatisticsLogRotationFrequency", 24 * 60 * 60 * 1000);
+			String logPath = statisticsBasePath + File.separator + name() + "-" + ERXConfigurationManager.defaultManager().hostName() + "-" + port() + ".log";
+			if (log.isDebugEnabled()) {
+				log.debug("Configured statistics logging to file path \"" + logPath + "\" with rotation frequency: " + rotationFrequency);
+			}
+			statisticsStore().setLogFile(logPath, rotationFrequency);
+		}
+	}
+
+	/**
+	 * Notification method called when the application posts the notification
+	 * {@link WOApplication#ApplicationWillFinishLaunchingNotification}. This
+	 * method calls subclasses' {@link #finishInitialization} method.
+	 * 
+	 * @param n notification posted after WOApplication has been constructed, but before the application is ready for accepting requests.
+	 */
+	public final void finishInitialization(NSNotification n) {
+		finishInitialization();
+		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.ApplicationDidFinishInitializationNotification, this));
+	}
+
+	/**
+	 * Notification method called when the application posts the notification
+	 * {@link WOApplication#ApplicationDidFinishLaunchingNotification}. This
+	 * method calls subclasse's {@link #didFinishLaunching} method.
+	 * 
+	 * @param n notification posted after WOApplication has finished launching and is ready for accepting requests.
+	 */
+	public final void didFinishLaunching(NSNotification n) {
+		didFinishLaunching();
+		ERXStats.logStatisticsForOperation(statsLog, "sum");
+
+		// FIXME: Is this being handled by ERXStats? Check out. 
+		_startupTimeInMilliseconds = System.currentTimeMillis() - _startupTimeInMilliseconds;
+		log.info( String.format( "Startup time %s ms: ", _startupTimeInMilliseconds ) );
+	}
+
+	/**
+	 * Called when the application posts {@link WOApplication#ApplicationWillFinishLaunchingNotification}.
+	 * Override this to perform application initialization.
+	 */
+	public void finishInitialization() {}
+
+	protected void didCreateApplication() {}
+
+	/**
+	 * Called when the application posts {@link WOApplication#ApplicationDidFinishLaunchingNotification}.
+	 * Override this to perform application specific tasks after the application has been initialized.
+	 * This is a good spot to perform batch application tasks.
+	 */
+	public void didFinishLaunching() {
+	}
+
+	/**
+	 * @return returns the <code>WOApplication.application()</code> cast as an ERXApplication
+	 */
+	public static ERXApplication erxApplication() {
+		return (ERXApplication) WOApplication.application();
 	}
 
 	/**
@@ -816,26 +816,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * When a context is created we push it into thread local storage. This
-	 * handles the case for direct actions.
-	 * 
-	 * @param request the request
-	 * @return the newly created context
-	 */
-	@Override
-	public WOContext createContextForRequest(WORequest request) {
-		WOContext context = super.createContextForRequest(request);
-
-		// We only want to push in the context the first time it is created, ie we don't
-		// want to lose the current context when we create a context for an error page.
-		if (ERXWOContext.currentContext() == null) {
-			ERXWOContext.setCurrentContext(context);
-		}
-
-		return context;
-	}
-
-	/**
 	 * Improved streaming support
 	 * 
 	 * FIXME: Why is this here? // Hugi 2021-11-17 
@@ -853,8 +833,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns whether or not this application is in development mode.
-	 * 
 	 * @return whether or not the current application is in development mode
 	 */
 	public static boolean isDevelopmentModeSafe() {
@@ -862,10 +840,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns whether or not this application is running in development-mode.
-	 * If you are using Xcode, you should add a WOIDE=Xcode setting to your launch parameters.
-	 * 
-	 * @return <code>true</code> if application is in dev mode
+	 * @return whether or not the current application is in development mode
 	 */
 	public boolean isDevelopmentMode() {
 		boolean developmentMode = false;
@@ -1170,7 +1145,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * You should not use ERXShutdownHook when deploying as servlet.
 	 */
-	protected static boolean enableERXShutdownHook() {
+	private static boolean enableERXShutdownHook() {
 		return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.enableERXShutdownHook", true);
 	}
 
@@ -1188,11 +1163,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		StringBuilder sb = new StringBuilder();
 
-		// NSArray<WOComponent> componentPath =
-		// ERXWOContext._componentPath(ERXWOContext.currentContext());
-		// componentPath.lastObject()
-		// WOComponent lastComponent =
-		// ERXWOContext.currentContext().component();
 		String lastComponentName = component.name().replaceFirst(".*\\.", "");
 		sb.append(lastComponentName);
 
