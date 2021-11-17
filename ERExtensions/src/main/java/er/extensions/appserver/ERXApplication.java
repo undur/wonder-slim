@@ -775,19 +775,17 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * is empty, it is fairly safe to override here to call the normal exception
 	 * handling earlier than usual.
 	 * 
-	 * @see WOApplication#handleActionRequestError(WORequest, Exception, String,
-	 *      WORequestHandler, String, String, Class, WOAction)
+	 * @see WOApplication#handleActionRequestError(WORequest, Exception, String, WORequestHandler, String, String, Class, WOAction)
 	 */
-	// NOTE: if you use WO 5.1, comment out this method, otherwise it won't
-	// compile.
+	// NOTE: if you use WO 5.1, comment out this method, otherwise it won't compile.
 	// CHECKME this was created for WO 5.2, do we still need this for 5.4.3?
 	@Override
 	public WOResponse handleActionRequestError(WORequest aRequest, Exception exception, String reason, WORequestHandler aHandler, String actionClassName, String actionName, Class actionClass, WOAction actionInstance) {
 		WOContext context = actionInstance != null ? actionInstance.context() : null;
+
 		boolean didCreateContext = false;
 		if (context == null) {
-			// AK: we provide the "handleException" with not much enough info to
-			// output a reasonable error message
+			// AK: we provide the "handleException" with not much enough info to output a reasonable error message
 			context = createContextForRequest(aRequest);
 			didCreateContext = true;
 		}
@@ -813,18 +811,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		// AK: bugfix for #4186886 (Session store deadlock with DAs). The bug
-		// occurs in 5.2.3, I'm not sure about other
-		// versions.
-		// It may create other problems, but this one is very severe to begin
-		// with
-		// The crux of the matter is that for certain exceptions, the DA request
-		// handler does not check sessions back in
-		// which leads to a deadlock in the session store when the session is
-		// accessed again.
+		// occurs in 5.2.3, I'm not sure about other versions.
+		// It may create other problems, but this one is very severe to begin with.
+		// The crux of the matter is that for certain exceptions, the DA request handler
+		// does not check sessions back in which leads to a deadlock in the session store
+		// when the session is accessed again.
 		else if (context.hasSession() && ("InstantiationError".equals(reason) || "InvocationError".equals(reason))) {
 			context._putAwakeComponentsToSleep();
 			saveSessionForContext(context);
 		}
+
 		return response;
 	}
 
@@ -903,16 +899,21 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	@Override
 	public WOContext createContextForRequest(WORequest request) {
 		WOContext context = super.createContextForRequest(request);
-		// We only want to push in the context the first time it is
-		// created, ie we don't want to lose the current context
-		// when we create a context for an error page.
+
+		// We only want to push in the context the first time it is created, ie we don't
+		// want to lose the current context when we create a context for an error page.
 		if (ERXWOContext.currentContext() == null) {
 			ERXWOContext.setCurrentContext(context);
 		}
+
 		return context;
 	}
 
-	/** improved streaming support */
+	/**
+	 * Improved streaming support
+	 * 
+	 * FIXME: Why is this here? // Hugi 2021-11-17 
+	 */
 	protected NSMutableArray<String> _streamingRequestHandlerKeys = new NSMutableArray<>(streamActionRequestHandlerKey());
 
 	public void registerStreamingRequestHandlerKey(String s) {
