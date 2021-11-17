@@ -77,7 +77,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Indicates if ERXApplication.main() has been invoked (so we can check that application actually did so)
 	 */
-	public static boolean wasERXApplicationMainInvoked = false;
+	private static boolean wasERXApplicationMainInvoked = false;
 
 	/**
 	 * Watches the state of the application's memory heap and handles low memory situations
@@ -181,8 +181,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Called prior to actually initializing the app. Defines framework load
-	 * order, class path order, checks patches etc.
+	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
 	public static void setup(String[] argv) {
 		_loader = new Loader(argv);
