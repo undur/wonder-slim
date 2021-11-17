@@ -528,7 +528,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 						if(log.isDebugEnabled())
 						  log.debug("Loading: {} - {} - {} {}", fileName, (framework == null ? "app" : framework), languages.componentsJoinedByString(" / "), path);
 						
-						NSDictionary<String, Object> dict = (NSDictionary<String, Object>) ERXUtilities.readPropertyListFromFileInFramework(fileName, framework, languages);
+						NSDictionary<String, Object> dict = (NSDictionary<String, Object>) readPropertyListFromFileInFramework(fileName, framework, languages);
 						// HACK: ak we have could have a collision between the search path for validation strings and
 						// the normal localized strings.
 						if (fileName.indexOf(ERXValidationFactory.VALIDATION_TEMPLATE_PREFIX) == 0) {
@@ -562,6 +562,31 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		
 		_plurifyRules = plurifyRules();
 		_singularifyRules = singularifyRules();
+	}
+
+	/**
+	 * FIXME: Eliminate this encoding guesswork horror
+	 */
+	private static Object readPropertyListFromFileInFramework(String fileName, String aFrameWorkName, NSArray<String> languageList) {
+		Object plist = null;
+
+		try {
+			plist = ERXUtilities.readPropertyListFromFileInFramework(fileName, aFrameWorkName, languageList, System.getProperty("file.encoding"));
+		}
+		catch (IllegalArgumentException e) {
+			try {
+				// BUGFIX: we didnt use an encoding before, so java tried to
+				// guess the encoding. Now some Localizable.strings plists
+				// are encoded in MacRoman whereas others are UTF-16.
+				plist = ERXUtilities.readPropertyListFromFileInFramework(fileName, aFrameWorkName, languageList, "utf-16");
+			}
+			catch (IllegalArgumentException e1) {
+				// OK, whatever it is, try to parse it!
+				plist = ERXUtilities.readPropertyListFromFileInFramework(fileName, aFrameWorkName, languageList, "utf-8");
+			}
+		}
+
+		return plist;
 	}
 
 	/**
