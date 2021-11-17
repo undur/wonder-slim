@@ -165,13 +165,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
 
 	/**
-	 * You should not use ERXShutdownHook when deploying as servlet.
-	 */
-	protected static boolean enableERXShutdownHook() {
-		return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.enableERXShutdownHook", true);
-	}
-
-	/**
 	 * Called when the application starts up and saves the command line
 	 * arguments for {@link ERXConfigurationManager}.
 	 * 
@@ -192,67 +185,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Terminates a different instance of the same application that may already be running.<br>
-	 * Only in dev mode.
-	 * 
-	 * Set the property "er.extensions.ERXApplication.allowMultipleDevInstances"
-	 * to "true" if you need to run multiple instances in dev mode.
-	 * 
-	 * @return true if a previously running instance was stopped.
-	 */
-	private static boolean stopPreviousDevInstance() {
-		if (!isDevelopmentModeSafe() || ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.allowMultipleDevInstances", false)) {
-			return false;
-		}
-
-		if (!(application().wasMainInvoked())) {
-			return false;
-		}
-
-		try {
-			ERXMutableURL adapterUrl = new ERXMutableURL(application().cgiAdaptorURL());
-			if (application().host() == null) {
-				adapterUrl.setHost("localhost");
-			}
-			adapterUrl.appendPath(application().name() + application().applicationExtension());
-
-			if (application().isDirectConnectEnabled()) {
-				adapterUrl.setPort((Integer) application().port());
-			}
-			else {
-				adapterUrl.appendPath("-" + application().port());
-			}
-
-			adapterUrl.appendPath(application().directActionRequestHandlerKey() + "/stop");
-			URL url = adapterUrl.toURL();
-
-			log.debug("Stopping previously running instance of " + application().name());
-
-			URLConnection connection = url.openConnection();
-			connection.getContent();
-
-			Thread.sleep(2000);
-
-			return true;
-		}
-		catch (Throwable e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	/**
-	 * This heuristic to determine if an application is deployed as servlet
-	 * relays on the fact, that contextClassName() is set WOServletContext or
-	 * ERXWOServletContext
-	 * 
-	 * @return true if the application is deployed as servlet.
-	 */
-	public boolean isDeployedAsServlet() {
-		return contextClassName().contains("Servlet");
-	}
-
-	/**
 	 * Called prior to actually initializing the app. Defines framework load
 	 * order, class path order, checks patches etc.
 	 */
@@ -267,44 +199,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 	}
 
-	/**
-	 * Installs several bugfixes and enhancements to WODynamicElements. Sets the
-	 * Context class name to "er.extensions.ERXWOContext" if it is "WOContext".
-	 * Patches ERXWOForm, ERXWOFileUpload, ERXWOText to be used instead of
-	 * WOForm, WOFileUpload, WOText.
-	 */
-	protected void installPatches() {
-		ERXPatcher.installPatches();
-
-		if (contextClassName().equals("WOContext")) {
-			setContextClassName(ERXWOContext.class.getName());
-		}
-
-		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
-		ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition");
-
-		// use our localizing string class works around #3574558
-		if (ERXLocalizer.isLocalizationEnabled()) {
-			ERXPatcher.setClassForName(ERXWOString.class, "WOString");
-			ERXPatcher.setClassForName(ERXWOTextField.class, "WOTextField");
-		}
-	}
-
-	@Override
-	public WOResourceManager createResourceManager() {
-		return new ERXResourceManager();
-	}
-
 	public ERXApplication() {
-		super();
 
-		/*
-		 * ERXComponentRequestHandler is a patched version of the original
-		 * WOComponentRequestHandler This method will tell Application to used
-		 * the patched, the patched version will disallow direct component
-		 * access by name If you want to use the unpatched version set the
-		 * property ERXDirectComponentAccessAllowed to true
-		 */
 		if (!ERXProperties.booleanForKeyWithDefault("ERXDirectComponentAccessAllowed", false)) {
 			ERXComponentRequestHandler erxComponentRequestHandler = new ERXComponentRequestHandler();
 			registerRequestHandler(erxComponentRequestHandler, componentRequestHandlerKey());
@@ -312,8 +208,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		ERXStats.initStatisticsIfNecessary();
 
-		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4.
-		// This is the workaround.
+		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
 		frameworksBaseURL();
 		applicationBaseURL();
 		if (System.getProperty("WOFrameworksBaseURL") != null) {
@@ -400,6 +295,41 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
+	}
+
+	/**
+	 * Installs several bugfixes and enhancements to WODynamicElements. Sets the Context class name to "er.extensions.ERXWOContext" if it is "WOContext".
+	 * Patches ERXWOForm, ERXWOFileUpload, ERXWOText to be used instead of WOForm, WOFileUpload, WOText.
+	 */
+	protected void installPatches() {
+		ERXPatcher.installPatches();
+
+		if (contextClassName().equals("WOContext")) {
+			setContextClassName(ERXWOContext.class.getName());
+		}
+
+		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
+		ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition");
+
+		// use our localizing string class works around #3574558
+		if (ERXLocalizer.isLocalizationEnabled()) {
+			ERXPatcher.setClassForName(ERXWOString.class, "WOString");
+			ERXPatcher.setClassForName(ERXWOTextField.class, "WOTextField");
+		}
+	}
+
+	@Override
+	public WOResourceManager createResourceManager() {
+		return new ERXResourceManager();
+	}
+
+	/**
+	 * Determines if an application is deployed as servlet (contextClassName() is set WOServletContext or ERXWOServletContext)
+	 * 
+	 * @return true if the application is deployed as servlet.
+	 */
+	public boolean isDeployedAsServlet() {
+		return contextClassName().contains("Servlet");
 	}
 
 	/**
@@ -1189,6 +1119,63 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			}
 			throw e;
 		}
+	}
+
+	/**
+	 * Terminates a different instance of the same application that may already be running.<br>
+	 * Only in dev mode.
+	 * 
+	 * Set the property "er.extensions.ERXApplication.allowMultipleDevInstances"
+	 * to "true" if you need to run multiple instances in dev mode.
+	 * 
+	 * @return true if a previously running instance was stopped.
+	 */
+	private static boolean stopPreviousDevInstance() {
+		if (!isDevelopmentModeSafe() || ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.allowMultipleDevInstances", false)) {
+			return false;
+		}
+
+		if (!(application().wasMainInvoked())) {
+			return false;
+		}
+
+		try {
+			ERXMutableURL adapterUrl = new ERXMutableURL(application().cgiAdaptorURL());
+			if (application().host() == null) {
+				adapterUrl.setHost("localhost");
+			}
+			adapterUrl.appendPath(application().name() + application().applicationExtension());
+
+			if (application().isDirectConnectEnabled()) {
+				adapterUrl.setPort((Integer) application().port());
+			}
+			else {
+				adapterUrl.appendPath("-" + application().port());
+			}
+
+			adapterUrl.appendPath(application().directActionRequestHandlerKey() + "/stop");
+			URL url = adapterUrl.toURL();
+
+			log.debug("Stopping previously running instance of " + application().name());
+
+			URLConnection connection = url.openConnection();
+			connection.getContent();
+
+			Thread.sleep(2000);
+
+			return true;
+		}
+		catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * You should not use ERXShutdownHook when deploying as servlet.
+	 */
+	protected static boolean enableERXShutdownHook() {
+		return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.enableERXShutdownHook", true);
 	}
 
 	protected void _debugValueForDeclarationNamed(WOComponent component, String verb, String aDeclarationName, String aDeclarationType, String aBindingName, String anAssociationDescription, Object aValue) {
