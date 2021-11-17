@@ -13,9 +13,8 @@ public class ERXAppRunner {
 	private static boolean _appInitialized = false;
 
 	/**
-	 * Initializes your WOApplication programmatically (for use in test cases
-	 * and main methods) with the assumption that the current directory is your
-	 * main bundle URL.
+	 * Initializes your WOApplication programmatically (for use in test cases and main methods)
+	 * with the assumption that the current directory is your main bundle URL.
 	 * 
 	 * @param applicationSubclass your Application subclass
 	 * @param args the commandline arguments for your application
@@ -36,9 +35,7 @@ public class ERXAppRunner {
 						}
 						else {
 							// Bundle-less builds. Yay!
-							// throw new IllegalArgumentException("You must run
-							// your application from a .woa folder to call this
-							// method.");
+							// throw new IllegalArgumentException("You must run your application from a .woa folder to call this method.");
 						}
 					}
 				}
@@ -78,13 +75,10 @@ public class ERXAppRunner {
 			if (mainBundleURL != null) {
 				System.setProperty("webobjects.user.dir", new File(mainBundleURL.getFile()).getCanonicalPath());
 			}
-			// Odds are you are only using this method for test cases and
-			// development mode
+			// Odds are you are only using this method for test cases and development mode
 			System.setProperty("er.extensions.ERXApplication.developmentMode", "true");
 			ERXApplication.primeApplication(mainBundleName, mainBundleURL, applicationSubclass.getName());
-			// NSNotificationCenter.defaultCenter().postNotification(new
-			// NSNotification(ERXApplication.ApplicationDidCreateNotification,
-			// WOApplication.application()));
+			// NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.ApplicationDidCreateNotification, WOApplication.application()));
 		}
 		catch (IOException e) {
 			throw new NSForwardException(e);
