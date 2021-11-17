@@ -70,8 +70,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * for creating custom validation exceptions the 
      * {@link ERXValidationFactory} should be used.
      *
-     * @param type of the exception, should be one of the constraints
-     *		defined in this class.
+     * @param type of the exception, should be one of the constraints defined in this class.
      * @param object that is throwing the exception
      * @param key property key that failed validation
      */
@@ -85,8 +84,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * for creating custom validation exceptions the
      * {@link ERXValidationFactory} should be used.
      *
-     * @param type of the exception, should be one of the constraints
-     *		defined in this class.
+     * @param type of the exception, should be one of the constraints defined in this class.
      * @param object that is throwing the exception
      * @param key property key that failed validation
      * @param value that failed validation
@@ -126,12 +124,15 @@ public class ERXValidationException extends NSValidation.ValidationException imp
     
     /**
      * Gets the message for this exception.
+     * 
      * @return the correctly formatted validation exception.
      */
     @Override
 	public String getMessage() {
-        if (message == null)
-            message = ERXValidationFactory.defaultFactory().messageForException(this);
+        if (message == null) {
+        	message = ERXValidationFactory.defaultFactory().messageForException(this);
+        }
+
         return message;
     }
 
@@ -139,12 +140,13 @@ public class ERXValidationException extends NSValidation.ValidationException imp
         if(message == null) {
             return type;
         }
+
         return message;
     }
     
     /**
-     * Implementation of key value coding.
-     * Uses the default implementation.
+     * Implementation of key value coding. Uses the default implementation.
+     * 
      * @param key to look up
      * @return result of the lookup on the object
      */
@@ -165,8 +167,8 @@ public class ERXValidationException extends NSValidation.ValidationException imp
     }
 
     /**
-     * Implementation of the key value coding.
-     * Uses the default implementation.
+     * Implementation of the key value coding. Uses the default implementation.
+     * 
      * @param obj value to be set on this exception
      * @param key to be set
      */
