@@ -192,11 +192,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	public ERXApplication() {
-
-		if (!ERXProperties.booleanForKeyWithDefault("ERXDirectComponentAccessAllowed", false)) {
-			ERXComponentRequestHandler erxComponentRequestHandler = new ERXComponentRequestHandler();
-			registerRequestHandler(erxComponentRequestHandler, componentRequestHandlerKey());
-		}
+		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 
 		ERXStats.initStatisticsIfNecessary();
 
