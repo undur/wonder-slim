@@ -177,10 +177,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		setup(argv);
 
-		if (enableERXShutdownHook()) {
-			ERXShutdownHook.initERXShutdownHook();
-		}
-
 		WOApplication.main(argv, applicationClass);
 	}
 
@@ -196,6 +192,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		if (enableERXShutdownHook()) {
 			ERXShutdownHook.useMe();
+			ERXShutdownHook.initERXShutdownHook();
 		}
 	}
 
