@@ -98,17 +98,6 @@ public class ERXValidationFactory {
     public static void setDefaultDelegate(Object obj) { _defaultValidationDelegate = obj; }
 
     /**
-     * The validation factory interface. This interface
-     * is currently not being used.
-     */
-    public interface FactoryInterface {
-        public Class validationExceptionClass();
-        public void setValidationExceptionClass(Class class1);
-        public ERXValidationException createException(Object /* FIXME: Was EOEeterpriseObject */eo, String property, Object value, String type);
-        public ERXValidationException createCustomException(Object /* FIXME: Was EOEeterpriseObject */ eo, String method);
-    }
-
-    /**
      * Exception delegates can be used to provide hooks to customize
      * how messages are generated for validation exceptions and how
      * templates are looked up. A validation exception can have a 
