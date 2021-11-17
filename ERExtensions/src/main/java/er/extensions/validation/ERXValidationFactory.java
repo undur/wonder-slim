@@ -240,27 +240,28 @@ public class ERXValidationFactory {
     }
 
     /**
-     * Creates a custom validation exception. This is the preferred 
-     * way of creating custom validation exceptions.
+     * Creates a custom validation exception. This is the preferred way of creating custom validation exceptions.
+     * 
      * @param eo enterprise object failing validation
      * @param property attribute that failed validation
      * @param value that failed validation
-     * @param method unique identified usually corresponding to a 
-     *		method name to pick up the validation template
+     * @param method unique identified usually corresponding to a  method name to pick up the validation template
      * @return custom validation exception
      */
     public ERXValidationException createCustomException(Object /* FIXME: Was EOEeterpriseObject */ eo, String property, Object value, String method) {
         ERXValidationException erv = createException(eo, property, value, ERXValidationException.CustomMethodException);
-        if (erv != null)
-            erv.setMethod(method);
+
+        if (erv != null) {
+        	erv.setMethod(method);
+        }
+
         return erv;
     }    
     
     /**
-     * Converts a model thrown validation exception into
-     * an {@link ERXValidationException ERXValidationException}.
-     * This is a cover method for the two argument version
-     * passing in null as the value.
+     * Converts a model thrown validation exception into an {@link ERXValidationException ERXValidationException}.
+     * This is a cover method for the two argument version passing in null as the value.
+     * 
      * @param eov validation exception to be converted
      * @return converted validation exception
      */
@@ -269,12 +270,11 @@ public class ERXValidationFactory {
     }
 
     /**
-     * Converts a given model thrown validation exception into
-     * an {@link ERXValidationException ERXValidationException}.
+     * Converts a given model thrown validation exception into an {@link ERXValidationException ERXValidationException}.
      * This method is used by {@link ERXEntityClassDescription ERXEntityClassDescription}
-     * to convert model thrown validation exceptions. This isn't 
-     * a very elegant solution, but until we can register our
+     * to convert model thrown validation exceptions. This isn't  a very elegant solution, but until we can register
      * our validation exception class this is what we have to do.
+     * 
      * @param eov validation exception to be converted
      * @param value that failed validation
      * @return converted validation exception
@@ -332,6 +332,7 @@ public class ERXValidationFactory {
 
     /**
      * Converts the additional exceptions contained in an Exception to ERXValidationException subclasses.
+     * 
      * @param ex validation exception
      * @return NSArray of converted exceptions
      */
@@ -350,10 +351,9 @@ public class ERXValidationFactory {
         }
     
     /**
-     * Entry point for generating an exception message
-     * for a given message. The method <code>getMessage</code>
-     * off of {@link ERXValidationException ERXValidationException}
-     * calls this method passing in itself as the parameter.
+     * Entry point for generating an exception message for a given message. The method <code>getMessage</code>
+     * off of {@link ERXValidationException ERXValidationException} calls this method passing in itself as the parameter.
+     * 
      * @param erv validation exception
      * @return a localized validation message for the given exception
      */
@@ -395,47 +395,48 @@ public class ERXValidationFactory {
     }
 
     /**
-     * Entry point for finding a template for a given validation
-     * exception. Override this method to provide your own
-     * template resolution scheme.
+     * Entry point for finding a template for a given validationexception.
+     * Override this method to provide your own template resolution scheme.
+     * 
      * @param erv validation exception
      * @return validation template for the given exception
      */
     public String templateForException(ERXValidationException erv) {
         String template = null;
+
         if (erv.delegate() != null && erv.delegate() instanceof ExceptionDelegateInterface) {
             template = ((ExceptionDelegateInterface)erv.delegate()).templateForException(erv);
         }
-        if (template == null) {
-        	/* FIXME: Was to get EOEnterpriseObject out of the way */
-//            String entityName = erv.eoObject() == null ? null : erv.eoObject().entityName();
-            String entityName = null;
 
+        if (template == null) {
+//            String entityName = erv.eoObject() == null ? null : erv.eoObject().entityName(); FIXME: Getting EOEnterpriseObject out of the way
+            String entityName = null;
             String property = erv.isCustomMethodException() ? erv.method() : erv.propertyKey();
             String type = erv.type();
             String targetLanguage = erv.targetLanguage();
+
             if (targetLanguage == null) {
                 targetLanguage = ERXLocalizer.currentLocalizer() != null ? ERXLocalizer.currentLocalizer().language() : ERXLocalizer.defaultLanguage();
             }
             
             log.debug("templateForException with entityName: {}; property: {}; type: {}; targetLanguage: {}", entityName, property, type, targetLanguage);
-            ERXMultiKey k = new ERXMultiKey (new Object[] {entityName, property,
-                type,targetLanguage});
+            ERXMultiKey k = new ERXMultiKey (new Object[] {entityName, property, type,targetLanguage});
             template = _cache.get(k);
+
             // Not in the cache.  Simple resolving.
             if (template == null) {
                 template = templateForEntityPropertyType(entityName, property, type, targetLanguage);
                 _cache.put(k, template);
             }
         }
+
         return template;
     }
 
     /**
-     * Called when the Localizer is reset. This will
-     * reset the template cache.
-     * @param n notification posted when the localizer
-     *		is reset.
+     * Called when the Localizer is reset. This will reset the template cache.
+     * 
+     * @param n notification posted when the localizer is reset.
      */
     public void resetTemplateCache(NSNotification n) {
         _cache = new Hashtable<>(1000);
@@ -450,6 +451,7 @@ public class ERXValidationFactory {
      * exception. Override this method if you want to provide
      * your own default contexts to validation exception template
      * parsing.
+     * 
      * @param erv a given validation exception
      * @return context to be used for this validation exception
      */
@@ -463,25 +465,26 @@ public class ERXValidationFactory {
     }
     
     /**
-     * Returns the template delimiter, the
-     * default delimiter is "@@".
+     * Returns the template delimiter, the default delimiter is "@@".
+     * 
      * @return template delimiter
      */
-    public String templateDelimiter() { return _delimiter; }
+    public String templateDelimiter() {
+    	return _delimiter;
+    }
     
     /**
-     * Sets the template delimiter to be used
-     * when parsing templates for creating validation
-     * exception messages.
+     * Sets the template delimiter to be used when parsing templates for creating validation exception messages.
+     * 
      * @param delimiter to be set
      */
-    public void setTemplateDelimiter(String delimiter) { _delimiter = delimiter; }
+    public void setTemplateDelimiter(String delimiter) {
+    	_delimiter = delimiter;
+    }
 
     /**
-     * Method used to configure the validation factory
-     * for operation. This method is called on the default
-     * factory from an observer when the application is
-     * finished launching.
+     * Method used to configure the validation factory for operation. This method is called on the default
+     * factory from an observer when the application is finished launching.
      */
     public void configureFactory() {
         if (WOApplication.application()!=null && !WOApplication.application().isCachingEnabled()) {
@@ -497,6 +500,7 @@ public class ERXValidationFactory {
      * Finds a template for a given entity, property key, exception type and target
      * language. This method provides the defaulting behaviour needed to handle model
      * thrown validation exceptions.
+     * 
      * @param entityName name of the entity
      * @param property key name
      * @param type validation exception type
@@ -533,8 +537,8 @@ public class ERXValidationFactory {
     }
 
     /**
-     * Get the template for a given key in a given language.
-     * Uses {@link ERXLocalizer} to handle the actual lookup.
+     * Get the template for a given key in a given language. Uses {@link ERXLocalizer} to handle the actual lookup.
+     * 
      * @param key the key to lookup
      * @param language use localizer for this language
      * @return template for key or <code>null</code> if none is found
