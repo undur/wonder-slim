@@ -1,6 +1,6 @@
 # wonder-slim
 
-A playground for experimenting with Project Wonder improvements. Contains the basics required to create and run a modern WO application.
+A slimmed down version of Project Wonder, containing only the required basics to create and run a modern WO application.
 
 ## Installation
 
@@ -14,7 +14,7 @@ A playground for experimenting with Project Wonder improvements. Contains the ba
 
 If you just want to play around, you can import the "testapp" in the repository's root into Eclipse and run it.
 
-To use in an existing project you can just change the version for `ERExtensions`, `Ajax`  and `WOOGNL` in your own project to 8.0.0.slim-SNAPSHOT in your `pom.xml` file. Note that these are the only frameworks included in Slim and if you're using other Wonder frameworks or EOF, compatibility will be hit and miss.
+To use in an existing project you can just change the version for `ERExtensions`, `Ajax`  and `WOOGNL` to 8.0.0.slim-SNAPSHOT in your `pom.xml`. Note that since this project only includes a fraction of the original Wonder frameworks and code, compatibility is likely to be hit and miss.
 
 ## Motivation
 
@@ -28,7 +28,7 @@ Below I enumerate a few primary goals of wonder-slim (from here on called just "
 
 Project Wonder has a multitude of features and frameworks. This project is about the minimal subset that's required to create and run a modern basic WO application, nothing more, nothing less.
 
-For this reason, the project picks only four frameworks from Project Wonder as baseline for the work, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. I've also combined `JavaWOExtensions` and `ERExtensions`, since they serve similar purposes in many ways.
+For this reason, the project picks only four frameworks from Project Wonder as baseline for the work, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. I've also combined `JavaWOExtensions` and `ERExtensions`, since they serve a similar purpose.
 
 ### **Loosen the ties between WOF and EOF**
 
@@ -36,7 +36,7 @@ This is really just an extension of "separate concerns", but since EOF is a huge
 
 A web framework and a persistence framework are separate things and this project focuses only on the "web" part. Therefore, everything EOF-related has been removed. Note that this does not preclude EOF usage, because although EOF is not *part* of *this* project it doesn't mean EOF can't *integrate* well with it. But I consider that a separate effort.
 
-For this reason, Slim's frameworks (notably ERExtensions) no longer does anything EOF-related nor does it use any code from JavaEOControl or JavaEOAccess. A WO application using it will still have to import these frameworks (due to JavaWebObjects referencing some classes there, such as WOEvent inheriting from EOEvent, WOSession having an EOEditingContext etc.)
+For this reason, Slim's frameworks (notably ERExtensions) no longer do anything EOF-related nor does it use any code from JavaEOControl or JavaEOAccess. A WO application using it will still have to import these frameworks (due to JavaWebObjects referencing some classes there, such as WOEvent inheriting from EOEvent, WOSession having an EOEditingContext etc.)
 
 ### Reduce the number of external dependencies
 
@@ -58,7 +58,7 @@ To keep the build simple, Slim is only built using maven.
 
 ### Run on (relatively) modern java
 
-Slim targets Java 11 and does not support older JDKs. This is a part of the simplification of the development and environment through standardization.
+Slim targets Java 17 and does not support older JDKs. This is a part of the simplification of the development and environment through standardization.
 
 ## FAQ
 
