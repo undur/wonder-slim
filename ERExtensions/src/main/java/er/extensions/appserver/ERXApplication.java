@@ -830,13 +830,31 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * @return whether or not the current application is in development mode
+	 * 
+	 * FIXME: Duplicate
 	 */
 	public static boolean isDevelopmentModeSafe() {
-		return erxApplication().isDevelopmentMode();
+		boolean developmentMode = false;
+		if (ERXProperties.stringForKey("er.extensions.ERXApplication.developmentMode") != null) {
+			developmentMode = ERXProperties.booleanForKey("er.extensions.ERXApplication.developmentMode");
+		}
+		else {
+			String ide = ERXProperties.stringForKey("WOIDE");
+			if ("WOLips".equals(ide) || "Xcode".equals(ide)) {
+				developmentMode = true;
+			}
+			if (!developmentMode) {
+				developmentMode = ERXProperties.booleanForKey("NSProjectBundleEnabled");
+			}
+		}
+
+		return developmentMode;
 	}
 
 	/**
 	 * @return whether or not the current application is in development mode
+	 * 
+	 * FIXME: Duplicate
 	 */
 	public boolean isDevelopmentMode() {
 		boolean developmentMode = false;
