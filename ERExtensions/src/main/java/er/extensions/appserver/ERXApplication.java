@@ -830,8 +830,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * @return whether or not the current application is in development mode
-	 * 
-	 * FIXME: Duplicate
 	 */
 	public static boolean isDevelopmentModeSafe() {
 		boolean developmentMode = false;
@@ -840,9 +838,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		else {
 			String ide = ERXProperties.stringForKey("WOIDE");
+
 			if ("WOLips".equals(ide) || "Xcode".equals(ide)) {
 				developmentMode = true;
 			}
+
 			if (!developmentMode) {
 				developmentMode = ERXProperties.booleanForKey("NSProjectBundleEnabled");
 			}
@@ -853,25 +853,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * @return whether or not the current application is in development mode
-	 * 
-	 * FIXME: Duplicate
 	 */
 	public boolean isDevelopmentMode() {
-		boolean developmentMode = false;
-		if (ERXProperties.stringForKey("er.extensions.ERXApplication.developmentMode") != null) {
-			developmentMode = ERXProperties.booleanForKey("er.extensions.ERXApplication.developmentMode");
-		}
-		else {
-			String ide = ERXProperties.stringForKey("WOIDE");
-			if ("WOLips".equals(ide) || "Xcode".equals(ide)) {
-				developmentMode = true;
-			}
-			if (!developmentMode) {
-				developmentMode = ERXProperties.booleanForKey("NSProjectBundleEnabled");
-			}
-		}
-
-		return developmentMode;
+		return isDevelopmentModeSafe();
 	}
 
 	/**
