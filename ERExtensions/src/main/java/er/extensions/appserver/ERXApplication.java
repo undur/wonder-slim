@@ -18,7 +18,8 @@ import java.util.Map;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOAction;
 import com.webobjects.appserver.WOAdaptor;
@@ -70,9 +71,9 @@ import er.extensions.statistics.ERXStats;
 
 public abstract class ERXApplication extends ERXAjaxApplication {
 
-	private static final Logger log = Logger.getLogger(ERXApplication.class);
-	private static final Logger requestHandlingLog = Logger.getLogger("er.extensions.ERXApplication.RequestHandling");
-	private static final Logger statsLog = Logger.getLogger("er.extensions.ERXApplication.Statistics");
+	private static final Logger log = LoggerFactory.getLogger(ERXApplication.class);
+	private static final Logger requestHandlingLog = LoggerFactory.getLogger("er.extensions.ERXApplication.RequestHandling");
+	private static final Logger statsLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Statistics");
 
 	/**
 	 * Indicates if ERXApplication.main() has been invoked (so we can check that application actually did so)
@@ -222,7 +223,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		// ak: telling Log4J to re-init the Console appenders so we get logging into WOOutputPath again
-		for (Enumeration e = Logger.getRootLogger().getAllAppenders(); e.hasMoreElements();) {
+		// FIXME: This shit is hardcoded to use log4j which is not nice.
+		for (Enumeration e = org.apache.log4j.Logger.getRootLogger().getAllAppenders(); e.hasMoreElements();) {
 			Appender appender = (Appender) e.nextElement();
 			if (appender instanceof ConsoleAppender) {
 				ConsoleAppender app = (ConsoleAppender) appender;
@@ -591,7 +593,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			success = true;
 		}
 		catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			log.error(e, e);
+			log.error("Failed to do some stupid reflection shit", e);
 		}
 
 		if (!success) {
@@ -785,7 +787,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		WOResponse response;
 
 		if (requestHandlingLog.isDebugEnabled()) {
-			requestHandlingLog.debug(request);
+			requestHandlingLog.debug("{}", request);
 		}
 
 		try {
