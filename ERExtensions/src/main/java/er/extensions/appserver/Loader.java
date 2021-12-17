@@ -27,7 +27,8 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -63,7 +64,7 @@ import er.extensions.foundation.ERXUtilities;
 
 public class Loader {
 
-	private static final Logger log = Logger.getLogger(Loader.class);
+	private static final Logger log = LoggerFactory.getLogger(Loader.class);
 
 	/**
 	 * Command line arguments passed to the main method
@@ -596,7 +597,7 @@ public class Loader {
 	 * @author ak
 	 */
 	public static class JarChecker {
-		private static final Logger startupLog = Logger.getLogger("er.extensions.ERXApplication.Startup");
+		private static final Logger startupLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Startup");
 
 		private static class Entry {
 			long _size;
