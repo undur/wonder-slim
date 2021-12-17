@@ -2,7 +2,8 @@ package er.extensions;
 
 import java.lang.reflect.Field;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableArray;
@@ -69,7 +70,7 @@ import er.extensions.foundation.ERXUtilities;
  */
 public abstract class ERXFrameworkPrincipal {
 
-	private static final Logger log = Logger.getLogger(ERXFrameworkPrincipal.class);
+	private static final Logger log = LoggerFactory.getLogger(ERXFrameworkPrincipal.class);
 
     /** holds the mapping between framework principals classes and ERXFrameworkPrincipal objects */
     private static final NSMutableDictionary<String, ERXFrameworkPrincipal> initializedFrameworks = new NSMutableDictionary<>();
