@@ -2,7 +2,8 @@ package er.extensions.appserver;
 
 import java.math.BigDecimal;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSNotification;
@@ -12,7 +13,7 @@ import er.extensions.foundation.ERXProperties;
 
 public class ERXLowMemoryHandler {
 
-	private static final Logger log = Logger.getLogger(ERXLowMemoryHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(ERXLowMemoryHandler.class);
 
 	/**
 	 * Notification to get posted when we get an OutOfMemoryError or when memory
@@ -121,8 +122,8 @@ public class ERXLowMemoryHandler {
 				// We first log just in case the log4j call puts us in a bad state.
 				if (shouldQuit) {
 					NSLog.err.appendln("Ran out of memory, killing this instance");
-					log.fatal("Ran out of memory, killing this instance");
-					log.fatal("Ran out of memory, killing this instance", throwable);
+					log.error("Ran out of memory, killing this instance");
+					log.error("Ran out of memory, killing this instance", throwable);
 				}
 			}
 			else {
