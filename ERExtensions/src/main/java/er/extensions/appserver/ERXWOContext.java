@@ -19,7 +19,6 @@ import com.webobjects.foundation.NSNotificationCenter;
 import er.extensions.appserver.ajax.ERXAjaxContext;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 
@@ -359,12 +358,64 @@ public class ERXWOContext extends ERXAjaxContext {
 				counter = Integer.valueOf(counter.intValue() + 1);
 			}
 			pageUserInfo.setObjectForKey(counter, ERXWOContext.SAFE_IDENTIFIER_NAME_KEY);
-			safeIdentifierName = ERXStringUtilities.safeIdentifierName(counter.toString());
+			safeIdentifierName = safeIdentifierName(counter.toString());
 		}
 		else {
-			safeIdentifierName = ERXStringUtilities.safeIdentifierName("e_" + context.elementID());	
+			safeIdentifierName = safeIdentifierName("e_" + context.elementID());	
 		}
 		return safeIdentifierName;
+	}
+	
+	/**
+	 * Converts source to be suitable for use as an identifier in JavaScript.
+	 * prefix is prefixed to source if the first character of source is not
+	 * suitable to start an identifier (e.g. a number). Any characters in source
+	 * that are not allowed in an identifier are replaced with replacement.
+	 * 
+	 * @see Character#isJavaIdentifierStart(char)
+	 * @see Character#isJavaIdentifierPart(char)
+	 * 
+	 * @param source
+	 *            String to make into a identifier name
+	 * @param prefix
+	 *            String to prefix source with to make it a valid identifier
+	 *            name
+	 * @param replacement
+	 *            character to use to replace characters in source that are no
+	 *            allowed in an identifier name
+	 * @return source converted to a name suitable for use as an identifier in
+	 *         JavaScript
+	 */
+	private static String safeIdentifierName(String source, String prefix, char replacement) {
+		StringBuilder b = new StringBuilder();
+		// Add prefix if source does not start with valid character
+		if (source == null || source.length() == 0 || !Character.isJavaIdentifierStart(source.charAt(0))) {
+			b.append(prefix);
+		}
+		b.append(source);
+
+		for (int i = 0; i < b.length(); i++) {
+			char c = b.charAt(i);
+			if (!Character.isJavaIdentifierPart(c)) {
+				b.setCharAt(i, replacement);
+			}
+		}
+
+		return b.toString();
+	}
+
+	/**
+	 * Convenience method to call safeIdentifierName(source, "_", '_')
+	 *
+	 * @see #safeIdentifierName(String, String, char)
+	 * 
+	 * @param source
+	 *            String to make into a identifier name
+	 * @return source converted to a name suitable for use as an identifier in
+	 *         JavaScript
+	 */
+	public static String safeIdentifierName(String source) {
+		return safeIdentifierName(source, "_", '_');
 	}
 
 	/**
@@ -548,7 +599,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 	
 	public String safeElementID() {
-		return ERXStringUtilities.safeIdentifierName(elementID());
+		return safeIdentifierName(elementID());
 	}
 
 	@Override

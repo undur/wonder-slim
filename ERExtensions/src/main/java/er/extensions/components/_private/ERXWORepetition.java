@@ -18,8 +18,8 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
+import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXValueUtilities;
 
 /**
@@ -267,7 +267,7 @@ public class ERXWORepetition extends WODynamicGroup {
 			throw new IllegalArgumentException("Can't use null as uniqueKey for " + object);
 		}
 		
-		String key = ERXStringUtilities.safeIdentifierName(uniqueKey.toString());
+		String key = ERXWOContext.safeIdentifierName(uniqueKey.toString());
 
 		if (_debugHashCodes != null && _debugHashCodes.booleanValueInComponent(component)) {
 			log.info("debugHashCodes for '{}', {} = {}", _list.keyPath(), object, key);

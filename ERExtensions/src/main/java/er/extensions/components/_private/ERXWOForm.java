@@ -29,7 +29,6 @@ import com.webobjects.foundation._NSDictionaryUtilities;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXStringUtilities;
 
 /**
  * Transparent replacement for WOForm. You don't really need to do anything to
@@ -296,7 +295,7 @@ public class ERXWOForm extends com.webobjects.appserver._private.WOHTMLDynamicEl
 			formName = (String) _formName.valueInComponent(context.component());
 		}
 		if (formName == null) {
-			formName = "f" + ERXStringUtilities.safeIdentifierName(context.elementID());
+			formName = "f" + ERXWOContext.safeIdentifierName(context.elementID());
 		}
 		return formName;
 	}
