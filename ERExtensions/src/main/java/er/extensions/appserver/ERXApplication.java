@@ -535,6 +535,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Bugfix for WO component loading. It fixes:
+	 * 
 	 * <ul>
 	 * <li>when isCachingEnabled is ON, and you have a new browser language that
 	 * hasn't been seen so far, the component gets re-read from the disk, which
@@ -543,26 +544,25 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * change in the first browser that touches the page. You need to re-save if
 	 * you want it seen in the second one.
 	 * </ul>
-	 * You need to set
-	 * <code>er.extensions.ERXApplication.fixCachingEnabled=false</code> is you
-	 * don't want it to load.
+	 * 
+	 * You need to set <code>er.extensions.ERXApplication.fixCachingEnabled=false</code> if you don't want it to load.
 	 * 
 	 * @author ak
 	 */
 	@Override
 	public WOComponentDefinition _componentDefinition(String s, NSArray nsarray) {
+
 		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.fixCachingEnabled", true)) {
-			// _expectedLanguages already contains all the languages in all
-			// projects, so
-			// there is no need to check for the ones that come in...
+			// _expectedLanguages already contains all the languages in all projects,
+			// so there is no need to check for the ones that come in...
 			return super._componentDefinition(s, (nsarray != null ? nsarray.arrayByAddingObjectsFromArray(_expectedLanguages()) : _expectedLanguages()));
 		}
+
 		return super._componentDefinition(s, nsarray);
 	}
 
 	/**
-	 * Override and return false if you do not want sessions to be refused when
-	 * memory is starved.
+	 * Override and return false if you do not want sessions to be refused when memory is starved.
 	 * 
 	 * @return whether or not sessions should be refused on starved memory
 	 */
@@ -571,8 +571,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Overridden to return the super value OR true if the app is memory
-	 * starved.
+	 * Overridden to return the super value OR true if the app is memory starved.
 	 */
 	@Override
 	public boolean isRefusingNewSessions() {
@@ -611,8 +610,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Sets the kill timer.
-	 * 
-	 * @param install
 	 */
 	private void resetKillTimer(boolean install) {
 		// we assume that we changed our mind about killing the instance.
@@ -632,8 +629,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Killing the instance will log a 'Forcing exit' message and then call
-	 * <code>System.exit(1)</code>
+	 * Killing the instance will log a 'Forcing exit' message and then call <code>System.exit(1)</code>
 	 */
 	public void killInstance() {
 		log.info("Forcing exit");
@@ -651,20 +647,20 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * is Buyer and you want to have a training instance appear with the name
 	 * BuyerTraining then you would set the ERApplicationNameSuffix to Training.
 	 * 
-	 * @return the System property <b>ERApplicationNameSuffix</b> or
-	 *         <code>""</code>
+	 * @return the System property <b>ERApplicationNameSuffix</b> or <code>""</code>
 	 */
 	public String nameSuffix() {
 		return ERXProperties.stringForKeyWithDefault("ERApplicationNameSuffix", "");
 	}
 
-	/** cached computed name */
+	/**
+	 * Cached computed name
+	 */
 	private String _userDefaultName;
 
 	/**
-	 * Adds the ability to completely change the applications name by setting
-	 * the System property <b>ERApplicationName</b>. Will also append the
-	 * <code>nameSuffix</code> if one is set.
+	 * Adds the ability to completely change the applications name by setting the System property <b>ERApplicationName</b>.
+	 * Will also append the <code>nameSuffix</code> if one is set.
 	 * 
 	 * @return the computed name of the application.
 	 */
@@ -686,18 +682,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * This method returns {@link WOApplication}'s <code>name</code> method.
-	 * 
-	 * @return the name of the application executable.
+	 * @return the name of the application executable (from WOApplication.name())
 	 */
 	public String rawName() {
 		return super.name();
 	}
 
 	/**
-	 * Workaround for WO 5.2 DirectAction lock-ups. As the super-implementation
-	 * is empty, it is fairly safe to override here to call the normal exception
-	 * handling earlier than usual.
+	 * Workaround for WO 5.2 DirectAction lock-ups. As the super-implementation is empty,
+	 * it is fairly safe to override here to call the normal exception handling earlier than usual.
 	 * 
 	 * @see WOApplication#handleActionRequestError(WORequest, Exception, String, WORequestHandler, String, String, Class, WOAction)
 	 */
@@ -708,11 +701,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		WOContext context = actionInstance != null ? actionInstance.context() : null;
 
 		boolean didCreateContext = false;
+
 		if (context == null) {
 			// AK: we provide the "handleException" with not much enough info to output a reasonable error message
 			context = createContextForRequest(aRequest);
 			didCreateContext = true;
 		}
+
 		WOResponse response = handleException(exception, context);
 
 		// CH: If we have created a context, then the request handler won't know
@@ -815,8 +810,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Improved streaming support
-	 * 
-	 * FIXME: Why is this here? // Hugi 2021-11-17 
 	 */
 	protected NSMutableArray<String> _streamingRequestHandlerKeys = new NSMutableArray<>(streamActionRequestHandlerKey());
 
@@ -893,8 +886,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * This method is called by ERXResourceManager and provides the application
-	 * a hook to rewrite generated URLs for resources.
+	 * This method is called by ERXResourceManager and provides the application a hook to rewrite generated URLs for resources.
 	 *
 	 * @param url the URL to rewrite
 	 * @param bundle the bundle the resource is located in
@@ -905,8 +897,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns whether or not to rewrite direct connect URLs.
-	 * 
 	 * @return whether or not to rewrite direct connect URLs
 	 */
 	public boolean rewriteDirectConnectURL() {
@@ -927,8 +917,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Set the default encoding of the app (message encodings)
-	 * 
-	 * @param encoding
 	 */
 	public void setDefaultEncoding(String encoding) {
 		WOMessage.setDefaultEncoding(encoding);
@@ -939,8 +927,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Returns the component for the given class without having to cast. For
-	 * example: MyPage page =
-	 * ERXApplication.erxApplication().pageWithName(MyPage.class, context);
+	 * example: MyPage page = ERXApplication.erxApplication().pageWithName(MyPage.class, context);
 	 * 
 	 * @param <T> the type of component to
 	 * @param componentClass the component class to lookup
@@ -953,8 +940,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Calls pageWithName with ERXWOContext.currentContext() for the current
-	 * thread.
+	 * Calls pageWithName with ERXWOContext.currentContext() for the current thread.
 	 * 
 	 * @param <T> the type of component to
 	 * @param componentClass the component class to lookup
@@ -978,8 +964,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns the host name that will be used to bind the SSL socket to
-	 * (defaults to host()).
+	 * Returns the host name that will be used to bind the SSL socket to (defaults to host()).
 	 * 
 	 * @return the SSL socket host
 	 * @property er.extensions.ERXApplication.ssl.host
@@ -1002,8 +987,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns the SSL port that will be used for DirectConnect SSL (defaults to
-	 * 443). A value of 0 will cause WO to autogenerate an SSL port number.
+	 * Returns the SSL port that will be used for DirectConnect SSL (defaults to 443). A value of 0 will cause WO to autogenerate an SSL port number.
 	 * 
 	 * @return the SSL port that will be used for DirectConnect SSL
 	 * @property er.extensions.ERXApplication.ssl.port
@@ -1030,8 +1014,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Injects additional adaptors into the WOAdditionalAdaptors setting.
-	 * Subclasses can extend this method, but should call
-	 * super._addAdditionalAdaptors.
+	 * Subclasses can extend this method, but should call super._addAdditionalAdaptors.
 	 * 
 	 * @param additionalAdaptors the mutable adaptors array
 	 */

@@ -32,13 +32,10 @@ public class ERXUtilities {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXUtilities.class);
 
-	@Deprecated
 	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
 
 	/**
-	 * Generates a string representation of the current stacktrace.
-	 *
-	 * @return current stacktrace.
+	 * @return A string representation of the current stacktrace.
 	 */
 	public static String stackTrace() {
 		String result = null;
@@ -69,8 +66,7 @@ public class ERXUtilities {
 	/**
 	 * Converts a throwable's stacktrace into a string representation.
 	 * 
-	 * @param t
-	 *            throwable to print to a string
+	 * @param t throwable to print to a string
 	 * @return string representation of stacktrace
 	 */
 	public static String stackTrace(Throwable t) {
@@ -101,8 +97,7 @@ public class ERXUtilities {
 	}
 
 	/**
-	 * Utility that returns a selector you can use with the
-	 * NSNotificationCenter.
+	 * Utility that returns a selector you can use with the NSNotificationCenter.
 	 * 
 	 * @param methodName
 	 * @return A selector suitable for firing a notification
