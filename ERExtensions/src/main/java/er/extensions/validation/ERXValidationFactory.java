@@ -116,8 +116,8 @@ public class ERXValidationFactory {
     protected Constructor regularConstructor;
     
     /**
-     * Sets the validation class to be used when
-     * creating validation exceptions.
+     * Sets the validation class to be used when creating validation exceptions.
+     * 
      * @param class1 validation exception class
      */
     public void setValidationExceptionClass(Class class1) { _validationExceptionClass = class1; }
@@ -126,8 +126,8 @@ public class ERXValidationFactory {
      * Returns the validation exception class to use
      * when creating exceptions. If none is specified
      * {@link ERXValidationException} is used.
-     * @return class object of validation exceptions to
-     *		be used.
+     * 
+     * @return class object of validation exceptions to be used.
      */
     public Class validationExceptionClass() {
         if (_validationExceptionClass == null)
@@ -136,8 +136,8 @@ public class ERXValidationFactory {
     }
 
     /**
-     * Simple method used to lookup and cache the 
-     * constructor to build validation exceptions.
+     * Simple method used to lookup and cache the constructor to build validation exceptions.
+     * 
      * @return constructor used to build validation exceptions
      */
     protected Constructor regularValidationExceptionConstructor() {
@@ -158,13 +158,14 @@ public class ERXValidationFactory {
      * @param erv validation exception
      * @return a localized validation message for the given exception
      */
-    // FIXME: Right now the delegate methods are implemented as a formal interface.  Not ideal.  Should be implemented as
-    //	an informal interface.  Can still return null to not have an effect.
+    // FIXME: Right now the delegate methods are implemented as a formal interface.  Not ideal.  Should be implemented as an informal interface.  Can still return null to not have an effect.
     public String messageForException(ERXValidationException erv) {
         String message = null;
+
         if (erv.delegate() != null && erv.delegate() instanceof ExceptionDelegateInterface) {
             message = ((ExceptionDelegateInterface)erv.delegate()).messageForException(erv);
         }
+
         if (message == null) {
         	Object context = erv.context();
         	// AK: as the exception doesn't have a very special idea in how the message should get 
@@ -192,6 +193,7 @@ public class ERXValidationFactory {
         	    }
         	}
         }
+
         return message;
     }
 
