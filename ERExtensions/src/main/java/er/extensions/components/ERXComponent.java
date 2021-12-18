@@ -15,8 +15,7 @@ import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
 
 /**
- * ERXComponent provides a common base class for WOComponents along with a bunch
- * of miscellaneous handy features.
+ * ERXComponent provides a common base class for WOComponents along with a bunch of miscellaneous handy features.
  * 
  * @author mschrag
  */
