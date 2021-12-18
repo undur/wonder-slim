@@ -44,6 +44,11 @@ public class ERXDirectAction extends WODirectAction {
 		super(r);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
+		return (T) super.pageWithName(componentClass.getName());
+	}
+
 	/**
 	 * Checks if the action can be executed.
 	 * 
@@ -232,11 +237,6 @@ public class ERXDirectAction extends WODirectAction {
 			return r;
 		}
 		return forbiddenResponse();
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
-		return (T) super.pageWithName(componentClass.getName());
 	}
 
 	/**
