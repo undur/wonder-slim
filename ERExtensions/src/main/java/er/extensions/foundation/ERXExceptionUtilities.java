@@ -68,8 +68,7 @@ public class ERXExceptionUtilities {
 	/**
 	 * Returns a paragraph form of the given throwable.
 	 * 
-	 * @param t
-	 *            the throwable to convert to paragraph form
+	 * @param t the throwable to convert to paragraph form
 	 * @return the paragraph string
 	 */
 	private static String toParagraph(Throwable t) {
@@ -79,8 +78,7 @@ public class ERXExceptionUtilities {
 	/**
 	 * Returns a paragraph form of the given throwable.
 	 * 
-	 * @param t
-	 *            the throwable to convert to paragraph form
+	 * @param t the throwable to convert to paragraph form
 	 * @param removeHtmlTags if true, html tags will be filtered from the error messages (to remove, for instance, bold tags from validation messages)
 	 * @return the paragraph string
 	 */
@@ -141,6 +139,34 @@ public class ERXExceptionUtilities {
 			meaningfulThrowable = ERXExceptionUtilities.getMeaningfulThrowable(meaningfulThrowable);
 		}
 		return meaningfulThrowable;
+	}
+
+	/**
+	 * Retrieves the actual cause of an error by unwrapping them as far as
+	 * possible, i.e. NSForwardException.originalThrowable(),
+	 * InvocationTargetException.getTargetException() or Exception.getCause()
+	 * are regarded as actual causes.
+	 */
+	public static Throwable originalThrowable(Throwable t) {
+		if (t instanceof InvocationTargetException) {
+			return originalThrowable(((InvocationTargetException) t).getTargetException());
+		}
+		if (t instanceof NSForwardException) {
+			return originalThrowable(((NSForwardException) t).originalException());
+		}
+		if (t instanceof SQLException) {
+			SQLException ex = (SQLException) t;
+			if (ex.getNextException() != null) {
+				return originalThrowable(ex.getNextException());
+			}
+		}
+		if (t instanceof Exception) {
+			Exception ex = (Exception) t;
+			if (ex.getCause() != null) {
+				return originalThrowable(ex.getCause());
+			}
+		}
+		return t;
 	}
 
 	/**
@@ -325,34 +351,6 @@ public class ERXExceptionUtilities {
 			writer.println("ERXExceptionUtilities.printStackTrace Failed!");
 			thisSucks.printStackTrace(writer);
 		}
-	}
-
-	/**
-	 * Retrieves the actual cause of an error by unwrapping them as far as
-	 * possible, i.e. NSForwardException.originalThrowable(),
-	 * InvocationTargetException.getTargetException() or Exception.getCause()
-	 * are regarded as actual causes.
-	 */
-	public static Throwable originalThrowable(Throwable t) {
-		if (t instanceof InvocationTargetException) {
-			return originalThrowable(((InvocationTargetException) t).getTargetException());
-		}
-		if (t instanceof NSForwardException) {
-			return originalThrowable(((NSForwardException) t).originalException());
-		}
-		if (t instanceof SQLException) {
-			SQLException ex = (SQLException) t;
-			if (ex.getNextException() != null) {
-				return originalThrowable(ex.getNextException());
-			}
-		}
-		if (t instanceof Exception) {
-			Exception ex = (Exception) t;
-			if (ex.getCause() != null) {
-				return originalThrowable(ex.getCause());
-			}
-		}
-		return t;
 	}
 
 	/**
