@@ -1,16 +1,9 @@
 package er.extensions.foundation;
 
-@Deprecated
 public class ERXStringUtilities {
 
 	/**
-	 * Capitalizes a given string. That is, the first character of the returned
-	 * string will be upper case, and other characters will be unchanged. For
-	 * example, for the input string "{@code you have a dog}", this method would
-	 * return "{@code You have a dog}".
-	 * 
-	 * @param value to be capitalized
-	 * @return capitalized string
+	 * @return The given string with the first letter set to uppercase
 	 */
 	public static String capitalize( String value ) {
 		String capital = null;
@@ -26,10 +19,7 @@ public class ERXStringUtilities {
 	}
 
 	/**
-	 * Simple test if the string is either null or equal to "".
-	 * 
-	 * @param string string to test
-	 * @return result of the above test
+	 * @return true if [string] is null or empty
 	 */
 	public static boolean isNullOrEmpty( String string ) {
 		return string == null || string.isEmpty();
