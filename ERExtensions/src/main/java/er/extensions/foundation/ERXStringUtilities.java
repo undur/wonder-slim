@@ -11,12 +11,14 @@ public class ERXStringUtilities {
 	 * @param version string
 	 * @return cleaned-up string that only contains the first dot(.) as the floating point indicator.
 	 */
-	public static String removeExtraDotsFromVersionString(String version) {
-		int floatingPointIndex = version.indexOf(".");
-		if (floatingPointIndex >= 0 && floatingPointIndex + 1 < version.length()) {
-			String minorVersion = version.substring(floatingPointIndex + 1).replace( ".", "");
-			version = version.substring(0, floatingPointIndex + 1) + minorVersion;
+	public static String removeExtraDotsFromVersionString( String version ) {
+		int floatingPointIndex = version.indexOf( "." );
+
+		if( floatingPointIndex >= 0 && floatingPointIndex + 1 < version.length() ) {
+			String minorVersion = version.substring( floatingPointIndex + 1 ).replace( ".", "" );
+			version = version.substring( 0, floatingPointIndex + 1 ) + minorVersion;
 		}
+
 		return version;
 	}
 
@@ -29,14 +31,16 @@ public class ERXStringUtilities {
 	 * @param value to be capitalized
 	 * @return capitalized string
 	 */
-	public static String capitalize(String value) {
+	public static String capitalize( String value ) {
 		String capital = null;
-		if (value != null && value.length() > 0) {
-			StringBuilder buffer = new StringBuilder(value);
 
-			buffer.setCharAt(0, Character.toUpperCase(value.charAt(0)));
+		if( value != null && value.length() > 0 ) {
+			StringBuilder buffer = new StringBuilder( value );
+
+			buffer.setCharAt( 0, Character.toUpperCase( value.charAt( 0 ) ) );
 			capital = buffer.toString();
 		}
+
 		return capital != null ? capital : value;
 	}
 
@@ -46,7 +50,7 @@ public class ERXStringUtilities {
 	 * @param string string to test
 	 * @return result of the above test
 	 */
-	public static boolean isNullOrEmpty(String string) {
+	public static boolean isNullOrEmpty( String string ) {
 		return string == null || string.isEmpty();
 	}
 }
