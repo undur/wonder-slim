@@ -6,7 +6,6 @@ import java.net.URL;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSArray;
@@ -22,11 +21,8 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 
-/**
- * Replacement of WOContext. This subclass is installed when the frameworks loads.
- */
-
 public class ERXWOContext extends ERXAjaxContext {
+
 	private static Observer observer;
 	private boolean _generateCompleteURLs;
 	private boolean _generateCompleteResourceURLs;
@@ -44,19 +40,20 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	/**
-	 * Returns the existing session if any is given in the form values or URL.
-	 * 
-	 * @return session for this request or <code>null</code>
+	 * @return The existing session if any is given in the form values or URL, or else <code>null</code>
 	 */
 	public WOSession existingSession() {
 		String sessionID = _requestSessionID();
-		if (!super.hasSession() && sessionID != null)
+
+		if (!super.hasSession() && sessionID != null) {
 			WOApplication.application().restoreSessionWithID(sessionID, this);
+		}
+
 		return _session();
 	}
 
 	/**
-	 * Returns true if there is an existing session.
+	 * @return true if there is an existing session.
 	 */
 	@Override
 	public boolean hasSession() {
@@ -118,8 +115,6 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	/**
-	 * Returns whether or not resources generate complete URLs.
-	 * 
 	 * @return whether or not resources generate complete URLs
 	 */
 	public boolean _generatingCompleteResourceURLs() {
@@ -144,8 +139,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	/**
-	 * Creates a WOContext using a dummy WORequest.
-	 * @return the new WOContext
+	 * @return A new WOContext created using a dummy WORequest.
 	 */
 	public static ERXWOContext newContext() {
 		ERXApplication app = ERXApplication.erxApplication();
@@ -237,15 +231,12 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * as key/value pairs. <code>includeSessionID</code> indicates if you want
 	 * to include the session ID in the URL.
 	 * 
-	 * @param actionName
-	 *            String action name
-	 * @param queryDict
-	 *            NSDictionary containing query key/value pairs
+	 * @param actionName String action name
+	 * @param queryDict NSDictionary containing query key/value pairs
 	 * @param includeSessionID
 	 *            <code>true</code>: to include the session ID (if has one), <br>
 	 *            <code>false</code>: not to include the session ID
 	 * @return a String containing the URL for the specified action
-	 * @see WODirectAction
 	 */
 	public String directActionURLForActionNamed(String actionName, NSDictionary queryDict, boolean includeSessionID) {
 		String url = super.directActionURLForActionNamed(actionName, queryDict);
@@ -256,16 +247,17 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	/**
-	 * Removes session ID query key/value pair from the given URL
-	 * string.
+	 * Removes session ID query key/value pair from the given URL string.
 	 * 
-	 * @param url
-	 *            String URL
+	 * @param url String URL
 	 * @return a String with the session ID removed
 	 */
 	public static String stripSessionIDFromURL(String url) {
-		if (url == null)
+
+		if (url == null) {
 			return null;
+		}
+
 		String sessionIdKey = WOApplication.application().sessionIdKey();
 		int len = 1;
 		int startpos = url.indexOf("?" + sessionIdKey);
@@ -289,6 +281,7 @@ public class ERXWOContext extends ERXAjaxContext {
 				url = url.substring(0, startpos + len) + url.substring(endpos + endLen);
 			}
 		}
+
 		return url;
 	}
 
@@ -333,6 +326,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	private static final String SAFE_IDENTIFIER_NAME_KEY = "ERXWOContext.safeIdentifierName";
+
 	/**
 	 * Returns a safe identifier for the current component.  If willCache is true, your
 	 * component should cache the identifier name so that it does not change.  In this case,
@@ -375,16 +369,10 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * @see Character#isJavaIdentifierStart(char)
 	 * @see Character#isJavaIdentifierPart(char)
 	 * 
-	 * @param source
-	 *            String to make into a identifier name
-	 * @param prefix
-	 *            String to prefix source with to make it a valid identifier
-	 *            name
-	 * @param replacement
-	 *            character to use to replace characters in source that are no
-	 *            allowed in an identifier name
-	 * @return source converted to a name suitable for use as an identifier in
-	 *         JavaScript
+	 * @param source String to make into a identifier name
+	 * @param prefix String to prefix source with to make it a valid identifier name
+	 * @param replacement character to use to replace characters in source that are no allowed in an identifier name
+	 * @return source converted to a name suitable for use as an identifier in JavaScript
 	 */
 	private static String safeIdentifierName(String source, String prefix, char replacement) {
 		StringBuilder b = new StringBuilder();
@@ -407,12 +395,8 @@ public class ERXWOContext extends ERXAjaxContext {
 	/**
 	 * Convenience method to call safeIdentifierName(source, "_", '_')
 	 *
-	 * @see #safeIdentifierName(String, String, char)
-	 * 
-	 * @param source
-	 *            String to make into a identifier name
-	 * @return source converted to a name suitable for use as an identifier in
-	 *         JavaScript
+	 * @param source String to make into a identifier name
+	 * @return source converted to a name suitable for use as an identifier in JavaScript
 	 */
 	public static String safeIdentifierName(String source) {
 		return safeIdentifierName(source, "_", '_');
@@ -438,18 +422,13 @@ public class ERXWOContext extends ERXAjaxContext {
 	/**
 	 * Generates direct action URLs with support for various overrides.
 	 * 
-	 * @param context
-	 *            the context to generate the URL within
-	 * @param directActionName
-	 *            the direct action name
-	 * @param key
-	 *            the query parameter key to add (or <code>null</code> to skip)
-	 * @param value
-	 *            the query parameter value to add (or <code>null</code> to skip)
-	 * @param secure
-	 *            <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
-	 * @param includeSessionID
-	 *            if <code>false</code>, removes session ID from query parameters
+	 * @param context the context to generate the URL within
+	 * @param directActionName the direct action name
+	 * @param key the query parameter key to add (or <code>null</code> to skip)
+	 * @param value the query parameter value to add (or <code>null</code> to skip)
+	 * @param secure <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
+	 * @param includeSessionID if <code>false</code>, removes session ID from query parameters
+	 * 
 	 * @return the constructed direct action URL
 	 */
 	public static String directActionUrl(WOContext context, String directActionName, String key, String value, Boolean secure, boolean includeSessionID) {
@@ -459,16 +438,12 @@ public class ERXWOContext extends ERXAjaxContext {
 	/**
 	 * Generates direct action URLs with support for various overrides.
 	 * 
-	 * @param context
-	 *            the context to generate the URL within
-	 * @param directActionName
-	 *            the direct action name
-	 * @param queryParameters
-	 *            the query parameters to append (or <code>null</code>)
-	 * @param secure
-	 *            <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
-	 * @param includeSessionID
-	 *            if <code>false</code>, removes session ID from query parameters
+	 * @param context the context to generate the URL within
+	 * @param directActionName the direct action name
+	 * @param queryParameters the query parameters to append (or <code>null</code>)
+	 * @param secure <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
+	 * @param includeSessionID if <code>false</code>, removes session ID from query parameters
+	 * 
 	 * @return the constructed direct action URL
 	 */
 	public static String directActionUrl(WOContext context, String directActionName, NSDictionary<String, Object> queryParameters, Boolean secure, boolean includeSessionID) {
@@ -478,24 +453,16 @@ public class ERXWOContext extends ERXAjaxContext {
 	/**
 	 * Generates direct action URLs with support for various overrides.
 	 * 
-	 * @param context
-	 *            the context to generate the URL within
-	 * @param host
-	 *            the host name for the URL (or <code>null</code> for default)
-	 * @param port
-	 *            the port number of the URL (or <code>null</code> for default)
-	 * @param path
-	 *            the custom path prefix (or <code>null</code> for none)
-	 * @param directActionName
-	 *            the direct action name
-	 * @param key
-	 *            the query parameter key to add (or <code>null</code> to skip)
-	 * @param value
-	 *            the query parameter value to add (or <code>null</code> to skip)
-	 * @param secure
-	 *            <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
-	 * @param includeSessionID
-	 *            if <code>false</code>, removes session ID from query parameters
+	 * @param context the context to generate the URL within
+	 * @param host the host name for the URL (or <code>null</code> for default)
+	 * @param port the port number of the URL (or <code>null</code> for default)
+	 * @param path the custom path prefix (or <code>null</code> for none)
+	 * @param directActionName the direct action name
+	 * @param key the query parameter key to add (or <code>null</code> to skip)
+	 * @param value the query parameter value to add (or <code>null</code> to skip)
+	 * @param secure <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
+	 * @param includeSessionID if <code>false</code>, removes session ID from query parameters
+	 * 
 	 * @return the constructed direct action URL
 	 */
 	public static String directActionUrl(WOContext context, String host, Integer port, String path, String directActionName, String key, Object value, Boolean secure, boolean includeSessionID) {
@@ -509,22 +476,15 @@ public class ERXWOContext extends ERXAjaxContext {
 	/**
 	 * Generates direct action URLs with support for various overrides.
 	 * 
-	 * @param context
-	 *            the context to generate the URL within
-	 * @param host
-	 *            the host name for the URL (or <code>null</code> for default)
-	 * @param port
-	 *            the port number of the URL (or <code>null</code> for default)
-	 * @param path
-	 *            the custom path prefix (or <code>null</code> for none)
-	 * @param directActionName
-	 *            the direct action name
-	 * @param queryParameters
-	 *            the query parameters to append (or <code>null</code>)
-	 * @param secure
-	 *            <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
-	 * @param includeSessionID
-	 *            if <code>false</code>, removes session ID from query parameters
+	 * @param context the context to generate the URL within
+	 * @param host the host name for the URL (or <code>null</code> for default)
+	 * @param port the port number of the URL (or <code>null</code> for default)
+	 * @param path the custom path prefix (or <code>null</code> for none)
+	 * @param directActionName the direct action name
+	 * @param queryParameters the query parameters to append (or <code>null</code>)
+	 * @param secure <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
+	 * @param includeSessionID if <code>false</code>, removes session ID from query parameters
+	 * 
 	 * @return the constructed direct action URL
 	 */
 	public static String directActionUrl(WOContext context, String host, Integer port, String path, String directActionName, NSDictionary<String, Object> queryParameters, Boolean secure, boolean includeSessionID) {
