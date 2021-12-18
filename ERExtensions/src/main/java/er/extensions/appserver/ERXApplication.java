@@ -186,7 +186,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
 
-		if (enableERXShutdownHook()) {
+		if( ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXApplication.enableERXShutdownHook", true ) ) {
 			ERXShutdownHook.useMe();
 			ERXShutdownHook.initERXShutdownHook();
 		}
@@ -422,14 +422,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Configures the statistics logging for a given application. By default
-	 * will log to a file &lt;base log directory&gt;/&lt;WOApp
-	 * Name&gt;-&lt;host&gt;-&lt;port&gt;.log if the base log path is defined.
-	 * The base log path is defined by the property
-	 * <code>er.extensions.ERXApplication.StatisticsBaseLogPath</code> The
-	 * default log rotation frequency is 24 hours, but can be changed by setting
-	 * in milliseconds the property
-	 * <code>er.extensions.ERXApplication.StatisticsLogRotationFrequency</code>
+	 * Configures the statistics logging for a given application.
+	 * By default will log to a file &lt;base log directory&gt;/&lt;WOApp Name&gt;-&lt;host&gt;-&lt;port&gt;.log if the base log path is defined.
+	 * The base log path is defined by the property <code>er.extensions.ERXApplication.StatisticsBaseLogPath</code>.
+	 * The default log rotation frequency is 24 hours, but can be changed by setting in milliseconds the property <code>er.extensions.ERXApplication.StatisticsLogRotationFrequency</code>
 	 */
 	public void configureStatisticsLogging() {
 		String statisticsBasePath = System.getProperty("er.extensions.ERXApplication.StatisticsBaseLogPath");
@@ -445,9 +441,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Notification method called when the application posts the notification
-	 * {@link WOApplication#ApplicationWillFinishLaunchingNotification}. This
-	 * method calls subclasses' {@link #finishInitialization} method.
+	 * Notification method called when the application posts the notification {@link WOApplication#ApplicationWillFinishLaunchingNotification}.
+	 * This method calls subclasses' {@link #finishInitialization} method.
 	 * 
 	 * @param n notification posted after WOApplication has been constructed, but before the application is ready for accepting requests.
 	 */
@@ -457,9 +452,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Notification method called when the application posts the notification
-	 * {@link WOApplication#ApplicationDidFinishLaunchingNotification}. This
-	 * method calls subclasse's {@link #didFinishLaunching} method.
+	 * Notification method called when the application posts the notification {@link WOApplication#ApplicationDidFinishLaunchingNotification}.
+	 * This method calls subclasse's {@link #didFinishLaunching} method.
 	 * 
 	 * @param n notification posted after WOApplication has finished launching and is ready for accepting requests.
 	 */
@@ -485,11 +479,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Override this to perform application specific tasks after the application has been initialized.
 	 * This is a good spot to perform batch application tasks.
 	 */
-	public void didFinishLaunching() {
-	}
+	public void didFinishLaunching() {}
 
 	/**
-	 * @return returns the <code>WOApplication.application()</code> cast as an ERXApplication
+	 * @return The <code>WOApplication.application()</code> cast as an ERXApplication
 	 */
 	public static ERXApplication erxApplication() {
 		return (ERXApplication) WOApplication.application();
@@ -502,8 +495,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @return created WOComponent with the given name
 	 */
 	public static WOComponent instantiatePage(String pageName) {
-		WOContext context = ERXWOContext.newContext();
-		return application().pageWithName(pageName, context);
+		return application().pageWithName(pageName, ERXWOContext.newContext());
 	}
 
 	/**
@@ -622,13 +614,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * The name suffix is appended to the current name of the application. This
-	 * adds the ability to add a useful suffix to differentiate between
-	 * different sets of applications on the same machine.
-	 * <p>
-	 * The name suffix is set via the System property
-	 * <b>ERApplicationNameSuffix</b>. For example if the name of an application
-	 * is Buyer and you want to have a training instance appear with the name
+	 * The name suffix is appended to the current name of the application. This adds the ability to add
+	 * a useful suffix to differentiate between different sets of applications on the same machine.
+	 * 
+	 * The name suffix is set via the System property <b>ERApplicationNameSuffix</b>.
+	 * For example if the name of an application is Buyer and you want to have a training instance appear with the name
 	 * BuyerTraining then you would set the ERApplicationNameSuffix to Training.
 	 * 
 	 * @return the System property <b>ERApplicationNameSuffix</b> or <code>""</code>
@@ -653,15 +643,21 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		if (_userDefaultName == null) {
 			synchronized (this) {
 				_userDefaultName = System.getProperty("ERApplicationName");
-				if (_userDefaultName == null)
+
+				if (_userDefaultName == null) {
 					_userDefaultName = super.name();
+				}
+
 				if (_userDefaultName != null) {
 					String suffix = nameSuffix();
-					if (suffix != null && suffix.length() > 0)
+
+					if (suffix != null && suffix.length() > 0) {
 						_userDefaultName += suffix;
+					}
 				}
 			}
 		}
+
 		return _userDefaultName;
 	}
 
@@ -748,9 +744,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Handles the potentially fatal OutOfMemoryError by quitting the
-	 * application ASAP. Broken out into a separate method to make custom error
-	 * handling easier, ie. generating your own error pages in production, etc.
+	 * Handles the potentially fatal OutOfMemoryError by quitting the application ASAP.
+	 * Broken out into a separate method to make custom error handling easier, ie. generating your own error pages in production, etc.
 	 * 
 	 * @param exception to check if it is a fatal exception.
 	 */
@@ -792,9 +787,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return response;
 	}
 
-	/**
-	 * Improved streaming support
-	 */
 	protected NSMutableArray<String> _streamingRequestHandlerKeys = new NSMutableArray<>(streamActionRequestHandlerKey());
 
 	public void registerStreamingRequestHandlerKey(String s) {
@@ -838,12 +830,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * This method is called by ERXWOContext and provides the application a hook
-	 * to rewrite generated URLs.
+	 * This method is called by ERXWOContext and provides the application a hook to rewrite generated URLs.
 	 * 
-	 * You can also set "er.extensions.replaceApplicationPath.pattern" to the
-	 * pattern to match and "er.extensions.replaceApplicationPath.replace" to
-	 * the value to replace it with.
+	 * You can also set "er.extensions.replaceApplicationPath.pattern" to the pattern
+	 * to match and "er.extensions.replaceApplicationPath.replace" to the value to replace it with.
 	 * 
 	 * For example, in Properties: <code>
 	 * er.extensions.ERXApplication.replaceApplicationPath.pattern=/cgi-bin/WebObjects/YourApp.woa
@@ -888,7 +878,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns the directConnecURL, optionally rewritten.
+	 * @return The directConnecURL, optionally rewritten.
 	 */
 	@Override
 	public String directConnectURL() {
@@ -1060,11 +1050,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Terminates a different instance of the same application that may already be running.<br>
-	 * Only in dev mode.
-	 * 
-	 * Set the property "er.extensions.ERXApplication.allowMultipleDevInstances"
-	 * to "true" if you need to run multiple instances in dev mode.
+	 * Terminates a different instance of the same application that may already be running, only in dev mode.
+	 * Set the property "er.extensions.ERXApplication.allowMultipleDevInstances" to "true" if you need to run multiple dev instances.
 	 * 
 	 * @return true if a previously running instance was stopped.
 	 */
@@ -1109,13 +1096,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return false;
 	}
 	
-	/**
-	 * You should not use ERXShutdownHook when deploying as servlet.
-	 */
-	private static boolean enableERXShutdownHook() {
-		return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.enableERXShutdownHook", true);
-	}
-
 	protected void _debugValueForDeclarationNamed(WOComponent component, String verb, String aDeclarationName, String aDeclarationType, String aBindingName, String anAssociationDescription, Object aValue) {
 		if (aValue instanceof String) {
 			StringBuilder stringbuffer = new StringBuilder(((String) aValue).length() + 2);
