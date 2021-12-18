@@ -52,26 +52,21 @@ public class ERXPatcher {
 
 	/**
 	 * Returns the class registered for the name <code>className</code>.
-	 * <p>
 	 * Uses the private WebObjects class cache.
 	 * 
-	 * @param className
-	 *            class name
+	 * @param className class name
 	 * @return class for the registered name or null
 	 */
-	
 	public static Class classForName(String className) {
 		return _NSUtilities.classWithName(className);
 	}
 
 	/**
 	 * Sets the class registered for the name <code>className</code> to the given class.
-	 * <p>Changes the private WebObjects class cache.
+	 * Changes the private WebObjects class cache.
 	 * 
-	 * @param clazz
-	 *            class object
-	 * @param className
-	 *            name for the class - normally clazz.getName()
+	 * @param clazz class object
+	 * @param className name for the class - normally clazz.getName()
 	 */
 	public static void setClassForName(Class clazz, String className) {
 		_NSUtilities.setClassForName(clazz, className);
