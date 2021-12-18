@@ -22,7 +22,8 @@ import er.extensions.foundation.ERXSystem;
  * to switch logging systems and this should be the only effected class .. in
  * theory.
  */
-public class ERXLogger extends org.apache.log4j.Logger {
+
+public class ERXLogger extends Logger {
 
 	public static final String CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES = "configureLoggingWithSystemProperties";
 
