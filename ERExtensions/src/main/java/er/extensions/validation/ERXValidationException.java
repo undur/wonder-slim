@@ -93,9 +93,6 @@ public class ERXValidationException extends NSValidation.ValidationException imp
     /** caches any set additionalExceptions */
     protected NSArray<ValidationException> additionalExceptions;
     
-    /** holds a reference to the exception delegate */
-    protected volatile Object delegate;
-    
     /**
      * Gets the message for this exception.
      * 
