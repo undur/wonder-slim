@@ -86,23 +86,6 @@ public class ERXDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Flushes the component cache to allow reloading components even when WOCachingEnabled=true.
-	 * 
-	 * @return "OK"
-	 */
-	public WOActionResults flushComponentCacheAction() {
-
-		if (canPerformActionWithPasswordKey("er.extensions.ERXFlushComponentCachePassword")) {
-			WOApplication.application()._removeComponentDefinitionCacheContents();
-			WOResponse response = new WOResponse();
-			response.setContent("OK");
-			return response;
-		}
-
-		return forbiddenResponse();
-	}
-
-	/**
 	 * Direct access to WOStats by giving over the password in the "pw" parameter.
 	 * 
 	 * @return statistics page
