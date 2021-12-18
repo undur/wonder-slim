@@ -138,7 +138,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
      * @return version number as string; can be null-string when the framework is not found or the framework doesn't have the value of <code>CFBundleShortVersionString</code> in its <code>info.plist</code> resource.
      * @see #versionStringForApplication()
      * @see #webObjectsVersion()
-     * @see ERXStringUtilities#removeExtraDotsFromVersionString(String)
      */ 
 	public static String versionStringForFrameworkNamed(String frameworkName) {
         return valueFromPlistBundleWithKey(NSBundle.bundleForName(frameworkName), "Info.plist", "CFBundleShortVersionString");
