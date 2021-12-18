@@ -117,8 +117,8 @@ public abstract class ERXFrameworkPrincipal {
     private static Observer observer;
     
     /**
-     * Gets the shared framework principal instance for a given
-     * class.
+     * Gets the shared framework principal instance for a given class.
+     * 
      * @param c principal class for a given framework
      * @return framework principal initializer
      */
@@ -127,26 +127,28 @@ public abstract class ERXFrameworkPrincipal {
     }
     
     /**
-     * Sets up a given framework principal class to receive notification
-     * when it is safe for the framework to be initialized.
+     * Sets up a given framework principal class to receive notification when it is safe for the framework to be initialized.
+     * 
      * @param c principal class
      */
     public static void setUpFrameworkPrincipalClass(Class c) {
+
         if (initializedFrameworks.objectForKey(c.getName()) != null) {
         	return;
         }
+
         try {
         	// NSLog.debug.appendln("Loaded items: " + initializedFrameworks);
             if(observer == null) {
                 observer = new Observer();
                 NSNotificationCenter center = NSNotificationCenter.defaultCenter();
                 center.addObserver(observer,
-                        new NSSelector("willFinishInitialization",  ERXUtilities.NotificationClassArray),
+                        new NSSelector("willFinishInitialization", ERXUtilities.NotificationClassArray),
                         // WOApplication.ApplicationWillFinishLaunchingNotification,
                         ERXApplication.ApplicationDidCreateNotification,
                         null);
                 center.addObserver(observer,
-                        new NSSelector("didFinishInitialization",  ERXUtilities.NotificationClassArray),
+                        new NSSelector("didFinishInitialization", ERXUtilities.NotificationClassArray),
                         // WOApplication.ApplicationWillFinishLaunchingNotification,
                         ERXApplication.ApplicationDidFinishInitializationNotification,
                         null);
@@ -191,13 +193,9 @@ public abstract class ERXFrameworkPrincipal {
     /**
      * Called directly after the constructor.
      */
-    protected void initialize() {
-        // empty
-    }
+    protected void initialize() {}
 
-    public ERXFrameworkPrincipal() {
-        // NSLog.debug.appendln("Started initialization: " + getClass().getName());
-    }
+    public ERXFrameworkPrincipal() {}
     
     /**
      * Overridden by subclasses to provide framework initialization.
@@ -207,9 +205,7 @@ public abstract class ERXFrameworkPrincipal {
     /**
      * Overridden by subclasses to finalize framework initialization.
      */
-    public void didFinishInitialization() {
-    	// Do nothing
-    }
+    public void didFinishInitialization() {}
     
     @Override
     public String toString() {
