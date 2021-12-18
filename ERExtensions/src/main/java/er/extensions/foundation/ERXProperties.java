@@ -83,7 +83,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     /** default string */
     public static final String DefaultString = "Default";
     
-    private static Boolean RetainDefaultsEnabled;
     private static String UndefinedMarker = "-undefined-";
 
     private static final Logger log = LoggerFactory.getLogger(ERXProperties.class);
@@ -95,15 +94,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     * Internal cache of type converted values to avoid reconverting attributes that are asked for frequently 
     */
     private static Map<String, Object> _cache = Collections.synchronizedMap(new HashMap<>());
-
-    private static boolean retainDefaultsEnabled() {
-        if (RetainDefaultsEnabled == null) {
-            final String propertyValue = ERXSystem.getProperty("er.extensions.ERXProperties.RetainDefaultsEnabled", "false");
-            final boolean isEnabled = "true".equals(propertyValue);
-            RetainDefaultsEnabled = Boolean.valueOf(isEnabled);
-        }
-        return RetainDefaultsEnabled.booleanValue();
-    }
 
     /**
      * Puts handy properties such as <code>com.webobjects.version</code> into the system
@@ -229,9 +219,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 			if (value == null) {
 				value = defaultValue;
 			}
-	        if (retainDefaultsEnabled() && value == null && defaultValue != null) {
-	            setArrayForKey(defaultValue, propertyName);
-	        }
 		}
 		return value;
     }
@@ -276,9 +263,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 			} else {
 				value = objValue.booleanValue();
 			}
-	        if (retainDefaultsEnabled() && objValue == null) {
-	            System.setProperty(propertyName, Boolean.toString(defaultValue));
-	        }
 		}
 		return value;
     }
@@ -318,9 +302,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 			if (value == null) {
 				value = defaultValue;
 			}
-	        if (retainDefaultsEnabled() && value == null && defaultValue != null) {
-	            setDictionaryForKey(defaultValue, propertyName);
-	        }
 		}
 		return value;
     }
@@ -429,10 +410,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         
         String propertyValue = ERXSystem.getProperty(propertyName);
         final BigDecimal bigDecimal = ERXValueUtilities.bigDecimalValueWithDefault(propertyValue, defaultValue);
-        if (retainDefaultsEnabled() && propertyValue == null && bigDecimal != null) {
-            propertyValue = bigDecimal.toString();
-            System.setProperty(propertyName, propertyValue);
-        }
         _cache.put(propertyName, propertyValue == null ? UndefinedMarker : bigDecimal);
         return bigDecimal;
     }
@@ -461,9 +438,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 			} else {
 				value = objValue.intValue();
 			}
-	        if (retainDefaultsEnabled() && objValue == null) {
-	            System.setProperty(propertyName, Integer.toString(defaultValue));
-	        }
 		}
 		return value;
     }
@@ -492,9 +466,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 			} else {
 				value = objValue.longValue();
 			}
-	        if (retainDefaultsEnabled() && objValue == null) {
-	            System.setProperty(propertyName, Long.toString(defaultValue));
-	        }
 		}
 		return value;
     }
@@ -524,9 +495,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 			} else {
 				value = objValue.floatValue();
 			}
-	        if (retainDefaultsEnabled() && objValue == null) {
-	            System.setProperty(propertyName, Float.toString(defaultValue));
-	        }
 		}
 		return value;
     }
@@ -556,9 +524,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 			} else {
 				value = objValue.doubleValue();
 			}
-	        if (retainDefaultsEnabled() && objValue == null) {
-	            System.setProperty(propertyName, Double.toString(defaultValue));
-	        }
 		}
 		return value;
     }
@@ -588,9 +553,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         final String propertyName = getApplicationSpecificPropertyName(s);
         final String propertyValue = ERXSystem.getProperty(propertyName);
         final String stringValue = propertyValue == null ? defaultValue : propertyValue;
-        if (retainDefaultsEnabled() && propertyValue == null) {
-            System.setProperty(propertyName, stringValue == null ? UndefinedMarker : stringValue);
-        }
         return stringValue == UndefinedMarker ? null : stringValue;
     }
     
