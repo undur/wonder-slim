@@ -25,7 +25,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSNotificationCenter;
 
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXStringUtilities;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Simple static resource request handler. Allows for better debugging 
@@ -92,7 +92,7 @@ public class ERXStaticResourceRequestHandler extends WORequestHandler {
 			_documentRoot = ERXProperties.stringForKey("WODocumentRoot");
 			if(_documentRoot == null) {
 				NSBundle bundle = NSBundle.bundleForName("JavaWebObjects");
-				NSDictionary dict = ERXStringUtilities.dictionaryFromPropertyList("WebServerConfig", bundle);
+				NSDictionary dict = ERXUtilities.dictionaryFromPropertyList("WebServerConfig", bundle);
 				_documentRoot = (String) dict.objectForKey("DocumentRoot");
 			}
 		}

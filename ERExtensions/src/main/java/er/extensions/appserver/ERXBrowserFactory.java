@@ -17,6 +17,7 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.foundation.ERXStringUtilities;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * All WebObjects applications have exactly one <code>ERXBrowserFactory</code> 
@@ -403,7 +404,7 @@ public class ERXBrowserFactory {
     private boolean isRobot(String userAgent) {
     	synchronized (robotExpressions) {
 			if(robotExpressions.count()==0) {
-				String strings = ERXStringUtilities.stringFromResource("robots", "txt", NSBundle.bundleForName("ERExtensions"));
+				String strings = ERXUtilities.stringFromResource("robots", "txt", NSBundle.bundleForName("ERExtensions"));
 				for (String item : NSArray.componentsSeparatedByString(strings, "\n")) {
 					if(item.trim().length() > 0 && item.charAt(0) != '#') {
 						robotExpressions.addObject(Pattern.compile(item));

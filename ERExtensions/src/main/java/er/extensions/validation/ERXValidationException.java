@@ -14,9 +14,6 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSValidation;
 import com.webobjects.foundation.NSValidation.ValidationException;
 
-import er.extensions.foundation.ERXStringUtilities;
-import er.extensions.localization.ERXLocalizer;
-
 /**
  * ERXValidationExceptions extends the regular
  * {@link com.webobjects.foundation.NSValidation.ValidationException NSValidation.ValidationException}

@@ -25,7 +25,6 @@ import com.webobjects.woextensions.stats.WOStatsPage;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXStringUtilities;
-import er.extensions.localization.ERXLocalizer;
 import er.extensions.logging.ERXLog4JConfiguration;
 import er.extensions.logging.ERXLogger;
 import er.extensions.statistics.ERXStats;

@@ -1,14 +1,7 @@
 package er.extensions.foundation;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.webobjects.foundation.NSBundle;
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSPropertyListSerialization;
 
 @Deprecated
 public class ERXStringUtilities {
@@ -60,48 +53,5 @@ public class ERXStringUtilities {
 	 */
 	public static boolean isNullOrEmpty(String string) {
 		return string == null || string.isEmpty();
-	}
-
-	/**
-	 * Retrieves a given string for a given name, extension and bundle.
-	 * 
-	 * @param name of the resource
-	 * @param extension of the resource, example: txt or rtf
-	 * @param bundle to look for the resource in
-	 * @return string of the given file specified in the bundle
-	 */
-	public static String stringFromResource(String name, String extension, NSBundle bundle) {
-		String path = null;
-
-		if (bundle == null) {
-			bundle = NSBundle.mainBundle();
-		}
-
-		path = bundle.resourcePathForLocalizedResourceNamed(name + (extension == null || extension.length() == 0 ? "" : "." + extension), null);
-
-		if (path != null) {
-			try( InputStream stream = bundle.inputStreamForResourcePath(path)) {
-				byte bytes[] = stream.readAllBytes();
-				return new String(bytes);
-			}
-			catch (IOException e) {
-				log.warn("IOException when stringFromResource({}.{} in bundle {}", name, extension, bundle.name());
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Creates an NSDictionary from a resource associated with a given bundle that is in property list format.
-	 * 
-	 * @param name name of the file or resource.
-	 * @param bundle NSBundle to which the resource belongs.
-	 * @return NSDictionary de-serialized from the property list.
-	 */
-	@SuppressWarnings("unchecked")
-	public static NSDictionary dictionaryFromPropertyList(String name, NSBundle bundle) {
-		String string = stringFromResource(name, "plist", bundle);
-		return (NSDictionary<?, ?>) NSPropertyListSerialization.propertyListFromString(string);
 	}
 }

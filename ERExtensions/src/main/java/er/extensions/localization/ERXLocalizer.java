@@ -478,7 +478,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 
 		// Let's go fishing
 		if (shortLanguage == null) {
-			NSDictionary<String, Object> dict = ERXStringUtilities.dictionaryFromPropertyList("Languages", NSBundle.bundleForName("JavaWebObjects"));
+			NSDictionary<String, Object> dict = ERXUtilities.dictionaryFromPropertyList("Languages", NSBundle.bundleForName("JavaWebObjects"));
 			if (dict != null) {
 				NSArray<String> keys = dict.allKeysForObject(aLanguage);
 				if (keys.count() > 0) {
