@@ -500,8 +500,7 @@ class ERXPatternParser extends PatternParser {
 		 * @param format
 		 *            string for the logging event format
 		 */
-		// FIXME: Work in progress - fixed template; format parameter will be
-		// ignored for now.
+		// FIXME: Work in progress - fixed template; format parameter will be ignored for now.
 		JavaVMInfoPatternConverter(FormattingInfo formattingInfo, String format) {
 			super(formattingInfo);
 			_runtime = Runtime.getRuntime();

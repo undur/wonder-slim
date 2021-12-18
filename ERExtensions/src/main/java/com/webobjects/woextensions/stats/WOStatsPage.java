@@ -269,10 +269,6 @@ public class WOStatsPage extends WOComponent {
 	public Format byteFormat() {
 		return new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE);
 	}
-	
-	public Format timeFormat() {
-		return new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.SECOND);
-	}
 
 	public NSArray<LogEntry> aggregateLogEntries() {
 		if (_aggregateLogEntries == null) {
