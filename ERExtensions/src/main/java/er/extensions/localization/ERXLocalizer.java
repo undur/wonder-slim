@@ -981,30 +981,6 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		}
 		return result;
 	}
-	
-	/**
-	 * Returns a plurified string.
-	 * 
-	 * @param name the string to plurify
-	 * @param count number to determine the plural form
-	 * 
-	 * @return plurified string
-	 */
-	public String plurifiedString(String name, int count) {
-		if (name != null) {
-			NSKeyValueCoding exceptions = (NSKeyValueCoding) valueForKey(KEY_LOCALIZER_EXCEPTIONS);
-			if (exceptions != null) {
-				String exception = (String) exceptions.valueForKey(name + "." + count);
-				if (exception == null) {
-					exception = (String) exceptions.valueForKey(name);
-				}
-				if (exception != null) {
-					return exception;
-				}
-			}
-		}
-		return plurify(name, count);
-	}
 
 	/**
 	 * Returns a singularified string
