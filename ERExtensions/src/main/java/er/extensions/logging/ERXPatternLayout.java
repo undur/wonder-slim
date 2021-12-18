@@ -52,14 +52,12 @@ import er.extensions.foundation.ERXUtilities;
  * u: used memory 
  * f: free memory in the current heap size (not max)
  * m: max memory
- * 
  * </pre>
- * 
  */
-// ENHANCEME: Need access to ERXThreadStorage, also need more WO stuff, could
-// opt for a WO char
-// and then specify all of the things to log as formatting info for that
-// converter.
+
+// ENHANCEME: Need access to ERXThreadStorage, also need more WO stuff, could opt for a WO char
+// and then specify all of the things to log as formatting info for that converter.
+
 public class ERXPatternLayout extends PatternLayout {
 
 	/**
