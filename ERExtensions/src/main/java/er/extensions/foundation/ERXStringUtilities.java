@@ -1,12 +1,7 @@
 package er.extensions.foundation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Deprecated
 public class ERXStringUtilities {
-
-	private static final Logger log = LoggerFactory.getLogger(ERXStringUtilities.class);
 
 	/**
 	 * Cleans up the given version string by removing extra dots(.), for
