@@ -9,6 +9,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 
+import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXStringUtilities;
 
 /**
@@ -236,7 +237,7 @@ public class AjaxHoverable extends WOComponent {
 	
 	public String idStr() {
 		if (isNullOrBlank(_idStr) && useJavascriptForHoverEffect()) {
-			_idStr = "hoverable_" + ERXStringUtilities.safeIdentifierName(context().elementID());
+			_idStr = "hoverable_" + ERXWOContext.safeIdentifierName(context().elementID());
 		}
 		return _idStr;
 	}
