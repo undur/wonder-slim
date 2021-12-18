@@ -46,13 +46,9 @@ import er.extensions.components._private.ERXWOHyperlink;
 import er.extensions.components._private.ERXWOSwitchComponent;
 
 /**
- * Wrapper around the WO-private NSUtilities which allows for some Objective-C-Style poseAs. Using these methods may or
- * may not break in the future.
+ * Wrapper around the WO-private NSUtilities which allows for some Objective-C-Style poseAs. Using these methods may or may not break in the future.
  */
 public class ERXPatcher {
-
-	public ERXPatcher() {
-	}
 
 	/**
 	 * Returns the class registered for the name <code>className</code>.
