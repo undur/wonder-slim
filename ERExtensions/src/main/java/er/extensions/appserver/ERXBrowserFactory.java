@@ -16,7 +16,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXUtilities;
 
 /**
@@ -461,7 +460,7 @@ public class ERXBrowserFactory {
         }
 		// Test if we got a real number
 		try {
-	        String normalizedVersion = ERXStringUtilities.removeExtraDotsFromVersionString(version);
+	        String normalizedVersion = ERXBrowser.removeExtraDotsFromVersionString(version);
 			Double.parseDouble(normalizedVersion);
 		}
 		catch (NumberFormatException e) {

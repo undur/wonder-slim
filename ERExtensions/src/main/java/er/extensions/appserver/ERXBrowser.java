@@ -304,4 +304,25 @@ public abstract class ERXBrowser implements NSKeyValueCoding {
         }
         return _toString;
     }
+
+	/**
+	 * Cleans up the given version string by removing extra dots(.), for
+	 * example, 5.1.3 becomes 5.13, so that the string can be converted to a
+	 * double or BigDecimal type easily.
+	 * 
+	 * @param version string
+	 * @return cleaned-up string that only contains the first dot(.) as the floating point indicator.
+	 * 
+	 * Ripped from ERXStringUtilities and moved here, since it's now only used by ERXBrowser
+	 */
+	public static String removeExtraDotsFromVersionString( String version ) {
+		int floatingPointIndex = version.indexOf( "." );
+	
+		if( floatingPointIndex >= 0 && floatingPointIndex + 1 < version.length() ) {
+			String minorVersion = version.substring( floatingPointIndex + 1 ).replace( ".", "" );
+			version = version.substring( 0, floatingPointIndex + 1 ) + minorVersion;
+		}
+	
+		return version;
+	}
 }
