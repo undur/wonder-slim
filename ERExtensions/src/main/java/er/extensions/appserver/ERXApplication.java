@@ -63,7 +63,6 @@ import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXRuntimeUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.localization.ERXLocalizer;
@@ -706,7 +705,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		handlePotentiallyFatalException(exception);
 
 		// Not a fatal exception, business as usual.
-		final NSDictionary extraInfo = ERXRuntimeUtilities.extraInformationForExceptionInContext(exception, context);
+		final NSDictionary extraInfo = ERXUtilities.extraInformationForExceptionInContext(exception, context);
 		log.error("Exception caught: " + exception.getMessage() + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
 		WOResponse response = super.handleException(exception, context);
 		response.setStatus(500);
