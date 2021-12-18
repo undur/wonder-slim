@@ -331,10 +331,10 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      */
     // CHECKME: Now with WO 5 this doesn't need to implement the NSKeyValueCoding interface
     public NSKeyValueCoding context() {
-        if (_context == null)
-            _context = ERXValidationFactory.defaultFactory().contextForException(this);
-        if (_context == null)
+        if (_context == null) {
         	return this;
+        }
+
         return _context;
     }
 

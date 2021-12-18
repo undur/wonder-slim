@@ -9,18 +9,14 @@ package er.extensions.validation;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
-import com.webobjects.foundation._NSCollectionPrimitives;
 
 import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXUtilities;
@@ -89,19 +85,6 @@ public class ERXValidationFactory {
      */
     public static void setDefaultDelegate(Object obj) { _defaultValidationDelegate = obj; }
 
-    /**
-     * Exception delegates can be used to provide hooks to customize
-     * how messages are generated for validation exceptions and how
-     * templates are looked up. A validation exception can have a 
-     * delegate set or a default delegate can be set on the factory
-     * itself.
-     */
-    public interface ExceptionDelegateInterface {
-        public String messageForException(ERXValidationException erv);
-        public String templateForException(ERXValidationException erv);
-        public NSKeyValueCoding contextForException(ERXValidationException erv);
-    }
-
     /** holds the template cache for a given set of keys */
     private Map<ERXMultiKey, String> _cache = new Hashtable<>(1000);
 
@@ -119,37 +102,28 @@ public class ERXValidationFactory {
     public String messageForException(ERXValidationException erv) {
         String message = null;
 
-        if (erv.delegate() != null && erv.delegate() instanceof ExceptionDelegateInterface) {
-            message = ((ExceptionDelegateInterface)erv.delegate()).messageForException(erv);
-        }
+    	Object context = erv.context();
 
-        if (message == null) {
-        	Object context = erv.context();
-        	// AK: as the exception doesn't have a very special idea in how the message should get 
-        	// formatted when gets displayed, we ask the context *first* before asking the exception.
-        	String template = templateForException(erv);
-        	if(template.startsWith(UNDEFINED_VALIDATION_TEMPLATE)) {
-                // try to get the actual exception message if one is set
-        	    message = erv._getMessage();
-        	    if(message == null) {
-        	        message = template;
-        	    }
-        	} else {
+    	// AK: as the exception doesn't have a very special idea in how the message should get 
+    	// formatted when gets displayed, we ask the context *first* before asking the exception.
+    	String template = templateForException(erv);
 
-        	    if(context == erv || context == null) {
-        	        message = ERXSimpleTemplateParser.sharedInstance().parseTemplateWithObject(
-        	                template,
-        	                templateDelimiter(),
-        	                erv);
-        	    } else {
-        	        message = ERXSimpleTemplateParser.sharedInstance().parseTemplateWithObject(
-        	                template, 
-        	                templateDelimiter(),
-        	                context,
-        	                erv);
-        	    }
-        	}
-        }
+    	if(template.startsWith(UNDEFINED_VALIDATION_TEMPLATE)) {
+            // try to get the actual exception message if one is set
+    	    message = erv._getMessage();
+
+    	    if(message == null) {
+    	        message = template;
+    	    }
+    	}
+    	else {
+
+    	    if(context == erv || context == null) {
+    	        message = ERXSimpleTemplateParser.sharedInstance().parseTemplateWithObject( template, templateDelimiter(), erv);
+    	    } else {
+    	        message = ERXSimpleTemplateParser.sharedInstance().parseTemplateWithObject( template,  templateDelimiter(), context, erv);
+    	    }
+    	}
 
         return message;
     }
@@ -164,30 +138,25 @@ public class ERXValidationFactory {
     public String templateForException(ERXValidationException erv) {
         String template = null;
 
-        if (erv.delegate() != null && erv.delegate() instanceof ExceptionDelegateInterface) {
-            template = ((ExceptionDelegateInterface)erv.delegate()).templateForException(erv);
+//      String entityName = erv.eoObject() == null ? null : erv.eoObject().entityName(); FIXME: Getting EOEnterpriseObject out of the way
+
+        String entityName = null;
+        String property = erv.isCustomMethodException() ? erv.method() : erv.propertyKey();
+        String type = erv.type();
+        String targetLanguage = erv.targetLanguage();
+
+        if (targetLanguage == null) {
+            targetLanguage = ERXLocalizer.currentLocalizer() != null ? ERXLocalizer.currentLocalizer().language() : ERXLocalizer.defaultLanguage();
         }
+        
+        log.debug("templateForException with entityName: {}; property: {}; type: {}; targetLanguage: {}", entityName, property, type, targetLanguage);
+        ERXMultiKey k = new ERXMultiKey (new Object[] {entityName, property, type,targetLanguage});
+        template = _cache.get(k);
 
+        // Not in the cache.  Simple resolving.
         if (template == null) {
-//            String entityName = erv.eoObject() == null ? null : erv.eoObject().entityName(); FIXME: Getting EOEnterpriseObject out of the way
-            String entityName = null;
-            String property = erv.isCustomMethodException() ? erv.method() : erv.propertyKey();
-            String type = erv.type();
-            String targetLanguage = erv.targetLanguage();
-
-            if (targetLanguage == null) {
-                targetLanguage = ERXLocalizer.currentLocalizer() != null ? ERXLocalizer.currentLocalizer().language() : ERXLocalizer.defaultLanguage();
-            }
-            
-            log.debug("templateForException with entityName: {}; property: {}; type: {}; targetLanguage: {}", entityName, property, type, targetLanguage);
-            ERXMultiKey k = new ERXMultiKey (new Object[] {entityName, property, type,targetLanguage});
-            template = _cache.get(k);
-
-            // Not in the cache.  Simple resolving.
-            if (template == null) {
-                template = templateForEntityPropertyType(entityName, property, type, targetLanguage);
-                _cache.put(k, template);
-            }
+            template = templateForEntityPropertyType(entityName, property, type, targetLanguage);
+            _cache.put(k, template);
         }
 
         return template;
@@ -201,27 +170,6 @@ public class ERXValidationFactory {
     public void resetTemplateCache(NSNotification n) {
         _cache = new Hashtable<>(1000);
         log.debug("Resetting template cache");
-    }
-
-    /**
-     * The context for a given validation exception can be used
-     * to resolve keys in validation template. If a context is
-     * not provided for a validation exception then this method
-     * will be called if a context is needed for a validation
-     * exception. Override this method if you want to provide
-     * your own default contexts to validation exception template
-     * parsing.
-     * 
-     * @param erv a given validation exception
-     * @return context to be used for this validation exception
-     */
-    // CHECKME: Doesn't need to be the NSKeyValueCoding interface now with WO 5
-    public NSKeyValueCoding contextForException(ERXValidationException erv) {
-        NSKeyValueCoding context = null;
-        if (erv.delegate() != null && erv.delegate() instanceof ExceptionDelegateInterface) {
-            context = ((ExceptionDelegateInterface)erv.delegate()).contextForException(erv);
-        }
-        return context;
     }
     
     /**
