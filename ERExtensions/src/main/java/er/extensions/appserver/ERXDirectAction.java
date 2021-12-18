@@ -35,6 +35,7 @@ import er.extensions.statistics.ERXStats;
  * protected, you need to give an argument "pw" that matches the corresponding
  * system property for the action.
  */
+
 public class ERXDirectAction extends WODirectAction {
 
 	private Logger log = LoggerFactory.getLogger( ERXDirectAction.class );
@@ -46,8 +47,7 @@ public class ERXDirectAction extends WODirectAction {
 	/**
 	 * Checks if the action can be executed.
 	 * 
-	 * @param passwordKey
-	 *            the password to test
+	 * @param passwordKey the password to test
 	 * @return <code>true</code> if action is allowed to be invoked
 	 */
 	protected boolean canPerformActionWithPasswordKey(String passwordKey) {
@@ -58,42 +58,47 @@ public class ERXDirectAction extends WODirectAction {
 
 //		String password = ERXProperties.decryptedStringForKey(passwordKey); // FIXME: This password used to be encrypted. Can't we just eliminate this DA instead?
 		String password = passwordKey;
+
 		if (password == null || password.length() == 0) {
 			log.error("Attempt to use action when key is not set: {}", passwordKey);
 			return false;
 		}
+
 		String requestPassword = request().stringFormValueForKey("pw");
+
 		if (requestPassword == null) {
 			requestPassword = (String) context().session().objectForKey("ERXDirectAction." + passwordKey);
 		}
 		else {
 			context().session().setObjectForKey(requestPassword, "ERXDirectAction." + passwordKey);
 		}
+
 		if (requestPassword == null || requestPassword.length() == 0) {
 			return false;
 		}
+
 		return password.equals(requestPassword);
 	}
 
 	/**
-	 * Flushes the component cache to allow reloading components even when
-	 * WOCachingEnabled=true.
+	 * Flushes the component cache to allow reloading components even when WOCachingEnabled=true.
 	 * 
 	 * @return "OK"
 	 */
 	public WOActionResults flushComponentCacheAction() {
+
 		if (canPerformActionWithPasswordKey("er.extensions.ERXFlushComponentCachePassword")) {
 			WOApplication.application()._removeComponentDefinitionCacheContents();
 			WOResponse response = new WOResponse();
 			response.setContent("OK");
 			return response;
 		}
+
 		return forbiddenResponse();
 	}
 
 	/**
-	 * Direct access to WOStats by giving over the password in the "pw"
-	 * parameter.
+	 * Direct access to WOStats by giving over the password in the "pw" parameter.
 	 * 
 	 * @return statistics page
 	 * 
@@ -106,12 +111,12 @@ public class ERXDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Direct access to reset the stats by giving over the password in the "pw"
-	 * parameter. This calls ERXStats.reset();
+	 * Direct access to reset the stats by giving over the password in the "pw" parameter. This calls ERXStats.reset();
 	 * 
 	 * @return statistics page
 	 */
 	public WOActionResults resetStatsAction() {
+
 		if (canPerformActionWithPasswordKey("WOStatisticsPassword")) {
 			ERXStats.reset();
 			ERXRedirect redirect = pageWithName(ERXRedirect.class);
@@ -119,12 +124,12 @@ public class ERXDirectAction extends WODirectAction {
 			redirect.setDirectActionClass("ERXDirectAction");
 			return redirect;
 		}
+
 		return forbiddenResponse();
 	}
 
 	/**
-	 * Direct access to WOEventDisplay by giving over the password in the "pw"
-	 * parameter.
+	 * Direct access to WOEventDisplay by giving over the password in the "pw" parameter.
 	 * 
 	 * @return event page
 	 */
@@ -136,8 +141,7 @@ public class ERXDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Direct access to WOEventDisplay by giving over the password in the "pw"
-	 * parameter and turning on all events.
+	 * Direct access to WOEventDisplay by giving over the password in the "pw" parameter and turning on all events.
 	 * 
 	 * @return event setup page
 	 */
@@ -157,14 +161,15 @@ public class ERXDirectAction extends WODirectAction {
 	 * <h3>Form Values:</h3> <b>pw</b> password to be checked against the system
 	 * property <code>er.extensions.ERXLog4JPassword</code>.
 	 * 
-	 * @return {@link ERXLog4JConfiguration} for modifying current logging
-	 *         settings.
+	 * @return {@link ERXLog4JConfiguration} for modifying current logging settings.
 	 */
 	public WOActionResults log4jAction() {
+
 		if (canPerformActionWithPasswordKey("er.extensions.ERXLog4JPassword")) {
 			session().setObjectForKey(Boolean.TRUE, "ERXLog4JConfiguration.enabled");
 			return pageWithName(ERXLog4JConfiguration.class);
 		}
+
 		return forbiddenResponse();
 	}
 
@@ -174,9 +179,11 @@ public class ERXDirectAction extends WODirectAction {
 	 * @return redirect to default action
 	 */
 	public WOActionResults logoutAction() {
+
 		if (existingSession() != null) {
 			existingSession().terminate();
 		}
+
 		ERXRedirect r = pageWithName(ERXRedirect.class);
 		r.setDirectActionName("default");
 		return r;
@@ -185,11 +192,11 @@ public class ERXDirectAction extends WODirectAction {
 	/**
 	 * Sets a System property. This is also active in deployment mode because
 	 * one might want to change a System property at runtime.
+	 * 
 	 * <h3>Synopsis:</h3>
 	 * pw=<i>aPassword</i>&amp;key=<i>someSystemPropertyKey</i>&amp;value=<i>someSystemPropertyValue</i>
 	 * 
-	 * @return either null when the password is wrong or a new page showing the
-	 *         System properties
+	 * @return either null when the password is wrong or a new page showing the System properties
 	 */
 	public WOActionResults systemPropertyAction() {
 		if (canPerformActionWithPasswordKey("er.extensions.ERXDirectAction.ChangeSystemPropertyPassword")) {
@@ -228,8 +235,7 @@ public class ERXDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Will dump all created keys of the current localizer via log4j and returns
-	 * an empty response.
+	 * Will dump all created keys of the current localizer via log4j and returns an empty response.
 	 * 
 	 * @return empty response
 	 */
