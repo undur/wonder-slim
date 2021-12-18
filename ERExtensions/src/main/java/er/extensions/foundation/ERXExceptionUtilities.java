@@ -172,13 +172,11 @@ public class ERXExceptionUtilities {
 	/**
 	 * Prints the given throwable to the given printwriter.
 	 * 
-	 * @param t
-	 *            the throwable to print
-	 * @param writer
-	 *            the writer to print to
+	 * @param t the throwable to print
+	 * @param writer the writer to print to
 	 */
 	public static void printStackTrace(Throwable t, PrintWriter writer) {
-		ERXExceptionUtilities.printStackTrace(t, writer, 0);
+		printStackTrace(t, writer, 0);
 	}
 
 	private static NSArray<Pattern> _skipPatterns;
@@ -312,17 +310,12 @@ public class ERXExceptionUtilities {
 	/**
 	 * Prints the given throwable to the given writer with an indent.
 	 * 
-	 * @param t
-	 *            the throwable to print
-	 * @param writer
-	 *            the writer to print to
-	 * @param exceptionDepth
-	 *            the indent level to use
-	 * @property er.extensions.stackTrace.cleanup if true, stack traces are
-	 *           cleaned up for easier use
-	 * @property er.extensions.stackTrace.skipPatternsFile the name the resource
-	 *           that contains an array of class name and method regexes to skip
-	 *           in stack traces
+	 * @param t the throwable to print
+	 * @param writer the writer to print to
+	 * @param exceptionDepth the indent level to use
+	 * 
+	 * @property er.extensions.stackTrace.cleanup if true, stack traces are cleaned up for easier use
+	 * @property er.extensions.stackTrace.skipPatternsFile the name the resource that contains an array of class name and method regexes to skip in stack traces
 	 */
 	private static void printStackTrace(Throwable t, PrintWriter writer, int exceptionDepth) {
 		try {
@@ -358,6 +351,7 @@ public class ERXExceptionUtilities {
 	 */
 	public static String stackTrace() {
 		String result = null;
+
 		try {
 			throw new Throwable();
 		}
