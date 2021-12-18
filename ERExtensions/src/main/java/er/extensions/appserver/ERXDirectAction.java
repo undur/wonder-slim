@@ -234,20 +234,6 @@ public class ERXDirectAction extends WODirectAction {
 		return forbiddenResponse();
 	}
 
-	/**
-	 * Will dump all created keys of the current localizer via log4j and returns an empty response.
-	 * 
-	 * @return empty response
-	 */
-	public WOActionResults dumpCreatedKeysAction() {
-		if (ERXApplication.isDevelopmentModeSafe()) {
-			session();
-			ERXLocalizer.currentLocalizer().dumpCreatedKeys();
-			return new WOResponse();
-		}
-		return null;
-	}
-
 	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
 		return (T) super.pageWithName(componentClass.getName());
