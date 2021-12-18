@@ -771,7 +771,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @param exception to check if it is a fatal exception.
 	 */
 	public void handlePotentiallyFatalException(Exception exception) {
-		Throwable throwable = ERXRuntimeUtilities.originalThrowable(exception);
+		Throwable throwable = ERXExceptionUtilities.originalThrowable(exception);
 
 		if( _lowMemoryHandler.shouldQuit( throwable ) ) {
 			Runtime.getRuntime().exit(1);

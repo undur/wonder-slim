@@ -1,13 +1,10 @@
 package er.extensions.foundation;
 
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.Enumeration;
 
 import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSSelector;
 
@@ -111,33 +108,5 @@ public class ERXRuntimeUtilities {
 			}
 		}
 		return extraInfo;
-	}
-
-	/**
-	 * Retrieves the actual cause of an error by unwrapping them as far as
-	 * possible, i.e. NSForwardException.originalThrowable(),
-	 * InvocationTargetException.getTargetException() or Exception.getCause()
-	 * are regarded as actual causes.
-	 */
-	public static Throwable originalThrowable(Throwable t) {
-		if (t instanceof InvocationTargetException) {
-			return originalThrowable(((InvocationTargetException) t).getTargetException());
-		}
-		if (t instanceof NSForwardException) {
-			return originalThrowable(((NSForwardException) t).originalException());
-		}
-		if (t instanceof SQLException) {
-			SQLException ex = (SQLException) t;
-			if (ex.getNextException() != null) {
-				return originalThrowable(ex.getNextException());
-			}
-		}
-		if (t instanceof Exception) {
-			Exception ex = (Exception) t;
-			if (ex.getCause() != null) {
-				return originalThrowable(ex.getCause());
-			}
-		}
-		return t;
 	}
 }
