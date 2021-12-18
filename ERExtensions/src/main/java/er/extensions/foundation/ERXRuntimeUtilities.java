@@ -10,19 +10,12 @@ import com.webobjects.foundation.NSSelector;
 
 import er.extensions.appserver.ERXWOContext;
 
-/**
- * Collection of utilities dealing with threads and processes.
- *
- * @author ak
- * @author david
- */
-
 public class ERXRuntimeUtilities {
 
 	/**
 	 * Puts together a dictionary with a bunch of useful information relative to
-	 * the current state when the exception occurred. Potentially added
-	 * information:
+	 * the current state when the exception occurred. Potentially added information:
+	 * 
 	 * <ol>
 	 * <li>the current page name</li>
 	 * <li>the current component</li>
@@ -34,10 +27,8 @@ public class ERXRuntimeUtilities {
 	 * Also, in case the top-level exception was a EOGeneralAdaptorException,
 	 * then you also get the failed ops and the sql exception.
 	 * 
-	 * @param e
-	 *            exception
-	 * @param context
-	 *            the current context
+	 * @param e exception
+	 * @param context the current context
 	 * @return dictionary containing extra information for the current context.
 	 */
 	public static NSMutableDictionary extraInformationForExceptionInContext(Exception e, WOContext context) {
