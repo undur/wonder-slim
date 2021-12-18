@@ -42,9 +42,6 @@ public class ERXValidationFactory {
     /** holds the value 'ValidationTemplate.' */
     public static final String VALIDATION_TEMPLATE_PREFIX = "ValidationTemplate.";
 
-    /** Regular ERXValidationException constructor parameters */
-    private static Class[] _regularConstructor = new Class[] { String.class, Object.class, String.class, Object.class };
-
     /** holds the marker for an undefined validation template */
     private final static String UNDEFINED_VALIDATION_TEMPLATE = "Undefined Validation Template";
     
