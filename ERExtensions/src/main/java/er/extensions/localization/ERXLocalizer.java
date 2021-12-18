@@ -431,7 +431,8 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 			className = ERXProperties.stringForKeyWithDefault("er.extensions.ERXLocalizer.pluralFormClassName", ERXLocalizer.class.getName());
 		}
 		else {
-			className = ERXProperties.stringForKeyWithDefault("er.extensions.ERXLocalizer.nonPluralFormClassName", ERXNonPluralFormLocalizer.class.getName());
+			throw new RuntimeException( "Sorry, I've deleted ERXNonPluralFormLocalizer" ); // FIXME: Hugi 2021-12-18
+//			className = ERXProperties.stringForKeyWithDefault("er.extensions.ERXLocalizer.nonPluralFormClassName", ERXNonPluralFormLocalizer.class.getName());
 		}
 		try {
 			Class localizerClass = Class.forName(className);
@@ -442,10 +443,13 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 			log.error("Unable to create localizer for language '{}' class name: {} exception: {}, will use default classes.", language, className, e.getMessage(), e);
 		}
 		if (localizer == null) {
-			if (pluralForm)
+			if (pluralForm) {
 				localizer = new ERXLocalizer(language);
-			else
-				localizer = new ERXNonPluralFormLocalizer(language);
+			}
+			else {
+				throw new RuntimeException( "Sorry, I've deleted ERXNonPluralFormLocalizer" ); // FIXME: Hugi 2021-12-18
+//				localizer = new ERXNonPluralFormLocalizer(language);
+			}
 		}
 		return localizer;
 	}
