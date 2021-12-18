@@ -981,13 +981,6 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		}
 		return result;
 	}
-
-	// name is already localized!
-	// subclasses can override for more sensible behaviour
-	public String plurifiedStringWithTemplateForKey(String key, String name, int count, Object helper) {
-		NSDictionary<String, Object> dict = new NSDictionary<>(new Object[] { plurifiedString(name, count), Integer.valueOf(count) }, new String[] { "pluralString", "pluralCount" });
-		return localizedTemplateStringForKeyWithObjectOtherObject(key, dict, helper);
-	}
 	
 	/**
 	 * Returns a plurified string.
@@ -1118,10 +1111,8 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 	 * If originalString is "HTTP" and newString is "something", this returns
 	 * "SOMETHING".
 	 * 
-	 * @param originalString
-	 *            the original string to analyze the case of
-	 * @param newString
-	 *            the new string
+	 * @param originalString the original string to analyze the case of
+	 * @param newString the new string
 	 * @return the case-matched variant of newString
 	 */
 	private static String matchCase(String originalString, String newString) {
