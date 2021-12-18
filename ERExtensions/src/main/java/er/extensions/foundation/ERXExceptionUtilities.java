@@ -22,12 +22,12 @@ import er.extensions.localization.ERXLocalizer;
  * 
  * @author mschrag
  */
+
 public class ERXExceptionUtilities {
 	private static final Logger log = LoggerFactory.getLogger(ERXExceptionUtilities.class);
 
 	/**
-	 * Implemented by any exception that you explicitly want to not appear in
-	 * stack dumps.
+	 * Implemented by any exception that you explicitly want to not appear in stack dumps.
 	 * 
 	 * @author mschrag
 	 */
@@ -119,8 +119,7 @@ public class ERXExceptionUtilities {
 	 * Returns the "meaningful" root cause from a throwable. For instance, an
 	 * InvocationTargetException is useless -- it's the cause that matters.
 	 * 
-	 * @param t
-	 *            the meaningful exception given another throwable
+	 * @param t the meaningful exception given another throwable
 	 * @return the meaningful exception
 	 */
 	public static Throwable getMeaningfulThrowable(Throwable t) {
