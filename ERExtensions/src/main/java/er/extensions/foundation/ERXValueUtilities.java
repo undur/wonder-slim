@@ -709,29 +709,4 @@ public class ERXValueUtilities {
 		}
 		return value;
 	}
-
-	public static String[] stringsToStringArray(String... anyStrings) {
-		int aryLen = anyStrings.length;
-		if (aryLen <= 0)
-			return null;
-		ArrayList<String> strlist = new ArrayList<>();
-		String wkStr = null;
-		for (int loop = 0; loop < aryLen; loop++) {
-			wkStr = anyStrings[loop];
-			// System.out.println("***++++++******** anyStrings[" + loop + "] =
-			// " + wkStr);
-			if ((wkStr != null) && (wkStr.length() > 0))
-				strlist.add(wkStr);
-		}
-		if (strlist.isEmpty()) {
-			return null;
-		}
-		// return (String[]) strlist.toArray();
-		aryLen = strlist.size();
-		String[] wkStrs = new String[aryLen];
-		for (int loop = 0; loop < aryLen; loop++) {
-			wkStrs[loop] = strlist.get(loop);
-		}
-		return wkStrs;
-	}
 }
