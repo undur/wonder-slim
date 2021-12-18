@@ -10,7 +10,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.foundation.ERXStringUtilities;
 
 /**
  * @binding hoverableWidth num of pixels for hoverable width (200 as default) (String)
