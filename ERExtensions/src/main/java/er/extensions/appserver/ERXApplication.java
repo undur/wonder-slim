@@ -166,9 +166,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
 
 	/**
-	 * Called when the application starts up and saves the command line arguments for {@link ERXConfigurationManager}.
-	 * 
-	 * @see WOApplication#main(String[], Class)
+	 * Application entry point.
 	 */
 	public static void main(String argv[], Class applicationClass) {
 		wasERXApplicationMainInvoked = true;
@@ -671,8 +669,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Workaround for WO 5.2 DirectAction lock-ups. As the super-implementation is empty,
 	 * it is fairly safe to override here to call the normal exception handling earlier than usual.
-	 * 
-	 * @see WOApplication#handleActionRequestError(WORequest, Exception, String, WORequestHandler, String, String, Class, WOAction)
 	 */
 	// NOTE: if you use WO 5.1, comment out this method, otherwise it won't compile.
 	// CHECKME this was created for WO 5.2, do we still need this for 5.4.3?
@@ -688,33 +684,23 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			didCreateContext = true;
 		}
 
-		WOResponse response = handleException(exception, context);
+		final WOResponse response = handleException(exception, context);
 
-		// CH: If we have created a context, then the request handler won't know
-		// about it and can't put the components
-		// from handleException(exception, context) to sleep nor check-in any
-		// session that may have been checked out
-		// or created (e.g. from a component action URL.
+		// CH: If we have created a context, then the request handler won't know about it and can't put the components from
+		// handleException(exception, context) to sleep nor check-in any session that may have been checked out or created (e.g. from a component action URL.
 		//
-		// I'm not sure if the reasoning below was valid, or of the real cause
-		// of this deadlocking was creating the context
-		// above and then creating / checking out a session during
-		// handleException(exception, context). In any case, a zombie
-		// session was getting created with WO 5.4.3 and this does NOT happen
-		// with a pure WO application making the code above
-		// a prime suspect. I am leaving the code below in so that if it does
-		// something for prior versions, that will still work.
+		// I'm not sure if the reasoning below was valid, or of the real cause of this deadlocking was creating the context
+		// above and then creating / checking out a session during handleException(exception, context). In any case, a zombie
+		// session was getting created with WO 5.4.3 and this does NOT happen with a pure WO application making the code above
+		// a prime suspect. I am leaving the code below in so that if it does something for prior versions, that will still work.
 		if (didCreateContext) {
 			context._putAwakeComponentsToSleep();
 			saveSessionForContext(context);
 		}
 
-		// AK: bugfix for #4186886 (Session store deadlock with DAs). The bug
-		// occurs in 5.2.3, I'm not sure about other versions.
-		// It may create other problems, but this one is very severe to begin with.
-		// The crux of the matter is that for certain exceptions, the DA request handler
-		// does not check sessions back in which leads to a deadlock in the session store
-		// when the session is accessed again.
+		// AK: bugfix for #4186886 (Session store deadlock with DAs). The bug occurs in 5.2.3, I'm not sure about other versions.
+		// It may create other problems, but this one is very severe to begin with. The crux of the matter is that for certain exceptions, the DA request handler
+		// does not check sessions back in which leads to a deadlock in the session store when the session is accessed again.
 		else if (context.hasSession() && ("InstantiationError".equals(reason) || "InvocationError".equals(reason))) {
 			context._putAwakeComponentsToSleep();
 			saveSessionForContext(context);
@@ -724,11 +710,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Logs extra information about the current state.
-	 * 
-	 * @param exception to be handled
-	 * @param context current context
-	 * @return the WOResponse of the generated exception page.
+	 * Overridden to log extra information about state when exception is handled.
 	 */
 	@Override
 	public WOResponse handleException(Exception exception, WOContext context) {
