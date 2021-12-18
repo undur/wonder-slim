@@ -91,11 +91,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static Loader _loader;
 
 	/**
-	 * Empty array for adaptorExtensions
-	 */
-	private static String[] EMPTY_STRING_ARRAY = {};
-
-	/**
 	 * Notification to get posted when terminate() is called.
 	 */
 	public static final String ApplicationWillTerminateNotification = "ApplicationWillTerminateNotification";
@@ -1191,6 +1186,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		NSNotificationCenter.defaultCenter().postNotification(ApplicationWillTerminateNotification, this);
 		super.terminate();
 	}
+
+	/**
+	 * Empty array for adaptorExtensions
+	 */
+	private static String[] EMPTY_STRING_ARRAY = {};
 
 	/**
 	 * Override default implementation WHICH returns {".dll", ".exe"} and therefore prohibits IIS as WebServer.
