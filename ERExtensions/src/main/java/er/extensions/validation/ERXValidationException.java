@@ -20,7 +20,9 @@ import com.webobjects.foundation.NSValidation.ValidationException;
  * to add template based resolution of the validation exception. See more
  * information about resolving templates in the {@link ERXValidationFactory ERXValidationFactory}.
  */
+
 public class ERXValidationException extends NSValidation.ValidationException implements NSKeyValueCoding {
+
 	/**
 	 * Do I need to update serialVersionUID?
 	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
@@ -28,35 +30,14 @@ public class ERXValidationException extends NSValidation.ValidationException imp
 	 */
 	private static final long serialVersionUID = 1L;
 
-    // Validation Exception Types
-    /** corresponds to a model thrown 'null property' exception */
-    public static final String NullPropertyException = "NullPropertyException";
-    
-    /** corresponds to a number formatter exception */
-    public static final String InvalidNumberException = "InvalidNumberException";
-    
-    /** corresponds to a generic 'invalid value' exception */
+    /**
+     * Corresponds to a generic 'invalid value' exception
+     */
     public static final String InvalidValueException = "InvalidValueException";
 
-    /** corresponds to a model thrown 'mandatory toOne relationship' exception */
-    public static final String MandatoryToOneRelationshipException = "MandatoryToOneRelationshipException";
-
-    /** corresponds to a model thrown 'mandatory toMany relationship' exception */
-    public static final String MandatoryToManyRelationshipException = "MandatoryToManyRelationshipException";
-
-    /** corresponds to a model thrown 'object removal' exception */    
-    public static final String ObjectRemovalException = "ObjectRemovalException";
-
-    /** corresponds to a model thrown 'objects removal' exception */
-    public static final String ObjectsRemovalException = "ObjectsRemovalException";
-
-    /** corresponds to a model thrown 'maximum length of attribute exceeded' exception */
-    public static final String ExceedsMaximumLengthException = "ExceedsMaximumLengthException";
-
-    /** corresponds to a model thrown 'Error converting value of class' exception */
-    public static final String ValueConversionException = "ValueConversionException";
-
-    /** corresponds to a custom method exception */
+    /**
+     * Corresponds to a custom method exception
+     */
     public static final String CustomMethodException = "CustomMethodException";
 
     /**

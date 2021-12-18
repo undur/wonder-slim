@@ -23,47 +23,50 @@ import er.extensions.foundation.ERXUtilities;
 import er.extensions.localization.ERXLocalizer;
 
 /**
- * The validation factory controls creating validation
- * exceptions, both from model thrown exceptions and 
- * custom validation exceptions. The factory is responsible
- * for resolving validation templates for validation
+ * The validation factory controls creating validation exceptions,
+ * both from model thrown exceptions and  custom validation exceptions.
+ * The factory is responsible for resolving validation templates for validation
  * exceptions and generating validation messages.
  */
+
 public class ERXValidationFactory {
+
     private final static Logger log = LoggerFactory.getLogger(ERXValidationFactory.class);
     
-    /** holds a reference to the default validation factory */
+    /**
+     * Holds a reference to the default validation factory
+     */
     private static ERXValidationFactory _defaultFactory;
     
-    /** holds the value 'ValidationTemplate.' */
+    /** 
+     * Holds the value 'ValidationTemplate.'
+     */
     public static final String VALIDATION_TEMPLATE_PREFIX = "ValidationTemplate.";
 
-    /** holds the marker for an undefined validation template */
-    private final static String UNDEFINED_VALIDATION_TEMPLATE = "Undefined Validation Template";
-    
     /**
-     * Sets the default factory to be used for converting
-     * model thrown exceptions.
-     * @param aFactory new factory
+     * Holds the marker for an undefined validation template
      */
-    public static void setDefaultFactory(ERXValidationFactory aFactory) { _defaultFactory = aFactory; }
-    
+    private final static String UNDEFINED_VALIDATION_TEMPLATE = "Undefined Validation Template";
+
     /**
-     * Returns the default factory. If one has not
-     * been set then a factory is created of type
-     * ERXValidationFactory.
      * @return the default validation factory
      */
     public static ERXValidationFactory defaultFactory() {
-        if (_defaultFactory == null)
-            setDefaultFactory(new ERXValidationFactory());
+        if (_defaultFactory == null) {
+        	_defaultFactory = new ERXValidationFactory();
+        }
+
         return _defaultFactory;
     }
 
-    /** holds the template cache for a given set of keys */
+    /**
+     * Holds the template cache for a given set of keys
+     */
     private Map<ERXMultiKey, String> _cache = new Hashtable<>(1000);
 
-    /** holds the default template delimiter, "@@" */
+    /**
+     * Holds the default template delimiter, "@@"
+     */
     private String _delimiter = "@@";
 
     /**
@@ -73,7 +76,6 @@ public class ERXValidationFactory {
      * @param erv validation exception
      * @return a localized validation message for the given exception
      */
-    // FIXME: Right now the delegate methods are implemented as a formal interface.  Not ideal.  Should be implemented as an informal interface.  Can still return null to not have an effect.
     public String messageForException(ERXValidationException erv) {
         String message = null;
 
