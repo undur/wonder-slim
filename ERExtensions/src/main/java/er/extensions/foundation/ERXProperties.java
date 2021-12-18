@@ -43,12 +43,10 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 import er.extensions.appserver.ERXApplication;
 
 /**
- * Collection of simple utility methods used to get and set properties
- * in the system properties. The only reason this class is needed is
- * because all of the methods in NSProperties have been deprecated.
- * This is a wee bit annoying. The usual method is to have a method
- * like <code>getBoolean</code> off of Boolean which would resolve
- * the System property as a Boolean object.
+ * Collection of simple utility methods used to get and set properties in the system properties.
+ * The only reason this class is needed is because all of the methods in NSProperties have been deprecated.
+ * This is a wee bit annoying. The usual method is to have a method like <code>getBoolean</code> off of
+ * Boolean which would resolve the System property as a Boolean object.
  * 
  * Properties can be set in all the following places:
  * <ul>
@@ -60,14 +58,10 @@ import er.extensions.appserver.ERXApplication;
  * </ul>
  * </div>
  * 
- * @property er.extensions.ERXProperties.RetainDefaultsEnabled
- * @property er.extensions.ERXProperties.loadOptionalProperties Default is true. When false loads only the standard properties. 
- * 			 This will improve application startup  time due to not looking for all files repeatedly.
+ * @property er.extensions.ERXProperties.loadOptionalProperties Default is true. When false loads only the standard properties.  This will improve application startup time due to not looking for all files repeatedly.
  * 
  * TODO - Neither of these property names are standard. Should be camel-case and proper prefix.
- * 
  * TODO - What character sets can you use in property names? Only ISO-8859-1? UTF-8?
- * 
  * TODO - If this would fallback to calling the System getProperty, we could ask that Project Wonder frameworks only use this class.
  */
 
