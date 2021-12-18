@@ -369,63 +369,6 @@ public class ERXValidationException extends NSValidation.ValidationException imp
         return additionalExceptions;
     }
 
-    /**
-     * Generates a displayable and localized version of the
-     * current propertyKey (also called key).
-     * @return localized displayable version of the current
-     *		propertyKey.
-     */
-    public String displayNameForProperty() {
-        return propertyKey() != null ? localizedDisplayNameForKey(propertyKey()) : null;
-    }
-
-    /**
-     * Generates a displayable and localized version of the
-     * current object's entity name.
-     * @return localized displayable version of an object's
-     *	       entity name.
-     */
-    public String displayNameForEntity() {
-    	// FIXME: This used to be based on the entity name. That's no longer an option (since we don't want a dependency on an ORM)
-        return eoObject() != null ? localizedDisplayNameForKey(eoObject().getClass().getSimpleName()) : null;
-    }
-
-    /**
-     * Creates a localized display name for a given key
-     * trying to localize it with the current "targetLanguage" or the
-     * current localizer. If there is an eoObject first try to
-     * localize "entityName.key" then "key" if nothing found.
-     * @param key to be translated
-     * @return localized display version of the given key.
-     */
-    protected String localizedDisplayNameForKey(String key) {
-        ERXLocalizer localizer = null;
-        
-        if (targetLanguage() != null) {
-            localizer = ERXLocalizer.localizerForLanguage(targetLanguage());
-        } else {
-        	localizer = ERXLocalizer.currentLocalizer();
-        }
-        return localizedDisplayNameForKey(key, localizer);
-    }
-
-    /**
-     * Calculates a localized display name for a given entity and key using the supplied localizer
-     * @param ecd class description the key belongs to
-     * @param key to localize
-     * @param localizer to use for localizing the content
-     * @return the localized display name
-     */
-	public static String localizedDisplayNameForKey( String key, ERXLocalizer localizer) {
-		String displayName;
-		if (localizer != null) {
-			displayName = localizer.localizedStringForKeyWithDefault(key);
-		} else {
-	    	displayName = ERXStringUtilities.displayNameForKey(key);
-		}
-		return displayName;
-	}
-
     @Override
     public int hashCode() {
     	return (type() == null ? 1 : type().hashCode()) * (key() == null ? 1 : key().hashCode()) * (object() == null ? 1 : object().hashCode()) * (value() == null ? 1 : value().hashCode()) * (additionalExceptions() == null ? 1 : additionalExceptions().hashCode()); 

@@ -922,30 +922,6 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		return (String) localizedValueForKey(key);
 	}
 
-	private String displayNameForKey(String key) {
-		return ERXStringUtilities.displayNameForKey(key);
-	}
-
-	/**
-	 * Returns a localized string for the given prefix and keyPath, inserting it "prefix.keyPath" = "Key Path"; Also tries to find "Key Path"
-	 * 
-	 * @return the localized string
-	 */
-	public String localizedDisplayNameForKey(String prefix, String key) {
-		String localizerKey = prefix + "." + key;
-		String result = localizedStringForKey(localizerKey);
-		if (result == null) {
-			result = displayNameForKey(key);
-			String localized = localizedStringForKey(result);
-			if (localized != null) {
-				result = localized;
-				log.info("Found an old-style entry: {}->{}", localizerKey, result);
-			}
-			takeValueForKey(result, localizerKey);
-		}
-		return result;
-	}
-
 	public String localizedTemplateStringForKeyWithObject(String key, Object o1) {
 		return localizedTemplateStringForKeyWithObjectOtherObject(key, o1, null);
 	}
@@ -1009,8 +985,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 	// name is already localized!
 	// subclasses can override for more sensible behaviour
 	public String plurifiedStringWithTemplateForKey(String key, String name, int count, Object helper) {
-		NSDictionary<String, Object> dict = new NSDictionary<>(new Object[] { plurifiedString(name, count), Integer.valueOf(count) }, 
-				new String[] { "pluralString", "pluralCount" });
+		NSDictionary<String, Object> dict = new NSDictionary<>(new Object[] { plurifiedString(name, count), Integer.valueOf(count) }, new String[] { "pluralString", "pluralCount" });
 		return localizedTemplateStringForKeyWithObjectOtherObject(key, dict, helper);
 	}
 	
