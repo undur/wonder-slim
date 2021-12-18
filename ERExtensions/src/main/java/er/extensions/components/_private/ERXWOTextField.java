@@ -16,6 +16,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestampFormatter;
+import com.webobjects.foundation.NSValidation;
 
 import er.extensions.appserver.ERXSession;
 import er.extensions.formatters.ERXNumberFormatter;
@@ -134,7 +135,7 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 									result = format.parseObject(reformatedObject);
 								} catch(ParseException parseexception) {
 									String keyPath = _value.keyPath();
-									ERXValidationException validationexception = new ERXValidationException(ERXValidationException.InvalidValueException, parseexception, keyPath, stringValue);
+									NSValidation.ValidationException validationexception = new ERXValidationException(ERXValidationException.InvalidValueException, parseexception, keyPath, stringValue);
 									component.validationFailedWithException(validationexception, stringValue, keyPath);
 									return;
 								} finally {
@@ -149,7 +150,7 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 								result = format.parseObject(reformatedObject);
 							} catch(ParseException parseexception) {
 								String keyPath = _value.keyPath();
-								ERXValidationException validationexception = new ERXValidationException(ERXValidationException.InvalidValueException, parseexception, keyPath, stringValue);
+								NSValidation.ValidationException validationexception = new ERXValidationException(ERXValidationException.InvalidValueException, parseexception, keyPath, stringValue);
 								component.validationFailedWithException(validationexception, stringValue, keyPath);
 								return;
 							}
