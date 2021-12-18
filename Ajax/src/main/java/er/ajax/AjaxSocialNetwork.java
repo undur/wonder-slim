@@ -90,7 +90,44 @@ public abstract class AjaxSocialNetwork {
 	 * @return the display name of the social network
 	 */
 	public String name() {
-		return ERXStringUtilities.displayNameForKey(getClass().getSimpleName());
+		return displayNameForKey(getClass().getSimpleName());
+	}
+
+	/**
+	 * Calculates a default display name for a given key path. For instance for
+	 * the key path: "foo.bar" the display name would be "Bar".
+	 * 
+	 * @param key to calculate the display name
+	 * @return display name for the given key
+	 * 
+	 * FIXME: Ripped this from ERXStringUtilities just to use for the name() method. Remove // Hugi 2021-12-18
+	 */
+	private static String displayNameForKey(String key) {
+		StringBuilder finalString = null;
+		if (!ERXStringUtilities.isNullOrEmpty(key) && !key.trim().equals("")) {
+			finalString = new StringBuilder();
+			String lastHop = key.indexOf(".") == -1 ? key : key.endsWith(".") ? "" : key.substring(key.lastIndexOf(".") + 1);
+			StringBuilder tempString = new StringBuilder();
+			char[] originalArray = lastHop.toCharArray();
+			originalArray[0] = Character.toUpperCase(originalArray[0]);
+			Character tempChar = null;
+			Character nextChar = Character.valueOf(originalArray[0]);
+			for (int i = 0; i < (originalArray.length - 1); i++) {
+				tempChar = Character.valueOf(originalArray[i]);
+				nextChar = Character.valueOf(originalArray[i + 1]);
+				if (Character.isUpperCase(originalArray[i]) &&
+						Character.isLowerCase(originalArray[i + 1])) {
+					finalString.append(tempString.toString());
+					if (i > 0)
+						finalString.append(' ');
+					tempString = new StringBuilder();
+				}
+				tempString.append(tempChar.toString());
+			}
+			finalString.append(tempString.toString());
+			finalString.append(nextChar);
+		}
+		return finalString == null ? "" : finalString.toString();
 	}
 
 	/**

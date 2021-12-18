@@ -16,41 +16,6 @@ public class ERXStringUtilities {
 	private static final Logger log = LoggerFactory.getLogger(ERXStringUtilities.class);
 
 	/**
-	 * Calculates a default display name for a given key path. For instance for
-	 * the key path: "foo.bar" the display name would be "Bar".
-	 * 
-	 * @param key to calculate the display name
-	 * @return display name for the given key
-	 */
-	public static String displayNameForKey(String key) {
-		StringBuilder finalString = null;
-		if (!isNullOrEmpty(key) && !key.trim().equals("")) {
-			finalString = new StringBuilder();
-			String lastHop = key.indexOf(".") == -1 ? key : key.endsWith(".") ? "" : key.substring(key.lastIndexOf(".") + 1);
-			StringBuilder tempString = new StringBuilder();
-			char[] originalArray = lastHop.toCharArray();
-			originalArray[0] = Character.toUpperCase(originalArray[0]);
-			Character tempChar = null;
-			Character nextChar = Character.valueOf(originalArray[0]);
-			for (int i = 0; i < (originalArray.length - 1); i++) {
-				tempChar = Character.valueOf(originalArray[i]);
-				nextChar = Character.valueOf(originalArray[i + 1]);
-				if (Character.isUpperCase(originalArray[i]) &&
-						Character.isLowerCase(originalArray[i + 1])) {
-					finalString.append(tempString.toString());
-					if (i > 0)
-						finalString.append(' ');
-					tempString = new StringBuilder();
-				}
-				tempString.append(tempChar.toString());
-			}
-			finalString.append(tempString.toString());
-			finalString.append(nextChar);
-		}
-		return finalString == null ? "" : finalString.toString();
-	}
-
-	/**
 	 * Cleans up the given version string by removing extra dots(.), for
 	 * example, 5.1.3 becomes 5.13, so that the string can be converted to a
 	 * double or BigDecimal type easily.
