@@ -20,7 +20,6 @@ import er.extensions.foundation.ERXSystem;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.logging.ERXLogger;
-import er.extensions.validation.ERXValidationFactory;
 
 /**
  * Principal class of the ERExtensions framework. This class will be loaded at
@@ -114,7 +113,7 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 
 		ERXConfigurationManager.defaultManager().configureRapidTurnAround();
 		ERXLocalizer.initialize();
-		ERXValidationFactory.defaultFactory().configureFactory();
+//		ERXValidationFactory.defaultFactory().configureFactory(); // FIXME: Deleted, remove // Hugi 2021-12-18
 		// update configuration with system properties that might depend
 		// on others like
 		// log4j.appender.SQL.File=@@loggingBasePath@@/@@port@@.sql

@@ -23,7 +23,6 @@ import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 import er.extensions.foundation.ERXKeyValueCodingUtilities;
 import er.extensions.foundation.ERXPatcher;
-import er.extensions.validation.ERXValidationException;
 
 /**
  * Replacement for WOTextField. Provides for localized formatters. 
@@ -135,7 +134,7 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 									result = format.parseObject(reformatedObject);
 								} catch(ParseException parseexception) {
 									String keyPath = _value.keyPath();
-									NSValidation.ValidationException validationexception = new ERXValidationException(ERXValidationException.InvalidValueException, parseexception, keyPath, stringValue);
+									NSValidation.ValidationException validationexception = new NSValidation.ValidationException(parseexception.getMessage(), stringValue, keyPath );
 									component.validationFailedWithException(validationexception, stringValue, keyPath);
 									return;
 								} finally {
@@ -150,7 +149,7 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 								result = format.parseObject(reformatedObject);
 							} catch(ParseException parseexception) {
 								String keyPath = _value.keyPath();
-								NSValidation.ValidationException validationexception = new ERXValidationException(ERXValidationException.InvalidValueException, parseexception, keyPath, stringValue);
+								NSValidation.ValidationException validationexception = new NSValidation.ValidationException(parseexception.getMessage(), stringValue, keyPath);
 								component.validationFailedWithException(validationexception, stringValue, keyPath);
 								return;
 							}

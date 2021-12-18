@@ -48,7 +48,6 @@ import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.validation.ERXValidationFactory;
 
 /**
  * Provides KVC access to localization.
@@ -518,16 +517,22 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 						  log.debug("Loading: {} - {} - {} {}", fileName, (framework == null ? "app" : framework), languages.componentsJoinedByString(" / "), path);
 						
 						NSDictionary<String, Object> dict = (NSDictionary<String, Object>) readPropertyListFromFileInFramework(fileName, framework, languages);
+						
+
 						// HACK: ak we have could have a collision between the search path for validation strings and
 						// the normal localized strings.
-						if (fileName.indexOf(ERXValidationFactory.VALIDATION_TEMPLATE_PREFIX) == 0) {
-							NSMutableDictionary<String, Object> newDict = new NSMutableDictionary<>();
-							for (Enumeration<String> keys = dict.keyEnumerator(); keys.hasMoreElements();) {
-								String key = keys.nextElement();
-								newDict.setObjectForKey(dict.objectForKey(key), ERXValidationFactory.VALIDATION_TEMPLATE_PREFIX + key);
-							}
-							dict = newDict;
-						}
+						// FIXME: Disabled all of this when deleting ERXValidationFactory. Remove. // Hugi 2021-12-18
+//						if (fileName.indexOf(ERXValidationFactory.VALIDATION_TEMPLATE_PREFIX) == 0) {
+//							NSMutableDictionary<String, Object> newDict = new NSMutableDictionary<>();
+//							for (Enumeration<String> keys = dict.keyEnumerator(); keys.hasMoreElements();) {
+//								String key = keys.nextElement();
+//								newDict.setObjectForKey(dict.objectForKey(key), ERXValidationFactory.VALIDATION_TEMPLATE_PREFIX + key);
+//							}
+//							dict = newDict;
+//						}
+
+						
+						
 						addEntriesToCache(dict);
 						if (!WOApplication.application().isCachingEnabled()) {
 							synchronized (monitoredFiles) {
