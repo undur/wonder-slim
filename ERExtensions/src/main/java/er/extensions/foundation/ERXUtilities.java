@@ -6,10 +6,8 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.foundation;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,46 +26,6 @@ public class ERXUtilities {
 	private static final Logger log = LoggerFactory.getLogger(ERXUtilities.class);
 
 	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
-
-	/**
-	 * @return A string representation of the current stacktrace.
-	 */
-	public static String stackTrace() {
-		String result = null;
-		try {
-			throw new Throwable();
-		}
-		catch (Throwable t) {
-			result = ERXUtilities.stackTrace(t);
-		}
-
-		String separator = System.getProperties().getProperty("line.separator");
-
-		// Chop off the 1st line, "java.lang.Throwable"
-		int offset = result.indexOf(separator);
-		result = result.substring(offset + 1);
-
-		// Chop off the lines at the start that refer to ERXUtilities
-		offset = result.indexOf(separator);
-		while (result.substring(0, offset).indexOf("ERXUtilities.java") >= 0) {
-			result = result.substring(offset + 1);
-			offset = result.indexOf(separator);
-		}
-		return separator + result;
-	}
-
-	/**
-	 * Converts a throwable's stacktrace into a string representation.
-	 * 
-	 * @param t throwable to print to a string
-	 * @return string representation of stacktrace
-	 */
-	public static String stackTrace(Throwable t) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-		PrintStream printStream = new PrintStream(baos);
-		t.printStackTrace(printStream);
-		return baos.toString();
-	}
 
 	/**
 	 * Useful interface for binding objects to WOComponent bindings where you want to delay the evaluation of the boolean operation until

@@ -17,9 +17,9 @@ import com.webobjects.foundation.NSMutableSet;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSet;
 
+import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
-import er.extensions.foundation.ERXUtilities;
 
 /**
  * <p>
@@ -448,7 +448,7 @@ public class ERXStats {
 			if (traceCollectingEnabled()) {
 				// Throwable t = new RuntimeException();
 				// t.fillInStackTrace();
-				String trace = ERXUtilities.stackTrace(); 
+				String trace = ERXExceptionUtilities.stackTrace(); 
 				_traces.add(trace);
 				_traceArray = null;
 			}

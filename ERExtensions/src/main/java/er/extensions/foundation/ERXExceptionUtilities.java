@@ -1,5 +1,7 @@
 package er.extensions.foundation;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,11 +32,8 @@ public class ERXExceptionUtilities {
 
 	/**
 	 * Implemented by any exception that you explicitly want to not appear in stack dumps.
-	 * 
-	 * @author mschrag
 	 */
-	private static interface WeDontNeedAStackTraceException {
-	}
+	private static interface WeDontNeedAStackTraceException {}
 
 	/**
 	 * Returns the cause of an exception.  This should be modified to be pluggable.
@@ -354,5 +353,45 @@ public class ERXExceptionUtilities {
 			}
 		}
 		return t;
+	}
+
+	/**
+	 * @return A string representation of the current stacktrace.
+	 */
+	public static String stackTrace() {
+		String result = null;
+		try {
+			throw new Throwable();
+		}
+		catch (Throwable t) {
+			result = stackTrace(t);
+		}
+	
+		String separator = System.getProperties().getProperty("line.separator");
+	
+		// Chop off the 1st line, "java.lang.Throwable"
+		int offset = result.indexOf(separator);
+		result = result.substring(offset + 1);
+	
+		// Chop off the lines at the start that refer to ERXUtilities
+		offset = result.indexOf(separator);
+		while (result.substring(0, offset).indexOf("ERXUtilities.java") >= 0) {
+			result = result.substring(offset + 1);
+			offset = result.indexOf(separator);
+		}
+		return separator + result;
+	}
+	
+	/**
+	 * Converts a throwable's stacktrace into a string representation.
+	 * 
+	 * @param t throwable to print to a string
+	 * @return string representation of stacktrace
+	 */
+	private static String stackTrace(Throwable t) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
+		PrintStream printStream = new PrintStream(baos);
+		t.printStackTrace(printStream);
+		return baos.toString();
 	}
 }

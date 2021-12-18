@@ -24,9 +24,9 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.formatters.ERXUnitAwareDecimalFormat;
+import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXThreadStorage;
-import er.extensions.foundation.ERXUtilities;
 
 /**
  * The ERXPatternLayout adds some additional (and needed) layout options. The
@@ -190,7 +190,7 @@ class ERXPatternParser extends PatternParser {
 		 */
 		@Override
 		public String convert(LoggingEvent event) {
-			NSArray parts = NSArray.componentsSeparatedByString(ERXUtilities.stackTrace(), "\n\t");
+			NSArray parts = NSArray.componentsSeparatedByString(ERXExceptionUtilities.stackTrace(), "\n\t");
 			NSMutableArray subParts = new NSMutableArray();
 			boolean first = true;
 			for (Enumeration e = parts.reverseObjectEnumerator(); e.hasMoreElements();) {
