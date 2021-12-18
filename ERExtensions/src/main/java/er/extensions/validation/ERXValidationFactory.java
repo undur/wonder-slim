@@ -6,7 +6,6 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.validation;
 
-import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
@@ -103,24 +102,12 @@ public class ERXValidationFactory {
         public NSKeyValueCoding contextForException(ERXValidationException erv);
     }
 
-    /** holds the validation exception class */
-    private Class _validationExceptionClass;
-
     /** holds the template cache for a given set of keys */
     private Map<ERXMultiKey, String> _cache = new Hashtable<>(1000);
 
     /** holds the default template delimiter, "@@" */
     private String _delimiter = "@@";
 
-    /**
-     * Sets the validation class to be used when creating validation exceptions.
-     * 
-     * @param class1 validation exception class
-     */
-    public void setValidationExceptionClass(Class class1) {
-    	_validationExceptionClass = class1;
-    }
-    
     /**
      * Entry point for generating an exception message for a given message. The method <code>getMessage</code>
      * off of {@link ERXValidationException ERXValidationException} calls this method passing in itself as the parameter.
