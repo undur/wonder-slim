@@ -47,9 +47,7 @@ import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
-import com.webobjects.foundation.development.NSBundleFactory;
 
-import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXUtilities;
 
 /**
@@ -329,12 +327,13 @@ public class Loader {
 			// AK: when we get here, the main bundle wasn't inited yet so we do
 			// it ourself...
 
-			if (ERXApplication.isDevelopmentModeSafe() && ERXConfigurationManager.defaultManager().isDeployedAsServlet()) {
+// Disabled this since ERXConfigurationManager.isDeployedAsServlet() no longer works // FIXME: Hugi 2021-12-18
+//			if (ERXApplication.isDevelopmentModeSafe() && ERXConfigurationManager.defaultManager().isDeployedAsServlet()) {
 				// bundle-less builds do not appear to work when running in
 				// servlet mode, so make it prefer the legacy bundle style
-				NSBundleFactory.registerBundleFactory(new com.webobjects.foundation.development.NSLegacyBundle.Factory());
+//				NSBundleFactory.registerBundleFactory(new com.webobjects.foundation.development.NSLegacyBundle.Factory());
 //					throw new RuntimeException( "This was using code from ERFoundation. Killed." );
-			}
+//			}
 
 			try {
 				Field ClassPath = NSBundle.class.getDeclaredField("ClassPath");
