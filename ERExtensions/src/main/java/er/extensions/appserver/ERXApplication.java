@@ -372,18 +372,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * When a context is created we push it into thread local storage. This
-	 * handles the case for direct actions.
-	 * 
-	 * @param request the request
-	 * @return the newly created context
+	 * When a context is created we push it into thread local storage. This handles the case for direct actions.
 	 */
 	@Override
 	public WOContext createContextForRequest(WORequest request) {
-		WOContext context = super.createContextForRequest(request);
+		final WOContext context = super.createContextForRequest(request);
 
-		// We only want to push in the context the first time it is created, ie we don't
-		// want to lose the current context when we create a context for an error page.
+		// We only want to push in the context the first time it is created, ie we don't want to lose the current context when we create a context for an error page.
 		if (ERXWOContext.currentContext() == null) {
 			ERXWOContext.setCurrentContext(context);
 		}
@@ -393,19 +388,17 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	@Override
 	public ERXRequest createRequest(String aMethod, String aURL, String anHTTPVersion, Map<String, ? extends List<String>> someHeaders, NSData aContent, Map<String, Object> someInfo) {
-		// Workaround for #3428067 (Apache Server Side Include module will feed
-		// "INCLUDED" as the HTTP version, which causes a request object not to
-		// be created by an exception.
+
+		// Workaround for #3428067 (Apache Server Side Include module will feed "INCLUDED" as the HTTP version, which causes a request object not to be created by an exception.
 		if (anHTTPVersion == null || anHTTPVersion.startsWith("INCLUDED")) {
 			anHTTPVersion = "HTTP/1.0";
 		}
 
-		// Workaround for Safari on Leopard bug (post followed by redirect to
-		// GET incorrectly has content-type header).
-		// The content-type header makes the WO parser only look at the content.
-		// Which is empty.
+		// Workaround for Safari on Leopard bug (post followed by redirect to GET incorrectly has content-type header).
+		// The content-type header makes the WO parser only look at the content. Which is empty.
 		// http://lists.macosforge.org/pipermail/webkit-unassigned/2007-November/053847.html
 		// http://jira.atlassian.com/browse/JRA-13791
+		// FIXME: I'm guessing we can safely remove this? It's ancient. // Hugi 2021-12-18
 		if ("GET".equalsIgnoreCase(aMethod) && someHeaders != null && someHeaders.get("content-type") != null) {
 			someHeaders.remove("content-type");
 		}
