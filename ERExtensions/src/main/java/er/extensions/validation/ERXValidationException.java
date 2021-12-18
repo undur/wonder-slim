@@ -93,9 +93,6 @@ public class ERXValidationException extends NSValidation.ValidationException imp
     /** caches any set additionalExceptions */
     protected NSArray<ValidationException> additionalExceptions;
     
-    /** holds a reference to the context of the exception */
-    protected volatile NSKeyValueCoding _context;
-    
     /** holds a reference to the exception delegate */
     protected volatile Object delegate;
     
@@ -292,12 +289,9 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * @return current context for the validation exception.
      */
     // CHECKME: Now with WO 5 this doesn't need to implement the NSKeyValueCoding interface
+    // FIXME: This can possibly be deleted? // Hugi 2021-12-18
     public NSKeyValueCoding context() {
-        if (_context == null) {
-        	return this;
-        }
-
-        return _context;
+       	return this;
     }
 
     /**
