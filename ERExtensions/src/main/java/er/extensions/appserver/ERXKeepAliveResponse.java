@@ -13,13 +13,14 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSForwardException;
 
 /**
- * Special response that keeps the connection alive and pushes the data to
- * the client. It does this by opening a stream that has small buffer but
- * huge length.
+ * Special response that keeps the connection alive and pushes the data to the client.
+ * It does this by opening a stream that has small buffer but huge length.
  * 
  * @author ak
  */
+
 public class ERXKeepAliveResponse extends WOResponse {
+
 	private static final Logger log = LoggerFactory.getLogger(ERXKeepAliveResponse.class);
 
 	/**
@@ -89,8 +90,6 @@ public class ERXKeepAliveResponse extends WOResponse {
 	
 	/**
 	 * Enqueues the data.
-	 * 
-	 * @param data
 	 */
 	public void push(byte[] data) {
 		if (log.isDebugEnabled()) {
@@ -103,8 +102,7 @@ public class ERXKeepAliveResponse extends WOResponse {
 	}
 
 	/**
-	 * Resets the response by clearing out the current item and notifying
-	 * the queue.
+	 * Resets the response by clearing out the current item and notifying the queue.
 	 */
 	public void reset() {
 		synchronized (_queue) {

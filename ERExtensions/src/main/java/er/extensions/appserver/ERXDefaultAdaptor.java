@@ -4,12 +4,13 @@ import com.webobjects.appserver._private.WOClassicAdaptor;
 import com.webobjects.foundation.NSDictionary;
 
 /**
- * ERXDefaultAdaptor extends WODefaultAdaptor and makes its optional
- * SSL-enabling constructor public.
+ * ERXDefaultAdaptor extends WODefaultAdaptor and makes its optional SSL-enabling constructor public.
  * 
  * @author mschrag
  */
+
 public class ERXDefaultAdaptor extends WOClassicAdaptor {
+
 	/**
 	 * Constructs an ERXDefaultAdaptor.
 	 * 

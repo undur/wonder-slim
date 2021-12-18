@@ -21,10 +21,11 @@ import com.webobjects.foundation.NSMutableDictionary;
 import er.extensions.foundation.ERXSimpleTemplateParser;
 
 /**
- * Holds encoding related settings and methods for {@link WOMessage} 
- * and its subclasses {@link WORequest} and {@link WOResponse}. 
+ * Holds encoding related settings and methods for {@link WOMessage}  and its subclasses {@link WORequest} and {@link WOResponse}. 
  */
+
 public class ERXMessageEncoding implements Serializable {
+
 	/**
 	 * Do I need to update serialVersionUID?
 	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 

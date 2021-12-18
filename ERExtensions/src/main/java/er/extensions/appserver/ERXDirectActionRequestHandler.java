@@ -1,9 +1,3 @@
-//
-// ERXDirectActionRequestHandler.java
-// Project ERExtensions
-//
-// Created by tatsuya on Thu Aug 15 2002
-//
 package er.extensions.appserver;
 
 import com.webobjects.appserver.WOApplication;
@@ -16,11 +10,7 @@ import com.webobjects.appserver._private.WOServerSessionStore;
 import er.extensions.foundation.ERXProperties;
 
 /**
- * Improved direct action request handler. Will automatically handle character
- * encodings and checks the {@link ERXWOResponseCache} before actually calling
- * the action.
- * 
- * NOTE: This class is multi thread safe.
+ * Improved direct action request handler. Will automatically handle character encodings and checks the {@link ERXWOResponseCache} before actually calling the action.
  *
  * @property er.extensions.ERXMessageEncoding.Enabled
  */

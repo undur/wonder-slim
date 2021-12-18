@@ -53,9 +53,7 @@ import er.extensions.foundation.ERXUtilities;
 /**
  * Responsible for classpath munging and ensuring all bundles are loaded
  * 
- * @property er.extensions.appserver.projectBundleLoading - to see logging this
- *           has to be set on the command line by using
- *           -Der.extensions.appserver.projectBundleLoading=DEBUG
+ * @property er.extensions.appserver.projectBundleLoading - to see logging this has to be set on the command line by using -Der.extensions.appserver.projectBundleLoading=DEBUG
  * 
  * @author ak
  */
@@ -153,8 +151,7 @@ public class Loader {
 	}
 
 	/**
-	 * Called prior to actually initializing the app. Defines framework load
-	 * order, class path order, checks patches etc.
+	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
 	public Loader(String[] argv) {
 		String cps[] = new String[] { "java.class.path", "com.webobjects.classpath" };
@@ -214,16 +211,10 @@ public class Loader {
 							debugMsg("Added Jar bundle: " + bundle);
 						}
 					}
-					// MS: This is totally hacked in to make Wonder startup
-					// properly with the new rapid turnaround. It's
-					// duplicating (poorly)
-					// code from NSProjectBundle. I'm not sure we actually
-					// need this anymore, because NSBundle now fires an "all
-					// bundles loaded" event.
+					// MS: This is totally hacked in to make Wonder startup properly with the new rapid turnaround. It's duplicating (poorly)
+					// code from NSProjectBundle. I'm not sure we actually need this anymore, because NSBundle now fires an "all bundles loaded" event.
 					else if (jar.endsWith("/bin") && new File(new File(jar).getParentFile(), ".project").exists()) {
-						// AK: I have no idea if this is checked anywhere
-						// else, but this keeps is from having to set it in
-						// the VM args.
+						// AK: I have no idea if this is checked anywhere else, but this keeps is from having to set it in the VM args.
 						debugMsg("Plain bundle: " + jar);
 						for (File classpathFolder = new File(bundle); classpathFolder != null && classpathFolder.exists(); classpathFolder = classpathFolder.getParentFile()) {
 							File projectFile = new File(classpathFolder, ".project");
@@ -302,8 +293,7 @@ public class Loader {
 		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("bundleDidLoad", ERXUtilities.NotificationClassArray), "NSBundleDidLoadNotification", null);
 	}
 
-	// for logging before logging has been setup and configured by loading the
-	// properties files
+	// for logging before logging has been setup and configured by loading the properties files
 	private void debugMsg(String msg) {
 		if ("DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"))) {
 			System.out.println(msg);
@@ -361,8 +351,6 @@ public class Loader {
 	 * get loaded last. So in order to set the properties correctly, we first
 	 * add all the props that are not already set, then we add the main bundle
 	 * and the WebObjects.properties and finally the command line props.
-	 * 
-	 * @param n
 	 */
 	public void bundleDidLoad(NSNotification n) {
 		NSBundle bundle = (NSBundle) n.object();
@@ -576,8 +564,7 @@ public class Loader {
 	}
 
 	/**
-	 * Copies the props from the command line to the static dict
-	 * propertiesFromArgv.
+	 * Copies the props from the command line to the static dict propertiesFromArgv.
 	 */
 	private static void insertCommandLineArguments() {
 		NSArray keys = propertiesFromArgv.allKeys();
@@ -590,8 +577,8 @@ public class Loader {
 	}
 	
 	/**
-	 * Utility class to track down duplicate items in the class path. Reports
-	 * duplicate packages and packages that are present in different versions.
+	 * Utility class to track down duplicate items in the class path.
+	 * Reports duplicate packages and packages that are present in different versions.
 	 * 
 	 * @author ak
 	 */

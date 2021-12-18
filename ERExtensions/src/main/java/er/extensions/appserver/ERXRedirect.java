@@ -22,7 +22,9 @@ import er.extensions.foundation.ERXMutableURL;
  *
  * @author mschrag
  */
+
 public class ERXRedirect extends WOComponent {
+
 	/**
 	 * Do I need to update serialVersionUID?
 	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 

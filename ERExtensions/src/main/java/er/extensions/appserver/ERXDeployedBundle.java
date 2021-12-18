@@ -1,6 +1,5 @@
 package er.extensions.appserver;
 
-
 import java.io.File;
 
 import com.webobjects._ideservices._WOProject;
@@ -47,6 +46,7 @@ import er.extensions.foundation.ERXProperties;
  * 
  * @author mstoll
  */
+
 public class ERXDeployedBundle extends WODeployedBundle {
 
     private final NSMutableDictionary _myURLs;

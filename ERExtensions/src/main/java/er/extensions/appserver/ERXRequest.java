@@ -33,7 +33,9 @@ import er.extensions.localization.ERXLocalizer;
  * #2957558 ("de-at" is converted to "German" instead of "German_Austria").
  * The request is created via {@link ERXApplication#createRequest(String, String, String, Map, NSData, Map)}.
  */
+
 public  class ERXRequest extends WORequest {
+
     private static final Logger log = LoggerFactory.getLogger(ERXRequest.class);
 
     public static final String UNKNOWN_HOST = "UNKNOWN";
