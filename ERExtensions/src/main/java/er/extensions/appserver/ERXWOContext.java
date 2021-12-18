@@ -392,6 +392,20 @@ public class ERXWOContext extends ERXAjaxContext {
 		return b.toString();
 	}
 
+    /**
+     * Convenience method to call safeIdentifierName(source, prefix, '_')
+     * 
+     * @see #safeIdentifierName(String, String, char)
+     * 
+     * @param source String to make into a identifier name
+     * @param prefix String to prefix source with to make it a valid identifier name
+     * @return source converted to a name suitable for use as an identifier in JavaScript
+     */
+	@Deprecated
+    public static String safeIdentifierName(String source, String prefix) {
+    	return safeIdentifierName(source, prefix, '_');
+    }
+
 	/**
 	 * Convenience method to call safeIdentifierName(source, "_", '_')
 	 *
