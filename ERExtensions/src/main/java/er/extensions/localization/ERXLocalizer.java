@@ -124,21 +124,22 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 	private static final Logger log = LoggerFactory.getLogger(ERXLocalizer.class);
 	private static final Logger createdKeysLog = LoggerFactory.getLogger(ERXLocalizer.class.getName() + ".createdKeys");
 
-	public static final String KEY_LOCALIZER_EXCEPTIONS = "localizerExceptions";
+	public static final String LocalizationDidResetNotification = "LocalizationDidReset";
+
+	private static final String KEY_LOCALIZER_EXCEPTIONS = "localizerExceptions";
 	private static boolean isLocalizationEnabled = true;
 	private static boolean isInitialized = false;
 	private static Boolean _useLocalizedFormatters;
 	private static Boolean _fallbackToDefaultLanguage;
-	public static final String LocalizationDidResetNotification = "LocalizationDidReset";
 	private static Observer observer = new Observer();
 	private static List<URL> monitoredFiles = new NSMutableArray<>();
 	private static final char _localizerMethodIndicatorCharacter = '@';
-	static NSArray<String> fileNamesToWatch;
-	static NSArray<String> frameworkSearchPath;
-	static NSArray<String> availableLanguages;
-	static String defaultLanguage;
+	private static NSArray<String> fileNamesToWatch;
+	private static NSArray<String> frameworkSearchPath;
+	private static NSArray<String> availableLanguages;
+	private static String defaultLanguage;
 
-	static NSMutableDictionary<String, ERXLocalizer> localizers = new NSMutableDictionary<>();
+	private static NSMutableDictionary<String, ERXLocalizer> localizers = new NSMutableDictionary<>();
 
 	public static class Observer {
 		public void fileDidChange(NSNotification n) {
@@ -171,6 +172,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 	 */
 	public static ERXLocalizer currentLocalizer() {
 		ERXLocalizer current = (ERXLocalizer) ERXThreadStorage.valueForKey("localizer");
+
 		if (current == null) {
 			if (!isInitialized) {
 				initialize();
@@ -185,6 +187,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 				current = defaultLocalizer();
 			}
 		}
+
 		return current;
 	}
 
@@ -241,25 +244,34 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 	 * @return The best localizer for a set of languages.
 	 */
 	public static ERXLocalizer localizerForLanguages(NSArray<String> languages) {
-		if (!isLocalizationEnabled)
-			return createLocalizerForLanguage("Nonlocalized", false);
 
-		if (languages == null || languages.isEmpty())
+		if (!isLocalizationEnabled) {
+			return createLocalizerForLanguage("Nonlocalized", false);
+		}
+
+		if (languages == null || languages.isEmpty()) {
 			return localizerForLanguage(defaultLanguage());
+		}
 		
 		ERXLocalizer l = null;
+
 		Enumeration<String> e = languages.objectEnumerator();
+
 		while (e.hasMoreElements()) {
 			String language = e.nextElement();
 			l = localizers.objectForKey(language);
+
 			if (l != null) {
 				return l;
 			}
+
 			if (availableLanguages().containsObject(language)) {
 				return localizerForLanguage(language);
 			}
+
 			// try to do a fallback to the base language if this was regionalized
 			int index = language.indexOf('_');
+
 			if (index > 0) {
 				language = language.substring(0, index);
 				if (availableLanguages().containsObject(language)) {
@@ -267,6 +279,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 				}
 			}
 		}
+
 		return localizerForLanguage(languages.objectAtIndex(0));
 	}
 
@@ -806,10 +819,6 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 			_useLocalizedFormatters = ERXProperties.booleanForKey("er.extensions.ERXLocalizer.useLocalizedFormatters") ? Boolean.TRUE : Boolean.FALSE;
 		}
 		return _useLocalizedFormatters.booleanValue();
-	}
-
-	public String languageCode() {
-		return locale().getLanguage();
 	}
 
 	public static boolean fallbackToDefaultLanguage() {
