@@ -17,24 +17,19 @@ import er.extensions.foundation.ERXUtilities;
 
 /** 
  * Designated starter class for frameworks, adds support for dependency management.
- * <p>
- * Allows you to disregard your framework order in the class path (at least where 
- * startup is concerned, if you override actual classes you still need to take care.)
- * <p>
- * The <code>initialize()</code> method will be called directly after your principal
- * is instantiated.<br>
- * The <code>finishInitialization()</code> method will be called when the app finishes 
- * startup but before it will begin to process requests.
- * <p>
- * If you define <pre><code>public static Class[] REQUIRES = Class[] {...}</code></pre>
- * all the classes (which must be assignable from this class) will get 
- * loaded before your principal.
- * <p>
- * NOTE: try to avoid putting code in static initializers. These may lead to 
- * unpredictable behaviour when launching. Use one of the methods above
- * to do what you need to do.
- * <p>
- * Here is an example:<pre><code>
+ * 
+ * Allows you to disregard your framework order in the class path (at least where startup is concerned, if you override actual classes you still need to take care.)
+ * 
+ * The <code>initialize()</code> method will be called directly after your principal is instantiated.
+ * The <code>finishInitialization()</code> method will be called when the app finishes startup but before it will begin to process requests.
+ * 
+ * If you define <pre><code>public static Class[] REQUIRES = Class[] {...}</code></pre> all the classes (which must be assignable from this class) will get loaded before your principal.
+ * 
+ * NOTE: try to avoid putting code in static initializers. These may lead to unpredictable behaviour when launching. Use one of the methods above to do what you need to do.
+ * 
+ * Here is an example:
+ * 
+ * <pre><code>
  * public class ExampleFrameworkPrincipal extends ERXFrameworkPrincipal {
  * 
  *     public static final Logger log = Logger.getLogger(ExampleFrameworkPrincipal.class);
@@ -68,25 +63,25 @@ import er.extensions.foundation.ERXUtilities;
  * principalClass = com.sample.ExampleFrameworkPrincipal
  * </code></pre>
  */
+
 public abstract class ERXFrameworkPrincipal {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXFrameworkPrincipal.class);
 
-    /** holds the mapping between framework principals classes and ERXFrameworkPrincipal objects */
+    /**
+     * Holds the mapping between framework principals classes and ERXFrameworkPrincipal objects
+     */
     private static final NSMutableDictionary<String, ERXFrameworkPrincipal> initializedFrameworks = new NSMutableDictionary<>();
+
     private static final NSMutableArray<ERXFrameworkPrincipal> launchingFrameworks = new NSMutableArray<>();
 
     public static class Observer {
         
         /**
-         * Notification method called when the WOApplication posts
-         * the notification 'ApplicationDidCreateNotification'. This
-         * method handles de-registering for notifications and releasing
-         * any references to observer so that it can be released for
-         * garbage collection.
-         * @param n notification that is posted after the WOApplication
-         *      has been constructed, but before the application is
-         *      ready for accepting requests.
+         * Notification method called when the WOApplication posts the notification 'ApplicationDidCreateNotification'.
+         * This method handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
+         * 
+         * @param n notification that is posted after the WOApplication has been constructed, but before the application is ready for accepting requests.
          */
         public final void willFinishInitialization(NSNotification n) {
             NSNotificationCenter.defaultCenter().removeObserver(this, ERXApplication.ApplicationDidCreateNotification, null);
@@ -97,14 +92,10 @@ public abstract class ERXFrameworkPrincipal {
         }
         
         /**
-         * Notification method called when the WOApplication posts
-         * the notification 'ApplicationDidFinishInitializationNotification'. This
-         * method handles de-registering for notifications and releasing
-         * any references to observer so that it can be released for
-         * garbage collection.
-         * @param n notification that is posted after the WOApplication
-         *      has been constructed, but before the application is
-         *      ready for accepting requests.
+         * Notification method called when the WOApplication posts the notification 'ApplicationDidFinishInitializationNotification'.
+         * This method handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
+         * 
+         * @param n notification that is posted after the WOApplication has been constructed, but before the application is ready for accepting requests.
          */
         public final void didFinishInitialization(NSNotification n) {
             NSNotificationCenter.defaultCenter().removeObserver(this);
