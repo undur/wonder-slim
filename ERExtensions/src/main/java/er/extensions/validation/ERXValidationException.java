@@ -179,35 +179,30 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * thrown exception. A custom exception would be
      * an exception that you throw in your validateFoo
      * method if a particular constraint is not valid.
+     * 
      * @return if this exception is a custom thrown exception.
      */
-    public boolean isCustomMethodException() { return type() == CustomMethodException; }
-
-    /**
-     * Returns method name. The method name is only set if the validation
-     * exception is a custom validation exception.
-     * @return custom method name.
-     */
-    public String method() { return method; }
-
-    /**
-     * Sets the custom method name that threw the
-     * validation exception.
-     * @param aMethod name to be set.
-     */
-    public void setMethod(String aMethod) { method = aMethod; }
-
-    /**
-     * Cover method that casts the <code>object</code> of
-     * the validation exception to an EOEnterpriseObject.
-     * @return object cast as an enterprise object.
-     */
-//    public EOEnterpriseObject eoObject() { return object() instanceof EOEnterpriseObject ? (EOEnterpriseObject)object() : null; }
-    public Object eoObject() {
-    	return null;
-//    	throw new RuntimeException("Disabled instead of deleting");
+    public boolean isCustomMethodException() {
+    	return type() == CustomMethodException;
     }
 
+    /**
+     * Returns method name. The method name is only set if the validation exception is a custom validation exception.
+     * 
+     * @return custom method name.
+     */
+    public String method() {
+    	return method;
+    }
+
+    /**
+     * Sets the custom method name that threw the validation exception.
+     * 
+     * @param aMethod name to be set.
+     */
+    public void setMethod(String aMethod) {
+    	method = aMethod;
+    }
 
     /**
      * Overrides super implementation to allow for settable object value.
@@ -215,14 +210,17 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      */
     @Override
 	public Object object() {
-        if(object == null)
+        if(object == null) {
         	object = super.object();
+        }
+
         return object;
     }
 
     /**
      * Cover method for returning the <code>key</code> of
      * the validation exception under the name propertyKey.
+     * 
      * @return the key of the validation exception
      */
     public String propertyKey() { return key(); }
@@ -231,6 +229,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * Cover method to return the type of the validation
      * exception. The corresponds to one of the constant
      * strings defined in this class.
+     * 
      * @return the type of this validation exception.
      */
     public String type() { return type; }
@@ -241,46 +240,49 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * defined in this class. All of the model thrown
      * validation exceptions should have the correct
      * type already set.
-     * @param aType name to set on this validation
-     *		exception.
+     * 
+     * @param aType name to set on this validation exception.
      */
     public void setType(String aType) { type = aType; }
 
     /**
-     * Returns the value that failed validation.
-     * @return failed validation value.
+     * @return The value that failed validation
      */
-    public Object value() { return value; }
+    public Object value() {
+    	return value;
+    }
     
     /**
      * Provides an escaped value to use in validation template string.
+     * 
      * @return escaped value
-     * @see #value()
-     * @see WOMessage#stringByEscapingHTMLString(String)
      */
     public String escapedValue() {
     	if(value() != null) {
     		return WOMessage.stringByEscapingHTMLString(value().toString());
     	}
+
     	return null;
     }
 
     /**
      * Sets the value that failed validation.
+     * 
      * @param aValue that failed validation
      */
     public void setValue(Object aValue) { value = aValue; }
 
     /**
      * Sets the object that failed validation.
+     * 
      * @param aValue object that failed validation
      */
     public void setObject(Object aValue) { object = aValue; }
     
     /**
      * Returns the target language to display the validation message in.
-     * If a target language is not set then the current default
-     * language for the current thread is used.
+     * If a target language is not set then the current default language for the current thread is used.
+     * 
      * @return target language if one is set.
      */
     public String targetLanguage() { return targetLanguage; }
@@ -289,8 +291,8 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * Sets the target language to use when rendering the validation
      * message. Only set a target language if you want to override
      * the current language of the thread.
-     * @param aValue name of the language to render the validation
-     *		exception in.
+     * 
+     * @param aValue name of the language to render the validation exception in.
      */
     public void setTargetLanguage(String aValue) {  targetLanguage = aValue; }
 
@@ -298,6 +300,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * Gets the current delegate for this validation exception.
      * If one is not set then the default delegate for the
      * {@link ERXValidationFactory ERXValidationFactory} is returned.
+     * 
      * @return delegate for this validation exception.
      */
     public Object delegate() { return delegate != null ? delegate : ERXValidationFactory.defaultDelegate(); }
@@ -307,6 +310,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * The delegate can intervene to provide a different template
      * for the validation exception or resolve the template in a
      * different manner.
+     * 
      * @param obj delegate to be used for this validation exception.
      */
     public void setDelegate(Object obj) { delegate = obj; }
@@ -322,7 +326,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
      * When this also returns null, then the exception will be used as its context.
      * This is needed because of some of the templates in ERDirectToWeb which use
      * <code>context.propertyKey</code> and will display <b>?</b> if none is given. 
-     * <p>
+     * 
      * @return current context for the validation exception.
      */
     // CHECKME: Now with WO 5 this doesn't need to implement the NSKeyValueCoding interface
@@ -335,14 +339,15 @@ public class ERXValidationException extends NSValidation.ValidationException imp
     }
 
     /**
-     * Sets the context that can be used to resolve key bindings
-     * in validation templates.
+     * Sets the context that can be used to resolve key bindings in validation templates.
+     * 
      * @param context of the current exception
      */
     public void setContext(NSKeyValueCoding context) { _context = context; }
 
     /**
      * Sets the array of additional exceptions.
+     * 
      * @param exceptions array of additional exceptions
      */
     public void setAdditionalExceptions(NSArray<ValidationException> exceptions) {
@@ -350,10 +355,9 @@ public class ERXValidationException extends NSValidation.ValidationException imp
     }
 
     /**
-     * Cover method to return any additional exceptions that
-     * occurred. The reason this method is needed is because
-     * we wanted to have the ability to set the additional
-     * exceptions.
+     * Cover method to return any additional exceptions that occurred.
+     * The reason this method is needed is because we wanted to have the ability to set the additional exceptions.
+     * 
      * @return array of additional exceptions
      */
     @Override
@@ -373,6 +377,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
 
     /**
      * Compares this exception to anything else.
+     * 
      * @return description of the validation exception
      */
     @Override
@@ -386,8 +391,7 @@ public class ERXValidationException extends NSValidation.ValidationException imp
     }
 
     /**
-     * Returns the formatted description of the validation exception
-     * without calling <code>getMessage</code>.
+     * Returns the formatted description of the validation exception without calling <code>getMessage</code>.
      * @return description of the validation exception
      */
     @Override
