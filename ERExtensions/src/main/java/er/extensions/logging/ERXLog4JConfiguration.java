@@ -32,7 +32,9 @@ import com.webobjects.foundation.NSMutableArray;
  * Configures and manages the log4j logging system. Will also configure the system for rapid turn around, i.e. when
  * WOCaching is disabled when the conf file changes it will get reloaded.
  */
+
 public class ERXLog4JConfiguration extends WOComponent {
+
 	/**
 	 * Do I need to update serialVersionUID?
 	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
@@ -491,5 +493,4 @@ public class ERXLog4JConfiguration extends WOComponent {
 
         _appenders = null;
     }
-
 }

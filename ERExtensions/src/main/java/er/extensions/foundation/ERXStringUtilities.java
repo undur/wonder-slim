@@ -18,20 +18,20 @@ public class ERXStringUtilities {
 	/**
 	 * Retrieves a given string for a given name, extension and bundle.
 	 * 
-	 * @param name
-	 *            of the resource
-	 * @param extension
-	 *            of the resource, example: txt or rtf
-	 * @param bundle
-	 *            to look for the resource in
+	 * @param name of the resource
+	 * @param extension of the resource, example: txt or rtf
+	 * @param bundle to look for the resource in
 	 * @return string of the given file specified in the bundle
 	 */
 	public static String stringFromResource(String name, String extension, NSBundle bundle) {
 		String path = null;
+
 		if (bundle == null) {
 			bundle = NSBundle.mainBundle();
 		}
+
 		path = bundle.resourcePathForLocalizedResourceNamed(name + (extension == null || extension.length() == 0 ? "" : "." + extension), null);
+
 		if (path != null) {
 			try( InputStream stream = bundle.inputStreamForResourcePath(path)) {
 				byte bytes[] = stream.readAllBytes();
@@ -41,6 +41,7 @@ public class ERXStringUtilities {
 				log.warn("IOException when stringFromResource({}.{} in bundle {}", name, extension, bundle.name());
 			}
 		}
+
 		return null;
 	}
 
@@ -48,8 +49,7 @@ public class ERXStringUtilities {
 	 * Calculates a default display name for a given key path. For instance for
 	 * the key path: "foo.bar" the display name would be "Bar".
 	 * 
-	 * @param key
-	 *            to calculate the display name
+	 * @param key to calculate the display name
 	 * @return display name for the given key
 	 */
 	public static String displayNameForKey(String key) {
@@ -85,10 +85,8 @@ public class ERXStringUtilities {
 	 * example, 5.1.3 becomes 5.13, so that the string can be converted to a
 	 * double or BigDecimal type easily.
 	 * 
-	 * @param version
-	 *            string
-	 * @return cleaned-up string that only contains the first dot(.) as the
-	 *         floating point indicator.
+	 * @param version string
+	 * @return cleaned-up string that only contains the first dot(.) as the floating point indicator.
 	 */
 	public static String removeExtraDotsFromVersionString(String version) {
 		int floatingPointIndex = version.indexOf(".");
