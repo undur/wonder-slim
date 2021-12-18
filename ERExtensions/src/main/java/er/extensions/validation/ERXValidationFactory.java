@@ -111,16 +111,15 @@ public class ERXValidationFactory {
 
     /** holds the default template delimiter, "@@" */
     private String _delimiter = "@@";
-    
-    /** caches the constructor used to build validation exceptions */
-    protected Constructor regularConstructor;
-    
+
     /**
      * Sets the validation class to be used when creating validation exceptions.
      * 
      * @param class1 validation exception class
      */
-    public void setValidationExceptionClass(Class class1) { _validationExceptionClass = class1; }
+    public void setValidationExceptionClass(Class class1) {
+    	_validationExceptionClass = class1;
+    }
     
     /**
      * Entry point for generating an exception message for a given message. The method <code>getMessage</code>
