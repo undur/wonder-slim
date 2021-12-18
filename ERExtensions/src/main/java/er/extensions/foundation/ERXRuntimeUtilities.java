@@ -33,8 +33,8 @@ public class ERXRuntimeUtilities {
 	 */
 	public static NSMutableDictionary extraInformationForExceptionInContext(Exception e, WOContext context) {
 		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
-		extraInfo.addEntriesFromDictionary(ERXRuntimeUtilities.informationForContext(context));
-		extraInfo.addEntriesFromDictionary(ERXRuntimeUtilities.informationForBundles());
+		extraInfo.addEntriesFromDictionary(informationForContext(context));
+		extraInfo.addEntriesFromDictionary(informationForBundles());
 		return extraInfo;
 	}
 
