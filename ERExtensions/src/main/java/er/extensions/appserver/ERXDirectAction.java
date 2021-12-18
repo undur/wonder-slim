@@ -38,7 +38,7 @@ import er.extensions.statistics.ERXStats;
 
 public class ERXDirectAction extends WODirectAction {
 
-	private Logger log = LoggerFactory.getLogger( ERXDirectAction.class );
+	private static Logger log = LoggerFactory.getLogger( ERXDirectAction.class );
 
 	public ERXDirectAction(WORequest r) {
 		super(r);
