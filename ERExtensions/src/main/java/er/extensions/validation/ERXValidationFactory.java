@@ -334,15 +334,6 @@ public class ERXValidationFactory {
         }
 
         /**
-         * Constructs a multi-key.
-         */
-        public ERXMultiKey() {
-            _keyCount=0;
-            _keys=_NSCollectionPrimitives.EmptyArray;
-            recomputeHashCode();
-        }
-
-        /**
          * Constructs a multi-key for a given
          * object array.
          * @param keys object array
@@ -352,67 +343,6 @@ public class ERXValidationFactory {
             System.arraycopy(keys,0,_keys,0,_keyCount);
             recomputeHashCode();
         }
-
-        /**
-         * Constructs a multi-key for a given
-         * array.
-         * @param keys array of keys
-         */    
-        public ERXMultiKey(NSArray<Object> keys) {
-            this((short)keys.count());
-            for (int i=0; i<keys.count(); i++) _keys[i]=keys.objectAtIndex(i);
-            recomputeHashCode();
-       }
-
-        /**
-         * Constructs a multi-key for a given
-         * vector.
-         * @param keys vector of keys
-         */
-        public ERXMultiKey(Vector<Object> keys) {
-            this ((short)keys.size());
-            for (int i=0; i<keys.size(); i++) _keys[i]=keys.elementAt(i);
-            recomputeHashCode();
-        }
-        
-        /**
-         * Constructs a multi-key for a given
-         * list of keys.
-         * @param key one key
-         * @param keys additional keys
-         */
-        public ERXMultiKey(Object key, Object ... keys) {
-            this((short)(keys.length + 1));
-            _keys[0] = key;
-            System.arraycopy(keys,0,_keys,1,_keyCount-1);
-            recomputeHashCode();
-        }
-
-        /**
-         * Method used to return a copy of the object array
-         * of keys for the current multi-key.
-         * @return object array of keys
-         */    
-        public final Object[] keys() {
-        	Object[] keys;
-        	if (_keyCount == 0) {
-        		keys = _keys;
-        	} else {
-        		keys = new Object[_keyCount];
-        		System.arraycopy(_keys, 0, keys, 0, _keyCount);
-        	}
-        	return keys;
-        }
-        
-        /**
-         * Method used to return the object array
-         * of keys for the current multi-key.<br>
-         * DO NOT MODIFY!
-         * @return object array of keys
-         */  
-        public final Object[] keysNoCopy() {
-    		return _keys;
-    	}
 
         /**
          * Calculates a unique hash code for
