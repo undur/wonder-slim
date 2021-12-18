@@ -134,22 +134,6 @@ public class ERXValidationFactory {
             _validationExceptionClass = ERXValidationException.class;
         return _validationExceptionClass;
     }
-
-    /**
-     * Simple method used to lookup and cache the constructor to build validation exceptions.
-     * 
-     * @return constructor used to build validation exceptions
-     */
-    protected Constructor regularValidationExceptionConstructor() {
-        if (regularConstructor == null) {
-            try {
-                regularConstructor = validationExceptionClass().getConstructor(_regularConstructor);
-            } catch (Exception e) {
-                log.error("Exception looking up regular constructor.", e);
-            }
-        }
-        return regularConstructor;
-    }
     
     /**
      * Entry point for generating an exception message for a given message. The method <code>getMessage</code>
