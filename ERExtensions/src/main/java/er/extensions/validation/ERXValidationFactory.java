@@ -123,19 +123,6 @@ public class ERXValidationFactory {
     public void setValidationExceptionClass(Class class1) { _validationExceptionClass = class1; }
     
     /**
-     * Returns the validation exception class to use
-     * when creating exceptions. If none is specified
-     * {@link ERXValidationException} is used.
-     * 
-     * @return class object of validation exceptions to be used.
-     */
-    public Class validationExceptionClass() {
-        if (_validationExceptionClass == null)
-            _validationExceptionClass = ERXValidationException.class;
-        return _validationExceptionClass;
-    }
-    
-    /**
      * Entry point for generating an exception message for a given message. The method <code>getMessage</code>
      * off of {@link ERXValidationException ERXValidationException} calls this method passing in itself as the parameter.
      * 
