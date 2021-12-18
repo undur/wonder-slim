@@ -6,9 +6,6 @@
 //
 package er.extensions.appserver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
@@ -29,8 +26,6 @@ import er.extensions.foundation.ERXProperties;
  */
 
 public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler {
-
-	private static final Logger log = LoggerFactory.getLogger(ERXDirectActionRequestHandler.class);
 
 	/**
 	 * caches if automatic message encoding is enabled, defaults to true
