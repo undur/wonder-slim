@@ -35,10 +35,6 @@ public class ERXValidationFactory {
     /** holds a reference to the default validation factory */
     private static ERXValidationFactory _defaultFactory;
     
-    /** holds a reference to the default validation delegate */
-    // FIXME: This should be a weak reference
-    private static Object _defaultValidationDelegate = null;
-    
     /** holds the value 'ValidationTemplate.' */
     public static final String VALIDATION_TEMPLATE_PREFIX = "ValidationTemplate.";
 
@@ -63,24 +59,6 @@ public class ERXValidationFactory {
             setDefaultFactory(new ERXValidationFactory());
         return _defaultFactory;
     }
-    /**
-     * Returns the default validation delegate that will
-     * be set on all validation exceptions created. At the
-     * moment delegates should implement the ExceptionDelegateInterface.
-     * This will change to an informal implementation soon.
-     * @return the default validation exception delegate.
-     */
-    public static Object defaultDelegate() { return _defaultValidationDelegate; }
-    
-    /**
-     * Sets the default validation delegate that
-     * will be set on all validation exceptions that
-     * are created by the factory. At the moment the
-     * delegate set needs to implement the interface
-     * ExceptionDelegateInterface.
-     * @param obj default validation delegate
-     */
-    public static void setDefaultDelegate(Object obj) { _defaultValidationDelegate = obj; }
 
     /** holds the template cache for a given set of keys */
     private Map<ERXMultiKey, String> _cache = new Hashtable<>(1000);

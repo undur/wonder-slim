@@ -297,25 +297,6 @@ public class ERXValidationException extends NSValidation.ValidationException imp
     public void setTargetLanguage(String aValue) {  targetLanguage = aValue; }
 
     /**
-     * Gets the current delegate for this validation exception.
-     * If one is not set then the default delegate for the
-     * {@link ERXValidationFactory ERXValidationFactory} is returned.
-     * 
-     * @return delegate for this validation exception.
-     */
-    public Object delegate() { return delegate != null ? delegate : ERXValidationFactory.defaultDelegate(); }
-
-    /**
-     * Sets the delegate for the current validation exception.
-     * The delegate can intervene to provide a different template
-     * for the validation exception or resolve the template in a
-     * different manner.
-     * 
-     * @param obj delegate to be used for this validation exception.
-     */
-    public void setDelegate(Object obj) { delegate = obj; }
-
-    /**
      * The current context of the validation exception. Context
      * objects are mainly used for resolving keys in validation
      * templates. When validation exceptions are thrown in D2W
