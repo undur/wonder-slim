@@ -278,7 +278,7 @@ public class ERXDirectAction extends WODirectAction {
 	 * 
 	 * @return 403 response
 	 */
-	protected WOResponse forbiddenResponse() {
+	private static WOResponse forbiddenResponse() {
 		WOResponse response = new WOResponse();
 		response.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 		return response;
