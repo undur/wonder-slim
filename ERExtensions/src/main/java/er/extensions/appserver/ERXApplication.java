@@ -394,15 +394,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			anHTTPVersion = "HTTP/1.0";
 		}
 
-		// Workaround for Safari on Leopard bug (post followed by redirect to GET incorrectly has content-type header).
-		// The content-type header makes the WO parser only look at the content. Which is empty.
-		// http://lists.macosforge.org/pipermail/webkit-unassigned/2007-November/053847.html
-		// http://jira.atlassian.com/browse/JRA-13791
-		// FIXME: I'm guessing we can safely remove this? It's ancient. // Hugi 2021-12-18
-		if ("GET".equalsIgnoreCase(aMethod) && someHeaders != null && someHeaders.get("content-type") != null) {
-			someHeaders.remove("content-type");
-		}
-
 		if (rewriteDirectConnectURL()) {
 			aURL = adaptorPath() + name() + applicationExtension() + aURL;
 		}
