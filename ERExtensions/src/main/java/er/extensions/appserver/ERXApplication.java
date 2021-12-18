@@ -172,7 +172,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public static void main(String argv[], Class applicationClass) {
 		wasERXApplicationMainInvoked = true;
-		ERXHacks.disablePBXProjectWatcher();
+		disablePBXProjectWatcher();
 		setup(argv);
 		WOApplication.main(argv, applicationClass);
 	}
@@ -1245,5 +1245,20 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	public String publicHost() {
 		return _publicHost;
+	}
+	
+	/**
+	 * On every startup of a WOApplication _PBXProjectWatcher._sendXMLToPB() gets invoked, in an attempt to communicate with ProjectBuilder, an IDE which no longer exists.
+	 * Disabling this request shaves about a second of application startup time.
+	 */
+	private static void disablePBXProjectWatcher() {
+		try {
+			Field field = com.webobjects._ideservices._PBXProjectWatcher.class.getDeclaredField("_communicationDisabled");
+			field.setAccessible(true);
+			field.set(null, true);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
