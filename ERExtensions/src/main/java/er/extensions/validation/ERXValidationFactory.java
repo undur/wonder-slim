@@ -49,6 +49,11 @@ public class ERXValidationFactory {
     private final static String UNDEFINED_VALIDATION_TEMPLATE = "Undefined Validation Template";
 
     /**
+     * Holds the default template delimiter, "@@"
+     */
+    private static final String TEMPLATE_DELIMITER = "@@";
+
+    /**
      * @return the default validation factory
      */
     public static ERXValidationFactory defaultFactory() {
@@ -63,11 +68,6 @@ public class ERXValidationFactory {
      * Holds the template cache for a given set of keys
      */
     private Map<ERXMultiKey, String> _cache = new Hashtable<>(1000);
-
-    /**
-     * Holds the default template delimiter, "@@"
-     */
-    private String _delimiter = "@@";
 
     /**
      * Entry point for generating an exception message for a given message. The method <code>getMessage</code>
@@ -94,11 +94,10 @@ public class ERXValidationFactory {
     	    }
     	}
     	else {
-
     	    if(context == erv || context == null) {
-    	        message = ERXSimpleTemplateParser.sharedInstance().parseTemplateWithObject( template, templateDelimiter(), erv);
+    	        message = ERXSimpleTemplateParser.sharedInstance().parseTemplateWithObject( template, TEMPLATE_DELIMITER, erv);
     	    } else {
-    	        message = ERXSimpleTemplateParser.sharedInstance().parseTemplateWithObject( template,  templateDelimiter(), context, erv);
+    	    	message = ERXSimpleTemplateParser.sharedInstance().parseTemplateWithObject( template,  TEMPLATE_DELIMITER, context, erv);
     	    }
     	}
 
@@ -112,7 +111,7 @@ public class ERXValidationFactory {
      * @param erv validation exception
      * @return validation template for the given exception
      */
-    public String templateForException(ERXValidationException erv) {
+    private String templateForException(ERXValidationException erv) {
         String template = null;
 
 //      String entityName = erv.eoObject() == null ? null : erv.eoObject().entityName(); FIXME: Getting EOEnterpriseObject out of the way
@@ -148,36 +147,15 @@ public class ERXValidationFactory {
         _cache = new Hashtable<>(1000);
         log.debug("Resetting template cache");
     }
-    
-    /**
-     * Returns the template delimiter, the default delimiter is "@@".
-     * 
-     * @return template delimiter
-     */
-    public String templateDelimiter() {
-    	return _delimiter;
-    }
-    
-    /**
-     * Sets the template delimiter to be used when parsing templates for creating validation exception messages.
-     * 
-     * @param delimiter to be set
-     */
-    public void setTemplateDelimiter(String delimiter) {
-    	_delimiter = delimiter;
-    }
 
     /**
-     * Method used to configure the validation factory for operation. This method is called on the default
-     * factory from an observer when the application is finished launching.
+     * Method used to configure the validation factory for operation. This method is called
+     * on the default factory from an observer when the application is finished launching.
      */
     public void configureFactory() {
         if (WOApplication.application()!=null && !WOApplication.application().isCachingEnabled()) {
             NSNotificationCenter center = NSNotificationCenter.defaultCenter();
-            center.addObserver(this,
-                               new NSSelector("resetTemplateCache",  ERXUtilities.NotificationClassArray),
-                               ERXLocalizer.LocalizationDidResetNotification,
-                               null);
+            center.addObserver(this, new NSSelector("resetTemplateCache",  ERXUtilities.NotificationClassArray), ERXLocalizer.LocalizationDidResetNotification, null);
         }
     }
 
@@ -192,10 +170,7 @@ public class ERXValidationFactory {
      * @param targetLanguage target language name
      * @return a template for the given set of parameters
      */
-    protected String templateForEntityPropertyType(String entityName,
-                                                   String property,
-                                                   String type,
-                                                   String targetLanguage) {
+    private String templateForEntityPropertyType(String entityName, String property, String type, String targetLanguage) {
         log.debug("Looking up template for entity named '{}' property '{}' type '{}' target language '{}'.", entityName, property, type, targetLanguage);
         // 1st try the whole string.
         String template = templateForKeyPath(entityName + "." + property + "." + type, targetLanguage);
@@ -228,7 +203,7 @@ public class ERXValidationFactory {
      * @param language use localizer for this language
      * @return template for key or <code>null</code> if none is found
      */
-    public String templateForKeyPath(String key, String language) {
+    private String templateForKeyPath(String key, String language) {
         return (String)ERXLocalizer.localizerForLanguage(language).valueForKey(VALIDATION_TEMPLATE_PREFIX + key);
     }
     
