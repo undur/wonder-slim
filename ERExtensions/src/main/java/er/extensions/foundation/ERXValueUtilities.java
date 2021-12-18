@@ -1,7 +1,6 @@
 package er.extensions.foundation;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSData;
