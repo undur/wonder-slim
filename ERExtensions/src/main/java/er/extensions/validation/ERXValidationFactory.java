@@ -48,9 +48,6 @@ public class ERXValidationFactory {
     // FIXME: This should be a weak reference
     private static Object _defaultValidationDelegate = null;
     
-    /** holds the default mappings that map model thrown validation strings to exception types */
-    private static NSDictionary<String, String> _mappings;
-
     /** holds the value 'ValidationTemplate.' */
     public static final String VALIDATION_TEMPLATE_PREFIX = "ValidationTemplate.";
 
@@ -108,34 +105,6 @@ public class ERXValidationFactory {
         public String messageForException(ERXValidationException erv);
         public String templateForException(ERXValidationException erv);
         public NSKeyValueCoding contextForException(ERXValidationException erv);
-    }
-
-    /**
-     * In the static initializer the mapping dictionary is
-     * created.
-     */
-    static {
-        String keys[] = {				// MESSAGE LIST:
-            "to be null", 				// "The 'xxxxx' property is not allowed to be NULL"
-            "Invalid Number", 				// "Invalid Number"
-            "must have a ", 				// "The owner property of Bug must have a People assigned "
-            "must have at least one",			// "The exercises property of ERPCompanyRole must have at least one ERPExercise"
-            "relationship, there is a related object",	// "Removal of ERPAccount object denied because its children relationship is not empty"
-            "relationship, there are related objects",	// "Removal of ERPAccount object denied because its children relationship is not empty"
-            "exceeds maximum length of",
-            "Error encountered converting value of class"
-        };
-        String objects[] = {
-            ERXValidationException.NullPropertyException,
-            ERXValidationException.InvalidNumberException,
-            ERXValidationException.MandatoryToOneRelationshipException,
-            ERXValidationException.MandatoryToManyRelationshipException,
-            ERXValidationException.ObjectRemovalException,
-            ERXValidationException.ObjectsRemovalException,
-            ERXValidationException.ExceedsMaximumLengthException,
-            ERXValidationException.ValueConversionException
-        };
-        _mappings = new NSDictionary<>(objects, keys);
     }
 
     /** holds the validation exception class */
@@ -257,98 +226,6 @@ public class ERXValidationFactory {
 
         return erv;
     }    
-    
-    /**
-     * Converts a model thrown validation exception into an {@link ERXValidationException ERXValidationException}.
-     * This is a cover method for the two argument version passing in null as the value.
-     * 
-     * @param eov validation exception to be converted
-     * @return converted validation exception
-     */
-    public ERXValidationException convertException(ValidationException eov) { 
-        return convertException(eov, null); 
-    }
-
-    /**
-     * Converts a given model thrown validation exception into an {@link ERXValidationException ERXValidationException}.
-     * This method is used by {@link ERXEntityClassDescription ERXEntityClassDescription}
-     * to convert model thrown validation exceptions. This isn't  a very elegant solution, but until we can register
-     * our validation exception class this is what we have to do.
-     * 
-     * @param eov validation exception to be converted
-     * @param value that failed validation
-     * @return converted validation exception
-     */
-    public ERXValidationException convertException(ValidationException eov, Object value) {
-        ERXValidationException erve = null;
-        log.debug("Converting exception: {} value: {}", eov, (value != null ? value : "<NULL>"));
-        if (!(eov instanceof ERXValidationException)) {
-            String message = eov.getMessage();
-            Object o = eov.object();
-            
-            // FIXME: This was diabled to get EOControl out of the way
-//            EOEnterpriseObject eo = ((o instanceof EOEnterpriseObject) ? (EOEnterpriseObject) o: null);
-            Object eo = null;
-
-            //NSDictionary userInfo = eov.userInfo() != null ? (NSDictionary)eov.userInfo() : NSDictionary.EmptyDictionary;
-            for (String key : _mappings.allKeys()) {
-                //EOEnterpriseObject eo = (EOEnterpriseObject)userInfo.objectForKey(ValidationException.ValidatedObjectUserInfoKey);
-                String type = _mappings.objectForKey(key);
-                if (message.lastIndexOf(key) >= 0) {
-                    String property = eov.key();
-                    if(property == null && message.indexOf("Removal") == 0) {
-                        //FIXME: (ak) pattern matching?
-                        property = NSArray.componentsSeparatedByString(message, "'").objectAtIndex(3);
-                    }
-                    if(property == null && message.indexOf("Error encountered converting") == 0) {
-                        //FIXME: (ak) pattern matching?
-                        property = NSArray.componentsSeparatedByString(message, "'").objectAtIndex(1);
-                    }
-                    erve = createException(eo, property, value, type);
-                    break;
-                }
-            }
-        } else {
-            ERXValidationException original = (ERXValidationException)eov;
-            if(shouldRecreateException(original, value)) {
-                erve = createException(original.eoObject(), original.key(), original.value(), original.type());
-                log.debug("Converting exception: {} value: {}", original, (original.value() != null ? original.value() : "<NULL>"));
-            } else {
-                erve = original;
-            }
-        }
-        if (erve == null) {
-            log.error("Unable to convert validation exception.", eov);
-        } else {
-            NSArray erveAdditionalExceptions = convertAdditionalExceptions(eov);
-            if (erveAdditionalExceptions.count() > 0)
-                erve.setAdditionalExceptions(erveAdditionalExceptions);
-            if(erve != eov) {
-                erve.setStackTrace(eov.getStackTrace());
-            }
-        }
-        return erve;
-    }
-
-    /**
-     * Converts the additional exceptions contained in an Exception to ERXValidationException subclasses.
-     * 
-     * @param ex validation exception
-     * @return NSArray of converted exceptions
-     */
-    protected NSArray<ERXValidationException> convertAdditionalExceptions(ValidationException ex) {
-        NSArray<ValidationException> additionalExceptions = ex.additionalExceptions();
-        if (additionalExceptions == null || additionalExceptions.isEmpty()) {
-            return NSArray.EmptyArray;
-        }
-        NSMutableArray<ERXValidationException> erveAdditionalExceptions = new NSMutableArray<>();
-        for (ValidationException e : additionalExceptions) {
-            ERXValidationException erve = convertException(e);
-            if (erve != null)
-                erveAdditionalExceptions.addObject(erve);
-            }
-            return erveAdditionalExceptions;
-        }
     
     /**
      * Entry point for generating an exception message for a given message. The method <code>getMessage</code>
