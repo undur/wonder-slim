@@ -23,11 +23,6 @@ import com.webobjects.foundation.NSSelector;
 
 import er.extensions.components.ERXStatelessComponent;
 
-/**
- * Diverse collection of utility methods for handling everything from EOF to
- * foundation. In the future this class will most likely be split into more
- * meaning full groups of utility methods.
- */
 public class ERXUtilities {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXUtilities.class);
@@ -49,12 +44,10 @@ public class ERXUtilities {
 		String separator = System.getProperties().getProperty("line.separator");
 
 		// Chop off the 1st line, "java.lang.Throwable"
-		//
 		int offset = result.indexOf(separator);
 		result = result.substring(offset + 1);
 
 		// Chop off the lines at the start that refer to ERXUtilities
-		//
 		offset = result.indexOf(separator);
 		while (result.substring(0, offset).indexOf("ERXUtilities.java") >= 0) {
 			result = result.substring(offset + 1);
@@ -77,20 +70,16 @@ public class ERXUtilities {
 	}
 
 	/**
-	 * Useful interface for binding objects to WOComponent bindings where you
-	 * want to delay the evaluation of the boolean operation until
-	 * <code>valueForBinding</code> is actually called. See
-	 * {@link ERXStatelessComponent} for examples.
+	 * Useful interface for binding objects to WOComponent bindings where you want to delay the evaluation of the boolean operation until
+	 * <code>valueForBinding</code> is actually called. See {@link ERXStatelessComponent} for examples.
 	 */
 	public static interface BooleanOperation {
 		public boolean value();
 	}
 
 	/**
-	 * Useful interface for binding objects to WOComponent bindings where you
-	 * want to delay the evaluation of the operation until
-	 * <code>valueForBinding</code> is actually called. See
-	 * {@link ERXStatelessComponent} for examples.
+	 * Useful interface for binding objects to WOComponent bindings where you want to delay the evaluation of the operation until
+	 * <code>valueForBinding</code> is actually called. See {@link ERXStatelessComponent} for examples.
 	 */
 	public static interface Operation {
 		public Object value();
@@ -99,7 +88,6 @@ public class ERXUtilities {
 	/**
 	 * Utility that returns a selector you can use with the NSNotificationCenter.
 	 * 
-	 * @param methodName
 	 * @return A selector suitable for firing a notification
 	 */
 	public static NSSelector<Void> notificationSelector(String methodName) {
@@ -116,7 +104,6 @@ public class ERXUtilities {
 	 * @param encoding the encoding used with <code>fileName</code>
 	 * @return de-serialized object from the plist formatted file specified.
 	 */
-	@Deprecated
 	public static Object readPropertyListFromFileInFramework(String fileName, String aFrameWorkName, NSArray<String> languageList, String encoding) {
 		Object result = null;
 
@@ -140,7 +127,6 @@ public class ERXUtilities {
 	 * @param bundle NSBundle to which the resource belongs.
 	 * @return NSDictionary de-serialized from the property list.
 	 */
-	@SuppressWarnings("unchecked")
 	public static NSDictionary dictionaryFromPropertyList(String name, NSBundle bundle) {
 		String string = ERXUtilities.stringFromResource(name, "plist", bundle);
 		return (NSDictionary<?, ?>) NSPropertyListSerialization.propertyListFromString(string);
