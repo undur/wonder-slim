@@ -7,23 +7,6 @@ import java.lang.reflect.Method;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSKeyValueCoding;
 
-/**
- * Utilities for use with key value coding. You could instantiate one of these
- * in your app-startup:
- * 
- * <pre>
- * <code>
- * ERXKeyValueCodingUtilities.registerClass(SomeClass.class); 
- * NSKeyValueCodingAdditions statics = ERXKeyValueCodingUtilities.Statics;
- * myValue = statics.valueForKeyPath("SomeClass.SOME_FIELD");
- * </code>
- * </pre>
- * 
- * Also has utilities for getting and private fields and methods on an object.
- * 
- * @author ak
- */
-
 public class ERXKeyValueCodingUtilities {
 
 	public static Object privateValueForKey(Object target, String key) {
