@@ -300,20 +300,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Adds support for automatic application cycling. Applications can be
-	 * configured to cycle in two ways:
-	 * <p>
-	 * The first way is by setting the System property <b>ERTimeToLive</b> to
-	 * the number of seconds (+ a random interval of 10 minutes) that the
-	 * application should be up before terminating. Note that when the
-	 * application's time to live is up it will quit calling the method
-	 * <code>killInstance</code>.
-	 * <p>
-	 * The second way is by setting the System property <b>ERTimeToDie</b> to
-	 * the time in seconds after midnight when the app should be starting to
-	 * refuse new sessions. In this case when the application starts to refuse
-	 * new sessions it will also register a kill timer that will terminate the
-	 * application between 0 minutes and 1:00 minutes.
+	 * Adds support for automatic application cycling. Applications can be configured to cycle in two ways:
+	 * 
+	 * The first way is by setting the System property <b>ERTimeToLive</b> to the number of seconds (+ a random interval of 10 minutes) that the
+	 * application should be up before terminating. Note that when the application's time to live is up it will quit calling the method <code>killInstance</code>.
+	 * 
+	 * The second way is by setting the System property <b>ERTimeToDie</b> to the time in seconds after midnight when the app should be starting to refuse new sessions.
+	 * In this case when the application starts to refuse new sessions it will also register a kill timer that will terminate the application between 0 minutes and 1:00 minutes.
 	 */
 	@Override
 	public void run() {
