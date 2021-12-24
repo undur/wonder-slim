@@ -58,19 +58,12 @@ public class ERXResourceManager extends WOResourceManager {
 			// AK: yeah, hack, I know...
 			_urlValuedElementsData = (_NSThreadsafeMutableDictionary) field.get(this);
 		}
-		catch (java.lang.SecurityException e) {
+		catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
 		}
-		catch (NoSuchFieldException e) {
-			throw NSForwardException._runtimeExceptionForThrowable(e);
-		}
-		catch (IllegalArgumentException e) {
-			throw NSForwardException._runtimeExceptionForThrowable(e);
-		}
-		catch (IllegalAccessException e) {
-			throw NSForwardException._runtimeExceptionForThrowable(e);
-		}
+
 		String versionManagerClassName = ERXProperties.stringForKeyWithDefault("er.extensions.ERXResourceManager.versionManager", "default");
+
 		if ("default".equals(versionManagerClassName)) {
 			_versionManager = new DefaultVersionManager();
 		}
@@ -109,20 +102,23 @@ public class ERXResourceManager extends WOResourceManager {
 		return _versionManager;
 	}
 
-    private void _initFrameworkProjectBundles()
-    {
+    private void _initFrameworkProjectBundles() {
         NSBundle aBundle = null;
-        NSArray aFrameworkBundleList = NSBundle.frameworkBundles();
-        for(Enumeration aBundleEnumerator = aFrameworkBundleList.objectEnumerator(); aBundleEnumerator.hasMoreElements(); _erxCachedBundleForFrameworkNamed(aBundle.name()))
-            aBundle = (NSBundle)aBundleEnumerator.nextElement();
 
+        NSArray aFrameworkBundleList = NSBundle.frameworkBundles();
+
+        for(Enumeration aBundleEnumerator = aFrameworkBundleList.objectEnumerator(); aBundleEnumerator.hasMoreElements(); _erxCachedBundleForFrameworkNamed(aBundle.name())) {
+        	aBundle = (NSBundle)aBundleEnumerator.nextElement();
+        }
     }
 
 	private static WODeployedBundle _initAppBundle() {
 		Object obj = null;
+
 		try {
 			WODeployedBundle wodeployedbundle = WODeployedBundle.deployedBundle();
 			obj = wodeployedbundle.projectBundle();
+
 			if (obj != null) {
 				log.warn("Application project found: Will locate resources in '{}' rather than '{}'.", ((WOProjectBundle) obj).projectPath(), wodeployedbundle.bundlePath());
 			}
@@ -138,72 +134,82 @@ public class ERXResourceManager extends WOResourceManager {
 	}
 
 	
-    private static WODeployedBundle _locateBundleForFrameworkNamed(String aFrameworkName)
-    {
+    private static WODeployedBundle _locateBundleForFrameworkNamed(String aFrameworkName) {
         WODeployedBundle aBundle = null;
         aBundle = ERXDeployedBundle.deployedBundleForFrameworkNamed(aFrameworkName);
-        if(aBundle == null)
-        {
+
+        if(aBundle == null) {
             NSBundle nsBundle = NSBundle.bundleForName(aFrameworkName);
-            if(nsBundle != null)
-                aBundle = _bundleWithNSBundle(nsBundle);
+
+            if(nsBundle != null) {
+            	aBundle = _bundleWithNSBundle(nsBundle);
+            }
         }
+
         return aBundle;
     }
 
-    private static WODeployedBundle _bundleWithNSBundle(NSBundle nsBundle)
-    {
+    private static WODeployedBundle _bundleWithNSBundle(NSBundle nsBundle) {
         WODeployedBundle aBundle = null;
         WODeployedBundle aDeployedBundle = ERXDeployedBundle.bundleWithNSBundle(nsBundle);
         WODeployedBundle aProjectBundle = aDeployedBundle.projectBundle();
-        if(aProjectBundle != null)
-        {
-            if(WOApplication._isDebuggingEnabled())
-                NSLog.debug.appendln((new StringBuilder()).append("Framework project found: Will locate resources in '").append(aProjectBundle.bundlePath()).append("' rather than '").append(aDeployedBundle.bundlePath()).append("' .").toString());
+
+        if(aProjectBundle != null) {
+            if(WOApplication._isDebuggingEnabled()) {
+            	NSLog.debug.appendln((new StringBuilder()).append("Framework project found: Will locate resources in '").append(aProjectBundle.bundlePath()).append("' rather than '").append(aDeployedBundle.bundlePath()).append("' .").toString());
+            }
+
             aBundle = aProjectBundle;
-        } else
-        {
+        }
+        else {
             aBundle = aDeployedBundle;
         }
+
         return aBundle;
     }
 
-    public NSArray _frameworkProjectBundles()
-    {
+    public NSArray _frameworkProjectBundles() {
         return _myFrameworkProjectBundles.immutableClone().allValues();
     }
 
-    public WODeployedBundle _erxCachedBundleForFrameworkNamed(String aFrameworkName)
-    {
+    public WODeployedBundle _erxCachedBundleForFrameworkNamed(String aFrameworkName) {
         WODeployedBundle aBundle = null;
-        if(aFrameworkName != null)
-        {
+        if(aFrameworkName != null) {
             aBundle = (WODeployedBundle)_myFrameworkProjectBundles.objectForKey(aFrameworkName);
-            if(aBundle == null)
-            {
+
+            if(aBundle == null) {
                 aBundle = _locateBundleForFrameworkNamed(aFrameworkName);
-                if(aBundle != null)
-                    _myFrameworkProjectBundles.setObjectForKey(aBundle, aFrameworkName);
+
+                if(aBundle != null) {
+                	_myFrameworkProjectBundles.setObjectForKey(aBundle, aFrameworkName);
+                }
             }
         }
-        if(aBundle == null)
-            aBundle = TheAppProjectBundle;
+
+        if(aBundle == null) {
+        	aBundle = TheAppProjectBundle;
+        }
+
         return aBundle;
     }
 	
 	private String _cachedURLForResource(String name, String bundleName, NSArray languages, WORequest request) {
 		String result = null;
+
 		if (bundleName != null) {
 			WODeployedBundle wodeployedbundle = _erxCachedBundleForFrameworkNamed(bundleName);
+
 			if (wodeployedbundle != null) {
 				result = wodeployedbundle.urlForResource(name, languages);
 			}
+
 			if (result == null) {
 				result = "/ERROR/NOT_FOUND/framework=" + bundleName + "/filename=" + (name == null ? "*null*" : name);
 			}
 		}
 		else {
 			result = TheAppProjectBundle.urlForResource(name, languages);
+
 			if (result == null) {
 				String appName = WOApplication.application().name();
 				result = "/ERROR/NOT_FOUND/app=" + appName + "/filename=" + (name == null ? "*null*" : name);
@@ -211,15 +217,18 @@ public class ERXResourceManager extends WOResourceManager {
 		}
 
 		String resourceUrlPrefix = null;
+
 		if (ERXRequest.isRequestSecure(request)) {
 			resourceUrlPrefix = ERXProperties.stringForKey("er.extensions.ERXResourceManager.secureResourceUrlPrefix");
 		}
 		else {
 			resourceUrlPrefix = ERXProperties.stringForKey("er.extensions.ERXResourceManager.resourceUrlPrefix");
 		}
+
 		if (resourceUrlPrefix != null && resourceUrlPrefix.length() > 0) {
 			result = resourceUrlPrefix + result;
 		}
+
 		return result;
 	}
 
@@ -232,6 +241,7 @@ public class ERXResourceManager extends WOResourceManager {
 		else {
 			URL url = pathURLForResourceNamed(name, bundleName, languages);
 			String fileURL = null;
+
 			if (url == null) {
 				fileURL = "ERROR_NOT_FOUND_framework_" + (bundleName == null ? "*null*" : bundleName) + "_filename_" + (name == null ? "*null*" : name);
 			}
@@ -239,13 +249,17 @@ public class ERXResourceManager extends WOResourceManager {
 				fileURL = url.toString();
 				cacheDataIfNotInCache(fileURL);
 			}
+
 			String encoded = WOURLEncoder.encode(fileURL);
 			String key = WOApplication.application().resourceRequestHandlerKey();
+
 			if (WOApplication.application()._rapidTurnaroundActiveForAnyProject() && WOApplication.application().isDirectConnectEnabled()) {
 				key = "_wr_";
 			}
+
 			WOContext context = (WOContext) request.valueForKey("context");
 			String wodata = _NSStringUtilities.concat("wodata", "=", encoded);
+
 			if (context != null) {
 				completeURL = context.urlWithRequestHandlerKey(key, null, wodata);
 			}
@@ -257,8 +271,10 @@ public class ERXResourceManager extends WOResourceManager {
 				sb.append(wodata);
 				completeURL = sb.toString();
 			}
+
 			// AK: TODO get rid of regex
 			int offset = completeURL.indexOf("?wodata=file%3A");
+
 			if (offset >= 0) {
 				completeURL = completeURL.replaceFirst("\\?wodata=file%3A", "/wodata=");
 				if (completeURL.indexOf("/wodata=") > 0) {
@@ -268,52 +284,59 @@ public class ERXResourceManager extends WOResourceManager {
 				}
 			}
 		}
+
 		completeURL = _versionManager.versionedUrlForResourceNamed(completeURL, name, bundleName, languages, request);
 		completeURL = _postprocessURL(completeURL, bundleName);
 		return completeURL;
 	}
 	
 	protected String _postprocessURL(String url, String bundleName) {
+
 		if (WOApplication.application() instanceof ERXApplication) {
 			WODeployedBundle bundle = _cachedBundleForFrameworkNamed(bundleName);
 			return ERXApplication.erxApplication()._rewriteResourceURL(url, bundle);
 		}
+
 		return url;
 	}
 
 	private WOURLValuedElementData cachedDataForKey(String key) {
 		WOURLValuedElementData data = _urlValuedElementsData.objectForKey(key);
+
 		if (data == null && key != null && key.startsWith("file:") && ERXApplication.isDevelopmentModeSafe()) {
 			data = cacheDataIfNotInCache(key);
 		}
+
 		return data;
 	}
 
 	protected WOURLValuedElementData cacheDataIfNotInCache(String key) {
 		WOURLValuedElementData data = _urlValuedElementsData.objectForKey(key);
+
 		if (data == null) {
 			String contentType = contentTypeForResourceNamed(key);
 			data = new WOURLValuedElementData(null, contentType, key);
 			_urlValuedElementsData.setObjectForKey(data, key);
 		}
+
 		return data;
 	}
 
 	@Override
 	public WOURLValuedElementData _cachedDataForKey(String key) {
 		WOURLValuedElementData wourlvaluedelementdata = null;
+
 		if (key != null) {
 			wourlvaluedelementdata = cachedDataForKey(key);
 		}
+
 		return wourlvaluedelementdata;
 	}
 
 	/**
 	 * Overrides the original implementation appending the additionalMimeTypes to the content types dictionary.
 	 *
-	 * @return a dictionary containing the original mime types supported along with the additional mime types
-	 * contributed by this class.
-	 * @see com.webobjects.appserver.WOResourceManager#_contentTypesDictionary()
+	 * @return a dictionary containing the original mime types supported along with the additional mime types contributed by this class.
 	 */
 	@Override
 	public NSDictionary _contentTypesDictionary() {
@@ -324,12 +347,9 @@ public class ERXResourceManager extends WOResourceManager {
 	 * Creates an immutable dictionary containing all of the keys and objects
 	 * from two dictionaries.
 	 * 
-	 * @param dict1
-	 *            the first dictionary
-	 * @param dict2
-	 *            the second dictionary
-	 * @return immutbale dictionary containing the union of the two
-	 *         dictionaries.
+	 * @param dict1 the first dictionary
+	 * @param dict2 the second dictionary
+	 * @return immutbale dictionary containing the union of the two dictionaries.
 	 */
 	private static <K, V> NSDictionary<K, V> dictionaryWithDictionaryAndDictionary(NSDictionary<? extends K, ? extends V> dict1, NSDictionary<? extends K, ? extends V> dict2) {
 		if (dict1 == null || dict1.allKeys().count() == 0)
@@ -344,6 +364,7 @@ public class ERXResourceManager extends WOResourceManager {
 
 	/**
 	 * Returns whether or not complete resource URLs should be generated.
+	 * 
 	 * @param context the context
 	 * @return whether or not complete resource URLs should be generated
 	 */
@@ -352,7 +373,8 @@ public class ERXResourceManager extends WOResourceManager {
 	}
 	
  	/**
-	 * Returns a fully qualified URL for the given partial resource URL (i.e. turns /whatever into http://server/whatever). 
+	 * Returns a fully qualified URL for the given partial resource URL (i.e. turns /whatever into http://server/whatever).
+	 *  
 	 * @param url the partial resource URL
 	 * @param secure whether or not to generate a secure URL
 	 * @param context the current context
@@ -362,6 +384,7 @@ public class ERXResourceManager extends WOResourceManager {
 		String completeUrl;
 		boolean requestIsSecure = ERXRequest.isRequestSecure(context.request());
 		boolean resourceIsSecure = (secure == null) ? requestIsSecure : secure.booleanValue();
+
 		if ((resourceIsSecure && ERXProperties.stringForKey("er.extensions.ERXResourceManager.secureResourceUrlPrefix") == null) || (!resourceIsSecure && ERXProperties.stringForKey("er.extensions.ERXResourceManager.resourceUrlPrefix") == null)) {
 			StringBuffer sb = new StringBuffer();
 			String serverPortStr = context.request()._serverPort();
@@ -373,6 +396,7 @@ public class ERXResourceManager extends WOResourceManager {
 		else {
 			completeUrl = url;
 		}
+
 		return completeUrl;
 	}
 	
@@ -386,20 +410,15 @@ public class ERXResourceManager extends WOResourceManager {
 	 * @author mschrag
 	 */
 	public static interface IVersionManager {
+
 		/**
-		 * Returns the variant of the given resource URL adjusted to include
-		 * version information.
+		 * Returns the variant of the given resource URL adjusted to include version information.
 		 * 
-		 * @param resourceUrl
-		 *            the original resource URL
-		 * @param name
-		 *            the name of the resource being loaded
-		 * @param bundleName
-		 *            the name of the bundle that contains the resource
-		 * @param languages
-		 *            the languages requested
-		 * @param request
-		 *            the request
+		 * @param resourceUrl the original resource URL
+		 * @param name the name of the resource being loaded
+		 * @param bundleName the name of the bundle that contains the resource
+		 * @param languages the languages requested
+		 * @param request the request
 		 * @return a versioned variant of the resourceUrl
 		 */
 		public String versionedUrlForResourceNamed(String resourceUrl, String name, String bundleName, NSArray<String> languages, WORequest request);
@@ -411,6 +430,7 @@ public class ERXResourceManager extends WOResourceManager {
 	 * @author mschrag
 	 */
 	public static class DefaultVersionManager implements IVersionManager {
+
 		/**
 		 * @return resourceUrl
 		 */
@@ -433,24 +453,29 @@ public class ERXResourceManager extends WOResourceManager {
 	 * @property er.extensions.ERXResourceManager.versionManager.[bundleName].[resourceName]
 	 *           the version to send for the specified resource. If not set
 	 *           explicitly, the app default version will be used instead.
+	 *          
 	 * @author mschrag
 	 */
 	public static class PropertiesVersionManager implements IVersionManager {
+
 		private static Logger log = LoggerFactory.getLogger(ERXResourceManager.class);
 		private String _defaultVersion;
 
 		public PropertiesVersionManager() {
 			String key = "er.extensions.ERXResourceManager.versionManager.default";
 			_defaultVersion = ERXProperties.stringForKey(key);
+
 			if (_defaultVersion == null) {
 				_defaultVersion = String.valueOf(System.currentTimeMillis());
 			}
 		}
 
 		public String versionedUrlForResourceNamed(String resourceUrl, String name, String bundleName, NSArray<String> languages, WORequest request) {
+
 			if (bundleName == null) {
 				bundleName = "app";
 			}
+
 			String key = "er.extensions.ERXResourceManager.versionManager." + bundleName + "." + name;
 			String version = ERXProperties.stringForKey(key);
 			if (version == null) {
@@ -474,26 +499,27 @@ public class ERXResourceManager extends WOResourceManager {
 	}
 	
 	/**
-	 * Overridden to supply additional mime types that are not present in the
-	 * JavaWebObjects framework.
-	 * @param aResourcePath file path of the resource, or just file name of the resource,
-	 *        as only the extension is required
+	 * Overridden to supply additional mime types that are not present in the JavaWebObjects framework.
+	 * 
+	 * @param aResourcePath file path of the resource, or just file name of the resource, as only the extension is required
 	 * @return HTTP content type for the named resource specified by <code>aResourcePath</code>
 	 */
 	@Override
 	public String contentTypeForResourceNamed(String aResourcePath) {
 		String aPathExtension = NSPathUtilities.pathExtension(aResourcePath);
+
 		if(aPathExtension != null && aPathExtension.length() != 0) {
 			String mime = _mimeTypes.objectForKey(aPathExtension.toLowerCase());
+
 			if(mime != null) {
 				return mime;
 			}
 		}
+
 		return super.contentTypeForResourceNamed(aResourcePath);
 	}
 	
 	private static NSDictionary<String, String> _additionalMimeTypes() {
-		NSDictionary<String, String> plist = (NSDictionary<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
-		return plist;
+		return (NSDictionary<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
 	}
 }
