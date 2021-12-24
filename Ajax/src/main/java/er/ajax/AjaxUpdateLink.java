@@ -269,12 +269,30 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 			fullEffectName = null;
 		}
 		else if (effectName.indexOf('.') == -1) {
-			fullEffectName = "Effect." + ERXStringUtilities.capitalize(effectName);
+			fullEffectName = "Effect." + capitalize(effectName);
 		}
 		else {
 			fullEffectName = effectName;
 		}
 		return fullEffectName;
+	}
+
+	/**
+	 * @return The given string with the first letter set to uppercase
+	 * 
+	 * FIXME: Ripped from ERXSTringUtilities, since this is the only remaining usage 
+	 */
+	private static String capitalize( String value ) {
+		String capital = null;
+
+		if( value != null && value.length() > 0 ) {
+			StringBuilder buffer = new StringBuilder( value );
+
+			buffer.setCharAt( 0, Character.toUpperCase( value.charAt( 0 ) ) );
+			capital = buffer.toString();
+		}
+
+		return capital != null ? capital : value;
 	}
 
 	// PROTOTYPE OPTIONS
