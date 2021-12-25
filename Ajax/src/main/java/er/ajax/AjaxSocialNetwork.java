@@ -7,7 +7,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.foundation.ERXMutableURL;
-import er.extensions.foundation.ERXStringUtilities;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Provides an interface to retrieving information and URLs 
@@ -104,7 +104,7 @@ public abstract class AjaxSocialNetwork {
 	 */
 	private static String displayNameForKey(String key) {
 		StringBuilder finalString = null;
-		if (!ERXStringUtilities.stringIsNullOrEmpty(key) && !key.trim().equals("")) {
+		if (!ERXUtilities.stringIsNullOrEmpty(key) && !key.trim().equals("")) {
 			finalString = new StringBuilder();
 			String lastHop = key.indexOf(".") == -1 ? key : key.endsWith(".") ? "" : key.substring(key.lastIndexOf(".") + 1);
 			StringBuilder tempString = new StringBuilder();

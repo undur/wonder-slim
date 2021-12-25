@@ -24,7 +24,7 @@ import com.webobjects.woextensions.stats.WOStatsPage;
 
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXStringUtilities;
+import er.extensions.foundation.ERXUtilities;
 import er.extensions.logging.ERXLog4JConfiguration;
 import er.extensions.logging.ERXLogger;
 import er.extensions.statistics.ERXStats;
@@ -189,7 +189,7 @@ public class ERXDirectAction extends WODirectAction {
 		if (canPerformActionWithPasswordKey("er.extensions.ERXDirectAction.ChangeSystemPropertyPassword")) {
 			String key = request().stringFormValueForKey("key");
 			WOResponse r = new WOResponse();
-			if (ERXStringUtilities.stringIsNullOrEmpty(key)) {
+			if (ERXUtilities.stringIsNullOrEmpty(key)) {
 				String user = request().stringFormValueForKey("user");
 				Properties props = ERXConfigurationManager.defaultManager().defaultProperties();
 				if (user != null) {
@@ -200,7 +200,7 @@ public class ERXDirectAction extends WODirectAction {
 			}
 			else {
 				String value = request().stringFormValueForKey("value");
-				value = ERXStringUtilities.stringIsNullOrEmpty(value) ? "" : value;
+				value = ERXUtilities.stringIsNullOrEmpty(value) ? "" : value;
 				java.util.Properties p = System.getProperties();
 				p.put(key, value);
 				System.setProperties(p);

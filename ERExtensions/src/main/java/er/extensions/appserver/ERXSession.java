@@ -34,7 +34,6 @@ import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXStringUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.localization.ERXLocalizer;
@@ -557,7 +556,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 							key += ".";
 						}
 						while (theObject == null && oriKey.indexOf(".") > -1);
-						if (theObject != null && !ERXStringUtilities.stringIsNullOrEmpty(oriKey)) {
+						if (theObject != null && !ERXUtilities.stringIsNullOrEmpty(oriKey)) {
 							theObject = NSKeyValueCodingAdditions.Utility.valueForKeyPath(theObject, oriKey);
 						}
 					}
