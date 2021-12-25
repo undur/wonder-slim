@@ -104,7 +104,7 @@ public abstract class AjaxSocialNetwork {
 	 */
 	private static String displayNameForKey(String key) {
 		StringBuilder finalString = null;
-		if (!ERXStringUtilities.isNullOrEmpty(key) && !key.trim().equals("")) {
+		if (!ERXStringUtilities.stringIsNullOrEmpty(key) && !key.trim().equals("")) {
 			finalString = new StringBuilder();
 			String lastHop = key.indexOf(".") == -1 ? key : key.endsWith(".") ? "" : key.substring(key.lastIndexOf(".") + 1);
 			StringBuilder tempString = new StringBuilder();

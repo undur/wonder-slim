@@ -189,7 +189,7 @@ public class ERXDirectAction extends WODirectAction {
 		if (canPerformActionWithPasswordKey("er.extensions.ERXDirectAction.ChangeSystemPropertyPassword")) {
 			String key = request().stringFormValueForKey("key");
 			WOResponse r = new WOResponse();
-			if (ERXStringUtilities.isNullOrEmpty(key)) {
+			if (ERXStringUtilities.stringIsNullOrEmpty(key)) {
 				String user = request().stringFormValueForKey("user");
 				Properties props = ERXConfigurationManager.defaultManager().defaultProperties();
 				if (user != null) {
@@ -200,7 +200,7 @@ public class ERXDirectAction extends WODirectAction {
 			}
 			else {
 				String value = request().stringFormValueForKey("value");
-				value = ERXStringUtilities.isNullOrEmpty(value) ? "" : value;
+				value = ERXStringUtilities.stringIsNullOrEmpty(value) ? "" : value;
 				java.util.Properties p = System.getProperties();
 				p.put(key, value);
 				System.setProperties(p);

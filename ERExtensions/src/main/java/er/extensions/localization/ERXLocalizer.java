@@ -697,7 +697,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 	 * @return a localized string value or the object value of the @ keyPath
 	 */
 	public Object localizedValueForKey(String key) {
-		if(!ERXStringUtilities.isNullOrEmpty(key) && _localizerMethodIndicatorCharacter == key.charAt(0)) {
+		if(!ERXStringUtilities.stringIsNullOrEmpty(key) && _localizerMethodIndicatorCharacter == key.charAt(0)) {
 			int dotIndex = key.indexOf(NSKeyValueCodingAdditions.KeyPathSeparator);
 			String methodKey = (dotIndex>0)?key.substring(1, dotIndex):key.substring(1, key.length());
       
