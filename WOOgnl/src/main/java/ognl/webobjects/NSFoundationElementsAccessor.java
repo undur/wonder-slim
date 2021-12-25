@@ -10,9 +10,9 @@ package ognl.webobjects;
 
 import java.util.Enumeration;
 
-import ognl.ElementsAccessor;
-
 import com.webobjects.foundation.NSSelector;
+
+import ognl.ElementsAccessor;
 
 public class NSFoundationElementsAccessor implements ElementsAccessor {
     private static NSSelector sel = new NSSelector( "objectEnumerator" );

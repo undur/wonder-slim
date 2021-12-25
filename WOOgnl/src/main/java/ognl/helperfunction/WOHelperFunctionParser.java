@@ -5,8 +5,6 @@ import java.util.Enumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ognl.webobjects.WOOgnl;
-
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver._private.WOConstantValueAssociation;
@@ -17,6 +15,8 @@ import com.webobjects.appserver._private.WOKeyValueAssociation;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
+
+import ognl.webobjects.WOOgnl;
 
 public class WOHelperFunctionParser {
 	private static final Logger log = LoggerFactory.getLogger(WOHelperFunctionParser.class);

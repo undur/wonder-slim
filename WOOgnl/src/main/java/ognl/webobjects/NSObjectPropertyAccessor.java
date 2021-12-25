@@ -10,12 +10,12 @@ package ognl.webobjects;
 
 import java.util.Map;
 
+import com.webobjects.foundation.NSKeyValueCoding;
+import com.webobjects.foundation.NSValidation;
+
 import ognl.OgnlContext;
 import ognl.OgnlException;
 import ognl.PropertyAccessor;
-
-import com.webobjects.foundation.NSKeyValueCoding;
-import com.webobjects.foundation.NSValidation;
 
 public class NSObjectPropertyAccessor implements PropertyAccessor {
 

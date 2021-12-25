@@ -10,9 +10,9 @@ package ognl.webobjects;
 
 import java.util.Map;
 
-import ognl.ClassResolver;
-
 import com.webobjects.foundation._NSUtilities;
+
+import ognl.ClassResolver;
 
 public class NSClassResolver implements ClassResolver {
 

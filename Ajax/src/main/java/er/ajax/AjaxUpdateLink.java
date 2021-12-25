@@ -19,7 +19,6 @@ import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.components.ERXComponentUtilities;
 import er.extensions.foundation.ERXMutableURL;
-import er.extensions.foundation.ERXStringUtilities;
 
 /**
  * Updates a region on the screen by creating a request to an action, then returning a script that in turn creates an

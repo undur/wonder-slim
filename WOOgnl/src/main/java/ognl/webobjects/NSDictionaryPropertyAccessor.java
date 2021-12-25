@@ -10,12 +10,12 @@ package ognl.webobjects;
 
 import java.util.Map;
 
+import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSMutableDictionary;
+
 import ognl.OgnlContext;
 import ognl.OgnlException;
 import ognl.PropertyAccessor;
-
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableDictionary;
 
 public class NSDictionaryPropertyAccessor implements PropertyAccessor {
 
