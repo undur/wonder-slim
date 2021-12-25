@@ -29,12 +29,6 @@ import er.extensions.logging.ERXLog4JConfiguration;
 import er.extensions.logging.ERXLogger;
 import er.extensions.statistics.ERXStats;
 
-/**
- * Basic collector for direct action additions. All of the actions are password
- * protected, you need to give an argument "pw" that matches the corresponding
- * system property for the action.
- */
-
 public class ERXAdminDirectAction extends WODirectAction {
 
 	private static Logger log = LoggerFactory.getLogger( ERXAdminDirectAction.class );
