@@ -35,11 +35,11 @@ import er.extensions.statistics.ERXStats;
  * system property for the action.
  */
 
-public class ERXDirectAction extends WODirectAction {
+public class ERXAdminDirectAction extends WODirectAction {
 
-	private static Logger log = LoggerFactory.getLogger( ERXDirectAction.class );
+	private static Logger log = LoggerFactory.getLogger( ERXAdminDirectAction.class );
 
-	public ERXDirectAction(WORequest r) {
+	public ERXAdminDirectAction(WORequest r) {
 		super(r);
 	}
 
