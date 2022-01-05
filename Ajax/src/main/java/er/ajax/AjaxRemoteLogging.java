@@ -1,6 +1,7 @@
 package er.ajax;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
@@ -21,8 +22,8 @@ import er.extensions.appserver.ERXDirectAction;
  * 
  * @author ak
  * 
- * @binding logger the log4j logger to append to (default: "AjaxRemoteLogging")
- * @binding level the log4j logging level to use (default: "info")
+ * @binding logger the logger to append to (default: "AjaxRemoteLogging")
+ * @binding level the logging level to use (default: "info")
  * @binding throttle the number of milliseconds to collect statements before actually sending (default: 100)
  * @binding filter a javascript function that returns true on a single argument
  *          msg when the logging should go to the server
@@ -91,9 +92,10 @@ public class AjaxRemoteLogging extends AjaxDynamicElement {
 			}
 			// trigger session loading if present
 			WOSession existing = existingSession();
-			Logger log = Logger.getLogger(logger);
+			Logger log = LoggerFactory.getLogger(logger);
 			if ("fatal".equalsIgnoreCase(level)) {
-				log.fatal(msg);
+				throw new RuntimeException( "We no longer support the logging level 'fatal'" ); // FIXME: We should look into this, removed 
+//				log.fatal(msg);
 			}
 			else if ("error".equalsIgnoreCase(level)) {
 				log.error(msg);
