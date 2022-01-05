@@ -4,8 +4,8 @@ import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver._private.WOConstantValueAssociation;
@@ -18,7 +18,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation._NSStringUtilities;
 
 public class WOHelperFunctionDeclarationParser {
-	public static Logger log = Logger.getLogger(WOHelperFunctionDeclarationParser.class);
+	public static Logger log = LoggerFactory.getLogger(WOHelperFunctionDeclarationParser.class);
 
 	private NSMutableDictionary _quotedStrings;
 	private static final int STATE_OUTSIDE = 0;
@@ -27,7 +27,8 @@ public class WOHelperFunctionDeclarationParser {
 	private static final String QUOTED_STRING_KEY = "_WODP_";
 
 	static {
-		WOHelperFunctionDeclarationParser.log.setLevel(Level.WARN);
+// 		FIXME: Disabled on switch to slf4j // Hugi 2022-01-05
+//		WOHelperFunctionDeclarationParser.log.setLevel(Level.WARN);
 	}
 
 	public WOHelperFunctionDeclarationParser() {
