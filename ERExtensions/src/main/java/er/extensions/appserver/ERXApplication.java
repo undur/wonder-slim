@@ -87,7 +87,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * The horrible thing that does horrible things
 	 */
-	private static Loader _loader;
+	private static ERXLoader _loader;
 
 	/**
 	 * Notification to get posted when terminate() is called.
@@ -173,7 +173,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
 	public static void setup(String[] argv) {
-		_loader = new Loader(argv);
+		_loader = new ERXLoader(argv);
 
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);

@@ -58,9 +58,9 @@ import er.extensions.foundation.ERXUtilities;
  * @author ak
  */
 
-public class Loader {
+public class ERXLoader {
 
-	private static final Logger log = LoggerFactory.getLogger(Loader.class);
+	private static final Logger log = LoggerFactory.getLogger(ERXLoader.class);
 
 	/**
 	 * Command line arguments passed to the main method
@@ -153,7 +153,7 @@ public class Loader {
 	/**
 	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
-	public Loader(String[] argv) {
+	public ERXLoader(String[] argv) {
 		String cps[] = new String[] { "java.class.path", "com.webobjects.classpath" };
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 		defaultProperties = (Properties) NSProperties._getProperties().clone();
