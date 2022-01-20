@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
@@ -47,8 +46,6 @@ public class ERXProperties {
 
     private static final Logger log = LoggerFactory.getLogger(ERXProperties.class);
     private static final Logger configLog = LoggerFactory.getLogger(ERXConfigurationManager.class);
-
-    private static final Map<String, String> AppSpecificPropertyNames = new HashMap<>(128);
 
     /**
      * FIXME: This constructor was onl yadded as an experiment, to ensure that no instances are created, so I can eliminate the KVC implementation // Hugi 2022-01-20
@@ -751,11 +748,7 @@ public class ERXProperties {
     }
 
     private static void systemPropertiesChanged() {
-        synchronized (AppSpecificPropertyNames) {
-            AppSpecificPropertyNames.clear();
-        }
         _cache.clear();
-        // MS: Leave for future WO support ...
         NSNotificationCenter.defaultCenter().postNotification(NSProperties.PropertiesDidChange, null, null);
     }
 
