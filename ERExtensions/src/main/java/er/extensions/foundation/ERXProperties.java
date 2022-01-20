@@ -275,39 +275,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         final String stringValue = propertyValue == null ? defaultValue : propertyValue;
         return stringValue == UndefinedMarker ? null : stringValue;
     }
-    
-    /**
-     * Returns an array of strings separated with the given separator string.
-     * 
-     * @param key the key to lookup
-     * @param separator the separator (",")
-     * @return the array of strings or NSArray.EmptyArray if not found
-     */
-    @SuppressWarnings({ "unchecked" })
-    public static NSArray<String> componentsSeparatedByString(String key, String separator) {
-    	return ERXProperties.componentsSeparatedByStringWithDefault(key, separator, NSArray.EmptyArray);
-    }
-
-    /**
-     * Returns an array of strings separated with the given separator string.
-     * 
-     * @param key the key to lookup
-     * @param separator the separator (",")
-     * @param defaultValue the default array to return if there is no value
-     * @return the array of strings
-     */
-    @SuppressWarnings({ "unchecked" })
-	public static NSArray<String> componentsSeparatedByStringWithDefault(String key, String separator, NSArray<String> defaultValue) {
-    	NSArray<String> array;
-    	String str = stringForKeyWithDefault(key, null);
-    	if (str == null) {
-    		array = defaultValue;
-    	}
-    	else {
-    		array = NSArray.componentsSeparatedByString(str, separator);
-    	}
-    	return array;
-    }
 
     /**
      * Returns an enum value for a given enum class and system property. If the property is not
