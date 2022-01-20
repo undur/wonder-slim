@@ -7,7 +7,6 @@
 package er.extensions.foundation;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,7 +29,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -871,22 +869,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         store(os, null);
         return new String(os.toByteArray());
-    }
-    
-    /**
-     * Load the properties from a String in Property file format. Useful when you use them 
-     * as custom value types, you would set this as the factory method name.
-     */
-	public static ERXProperties fromExternalForm(String string) {
-        ERXProperties result = new ERXProperties();
-        try {
-			result.load(new ByteArrayInputStream(string.getBytes()));
-		}
-		catch (IOException e) {
-			// AK: shouldn't ever happen...
-			throw NSForwardException._runtimeExceptionForThrowable(e);
-		}
-        return result;
     }
 
 	@Override
