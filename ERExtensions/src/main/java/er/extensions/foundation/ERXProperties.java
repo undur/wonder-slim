@@ -857,20 +857,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         return property;
     }
 
-    /**
-     * Returns the properties as a String in Property file format. Useful when you use them 
-     * as custom value types, you would set this as the conversion method name.
-     * 
-     * @return Returns the properties as a String in Property file format
-     * @throws IOException
-     */
-    // TODO The result isn't a Object it is a String
-	public Object toExternalForm() throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        store(os, null);
-        return new String(os.toByteArray());
-    }
-
 	@Override
     public void takeValueForKey(Object anObject, String aKey) {
          setProperty(aKey, (anObject != null ? anObject.toString() : null));
