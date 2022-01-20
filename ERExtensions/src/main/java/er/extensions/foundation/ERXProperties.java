@@ -96,7 +96,7 @@ public class ERXProperties {
 		} else if (cachedValue instanceof NSArray) {
 			value = (NSArray) cachedValue;
 		} else {
-			value = ERXValueUtilities.arrayValueWithDefault(ERXSystem.getProperty(propertyName), null);
+			value = ERXValueUtilities.arrayValueWithDefault(NSProperties.getProperty(propertyName), null);
 			_cache.put(s, value == null ? UndefinedMarker : value);
 			if (value == null) {
 				value = defaultValue;
@@ -138,7 +138,7 @@ public class ERXProperties {
 		} else if (cachedValue instanceof Boolean) {
 			value = ((Boolean) cachedValue).booleanValue();
 		} else {
-			Boolean objValue = ERXValueUtilities.BooleanValueWithDefault(ERXSystem.getProperty(propertyName), null);
+			Boolean objValue = ERXValueUtilities.BooleanValueWithDefault(NSProperties.getProperty(propertyName), null);
 			_cache.put(propertyName, objValue == null ? UndefinedMarker : objValue);
 			if (objValue == null) {
 				value = defaultValue;
@@ -176,7 +176,7 @@ public class ERXProperties {
 		} else if (cachedValue instanceof Integer) {
 			value = ((Integer) cachedValue).intValue();
 		} else {
-			Integer objValue = ERXValueUtilities.IntegerValueWithDefault(ERXSystem.getProperty(propertyName), null);
+			Integer objValue = ERXValueUtilities.IntegerValueWithDefault(NSProperties.getProperty(propertyName), null);
 			_cache.put(s, objValue == null ? UndefinedMarker : objValue);
 			if (objValue == null) {
 				value = defaultValue;
@@ -208,7 +208,7 @@ public class ERXProperties {
             return (BigDecimal)value;
         }
         
-        String propertyValue = ERXSystem.getProperty(propertyName);
+        String propertyValue = NSProperties.getProperty(propertyName);
         final BigDecimal bigDecimal = ERXValueUtilities.bigDecimalValueWithDefault(propertyValue, defaultValue);
         _cache.put(propertyName, propertyValue == null ? UndefinedMarker : bigDecimal);
         return bigDecimal;
@@ -231,7 +231,7 @@ public class ERXProperties {
 		} else if (cachedValue instanceof Long) {
 			value = ((Long) cachedValue).longValue();
 		} else {
-			Long objValue = ERXValueUtilities.LongValueWithDefault(ERXSystem.getProperty(propertyName), null);
+			Long objValue = ERXValueUtilities.LongValueWithDefault(NSProperties.getProperty(propertyName), null);
 			_cache.put(s, objValue == null ? UndefinedMarker : objValue);
 			if (objValue == null) {
 				value = defaultValue;
@@ -265,7 +265,7 @@ public class ERXProperties {
      */
 	public static String stringForKeyWithDefault(final String s, final String defaultValue) {
         final String propertyName = getApplicationSpecificPropertyName(s);
-        final String propertyValue = ERXSystem.getProperty(propertyName);
+        final String propertyValue = NSProperties.getProperty(propertyName);
         final String stringValue = propertyValue == null ? defaultValue : propertyValue;
         return stringValue == UndefinedMarker ? null : stringValue;
     }
@@ -405,7 +405,7 @@ public class ERXProperties {
         	addIfPresent(frameworkName + ".framework.dev", devPropertiesPath, propertiesPaths, projectsInfo);
         	
         	/** Properties.<userName> -- per-Framework-per-User properties */
-        	String userPropertiesPath = ERXProperties.variantPropertiesInBundle(ERXSystem.getProperty("user.name"), frameworkName);
+        	String userPropertiesPath = ERXProperties.variantPropertiesInBundle(NSProperties.getProperty("user.name"), frameworkName);
         	addIfPresent(frameworkName + ".framework.user", userPropertiesPath, propertiesPaths, projectsInfo);
         }
 
@@ -419,7 +419,7 @@ public class ERXProperties {
 		}
 
 		/*  WebObjects.properties in the user home directory */
-		String userHome = ERXSystem.getProperty("user.home");
+		String userHome = NSProperties.getProperty("user.home");
 		if (userHome != null && userHome.length() > 0) {
 			File file = new File(userHome, "WebObjects.properties");
 			if (file.exists() && file.isFile() && file.canRead()) {
@@ -453,7 +453,7 @@ public class ERXProperties {
 			}
 		}
 
-		optionalPropertiesLoader(ERXSystem.getProperty("user.name"), propertiesPaths, projectsInfo);
+		optionalPropertiesLoader(NSProperties.getProperty("user.name"), propertiesPaths, projectsInfo);
 		
         /** /etc/WebObjects/AppName/Properties -- per-Application-per-Machine properties */
         String applicationMachinePropertiesPath = ERXProperties.applicationMachinePropertiesPath("Properties");
@@ -474,7 +474,7 @@ public class ERXProperties {
 			message.append(projectsInfo.componentsJoinedByString("\n"));
 			message.append('\n');
 			message.append("ERXProperties currently has the following properties:\n");
-			message.append(ERXProperties.logString(ERXSystem.getProperties()));
+			message.append(ERXProperties.logString(NSProperties._getProperties()));
 			// ERXLogger.configureLoggingWithSystemProperties();
 			log.info(message.toString());
 		}
@@ -647,7 +647,7 @@ public class ERXProperties {
 	private static String applicationDeveloperProperties() {
     	String applicationDeveloperPropertiesPath = null;
     	if (ERXApplication.isDevelopmentModeSafe()) {
-	        String devName = ERXSystem.getProperty("er.extensions.ERXProperties.devPropertiesName", "dev");
+	        String devName = NSProperties.getProperty("er.extensions.ERXProperties.devPropertiesName", "dev");
 	        applicationDeveloperPropertiesPath = variantPropertiesInBundle(devName, "app");
     	}
         return applicationDeveloperPropertiesPath;
@@ -675,7 +675,7 @@ public class ERXProperties {
      * @return The application-specific user properties
      */
 	private static String applicationUserProperties() {
-    	return variantPropertiesInBundle(ERXSystem.getProperty("user.name"), "app");
+    	return variantPropertiesInBundle(NSProperties.getProperty("user.name"), "app");
     }
     
     /**
@@ -688,14 +688,14 @@ public class ERXProperties {
      */
 	private static String applicationMachinePropertiesPath(String fileName) {
     	String applicationMachinePropertiesPath = null;
-    	String machinePropertiesPath = ERXSystem.getProperty("er.extensions.ERXProperties.machinePropertiesPath", "/etc/WebObjects");
+    	String machinePropertiesPath = NSProperties.getProperty("er.extensions.ERXProperties.machinePropertiesPath", "/etc/WebObjects");
     	WOApplication application = WOApplication.application();
     	String applicationName;
     	if (application != null) {
     		applicationName = application.name();
     	}
     	else {
-    		applicationName = ERXSystem.getProperty("WOApplicationName");
+    		applicationName = NSProperties.getProperty("WOApplicationName");
     		if (applicationName == null) {
     			NSBundle mainBundle = NSBundle.mainBundle();
     			if (mainBundle != null) {

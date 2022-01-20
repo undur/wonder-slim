@@ -16,7 +16,6 @@ import com.webobjects.foundation.NSSelector;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXSystem;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.localization.ERXLocalizer;
 import er.extensions.logging.ERXLogger;
@@ -42,7 +41,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 			// This will load any optional configuration files, ensures that WOOutputPath's was processed with this @@ variable substitution.
 			// WOApplication uses WOOutputPath in its constructor so we need to modify it before calling the constructor.
 			ERXConfigurationManager.defaultManager().initialize();
-			ERXSystem.updateProperties();
 
 			// GN: configure logging with optional custom subclass of ERXLogger
 			String className = ERXProperties.stringForKey("er.extensions.erxloggerclass");

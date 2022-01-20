@@ -261,7 +261,6 @@ public class ERXConfigurationManager {
 		Properties systemProperties = System.getProperties();
 		systemProperties = applyConfiguration(systemProperties);
 
-		ERXSystem.updateProperties(systemProperties);
 		ERXProperties.transferPropertiesFromSourceToDest(systemProperties, System.getProperties());
 
 		ERXLogger.configureLoggingWithSystemProperties();

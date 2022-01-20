@@ -12,9 +12,9 @@ import org.apache.log4j.PropertyConfigurator;
 
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSNotificationCenter;
+import com.webobjects.foundation.NSProperties;
 
 import er.extensions.foundation.ERXConfigurationManager;
-import er.extensions.foundation.ERXSystem;
 
 /**
  * Custom subclass of Logger. The main reason for this class is to isolate the
@@ -163,7 +163,7 @@ public class ERXLogger extends Logger {
 	}
 
 	public static synchronized void configureLoggingWithSystemProperties() {
-		ERXLogger.configureLogging(ERXSystem.getProperties());
+		ERXLogger.configureLogging(NSProperties._getProperties());
 	}
 
 	/**
