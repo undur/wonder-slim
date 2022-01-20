@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -89,54 +88,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     * Internal cache of type converted values to avoid reconverting attributes that are asked for frequently 
     */
     private static Map<String, Object> _cache = new ConcurrentHashMap<>();
-
-    /** 
-     * Returns the version string of the application.  
-     * It checks <code>CFBundleShortVersionString</code> property 
-     * in the <code>info.plist</code> resource and returns 
-     * a trimmed version of the value. 
-     * 
-     * @return version number as string; can be a null-string when the application doesn't have the value of <code>CFBundleShortVersionString</code> in its <code>info.plist</code> resource.
-     * @see #versionStringForFrameworkNamed
-     * @see #webObjectsVersion
-     */ 
-	public static String versionStringForApplication() {
-        return valueFromPlistBundleWithKey(NSBundle.mainBundle(), "../Info.plist", "CFBundleShortVersionString");
-    }
-
-    /** 
-     * Returns the version string of the given framework.
-     * It checks <code>CFBundleShortVersionString</code> property 
-     * in the <code>info.plist</code> resource and returns 
-     * a trimmed version of the value.
-     * 
-     * @param frameworkName name
-     * @return version number as string; can be null-string when the framework is not found or the framework doesn't have the value of <code>CFBundleShortVersionString</code> in its <code>info.plist</code> resource.
-     * @see #versionStringForApplication()
-     * @see #webObjectsVersion()
-     */ 
-	public static String versionStringForFrameworkNamed(String frameworkName) {
-        return valueFromPlistBundleWithKey(NSBundle.bundleForName(frameworkName), "Info.plist", "CFBundleShortVersionString");
-    }
-
-    /**
-     * Returns the key in an plist of the given framework.
-     * 
-     * @param bundle bundle name
-     * @param plist plist Filename
-     * @param key key
-     * @return Result
-     */
-    public static String valueFromPlistBundleWithKey(NSBundle bundle, String plist, String key) {
-    	if (bundle == null)
-    		return "";
-
-    	String dictString = new String(bundle.bytesForResourcePath(plist));
-    	NSDictionary versionDictionary = NSPropertyListSerialization.dictionaryForString(dictString);
-
-    	String versionString = (String) versionDictionary.objectForKey(key);
-    	return versionString == null  ?  ""  :  versionString.trim(); // trim() removes the line ending char
-    }
 
     /** constant string used if Wonder version could not be determined */
     public static final String UNKNOWN_WONDER_VERSION = "Not Available";

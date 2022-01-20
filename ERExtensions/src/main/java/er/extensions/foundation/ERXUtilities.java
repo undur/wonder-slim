@@ -156,7 +156,7 @@ public class ERXUtilities {
 		NSMutableDictionary<String, Object> bundleVersions = new NSMutableDictionary<String, Object>();
 		for (Enumeration bundles = NSBundle._allBundlesReally().objectEnumerator(); bundles.hasMoreElements();) {
 			NSBundle bundle = (NSBundle) bundles.nextElement();
-			String version = ERXProperties.versionStringForFrameworkNamed(bundle.name());
+			String version = versionStringForFrameworkNamed(bundle.name());
 			if (version == null) {
 				version = "No version provided";
 			}
@@ -220,4 +220,52 @@ public class ERXUtilities {
 	public static boolean stringIsNullOrEmpty( String string ) {
 		return string == null || string.isEmpty();
 	}
+	
+    /** 
+     * Returns the version string of the application.  
+     * It checks <code>CFBundleShortVersionString</code> property 
+     * in the <code>info.plist</code> resource and returns 
+     * a trimmed version of the value. 
+     * 
+     * @return version number as string; can be a null-string when the application doesn't have the value of <code>CFBundleShortVersionString</code> in its <code>info.plist</code> resource.
+     * @see #webObjectsVersion
+     * 
+     * FIXME: Moved here from ERXProperties. I'm going to allow it to stay for a bit, even if it's unused // Hugi 2022-01-20
+     */ 
+	private static String versionStringForApplication() {
+        return valueFromPlistBundleWithKey(NSBundle.mainBundle(), "../Info.plist", "CFBundleShortVersionString");
+    }
+
+    /** 
+     * Returns the version string of the given framework.
+     * It checks <code>CFBundleShortVersionString</code> property 
+     * in the <code>info.plist</code> resource and returns 
+     * a trimmed version of the value.
+     * 
+     * @param frameworkName name
+     * @return version number as string; can be null-string when the framework is not found or the framework doesn't have the value of <code>CFBundleShortVersionString</code> in its <code>info.plist</code> resource.
+     * @see #webObjectsVersion()
+     */ 
+	private static String versionStringForFrameworkNamed(String frameworkName) {
+        return valueFromPlistBundleWithKey(NSBundle.bundleForName(frameworkName), "Info.plist", "CFBundleShortVersionString");
+    }
+
+    /**
+     * Returns the key in an plist of the given framework.
+     * 
+     * @param bundle bundle name
+     * @param plist plist Filename
+     * @param key key
+     * @return Result
+     */
+	private static String valueFromPlistBundleWithKey(NSBundle bundle, String plist, String key) {
+    	if (bundle == null)
+    		return "";
+
+    	String dictString = new String(bundle.bytesForResourcePath(plist));
+    	NSDictionary versionDictionary = NSPropertyListSerialization.dictionaryForString(dictString);
+
+    	String versionString = (String) versionDictionary.objectForKey(key);
+    	return versionString == null  ?  ""  :  versionString.trim(); // trim() removes the line ending char
+    }
 }
