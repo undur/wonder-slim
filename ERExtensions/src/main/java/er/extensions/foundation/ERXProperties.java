@@ -177,46 +177,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 		}
 		return value;
     }
-    
-    /**
-     * Cover method for returning an NSDictionary for a
-     * given system property.
-     * 
-     * @param s system property
-     * 
-     * @return dictionary de-serialized from the string in the system properties
-     */
-	public static NSDictionary dictionaryForKey(String s) {
-        return dictionaryForKeyWithDefault(s, null);
-    }
 
-    /**
-     * dictionaryForKeyWithDefault
-     * Cover method for returning an NSDictionary for a
-     * given system property or the default value.
-     * 
-     * @param s system property
-     * @param defaultValue default value
-     * @return dictionary de-serialized from the string in the system properties
-     */
-	public static NSDictionary dictionaryForKeyWithDefault(final String s, final NSDictionary defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
-		NSDictionary value;
-		Object cachedValue = _cache.get(propertyName);
-		if (UndefinedMarker.equals(cachedValue)) {
-			value = defaultValue;
-		} else if (cachedValue instanceof NSDictionary) {
-			value = (NSDictionary) cachedValue;
-		} else {
-			value = ERXValueUtilities.dictionaryValueWithDefault(ERXSystem.getProperty(propertyName), null);
-			_cache.put(s, value == null ? UndefinedMarker : value);
-			if (value == null) {
-				value = defaultValue;
-			}
-		}
-		return value;
-    }
-    
     /**
      * Cover method for returning an int for a given system property.
      * 
@@ -517,16 +478,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
      */
     public static void setArrayForKey(NSArray array, String key) {
         setStringForKey(NSPropertyListSerialization.stringFromPropertyList(array), key);
-    }
-
-    /**
-     * Sets a dictionary in the System properties for a particular key.
-     * 
-     * @param dictionary to be set in the System properties
-     * @param key to be used to get the value
-     */
-    public static void setDictionaryForKey(NSDictionary dictionary, String key) {
-        setStringForKey(NSPropertyListSerialization.stringFromPropertyList(dictionary), key);
     }
 
     /**
