@@ -14,10 +14,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
@@ -38,7 +36,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
-import com.webobjects.foundation.NSPropertyListSerialization;
 
 import er.extensions.appserver.ERXApplication;
 
@@ -670,33 +667,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         	message.append("  " + entry.getKey() + "=" + entry.getValue() + "\n");
         }
         return message.toString();
-    }
-
-    /** 
-     * Returns the full path to the Properties file under the 
-     * given project path. At the current implementation, 
-     * it looks for /Properties and /Resources/Properties. 
-     * If the Properties file doesn't exist, returns null.  
-     * 
-     * @param projectPath string to the project root directory
-     * @return the path to the Properties file if it exists
-     */
-	public static String pathForPropertiesUnderProjectPath(String projectPath) {
-        String path = null; 
-        final List<String> supportedPropertiesPaths = Arrays.asList( "/Properties", "/Resources/Properties");
-
-        for( String s : supportedPropertiesPaths ) {
-            File file = new File(projectPath + s);
-            if (file.exists()  &&  file.isFile()  &&  file.canRead()) {
-                try {
-                    path = file.getCanonicalPath();
-                } catch (IOException ex) {
-                    log.error("Could not get canonical path from {}", file, ex);
-                }
-                break;
-            }
-        }
-        return path;
     }
     
     /**
