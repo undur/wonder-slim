@@ -348,39 +348,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     }
     
     /**
-     * Reads a Java properties file at the given path 
-     * and returns a {@link java.util.Properties Properties} object 
-     * as the result. If the file does not exist, returns 
-     * an empty properties object. 
-     * 
-     * @param path file path to the properties file
-     * @return properties object with the values from the file specified.
-     */
-    // FIXME: This shouldn't eat the exception
-	public static Properties propertiesFromPath(String path) {
-    	ERXProperties._Properties prop = new ERXProperties._Properties();
-
-        if (path == null  ||  path.length() == 0) {
-            log.warn("Attempting to read property file for null file path");
-            return prop;
-        }
-
-        File file = new File(path);
-        if (! file.exists()  ||  ! file.isFile()  ||  ! file.canRead()) {
-            log.warn("File '{}' doesn't exist or can't be read.", path);
-            return prop;
-        }
-
-        try {
-        	prop.load(file);
-            log.debug("Loaded configuration file at path: {}", path);
-        } catch (IOException e) {
-            log.error("Unable to initialize properties from file '{}'", path, e);
-        }
-        return prop;
-    }
-
-    /**
      * Gets the properties for a given file.
      * 
      * @param file the properties file
