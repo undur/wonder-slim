@@ -251,8 +251,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			WOMessage.setDefaultEncoding(defaultMessageEncoding);
 		}
 
-		log.info("Wonder version: " + ERXProperties.wonderVersion());
-
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 

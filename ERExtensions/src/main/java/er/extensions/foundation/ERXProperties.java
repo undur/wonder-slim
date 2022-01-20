@@ -90,15 +90,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     private static Map<String, Object> _cache = new ConcurrentHashMap<>();
 
     /**
-     * Returns the version string of the Wonder frameworks.
-     * 
-     * @return version string
-     */
-    public static String wonderVersion() {
-    	return "8.0.0.slim-SNAPSHOT";
-    }
-    
-    /**
      * Cover method for returning an NSArray for a given system property.
      * 
      * @param s system property
