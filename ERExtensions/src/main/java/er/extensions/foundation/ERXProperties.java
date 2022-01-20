@@ -34,7 +34,7 @@ import com.webobjects.foundation.NSProperties;
 
 import er.extensions.appserver.ERXApplication;
 
-public class ERXProperties extends Properties {
+public class ERXProperties {
 
 	/**
 	 * Do I need to update serialVersionUID?
@@ -804,55 +804,6 @@ public class ERXProperties extends Properties {
 
     /** caches the application name that is appended to the key for lookup */
     protected String applicationNameForAppending;
-
-    /**
-     * Caches the application name for appending to the key.
-     * Note that for a period when the application is starting up
-     * application() will be null and name() will be null.
-     * <p>
-     * Note: this is redundant with the scheme checked in on March 21, 2005 by clloyd (ben holt did checkin).
-     * This scheme requires the user to swizzle the existing properties file with a new one of this type.
-     * 
-     * @return application name used for appending, for example ".ERMailer"
-     */
-	protected String applicationNameForAppending() {
-        if (applicationNameForAppending == null) {
-            applicationNameForAppending = WOApplication.application() != null ? WOApplication.application().name() : null;
-            if (applicationNameForAppending != null) {
-                applicationNameForAppending = "." + applicationNameForAppending;
-            }
-        }
-        return applicationNameForAppending;
-    }
-
-    /**
-     * Overriding the default getProperty method to first check:
-     * key.&lt;ApplicationName&gt; before checking for key. If nothing
-     * is found then key.Default is checked.
-     * 
-     * @param key to check
-     * @return property value
-     */
-	@Override
-    public String getProperty(String key) {
-        String property = null;
-        String application = applicationNameForAppending();
-        if (application != null) {
-            property = super.getProperty(key + application);
-        }
-        if (property == null) {
-            property = super.getProperty(key);
-            if (property == null) {
-                property = super.getProperty(key + DefaultString);
-            }
-            // We go ahead and set the value to increase the lookup the next time the
-            // property is accessed.
-            if (property != null && application != null) {
-                setProperty(key + application, property);
-            }
-        }
-        return property;
-    }
 
 	/**
 	 * For every application specific property, this method generates a similar property without
