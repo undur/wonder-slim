@@ -89,9 +89,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     */
     private static Map<String, Object> _cache = new ConcurrentHashMap<>();
 
-    /** constant string used if Wonder version could not be determined */
-    public static final String UNKNOWN_WONDER_VERSION = "Not Available";
-
     /**
      * Returns the version string of the Wonder frameworks.
      * 
