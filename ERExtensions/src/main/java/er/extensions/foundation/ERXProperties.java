@@ -316,16 +316,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     }
 
     /**
-     * Sets an array in the System properties for a particular key.
-     * 
-     * @param array to be set in the System properties
-     * @param key to be used to get the value
-     */
-    public static void setArrayForKey(NSArray array, String key) {
-        setStringForKey(NSPropertyListSerialization.stringFromPropertyList(array), key);
-    }
-
-    /**
      * Sets a string in the System properties for another string.
      * 
      * @param string to be set in the System properties
