@@ -28,14 +28,13 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 
 import er.extensions.appserver.ERXApplication;
 
-public class ERXProperties extends Properties implements NSKeyValueCoding {
+public class ERXProperties extends Properties {
 
 	/**
 	 * Do I need to update serialVersionUID?
@@ -53,6 +52,11 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     private static final Logger configLog = LoggerFactory.getLogger(ERXConfigurationManager.class);
 
     private static final Map<String, String> AppSpecificPropertyNames = new HashMap<>(128);
+
+    /**
+     * FIXME: This constructor was onl yadded as an experiment, to ensure that no instances are created, so I can eliminate the KVC implementation // Hugi 2022-01-20
+     */
+    private ERXProperties() {}
 
     /** 
     * Internal cache of type converted values to avoid reconverting attributes that are asked for frequently 
@@ -848,16 +852,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
             }
         }
         return property;
-    }
-
-	@Override
-    public void takeValueForKey(Object anObject, String aKey) {
-         setProperty(aKey, (anObject != null ? anObject.toString() : null));
-    }
-
-    @Override
-    public Object valueForKey(String aKey) {
-         return getProperty(aKey);
     }
 
 	/**
