@@ -71,15 +71,6 @@ public class ERXProperties {
     }
 
     /**
-     * Converts the standard propertyName into one with a .&lt;AppName&gt; on the end, if the property is defined with
-     * that suffix.  If not, then this caches the standard propertyName.  A cache is maintained to avoid concatenating
-     * strings frequently, but may be overkill since most usage of this system doesn't involve frequent access.
-     */
-	private static String getApplicationSpecificPropertyName(final String propertyName) {
-    	return propertyName;
-    }
-
-    /**
      * Cover method for returning an NSArray for a
      * given system property and set a default value if not given.
      * 
@@ -87,8 +78,7 @@ public class ERXProperties {
      * @param defaultValue default value
      * @return array de-serialized from the string in the system properties or default value
      */
-	public static NSArray<String> arrayForKeyWithDefault(final String s, final NSArray<String> defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
+	public static NSArray<String> arrayForKeyWithDefault(final String propertyName, final NSArray<String> defaultValue) {
 		NSArray<String> value;
 		Object cachedValue = _cache.get(propertyName);
 		if (UndefinedMarker.equals(cachedValue)) {
@@ -97,7 +87,7 @@ public class ERXProperties {
 			value = (NSArray) cachedValue;
 		} else {
 			value = ERXValueUtilities.arrayValueWithDefault(NSProperties.getProperty(propertyName), null);
-			_cache.put(s, value == null ? UndefinedMarker : value);
+			_cache.put(propertyName, value == null ? UndefinedMarker : value);
 			if (value == null) {
 				value = defaultValue;
 			}
@@ -111,12 +101,12 @@ public class ERXProperties {
      * 	method <code>booleanValue</code> from
      * 	{@link ERXUtilities}.
      * 
-     * @param s system property
+     * @param propertyName system property
      * 
      * @return boolean value of the string in the system properties.
      */
-	public static boolean booleanForKey(String s) {
-        return booleanForKeyWithDefault(s, false);
+	public static boolean booleanForKey(String propertyName) {
+        return booleanForKeyWithDefault(propertyName, false);
     }
 
     /**
@@ -129,8 +119,7 @@ public class ERXProperties {
      * @param defaultValue default value
      * @return boolean value of the string in the system properties.
      */
-	public static boolean booleanForKeyWithDefault(final String s, final boolean defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
+	public static boolean booleanForKeyWithDefault(final String propertyName, final boolean defaultValue) {
         boolean value;
 		Object cachedValue = _cache.get(propertyName);
 		if (UndefinedMarker.equals(cachedValue)) {
@@ -167,8 +156,7 @@ public class ERXProperties {
      * @param defaultValue default value
      * @return int value of the system property or the default value
      */
-	public static int intForKeyWithDefault(final String s, final int defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
+	public static int intForKeyWithDefault(final String propertyName, final int defaultValue) {
 		int value;
 		Object cachedValue = _cache.get(propertyName);
 		if (UndefinedMarker.equals(cachedValue)) {
@@ -177,7 +165,7 @@ public class ERXProperties {
 			value = ((Integer) cachedValue).intValue();
 		} else {
 			Integer objValue = ERXValueUtilities.IntegerValueWithDefault(NSProperties.getProperty(propertyName), null);
-			_cache.put(s, objValue == null ? UndefinedMarker : objValue);
+			_cache.put(propertyName, objValue == null ? UndefinedMarker : objValue);
 			if (objValue == null) {
 				value = defaultValue;
 			} else {
@@ -197,9 +185,7 @@ public class ERXProperties {
      * @param defaultValue default value
      * @return BigDecimal value of the string in the system properties. Scale is controlled by the string, ie "4.400" will have a scale of 3.
      */
-	public static BigDecimal bigDecimalForKeyWithDefault(String s, BigDecimal defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
-
+	public static BigDecimal bigDecimalForKeyWithDefault(String propertyName, BigDecimal defaultValue) {
         Object value = _cache.get(propertyName);
         if (UndefinedMarker.equals(value)) {
             return defaultValue;
@@ -222,8 +208,7 @@ public class ERXProperties {
      * @param defaultValue default value
      * @return long value of the system property or the default value
      */
-	public static long longForKeyWithDefault(final String s, final long defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
+	public static long longForKeyWithDefault(final String propertyName, final long defaultValue) {
 		long value;
 		Object cachedValue = _cache.get(propertyName);
 		if (UndefinedMarker.equals(cachedValue)) {
@@ -232,7 +217,7 @@ public class ERXProperties {
 			value = ((Long) cachedValue).longValue();
 		} else {
 			Long objValue = ERXValueUtilities.LongValueWithDefault(NSProperties.getProperty(propertyName), null);
-			_cache.put(s, objValue == null ? UndefinedMarker : objValue);
+			_cache.put(propertyName, objValue == null ? UndefinedMarker : objValue);
 			if (objValue == null) {
 				value = defaultValue;
 			} else {
@@ -263,8 +248,7 @@ public class ERXProperties {
      * @param defaultValue default value
      * @return string value of the system property or null
      */
-	public static String stringForKeyWithDefault(final String s, final String defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
+	public static String stringForKeyWithDefault(final String propertyName, final String defaultValue) {
         final String propertyValue = NSProperties.getProperty(propertyName);
         final String stringValue = propertyValue == null ? defaultValue : propertyValue;
         return stringValue == UndefinedMarker ? null : stringValue;
