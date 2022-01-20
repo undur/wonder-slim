@@ -100,7 +100,6 @@ public class ERXSystem implements NSKeyValueCoding, NSKeyValueCodingAdditions {
      */
     public static void updateProperties(Properties properties) {
 		ERXSystem.convertProperties(properties, properties);
-		ERXProperties.evaluatePropertyOperators(properties, properties);
 		ERXProperties.flattenPropertyNames(properties);
 	}
 
