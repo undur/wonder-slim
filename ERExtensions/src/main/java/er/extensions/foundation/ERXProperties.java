@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -751,39 +750,6 @@ public class ERXProperties {
         _cache.clear();
         NSNotificationCenter.defaultCenter().postNotification(NSProperties.PropertiesDidChange, null, null);
     }
-
-	/**
-	 * For every application specific property, this method generates a similar property without
-	 * the application name in the property key. The original property is not removed.
-	 * <p>
-	 * Ex: if current application is MyApp, for a property foo.bar.MyApp=true a new property
-	 * foo.bar=true is generated.
-	 * 
-	 * @param properties Properties to update
-	 */
-// xxxxxxxxxxxxxxxxxxx
-// This is more complex than it needs to be. Can just use endsWith....
-	public static void flattenPropertyNames(Properties properties) {
-	    
-	    WOApplication application = WOApplication.application();
-	    if (application == null) {
-	        return;
-	    }
-	    String applicationName = application.name();
-	    for (Object keyObj : new TreeSet<>(properties.keySet())) {
-	        String key = (String) keyObj;
-	        if (key != null && key.length() > 0) {
-	            String value = properties.getProperty(key);
-	            int lastDotPosition = key.lastIndexOf(".");
-	            if (lastDotPosition != -1) {
-	                String lastElement = key.substring(lastDotPosition + 1);
-	                if (lastElement.equals(applicationName)) {
-	                    properties.put(key.substring(0, lastDotPosition), value);
-	                }
-	            }
-	        }
-	    }
-	}
 
 	/**
 	 * _Properties is a subclass of Properties that provides support for including other
