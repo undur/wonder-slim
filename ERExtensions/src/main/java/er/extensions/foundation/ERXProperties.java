@@ -7,7 +7,6 @@
 package er.extensions.foundation;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 
@@ -322,11 +320,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
         _cache.remove(key);
     }
 
-    public static void removeKey(String key) {
-    	System.getProperties().remove(key);
-    	_cache.remove(key);
-    }
-    
     /** 
      * Copies all properties from source to dest. 
      * 
