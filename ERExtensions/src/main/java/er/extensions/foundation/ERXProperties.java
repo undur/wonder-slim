@@ -218,36 +218,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     }
     
     /**
-     * Checks if a property for the given key exists.
-     * 
-     * @param key name of the property
-     * @return <code>true</code> if a property for key exists
-     */
-    public static boolean hasKey(String key) {
-		return hasKey(key, false);
-    }
-    
-    /**
-     * Checks if a property for the given key exists. If you want to
-     * ignore properties that have an empty value pass <code>true</code>
-     * as parameter (i.e. '<code>my.property=</code>').
-     * 
-     * @param key name of the property
-     * @param ignoreEmptyValue <code>true</code> if you want to ignore
-     *            properties with empty values
-     * @return <code>true</code> if a property exists
-     */
-    public static boolean hasKey(String key, boolean ignoreEmptyValue) {
-    	final String propertyName = getApplicationSpecificPropertyName(key);
-    	Object cachedValue = _cache.get(propertyName);
-    	if (cachedValue == null || UndefinedMarker.equals(cachedValue)) {
-    		String value = ERXSystem.getProperty(key);
-    		return value != null && !(ignoreEmptyValue && value.length() == 0);
-    	}
-		return true;
-    }
-
-    /**
      * Cover method for returning an int for a given system property.
      * 
      * @param s system property
