@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,7 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     /** 
     * Internal cache of type converted values to avoid reconverting attributes that are asked for frequently 
     */
-    private static Map<String, Object> _cache = Collections.synchronizedMap(new HashMap<>());
+    private static Map<String, Object> _cache = new ConcurrentHashMap<>();
 
     /**
      * Puts handy properties such as <code>com.webobjects.version</code> into the system
