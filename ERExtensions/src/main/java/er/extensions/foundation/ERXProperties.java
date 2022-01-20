@@ -43,9 +43,6 @@ public class ERXProperties {
 	 */
 	private static final long serialVersionUID = 1L;
 
-    /** default string */
-    public static final String DefaultString = "Default";
-    
     private static String UndefinedMarker = "-undefined-";
 
     private static final Logger log = LoggerFactory.getLogger(ERXProperties.class);
@@ -298,7 +295,7 @@ public class ERXProperties {
      * @param defaultValue the default value
      * @return the enum value
      */
-    public static <T extends Enum> T enumValueForKeyWithDefault(Class<T> enumClass, String key, T defaultValue) {
+    private static <T extends Enum> T enumValueForKeyWithDefault(Class<T> enumClass, String key, T defaultValue) {
     	T result = defaultValue;
     	String stringValue = stringForKey(key);
     	if (stringValue != null) {
@@ -346,7 +343,7 @@ public class ERXProperties {
      * @return properties from the given file
      * @throws java.io.IOException if the file is not found or cannot be read
      */
-	public static Properties propertiesFromFile(File file) throws java.io.IOException {
+	private static Properties propertiesFromFile(File file) throws java.io.IOException {
         if (file == null)
             throw new IllegalStateException("Attempting to get properties for a null file!");
         ERXProperties._Properties prop = new ERXProperties._Properties();
@@ -622,21 +619,11 @@ public class ERXProperties {
     /**
      * Returns all of the properties in the system mapped to their evaluated values, sorted by key.
      * 
-     * @param protectValues if true, keys with the word "password" in them will have their values removed
-     * @return all of the properties in the system mapped to their evaluated values, sorted by key
-     */
-	public static Map<String, String> allPropertiesMap(boolean protectValues) {
-    	return propertiesMap(ERXSystem.getProperties(), protectValues);
-    }
-
-    /**
-     * Returns all of the properties in the system mapped to their evaluated values, sorted by key.
-     * 
      * @param properties
      * @param protectValues if <code>true</code>, keys with the word "password" in them will have their values removed 
      * @return all of the properties in the system mapped to their evaluated values, sorted by key
      */
-    public static Map<String, String> propertiesMap(Properties properties, boolean protectValues) {
+    private static Map<String, String> propertiesMap(Properties properties, boolean protectValues) {
     	Map<String, String> props = new TreeMap<>();
     	for (Enumeration e = properties.keys(); e.hasMoreElements();) {
     		String key = (String) e.nextElement();
@@ -669,7 +656,7 @@ public class ERXProperties {
      * 
      * @return application-specific user properties
      */
-	public static String applicationDeveloperProperties() {
+	private static String applicationDeveloperProperties() {
     	String applicationDeveloperPropertiesPath = null;
     	if (ERXApplication.isDevelopmentModeSafe()) {
 	        String devName = ERXSystem.getProperty("er.extensions.ERXProperties.devPropertiesName", "dev");
@@ -685,7 +672,7 @@ public class ERXProperties {
      * @param bundleName 
      * @return the application-specific variant properties for the given bundle.
      */
-    public static String variantPropertiesInBundle(String userName, String bundleName) {
+    private static String variantPropertiesInBundle(String userName, String bundleName) {
     	String applicationUserPropertiesPath = null;
         if (userName != null  &&  userName.length() > 0) { 
         	String resourceApplicationUserPropertiesPath = pathForResourceNamed("Properties." + userName, bundleName, null);
@@ -697,11 +684,9 @@ public class ERXProperties {
     }
 
     /**
-     * Returns the application-specific user properties.
-     * 
-     * @return the application-specific user properties
+     * @return The application-specific user properties
      */
-	public static String applicationUserProperties() {
+	private static String applicationUserProperties() {
     	return variantPropertiesInBundle(ERXSystem.getProperty("user.name"), "app");
     }
     
@@ -713,7 +698,7 @@ public class ERXProperties {
      * @param fileName the Filename
      * @return the path, or null if the path does not exist
      */
-	public static String applicationMachinePropertiesPath(String fileName) {
+	private static String applicationMachinePropertiesPath(String fileName) {
     	String applicationMachinePropertiesPath = null;
     	String machinePropertiesPath = ERXSystem.getProperty("er.extensions.ERXProperties.machinePropertiesPath", "/etc/WebObjects");
     	WOApplication application = WOApplication.application();
@@ -755,7 +740,7 @@ public class ERXProperties {
      * 
      * @return array of configuration file names
      */
-	public static NSArray optionalConfigurationFiles() {
+	private static NSArray optionalConfigurationFiles() {
     	NSArray immutableOptionalConfigurationFiles = arrayForKey("er.extensions.ERXProperties.OptionalConfigurationFiles");
     	NSMutableArray optionalConfigurationFiles = null;
     	if (immutableOptionalConfigurationFiles != null) {
@@ -782,7 +767,7 @@ public class ERXProperties {
      * @param path path string to a resource that could contain symbolic links
      * @return actual path to the resource
      */
-	public static String getActualPath(String path) {
+	private static String getActualPath(String path) {
         String actualPath = null;
         File file = new File(path);
         try {
@@ -793,7 +778,7 @@ public class ERXProperties {
         return actualPath;
     }
 
-    public static void systemPropertiesChanged() {
+    private static void systemPropertiesChanged() {
         synchronized (AppSpecificPropertyNames) {
             AppSpecificPropertyNames.clear();
         }
@@ -801,9 +786,6 @@ public class ERXProperties {
         // MS: Leave for future WO support ...
         NSNotificationCenter.defaultCenter().postNotification(NSProperties.PropertiesDidChange, null, null);
     }
-
-    /** caches the application name that is appended to the key for lookup */
-    protected String applicationNameForAppending;
 
 	/**
 	 * For every application specific property, this method generates a similar property without
@@ -846,7 +828,7 @@ public class ERXProperties {
 	 * home directory.  Multiple .includeProps can be included in a Properties file and they
 	 * will be loaded in the order they appear within the file.
 	 */
-	public static class _Properties extends Properties {
+	private static class _Properties extends Properties {
 
 		private static final Logger log = LoggerFactory.getLogger(ERXProperties.class);
 
