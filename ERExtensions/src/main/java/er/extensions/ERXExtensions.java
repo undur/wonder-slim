@@ -70,7 +70,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 		// The first install only loads plain and user props the second has no good way
 		// to set up the main bundle and this one comes too late for static inits
 		ERXConfigurationManager.defaultManager().loadConfiguration();
-		ERXProperties.populateSystemProperties();
 		ERXConfigurationManager.defaultManager().configureRapidTurnAround();
 		ERXLocalizer.initialize();
 		ERXProperties.pathsForUserAndBundleProperties(true);

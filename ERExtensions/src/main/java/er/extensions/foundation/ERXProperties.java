@@ -90,15 +90,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     */
     private static Map<String, Object> _cache = new ConcurrentHashMap<>();
 
-    /**
-     * Puts handy properties such as <code>com.webobjects.version</code> into the system
-     * properties. This method is called when  the framework is initialized
-     * (when WOApplication.ApplicationWillFinishLaunchingNotification is posted.)
-     */
-    public static void populateSystemProperties() {
-        System.setProperty("com.webobjects.version", "5.4");
-    }
-
     /** 
      * Returns the version string of the application.  
      * It checks <code>CFBundleShortVersionString</code> property 
