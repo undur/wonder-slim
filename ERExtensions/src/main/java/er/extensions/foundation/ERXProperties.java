@@ -309,18 +309,6 @@ public class ERXProperties {
     	return result;
     }
 
-    /**
-     * Sets a string in the System properties for another string.
-     * 
-     * @param string to be set in the System properties
-     * @param key to be used to get the value
-     */
-    // DELETEME: Really not needed anymore -- MS: Why?  We need the cache clearing.
-    public static void setStringForKey(String string, String key) {
-        System.setProperty(key, string);
-        _cache.remove(key);
-    }
-
     /** 
      * Copies all properties from source to dest. 
      * 
