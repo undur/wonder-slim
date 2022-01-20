@@ -166,44 +166,31 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     }
 
     /**
-     * Cover method for returning a long for a given system property.
+     * Cover method for returning an int for a
+     * given system property with a default value.
      * 
      * @param s system property
-     * @return long value of the system property or 0
+     * @param defaultValue default value
+     * @return int value of the system property or the default value
      */
-	public static long longForKey(String s) {
-        return longForKeyWithDefault(s, 0);
-    }
-
-    /**
-     * Cover method for returning a float for a given system property.
-     * 
-     * @param s system property
-     * @return float value of the system property or 0
-     */
-	public static float floatForKey(String s) {
-        return floatForKeyWithDefault(s, 0);
-    }
-
-    /**
-     * Cover method for returning a double for a given system property.
-     * 
-     * @param s system property
-     * @return double value of the system property or 0
-     */
-	public static double doubleForKey(String s) {
-        return doubleForKeyWithDefault(s, 0);
-    }
-
-    /**
-     * Cover method for returning a BigDecimal for a given system property. This method uses the
-     * method <code>bigDecimalValueWithDefault</code> from {@link ERXValueUtilities}.
-     * 
-     * @param s system property
-     * @return BigDecimal value of the string in the system properties.  Scale is controlled by the string, ie "4.400" will have a scale of 3.
-     */
-	public static BigDecimal bigDecimalForKey(String s) {
-        return bigDecimalForKeyWithDefault(s,null);
+	public static int intForKeyWithDefault(final String s, final int defaultValue) {
+        final String propertyName = getApplicationSpecificPropertyName(s);
+		int value;
+		Object cachedValue = _cache.get(propertyName);
+		if (UndefinedMarker.equals(cachedValue)) {
+			value = defaultValue;
+		} else if (cachedValue instanceof Integer) {
+			value = ((Integer) cachedValue).intValue();
+		} else {
+			Integer objValue = ERXValueUtilities.IntegerValueWithDefault(ERXSystem.getProperty(propertyName), null);
+			_cache.put(s, objValue == null ? UndefinedMarker : objValue);
+			if (objValue == null) {
+				value = defaultValue;
+			} else {
+				value = objValue.intValue();
+			}
+		}
+		return value;
     }
 
     /**
@@ -234,34 +221,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     }
 
     /**
-     * Cover method for returning an int for a
-     * given system property with a default value.
-     * 
-     * @param s system property
-     * @param defaultValue default value
-     * @return int value of the system property or the default value
-     */
-	public static int intForKeyWithDefault(final String s, final int defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
-		int value;
-		Object cachedValue = _cache.get(propertyName);
-		if (UndefinedMarker.equals(cachedValue)) {
-			value = defaultValue;
-		} else if (cachedValue instanceof Integer) {
-			value = ((Integer) cachedValue).intValue();
-		} else {
-			Integer objValue = ERXValueUtilities.IntegerValueWithDefault(ERXSystem.getProperty(propertyName), null);
-			_cache.put(s, objValue == null ? UndefinedMarker : objValue);
-			if (objValue == null) {
-				value = defaultValue;
-			} else {
-				value = objValue.intValue();
-			}
-		}
-		return value;
-    }
-
-    /**
      * Cover method for returning a long for a
      * given system property with a default value.
      * 
@@ -284,64 +243,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
 				value = defaultValue;
 			} else {
 				value = objValue.longValue();
-			}
-		}
-		return value;
-    }
-
-    /**
-     * Cover method for returning a float for a
-     * given system property with a default value.
-     * 
-     * @param s system property
-     * @param defaultValue default value
-     * @return float value of the system property or the default value
-     */
-	public static float floatForKeyWithDefault(final String s, final float defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
-
-		float value;
-		Object cachedValue = _cache.get(propertyName);
-		if (UndefinedMarker.equals(cachedValue)) {
-			value = defaultValue;
-		} else if (cachedValue instanceof Float) {
-			value = ((Float) cachedValue).floatValue();
-		} else {
-			Float objValue = ERXValueUtilities.FloatValueWithDefault(ERXSystem.getProperty(propertyName), null);
-			_cache.put(s, objValue == null ? UndefinedMarker : objValue);
-			if (objValue == null) {
-				value = defaultValue;
-			} else {
-				value = objValue.floatValue();
-			}
-		}
-		return value;
-    }
-
-    /**
-     * Cover method for returning a double for a
-     * given system property with a default value.
-     * 
-     * @param s system property
-     * @param defaultValue default value
-     * @return double value of the system property or the default value
-     */
-	public static double doubleForKeyWithDefault(final String s, final double defaultValue) {
-        final String propertyName = getApplicationSpecificPropertyName(s);
-
-		double value;
-		Object cachedValue = _cache.get(propertyName);
-		if (UndefinedMarker.equals(cachedValue)) {
-			value = defaultValue;
-		} else if (cachedValue instanceof Double) {
-			value = ((Double) cachedValue).doubleValue();
-		} else {
-			Double objValue = ERXValueUtilities.DoubleValueWithDefault(ERXSystem.getProperty(propertyName), null);
-			_cache.put(s, objValue == null ? UndefinedMarker : objValue);
-			if (objValue == null) {
-				value = defaultValue;
-			} else {
-				value = objValue.doubleValue();
 			}
 		}
 		return value;
