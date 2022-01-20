@@ -120,20 +120,6 @@ public class ERXProperties extends Properties implements NSKeyValueCoding {
     }
 
     /**
-     * Returns the version string of the given framework.
-     * It checks <code>SourceVersion</code> property
-     * in the <code>version.plist</code> resource and returns
-     * a trimmed version of the value.
-     * 
-     * @return version number as string; can be null-string when the framework is not found or the framework doesn't have the value of <code>SourceVersion</code> in its <code>info.plist</code> resource.
-     * @see #versionStringForApplication
-     * @see #webObjectsVersion
-     */
-	public static String sourceVersionString() {
-        return valueFromPlistBundleWithKey(NSBundle.bundleForName("JavaWebObjects"), "version.plist", "SourceVersion");
-    }
-
-    /**
      * Returns the key in an plist of the given framework.
      * 
      * @param bundle bundle name
