@@ -799,7 +799,7 @@ public class ERXProperties extends Properties {
         }
         _cache.clear();
         // MS: Leave for future WO support ...
-        NSNotificationCenter.defaultCenter().postNotification("PropertiesDidChange", null, null);
+        NSNotificationCenter.defaultCenter().postNotification(NSProperties.PropertiesDidChange, null, null);
     }
 
     /** caches the application name that is appended to the key for lookup */
