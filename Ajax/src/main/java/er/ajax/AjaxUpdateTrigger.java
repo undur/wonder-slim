@@ -1,5 +1,6 @@
 package er.ajax;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,12 +31,14 @@ import er.extensions.components.ERXComponentUtilities;
  */
 public class AjaxUpdateTrigger extends WODynamicElement {
 	private NSDictionary<String, WOAssociation> _associations;
+	private WOAssociation _updateContainerID;
 	private WOAssociation _updateContainerIDs;
 	private WOAssociation _resetAfterUpdate;
 
 	public AjaxUpdateTrigger(String name, NSDictionary<String, WOAssociation> associations, WOElement template) {
 		super(name, associations, template);
 		_associations = associations;
+		_updateContainerID = (WOAssociation) associations.objectForKey("updateContainerID");
 		_updateContainerIDs = (WOAssociation) associations.objectForKey("updateContainerIDs");
 		_resetAfterUpdate = (WOAssociation) associations.objectForKey("resetAfterUpdate");
 	}
@@ -43,25 +46,37 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 	@Override
 	public void appendToResponse(WOResponse response, WOContext context) {
 		super.appendToResponse(response, context);
-		WOComponent component = context.component();
-		List<String> updateContainerIDs = (List<String>) _updateContainerIDs.valueInComponent(component);
-		if (updateContainerIDs != null && updateContainerIDs.size() > 0) {
+		final WOComponent component = context.component();
+		final List<String> containersToUpdate = new ArrayList<>();
+
+		final String updateContainerID = (String) _updateContainerID.valueInComponent(component);
+
+		if( updateContainerID != null ) {
+			containersToUpdate.add( updateContainerID );
+		}
+
+		final List<String> updateContainerIDs = (List<String>) _updateContainerIDs.valueInComponent(component);
+		
+		if( updateContainerIDs != null ) {
+			containersToUpdate.addAll( updateContainerIDs );
+		}
+		
+		if (!containersToUpdate.isEmpty()) {
 			AjaxUtils.appendScriptHeader(response);
-			Iterator<String> updateContainerIDEnum = updateContainerIDs.iterator();
+			Iterator<String> updateContainerIDEnum = containersToUpdate.iterator();
 			while (updateContainerIDEnum.hasNext()) {
-				String updateContainerID = updateContainerIDEnum.next();
+				String nextUpdateContainerID = updateContainerIDEnum.next();
 				// PROTOTYPE FUNCTIONS
 				Object evalScripts = ERXComponentUtilities.valueForBinding("evalScripts", "true", _associations, component);
-				response.appendContentString("if ($wi('" + updateContainerID + "')) { ");
-				response.appendContentString("new Ajax.Updater('" + updateContainerID + "', $wi('" + updateContainerID + "').getAttribute('data-updateUrl'), {" + " evalScripts: " + evalScripts + ", insertion: Element.update, method: 'get' });\n");
+				response.appendContentString("if ($wi('" + nextUpdateContainerID + "')) { ");
+				response.appendContentString("new Ajax.Updater('" + nextUpdateContainerID + "', $wi('" + nextUpdateContainerID + "').getAttribute('data-updateUrl'), {" + " evalScripts: " + evalScripts + ", insertion: Element.update, method: 'get' });\n");
 				response.appendContentString(" }");
 			}
 			AjaxUtils.appendScriptFooter(response);
 	
 			if (_resetAfterUpdate != null && _resetAfterUpdate.booleanValueInComponent(component)) {
-				updateContainerIDs.clear();
+				containersToUpdate.clear();
 			}
 		}
 	}
-
 }
