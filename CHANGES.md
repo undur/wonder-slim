@@ -1,5 +1,8 @@
 # Changelog
 
+## 2022-02-06
+- **Added an updateContainerID binding to AjaxUpdateTrigger**
+
 ## 2021-05-24
 
 - **Moved response compression from dispatchRequest() to new class ERXResponseCompression**
