@@ -15,6 +15,8 @@ import com.webobjects.foundation.NSDictionary;
  * object is non-zero.
  * @binding condition numeric condition to test.
  * @binding negate inverts the sense of the conditional.
+ * 
+ * FIXME: This element is stupid. It should check for absolute zero, not floor the value using an integer // Hugi 2022-02-12
  */
 public class ERXNonZeroConditional extends ERXWOConditional {
 
