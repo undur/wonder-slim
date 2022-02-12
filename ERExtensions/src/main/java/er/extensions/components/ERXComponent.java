@@ -272,37 +272,32 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Convenience method to get the localizer.
-	 * 
-	 * @return the current localizer
+	 * @return The current localizer
 	 */
 	public ERXLocalizer localizer() {
 		return ERXLocalizer.currentLocalizer();
 	}
 	
 	/** 
-	 * Convenience method to get the browser.
-	 * 
-	 * @return the current browser
+	 * @return The ERXBrowser from the request
 	 */ 
 	public ERXBrowser browser() {
-		ERXRequest request = (ERXRequest) context().request();
-		return request.browser();
+		return ((ERXRequest)context().request()).browser();
 	}
 
 	/**
-	 * Returns the name of this component without the package name.
-	 * 
-	 * @return the name of this component without the package name
+	 * @return The name of this component without the package name
 	 */
 	public String componentName() {
 		String componentName = name();
+
 		if (componentName != null) {
 			int lastDotIndex = componentName.lastIndexOf('.');
 			if (lastDotIndex != -1) {
 				componentName = componentName.substring(lastDotIndex + 1);
 			}
 		}
+
 		return componentName;
 	}
 
@@ -422,22 +417,22 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Returns the name of this component's framework or "app" if
-	 * frameworkName() returns null.
+	 * Returns the name of this component's framework or "app" if frameworkName() returns null.
 	 *  
 	 * @return the name of this component's framework
 	 */
 	protected String _frameworkName() {
 		String frameworkName = super.frameworkName();
+
 		if (frameworkName == null) {
 			frameworkName = "app";
 		}
+
 		return frameworkName;
 	}
 
 	/**
-	 * Returns true if this component provides a default CSS file that has the
-	 * same name as the component itself.
+	 * Returns true if this component provides a default CSS file that has the same name as the component itself.
 	 * 
 	 * @return true if this component provides a default-named CSS
 	 */
@@ -446,8 +441,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Returns the default path prefix for CSS, which will be prepended to all
-	 * required CSS files for this component. The default is "".
+	 * Returns the default path prefix for CSS, which will be prepended to all required CSS files for this component. The default is "".
 	 * 
 	 * @return the default CSS path.
 	 */
@@ -456,8 +450,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Returns the primary CSS file for this component, or null if there isn't
-	 * one. This path will be prepended with defaultCSSPath().
+	 * Returns the primary CSS file for this component, or null if there isn't one. This path will be prepended with defaultCSSPath().
 	 * 
 	 * @return the primary CSS file for this component
 	 */
@@ -466,9 +459,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Returns an array of additional CSS files for this component, or null (or
-	 * empty array) if there aren't any. Each path will be prepended with
-	 * defaultCSSPath().
+	 * Returns an array of additional CSS files for this component, or null (or empty array) if there aren't any. Each path will be prepended with defaultCSSPath().
 	 * 
 	 * @return an array of additional CSS files for this component.
 	 */
@@ -477,8 +468,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Returns true if this component provides a default Javascript file that
-	 * has the same name as the component itself.
+	 * Returns true if this component provides a default Javascript file that has the same name as the component itself.
 	 * 
 	 * @return true if this component provides a default-named Javascript
 	 */
@@ -487,8 +477,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Returns the default path prefix for Javascript, which will be prepended
-	 * to all required Javascript files for this component. The default is "".
+	 * Returns the default path prefix for Javascript, which will be prepended to all required Javascript files for this component. The default is "".
 	 * 
 	 * @return the default Javascript path.
 	 */
@@ -497,8 +486,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Returns the primary Javascript file for this component, or null if there
-	 * isn't one. This path will be prepended with defaultJavascriptPath().
+	 * Returns the primary Javascript file for this component, or null if there isn't one. This path will be prepended with defaultJavascriptPath().
 	 * 
 	 * @return the primary Javascript file for this component
 	 */
@@ -507,8 +495,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Returns an array of additional Javascript files for this component, or
-	 * null (or empty array) if there aren't any. Each path will be prepended
+	 * Returns an array of additional Javascript files for this component, or null (or empty array) if there aren't any. Each path will be prepended
 	 * with defaultJavascriptPath().
 	 * 
 	 * @return an array of additional Javascript files for this component.
@@ -518,8 +505,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Override and return true for any components to which you would like to
-	 * allow page level access.
+	 * Override and return true for any components to which you would like to allow page level access.
 	 * 
 	 * @return true by default
 	 */
@@ -528,8 +514,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Override to provide custom security checks. It is not necessary to call
-	 * super on this method.
+	 * Override to provide custom security checks. It is not necessary to call super on this method.
 	 * 
 	 * @throws SecurityException if the security check fails
 	 */
