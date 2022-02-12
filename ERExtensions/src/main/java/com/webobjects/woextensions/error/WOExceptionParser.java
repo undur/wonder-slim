@@ -7,18 +7,13 @@
 
 package com.webobjects.woextensions.error;
 
-/**
- * WOExceptionParser parse the stack trace of a Java exception (in fact the parse is really
- * made in WOParsedErrorLine).
- * 
- * The stack trace is set in an NSArray that will be used in the UI in the exception page.
- */
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
@@ -30,14 +25,14 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
 public class WOExceptionParser {
-	protected NSMutableArray _stackTrace;
+
+	protected List<WOParsedErrorLine> _stackTrace;
 	protected Throwable _exception;
 	protected String _message;
 	protected String _typeException;
 
 	public WOExceptionParser(Throwable exception) {
-		super();
-		_stackTrace = new NSMutableArray();
+		_stackTrace = new ArrayList<>();
 		_exception = NSForwardException._originalThrowable(exception);
 		_message = _exception.getMessage();
 		_typeException = _exception.getClass().getName();
@@ -68,7 +63,7 @@ public class WOExceptionParser {
 				}
 			}
 		}
-		System.out.println("_ignoredPackages:: " + ignored);
+
 		return ignored;
 	}
 
@@ -77,6 +72,7 @@ public class WOExceptionParser {
 		String ignoredPackageName, linePackageName;
 		linePackageName = line.packageName();
 		enumerator = packages.objectEnumerator();
+
 		while (enumerator.hasMoreElements()) {
 			ignoredPackageName = (String) enumerator.nextElement();
 			if (linePackageName.startsWith(ignoredPackageName)) {
@@ -120,7 +116,7 @@ public class WOExceptionParser {
 						// have probably reach the latest stack trace.
 						aLine = new WOParsedErrorLine(line);
 						_verifyPackageForLine(aLine, ignoredPackage);
-						_stackTrace.addObject(aLine);
+						_stackTrace.add(aLine);
 					}
 				}
 			}
@@ -134,7 +130,7 @@ public class WOExceptionParser {
 		}
 	}
 
-	public NSArray stackTrace() {
+	public List<WOParsedErrorLine> stackTrace() {
 		return _stackTrace;
 	}
 
@@ -147,10 +143,7 @@ public class WOExceptionParser {
 	}
 
 	/**
-	 * Return a string from the contents of a file, returning null instead of
-	 * any possible exception.
-	 * 
-	 * TODO I wonder if this has been done somewhere else in the frameworks....
+	 * Return a string from the contents of a file, returning null instead of any possible exception.
 	 */
 	private static String _stringFromFileSafely(String path) {
 		File f = new File(path);
@@ -195,127 +188,136 @@ public class WOExceptionParser {
 			return null;
 		return new String(data);
 	}
-	
+
 	/**
 	 * WOParsedErrorLine is the class that will parse an exception line. After
 	 * parsing a line (see format in the constructor comment), each instance
-	 * will be able to get information about the line, class, method where
-	 * the error occurs.
+	 * will be able to get information about the line, class, method where the
+	 * error occurs.
 	 *
-	 * Evolution : should rewrite the parsing stuff... And verify the real format
-	 * of java exception... Be careful, apparently it could happen that the latest
-	 * ")" on a line is not present. This is why in the parsing stuff I try to get
-	 * the index of this closing parenthesis.
+	 * Evolution : should rewrite the parsing stuff... And verify the real
+	 * format of java exception... Be careful, apparently it could happen that
+	 * the latest ")" on a line is not present. This is why in the parsing stuff
+	 * I try to get the index of this closing parenthesis.
 	 */
 
 	public static class WOParsedErrorLine {
-	    protected String _packageName;
-	    protected String _className;
-	    protected String _methodName;
-	    protected String _fileName;
-	    protected int _line;
-	    protected boolean _ignorePackage; // if true, then it will not be possible to display an hyperlink
+		protected String _packageName;
+		protected String _className;
+		protected String _methodName;
+		protected String _fileName;
+		protected int _line;
+		protected boolean _ignorePackage; // if true, then it will not be
+											// possible to display an hyperlink
 
-	    public WOParsedErrorLine(String line) {
-	        // line should have the format of an exception, which is normally (below the index value)
-	        //        at my.package.name.MyClass.myMethod(FileName.java:lineNumber)
-	        //           ^                       ^        ^             ^
-	        //        atIndex                    I     classIndex     lineIndex
-	        //                                 methodIndex
-	        int atIndex, methodIndex, classIndex, lineIndex, index;
-	        String string;
-	        atIndex = line.indexOf("at ") + 3;
-	        classIndex = line.indexOf('(') + 1;
-	        methodIndex = line.lastIndexOf('.', classIndex - 2) + 1;
-	        lineIndex = line.lastIndexOf(':');
-	        if (lineIndex < 0) { // We could potentially do not have the info if we use a JIT
-	            _line = -1;
-	            _fileName = null;
-	        } else {
-	            lineIndex++;
-	            // Parse the line number
-	            index = line.indexOf(')', lineIndex);
-	            if (index < 0) {
-	                index = line.length();
-	            }
+		public WOParsedErrorLine(String line) {
+			// line should have the format of an exception, which is normally
+			// (below the index value)
+			// at my.package.name.MyClass.myMethod(FileName.java:lineNumber)
+			// ^ ^ ^ ^
+			// atIndex I classIndex lineIndex
+			// methodIndex
+			int atIndex, methodIndex, classIndex, lineIndex, index;
+			String string;
+			atIndex = line.indexOf("at ") + 3;
+			classIndex = line.indexOf('(') + 1;
+			methodIndex = line.lastIndexOf('.', classIndex - 2) + 1;
+			lineIndex = line.lastIndexOf(':');
+			if (lineIndex < 0) { // We could potentially do not have the info if
+									// we use a JIT
+				_line = -1;
+				_fileName = null;
+			}
+			else {
+				lineIndex++;
+				// Parse the line number
+				index = line.indexOf(')', lineIndex);
+				if (index < 0) {
+					index = line.length();
+				}
 
-	            string = line.substring(lineIndex, index);              // Remove the last ")"
+				string = line.substring(lineIndex, index); // Remove the last
+															// ")"
 
-	            try {
-	                _line = Integer.parseInt(string);                   // Parse the fileName
-	                _fileName = line.substring( classIndex, lineIndex - 1);
-	            } catch (NumberFormatException ex) {
-	                _line = -1;
-	                _fileName = null;
-	            }
-	        }
-	        _methodName = line.substring( methodIndex, classIndex - 1);
-	        _packageName = line.substring( atIndex, methodIndex - 1);
-	        index = _packageName.lastIndexOf('.');
-	        if (index >= 0) {
-	            _className = _packageName.substring( index + 1);
-	            _packageName = _packageName.substring(0, index);
-	        } else _className = _packageName;
-	        if (_line < 0) {
-	            // JIT Activated so we don't have the class name... we can guess it by using the package info\
-	            _fileName = _className + ".java";
-	        }
-	        _ignorePackage = false; // By default we handle all packages
-	    }
+				try {
+					_line = Integer.parseInt(string); // Parse the fileName
+					_fileName = line.substring(classIndex, lineIndex - 1);
+				}
+				catch (NumberFormatException ex) {
+					_line = -1;
+					_fileName = null;
+				}
+			}
+			_methodName = line.substring(methodIndex, classIndex - 1);
+			_packageName = line.substring(atIndex, methodIndex - 1);
+			index = _packageName.lastIndexOf('.');
+			if (index >= 0) {
+				_className = _packageName.substring(index + 1);
+				_packageName = _packageName.substring(0, index);
+			}
+			else
+				_className = _packageName;
+			if (_line < 0) {
+				// JIT Activated so we don't have the class name... we can guess
+				// it by using the package info\
+				_fileName = _className + ".java";
+			}
+			_ignorePackage = false; // By default we handle all packages
+		}
 
-	    public String packageName() {
-	        return _packageName;
-	    }
+		public String packageName() {
+			return _packageName;
+		}
 
-	    public String className() {
-	        return _className;
-	    }
+		public String className() {
+			return _className;
+		}
 
-	    public String packageClassPath() {
-	        if (_packageName.equals(_className)) {
-	            return _className;
-	        }
-	        return _packageName + "." + _className;
-	    }
+		public String packageClassPath() {
+			if (_packageName.equals(_className)) {
+				return _className;
+			}
+			return _packageName + "." + _className;
+		}
 
-	    public String methodName() {
-	        return _methodName;
-	    }
+		public String methodName() {
+			return _methodName;
+		}
 
-	    public boolean isDisable() {
-	        return (_line < 0 || _ignorePackage);
-	    }
+		public boolean isDisable() {
+			return _line < 0 || _ignorePackage;
+		}
 
-	    protected void setIgnorePackage(boolean yn) { _ignorePackage = yn; }
-	    
-	    public String fileName() {
-	        return _fileName;
-	/*        if (_line >= 0)
-	            return _fileName;
-	        int index = _packageName.lastIndexOf(".");
-	        if (index >= 0)
-	            return _packageName.substring(index + 1) + ".java";
-	        return _packageName + ".java";*/
-	    }
+		protected void setIgnorePackage(boolean yn) {
+			_ignorePackage = yn;
+		}
 
-	    public String lineNumber() {
-	        if (_line >= 0)
-	            return String.valueOf(_line);
-	        return "NA";
-	    }
+		public String fileName() {
+			return _fileName;
+		}
 
-	    public int line() {
-	        return _line;
-	    }
-	    
-	    @Override
-	    public String toString() {
-	        String lineInfo = (_line >= 0) ? String.valueOf( _line) : "No line info due to compiled code";
-	        String fileInfo = (_line >= 0) ? _fileName : "Compiled code no file info";
-	        if (_packageName.equals(_className)) {
-	            return "class : " + _className + ": " + _methodName + " in file :" + fileInfo + " - line :" + lineInfo;
-	        }
-	        return "In package : " + _packageName + ", class : " + _className + " method : " + _methodName + " in file :" + fileInfo + " - line :" + lineInfo;
-	    }
+		public String lineNumber() {
+			if (_line >= 0) {
+				return String.valueOf(_line);
+			}
+
+			return "NA";
+		}
+
+		public int line() {
+			return _line;
+		}
+
+		@Override
+		public String toString() {
+			final String lineInfo = (_line >= 0) ? String.valueOf(_line) : "No line info due to compiled code";
+			final String fileInfo = (_line >= 0) ? _fileName : "Compiled code no file info";
+
+			if (_packageName.equals(_className)) {
+				return "class : " + _className + ": " + _methodName + " in file :" + fileInfo + " - line :" + lineInfo;
+			}
+
+			return "In package : " + _packageName + ", class : " + _className + " method : " + _methodName + " in file :" + fileInfo + " - line :" + lineInfo;
+		}
 	}
 }
