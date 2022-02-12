@@ -26,10 +26,10 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 
 public class WOExceptionParser {
 
-	protected List<WOParsedErrorLine> _stackTrace;
-	protected Throwable _exception;
-	protected String _message;
-	protected String _typeException;
+	private List<WOParsedErrorLine> _stackTrace;
+	private Throwable _exception;
+	private String _message;
+	private String _typeException;
 
 	public WOExceptionParser(Throwable exception) {
 		_stackTrace = new ArrayList<>();
@@ -39,7 +39,7 @@ public class WOExceptionParser {
 		_parseException();
 	}
 
-	protected NSArray _ignoredPackages() {
+	private NSArray _ignoredPackages() {
 		NSBundle bundle;
 		String path, content;
 		NSDictionary dic = null;
@@ -67,7 +67,7 @@ public class WOExceptionParser {
 		return ignored;
 	}
 
-	protected void _verifyPackageForLine(WOParsedErrorLine line, NSArray packages) {
+	private void _verifyPackageForLine(WOParsedErrorLine line, NSArray packages) {
 		Enumeration enumerator;
 		String ignoredPackageName, linePackageName;
 		linePackageName = line.packageName();
@@ -82,7 +82,7 @@ public class WOExceptionParser {
 		}
 	}
 
-	protected void _parseException() {
+	private void _parseException() {
 		StringWriter sWriter = new StringWriter();
 		PrintWriter pWriter = new PrintWriter(sWriter, false);
 		String string;
@@ -200,14 +200,13 @@ public class WOExceptionParser {
 	 * the latest ")" on a line is not present. This is why in the parsing stuff
 	 * I try to get the index of this closing parenthesis.
 	 */
-
 	public static class WOParsedErrorLine {
-		protected String _packageName;
-		protected String _className;
-		protected String _methodName;
-		protected String _fileName;
-		protected int _line;
-		protected boolean _ignorePackage; // if true, then it will not be
+		private String _packageName;
+		private String _className;
+		private String _methodName;
+		private String _fileName;
+		private int _line;
+		private boolean _ignorePackage; // if true, then it will not be
 											// possible to display an hyperlink
 
 		public WOParsedErrorLine(String line) {
@@ -288,7 +287,7 @@ public class WOExceptionParser {
 			return _line < 0 || _ignorePackage;
 		}
 
-		protected void setIgnorePackage(boolean yn) {
+		private void setIgnorePackage(boolean yn) {
 			_ignorePackage = yn;
 		}
 
