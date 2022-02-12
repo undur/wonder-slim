@@ -7,7 +7,6 @@
 package er.extensions.appserver;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -21,187 +20,200 @@ import com.webobjects.foundation.NSMutableDictionary;
 import er.extensions.foundation.ERXSimpleTemplateParser;
 
 /**
- * Holds encoding related settings and methods for {@link WOMessage}  and its subclasses {@link WORequest} and {@link WOResponse}. 
+ * Holds encoding related settings and methods for {@link WOMessage} and its subclasses {@link WORequest} and {@link WOResponse}.
  */
 
-public class ERXMessageEncoding implements Serializable {
+public class ERXMessageEncoding {
 
-	/**
-	 * Do I need to update serialVersionUID?
-	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
-	 * <a href="http://java.sun.com/j2se/1.4/pdf/serial-spec.pdf">Java Object Serialization Spec</a>
-	 */
-	private static final long serialVersionUID = 1L;
+	private String _encoding;
 
-    private String _encoding; 
-    public String encoding() { return _encoding; }
-    
-    public ERXMessageEncoding(String languageOrEncoding) {
-        if (availableEncodings().containsObject(languageOrEncoding)) {
-            _encoding = languageOrEncoding;
-        } else if (availableLanguages().containsObject(languageOrEncoding)) {
-            _encoding = defaultEncodingForLanguage(languageOrEncoding);
-        } else {
-            _encoding = defaultEncoding();
-        }
-    }
-    
-    public ERXMessageEncoding(NSArray preferedLanguages) {
-        _encoding = null;
-        NSArray availableLanguages = availableLanguages();
-        
-        Enumeration e = preferedLanguages.objectEnumerator();
-        while (e.hasMoreElements()) {
-            String aPreferedLanguage = (String)e.nextElement();
-            if (availableLanguages.containsObject(aPreferedLanguage)) {
-                _encoding = defaultEncodingForLanguage(aPreferedLanguage);
-                break;
-            }
-        }
-        if (_encoding == null) 
-            _encoding = defaultEncoding();
-    }
+	private String encoding() {
+		return _encoding;
+	}
 
-    public static NSArray availableEncodings() { 
-        return new NSArray<>( _encodings().keySet() );
-    }
+	public ERXMessageEncoding(String languageOrEncoding) {
+		if (availableEncodings().containsObject(languageOrEncoding)) {
+			_encoding = languageOrEncoding;
+		}
+		else if (availableLanguages().containsObject(languageOrEncoding)) {
+			_encoding = defaultEncodingForLanguage(languageOrEncoding);
+		}
+		else {
+			_encoding = defaultEncoding();
+		}
+	}
 
-    public static NSArray availableLanguages() { 
-        return new NSArray<>( _languagesAndDefaultEncodings().keySet() );
-    }
+	public ERXMessageEncoding(NSArray preferedLanguages) {
+		_encoding = null;
+		NSArray availableLanguages = availableLanguages();
 
-    private static Map<String,String> _encodings;
-    private static Map<String,String> _encodings() { 
-        if (_encodings == null) {
-            _encodings = Map.of(
-				"ISO8859_1", "ISO-8859-1",
-				"ISO-8859-1", "ISO-8859-1",
-				"SJIS", "Shift_JIS",
-				"SHIFT_JIS", "Shift_JIS",
-				"EUC_JP", "EUC-JP", // Note: dash and underscore
-				"EUC-JP", "EUC-JP",
-				"ISO2022JP", "iso-2022-jp",
-				"ISO-2022-JP", "iso-2022-jp",  
-				"UTF8", "UTF-8",       
-				"UTF-8", "UTF-8" );
-        }
-        return _encodings;
-    }
+		Enumeration e = preferedLanguages.objectEnumerator();
+		while (e.hasMoreElements()) {
+			String aPreferedLanguage = (String) e.nextElement();
+			if (availableLanguages.containsObject(aPreferedLanguage)) {
+				_encoding = defaultEncodingForLanguage(aPreferedLanguage);
+				break;
+			}
+		}
+		if (_encoding == null) {
+			_encoding = defaultEncoding();
+		}
+	}
 
-    private static Map<String,String> _languagesAndDefaultEncodings;
-    private static Map<String,String> _languagesAndDefaultEncodings() {
-        if (_languagesAndDefaultEncodings == null) {
-            _languagesAndDefaultEncodings = Map.of(
-            	"English", "ISO8859_1",  
-                "German", "ISO8859_1", 
-                "Japanese", "SJIS" );
-        }
-        return _languagesAndDefaultEncodings;
-    }
-    private static void _setLanguagesAndDefaultEncodings(NSDictionary newLanguagesAndDefaultEncodings) {
-        _languagesAndDefaultEncodings = newLanguagesAndDefaultEncodings;
-    }
+	private static NSArray availableEncodings() {
+		return new NSArray<>(_encodings().keySet());
+	}
 
-    private static String _defaultEncoding;
-    public static String defaultEncoding() {
-        if (_defaultEncoding == null) 
-            _defaultEncoding = "ISO8859_1";
-        return _defaultEncoding;
-    }
-    public static void setDefaultEncoding(String newDefaultEncoding) {
-        if (! availableEncodings().containsObject(newDefaultEncoding.toUpperCase())) 
-            throw createIllegalArgumentException(newDefaultEncoding, "encoding", "availableEncodings()");
+	private static NSArray availableLanguages() {
+		return new NSArray<>(_languagesAndDefaultEncodings().keySet());
+	}
 
-        _defaultEncoding = newDefaultEncoding;
-    }
+	private static Map<String, String> _encodings;
 
-    /**
-     * @return The defaultEncoding() as a Charset
-     */
-    public static Charset defaultEncodingAsCharset() {
-    	return Charset.forName( defaultEncoding() );
-    }
+	private static Map<String, String> _encodings() {
+		if (_encodings == null) {
+			_encodings = Map.of(
+					"ISO8859_1", "ISO-8859-1",
+					"ISO-8859-1", "ISO-8859-1",
+					"SJIS", "Shift_JIS",
+					"SHIFT_JIS", "Shift_JIS",
+					"EUC_JP", "EUC-JP", // Note: dash and underscore
+					"EUC-JP", "EUC-JP",
+					"ISO2022JP", "iso-2022-jp",
+					"ISO-2022-JP", "iso-2022-jp",
+					"UTF8", "UTF-8",
+					"UTF-8", "UTF-8");
+		}
+		return _encodings;
+	}
 
-    public static void setDefaultEncodingForAllLanguages(String newDefaultEncoding) {
-        // This statement may throw an IllegalArgumentException when newDefaultEncoding isn't supported.  
-        setDefaultEncoding(newDefaultEncoding); 
+	private static Map<String, String> _languagesAndDefaultEncodings;
 
-        NSMutableDictionary d = new NSMutableDictionary(_languagesAndDefaultEncodings());
-        Enumeration e = d.keyEnumerator();
-        while (e.hasMoreElements()) {
-            String key = (String)e.nextElement();
-            d.setObjectForKey(newDefaultEncoding, key);
-        }
-        _setLanguagesAndDefaultEncodings(d);
-    }
+	private static Map<String, String> _languagesAndDefaultEncodings() {
+		if (_languagesAndDefaultEncodings == null) {
+			_languagesAndDefaultEncodings = Map.of(
+					"English", "ISO8859_1",
+					"German", "ISO8859_1",
+					"Japanese", "SJIS");
+		}
+		return _languagesAndDefaultEncodings;
+	}
 
-    public static String defaultEncodingForLanguage(String language) {
-        String defaultEncoding = null;
-        if (availableLanguages().containsObject(language)) 
-            defaultEncoding = _languagesAndDefaultEncodings.get(language);
-        if (defaultEncoding == null) 
-            defaultEncoding = defaultEncoding();
-        return defaultEncoding; 
-    }
-    public static void setDefaultEncodingForLanguage(String encoding, String language) {
-        if (! availableLanguages().containsObject(language)) 
-            throw createIllegalArgumentException(language, "language", "availableLanguages()");
-        if (! availableEncodings().containsObject(encoding)) 
-            throw createIllegalArgumentException(encoding, "encoding", "availableEncodings()");
-        
-        NSMutableDictionary d = new NSMutableDictionary(_languagesAndDefaultEncodings);
-        d.setObjectForKey(encoding, language);
-        _languagesAndDefaultEncodings = d;
-    }
+	private static void _setLanguagesAndDefaultEncodings(NSDictionary newLanguagesAndDefaultEncodings) {
+		_languagesAndDefaultEncodings = newLanguagesAndDefaultEncodings;
+	}
 
-    public static void setEncodingToResponse(WOResponse response, String encoding) {
-    	encoding = encoding.toUpperCase();
-        if (! availableEncodings().containsObject(encoding)) 
-            throw createIllegalArgumentException(encoding, "encoding", "availableEncodings()");
+	private static String _defaultEncoding;
 
-        String mimeType = response.headerForKey("Content-Type");
-        if (mimeType != null && (mimeType.equals("text/html") || mimeType.equals("text/xml"))) {
-            response.setContentEncoding (encoding); 
-            response.setHeader(mimeType + "; charset=" + _encodings().get(encoding), "Content-Type");
-        }
-    }
+	private static String defaultEncoding() {
 
-    public void setEncodingToResponse(WOResponse response) {
-        setEncodingToResponse(response, encoding());
-    }
-    
-    public static void setDefaultFormValueEncodingToRequest(WORequest request, String encoding) {
-    	encoding = encoding.toUpperCase();
-        if (! availableEncodings().containsObject(encoding)) 
-            throw createIllegalArgumentException(encoding, "encoding", "availableEncodings()");
+		if (_defaultEncoding == null) {
+			_defaultEncoding = "ISO8859_1"; // WTF? No!
+		}
 
-        request.setDefaultFormValueEncoding (encoding); 
-        // request.setFormValueEncodingDetectionEnabled (true);
-    }
+		return _defaultEncoding;
+	}
 
-    public void setDefaultFormValueEncodingToRequest(WORequest request) {
-        setDefaultFormValueEncodingToRequest(request, encoding());
-    }
-    
-    protected static IllegalArgumentException createIllegalArgumentException(String value, String target, String listingMethod) {
-        Map d = Map.of(
-        		"value", value,		 
-        		"target", target, 	 
-        		"listingMethod", listingMethod );
-        ERXSimpleTemplateParser parser = ERXSimpleTemplateParser.sharedInstance();
-        String message = parser.parseTemplateWithObject(
-                    "@@value@@ isn't a supported @@target@@. (Not listed under @@listingMethod@@)", null, d, null);
-        return new IllegalArgumentException(message);
-    }
+	public static void setDefaultEncoding(String newDefaultEncoding) {
 
-    private String _toString;
-    @Override
-    public String toString() {
-        if (_toString == null) {
-            _toString = "<" + getClass().getName() 
-                        + " encoding: " + _encoding
-                        + ">";
-        }
-        return _toString;
-    }
+		if (!availableEncodings().containsObject(newDefaultEncoding.toUpperCase())) {
+			throw createIllegalArgumentException(newDefaultEncoding, "encoding", "availableEncodings()");
+		}
+
+		_defaultEncoding = newDefaultEncoding;
+	}
+
+	public static void setDefaultEncodingForAllLanguages(String newDefaultEncoding) {
+		// This statement may throw an IllegalArgumentException when
+		// newDefaultEncoding isn't supported.
+		setDefaultEncoding(newDefaultEncoding);
+
+		final NSMutableDictionary d = new NSMutableDictionary(_languagesAndDefaultEncodings());
+		final Enumeration e = d.keyEnumerator();
+
+		while (e.hasMoreElements()) {
+			String key = (String) e.nextElement();
+			d.setObjectForKey(newDefaultEncoding, key);
+		}
+
+		_setLanguagesAndDefaultEncodings(d);
+	}
+
+	private static String defaultEncodingForLanguage(String language) {
+		String defaultEncoding = null;
+
+		if (availableLanguages().containsObject(language)) {
+			defaultEncoding = _languagesAndDefaultEncodings.get(language);
+		}
+
+		if (defaultEncoding == null) {
+			defaultEncoding = defaultEncoding();
+		}
+
+		return defaultEncoding;
+	}
+
+	private static void setDefaultEncodingForLanguage(String encoding, String language) {
+
+		if (!availableLanguages().containsObject(language)) {
+			throw createIllegalArgumentException(language, "language", "availableLanguages()");
+		}
+
+		if (!availableEncodings().containsObject(encoding)) {
+			throw createIllegalArgumentException(encoding, "encoding", "availableEncodings()");
+		}
+
+		NSMutableDictionary d = new NSMutableDictionary(_languagesAndDefaultEncodings);
+		d.setObjectForKey(encoding, language);
+		_languagesAndDefaultEncodings = d;
+	}
+
+	private static void setEncodingToResponse(WOResponse response, String encoding) {
+		encoding = encoding.toUpperCase();
+
+		if (!availableEncodings().containsObject(encoding)) {
+			throw createIllegalArgumentException(encoding, "encoding", "availableEncodings()");
+		}
+
+		final String mimeType = response.headerForKey("Content-Type");
+
+		if (mimeType != null && (mimeType.equals("text/html") || mimeType.equals("text/xml"))) {
+			response.setContentEncoding(encoding);
+			response.setHeader(mimeType + "; charset=" + _encodings().get(encoding), "Content-Type");
+		}
+	}
+
+	public void setEncodingToResponse(WOResponse response) {
+		setEncodingToResponse(response, encoding());
+	}
+
+	private static void setDefaultFormValueEncodingToRequest(WORequest request, String encoding) {
+		encoding = encoding.toUpperCase();
+
+		if (!availableEncodings().containsObject(encoding)) {
+			throw createIllegalArgumentException(encoding, "encoding", "availableEncodings()");
+		}
+
+		request.setDefaultFormValueEncoding(encoding);
+	}
+
+	public void setDefaultFormValueEncodingToRequest(WORequest request) {
+		setDefaultFormValueEncodingToRequest(request, encoding());
+	}
+
+	private static IllegalArgumentException createIllegalArgumentException(String value, String target, String listingMethod) {
+		Map d = Map.of(
+				"value", value,
+				"target", target,
+				"listingMethod", listingMethod);
+
+		ERXSimpleTemplateParser parser = ERXSimpleTemplateParser.sharedInstance();
+		String message = parser.parseTemplateWithObject("@@value@@ isn't a supported @@target@@. (Not listed under @@listingMethod@@)", null, d, null);
+		return new IllegalArgumentException(message);
+	}
+
+	@Override
+	public String toString() {
+		return "<" + getClass().getName() + " encoding: " + _encoding + ">";
+	}
 }
