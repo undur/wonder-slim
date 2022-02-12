@@ -62,11 +62,6 @@ public class ERXMessageEncoding implements Serializable {
             _encoding = defaultEncoding();
     }
 
-    public static void resetToFactoryDefault() { 
-        _encodings = null;
-        _languagesAndDefaultEncodings = null;
-    }   
-
     public static NSArray availableEncodings() { 
         return new NSArray<>( _encodings().keySet() );
     }
