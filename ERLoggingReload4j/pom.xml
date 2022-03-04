@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>undur</groupId>
+		<artifactId>undur-reactor</artifactId>
+		<version>8.0.0.slim-SNAPSHOT</version>
+	</parent>
+	<groupId>wonder.core</groupId>
+	<artifactId>ERLoggingReload4j</artifactId>
+	<name>ERLoggingReload4j Framework</name>
+	<packaging>woframework</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>${webobjects.group}</groupId>
+			<artifactId>JavaFoundation</artifactId>
+			<version>${webobjects.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${webobjects.group}</groupId>
+			<artifactId>JavaWebObjects</artifactId>
+			<version>${webobjects.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>${webobjects.group}</groupId>
+					<artifactId>JavaXML</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.36</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.reload4j</groupId>
+			<artifactId>reload4j</artifactId>
+			<version>1.2.19</version>
+		</dependency>
+	</dependencies>
+</project>
