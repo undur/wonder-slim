@@ -105,7 +105,7 @@ public class ERXMessageEncoding {
 
 	private static String _defaultEncoding;
 
-	private static String defaultEncoding() {
+	public static String defaultEncoding() {
 
 		if (_defaultEncoding == null) {
 			_defaultEncoding = "ISO8859_1"; // WTF? No!

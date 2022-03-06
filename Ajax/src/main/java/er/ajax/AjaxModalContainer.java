@@ -4,6 +4,7 @@ package er.ajax;
 
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
@@ -131,13 +132,13 @@ public class AjaxModalContainer extends AjaxDynamicElement {
 		Object width = valueForBinding("width", component);
 		Object closeLabel = valueForBinding("closeLabel", component);
 		if (height != null) {
-			relAttributeValue += "&height=" +  URLEncoder.encode(height.toString(), ERXMessageEncoding.defaultEncodingAsCharset());
+			relAttributeValue += "&height=" +  URLEncoder.encode(height.toString(), Charset.forName( ERXMessageEncoding.defaultEncoding()) );
 		}
 		if (width != null) {
-			relAttributeValue += "&width=" +  URLEncoder.encode(width.toString(), ERXMessageEncoding.defaultEncodingAsCharset());
+			relAttributeValue += "&width=" +  URLEncoder.encode(width.toString(), Charset.forName( ERXMessageEncoding.defaultEncoding()) );
 		}
 		if (closeLabel != null) {
-			relAttributeValue += "&closeLabel=" + URLEncoder.encode(closeLabel.toString(), ERXMessageEncoding.defaultEncodingAsCharset());
+			relAttributeValue += "&closeLabel=" + URLEncoder.encode(closeLabel.toString(), Charset.forName( ERXMessageEncoding.defaultEncoding()) );
 		}
 		if (booleanValueForBinding("locked", false, component)) {
 			relAttributeValue += "&locked=true";
