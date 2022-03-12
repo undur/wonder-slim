@@ -24,6 +24,7 @@ import com.webobjects.appserver._private.WOKeyValueAssociation;
 import com.webobjects.appserver.parser.WOComponentTemplateParser;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
@@ -32,11 +33,6 @@ import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSSet;
 import com.webobjects.foundation._NSUtilities;
 
-import ognl.ClassResolver;
-import ognl.Ognl;
-import ognl.OgnlContext;
-import ognl.OgnlException;
-import ognl.OgnlRuntime;
 import ognl.helperfunction.WOHelperFunctionHTMLParser;
 import ognl.helperfunction.WOHelperFunctionParser;
 import ognl.helperfunction.WOHelperFunctionTagRegistry;
@@ -100,35 +96,16 @@ public class WOOgnl {
 		_factory = factory;
 	}
 
-	public ClassResolver classResolver() {
-		return NSClassResolver.sharedInstance();
-	}
-
 	public String ognlBindingFlag() {
 		return DefaultWOOgnlBindingFlag;
 	}
 
-	public OgnlContext newDefaultContext() {
-		// allow access to everything that is not declared private
-		OgnlContext context = new OgnlContext(classResolver(), null, new DefaultMemberAccess(false, true, true));
-		return context;
-	}
-
 	public void configureWOForOgnl() {
-		// Configure runtime.
-		// Configure foundation classes.
-		OgnlRuntime.setPropertyAccessor(Object.class, new NSObjectPropertyAccessor());
-		OgnlRuntime.setPropertyAccessor(NSArray.class, new NSArrayPropertyAccessor());
-		OgnlRuntime.setPropertyAccessor(NSDictionary.class, new NSDictionaryPropertyAccessor());
-
-		NSFoundationElementsAccessor e = new NSFoundationElementsAccessor();
-		OgnlRuntime.setElementsAccessor(NSArray.class, e);
-		OgnlRuntime.setElementsAccessor(NSDictionary.class, e);
-		OgnlRuntime.setElementsAccessor(NSSet.class, e);
 		// Register template parser
 		if (hasProperty("ognl.active", "true")) {
 			String parserClassName = System.getProperty("ognl.parserClassName", "ognl.helperfunction.WOHelperFunctionParser54");
 			WOComponentTemplateParser.setWOHTMLTemplateParserClassName(parserClassName);
+
 			if (hasProperty("ognl.inlineBindings", "false")) {
 				WOHelperFunctionTagRegistry.setAllowInlineBindings(true);
 			}
@@ -140,7 +117,7 @@ public class WOOgnl {
 			}
 		}
 	}
-	
+
 	private boolean hasProperty(String prop, String def) {
 		String property = System.getProperty(prop, def).trim();
 		return "true".equalsIgnoreCase(property) || "yes".equalsIgnoreCase(property);
@@ -206,32 +183,12 @@ public class WOOgnl {
 		}
 	}
 
+	// FIXME: THis should probably be NSKeyValueCodingAdditions
 	public Object getValue(String expression, Object obj) {
-		Object value = null;
-		try {
-			value = Ognl.getValue(expression, newDefaultContext(), obj);
-		}
-		catch (OgnlException ex) {
-			String message = ex.getMessage();
-			// MS: This is SUPER SUPER LAME, but I don't see any other way in OGNL to
-			// make keypaths with null components behave like NSKVC (i.e. returning null
-			// vs throwing an exception).  They have something called nullHandlers 
-			// in OGNL, but it appears that you have to register it per-class and you
-			// can't override the factory.
-			if (message == null || !message.startsWith("source is null for getProperty(null, ")) {
-				throw new RuntimeException("Failed to get value '" + expression + "' on " + obj, ex);
-			}
-		}
-		return value;
+		return NSKeyValueCoding.Utility.valueForKey(obj, expression);
 	}
 
 	public void setValue(String expression, Object obj, Object value) {
-		try {
-			Ognl.setValue(expression, newDefaultContext(), obj, value);
-		}
-		catch (OgnlException ex) {
-			throw new RuntimeException("Failed to set value '" + expression + "' on " + obj, ex);
-		}
+		NSKeyValueCoding.Utility.takeValueForKey(obj, value, expression);
 	}
-
 }
