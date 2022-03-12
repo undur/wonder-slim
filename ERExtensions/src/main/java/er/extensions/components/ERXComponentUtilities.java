@@ -160,6 +160,8 @@ public class ERXComponentUtilities {
 	 * @param name binding name
 	 * @param associations array of associations
 	 * @return association for given binding or <code>null</code>
+	 * 
+	 * FIXME: Uh… This is just associations.get(name) // Hugi 2022-03-12
 	 */
 	public static WOAssociation bindingNamed(String name, NSDictionary<String, WOAssociation> associations) {
 		return associations.objectForKey(name);
