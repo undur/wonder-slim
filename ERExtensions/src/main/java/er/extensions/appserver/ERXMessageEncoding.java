@@ -19,6 +19,8 @@ import er.extensions.foundation.ERXSimpleTemplateParser;
 public class ERXMessageEncoding {
 
 	private String _encoding;
+
+	private static String _defaultEncoding;
 	private static Map<String, String> _encodings;
 	private static Map<String, String> _languagesAndDefaultEncodings;
 
@@ -80,7 +82,6 @@ public class ERXMessageEncoding {
 		return _encodings;
 	}
 
-
 	private static Map<String, String> _languagesAndDefaultEncodings() {
 		if (_languagesAndDefaultEncodings == null) {
 			_languagesAndDefaultEncodings = Map.of(
@@ -94,8 +95,6 @@ public class ERXMessageEncoding {
 	private static void _setLanguagesAndDefaultEncodings(NSDictionary newLanguagesAndDefaultEncodings) {
 		_languagesAndDefaultEncodings = newLanguagesAndDefaultEncodings;
 	}
-
-	private static String _defaultEncoding;
 
 	public static String defaultEncoding() {
 
