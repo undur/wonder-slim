@@ -6,6 +6,7 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.logging;
 
+import java.text.NumberFormat;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -468,7 +469,7 @@ class ERXPatternParser extends PatternParser {
 		private Runtime _runtime;
 
 		/** */
-		private ERXUnitAwareDecimalFormat _decimalFormatter;
+		private NumberFormat _decimalFormatter;
 
 		/** Template parser to format logging events */
 		private ERXSimpleTemplateParser _templateParser;
