@@ -128,10 +128,7 @@ public class ERXWOString extends WODynamicElement {
 				}
 
 				if (format != null) {
-					if (valueInComponent == null) {
-						// do nothing;
-					}
-					else {
+					if (valueInComponent != null) {
 						try {
 							valueInComponent = format.format(valueInComponent);
 						}
