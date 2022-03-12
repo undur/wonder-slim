@@ -22,11 +22,9 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
-import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXValueUtilities;
 
 /**
@@ -336,24 +334,6 @@ public class ERXComponentUtilities {
 		catch (IOException e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
 		}
-	}
-
-	/**
-	 * Returns an array of the current component names.
-	 * 
-	 * @return array of current component names
-	 */
-	public static NSArray<String> componentTree() {
-		WOContext context = ERXWOContext.currentContext();
-		NSMutableArray<String> result = new NSMutableArray<>();
-		if (context != null) {
-			WOComponent c = context.component();
-			while (c != null) {
-				result.addObject(c.name());
-				c = c.parent();
-			}
-		}
-		return result;
 	}
 
 	/**
