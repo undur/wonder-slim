@@ -19,22 +19,43 @@ import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 
 /**
- * Reimplementation of WOString that can resolve localized format strings. This
- * is very useful as most of the components in DirectToWeb use a "format"-String
- * binding - so to use localized patterns, you'd need to re-implement all these
- * components.
- * 
- * @author ak
+ * Reimplementation of WOString. Automatically patched in by ERXPatcher.
  */
+
 public class ERXWOString extends WODynamicElement {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXWOString.class);
 
-	private final WOAssociation _dateFormat;
-	private final WOAssociation _numberFormat;
-	private final WOAssociation _formatter;
+	/**
+	 * The object to append to the response as a string.
+	 */
 	private final WOAssociation _value;
+
+	/**
+	 * Format string to use for formatting NSTimestamp dates.
+	 * 
+	 * FIXME: This binding is essentially obsolete since it's only meant for use with NSTimestamp, which sucks and is dead // Hugi 2022-03-12
+	 */
+	private final WOAssociation _dateFormat;
+	
+	/**
+	 * Format string to use with numbers (as specified by NSNumberFormatter)
+	 */
+	private final WOAssociation _numberFormat;
+	
+	/**
+	 * An instance of java.util.format to use to format the passed {value]
+	 */
+	private final WOAssociation _formatter;
+	
+	/**
+	 * Indicates if we'd like to escape HTML before appending to the response.
+	 */
 	private final WOAssociation _escapeHTML;
+	
+	/**
+	 * The value to render in case the passed in object is null or an empty string.
+	 */
 	private final WOAssociation _valueWhenEmpty;
 
 	/**
