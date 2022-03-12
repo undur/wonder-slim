@@ -23,29 +23,12 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
 
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.components.ERXStatelessComponent;
 
 public class ERXUtilities {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXUtilities.class);
 
 	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
-
-	/**
-	 * Useful interface for binding objects to WOComponent bindings where you want to delay the evaluation of the boolean operation until
-	 * <code>valueForBinding</code> is actually called. See {@link ERXStatelessComponent} for examples.
-	 */
-	public static interface BooleanOperation {
-		public boolean value();
-	}
-
-	/**
-	 * Useful interface for binding objects to WOComponent bindings where you want to delay the evaluation of the operation until
-	 * <code>valueForBinding</code> is actually called. See {@link ERXStatelessComponent} for examples.
-	 */
-	public static interface Operation {
-		public Object value();
-	}
 
 	/**
 	 * Utility that returns a selector you can use with the NSNotificationCenter.

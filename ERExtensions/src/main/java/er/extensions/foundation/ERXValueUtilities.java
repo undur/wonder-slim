@@ -121,9 +121,6 @@ public class ERXValueUtilities {
 				flag = (Boolean) obj;
 				// MS: Nothing actually implements BooleanOperation ...
 			}
-			else if (obj instanceof ERXUtilities.BooleanOperation) {
-				flag = ((ERXUtilities.BooleanOperation) obj).value();
-			}
 			else {
 				throw new IllegalArgumentException("Failed to parse a boolean from the value '" + obj + "'.");
 			}

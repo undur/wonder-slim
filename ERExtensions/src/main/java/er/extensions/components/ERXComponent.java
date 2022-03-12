@@ -163,22 +163,6 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Resolves a given binding as a boolean value with the option of specifying
-	 * a boolean operator as the default value.
-	 * 
-	 * @param binding binding to be resolved as a boolean value.
-	 * @param defaultValue boolean operator to be evaluated if the binding is not present.
-	 * 
-	 * @return result of evaluating binding as a boolean.
-	 */
-	protected boolean booleanValueForBinding(String binding, ERXUtilities.BooleanOperation defaultValue) {
-		if (hasBinding(binding)) {
-			return booleanValueForBinding(binding, false);
-		}
-		return defaultValue.value();
-	}
-
-	/**
 	 * Resolves a given binding as an object in the normal fashion of calling
 	 * <code>valueForBinding</code>. This has the one advantage of being able to
 	 * resolve the resulting object as a {link ERXUtilities$Operation} if it is
@@ -214,9 +198,6 @@ public abstract class ERXComponent extends WOComponent {
 		}
 		else {
 			result = defaultValue;
-		}
-		if (result instanceof ERXUtilities.Operation) {
-			result = ((ERXUtilities.Operation) result).value();
 		}
 		return result;
 	}
