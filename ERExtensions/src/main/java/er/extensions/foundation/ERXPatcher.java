@@ -79,7 +79,7 @@ public class ERXPatcher {
 		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
 		ERXPatcher.setClassForName(DynamicElementsPatches.GenericElement.class, "WOGenericElement");
-		// ERXPatcher.setClassForName(DynamicElementsPatches.GenericContainer.class, "WOGenericContainer");
+		// ERXPatcher.setClassForName(DynamicElementsPatches.GenericContainer.class, "WOGenericContainer"); // FIXME: Find out why this is no longer included // Hugi 2022-03-12
 		ERXPatcher.setClassForName(DynamicElementsPatches.Image.class, "WOImage");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ActiveImage.class, "WOActiveImage");
 		ERXPatcher.setClassForName(DynamicElementsPatches.Text.class, "WOText");
@@ -92,12 +92,9 @@ public class ERXPatcher {
 		ERXPatcher.setClassForName(DynamicElementsPatches.PasswordField.class, "WOPasswordField");
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButton.class, "WORadioButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
-
+		ERXPatcher.setClassForName(DynamicElementsPatches.JavaScript.class, "WOJavaScript");
 		ERXPatcher.setClassForName(ERXWOHyperlink.class, "WOHyperlink");
 		ERXPatcher.setClassForName(ERXWOSwitchComponent.class, "WOSwitchComponent");
-		
-		// RM XHTML strict compliance
-		ERXPatcher.setClassForName(DynamicElementsPatches.JavaScript.class, "WOJavaScript");
 	}
 
 	/**
