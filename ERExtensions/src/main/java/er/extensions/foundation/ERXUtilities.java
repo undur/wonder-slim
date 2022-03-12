@@ -215,25 +215,15 @@ public class ERXUtilities {
      * @see #webObjectsVersion()
      */ 
 	private static String versionStringForFrameworkNamed(String frameworkName) {
-        return valueFromPlistBundleWithKey(NSBundle.bundleForName(frameworkName), "Info.plist", "CFBundleShortVersionString");
-    }
+        NSBundle bundle = NSBundle.bundleForName(frameworkName);
 
-    /**
-     * Returns the key in an plist of the given framework.
-     * 
-     * @param bundle bundle name
-     * @param plist plist Filename
-     * @param key key
-     * @return Result
-     */
-	private static String valueFromPlistBundleWithKey(NSBundle bundle, String plist, String key) {
-    	if (bundle == null)
+    	if (bundle == null) {
     		return "";
+    	}
 
-    	String dictString = new String(bundle.bytesForResourcePath(plist));
-    	NSDictionary versionDictionary = NSPropertyListSerialization.dictionaryForString(dictString);
-
-    	String versionString = (String) versionDictionary.objectForKey(key);
+    	final String dictString = new String(bundle.bytesForResourcePath("Info.plist"));
+    	final NSDictionary versionDictionary = NSPropertyListSerialization.dictionaryForString(dictString);
+    	final String versionString = (String) versionDictionary.objectForKey("CFBundleShortVersionString");
     	return versionString == null  ?  ""  :  versionString.trim(); // trim() removes the line ending char
     }
 }
