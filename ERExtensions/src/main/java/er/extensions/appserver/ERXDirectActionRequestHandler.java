@@ -17,17 +17,18 @@ import er.extensions.foundation.ERXProperties;
 
 public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler {
 
-	/**
-	 * caches if automatic message encoding is enabled, defaults to true
-	 */
-	protected static Boolean automaticMessageEncodingEnabled;
+	private static Boolean automaticMessageEncodingEnabled;
+
+	public ERXDirectActionRequestHandler() {}
+
+	public ERXDirectActionRequestHandler(String anActionClassName, String aDefaultActionName, boolean ifShouldAddToStatistics) {
+		super(anActionClassName, aDefaultActionName, ifShouldAddToStatistics);
+	}
 
 	/**
-	 * Allows the disabling of automatic message encoding. Useful for backend services where you want to just use the default encoding.
-	 * 
-	 * @return if automatic message encoding is enabled.
+	 * Disabling automatic message encoding can be useful for back-end services where you just want to use the default encoding.
 	 */
-	public static boolean automaticMessageEncodingEnabled() {
+	private static boolean automaticMessageEncodingEnabled() {
 		if (automaticMessageEncodingEnabled == null) {
 			automaticMessageEncodingEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXMessageEncoding.Enabled", true) ? Boolean.TRUE : Boolean.FALSE;
 		}
@@ -35,15 +36,8 @@ public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler 
 		return automaticMessageEncodingEnabled.booleanValue();
 	}
 
-	public ERXDirectActionRequestHandler() {}
-
-	public ERXDirectActionRequestHandler(String actionClassName, String defaultActionName, boolean shouldAddToStatistics) {
-		super(actionClassName, defaultActionName, shouldAddToStatistics);
-	}
-
 	/**
-	 * Return true if you want to handle the request even though the app is refusing new sessions.
-	 * Currently, this includes all urls with "stats" in them
+	 * @return true if you want to handle the request even though the app is refusing new sessions. Currently, this includes all urls with "stats" in them.
 	 */
 	protected boolean isSystemRequest(WORequest request) {
 		return request.requestHandlerPath() != null && request.requestHandlerPath().toLowerCase().indexOf("stats") >= 0;
