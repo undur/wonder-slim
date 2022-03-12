@@ -510,19 +510,15 @@ public class ERXResponseRewriter {
 	 */
 	public static void addStylesheetResourceInHead(WOResponse response, WOContext context, String framework, String fileName, String media) {
 		String cssStartTag;
+
 		if (media == null) {
 			cssStartTag = "<link rel=\"stylesheet\" type=\"text/css\" href=\"";
 		}
 		else {
 			cssStartTag = "<link rel=\"stylesheet\" type=\"text/css\" media=\"" + media + "\" href=\"";
 		}
-		String cssEndTag;
-		if (ERXStyleSheet.shouldCloseLinkTags()) {
-			cssEndTag = "\"/>";
-		}
-		else {
-			cssEndTag = "\">";
-		}
+
+		String cssEndTag = "\"/>";
 		String fallbackStartTag = null;
 		String fallbackEndTag = null;
 

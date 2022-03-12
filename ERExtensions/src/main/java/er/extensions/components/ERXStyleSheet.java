@@ -42,10 +42,10 @@ import er.extensions.foundation.ERXProperties;
  *          will be placed inline for ajax requests and in the head for regular
  *          requests
  * @binding media media name this style sheet is for
- * @property er.extensions.ERXStyleSheet.xhtml (defaults <code>true</code>) if <code>false</code>,
- *           link tags are not closed, which is compatible with older HTML
  */
+
 // FIXME: cache should be able to cache on values of bindings, not a single key
+
 public class ERXStyleSheet extends ERXStatelessComponent {
 	/**
 	 * Do I need to update serialVersionUID?
@@ -217,12 +217,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 		response._appendTagAttributeAndValue( "type", "text/css", false );
 		response._appendTagAttributeAndValue( "href", href, false );
 		response._appendTagAttributeAndValue( "media", mediaType(), false );
-
-		if( ERXStyleSheet.shouldCloseLinkTags() ) {
-			response._appendContentAsciiString( "/>" );
-		} else {
-			response._appendContentAsciiString( ">" );
-		}
+		response._appendContentAsciiString( "/>" );
 		response.appendContentString("\n");
 		boolean inserted = true;
 		if( !inline ) {
@@ -239,18 +234,6 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 		}
 	}
 
-	/**
-	 * Returns whether or not XHTML link tags should be used. If false, then
-	 * link tags will not be closed, which is more compatible with certain
-	 * browser parsers. Set the 'er.extensions.ERXStyleSheet.xhtml' to control
-	 * this property.
-	 * 
-	 * @return true of link tags should be closed, false otherwise
-	 */
-	public static boolean shouldCloseLinkTags() {
-		return ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXStyleSheet.xhtml", true );
-	}
-	
 	/**
 	 * Partial rip from ERXStringUtilities
 	 * 
