@@ -49,7 +49,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${wonder.core.group}</groupId>
-			<artifactId>WOOgnl</artifactId>
+			<artifactId>WONoOgnl</artifactId>
 			<version>${wonder.version}</version>
 		</dependency>
 	</dependencies>
