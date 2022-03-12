@@ -6,7 +6,6 @@
 //
 package er.extensions.appserver;
 
-import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Map;
 
