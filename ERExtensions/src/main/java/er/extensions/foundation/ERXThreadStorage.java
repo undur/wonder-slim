@@ -10,12 +10,11 @@ package er.extensions.foundation;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.webobjects.foundation.NSKeyValueCodingAdditions;
-
 /**
  * Provides a way to store objects for a particular thread. This can be especially handy for storing objects
  * like the current actor or the current form name within the scope of a thread handling a particular request.
  */
+
 public class ERXThreadStorage {
 
     /**
@@ -30,9 +29,6 @@ public class ERXThreadStorage {
 
     /**
      * Sets a value for a particular key for a particular thread.
-     * 
-     * @param object value
-     * @param key key
      */
     public static void takeValueForKey(Object object, String key) {
     	Map map = storageMap(true);
@@ -50,26 +46,6 @@ public class ERXThreadStorage {
         return map != null ? map.remove(key) : null;
     }
 
-    /**
-     * Gets the object associated with the keypath in the storage map off of the current thread.
-     * 
-     * @param keyPath key path to be used to retrieve value from map.
-     * @return the value stored in the map for the given key.
-     */
-    public static Object valueForKeyPath(String keyPath) {
-        int dot = keyPath.indexOf(".");
-        Object value = null;
-        if(dot > 1) {
-            value = valueForKey(keyPath.substring(0, dot));
-            if(value != null) {
-                value = NSKeyValueCodingAdditions.Utility.valueForKeyPath(value, keyPath.substring(dot+1));
-            }
-        } else {
-            value = valueForKey(keyPath);
-        }
-        return value;
-    }
-    
     /**
      * Gets the object associated with the key in the storage map off of the current thread.
      * 
