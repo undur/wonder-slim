@@ -79,7 +79,7 @@ public class ERXPatcher {
 		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
 		ERXPatcher.setClassForName(DynamicElementsPatches.GenericElement.class, "WOGenericElement");
-		// ERXPatcher.setClassForName(DynamicElementsPatches.GenericContainer.class, "WOGenericContainer"); // FIXME: Find out why this is no longer included // Hugi 2022-03-12
+		// ERXPatcher.setClassForName(DynamicElementsPatches.GenericContainer.class, "WOGenericContainer"); // FIXME: Find out why this is no longer active. Perhaps accidentally removed 18 years ago in db080fed55a420228a5b6bb33d4662d465f343cd ? // Hugi 2022-03-12
 		ERXPatcher.setClassForName(DynamicElementsPatches.Image.class, "WOImage");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ActiveImage.class, "WOActiveImage");
 		ERXPatcher.setClassForName(DynamicElementsPatches.Text.class, "WOText");
