@@ -94,9 +94,7 @@ public class ERXPatcher {
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
 
 		ERXPatcher.setClassForName(ERXWOHyperlink.class, "WOHyperlink");
-		if (ERXProperties.booleanForKeyWithDefault("er.extensions.WOSwitchComponent.patch", true)) {
-			ERXPatcher.setClassForName(ERXWOSwitchComponent.class, "WOSwitchComponent");
-		}
+		ERXPatcher.setClassForName(ERXWOSwitchComponent.class, "WOSwitchComponent");
 		
 		// RM XHTML strict compliance
 		ERXPatcher.setClassForName(DynamicElementsPatches.JavaScript.class, "WOJavaScript");
