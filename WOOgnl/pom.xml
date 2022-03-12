@@ -34,10 +34,5 @@
 			<artifactId>ognl</artifactId>
 			<version>3.3.2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.36</version>
-		</dependency>
 	</dependencies>
 </project>
