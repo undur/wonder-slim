@@ -14,11 +14,8 @@ import com.webobjects.appserver._private.WODynamicElementCreationException;
 import com.webobjects.appserver._private.WOInput;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSLog;
-import com.webobjects.foundation.NSTimeZone;
-import com.webobjects.foundation.NSTimestampFormatter;
 import com.webobjects.foundation.NSValidation;
 
-import er.extensions.appserver.ERXSession;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 import er.extensions.foundation.ERXKeyValueCodingUtilities;
@@ -113,46 +110,15 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 						}
 					}
 					if(format != null) {
-						if(ERXSession.autoAdjustTimeZone() &&
-								!hasFormatter && 
-        						format instanceof NSTimestampFormatter && 
-        						wocontext.hasSession() && 
-        						ERXSession.class.isAssignableFrom(wocontext.session().getClass())
-                				) {
-								
-							synchronized(format) {
-								ERXSession session = (ERXSession)wocontext.session();
-								NSTimeZone zone = NSTimeZone._nstimeZoneWithTimeZone(session.timeZone());
-								NSTimestampFormatter tsFormat = (NSTimestampFormatter)format;
-								NSTimeZone parseZone = tsFormat.defaultParseTimeZone();
-								NSTimeZone formatZone = tsFormat.defaultFormatTimeZone();
-								tsFormat.setDefaultFormatTimeZone(zone);
-								tsFormat.setDefaultParseTimeZone(zone);
-								try {
-									Object parsedObject = format.parseObject(stringValue);
-									String reformatedObject = format.format(parsedObject);
-									result = format.parseObject(reformatedObject);
-								} catch(ParseException parseexception) {
-									String keyPath = _value.keyPath();
-									NSValidation.ValidationException validationexception = new NSValidation.ValidationException(parseexception.getMessage(), stringValue, keyPath );
-									component.validationFailedWithException(validationexception, stringValue, keyPath);
-									return;
-								} finally {
-									tsFormat.setDefaultFormatTimeZone(formatZone);
-									tsFormat.setDefaultParseTimeZone(parseZone);
-								}
-							}
-						} else {
-							try {
-								Object parsedObject = format.parseObject(stringValue);
-								String reformatedObject = format.format(parsedObject);
-								result = format.parseObject(reformatedObject);
-							} catch(ParseException parseexception) {
-								String keyPath = _value.keyPath();
-								NSValidation.ValidationException validationexception = new NSValidation.ValidationException(parseexception.getMessage(), stringValue, keyPath);
-								component.validationFailedWithException(validationexception, stringValue, keyPath);
-								return;
-							}
+						try {
+							Object parsedObject = format.parseObject(stringValue);
+							String reformatedObject = format.format(parsedObject);
+							result = format.parseObject(reformatedObject);
+						} catch(ParseException parseexception) {
+							String keyPath = _value.keyPath();
+							NSValidation.ValidationException validationexception = new NSValidation.ValidationException(parseexception.getMessage(), stringValue, keyPath);
+							component.validationFailedWithException(validationexception, stringValue, keyPath);
+							return;
 						}
 						if(result != null && _useDecimalNumber != null && _useDecimalNumber.booleanValueInComponent(component)) {
 							result = new BigDecimal(result.toString());
@@ -193,46 +159,15 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 				hasFormatter = true;
 			}
 			if(format != null) {
-				if(ERXSession.autoAdjustTimeZone() &&
-						!hasFormatter && 
-						format instanceof NSTimestampFormatter && 
-						wocontext.hasSession() && 
-						ERXSession.class.isAssignableFrom(wocontext.session().getClass())
-        				) {
-						
-					synchronized(format) {
-						ERXSession session = (ERXSession)wocontext.session();
-						NSTimeZone zone = NSTimeZone._nstimeZoneWithTimeZone(session.timeZone());
-						NSTimestampFormatter tsFormat = (NSTimestampFormatter)format;
-						NSTimeZone parseZone = tsFormat.defaultParseTimeZone();
-						NSTimeZone formatZone = tsFormat.defaultFormatTimeZone();
-						tsFormat.setDefaultFormatTimeZone(zone);
-						tsFormat.setDefaultParseTimeZone(zone);
-						try {
-							String formatedValue = format.format(valueInComponent);
-							Object reparsedObject = format.parseObject(formatedValue);
-							stringValue = format.format(reparsedObject);
-						} catch(IllegalArgumentException illegalargumentexception) {
-							NSLog._conditionallyLogPrivateException(illegalargumentexception);
-							stringValue = null;
-						} catch(ParseException parseexception) {
-							NSLog._conditionallyLogPrivateException(parseexception);
-						} finally {
-							tsFormat.setDefaultFormatTimeZone(formatZone);
-							tsFormat.setDefaultParseTimeZone(parseZone);
-						}
-					}
-				} else {
-					try {
-						String formatedValue = format.format(valueInComponent);
-						Object reparsedObject = format.parseObject(formatedValue);
-						stringValue = format.format(reparsedObject);
-					} catch(IllegalArgumentException illegalargumentexception) {
-						NSLog._conditionallyLogPrivateException(illegalargumentexception);
-						stringValue = null;
-					} catch(ParseException parseexception) {
-						NSLog._conditionallyLogPrivateException(parseexception);
-					}
+				try {
+					String formatedValue = format.format(valueInComponent);
+					Object reparsedObject = format.parseObject(formatedValue);
+					stringValue = format.format(reparsedObject);
+				} catch(IllegalArgumentException illegalargumentexception) {
+					NSLog._conditionallyLogPrivateException(illegalargumentexception);
+					stringValue = null;
+				} catch(ParseException parseexception) {
+					NSLog._conditionallyLogPrivateException(parseexception);
 				}
 			}
 			if(stringValue == null) {

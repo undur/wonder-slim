@@ -14,10 +14,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODynamicElementCreationException;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCoding;
-import com.webobjects.foundation.NSTimeZone;
-import com.webobjects.foundation.NSTimestampFormatter;
 
-import er.extensions.appserver.ERXSession;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 
@@ -107,41 +104,12 @@ public class ERXWOString extends WODynamicElement {
 						// do nothing;
 					}
 					else {
-						if (ERXSession.autoAdjustTimeZone() &&
-								!hasFormatter &&
-								format instanceof NSTimestampFormatter &&
-								wocontext.hasSession() &&
-								ERXSession.class.isAssignableFrom(wocontext.session().getClass())) {
-
-							synchronized (format) {
-								ERXSession session = (ERXSession) wocontext.session();
-								NSTimeZone zone = NSTimeZone._nstimeZoneWithTimeZone(session.timeZone());
-								NSTimestampFormatter tsFormat = (NSTimestampFormatter) format;
-								NSTimeZone parseZone = tsFormat.defaultParseTimeZone();
-								NSTimeZone formatZone = tsFormat.defaultFormatTimeZone();
-								tsFormat.setDefaultFormatTimeZone(zone);
-								tsFormat.setDefaultParseTimeZone(zone);
-								try {
-									valueInComponent = format.format(valueInComponent);
-								}
-								catch (IllegalArgumentException ex) {
-									log.info("Exception while formatting", ex);
-									valueInComponent = null;
-								}
-								finally {
-									tsFormat.setDefaultFormatTimeZone(formatZone);
-									tsFormat.setDefaultParseTimeZone(parseZone);
-								}
-							}
+						try {
+							valueInComponent = format.format(valueInComponent);
 						}
-						else {
-							try {
-								valueInComponent = format.format(valueInComponent);
-							}
-							catch (IllegalArgumentException ex) {
-								log.info("Exception while formatting", ex);
-								valueInComponent = null;
-							}
+						catch (IllegalArgumentException ex) {
+							log.info("Exception while formatting", ex);
+							valueInComponent = null;
 						}
 					}
 
