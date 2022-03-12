@@ -22,15 +22,11 @@ import com.webobjects.appserver._private.WOBindingNameAssociation;
 import com.webobjects.appserver._private.WOConstantValueAssociation;
 import com.webobjects.appserver._private.WOKeyValueAssociation;
 import com.webobjects.appserver.parser.WOComponentTemplateParser;
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
-import com.webobjects.foundation.NSSet;
 import com.webobjects.foundation._NSUtilities;
 
 import ognl.helperfunction.WOHelperFunctionHTMLParser;
