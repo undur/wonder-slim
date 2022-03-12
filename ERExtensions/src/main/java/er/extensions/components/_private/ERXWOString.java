@@ -67,12 +67,15 @@ public class ERXWOString extends WODynamicElement {
 
 		if (_value != null) {
 			valueInComponent = _value.valueInComponent(component);
+
 			if (_shouldFormat) {
 				Format format = null;
 				boolean hasFormatter = false; // FIXME: This can probably be deleted (remnants of the ERXSession.autoAdjustTimeZones() thing)
+
 				if (_formatter != null) {
 					format = (Format) _formatter.valueInComponent(component);
 				}
+
 				if (format == null) {
 					if (_dateFormat != null) {
 						String formatString = (String) _dateFormat.valueInComponent(component);
@@ -96,9 +99,11 @@ public class ERXWOString extends WODynamicElement {
 				else {
 					hasFormatter = true;
 				}
+
 				if (valueInComponent == NSKeyValueCoding.NullValue) {
 					valueInComponent = null;
 				}
+
 				if (format != null) {
 					if (valueInComponent == null) {
 						// do nothing;
@@ -112,7 +117,6 @@ public class ERXWOString extends WODynamicElement {
 							valueInComponent = null;
 						}
 					}
-
 				}
 				else {
 					if (valueInComponent != null) {
