@@ -51,8 +51,6 @@ import ognl.helperfunction.WOHelperFunctionTagRegistry;
 public class WOOgnl {
 	private static final Logger log = LoggerFactory.getLogger(WOOgnl.class);
 
-	public static final String DefaultWOOgnlBindingFlag = "~";
-
 	protected static Collection<Observer> _retainerArray = new NSMutableArray<>();
 	static {
 		try {
@@ -94,10 +92,6 @@ public class WOOgnl {
 
 	public static void setFactory(WOOgnl factory) {
 		_factory = factory;
-	}
-
-	public String ognlBindingFlag() {
-		return DefaultWOOgnlBindingFlag;
 	}
 
 	public void configureWOForOgnl() {
@@ -161,34 +155,7 @@ public class WOOgnl {
 						}
 					}
 				}
-				if (isConstant && keyPath.startsWith(ognlBindingFlag())) {
-					String ognlExpression = keyPath.substring(ognlBindingFlag().length(), keyPath.length());
-					if (ognlExpression.length() > 0) {
-						WOAssociation newAssociation = new WOOgnlAssociation(ognlExpression);
-						NSArray keys = associations.allKeysForObject(association);
-						//if (log.isDebugEnabled())
-						//    log.debug("Constructing Ognl association for binding key(s): "
-						//              + (keys.count() == 1 ? keys.lastObject() : keys) + " expression: " + ognlExpression);
-						if (keys.count() == 1) {
-							associations.setObjectForKey(newAssociation, keys.lastObject());
-						}
-						else {
-							for (Enumeration ee = keys.objectEnumerator(); ee.hasMoreElements();) {
-								associations.setObjectForKey(newAssociation, e.nextElement());
-							}
-						}
-					}
-				}
 			}
 		}
-	}
-
-	// FIXME: THis should probably be NSKeyValueCodingAdditions
-	public Object getValue(String expression, Object obj) {
-		return NSKeyValueCoding.Utility.valueForKey(obj, expression);
-	}
-
-	public void setValue(String expression, Object obj, Object value) {
-		NSKeyValueCoding.Utility.takeValueForKey(obj, value, expression);
 	}
 }
