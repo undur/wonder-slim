@@ -192,4 +192,36 @@ public class ERXMessageEncoding {
 	public String toString() {
 		return "<" + getClass().getName() + " encoding: " + _encoding + ">";
 	}
+	
+    /**
+     * Gets the message encoding for a given request. Default implementation
+     * gets the message encoding for all of the browserLanguages off of
+     * the request.
+     * 
+     * @param request to get the message encoding for
+     * @return message encoding
+     */
+    public static ERXMessageEncoding messageEncodingForRequest(WORequest request) {
+        return messageEncodingForLanguages(request.browserLanguages());
+    }
+
+    /**
+     * Gets the message encoding for a given array of languages.
+     * 
+     * @param languages array to get the correct encoding for
+     * @return message encoding
+     */
+    public static ERXMessageEncoding messageEncodingForLanguages(NSArray languages) {
+        return new ERXMessageEncoding(languages);
+    }
+    
+    /**
+     * Gets the message encoding for a given language.
+     * 
+     * @param language to get the encoding for
+     * @return message encoding
+     */
+    public static ERXMessageEncoding messageEncodingForLanguage(String language) {
+        return new ERXMessageEncoding(language);
+    }
 }

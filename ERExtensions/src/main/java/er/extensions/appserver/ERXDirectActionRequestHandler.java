@@ -91,8 +91,7 @@ public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler 
 				erxSession.lastActionWasDA = true;
 			}
 			else if (request instanceof ERXRequest) {
-				ERXBrowser browser = ((ERXRequest) request).browser();
-				messageEncoding = browser.messageEncodingForRequest(request);
+				messageEncoding = ERXMessageEncoding.messageEncodingForRequest(request);
 			}
 			else {
 				messageEncoding = new ERXMessageEncoding(request.browserLanguages());

@@ -191,7 +191,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 			ERXLocalizer.setCurrentLocalizer(_localizer);
 
 			if (browser() != null) {
-				_messageEncoding = browser().messageEncodingForLanguage(_localizer.language());
+				_messageEncoding = ERXMessageEncoding.messageEncodingForLanguage(_localizer.language()); // FIXME: This is all such utter bullshit // Hugi 2022-03-12
 			}
 
 			NSMutableArray languageList = new NSMutableArray(_localizer.language());
@@ -225,7 +225,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 			_localizer = newLocalizer;
 			ERXLocalizer.setCurrentLocalizer(_localizer);
 			if (browser() != null) {
-				_messageEncoding = browser().messageEncodingForLanguage(_localizer.language());
+				_messageEncoding = ERXMessageEncoding.messageEncodingForLanguage(_localizer.language());  // FIXME: This is all such utter bullshit // Hugi 2022-03-12
 			}
 		}
 	}
@@ -281,7 +281,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	public ERXMessageEncoding messageEncoding() {
 		if (_messageEncoding == null) {
 			if (browser() != null) {
-				_messageEncoding = browser().messageEncodingForLanguage(language());
+				_messageEncoding = ERXMessageEncoding.messageEncodingForLanguage(language());  // FIXME: This is all such utter bullshit // Hugi 2022-03-12
 			}
 		}
 		return _messageEncoding;
