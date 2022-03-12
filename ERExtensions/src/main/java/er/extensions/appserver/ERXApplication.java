@@ -255,9 +255,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		configureStatisticsLogging();
 
 		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("finishInitialization", ERXUtilities.NotificationClassArray), WOApplication.ApplicationWillFinishLaunchingNotification, null);
-
 		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("didFinishLaunching", ERXUtilities.NotificationClassArray), WOApplication.ApplicationDidFinishLaunchingNotification, null);
-
 		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("addBalancerRouteCookieByNotification", new Class[] { NSNotification.class }), WORequestHandler.DidHandleRequestNotification, null);
 
 		_replaceApplicationPathPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
