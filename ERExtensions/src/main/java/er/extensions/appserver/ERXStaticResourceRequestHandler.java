@@ -20,7 +20,6 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODeployedBundle;
-import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSNotificationCenter;
 
@@ -91,8 +90,7 @@ public class ERXStaticResourceRequestHandler extends WORequestHandler {
 		if (_documentRoot == null) {
 			_documentRoot = ERXProperties.stringForKey("WODocumentRoot");
 			if(_documentRoot == null) {
-				NSBundle bundle = NSBundle.bundleForName("JavaWebObjects");
-				NSDictionary dict = ERXUtilities.dictionaryFromPropertyList("WebServerConfig", bundle);
+				NSDictionary dict = ERXUtilities.dictionaryFromPropertyList("WebServerConfig", "JavaWebObjects");
 				_documentRoot = (String) dict.objectForKey("DocumentRoot");
 			}
 		}

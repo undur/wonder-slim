@@ -70,7 +70,8 @@ public class ERXUtilities {
 	 * @param bundle NSBundle to which the resource belongs.
 	 * @return NSDictionary de-serialized from the property list.
 	 */
-	public static NSDictionary dictionaryFromPropertyList(String name, NSBundle bundle) {
+	public static NSDictionary dictionaryFromPropertyList(String name, String bundleName) {
+		NSBundle bundle = NSBundle.bundleForName(bundleName);
 		String string = ERXUtilities.stringFromResource(name, "plist", bundle);
 		return (NSDictionary<?, ?>) NSPropertyListSerialization.propertyListFromString(string);
 	}
