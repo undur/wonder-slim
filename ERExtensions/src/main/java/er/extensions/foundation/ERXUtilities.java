@@ -222,21 +222,6 @@ public class ERXUtilities {
 	}
 	
     /** 
-     * Returns the version string of the application.  
-     * It checks <code>CFBundleShortVersionString</code> property 
-     * in the <code>info.plist</code> resource and returns 
-     * a trimmed version of the value. 
-     * 
-     * @return version number as string; can be a null-string when the application doesn't have the value of <code>CFBundleShortVersionString</code> in its <code>info.plist</code> resource.
-     * @see #webObjectsVersion
-     * 
-     * FIXME: Moved here from ERXProperties. I'm going to allow it to stay for a bit, even if it's unused // Hugi 2022-01-20
-     */ 
-	private static String versionStringForApplication() {
-        return valueFromPlistBundleWithKey(NSBundle.mainBundle(), "../Info.plist", "CFBundleShortVersionString");
-    }
-
-    /** 
      * Returns the version string of the given framework.
      * It checks <code>CFBundleShortVersionString</code> property 
      * in the <code>info.plist</code> resource and returns 
