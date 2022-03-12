@@ -10,7 +10,7 @@ import com.webobjects.appserver._private.WOServerSessionStore;
 import er.extensions.foundation.ERXProperties;
 
 /**
- * Improved direct action request handler. Will automatically handle character encodings and checks the {@link ERXWOResponseCache} before actually calling the action.
+ * Improved direct action request handler. Will automatically handle character encodings.
  *
  * @property er.extensions.ERXMessageEncoding.Enabled
  */

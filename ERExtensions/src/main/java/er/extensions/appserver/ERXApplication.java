@@ -105,7 +105,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public static final String ApplicationDidCreateNotification = "NSApplicationDidCreateNotification";
 
 	/**
-	 * Notification to post when all application initialization processes are complete (including migrations)
+	 * Notification to post when all application initialization processes are complete
 	 */
 	public static final String ApplicationDidFinishInitializationNotification = "NSApplicationDidFinishInitializationNotification";
 
