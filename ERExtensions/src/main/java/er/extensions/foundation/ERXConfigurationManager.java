@@ -276,7 +276,7 @@ public class ERXConfigurationManager {
 	/**
 	 * Updates the configuration from the current configuration and posts
 	 * {@link #ConfigurationDidChangeNotification}. It also calls
-	 * {@link er.extensions.logging.ERXLogger#configureLoggingWithSystemProperties()}
+	 * er.extensions.logging.ERXLogger#configureLoggingWithSystemProperties()
 	 * to reconfigure the logging system.
 	 * <p>
 	 * The configuration files: Properties and WebObjects.properties files are
