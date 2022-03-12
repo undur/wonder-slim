@@ -10,7 +10,6 @@ import com.webobjects.foundation.NSArray;
 import er.extensions.appserver.ERXBrowser;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXResponseRewriter;
-import er.extensions.foundation.ERXUtilities;
 import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
 

@@ -21,7 +21,6 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.components.ERXStyleSheet;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
 

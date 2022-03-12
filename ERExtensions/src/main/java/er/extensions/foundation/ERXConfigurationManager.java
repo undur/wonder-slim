@@ -16,7 +16,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
-import com.webobjects.foundation.NSSelector;
 
 import er.extensions.ERXExtensions;
 import er.extensions.logging.ERXLogger;
@@ -246,7 +245,7 @@ public class ERXConfigurationManager {
 
 	private void registerForFileNotification(String path, String callbackMethod) {
 		try {
-			ERXFileNotificationCenter.defaultCenter().addObserver(this, new NSSelector(callbackMethod, ERXUtilities.NotificationClassArray), path);
+			ERXFileNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector(callbackMethod), path);
 			log.debug("Registered: {}", path);
 		}
 		catch (Exception ex) {

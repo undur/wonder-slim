@@ -10,7 +10,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
-import com.webobjects.foundation.NSSelector;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXUtilities;
@@ -134,12 +133,12 @@ public abstract class ERXFrameworkPrincipal {
                 observer = new Observer();
                 NSNotificationCenter center = NSNotificationCenter.defaultCenter();
                 center.addObserver(observer,
-                        new NSSelector("willFinishInitialization", ERXUtilities.NotificationClassArray),
+                        ERXUtilities.notificationSelector("willFinishInitialization"),
                         // WOApplication.ApplicationWillFinishLaunchingNotification,
                         ERXApplication.ApplicationDidCreateNotification,
                         null);
                 center.addObserver(observer,
-                        new NSSelector("didFinishInitialization", ERXUtilities.NotificationClassArray),
+                		ERXUtilities.notificationSelector("didFinishInitialization"),
                         // WOApplication.ApplicationWillFinishLaunchingNotification,
                         ERXApplication.ApplicationDidFinishInitializationNotification,
                         null);

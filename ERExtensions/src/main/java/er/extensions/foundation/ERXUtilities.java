@@ -28,7 +28,7 @@ public class ERXUtilities {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXUtilities.class);
 
-	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
+	private static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
 
 	/**
 	 * @return A selector suitable for firing a notification

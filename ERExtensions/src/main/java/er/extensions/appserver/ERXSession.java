@@ -28,7 +28,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSPathUtilities;
-import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.appserver.ajax.ERXAjaxSession;
@@ -145,7 +144,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 		 * {@link er.extensions.localization.ERXLocalizer#LocalizationDidResetNotification}
 		 */
 		protected void registerForLocalizationDidResetNotification() {
-			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("localizationDidReset", ERXUtilities.NotificationClassArray), ERXLocalizer.LocalizationDidResetNotification, null);
+			NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("localizationDidReset"), ERXLocalizer.LocalizationDidResetNotification, null);
 		}
 	}
 

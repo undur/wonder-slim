@@ -46,7 +46,6 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
-import com.webobjects.foundation.NSSelector;
 
 import er.extensions.foundation.ERXUtilities;
 
@@ -290,7 +289,7 @@ public class ERXLoader {
 				}
 			}
 		}
-		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("bundleDidLoad", ERXUtilities.NotificationClassArray), "NSBundleDidLoadNotification", null);
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
 
 	// for logging before logging has been setup and configured by loading the properties files

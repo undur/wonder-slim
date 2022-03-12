@@ -36,7 +36,6 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSNumberFormatter;
 import com.webobjects.foundation.NSPropertyListSerialization;
-import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSTimestampFormatter;
 
 import er.extensions.appserver.ERXWOContext;
@@ -536,7 +535,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 						if (!WOApplication.application().isCachingEnabled()) {
 							synchronized (monitoredFiles) {
 								if (!monitoredFiles.contains(path)) {
-									ERXFileNotificationCenter.defaultCenter().addObserver(observer, new NSSelector("fileDidChange", ERXUtilities.NotificationClassArray), path.getFile());
+									ERXFileNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector("fileDidChange"), path.getFile());
 									monitoredFiles.add(path);
 								}
 							}

@@ -48,7 +48,6 @@ import com.webobjects.foundation.NSMutableSet;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSPropertyListSerialization;
-import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.ERXExtensions;
@@ -254,9 +253,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("finishInitialization", ERXUtilities.NotificationClassArray), WOApplication.ApplicationWillFinishLaunchingNotification, null);
-		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("didFinishLaunching", ERXUtilities.NotificationClassArray), WOApplication.ApplicationDidFinishLaunchingNotification, null);
-		NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("addBalancerRouteCookieByNotification", new Class[] { NSNotification.class }), WORequestHandler.DidHandleRequestNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("finishInitialization"), WOApplication.ApplicationWillFinishLaunchingNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("didFinishLaunching"), WOApplication.ApplicationDidFinishLaunchingNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("addBalancerRouteCookieByNotification"), WORequestHandler.DidHandleRequestNotification, null);
 
 		_replaceApplicationPathPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
 		if (_replaceApplicationPathPattern != null && _replaceApplicationPathPattern.length() == 0) {

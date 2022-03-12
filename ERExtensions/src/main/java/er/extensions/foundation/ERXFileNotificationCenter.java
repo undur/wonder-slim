@@ -89,7 +89,7 @@ public class ERXFileNotificationCenter {
 		if (developmentMode || checkFilesPeriod() > 0) {
 			ERXRetainer.retain(this);
 			log.debug("Caching disabled.  Registering for notification: {}", WOApplication.ApplicationWillDispatchRequestNotification);
-			NSNotificationCenter.defaultCenter().addObserver(this, new NSSelector("checkIfFilesHaveChanged", ERXUtilities.NotificationClassArray), WOApplication.ApplicationWillDispatchRequestNotification, null);
+			NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("checkIfFilesHaveChanged"), WOApplication.ApplicationWillDispatchRequestNotification, null);
 		}
 
 		// MS: In case we are touching properties before they're fully
