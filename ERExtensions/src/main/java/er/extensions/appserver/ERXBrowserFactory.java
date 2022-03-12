@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WORequest;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -403,7 +402,7 @@ public class ERXBrowserFactory {
     private boolean isRobot(String userAgent) {
     	synchronized (robotExpressions) {
 			if(robotExpressions.count()==0) {
-				String strings = ERXUtilities.stringFromResource("robots", "txt", NSBundle.bundleForName("ERExtensions"));
+				String strings = ERXUtilities.stringFromResource("robots", "txt", "ERExtensions");
 				for (String item : NSArray.componentsSeparatedByString(strings, "\n")) {
 					if(item.trim().length() > 0 && item.charAt(0) != '#') {
 						robotExpressions.addObject(Pattern.compile(item));

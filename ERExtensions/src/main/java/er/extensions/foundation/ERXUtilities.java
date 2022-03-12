@@ -71,8 +71,7 @@ public class ERXUtilities {
 	 * @return NSDictionary de-serialized from the property list.
 	 */
 	public static NSDictionary dictionaryFromPropertyList(String name, String bundleName) {
-		NSBundle bundle = NSBundle.bundleForName(bundleName);
-		String string = ERXUtilities.stringFromResource(name, "plist", bundle);
+		String string = ERXUtilities.stringFromResource(name, "plist", bundleName);
 		return (NSDictionary<?, ?>) NSPropertyListSerialization.propertyListFromString(string);
 	}
 
@@ -84,14 +83,15 @@ public class ERXUtilities {
 	 * @param bundle to look for the resource in
 	 * @return string of the given file specified in the bundle
 	 */
-	public static String stringFromResource(String name, String extension, NSBundle bundle) {
-		String path = null;
+	public static String stringFromResource(String name, String extension, String bundleName) {
+
+		NSBundle bundle = NSBundle.bundleForName(bundleName);
 	
 		if (bundle == null) {
 			bundle = NSBundle.mainBundle();
 		}
-	
-		path = bundle.resourcePathForLocalizedResourceNamed(name + (extension == null || extension.length() == 0 ? "" : "." + extension), null);
+
+		String path = bundle.resourcePathForLocalizedResourceNamed(name + (extension == null || extension.length() == 0 ? "" : "." + extension), null);
 	
 		if (path != null) {
 			try( InputStream stream = bundle.inputStreamForResourcePath(path)) {
