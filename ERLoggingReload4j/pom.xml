@@ -30,6 +30,11 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>${wonder.core.group}</groupId>
+			<artifactId>ERExtensions</artifactId>
+			<version>${wonder.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.36</version>
