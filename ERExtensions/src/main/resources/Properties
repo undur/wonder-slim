@@ -51,11 +51,6 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 # er.extensions.ERXLocalizer.pluralFormClassName = er.extensions.localization.ERXLocalizer
 # er.extensions.ERXLocalizer.nonPluralFormClassName = er.extensions.localization.ERXNonPluralFormLocalizer
 
-## Components that use ERXToOne/ManyRelationship can have localized display keys
-## This can be specified on a per-component basis in the bindings, 
-## but here's the default value
-# er.extensions.ERXArrayChooser.localizeDisplayKeysDefault = false
-
 ## This tells ERXWOString/ERXWOText to use localized 
 ## formatters. 
 # er.extensions.ERXLocalizer.useLocalizedFormatters = true
@@ -69,17 +64,6 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 ## Fallback to localized value in default language when key is not found for current language.
 ## Default is false.
 # er.extensions.ERXLocalizer.fallbackToDefaultLanguage = false
-
-## Components that use ERXToOne/ManyRelationship include missing items when using a possibleChoice
-## This can be specified on a per-component basis in the bindings, 
-## but here's the default value
-# er.extensions.ERXArrayChooser.includeUnmatchedValuesDefault = false
-
-## Components that use ERXToOne/ManyRelationship can sort case 
-## sensitive or insensitive
-## This can be specified on a per-component basis in the bindings, 
-## but here's the default value
-# er.extensions.ERXArrayChooser.sortCaseInsensitive = false
 
 ## If using EO localization, this will cause ERXGenericRecord to look for data
 ## in the attribute for the default language if the data for the current langage is 
