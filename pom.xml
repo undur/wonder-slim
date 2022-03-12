@@ -9,6 +9,7 @@
 	<modules>
 		<module>ERExtensions</module>
 		<module>WOOgnl</module>
+		<module>WONoOgnl</module>
 		<module>Ajax</module>
 	</modules>
 	<properties>
