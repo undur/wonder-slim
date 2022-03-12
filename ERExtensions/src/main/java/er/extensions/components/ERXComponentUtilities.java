@@ -24,7 +24,6 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXValueUtilities;
 
 /**
@@ -413,39 +412,6 @@ public class ERXComponentUtilities {
 			response.appendContentHTMLAttributeValue(value.toString());
 			response.appendContentString("\"");
 		}
-	}
-
-	/**
-	 * Returns the component for the given class without having to cast. For
-	 * example: MyPage page = ERXComponentUtilities.pageWithName(MyPage.class,
-	 * context);
-	 * 
-	 * @param <T>
-	 *            the type of component to
-	 * @param componentClass
-	 *            the component class to lookup
-	 * @param context
-	 *            the context
-	 * @return the created component
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends WOComponent> T pageWithName(Class<T> componentClass, WOContext context) {
-		return ERXApplication.erxApplication().pageWithName(componentClass, context);
-	}
-
-	/**
-	 * Calls pageWithName with ERXWOContext.currentContext() for the current
-	 * thread.
-	 * 
-	 * @param <T>
-	 *            the type of component to
-	 * @param componentClass
-	 *            the component class to lookup
-	 * @return the created component
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends WOComponent> T pageWithName(Class<T> componentClass) {
-		return ERXApplication.erxApplication().pageWithName(componentClass);
 	}
 
 	/**
