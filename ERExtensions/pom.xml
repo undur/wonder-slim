@@ -13,43 +13,20 @@
 	<packaging>woframework</packaging>
 
 	<dependencies>
-		<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 		<dependency>
+			<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 			<groupId>wonder.core</groupId>
 			<artifactId>ERFoundation</artifactId>
 			<version>1.0</version>
 		</dependency>
-		<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 		<dependency>
+			<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 			<groupId>wonder.core</groupId>
 			<artifactId>ERWebObjects</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>${webobjects.group}</groupId>
-			<artifactId>JavaFoundation</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${webobjects.group}</groupId>
-			<artifactId>JavaWebObjects</artifactId>
-			<version>${webobjects.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>${webobjects.group}</groupId>
-					<artifactId>JavaXML</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>${webobjects.group}</groupId>
-					<artifactId>JavaEOAccess</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>${webobjects.group}</groupId>
-					<artifactId>JavaEOControl</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
+			<!-- This dependency is only declared because JavaWebObjects requires it, but fails to declare it. So we include it for convenience to pull it into our apps -->
 			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaEOAccess</artifactId>
 			<version>${webobjects.version}</version>

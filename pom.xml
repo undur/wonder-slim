@@ -46,6 +46,22 @@
 	</build>
 	<dependencies>
 		<dependency>
+			<groupId>${webobjects.group}</groupId>
+			<artifactId>JavaFoundation</artifactId>
+			<version>${webobjects.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${webobjects.group}</groupId>
+			<artifactId>JavaWebObjects</artifactId>
+			<version>${webobjects.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>${webobjects.group}</groupId>
+					<artifactId>JavaXML</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.36</version>

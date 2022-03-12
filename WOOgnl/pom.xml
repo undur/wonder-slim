@@ -14,22 +14,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>${webobjects.group}</groupId>
-			<artifactId>JavaFoundation</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${webobjects.group}</groupId>
-			<artifactId>JavaWebObjects</artifactId>
-			<version>${webobjects.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>${webobjects.group}</groupId>
-					<artifactId>JavaXML</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>ognl</groupId>
 			<artifactId>ognl</artifactId>
 			<version>3.3.2</version>
