@@ -105,6 +105,12 @@ public class ERXUtilities {
 		return null;
 	}
 	
+	/**
+	 * @return true if [string] is null or empty
+	 */
+	public static boolean stringIsNullOrEmpty( String string ) {
+		return string == null || string.isEmpty();
+	}
 
 	/**
 	 * Puts together a dictionary with a bunch of useful information relative to
@@ -193,13 +199,6 @@ public class ERXUtilities {
 			}
 		}
 		return extraInfo;
-	}
-
-	/**
-	 * @return true if [string] is null or empty
-	 */
-	public static boolean stringIsNullOrEmpty( String string ) {
-		return string == null || string.isEmpty();
 	}
 	
     /** 
