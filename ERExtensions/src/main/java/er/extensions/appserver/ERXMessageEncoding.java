@@ -1,9 +1,3 @@
-//
-// ERXMessageEncoding.java
-// Project ERExtensions
-//
-// Created by tatsuya on Wed Jun 05 2002
-//
 package er.extensions.appserver;
 
 import java.util.Enumeration;
@@ -25,6 +19,8 @@ import er.extensions.foundation.ERXSimpleTemplateParser;
 public class ERXMessageEncoding {
 
 	private String _encoding;
+	private static Map<String, String> _encodings;
+	private static Map<String, String> _languagesAndDefaultEncodings;
 
 	private String encoding() {
 		return _encoding;
@@ -67,8 +63,6 @@ public class ERXMessageEncoding {
 		return new NSArray<>(_languagesAndDefaultEncodings().keySet());
 	}
 
-	private static Map<String, String> _encodings;
-
 	private static Map<String, String> _encodings() {
 		if (_encodings == null) {
 			_encodings = Map.of(
@@ -86,7 +80,6 @@ public class ERXMessageEncoding {
 		return _encodings;
 	}
 
-	private static Map<String, String> _languagesAndDefaultEncodings;
 
 	private static Map<String, String> _languagesAndDefaultEncodings() {
 		if (_languagesAndDefaultEncodings == null) {
