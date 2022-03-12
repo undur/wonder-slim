@@ -152,21 +152,6 @@ public class ERXMessageEncoding {
 		return defaultEncoding;
 	}
 
-	private static void setDefaultEncodingForLanguage(String encoding, String language) {
-
-		if (!availableLanguages().containsObject(language)) {
-			throw createIllegalArgumentException(language, "language", "availableLanguages()");
-		}
-
-		if (!availableEncodings().containsObject(encoding)) {
-			throw createIllegalArgumentException(encoding, "encoding", "availableEncodings()");
-		}
-
-		NSMutableDictionary d = new NSMutableDictionary(_languagesAndDefaultEncodings);
-		d.setObjectForKey(encoding, language);
-		_languagesAndDefaultEncodings = d;
-	}
-
 	private static void setEncodingToResponse(WOResponse response, String encoding) {
 		encoding = encoding.toUpperCase();
 
