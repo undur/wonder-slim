@@ -27,16 +27,22 @@ import er.extensions.formatters.ERXTimestampFormatter;
  * @author ak
  */
 public class ERXWOString extends WODynamicElement {
+
 	private static final Logger log = LoggerFactory.getLogger(ERXWOString.class);
 
-	protected WOAssociation _dateFormat;
-	protected WOAssociation _numberFormat;
-	protected WOAssociation _formatter;
-	protected WOAssociation _value;
-	protected WOAssociation _escapeHTML;
-	protected WOAssociation _valueWhenEmpty;
+	private final WOAssociation _dateFormat;
+	private final WOAssociation _numberFormat;
+	private final WOAssociation _formatter;
+	private final WOAssociation _value;
+	private final WOAssociation _escapeHTML;
+	private final WOAssociation _valueWhenEmpty;
 
-	boolean _shouldFormat;
+	/**
+	 * Introduced as a performance enhancement to check.
+	 * 
+	 * FIXME: Shouldn't this just be a local variable inside appendToResponse()? Or is there performance to be gained from using this here? I.e. is the DynamicElement instance reused? // Hugi 2022-03-12 
+	 */
+	private final boolean  _shouldFormat;
 
 	public ERXWOString(String s, NSDictionary nsdictionary, WOElement woelement) {
 		super(null, null, null);
@@ -62,7 +68,7 @@ public class ERXWOString extends WODynamicElement {
 
 	@Override
 	public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-		WOComponent component = wocontext.component();
+		final WOComponent component = wocontext.component();
 		Object valueInComponent = null;
 
 		if (_value != null) {
