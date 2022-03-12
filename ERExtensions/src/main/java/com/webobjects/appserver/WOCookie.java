@@ -16,7 +16,6 @@ import com.webobjects.foundation.NSTimestamp;
 public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandling,
 		NSKeyValueCodingAdditions, Serializable {
 
-	static final long serialVersionUID = 1L;
 	String _name;
 	String _value;
 	String _domain;

@@ -21,8 +21,6 @@ import er.extensions.localization.ERXLocalizer;
 
 public abstract class ERXComponent extends WOComponent {
 
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * Constructs a new ERXComponent.
 	 * 

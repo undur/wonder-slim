@@ -41,12 +41,6 @@ import er.extensions.foundation.ERXProperties;
  * @author mschrag
  */
 public class ERXAjaxSession extends WOSession {
-	/**
-	 * Do I need to update serialVersionUID?
-	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
-	 * <a href="http://java.sun.com/j2se/1.4/pdf/serial-spec.pdf">Java Object Serialization Spec</a>
-	 */
-	private static final long serialVersionUID = 1L;
 
   /**
    * Key that tells the session not to store the current page. Checks both the 
@@ -98,12 +92,6 @@ public class ERXAjaxSession extends WOSession {
    * @author mschrag
    */
   static class TransactionRecord implements Serializable {
-		/**
-		 * Do I need to update serialVersionUID?
-		 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
-		 * <a href="http://java.sun.com/j2se/1.4/pdf/serial-spec.pdf">Java Object Serialization Spec</a>
-		 */
-		private static final long serialVersionUID = 1L;
 
     private String _contextID;
     private WOComponent _page;

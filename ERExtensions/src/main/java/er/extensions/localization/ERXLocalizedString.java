@@ -29,8 +29,6 @@ import er.extensions.components.ERXStatelessComponent;
 
 public class ERXLocalizedString extends ERXStatelessComponent {
 
-	private static final long serialVersionUID = 1L;
-
     public ERXLocalizedString(WOContext context) {
         super(context);
     }

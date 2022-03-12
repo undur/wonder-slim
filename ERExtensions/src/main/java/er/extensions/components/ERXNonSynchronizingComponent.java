@@ -10,8 +10,6 @@ import com.webobjects.appserver.WOContext;
 
 public abstract class ERXNonSynchronizingComponent extends ERXComponent {
 
-	private static final long serialVersionUID = 1L;
-
 	public ERXNonSynchronizingComponent(WOContext context) {
 		super(context);
 	}
