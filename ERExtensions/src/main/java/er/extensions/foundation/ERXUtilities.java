@@ -8,6 +8,7 @@ package er.extensions.foundation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Enumeration;
 
 import org.slf4j.Logger;
@@ -42,25 +43,24 @@ public class ERXUtilities {
 	 * parses the file as if it were a property list, using the specified encoding.
 	 *
 	 * @param fileName name of the file
-	 * @param aFrameWorkName name of the framework, <code>null</code> or 'app' for the application bundle.
+	 * @param frameWorkName name of the framework, <code>null</code> or 'app' for the application bundle.
 	 * @param languageList language list search order
 	 * @param encoding the encoding used with <code>fileName</code>
 	 * @return de-serialized object from the plist formatted file specified.
 	 */
-	public static Object readPropertyListFromFileInFramework(String fileName, String aFrameWorkName, NSArray<String> languageList, String encoding) {
-		Object result = null;
+	public static Object readPropertyListFromFileInFramework(String fileName, String frameWorkName, NSArray<String> languageList, String encoding) {
+		try( InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(fileName, frameWorkName, languageList)) {
 
-		try( InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(fileName, aFrameWorkName, languageList)) {
-			if (stream != null) {
-				String stringFromFile = new String(stream.readAllBytes(), encoding);
-				result = NSPropertyListSerialization.propertyListFromString(stringFromFile);
+			if( stream == null ) {
+				return null;
 			}
+
+			final String stringFromFile = new String(stream.readAllBytes(), encoding);
+			return NSPropertyListSerialization.propertyListFromString(stringFromFile);
 		}
 		catch (IOException ioe) {
-			log.error("ConfigurationManager: Error reading file <{}> from framework {}", fileName, aFrameWorkName);
+			throw new UncheckedIOException(ioe);
 		}
-
-		return result;
 	}
 
 	/**
