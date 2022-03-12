@@ -4,7 +4,6 @@ import java.util.Enumeration;
 
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
-import com.webobjects.appserver._private.WOConstantValueAssociation;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -18,12 +17,6 @@ import er.extensions.foundation.ERXValueUtilities;
  */
 public class ERXComponentUtilities {
 	
-	// use these so you don't need to check for null
-	public static WOAssociation TRUE = new WOConstantValueAssociation(Boolean.TRUE);
-	public static WOAssociation FALSE = new WOConstantValueAssociation(Boolean.FALSE);
-	public static WOAssociation EMPTY = new WOConstantValueAssociation("");
-	public static WOAssociation ZERO = new WOConstantValueAssociation(0);
-
 	/**
 	 * Returns a query parameter dictionary from a set of ?key=association
 	 * WOAssociation dictionary.
