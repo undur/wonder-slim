@@ -22,7 +22,6 @@ import er.extensions.appserver.ERXResourceManager;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXExpiringCache;
-import er.extensions.foundation.ERXProperties;
 
 /**
  * Adds a style sheet to a page. You can either supply a complete URL, a file
@@ -45,8 +44,10 @@ import er.extensions.foundation.ERXProperties;
  */
 
 // FIXME: cache should be able to cache on values of bindings, not a single key
+// FIXME: Shouldn't this be a dynamic element rather than a component? // Hugi 2022-03-12
 
 public class ERXStyleSheet extends ERXStatelessComponent {
+
 	/**
 	 * Do I need to update serialVersionUID?
 	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the 
@@ -54,27 +55,24 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * Public constructor
-	 * 
-	 * @param aContext
-	 *            a context
-	 */
 	public ERXStyleSheet( WOContext aContext ) {
 		super( aContext );
 	}
 
-	protected static ERXExpiringCache<String, WOResponse> cache( WOSession session ) {
+	private static ERXExpiringCache<String, WOResponse> cache( WOSession session ) {
 		ERXExpiringCache<String, WOResponse> cache = (ERXExpiringCache<String, WOResponse>)session.objectForKey( "ERXStylesheet.cache" );
+
 		if( cache == null ) {
 			cache = new ERXExpiringCache<>( 60 );
 			cache.startBackgroundExpiration();
 			session.setObjectForKey( cache, "ERXStylesheet.cache" );
 		}
+
 		return cache;
 	}
 
 	public static class Sheet extends WODirectAction {
+
 		public Sheet( WORequest worequest ) {
 			super( worequest );
 		}
@@ -86,13 +84,15 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 	}
 
 	/**
-	 * Returns the complete url to the style sheet.
-	 * 
-	 * @return style sheet url
+	 * @return Returns the complete url to the style sheet.
 	 */
-	public String styleSheetUrl() {
+	private String styleSheetUrl() {
 		String url = stringValueForBinding("styleSheetUrl");
-		url = (url == null ? stringValueForBinding("href") : url);
+		
+		if( url == null ) {
+			url = stringValueForBinding("href");
+		}
+
 		if( url == null ) {
 			String name = styleSheetName();
 			if( name != null ) {
@@ -102,73 +102,68 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 				}
 			}
 		}
+
 		return url;
 	}
 
 	/**
-	 * Returns the style sheet framework name either resolved via the binding <b>framework</b>.
-	 * 
-	 * @return style sheet framework name
+	 * @return The style sheet framework name either resolved via the binding <b>framework</b>.
 	 */
-	public String styleSheetFrameworkName() {
+	private String styleSheetFrameworkName() {
 		String result = stringValueForBinding("styleSheetFrameworkName");
 		result = (result == null ? stringValueForBinding("framework") : result);
 		return result;
 	}
 
 	/**
-	 * Returns the style sheet name either resolved via the binding <b>filename</b>.
-	 * 
-	 * @return style sheet name
+	 * @return The style sheet name either resolved via the binding <b>filename</b>.
 	 */
-	public String styleSheetName() {
+	private String styleSheetName() {
 		String result = stringValueForBinding("styleSheetName");
 		result = (result == null ? stringValueForBinding("filename") : result);
 		return result;
 	}
 
 	/**
-	 * Returns key under which the stylesheet should be placed in the cache.
-	 * If no key is given, the session id is used.
-	 * 
-	 * @return cache key
+	 * @return key under which the stylesheet should be placed in the cache. If no key is given, the session id is used.
 	 */
-	public String styleSheetKey() {
+	private String styleSheetKey() {
 		String result = stringValueForBinding("key");
+
 		if( result == null ) {
 			result = session().sessionID();
 		}
+
 		return result;
 	}
 
 	/**
-	 * Specifies on what device the linked document will be displayed.
-	 * 
-	 * @return media string
+	 * @return value of the [media] binding
 	 */
-	public String mediaType() {
+	private String mediaType() {
 		return stringValueForBinding( "media" );
 	}
 
 	/**
-	 * Returns the languages for the request.
-	 * @return requested languages
+	 * @return The languages for the request.
 	 */
 	private NSArray<String> languages() {
+
 		if( hasSession() ) {
 			return session().languages();
 		}
+
 		WORequest request = context().request();
+
 		if( request != null ) {
 			return request.browserLanguages();
 		}
+
 		return null;
 	}
 
 	/**
-	 * Appends the &lt;link&gt; tag, either by using the style sheet name and
-	 * framework or by using the component content and then generating a link to
-	 * it.
+	 * Appends the &lt;link&gt; tag, either by using the style sheet name and framework or by using the component content and then generating a link to it.
 	 */
 	@Override
 	public void appendToResponse( WOResponse originalResponse, WOContext wocontext ) {
