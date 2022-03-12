@@ -13,10 +13,8 @@ import java.util.Enumeration;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
-import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WOResourceManager;
-import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOConstantValueAssociation;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
@@ -332,85 +330,6 @@ public class ERXComponentUtilities {
 		}
 		catch (IOException e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
-		}
-	}
-
-	/**
-	 * Appends a dictionary of associations as HTML attributes.
-	 * 
-	 * @param associations
-	 *            the associations dictionary
-	 * @param response
-	 *            the response to write to
-	 * @param context
-	 *            the context
-	 */
-	public static void appendHtmlAttributes(NSDictionary<String, WOAssociation> associations, WOResponse response, WOContext context) {
-		WOComponent component = context.component();
-		ERXComponentUtilities.appendHtmlAttributes(associations, response, component);
-	}
-
-	/**
-	 * Appends a dictionary of associations as HTML attributes.
-	 * 
-	 * @param associations
-	 *            the associations dictionary
-	 * @param response
-	 *            the response to write to
-	 * @param component
-	 *            the component to evaluate the associations within
-	 */
-	public static void appendHtmlAttributes(NSDictionary<String, WOAssociation> associations, WOResponse response, WOComponent component) {
-		for (String key : associations.allKeys()) {
-			WOAssociation association = associations.objectForKey(key);
-			ERXComponentUtilities.appendHtmlAttribute(key, association, response, component);
-		}
-	}
-	
-	/**
-	 * Appends a dictionary of associations as HTML attributes.
-	 * 
-	 * @param associations
-	 *            the associations dictionary
-	 * @param excludeKeys
-	 *            the associations to ignore
-	 * @param response
-	 *            the response to write to
-	 * @param component
-	 *            the component to evaluate the associations within
-	 */
-	public static void appendHtmlAttributes(NSDictionary<String, WOAssociation> associations, NSArray<String> excludeKeys, WOResponse response, WOComponent component) {
-		if (excludeKeys == null) {
-			excludeKeys = NSArray.EmptyArray;
-		}
-		for (String key : associations.allKeys()) {
-			if (!excludeKeys.contains(key)) {
-				WOAssociation association = associations.objectForKey(key);
-				ERXComponentUtilities.appendHtmlAttribute(key, association, response, component);
-			}
-		}
-	}
-
-	/**
-	 * Appends an association as an HTML attribute.
-	 * 
-	 * @param key
-	 *            the key to append
-	 * @param association
-	 *            the association
-	 * @param response
-	 *            the response to write to
-	 * @param component
-	 *            the component to evaluate the association within
-	 */
-	public static void appendHtmlAttribute(String key, WOAssociation association, WOResponse response, WOComponent component) {
-		Object value = association.valueInComponent(component);
-		if (value != null) {
-			response.appendContentString(" ");
-			response.appendContentString(key);
-			response.appendContentString("=\"");
-			response.appendContentHTMLAttributeValue(value.toString());
-			response.appendContentString("\"");
 		}
 	}
 
