@@ -30,134 +30,157 @@ import er.extensions.formatters.ERXTimestampFormatter;
  * @author ak
  */
 public class ERXWOString extends WODynamicElement {
-    private static final Logger log = LoggerFactory.getLogger(ERXWOString.class);
+	private static final Logger log = LoggerFactory.getLogger(ERXWOString.class);
 
-    protected WOAssociation _dateFormat;
-    protected WOAssociation _numberFormat;
-    protected WOAssociation _formatter;
-    protected WOAssociation _value;
-    protected WOAssociation _escapeHTML;
-    protected WOAssociation _valueWhenEmpty;
+	protected WOAssociation _dateFormat;
+	protected WOAssociation _numberFormat;
+	protected WOAssociation _formatter;
+	protected WOAssociation _value;
+	protected WOAssociation _escapeHTML;
+	protected WOAssociation _valueWhenEmpty;
 
-    boolean                 _shouldFormat;
+	boolean _shouldFormat;
 
-    public ERXWOString(String s, NSDictionary nsdictionary, WOElement woelement) {
-        super(null, null, null);
-        _value = (WOAssociation) nsdictionary.objectForKey("value");
-        if (_value == null) { throw new WODynamicElementCreationException("<" + getClass().getName()
-                + "> ( no 'value' attribute specified."); }
-        _valueWhenEmpty = (WOAssociation) nsdictionary.objectForKey("valueWhenEmpty");
-        _escapeHTML = (WOAssociation) nsdictionary.objectForKey("escapeHTML");
-        _dateFormat = (WOAssociation) nsdictionary.objectForKey("dateformat");
-        _numberFormat = (WOAssociation) nsdictionary.objectForKey("numberformat");
-        _formatter = (WOAssociation) nsdictionary.objectForKey("formatter");
+	public ERXWOString(String s, NSDictionary nsdictionary, WOElement woelement) {
+		super(null, null, null);
+		_value = (WOAssociation) nsdictionary.objectForKey("value");
 
-        if (_dateFormat != null || _numberFormat != null || _formatter != null)
-            _shouldFormat = true;
-        else
-            _shouldFormat = false;
+		// [value] is the only required binding
+		if (_value == null) {
+			throw new WODynamicElementCreationException("<" + getClass().getName() + "> ( no 'value' attribute specified.");
+		}
 
-        if ((_dateFormat != null && _numberFormat != null) || (_formatter != null && _dateFormat != null)
-                || (_formatter != null && _numberFormat != null)) { throw new WODynamicElementCreationException("<" + getClass().getName()
-                + "> ( cannot have 'dateFormat' and 'numberFormat' or 'formatter' attributes at the same time."); }
-    }
+		_valueWhenEmpty = (WOAssociation) nsdictionary.objectForKey("valueWhenEmpty");
+		_escapeHTML = (WOAssociation) nsdictionary.objectForKey("escapeHTML");
+		_dateFormat = (WOAssociation) nsdictionary.objectForKey("dateformat");
+		_numberFormat = (WOAssociation) nsdictionary.objectForKey("numberformat");
+		_formatter = (WOAssociation) nsdictionary.objectForKey("formatter");
 
-    @Override
-    public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-        WOComponent component = wocontext.component();
-        Object valueInComponent = null;
+		_shouldFormat = _dateFormat != null || _numberFormat != null || _formatter != null;
 
-        if (_value != null) {
-            valueInComponent = _value.valueInComponent(component);
-            if (_shouldFormat) {
-                Format format = null;
-                boolean hasFormatter = false;
-                if (_formatter != null) {
-                    format = (Format) _formatter.valueInComponent(component);
-                }
-                if (format == null) {
-                    if (_dateFormat != null) {
-                        String formatString = (String) _dateFormat.valueInComponent(component);
-                        if (formatString == null) {
-                            format = ERXTimestampFormatter.defaultDateFormatterForObject(formatString);
-                        } else {
-                            format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
-                        }
-                    } else if (_numberFormat != null) {
-                        String formatString = (String) _numberFormat.valueInComponent(component);
-                        if (formatString == null) {
-                            format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
-                        } else {
-                            format = ERXNumberFormatter.numberFormatterForPattern(formatString);
-                        }
-                    }
-                } else {
-                	hasFormatter = true;
-                }
-                if(valueInComponent == NSKeyValueCoding.NullValue) {
-                	valueInComponent = null;
-                }
-                if (format != null) {
-                	if (valueInComponent == null) {
-                		// do nothing;
-                	} else {
-						if(ERXSession.autoAdjustTimeZone() &&
-								!hasFormatter && 
-        						format instanceof NSTimestampFormatter && 
-        						wocontext.hasSession() && 
-        						ERXSession.class.isAssignableFrom(wocontext.session().getClass())
-                				) {
-								
-							synchronized(format) {
-								ERXSession session = (ERXSession)wocontext.session();
+		if ((_dateFormat != null && _numberFormat != null) || (_formatter != null && _dateFormat != null) || (_formatter != null && _numberFormat != null)) {
+			throw new WODynamicElementCreationException("<" + getClass().getName() + "> ( cannot have 'dateFormat' and 'numberFormat' or 'formatter' attributes at the same time.");
+		}
+	}
+
+	@Override
+	public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
+		WOComponent component = wocontext.component();
+		Object valueInComponent = null;
+
+		if (_value != null) {
+			valueInComponent = _value.valueInComponent(component);
+			if (_shouldFormat) {
+				Format format = null;
+				boolean hasFormatter = false;
+				if (_formatter != null) {
+					format = (Format) _formatter.valueInComponent(component);
+				}
+				if (format == null) {
+					if (_dateFormat != null) {
+						String formatString = (String) _dateFormat.valueInComponent(component);
+						if (formatString == null) {
+							format = ERXTimestampFormatter.defaultDateFormatterForObject(formatString);
+						}
+						else {
+							format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
+						}
+					}
+					else if (_numberFormat != null) {
+						String formatString = (String) _numberFormat.valueInComponent(component);
+						if (formatString == null) {
+							format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
+						}
+						else {
+							format = ERXNumberFormatter.numberFormatterForPattern(formatString);
+						}
+					}
+				}
+				else {
+					hasFormatter = true;
+				}
+				if (valueInComponent == NSKeyValueCoding.NullValue) {
+					valueInComponent = null;
+				}
+				if (format != null) {
+					if (valueInComponent == null) {
+						// do nothing;
+					}
+					else {
+						if (ERXSession.autoAdjustTimeZone() &&
+								!hasFormatter &&
+								format instanceof NSTimestampFormatter &&
+								wocontext.hasSession() &&
+								ERXSession.class.isAssignableFrom(wocontext.session().getClass())) {
+
+							synchronized (format) {
+								ERXSession session = (ERXSession) wocontext.session();
 								NSTimeZone zone = NSTimeZone._nstimeZoneWithTimeZone(session.timeZone());
-								NSTimestampFormatter tsFormat = (NSTimestampFormatter)format;
+								NSTimestampFormatter tsFormat = (NSTimestampFormatter) format;
 								NSTimeZone parseZone = tsFormat.defaultParseTimeZone();
 								NSTimeZone formatZone = tsFormat.defaultFormatTimeZone();
 								tsFormat.setDefaultFormatTimeZone(zone);
 								tsFormat.setDefaultParseTimeZone(zone);
-		                		try {
-		                            valueInComponent = format.format(valueInComponent);
-		                        } catch (IllegalArgumentException ex) {
-		                            log.info("Exception while formatting", ex);
-		                            valueInComponent = null;
-		                        } finally {
-		                        	tsFormat.setDefaultFormatTimeZone(formatZone);
-		                        	tsFormat.setDefaultParseTimeZone(parseZone);
-		                        }
+								try {
+									valueInComponent = format.format(valueInComponent);
+								}
+								catch (IllegalArgumentException ex) {
+									log.info("Exception while formatting", ex);
+									valueInComponent = null;
+								}
+								finally {
+									tsFormat.setDefaultFormatTimeZone(formatZone);
+									tsFormat.setDefaultParseTimeZone(parseZone);
+								}
 							}
-						} else {
-	                		try {
-	                            valueInComponent = format.format(valueInComponent);
-	                        } catch (IllegalArgumentException ex) {
-	                            log.info("Exception while formatting", ex);
-	                            valueInComponent = null;
-	                        }
 						}
-                    }
+						else {
+							try {
+								valueInComponent = format.format(valueInComponent);
+							}
+							catch (IllegalArgumentException ex) {
+								log.info("Exception while formatting", ex);
+								valueInComponent = null;
+							}
+						}
+					}
 
-                } else {
-                    if (valueInComponent != null) {
-                        log.debug("no formatter found! {}", valueInComponent);
-                    }
-                }
-            }
-        } else {
-            log.warn("value binding is null !");
-        }
-        String stringValue = null;
+				}
+				else {
+					if (valueInComponent != null) {
+						log.debug("no formatter found! {}", valueInComponent);
+					}
+				}
+			}
+		}
+		else {
+			// FIXME: Why are we logging this? The binding is checked at element construction time // Hugi 2022-03-12
+			log.warn("value binding is null !");
+		}
 
-        if (valueInComponent != null) stringValue = valueInComponent.toString();
-        if ((stringValue == null || stringValue.length() == 0) && _valueWhenEmpty != null) {
-            stringValue = (String) _valueWhenEmpty.valueInComponent(component);
-            woresponse.appendContentString(stringValue);
-        } else if (stringValue != null) {
-            boolean escapeHTML = true;
-            if (_escapeHTML != null) escapeHTML = _escapeHTML.booleanValueInComponent(component);
-            if (escapeHTML)
-                woresponse.appendContentHTMLString(stringValue);
-            else
-                woresponse.appendContentString(stringValue);
-        }
-    }
+		String stringValue = null;
+
+		if (valueInComponent != null) {
+			stringValue = valueInComponent.toString();
+		}
+
+		if ((stringValue == null || stringValue.length() == 0) && _valueWhenEmpty != null) {
+			stringValue = (String) _valueWhenEmpty.valueInComponent(component);
+			woresponse.appendContentString(stringValue);
+		}
+		else if (stringValue != null) {
+			boolean escapeHTML = true;
+
+			if (_escapeHTML != null) {
+				escapeHTML = _escapeHTML.booleanValueInComponent(component);
+			}
+
+			if (escapeHTML) {
+				woresponse.appendContentHTMLString(stringValue);
+			}
+			else {
+				woresponse.appendContentString(stringValue);
+			}
+		}
+	}
 }
