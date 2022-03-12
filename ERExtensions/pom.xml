@@ -26,12 +26,6 @@
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<!-- This dependency is only declared because JavaWebObjects requires it, but fails to declare it. So we include it for convenience to pull it into our apps -->
-			<groupId>${webobjects.group}</groupId>
-			<artifactId>JavaEOAccess</artifactId>
-			<version>${webobjects.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>ch.qos.reload4j</groupId>
 			<artifactId>reload4j</artifactId>
 			<version>1.2.19</version>
