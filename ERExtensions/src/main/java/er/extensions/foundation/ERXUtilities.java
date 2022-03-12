@@ -31,12 +31,10 @@ public class ERXUtilities {
 	public static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
 
 	/**
-	 * Utility that returns a selector you can use with the NSNotificationCenter.
-	 * 
 	 * @return A selector suitable for firing a notification
 	 */
 	public static NSSelector<Void> notificationSelector(String methodName) {
-		return new NSSelector<Void>(methodName, ERXUtilities.NotificationClassArray);
+		return new NSSelector<>(methodName, ERXUtilities.NotificationClassArray);
 	}
 
 	/**
