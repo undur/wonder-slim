@@ -84,12 +84,13 @@ public  class ERXRequest extends WORequest {
      * @param aContent the HTML content
      * @param aUserInfoDictionary java.util.Map that contains any information that the WORequest object wants to pass along to other objects
      */
-    public ERXRequest(String aMethod, String aURL, String anHTTPVersion,
-                      Map someHeaders, NSData aContent, Map aUserInfoDictionary) {
+    public ERXRequest(String aMethod, String aURL, String anHTTPVersion, Map someHeaders, NSData aContent, Map aUserInfoDictionary) {
         super(aMethod, aURL, anHTTPVersion, someHeaders, aContent, aUserInfoDictionary);
+
         if (isBrowserFormValueEncodingOverrideEnabled() && browser().formValueEncoding() != null) {
             setDefaultFormValueEncoding(browser().formValueEncoding());
         }
+
         _secureDisabled = ERXRequest._isSecureDisabled();
     }
     
