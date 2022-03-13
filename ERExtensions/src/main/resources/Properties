@@ -67,13 +67,6 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 ## When in doubt, set this one.
 # er.extensions.ERXApplication.DefaultEncoding=UTF-8
 
-## Can specify the default message encoding. Defaults to ISO Latin 1
-## Accepted encodings: http://java.sun.com/j2se/1.3/docs/guide/intl/encoding.doc.html
-## This is a subset of er.extensions.ERXApplication.DefaultEncoding.
-# er.extensions.ERXApplication.DefaultMessageEncoding=ISO8859_1
-
-er.extensions.ERXMessageEncoding.Enabled=false
-
 ## If true, the browser's form value encoding is set, it will override
 ## your application encoding for a given request.
 # er.extensions.ERXRequest.BrowserFormValueEncodingOverrideEnabled=true

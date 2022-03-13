@@ -65,13 +65,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 */
 	private String _serializableLanguageName;
 
-	/**
-	 * The message encoding used for this session
-	 * 
-	 * FIXME: This can probably be removed since ERXMEssageEncoding is now global // Hugi 2022-03-14
-	 */
-	private ERXMessageEncoding _messageEncoding;
-
 	/** 
 	 * The browser used for this session
 	 */
@@ -193,8 +186,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 			_localizer = newLocalizer;
 			ERXLocalizer.setCurrentLocalizer(_localizer);
 
-			_messageEncoding = ERXMessageEncoding.instance(); // FIXME: This is all such utter bullshit // Hugi 2022-03-12
-
 			NSMutableArray languageList = new NSMutableArray(_localizer.language());
 			if (!languageList.containsObject("Nonlocalized"))
 				languageList.addObject("Nonlocalized");
@@ -208,10 +199,9 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * application will search .lproj directories for localized strings, images,
 	 * and component definitions.
 	 * <p>
-	 * Also updates localizer and messageEncodings.
+	 * Also updates localizer
 	 * 
-	 * @param languageList
-	 *            the array of languages for the session
+	 * @param languageList the array of languages for the session
 	 * @see #language
 	 * @see #setLanguage
 	 */
@@ -225,7 +215,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 
 			_localizer = newLocalizer;
 			ERXLocalizer.setCurrentLocalizer(_localizer);
-			_messageEncoding = ERXMessageEncoding.instance();  // FIXME: This is all such utter bullshit // Hugi 2022-03-12
 		}
 	}
 
@@ -268,23 +257,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 		}
 
 		return new NSArray<>(languages);
-	}
-
-	/**
-	 * Returns the message encoding of the current session. If it's not already
-	 * set up but no current <code>language()</code> available for the session,
-	 * it creates one with the default encoding.
-	 * 
-	 * @return message encoding object
-	 * 
-	 * FIXME: This is all such utter bullshit // Hugi 2022-03-12
-	 */
-	public ERXMessageEncoding messageEncoding() {
-		if (_messageEncoding == null) {
-			_messageEncoding = ERXMessageEncoding.instance(); 
-		}
-
-		return _messageEncoding;
 	}
 
 	/**
@@ -436,24 +408,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * Provides automatic encoding support for component action with <code>messageEncoding</code> object.
-	 */
-	@Override
-	public void takeValuesFromRequest(WORequest aRequest, WOContext aContext) {
-		messageEncoding().setDefaultFormValueEncodingToRequest(aRequest);
-		super.takeValuesFromRequest(aRequest, aContext);
-	}
-
-	/**
-	 * Provides automatic encoding support for component action with <code>messageEncoding</code> object.
-	 */
-	@Override
-	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
-		messageEncoding().setEncodingToResponse(aResponse);
-		super.appendToResponse(aResponse, aContext);
-	}
-
-	/**
 	 * Bringing application into KVC.
 	 * 
 	 * @return the application object
@@ -572,7 +526,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	@Override
 	public String toString() {
 		String superString = super.toString();
-		String thisString = " localizer=" + (_localizer == null ? "null" : _localizer.toString()) + " messageEncoding=" + (_messageEncoding == null ? "null" : _messageEncoding.toString()) + " browser=" + (_browser == null ? "null" : _browser.toString());
+		String thisString = " localizer=" + (_localizer == null ? "null" : _localizer.toString()) + " browser=" + (_browser == null ? "null" : _browser.toString());
 
 		int lastIndex = superString.lastIndexOf(">");
 		String toStr;

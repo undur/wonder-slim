@@ -79,6 +79,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static boolean wasERXApplicationMainInvoked = false;
 
 	/**
+	 * Name of the application's default encoding name. This is definitely redundant, since it's really done in WOMessage. *sigh*
+	 */
+	private String _defaultEncodingName;
+
+	/**
 	 * Watches the state of the application's memory heap and handles low memory situations
 	 */
 	private final ERXLowMemoryHandler _lowMemoryHandler;
@@ -239,16 +244,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
 
 		String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
-		if (defaultEncoding != null) {
-			log.debug("Setting default encoding to \"" + defaultEncoding + "\"");
-			setDefaultEncoding(defaultEncoding);
-		}
 
-		String defaultMessageEncoding = System.getProperty("er.extensions.ERXApplication.DefaultMessageEncoding");
-		if (defaultMessageEncoding != null) {
-			log.debug("Setting WOMessage default encoding to \"" + defaultMessageEncoding + "\"");
-			WOMessage.setDefaultEncoding(defaultMessageEncoding);
+		if (defaultEncoding == null) {
+			defaultEncoding = "utf-8";
 		}
+		
+		setDefaultEncoding(defaultEncoding);
 
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
@@ -854,12 +855,21 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
+	 * @return The application's default encoding name
+	 */
+	public String defaultEncodingName() {
+		return _defaultEncodingName;
+	}
+
+	/**
 	 * Set the default encoding of the app (message encodings)
 	 */
-	public void setDefaultEncoding(String encoding) {
-		WOMessage.setDefaultEncoding(encoding);
-		WOMessage.setDefaultURLEncoding(encoding);
-		ERXMessageEncoding.setDefaultEncoding(encoding);
+	public void setDefaultEncoding(String encodingName) {
+		log.info("Setting default encoding to '{}'", encodingName); // FIXME: Temporarily setting to info level, while we ensure this is working as intended
+
+		_defaultEncodingName = encodingName;
+		WOMessage.setDefaultEncoding(encodingName);
+		WOMessage.setDefaultURLEncoding(encodingName);
 	}
 
 	/**

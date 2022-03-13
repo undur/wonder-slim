@@ -17,7 +17,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.appserver.ERXMessageEncoding;
+import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXMutableURL;
@@ -132,13 +132,13 @@ public class AjaxModalContainer extends AjaxDynamicElement {
 		Object width = valueForBinding("width", component);
 		Object closeLabel = valueForBinding("closeLabel", component);
 		if (height != null) {
-			relAttributeValue += "&height=" +  URLEncoder.encode(height.toString(), Charset.forName( ERXMessageEncoding.defaultEncoding()) );
+			relAttributeValue += "&height=" +  URLEncoder.encode(height.toString(), Charset.forName( ERXApplication.erxApplication().defaultEncodingName()) );
 		}
 		if (width != null) {
-			relAttributeValue += "&width=" +  URLEncoder.encode(width.toString(), Charset.forName( ERXMessageEncoding.defaultEncoding()) );
+			relAttributeValue += "&width=" +  URLEncoder.encode(width.toString(), Charset.forName( ERXApplication.erxApplication().defaultEncodingName()) );
 		}
 		if (closeLabel != null) {
-			relAttributeValue += "&closeLabel=" + URLEncoder.encode(closeLabel.toString(), Charset.forName( ERXMessageEncoding.defaultEncoding()) );
+			relAttributeValue += "&closeLabel=" + URLEncoder.encode(closeLabel.toString(), Charset.forName( ERXApplication.erxApplication().defaultEncodingName()) );
 		}
 		if (booleanValueForBinding("locked", false, component)) {
 			relAttributeValue += "&locked=true";
