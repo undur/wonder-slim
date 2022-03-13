@@ -36,15 +36,17 @@ public class ERXMessageEncoding {
 	}
 
 	public void setEncodingToResponse(WOResponse response) {
+		/*
 		final String mimeType = response.headerForKey("Content-Type");
 
 		if (mimeType != null && (mimeType.equals("text/html") || mimeType.equals("text/xml"))) {
 			response.setContentEncoding(defaultEncoding());
 			response.setHeader(mimeType + "; charset=" + defaultEncoding(), "Content-Type");
 		}
+		*/
 	}
 
 	public void setDefaultFormValueEncodingToRequest(WORequest request) {
-		request.setDefaultFormValueEncoding(defaultEncoding());
+//		request.setDefaultFormValueEncoding(defaultEncoding());
 	}
 }
