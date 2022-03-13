@@ -13,18 +13,18 @@ import com.webobjects.appserver.WOResponse;
 
 public class WOPageRestorationError extends WOComponent {
 
-    public WOPageRestorationError(WOContext aContext)  {
-        super(aContext);
-    }
+	public WOPageRestorationError(WOContext aContext) {
+		super(aContext);
+	}
 
-    @Override
-    public boolean isEventLoggingEnabled() {
-        return false;
-    }
+	@Override
+	public boolean isEventLoggingEnabled() {
+		return false;
+	}
 
-    @Override
-    public void appendToResponse(WOResponse aResponse, WOContext aContext) {
-        super.appendToResponse(aResponse, aContext);
-        aResponse.disableClientCaching();
-    }
+	@Override
+	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
+		super.appendToResponse(aResponse, aContext);
+		aResponse.disableClientCaching();
+	}
 }
