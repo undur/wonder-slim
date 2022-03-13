@@ -1,4 +1,4 @@
-package ognl.helperfunction;
+package er.extensions.bettertemplates;
 
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver._private.WOBindingNameAssociation;

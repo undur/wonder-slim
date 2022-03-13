@@ -1,4 +1,4 @@
-package ognl.helperfunction;
+package er.extensions.bettertemplates;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

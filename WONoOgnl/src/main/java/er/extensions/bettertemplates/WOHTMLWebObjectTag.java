@@ -1,4 +1,4 @@
-package ognl.helperfunction;
+package er.extensions.bettertemplates;
 
 import java.util.Enumeration;
 import java.util.StringTokenizer;

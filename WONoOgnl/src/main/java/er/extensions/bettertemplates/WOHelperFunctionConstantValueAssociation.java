@@ -1,4 +1,4 @@
-package ognl.helperfunction;
+package er.extensions.bettertemplates;
 
 import com.webobjects.appserver._private.WOConstantValueAssociation;
 

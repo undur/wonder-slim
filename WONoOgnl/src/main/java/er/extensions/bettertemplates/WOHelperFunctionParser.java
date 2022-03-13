@@ -1,4 +1,4 @@
-package ognl.helperfunction;
+package er.extensions.bettertemplates;
 
 import java.util.Enumeration;
 
@@ -15,8 +15,6 @@ import com.webobjects.appserver._private.WOKeyValueAssociation;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
-
-import ognl.webobjects.WOOgnl;
 
 public class WOHelperFunctionParser {
 	private static final Logger log = LoggerFactory.getLogger(WOHelperFunctionParser.class);
@@ -243,7 +241,7 @@ public class WOHelperFunctionParser {
 		}
 		// This will replace constant associations with ognl associations
 		// when needed.
-		WOOgnl.factory().convertOgnlConstantAssociations(associations);
+		ERXBetterTemplates.factory().convertOgnlConstantAssociations(associations);
 	}
 
 	protected WOAssociation parserHelperAssociation(WOAssociation originalAssociation) {

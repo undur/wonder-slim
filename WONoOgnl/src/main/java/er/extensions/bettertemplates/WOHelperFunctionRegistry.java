@@ -1,4 +1,4 @@
-package ognl.helperfunction;
+package er.extensions.bettertemplates;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

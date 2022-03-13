@@ -1,4 +1,4 @@
-package ognl.helperfunction;
+package er.extensions.bettertemplates;
 
 public class WOHelperFunctionHTMLFormatException extends Exception {
 	public WOHelperFunctionHTMLFormatException(String message) {

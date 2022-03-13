@@ -6,7 +6,7 @@
  * included with this distribution in the LICENSE.NPL file.  */
 
 /* WOOgnl.java created by max on Fri 28-Sep-2001 */
-package ognl.webobjects;
+package er.extensions.bettertemplates;
 
 import java.util.Collection;
 import java.util.Enumeration;
@@ -29,10 +29,6 @@ import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation._NSUtilities;
 
-import ognl.helperfunction.WOHelperFunctionHTMLParser;
-import ognl.helperfunction.WOHelperFunctionParser;
-import ognl.helperfunction.WOHelperFunctionTagRegistry;
-
 /**
  * WOOgnl provides a template parser that support WOOgnl associations, Helper Functions, Inline Bindings, and Binding Debugging. 
  * 
@@ -44,8 +40,8 @@ import ognl.helperfunction.WOHelperFunctionTagRegistry;
  * @author mschrag
  */
 
-public class WOOgnl {
-	private static final Logger log = LoggerFactory.getLogger(WOOgnl.class);
+public class ERXBetterTemplates {
+	private static final Logger log = LoggerFactory.getLogger(ERXBetterTemplates.class);
 
 	protected static Collection<Observer> _retainerArray = new NSMutableArray<>();
 	static {
@@ -71,22 +67,22 @@ public class WOOgnl {
 
 	public static class Observer {
 		public void configureWOOgnl(NSNotification n) {
-			WOOgnl.factory().configureWOForOgnl();
+			ERXBetterTemplates.factory().configureWOForOgnl();
 			NSNotificationCenter.defaultCenter().removeObserver(this);
 			_retainerArray.remove(this);
 		}
 	}
 
-	protected static WOOgnl _factory;
+	protected static ERXBetterTemplates _factory;
 
-	public static WOOgnl factory() {
+	public static ERXBetterTemplates factory() {
 		if (_factory == null) {
-			_factory = new WOOgnl();
+			_factory = new ERXBetterTemplates();
 		}
 		return _factory;
 	}
 
-	public static void setFactory(WOOgnl factory) {
+	public static void setFactory(ERXBetterTemplates factory) {
 		_factory = factory;
 	}
 
