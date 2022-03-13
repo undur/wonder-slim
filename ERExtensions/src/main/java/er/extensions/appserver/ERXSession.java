@@ -49,33 +49,41 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 */
 	public static final String SessionWillSleepNotification = "SessionWillSleepNotification";
 
-	/** the SameSite to set for session and instance cookies */
+	/**
+	 * The SameSite to set for session and instance cookies
+	 */
 	private static SameSite _sameSite = ERXProperties.enumValueForKey(SameSite.class, "er.extensions.ERXSession.cookies.SameSite");
 
-	/** holds a reference to the current localizer used for this session */
+	/**
+	 * The localizer used for this session
+	 */
 	transient private ERXLocalizer _localizer;
 
 	/**
 	 * special variable to hold language name only for when session object gets
-	 * serialized. Do not use this value to get the language name; use
-	 * {@link #language} method instead.
+	 * serialized. Do not use this value to get the language name; use {@link #language} method instead.
 	 */
 	private String _serializableLanguageName;
 
 	/**
-	 * holds a reference to the current message encoding used for this session
+	 * The message encoding used for this session
+	 * 
+	 * FIXME: This can probably be removed since ERXMEssageEncoding is now global // Hugi 2022-03-14
 	 */
 	private ERXMessageEncoding _messageEncoding;
 
-	/** holds a reference to the current browser used for this session */
+	/** 
+	 * The browser used for this session
+	 */
 	transient private ERXBrowser _browser;
 
-	/** the receiver of the various notifications */
+	/**
+	 * Receiver of the various notifications
+	 */
 	transient private Observer _observer;
 
 	/**
-	 * _originalThreadName holds the original name from the WorkerThread which
-	 * is the value before executing <code>awake()</code>
+	 * the original name from the WorkerThread which is the value before executing <code>awake()</code>
 	 */
 	public String _originalThreadName;
 
@@ -88,10 +96,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * returns the observer object for this session. If it doesn't ever exist,
-	 * one will be created.
-	 * 
-	 * @return the observer
+	 * @return the observer object for this session. If it doesn't ever exist, one will be created.
 	 */
 	public Observer observer() {
 		if (_observer == null)
@@ -100,32 +105,35 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * The Observer inner class encapsulates functions to handle various
-	 * notifications.
+	 * The Observer inner class encapsulates functions to handle various notifications.
 	 */
 	public static class Observer {
 
-		/** the parent session */
+		/**
+		 * The owning session
+		 */
 		transient protected ERXSession session;
 
-		/** private constructor; prevents instantiation in this way */
-		private Observer() {
-			super();
-		}
+		/**
+		 * Prevents instantiation in this way
+		 */
+		private Observer() {}
 
-		/** creates observer object which works with the given session */
+		/**
+		 * Create observer objects for the given session
+		 */
 		public Observer(ERXSession session) {
-			super();
 			this.session = session;
 		}
 
 		/**
-		 * resets the reference to localizer when localization templates or
-		 * localizer class itself is updated.
+		 * Reset the reference to localizer when localization templates or localizer class itself is updated.
 		 */
 		public void localizationDidReset(NSNotification n) {
-			if (session._localizer == null)
+
+			if (session._localizer == null) {
 				return;
+			}
 
 			String currentLanguage = session._localizer.language();
 			session._localizer = ERXLocalizer.localizerForLanguage(currentLanguage);
@@ -133,8 +141,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 		}
 
 		/**
-		 * registers this observer object for
-		 * {@link er.extensions.localization.ERXLocalizer#LocalizationDidResetNotification}
+		 * Registers this observer object for {@link er.extensions.localization.ERXLocalizer#LocalizationDidResetNotification}
 		 */
 		protected void registerForLocalizationDidResetNotification() {
 			NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("localizationDidReset"), ERXLocalizer.LocalizationDidResetNotification, null);
@@ -160,11 +167,8 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * Returns the primary language of the current session's localizer. This
-	 * method is just a cover for calling the method
-	 * <code>localizer().language()</code>.
-	 * 
-	 * @return primary language
+	 * @return The primary language of the current session's localizer. This
+	 * method is just a cover for calling the method <code>localizer().language()</code>.
 	 */
 	public String language() {
 		return localizer().language();
@@ -176,8 +180,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * <p>
 	 * Also updates languages list with the new single language.
 	 * 
-	 * @param language
-	 *            to set the current localizer for.
+	 * @param language to set the current localizer for.
 	 * @see #language
 	 * @see #setLanguages
 	 */
@@ -433,13 +436,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * Provides automatic encoding support for component action with
-	 * <code>messageEncoding</code> object.
-	 * 
-	 * @param aRequest
-	 *            current request
-	 * @param aContext
-	 *            current context
+	 * Provides automatic encoding support for component action with <code>messageEncoding</code> object.
 	 */
 	@Override
 	public void takeValuesFromRequest(WORequest aRequest, WOContext aContext) {
@@ -448,13 +445,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * Provides automatic encoding support for component action with
-	 * <code>messageEncoding</code> object.
-	 * 
-	 * @param aResponse
-	 *            current response object
-	 * @param aContext
-	 *            current context object
+	 * Provides automatic encoding support for component action with <code>messageEncoding</code> object.
 	 */
 	@Override
 	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
