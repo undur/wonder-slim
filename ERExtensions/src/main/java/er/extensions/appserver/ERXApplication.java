@@ -860,7 +860,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		WOMessage.setDefaultEncoding(encoding);
 		WOMessage.setDefaultURLEncoding(encoding);
 		ERXMessageEncoding.setDefaultEncoding(encoding);
-		ERXMessageEncoding.setDefaultEncodingForAllLanguages(encoding);
 	}
 
 	/**

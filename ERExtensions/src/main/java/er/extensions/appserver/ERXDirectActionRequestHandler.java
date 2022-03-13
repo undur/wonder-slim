@@ -85,17 +85,16 @@ public class ERXDirectActionRequestHandler extends WODirectActionRequestHandler 
 
 			final WOSession session = ERXSession.anySession();
 
-			if (session != null && session instanceof ERXSession) {
+			if (session != null ) {
 				ERXSession erxSession = (ERXSession) session;
 				messageEncoding = erxSession.messageEncoding();
 				erxSession.lastActionWasDA = true;
 			}
-			else if (request instanceof ERXRequest) {
-				messageEncoding = ERXMessageEncoding.messageEncodingForRequest(request);
-			}
 			else {
-				messageEncoding = new ERXMessageEncoding(request.browserLanguages());
+				// FIXME: This is kind of bullshitish at the moment
+				messageEncoding = ERXMessageEncoding.instance();
 			}
+
 			messageEncoding.setEncodingToResponse(response);
 		}
 
