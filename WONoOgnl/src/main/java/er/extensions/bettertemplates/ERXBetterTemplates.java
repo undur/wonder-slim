@@ -7,21 +7,14 @@
 package er.extensions.bettertemplates;
 
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOAssociation;
-import com.webobjects.appserver._private.WOBindingNameAssociation;
-import com.webobjects.appserver._private.WOConstantValueAssociation;
-import com.webobjects.appserver._private.WOKeyValueAssociation;
 import com.webobjects.appserver.parser.WOComponentTemplateParser;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
@@ -51,12 +44,6 @@ public class ERXBetterTemplates {
 		catch (Exception e) {
 			log.error("Failed to configure ERXBetterTemplates", e);
 		}
-	}
-
-	private static Map<String, Class> associationMappings = new Hashtable<>();
-
-	public static void setAssociationClassForPrefix(Class clazz, String prefix) {
-		associationMappings.put(prefix, clazz);
 	}
 
 	private WOAssociation createAssociationForClass(Class clazz, String value, boolean isConstant) {
@@ -105,47 +92,5 @@ public class ERXBetterTemplates {
 	private boolean hasProperty(String prop, String def) {
 		String property = System.getProperty(prop, def).trim();
 		return "true".equalsIgnoreCase(property) || "yes".equalsIgnoreCase(property);
-	}
-
-	public void convertConstantAssociations(NSMutableDictionary associations) {
-		for (Enumeration e = associations.keyEnumerator(); e.hasMoreElements();) {
-			String name = (String) e.nextElement();
-			WOAssociation association = (WOAssociation) associations.objectForKey(name);
-			boolean isConstant = false;
-			String keyPath = null;
-			if (association instanceof WOConstantValueAssociation) {
-				WOConstantValueAssociation constantAssociation = (WOConstantValueAssociation) association;
-				// AK: this sucks, but there is no API to get at the value
-				Object value = constantAssociation.valueInComponent(null);
-				keyPath = value != null ? value.toString() : null;
-				isConstant = true;
-			}
-			else if (association instanceof WOKeyValueAssociation) {
-				keyPath = association.keyPath();
-			}
-			else if (association instanceof WOBindingNameAssociation) {
-				WOBindingNameAssociation b = (WOBindingNameAssociation) association;
-				// AK: strictly speaking, this is not correct, as we only get the first part of 
-				// the path. But take a look at WOBindingNameAssociation for a bit of fun...
-				keyPath = "^" + b._parentBindingName;
-			}
-			if (keyPath != null) {
-				if (!associationMappings.isEmpty()) {
-					int index = name.indexOf(':');
-					if (index > 0) {
-						String prefix = name.substring(0, index);
-						if (prefix != null) {
-							Class c = associationMappings.get(prefix);
-							if (c != null) {
-								String postfix = name.substring(index + 1);
-								WOAssociation newAssociation = createAssociationForClass(c, keyPath, isConstant);
-								associations.removeObjectForKey(name);
-								associations.setObjectForKey(newAssociation, postfix);
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 }

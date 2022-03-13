@@ -239,8 +239,6 @@ public class WOHelperFunctionParser {
 				associations.setObjectForKey(helperAssociation, bindingName);
 			}
 		}
-		// This will replace constant associations with our associations when needed.
-		ERXBetterTemplates.factory().convertConstantAssociations(associations);
 	}
 
 	protected WOAssociation parserHelperAssociation(WOAssociation originalAssociation) {
