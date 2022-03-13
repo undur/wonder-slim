@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -77,6 +78,10 @@ public class WOExceptionPage extends ERXComponent {
 	public WOExceptionPage( WOContext aContext ) {
 		super( aContext );
 		pathModifier = "";
+	}
+
+	public LocalDateTime now() {
+		return LocalDateTime.now();
 	}
 
 	/**
