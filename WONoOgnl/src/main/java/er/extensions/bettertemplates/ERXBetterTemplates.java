@@ -47,26 +47,13 @@ public class ERXBetterTemplates {
 
 	public static class Observer {
 		public void configureWOForBetterTemplates(NSNotification n) {
-			ERXBetterTemplates.factory().configureWOForBetterTemplates();
+			ERXBetterTemplates.configureWOForBetterTemplates();
 			NSNotificationCenter.defaultCenter().removeObserver(this);
 			_retainerArray.remove(this);
 		}
 	}
 
-	protected static ERXBetterTemplates _factory;
-
-	public static ERXBetterTemplates factory() {
-		if (_factory == null) {
-			_factory = new ERXBetterTemplates();
-		}
-		return _factory;
-	}
-
-	public static void setFactory(ERXBetterTemplates factory) {
-		_factory = factory;
-	}
-
-	public void configureWOForBetterTemplates() {
+	public static void configureWOForBetterTemplates() {
 		// Register template parser
 		if (hasProperty("ognl.active", "true")) {
 			String parserClassName = System.getProperty("ognl.parserClassName", "er.extensions.bettertemplates.WOHelperFunctionParser54");
@@ -84,7 +71,7 @@ public class ERXBetterTemplates {
 		}
 	}
 
-	private boolean hasProperty(String prop, String def) {
+	private static boolean hasProperty(String prop, String def) {
 		String property = System.getProperty(prop, def).trim();
 		return "true".equalsIgnoreCase(property) || "yes".equalsIgnoreCase(property);
 	}
