@@ -12,13 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.parser.WOComponentTemplateParser;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
-import com.webobjects.foundation._NSUtilities;
 
 /**
  * Provides a template parser that support Helper Functions, Inline Bindings, and Binding Debugging. 
@@ -35,6 +33,7 @@ public class ERXBetterTemplates {
 	private static final Logger log = LoggerFactory.getLogger(ERXBetterTemplates.class);
 
 	protected static Collection<Observer> _retainerArray = new NSMutableArray<>();
+
 	static {
 		try {
 			Observer o = new Observer();
@@ -44,10 +43,6 @@ public class ERXBetterTemplates {
 		catch (Exception e) {
 			log.error("Failed to configure ERXBetterTemplates", e);
 		}
-	}
-
-	private WOAssociation createAssociationForClass(Class clazz, String value, boolean isConstant) {
-		return (WOAssociation) _NSUtilities.instantiateObject(clazz, new Class[] { Object.class, boolean.class }, new Object[] { value, Boolean.valueOf(isConstant) }, true, false);
 	}
 
 	public static class Observer {
