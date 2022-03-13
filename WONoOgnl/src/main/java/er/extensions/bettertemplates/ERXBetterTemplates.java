@@ -4,8 +4,6 @@
  * This software is published under the terms of the NetStruxr
  * Public Software License version 0.5, a copy of which has been
  * included with this distribution in the LICENSE.NPL file.  */
-
-/* WOOgnl.java created by max on Fri 28-Sep-2001 */
 package er.extensions.bettertemplates;
 
 import java.util.Collection;
@@ -30,16 +28,14 @@ import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation._NSUtilities;
 
 /**
- * FIXME: We need to rename the properties 
- * 
- * WOOgnl provides a template parser that support WOOgnl associations, Helper Functions, Inline Bindings, and Binding Debugging. 
+ * Provides a template parser that support Helper Functions, Inline Bindings, and Binding Debugging. 
  * 
  * @property ognl.active - defaults to true, if false ognl support is disabled
  * @property ognl.inlineBindings - if true, inline bindings are supported in component templates
  * @property ognl.parseStandardTags - if true, you can use inline bindings in regular html tags, but requires well-formed templates
  * @property ognl.debugSupport - if true, debug metadata is included in all bindings (but binding debug is not automatically turned on) 
  * 
- * @author mschrag
+ * FIXME: We should probably rename these properties eventually… Keeping them now for nice compatibility. 
  */
 
 public class ERXBetterTemplates {
@@ -50,10 +46,10 @@ public class ERXBetterTemplates {
 		try {
 			Observer o = new Observer();
 			_retainerArray.add(o);
-			NSNotificationCenter.defaultCenter().addObserver(o, new NSSelector("configureWOOgnl", new Class[] { com.webobjects.foundation.NSNotification.class }), WOApplication.ApplicationWillFinishLaunchingNotification, null);
+			NSNotificationCenter.defaultCenter().addObserver(o, new NSSelector("configureWOForBetterTemplates", new Class[] { com.webobjects.foundation.NSNotification.class }), WOApplication.ApplicationWillFinishLaunchingNotification, null);
 		}
 		catch (Exception e) {
-			log.error("Failed to configure WOOgnl.", e);
+			log.error("Failed to configure ERXBetterTemplates", e);
 		}
 	}
 
@@ -68,7 +64,7 @@ public class ERXBetterTemplates {
 	}
 
 	public static class Observer {
-		public void configureWOOgnl(NSNotification n) {
+		public void configureWOForBetterTemplates(NSNotification n) {
 			ERXBetterTemplates.factory().configureWOForBetterTemplates();
 			NSNotificationCenter.defaultCenter().removeObserver(this);
 			_retainerArray.remove(this);
@@ -111,7 +107,7 @@ public class ERXBetterTemplates {
 		return "true".equalsIgnoreCase(property) || "yes".equalsIgnoreCase(property);
 	}
 
-	public void convertOgnlConstantAssociations(NSMutableDictionary associations) {
+	public void convertConstantAssociations(NSMutableDictionary associations) {
 		for (Enumeration e = associations.keyEnumerator(); e.hasMoreElements();) {
 			String name = (String) e.nextElement();
 			WOAssociation association = (WOAssociation) associations.objectForKey(name);

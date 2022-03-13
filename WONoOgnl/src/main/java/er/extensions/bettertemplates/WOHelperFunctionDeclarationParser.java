@@ -231,11 +231,11 @@ public class WOHelperFunctionDeclarationParser {
 		WOAssociation association = null;
 		if (associationValue != null && associationValue.startsWith("~")) {
 			int associationValueLength = associationValue.length();
-			StringBuilder ognlValue = new StringBuilder();
+			StringBuilder value = new StringBuilder();
 			int lastIndex = 0;
 			int index = 0;
 			while ((index = associationValue.indexOf(WOHelperFunctionDeclarationParser.QUOTED_STRING_KEY, lastIndex)) != -1) {
-				ognlValue.append(associationValue.substring(lastIndex, index));
+				value.append(associationValue.substring(lastIndex, index));
 				int wodpValueStartIndex = index + WOHelperFunctionDeclarationParser.QUOTED_STRING_KEY.length();
 				int wodpValueEndIndex = wodpValueStartIndex;
 				for (; wodpValueEndIndex < associationValueLength && Character.isDigit(associationValue.charAt(wodpValueEndIndex)); wodpValueEndIndex++) {
@@ -245,14 +245,14 @@ public class WOHelperFunctionDeclarationParser {
 				String quotedString = (String) quotedStrings.objectForKey(wodpKey);
 				if (quotedString != null) {
 					quotedString = quotedString.replaceAll("\\\"", "\\\\\"");
-					ognlValue.append("\"");
-					ognlValue.append(quotedString);
-					ognlValue.append("\"");
+					value.append("\"");
+					value.append(quotedString);
+					value.append("\"");
 				}
 				lastIndex = wodpValueEndIndex;
 			}
-			ognlValue.append(associationValue.substring(lastIndex));
-			associationValue = ognlValue.toString();
+			value.append(associationValue.substring(lastIndex));
+			associationValue = value.toString();
 			association = WOHelperFunctionAssociation.associationWithValue(associationValue);
 		}
 		else {

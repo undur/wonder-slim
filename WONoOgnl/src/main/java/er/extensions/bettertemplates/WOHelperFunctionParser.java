@@ -239,9 +239,8 @@ public class WOHelperFunctionParser {
 				associations.setObjectForKey(helperAssociation, bindingName);
 			}
 		}
-		// This will replace constant associations with ognl associations
-		// when needed.
-		ERXBetterTemplates.factory().convertOgnlConstantAssociations(associations);
+		// This will replace constant associations with our associations when needed.
+		ERXBetterTemplates.factory().convertConstantAssociations(associations);
 	}
 
 	protected WOAssociation parserHelperAssociation(WOAssociation originalAssociation) {
@@ -278,25 +277,25 @@ public class WOHelperFunctionParser {
 					frameworkName = helperFunctionName.substring(0, helperFunctionDotIndex);
 					helperFunctionName = helperFunctionName.substring(helperFunctionDotIndex + 1);
 				}
-				StringBuilder ognlKeyPath = new StringBuilder();
-				ognlKeyPath.append('~');
-				ognlKeyPath.append("@" + WOHelperFunctionRegistry.class.getName() + "@registry()._helperInstanceForFrameworkNamed(#this, \"");
-				ognlKeyPath.append(helperFunctionName);
-				ognlKeyPath.append("\", \"");
-				ognlKeyPath.append(targetKeyPath);
-				ognlKeyPath.append("\", \"");
-				ognlKeyPath.append(frameworkName);
-				ognlKeyPath.append("\").");
-				ognlKeyPath.append(helperFunctionName);
-				ognlKeyPath.append('(');
-				ognlKeyPath.append(targetKeyPath);
+				StringBuilder newKeyPath = new StringBuilder();
+				newKeyPath.append('~');
+				newKeyPath.append("@" + WOHelperFunctionRegistry.class.getName() + "@registry()._helperInstanceForFrameworkNamed(#this, \"");
+				newKeyPath.append(helperFunctionName);
+				newKeyPath.append("\", \"");
+				newKeyPath.append(targetKeyPath);
+				newKeyPath.append("\", \"");
+				newKeyPath.append(frameworkName);
+				newKeyPath.append("\").");
+				newKeyPath.append(helperFunctionName);
+				newKeyPath.append('(');
+				newKeyPath.append(targetKeyPath);
 				if (otherParams != null) {
-					ognlKeyPath.append(',');
-					ognlKeyPath.append(otherParams);
+					newKeyPath.append(',');
+					newKeyPath.append(otherParams);
 				}
-				ognlKeyPath.append(')');
-				log.debug("Converted {} into {}", originalKeyPath, ognlKeyPath);
-				association = new WOConstantValueAssociation(ognlKeyPath.toString());
+				newKeyPath.append(')');
+				log.debug("Converted {} into {}", originalKeyPath, newKeyPath);
+				association = new WOConstantValueAssociation(newKeyPath.toString());
 			}
 		}
 		return association;
