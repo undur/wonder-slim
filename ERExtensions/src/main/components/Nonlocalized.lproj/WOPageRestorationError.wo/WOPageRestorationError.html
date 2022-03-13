@@ -8,14 +8,14 @@
 		<table border="0" width="100%">
 			<tr>
 				<td align="center" valign="top">
-					<webobject name="ExclamationImage" /><br/>
+					<wo:img filename="exclamation.gif" framework="ERExtensions" /><br/>
 					Re-enter<br/>
-					<webobject name="ReenterHyperlink"><b><webobject name="ApplicationNameString" /></b></webobject>
+					<wo:link pageName="Main" target="_top"><b><wo:str value="$application.name" /></b></wo:link>
 				</td>
 				<td align="left" valign="middle">
 					<b> You backtracked too far.<br/></b>
 					The application backtracking limit of
-					<webobject name="BacktrackingLimitString" /> has been exceeded.<br/>
+					<wo:str value="$application.pageCacheSize" /> has been exceeded.<br/>
 				</td>
 			</tr>
 		</table>
