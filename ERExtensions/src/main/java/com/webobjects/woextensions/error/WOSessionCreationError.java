@@ -13,18 +13,18 @@ import com.webobjects.appserver.WOResponse;
 
 public class WOSessionCreationError extends WOComponent {
 
-    public WOSessionCreationError(WOContext aContext)  {
-        super(aContext);
-    }
+	public WOSessionCreationError(WOContext aContext) {
+		super(aContext);
+	}
 
-    @Override
-    public boolean isEventLoggingEnabled() {
-        return false;
-    }
+	@Override
+	public boolean isEventLoggingEnabled() {
+		return false;
+	}
 
-    @Override
-    public void appendToResponse(WOResponse aResponse, WOContext aContext) {
-        super.appendToResponse(aResponse, aContext);
-        aResponse.disableClientCaching();
-    }
+	@Override
+	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
+		super.appendToResponse(aResponse, aContext);
+		aResponse.disableClientCaching();
+	}
 }

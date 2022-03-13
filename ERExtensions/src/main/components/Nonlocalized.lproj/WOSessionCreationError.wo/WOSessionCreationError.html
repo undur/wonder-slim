@@ -8,9 +8,9 @@
 		<table border="0" width="100%">
 			<tr>
 				<td align="center" valign="top">
-					<webobject name="ExclamationImage" /><br/>
+					<wo:img filename="exclamation.gif" framework="ERExtensions" /><br/>
 					Re-enter<br/>
-					<webobject name="ReenterHyperlink"><b><webobject name="ApplicationNameString" /></b></webobject>
+					<wo:link directActionName="default" target="_top"><b><wo:str value="$application.name" /></b></wo:link>
 				</td>
 				<td align="left" valign="middle">
 					<b>Your session could not be created.</b>
