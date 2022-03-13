@@ -11,6 +11,7 @@ import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
+import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
@@ -132,13 +133,13 @@ public class AjaxModalContainer extends AjaxDynamicElement {
 		Object width = valueForBinding("width", component);
 		Object closeLabel = valueForBinding("closeLabel", component);
 		if (height != null) {
-			relAttributeValue += "&height=" +  URLEncoder.encode(height.toString(), Charset.forName( ERXApplication.erxApplication().defaultEncodingName()) );
+			relAttributeValue += "&height=" +  URLEncoder.encode(height.toString(), Charset.forName(WOMessage.defaultURLEncoding()) );
 		}
 		if (width != null) {
-			relAttributeValue += "&width=" +  URLEncoder.encode(width.toString(), Charset.forName( ERXApplication.erxApplication().defaultEncodingName()) );
+			relAttributeValue += "&width=" +  URLEncoder.encode(width.toString(), Charset.forName(WOMessage.defaultURLEncoding()) );
 		}
 		if (closeLabel != null) {
-			relAttributeValue += "&closeLabel=" + URLEncoder.encode(closeLabel.toString(), Charset.forName( ERXApplication.erxApplication().defaultEncodingName()) );
+			relAttributeValue += "&closeLabel=" + URLEncoder.encode(closeLabel.toString(), Charset.forName(WOMessage.defaultURLEncoding()) );
 		}
 		if (booleanValueForBinding("locked", false, component)) {
 			relAttributeValue += "&locked=true";
