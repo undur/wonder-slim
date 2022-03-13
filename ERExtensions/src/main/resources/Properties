@@ -72,7 +72,7 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 ## This is a subset of er.extensions.ERXApplication.DefaultEncoding.
 # er.extensions.ERXApplication.DefaultMessageEncoding=ISO8859_1
 
-er.extensions.ERXMessageEncoding.Enabled=true
+er.extensions.ERXMessageEncoding.Enabled=false
 
 ## If true, the browser's form value encoding is set, it will override
 ## your application encoding for a given request.
