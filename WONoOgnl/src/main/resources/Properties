@@ -1,6 +1,6 @@
 ##  Properies Info
 er.extensions.load.Properties.framework.WOOgnl=load
-er.extensions.WOOgnl.hasLocalization=false
+er.extensions.WONoOgnl.hasLocalization=false
 
 
 #### If you want to use OGNL but not enable it automatically in your bindings, 

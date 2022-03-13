@@ -30,6 +30,8 @@ import com.webobjects.foundation.NSSelector;
 import com.webobjects.foundation._NSUtilities;
 
 /**
+ * FIXME: We need to rename the properties 
+ * 
  * WOOgnl provides a template parser that support WOOgnl associations, Helper Functions, Inline Bindings, and Binding Debugging. 
  * 
  * @property ognl.active - defaults to true, if false ognl support is disabled
@@ -67,7 +69,7 @@ public class ERXBetterTemplates {
 
 	public static class Observer {
 		public void configureWOOgnl(NSNotification n) {
-			ERXBetterTemplates.factory().configureWOForOgnl();
+			ERXBetterTemplates.factory().configureWOForBetterTemplates();
 			NSNotificationCenter.defaultCenter().removeObserver(this);
 			_retainerArray.remove(this);
 		}
@@ -86,10 +88,10 @@ public class ERXBetterTemplates {
 		_factory = factory;
 	}
 
-	public void configureWOForOgnl() {
+	public void configureWOForBetterTemplates() {
 		// Register template parser
 		if (hasProperty("ognl.active", "true")) {
-			String parserClassName = System.getProperty("ognl.parserClassName", "ognl.helperfunction.WOHelperFunctionParser54");
+			String parserClassName = System.getProperty("ognl.parserClassName", "er.extensions.bettertemplates.WOHelperFunctionParser54");
 			WOComponentTemplateParser.setWOHTMLTemplateParserClassName(parserClassName);
 
 			if (hasProperty("ognl.inlineBindings", "false")) {
