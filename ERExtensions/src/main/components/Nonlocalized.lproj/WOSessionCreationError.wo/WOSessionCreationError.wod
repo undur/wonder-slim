@@ -1,13 +1,10 @@
-
 ApplicationNameString: WOString {
     value = application.name;
 }
+
 ExclamationImage: WOImage {
     filename = "exclamation.gif";
-    framework = "JavaWOExtensions";
-    border = "0";
-	height = "32";
-	width = "32";
+    framework = "ERExtensions";
 }
 
 ReenterHyperlink: WOHyperlink {
