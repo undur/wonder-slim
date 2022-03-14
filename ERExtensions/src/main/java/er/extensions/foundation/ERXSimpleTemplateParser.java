@@ -18,8 +18,6 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSMutableSet;
 
-import er.extensions.logging.ERXPatternLayout;
-
 /**
  * Very simple template parser.  For example if you have the delimiter:
  * {@literal @}{@literal @}, then a possible template might look like: "Hello, {@literal @}{@literal @}name{@literal @}{@literal @}.  How are
@@ -64,7 +62,7 @@ public class ERXSimpleTemplateParser {
     } 
     
     /** 
-     * Flag to disable logging. {@link ERXPatternLayout} will set 
+     * Flag to disable logging. ERXPatternLayout will set 
      * this to true for its internal parser object in order to 
      * prevent an infinite debug logging loop. 
      */ 
