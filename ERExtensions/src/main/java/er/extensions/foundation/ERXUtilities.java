@@ -9,6 +9,9 @@ package er.extensions.foundation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Enumeration;
 
 import org.slf4j.Logger;
@@ -19,6 +22,8 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSForwardException;
+import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
@@ -224,4 +229,83 @@ public class ERXUtilities {
     	final String versionString = (String) versionDictionary.objectForKey("CFBundleShortVersionString");
     	return versionString == null  ?  ""  :  versionString.trim(); // trim() removes the line ending char
     }
+	
+	public static Object privateValueForKey(Object target, String key) {
+		Field field = accessibleFieldForKey(target, key);
+		try {
+			if (field != null) {
+				return field.get(target);
+			}
+			Method method = accessibleMethodForKey(target, key);
+			if (method != null) {
+				return method.invoke(target, (Object[]) null);
+			}
+			throw new NSKeyValueCoding.UnknownKeyException("Key " + key + " not found", target, key);
+		}
+		catch (IllegalArgumentException e) {
+			throw NSForwardException._runtimeExceptionForThrowable(e);
+		}
+		catch (IllegalAccessException e) {
+			throw NSForwardException._runtimeExceptionForThrowable(e);
+		}
+		catch (InvocationTargetException e) {
+			throw NSForwardException._runtimeExceptionForThrowable(e);
+		}
+	}
+
+	private static Field accessibleFieldForKey(Object target, String key) {
+		Field f = fieldForKey(target, key);
+		if (f != null) {
+			f.setAccessible(true);
+		}
+		return f;
+	}
+
+	private static Method accessibleMethodForKey(Object target, String key) {
+		Method f = methodForKey(target, key);
+		if (f != null) {
+			f.setAccessible(true);
+		}
+		return f;
+	}
+
+	private static Field fieldForKey(Object target, String key) {
+		Field result = null;
+		Class c = target.getClass();
+		while (c != null) {
+			try {
+				result = c.getDeclaredField(key);
+				if (result != null) {
+					return result;
+				}
+			}
+			catch (SecurityException e) {
+				throw NSForwardException._runtimeExceptionForThrowable(e);
+			}
+			catch (NoSuchFieldException e) {
+				c = c.getSuperclass();
+			}
+		}
+		return null;
+	}
+
+	private static Method methodForKey(Object target, String key) {
+		Method result = null;
+		Class c = target.getClass();
+		while (c != null) {
+			try {
+				result = c.getDeclaredMethod(key);
+				if (result != null) {
+					return result;
+				}
+			}
+			catch (SecurityException e) {
+				throw NSForwardException._runtimeExceptionForThrowable(e);
+			}
+			catch (NoSuchMethodException e) {
+				c = c.getSuperclass();
+			}
+		}
+		return null;
+	}
 }

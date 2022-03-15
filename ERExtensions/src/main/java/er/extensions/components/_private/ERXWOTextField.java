@@ -18,8 +18,8 @@ import com.webobjects.foundation.NSValidation;
 
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
-import er.extensions.foundation.ERXKeyValueCodingUtilities;
 import er.extensions.foundation.ERXPatcher;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Replacement for WOTextField. Provides for localized formatters. 
@@ -62,7 +62,7 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 	   
     @Override
     protected boolean isDisabledInContext(WOContext context) {
-    	WOAssociation disabled = (WOAssociation) ERXKeyValueCodingUtilities.privateValueForKey(this, "_disabled");
+    	WOAssociation disabled = (WOAssociation) ERXUtilities.privateValueForKey(this, "_disabled");
     	return disabled != null && disabled.booleanValueInComponent(context.component());
     }
 	   
