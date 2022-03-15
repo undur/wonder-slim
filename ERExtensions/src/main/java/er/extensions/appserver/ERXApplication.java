@@ -1223,25 +1223,32 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public static final String CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES = "configureLoggingWithSystemProperties";
 
 	/**
-	 * Temporary facade while we move logging out of ERExtensions. 
+	 * Temporary facade while we move logging out of ERExtensions.
+	 * Do some uglylogging while we discover where this method is used. 
 	 */
 	public static void configureLoggingWithSystemProperties() {
-		System.out.println("configureLoggingWithSystemProperties. Well that would have been nice...");
+		System.out.println("!!DEBUG!! configureLoggingWithSystemProperties invoked");
+		runLoggingBridgeMethod( "configureLoggingWithSystemProperties" );
 	}
+
 	/**
-	 * Temporary facade while we move logging out of ERExtensions. 
+	 * Temporary facade while we move logging out of ERExtensions.
+	 * Do some uglylogging while we discover where this method is used. 
 	 */
 	public static void reInitConsoleAppenders() {
-		System.out.println("reInitConsoleAppenders. Well that would have been nice...");
-		
-		// ak: telling Log4J to re-init the Console appenders so we get logging into WOOutputPath again
-		// FIXME: This shit is hardcoded to use log4j which is not nice.
-//		for (Enumeration e = org.apache.log4j.Logger.getRootLogger().getAllAppenders(); e.hasMoreElements();) {
-//			Appender appender = (Appender) e.nextElement();
-//			if (appender instanceof ConsoleAppender) {
-//				ConsoleAppender app = (ConsoleAppender) appender;
-//				app.activateOptions();
-//			}
-//		}
+		System.out.println("!!DEBUG!! reInitConsoleAppenders invoked");
+		runLoggingBridgeMethod( "reInitConsoleAppenders" );
+
+	}
+	
+	private static void runLoggingBridgeMethod( final String methodName ) {
+		try {
+			Class<?> bridge = Class.forName("er.extensions.logging.ERXTemporaryLoggingBridge");
+			bridge.getMethod(methodName, null).invoke(null, null);
+		}
+		catch (Exception e) {
+			System.out.println("Failed to locate the logging bridge or run a method on it. WARNING! SILENT RUNNING!" );
+			e.printStackTrace();
+		}
 	}
 }
