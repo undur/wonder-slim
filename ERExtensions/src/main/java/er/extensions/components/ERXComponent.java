@@ -7,8 +7,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 
-import er.extensions.appserver.ERXBrowser;
-import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.foundation.ERXValueUtilities;
 import er.extensions.localization.ERXLocalizer;
@@ -254,13 +252,6 @@ public abstract class ERXComponent extends WOComponent {
 	 */
 	public ERXLocalizer localizer() {
 		return ERXLocalizer.currentLocalizer();
-	}
-	
-	/** 
-	 * @return The ERXBrowser from the request
-	 */ 
-	public ERXBrowser browser() {
-		return ((ERXRequest)context().request()).browser();
 	}
 
 	/**
