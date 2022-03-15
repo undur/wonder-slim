@@ -431,6 +431,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// FIXME: Is this being handled by ERXStats? Check out. 
 		_startupTimeInMilliseconds = System.currentTimeMillis() - _startupTimeInMilliseconds;
 		log.info( String.format( "Startup time %s ms: ", _startupTimeInMilliseconds ) );
+
+		System.out.println( "============= LOADED BUNDLES START =============" );
+		for( NSBundle nsBundle : NSBundle._allBundlesReally() ) {
+			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass(), nsBundle.isJar() ) );
+		}
+		System.out.println( "============= LOADED BUNDLES END ===============" );
 	}
 
 	/**
