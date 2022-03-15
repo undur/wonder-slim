@@ -45,7 +45,7 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 
 			if (className != null) {
 				Class loggerClass = Class.forName(className);
-				Method method = loggerClass.getDeclaredMethod(ERXApplication.CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES, (Class[]) null);
+				Method method = loggerClass.getDeclaredMethod("configureLoggingWithSystemProperties", (Class[]) null);
 				method.invoke(loggerClass, (Object[]) null);
 			}
 			else {
