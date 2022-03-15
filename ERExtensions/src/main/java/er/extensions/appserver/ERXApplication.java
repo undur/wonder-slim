@@ -1131,7 +1131,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Turns on/off binding debugging for the given component. Binding debugging
-	 * requires using the WOOgnl template parser and setting ognl.debugSupport=true.
+	 * requires using the BetterTemplates parser and setting bettertemplates.debugSupport=true.
 	 * 
 	 * @param debugEnabled whether or not to enable debugging
 	 * @param componentName the component name to enable debugging for

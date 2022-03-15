@@ -9,31 +9,32 @@ package er.extensions.bettertemplates;
 import com.webobjects.appserver.parser.WOComponentTemplateParser;
 
 /**
- * Provides a template parser that support Helper Functions, Inline Bindings, and Binding Debugging. 
+ * Provides a template parser that support Helper Functions, Inline Bindings,
+ * and Binding Debugging.
  * 
- * @property ognl.active - defaults to true, if false ognl support is disabled
- * @property ognl.inlineBindings - if true, inline bindings are supported in component templates
- * @property ognl.parseStandardTags - if true, you can use inline bindings in regular html tags, but requires well-formed templates
- * @property ognl.debugSupport - if true, debug metadata is included in all bindings (but binding debug is not automatically turned on) 
+ * @property bettertemplates.active - defaults to true, if false bettertemplates support is disabled
+ * @property bettertemplates.inlineBindings - if true, inline bindings are supported in component templates
+ * @property bettertemplates.parseStandardTags - if true, you can use inline bindings in regular html tags, but requires well-formed templates
+ * @property bettertemplates.debugSupport - if true, debug metadata is included in all bindings (but binding debug is not automatically turned on)
  * 
- * FIXME: We should probably rename these properties eventually… Keeping them now for nice compatibility. 
+ * FIXME: Does the ognl.helperfunctions property still exist somewhere and does it do something?
  */
 
 public class ERXBetterTemplates {
 
 	public static void configureWOForBetterTemplates() {
-		// Register template parser
-		if (hasProperty("ognl.active", "true")) {
-			String parserClassName = System.getProperty("ognl.parserClassName", "er.extensions.bettertemplates.WOHelperFunctionParser54");
+		if (hasProperty("bettertemplates.active", "true")) {
+			String parserClassName = System.getProperty("bettertemplates.parserClassName", WOHelperFunctionParser54.class.getName());
 			WOComponentTemplateParser.setWOHTMLTemplateParserClassName(parserClassName);
 
-			if (hasProperty("ognl.inlineBindings", "false")) {
+			if (hasProperty("bettertemplates.inlineBindings", "true")) {
 				WOHelperFunctionTagRegistry.setAllowInlineBindings(true);
 			}
-			if (hasProperty("ognl.parseStandardTags", "false")) {
+
+			if (hasProperty("bettertemplates.parseStandardTags", "false")) {
 				WOHelperFunctionHTMLParser.setParseStandardTags(true);
 			}
-			if (hasProperty("ognl.debugSupport", "false")) {
+			if (hasProperty("bettertemplates.debugSupport", "false")) {
 				WOHelperFunctionParser._debugSupport = true;
 			}
 		}
