@@ -12,12 +12,9 @@ import java.net.BindException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.time.LocalDateTime;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.ConsoleAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,15 +212,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			throw new RuntimeException("Your main bundle is \"JavaFoundation\".  You are not launching this WO application properly.  If you are using Eclipse, most likely you launched your WOA as a \"Java Application\" instead of a \"WO Application\".");
 		}
 
-		// ak: telling Log4J to re-init the Console appenders so we get logging into WOOutputPath again
-		// FIXME: This shit is hardcoded to use log4j which is not nice.
-		for (Enumeration e = org.apache.log4j.Logger.getRootLogger().getAllAppenders(); e.hasMoreElements();) {
-			Appender appender = (Appender) e.nextElement();
-			if (appender instanceof ConsoleAppender) {
-				ConsoleAppender app = (ConsoleAppender) appender;
-				app.activateOptions();
-			}
-		}
+		reInitConsoleAppenders();
 
 		if (_loader != null) {
 			_loader._checker.reportErrors();
@@ -1226,5 +1215,33 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * Temporary facade while we move logging out of ERExtensions. 
+	 */
+	public static final String CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES = null;
+
+	/**
+	 * Temporary facade while we move logging out of ERExtensions. 
+	 */
+	public static void configureLoggingWithSystemProperties() {
+		System.out.println("configureLoggingWithSystemProperties. Well that would have been nice...");
+	}
+	/**
+	 * Temporary facade while we move logging out of ERExtensions. 
+	 */
+	public static void reInitConsoleAppenders() {
+		System.out.println("reInitConsoleAppenders. Well that would have been nice...");
+		
+		// ak: telling Log4J to re-init the Console appenders so we get logging into WOOutputPath again
+		// FIXME: This shit is hardcoded to use log4j which is not nice.
+//		for (Enumeration e = org.apache.log4j.Logger.getRootLogger().getAllAppenders(); e.hasMoreElements();) {
+//			Appender appender = (Appender) e.nextElement();
+//			if (appender instanceof ConsoleAppender) {
+//				ConsoleAppender app = (ConsoleAppender) appender;
+//				app.activateOptions();
+//			}
+//		}
 	}
 }

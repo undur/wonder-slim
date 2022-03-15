@@ -8,6 +8,7 @@
 	<name>Wonder reactor</name>
 	<modules>
 		<module>ERExtensions</module>
+		<module>ERLoggingReload4j</module>
 		<module>Ajax</module>
 	</modules>
 	<properties>

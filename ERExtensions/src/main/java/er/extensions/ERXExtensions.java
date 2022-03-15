@@ -17,7 +17,6 @@ import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.localization.ERXLocalizer;
-import er.extensions.logging.ERXLogger;
 
 public class ERXExtensions extends ERXFrameworkPrincipal {
 
@@ -46,12 +45,12 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 
 			if (className != null) {
 				Class loggerClass = Class.forName(className);
-				Method method = loggerClass.getDeclaredMethod(ERXLogger.CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES, (Class[]) null);
+				Method method = loggerClass.getDeclaredMethod(ERXApplication.CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES, (Class[]) null);
 				method.invoke(loggerClass, (Object[]) null);
 			}
 			else {
 				// default behaviour:
-				ERXLogger.configureLoggingWithSystemProperties();
+				ERXApplication.configureLoggingWithSystemProperties();
 			}
 		}
 		catch (Exception e) {

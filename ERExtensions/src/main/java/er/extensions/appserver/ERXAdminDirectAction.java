@@ -25,8 +25,6 @@ import com.webobjects.woextensions.stats.WOStatsPage;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.logging.ERXLog4JConfiguration;
-import er.extensions.logging.ERXLogger;
 import er.extensions.statistics.ERXStats;
 
 public class ERXAdminDirectAction extends WODirectAction {
@@ -135,26 +133,6 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Action used for changing logging settings at runtime. This method is only
-	 * active when WOCachingEnabled is disabled (we take this to mean that the
-	 * application is not in production).
-	 * <h3>Synopsis:</h3> pw=<i>aPassword</i>
-	 * <h3>Form Values:</h3> <b>pw</b> password to be checked against the system
-	 * property <code>er.extensions.ERXLog4JPassword</code>.
-	 * 
-	 * @return {@link ERXLog4JConfiguration} for modifying current logging settings.
-	 */
-	public WOActionResults log4jAction() {
-
-		if (canPerformActionWithPasswordKey("er.extensions.ERXLog4JPassword")) {
-			session().setObjectForKey(Boolean.TRUE, "ERXLog4JConfiguration.enabled");
-			return pageWithName(ERXLog4JConfiguration.class);
-		}
-
-		return forbiddenResponse();
-	}
-
-	/**
 	 * Will terminate an existing session and redirect to the default action.
 	 * 
 	 * @return redirect to default action
@@ -198,7 +176,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 				java.util.Properties p = System.getProperties();
 				p.put(key, value);
 				System.setProperties(p);
-				ERXLogger.configureLoggingWithSystemProperties();
+				ERXApplication.configureLoggingWithSystemProperties();
 				for (java.util.Enumeration e = p.keys(); e.hasMoreElements();) {
 					Object k = e.nextElement();
 					if (k.equals(key)) {
