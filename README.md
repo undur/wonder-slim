@@ -4,7 +4,7 @@ A slimmed down version of Project Wonder, containing only the required basics to
 
 ## Installation
 
-*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part [here]( https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has different versioning from the real Project Wonder and will not interfere with other Project Wonder installations*
+*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part [here]( https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has different versioning from the real Project Wonder and will not interfere with any other Project Wonder installations*
 
 1. Clone the repository
 2. Run `mvn clean install` in the cloned repository's root **or**
@@ -12,9 +12,9 @@ A slimmed down version of Project Wonder, containing only the required basics to
 
 ## Usage
 
-If you just want to play around, you can import the "testapp" in the repository's root into Eclipse and run it.
+If you just want to play around, you can import "testapp" in the repository's root into Eclipse as an Eclipse project and run it.
 
-To use in an existing project you can just change the version for `ERExtensions`, `Ajax`  and `WOOGNL` to 8.0.0.slim-SNAPSHOT in your `pom.xml`. Note that since this project only includes a fraction of the original Wonder frameworks and code, compatibility is likely to be hit and miss.
+To use in an existing project you can just change the version for `ERExtensions` and `Ajax` to `8.0.0.slim-SNAPSHOT` in your `pom.xml`. Note that since this project only includes a fraction of the original Wonder frameworks and code, compatibility is likely to be hit and miss.
 
 ## Motivation
 
@@ -28,7 +28,7 @@ Below I enumerate a few primary goals of wonder-slim (from here on called just "
 
 Project Wonder has a multitude of features and frameworks. This project is about the minimal subset that's required to create and run a modern basic WO application, nothing more, nothing less.
 
-For this reason, the project picks only four frameworks from Project Wonder as baseline for the work, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. I've also combined `JavaWOExtensions` and `ERExtensions`, since they serve a similar purpose.
+For this reason, the project picks four frameworks from Project Wonder as baseline, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. `JavaWOExtensions` and `ERExtensions` have been combined since they serve a similar purpose. `WOOGNL` has also been integrated into `ERExtensions` in the package `er.extensions.bettertemplates` and has lost it's dependency on OGNL (meaning it no longer supports OGNL expressions, just regular keyPaths and other standard associations).
 
 ### **Loosen the ties between WOF and EOF**
 
@@ -40,7 +40,9 @@ For this reason, Slim's frameworks (notably ERExtensions) no longer do anything 
 
 ### Reduce the number of external dependencies
 
-`ERExtensions` only pulls in two external dependencies `slf4j-api` and `log4j`.  The other two frameworks are unchanged from wonder; `WOOGNL ` pulls in `ognl` and `Ajax` pulls in `jabsorb`.
+`ERExtensions` only pulls in two external dependencies `slf4j-api` and `reload4j` (as a temporary replacement for log4j 1.x) and `Ajax` pulls in `jabsorb`.
+
+Note that `JavaXML.framework` is *not* pulled in as a dependency, but rather exclusively excluded from the project's poms.
 
 ### Reduce usage of code and APIs in closed frameworks
 
