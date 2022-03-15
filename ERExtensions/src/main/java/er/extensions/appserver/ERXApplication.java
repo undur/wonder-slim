@@ -1220,7 +1220,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Temporary facade while we move logging out of ERExtensions. 
 	 */
-	public static final String CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES = null;
+	public static final String CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES = "configureLoggingWithSystemProperties";
 
 	/**
 	 * Temporary facade while we move logging out of ERExtensions. 
