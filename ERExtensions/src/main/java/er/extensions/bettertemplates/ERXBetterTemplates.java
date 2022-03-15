@@ -6,17 +6,7 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.bettertemplates;
 
-import java.util.Collection;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.parser.WOComponentTemplateParser;
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSNotification;
-import com.webobjects.foundation.NSNotificationCenter;
-import com.webobjects.foundation.NSSelector;
 
 /**
  * Provides a template parser that support Helper Functions, Inline Bindings, and Binding Debugging. 
@@ -30,28 +20,6 @@ import com.webobjects.foundation.NSSelector;
  */
 
 public class ERXBetterTemplates {
-	private static final Logger log = LoggerFactory.getLogger(ERXBetterTemplates.class);
-
-	protected static Collection<Observer> _retainerArray = new NSMutableArray<>();
-
-	static {
-		try {
-			Observer o = new Observer();
-			_retainerArray.add(o);
-			NSNotificationCenter.defaultCenter().addObserver(o, new NSSelector("configureWOForBetterTemplates", new Class[] { com.webobjects.foundation.NSNotification.class }), WOApplication.ApplicationWillFinishLaunchingNotification, null);
-		}
-		catch (Exception e) {
-			log.error("Failed to configure ERXBetterTemplates", e);
-		}
-	}
-
-	public static class Observer {
-		public void configureWOForBetterTemplates(NSNotification n) {
-			ERXBetterTemplates.configureWOForBetterTemplates();
-			NSNotificationCenter.defaultCenter().removeObserver(this);
-			_retainerArray.remove(this);
-		}
-	}
 
 	public static void configureWOForBetterTemplates() {
 		// Register template parser

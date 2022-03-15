@@ -53,6 +53,7 @@ import com.webobjects.foundation.NSTimestamp;
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
+import er.extensions.bettertemplates.ERXBetterTemplates;
 import er.extensions.components._private.ERXWOForm;
 import er.extensions.components._private.ERXWORepetition;
 import er.extensions.components._private.ERXWOString;
@@ -187,6 +188,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 
 		ERXStats.initStatisticsIfNecessary();
+		ERXBetterTemplates.configureWOForBetterTemplates();
 
 		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
 		frameworksBaseURL();
