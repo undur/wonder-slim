@@ -231,11 +231,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 
-		if (defaultEncoding == null) {
-			defaultEncoding = "utf-8";
+		if (defaultEncoding != null) {
+			setDefaultEncoding(defaultEncoding);
 		}
 		
-		setDefaultEncoding(defaultEncoding);
 
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
