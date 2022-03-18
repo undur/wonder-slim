@@ -85,13 +85,6 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 # er.extensions.ERXBrowserFactory.BrowserClassName=er.extensions.appserver.ERXBasicBrowser
 
 #########################################################################
-# Direct Action 
-#########################################################################
-## Direct Action Passwords. CHANGE THESE IN DEPLOYMENT!!
-# er.extensions.ERXLog4JPassword = pw
-# er.extensions.ERXDirectAction.ChangeSystemPropertyPassword = pw
-
-#########################################################################
 # ERXPatcher 
 #########################################################################
 ## Set to true if you need XHTML from the dynamic elements. Note that this can
