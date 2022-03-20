@@ -23,12 +23,6 @@ WOAutoOpenInBrowser=true
 #WOAllowsConcurrentRequestHandling=false
 
 #========================================================================
-# OGNL
-#========================================================================
-ognl.helperFunctions=true
-ognl.inlineBindings=true
-
-#========================================================================
 # Misc
 #========================================================================
 er.extensions.stackTrace.cleanup=true

@@ -47,10 +47,5 @@
 			<artifactId>Ajax</artifactId>
 			<version>${wonder.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>${wonder.core.group}</groupId>
-			<artifactId>WONoOgnl</artifactId>
-			<version>${wonder.version}</version>
-		</dependency>
 	</dependencies>
 </project>
