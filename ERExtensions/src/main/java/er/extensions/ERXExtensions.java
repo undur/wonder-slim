@@ -6,8 +6,6 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions;
 
-import java.lang.reflect.Method;
-
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
@@ -40,18 +38,7 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 			// WOApplication uses WOOutputPath in its constructor so we need to modify it before calling the constructor.
 			ERXConfigurationManager.defaultManager().initialize();
 
-			// GN: configure logging with optional custom subclass of ERXLogger
-			String className = ERXProperties.stringForKey("er.extensions.erxloggerclass");
-
-			if (className != null) {
-				Class loggerClass = Class.forName(className);
-				Method method = loggerClass.getDeclaredMethod("configureLoggingWithSystemProperties", (Class[]) null);
-				method.invoke(loggerClass, (Object[]) null);
-			}
-			else {
-				// default behaviour:
-				ERXApplication.configureLoggingWithSystemProperties();
-			}
+			ERXApplication.configureLoggingWithSystemProperties();
 		}
 		catch (Exception e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);

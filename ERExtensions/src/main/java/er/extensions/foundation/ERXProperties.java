@@ -448,7 +448,6 @@ public class ERXProperties {
 			message.append('\n');
 			message.append("ERXProperties currently has the following properties:\n");
 			message.append(ERXProperties.logString(NSProperties._getProperties()));
-			// ERXLogger.configureLoggingWithSystemProperties();
 			log.info(message.toString());
 		}
 
