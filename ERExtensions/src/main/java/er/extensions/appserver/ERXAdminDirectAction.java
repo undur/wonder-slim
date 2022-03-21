@@ -46,6 +46,11 @@ public class ERXAdminDirectAction extends WODirectAction {
 	 * FIXME: This is a temporary placeholder until we have a nicer access control implementation // Hugi 2022-03-21 
 	 */
 	protected boolean canPerformAction() {
+		
+		if (ERXApplication.isDevelopmentModeSafe()) {
+			return true;
+		}
+
 		final String password = request().stringFormValueForKey("pw");
 		
 		if( ERXUtilities.stringIsNullOrEmpty( password ) ) {
