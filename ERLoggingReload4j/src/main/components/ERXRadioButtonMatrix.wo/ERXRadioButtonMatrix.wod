@@ -1,0 +1,35 @@
+Content: WOComponentContent {
+}
+
+RadioButton: WOGenericElement {
+	elementName = "input";
+	name = uniqueID;
+	otherTagString = otherTagStringForRadioButton;
+	type = "radio";
+	value = index;
+}
+
+RadioButtonDisabled: WOGenericElement {
+    elementName = "input";
+    name = uniqueID;
+    otherTagString = isCurrentItemSelected;
+    type = "radio";
+    value = index;
+    disabled = true;
+}
+
+RadioButtonIsDisabled: WOConditional {
+	condition = disabled;
+}
+
+RadioButtonIsEnabled: WOConditional {
+	condition = disabled;
+	negate = true;
+}
+
+RadioButtonRepetition: WORepetition {
+	index = index;
+	item = currentItem;
+	list = ^list;
+}
+

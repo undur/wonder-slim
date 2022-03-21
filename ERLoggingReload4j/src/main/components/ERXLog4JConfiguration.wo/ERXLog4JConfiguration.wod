@@ -211,7 +211,7 @@ RepositoryDiv: WOGenericContainer {
 
 Scripts: ERXJavaScript {
     filename = "log4j_config.js";
-    framework = "ERExtensions";
+    framework = "ERLoggingReload4j";
 }
 
 SettingsForm: WOForm {
@@ -242,7 +242,7 @@ StringLoggerName: WOString {
 
 Stylesheet: ERXStyleSheet {
     filename = "log4j_config.css";
-    framework = "ERExtensions";
+    framework = "ERLoggingReload4j";
 }
 
 SubmitButtonAddLogger: WOSubmitButton {
