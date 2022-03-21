@@ -16,24 +16,21 @@ import com.webobjects.foundation.NSForwardException;
 public class ERXExceptionUtilities {
 
 	/**
-	 * Implemented by any exception that you explicitly want to not appear in stack dumps.
+	 * Implemented by exception classes that you explicitly want to not appear in stack dumps.
 	 */
 	private static interface WeDontNeedAStackTraceException {}
 
 	/**
-	 * Returns the "meaningful" root cause from a throwable. For instance, an
-	 * InvocationTargetException is useless -- it's the cause that matters.
-	 * 
-	 * @param t the meaningful exception given another throwable
-	 * @return the meaningful exception
+	 * @return The "meaningful" root cause from the given throwable. For instance, an InvocationTargetException is useless, it's the cause that matters.
 	 */
 	public static Throwable getMeaningfulThrowable(Throwable t) {
 		Throwable meaningfulThrowable;
+
 		if (t instanceof NSForwardException) {
-			meaningfulThrowable = ((NSForwardException) t).originalException();
+			meaningfulThrowable = t.getCause();
 		}
-		else if (t instanceof InvocationTargetException) {
-			meaningfulThrowable = ((InvocationTargetException) t).getCause();
+		else if (t instanceof InvocationTargetException ) {
+			meaningfulThrowable = t.getCause();
 		}
 		else if (t instanceof WeDontNeedAStackTraceException && t.getMessage() == null) {
 			meaningfulThrowable = t.getCause();
@@ -41,37 +38,42 @@ public class ERXExceptionUtilities {
 		else {
 			meaningfulThrowable = t;
 		}
+
 		if (meaningfulThrowable != t) {
-			meaningfulThrowable = ERXExceptionUtilities.getMeaningfulThrowable(meaningfulThrowable);
+			meaningfulThrowable = getMeaningfulThrowable(meaningfulThrowable);
 		}
+
 		return meaningfulThrowable;
 	}
 
 	/**
-	 * Retrieves the actual cause of an error by unwrapping them as far as
-	 * possible, i.e. NSForwardException.originalThrowable(),
-	 * InvocationTargetException.getTargetException() or Exception.getCause()
-	 * are regarded as actual causes.
+	 * @return The actual cause of an error by unwrapping exceptions as far as possible, i.e. NSForwardException.originalThrowable(),
+	 * InvocationTargetException.getTargetException() or Exception.getCause() are regarded as actual causes.
 	 */
 	public static Throwable originalThrowable(Throwable t) {
-		if (t instanceof InvocationTargetException) {
-			return originalThrowable(((InvocationTargetException) t).getTargetException());
+
+		if (t instanceof InvocationTargetException it) {
+			return originalThrowable(it.getTargetException());
 		}
+
 		if (t instanceof NSForwardException) {
-			return originalThrowable(((NSForwardException) t).originalException());
+			return originalThrowable(t.getCause());
 		}
+
 		if (t instanceof SQLException) {
 			SQLException ex = (SQLException) t;
 			if (ex.getNextException() != null) {
 				return originalThrowable(ex.getNextException());
 			}
 		}
+
 		if (t instanceof Exception) {
 			Exception ex = (Exception) t;
 			if (ex.getCause() != null) {
 				return originalThrowable(ex.getCause());
 			}
 		}
+
 		return t;
 	}
 
