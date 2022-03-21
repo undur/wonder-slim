@@ -41,11 +41,27 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Checks if the action can be executed.
+	 * @return true if the request parameter "pw" matches the pw set for WOStatisticsStore
 	 * 
+	 * FIXME: This is a temporary placeholder until we have a nicer access control implementation // Hugi 2022-03-21 
+	 */
+	protected boolean canPerformAction() {
+		final String password = request().stringFormValueForKey("pw");
+		
+		if( ERXUtilities.stringIsNullOrEmpty( password ) ) {
+			return false;
+		}
+		
+		final Object uglyAssWayToGetThestatisticsStorePassword = ERXUtilities.privateValueForKey(ERXApplication.erxApplication().statisticsStore(), "_password" );
+
+		return password.equals( uglyAssWayToGetThestatisticsStorePassword );
+	}
+	
+	/**
 	 * @param passwordKey the password to test
 	 * @return <code>true</code> if action is allowed to be invoked
 	 */
+	@Deprecated
 	private boolean canPerformActionWithPasswordKey(String passwordKey) {
 
 		if (ERXApplication.isDevelopmentModeSafe()) {
@@ -214,11 +230,9 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Creates a response object with HTTP status code 403.
-	 * 
-	 * @return 403 response
+	 * @return A response object with HTTP status code 403.
 	 */
-	private static WOResponse forbiddenResponse() {
+	protected static WOResponse forbiddenResponse() {
 		WOResponse response = new WOResponse();
 		response.setStatus( WOMessage.HTTP_STATUS_FORBIDDEN );
 		return response;

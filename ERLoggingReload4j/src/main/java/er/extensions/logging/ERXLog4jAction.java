@@ -18,17 +18,16 @@ public class ERXLog4jAction extends ERXDirectAction {
 	 * <h3>Synopsis:</h3> pw=<i>aPassword</i>
 	 * <h3>Form Values:</h3> <b>pw</b> password to be checked against the system
 	 * property <code>er.extensions.ERXLog4JPassword</code>.
-	 * 
+	 *
 	 * @return {@link ERXLog4JConfiguration} for modifying current logging settings.
 	 */
 	public WOActionResults log4jAction() {
-		//FIXME: Implement.
-		return null;
-//		if( canPerformActionWithPasswordKey( "er.extensions.ERXLog4JPassword" ) ) {
-//			session().setObjectForKey( Boolean.TRUE, "ERXLog4JConfiguration.enabled" );
-//			return pageWithName( ERXLog4JConfiguration.class );
-//		}
-//
-//		return forbiddenResponse();
+
+		if( canPerformAction() ) {
+			session().setObjectForKey( Boolean.TRUE, "ERXLog4JConfiguration.enabled" );
+			return pageWithName( ERXLog4JConfiguration.class );
+		}
+
+		return forbiddenResponse();
 	}
 }
