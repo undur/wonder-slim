@@ -8,9 +8,6 @@ package er.extensions.appserver;
 
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
@@ -28,8 +25,6 @@ import er.extensions.foundation.ERXUtilities;
 import er.extensions.statistics.ERXStats;
 
 public class ERXAdminDirectAction extends WODirectAction {
-
-	private static Logger log = LoggerFactory.getLogger( ERXAdminDirectAction.class );
 
 	public ERXAdminDirectAction(WORequest r) {
 		super(r);
@@ -63,41 +58,6 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 	
 	/**
-	 * @param passwordKey the password to test
-	 * @return <code>true</code> if action is allowed to be invoked
-	 */
-	@Deprecated
-	private boolean canPerformActionWithPasswordKey(String passwordKey) {
-
-		if (ERXApplication.isDevelopmentModeSafe()) {
-			return true;
-		}
-
-//		String password = ERXProperties.decryptedStringForKey(passwordKey); // FIXME: This password used to be encrypted. Can't we just eliminate this DA instead?
-		String password = passwordKey;
-
-		if (password == null || password.length() == 0) {
-			log.error("Attempt to use action when key is not set: {}", passwordKey);
-			return false;
-		}
-
-		String requestPassword = request().stringFormValueForKey("pw");
-
-		if (requestPassword == null) {
-			requestPassword = (String) context().session().objectForKey("ERXDirectAction." + passwordKey);
-		}
-		else {
-			context().session().setObjectForKey(requestPassword, "ERXDirectAction." + passwordKey);
-		}
-
-		if (requestPassword == null || requestPassword.length() == 0) {
-			return false;
-		}
-
-		return password.equals(requestPassword);
-	}
-
-	/**
 	 * Direct access to WOStats by giving over the password in the "pw" parameter.
 	 * 
 	 * @return statistics page
@@ -117,7 +77,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 	 */
 	public WOActionResults resetStatsAction() {
 
-		if (canPerformActionWithPasswordKey("WOStatisticsPassword")) {
+		if (canPerformAction()) {
 			ERXStats.reset();
 			ERXRedirect redirect = pageWithName(ERXRedirect.class);
 			redirect.setDirectActionName("stats");
@@ -179,7 +139,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 	 * @return either null when the password is wrong or a new page showing the System properties
 	 */
 	public WOActionResults systemPropertyAction() {
-		if (canPerformActionWithPasswordKey("er.extensions.ERXDirectAction.ChangeSystemPropertyPassword")) {
+		if (canPerformAction()) {
 			String key = request().stringFormValueForKey("key");
 			WOResponse r = new WOResponse();
 			if (ERXUtilities.stringIsNullOrEmpty(key)) {
