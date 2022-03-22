@@ -114,22 +114,6 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Will terminate an existing session and redirect to the default action.
-	 * 
-	 * @return redirect to default action
-	 */
-	public WOActionResults logoutAction() {
-
-		if (existingSession() != null) {
-			existingSession().terminate();
-		}
-
-		ERXRedirect r = pageWithName(ERXRedirect.class);
-		r.setDirectActionName("default");
-		return r;
-	}
-
-	/**
 	 * Sets a System property. This is also active in deployment mode because
 	 * one might want to change a System property at runtime.
 	 * 
