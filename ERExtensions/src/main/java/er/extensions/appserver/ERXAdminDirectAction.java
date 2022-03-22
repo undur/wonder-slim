@@ -36,44 +36,9 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * @return true if the request parameter "pw" matches the pw set for WOStatisticsStore
-	 * 
-	 * FIXME: This is a temporary placeholder until we have a nicer access control implementation // Hugi 2022-03-21 
-	 */
-	protected boolean canPerformAction() {
-		
-		if (ERXApplication.isDevelopmentModeSafe()) {
-			return true;
-		}
-
-		final String password = request().stringFormValueForKey("pw");
-		
-		if( ERXUtilities.stringIsNullOrEmpty( password ) ) {
-			return false;
-		}
-		
-		final Object uglyAssWayToGetThestatisticsStorePassword = ERXUtilities.privateValueForKey(ERXApplication.erxApplication().statisticsStore(), "_password" );
-
-		return password.equals( uglyAssWayToGetThestatisticsStorePassword );
-	}
-	
-	/**
-	 * Direct access to WOStats by giving over the password in the "pw" parameter.
-	 * 
-	 * @return statistics page
-	 * 
-	 * FIXME: This is now just a copy of WOStats/defaultAction() // Hugi 2021-06-27
-	 */
-	public WOActionResults statsAction() {
-		WOStatsPage nextPage = pageWithName(WOStatsPage.class);
-		nextPage.password = context().request().stringFormValueForKey("pw");
-		return nextPage.submit();
-	}
-
-	/**
 	 * Direct access to reset the stats by giving over the password in the "pw" parameter. This calls ERXStats.reset();
 	 * 
-	 * @return statistics page
+	 * @return statistics page 
 	 */
 	public WOActionResults resetStatsAction() {
 
@@ -89,21 +54,31 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Direct access to WOEventDisplay by giving over the password in the "pw" parameter.
+	 * @return WOStatsPage page using password in the "pw" query parameter
 	 * 
-	 * @return event page
+	 * FIXME: Why?
+	 */
+    public WOActionResults statsAction() {
+        WOStatsPage nextPage = pageWithName(WOStatsPage.class);
+        nextPage.password = context().request().stringFormValueForKey("pw");
+        return nextPage.submit();
+    }
+
+	/**
+	 * @return WOEventDisplay page using password in the "pw" query parameter
+	 * 
+	 * FIXME: Why?
 	 */
 	public WOActionResults eventsAction() {
 		WOEventDisplayPage nextPage = pageWithName(WOEventDisplayPage.class);
 		nextPage.password = context().request().stringFormValueForKey("pw");
-		nextPage.submit();
-		return nextPage;
+		return nextPage.submit();
 	}
 
 	/**
-	 * Direct access to WOEventDisplay by giving over the password in the "pw" parameter and turning on all events.
+	 * @return WOEventSetup page using password in the "pw" query parameter
 	 * 
-	 * @return event setup page
+	 * FIXME: Why?
 	 */
 	public WOActionResults eventsSetupAction() {
 		WOEventSetupPage nextPage = pageWithName(WOEventSetupPage.class);
@@ -114,8 +89,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * Sets a System property. This is also active in deployment mode because
-	 * one might want to change a System property at runtime.
+	 * Sets a System property. Also active in deployment mode.
 	 * 
 	 * <h3>Synopsis:</h3>
 	 * pw=<i>aPassword</i>&amp;key=<i>someSystemPropertyKey</i>&amp;value=<i>someSystemPropertyValue</i>
@@ -176,6 +150,28 @@ public class ERXAdminDirectAction extends WODirectAction {
 		}
 
 		return response;
+	}
+
+	/**
+	 * @return true if the request parameter "pw" matches the pw set for WOStatisticsStore
+	 * 
+	 * FIXME: This is a temporary placeholder until we have a nicer access control implementation // Hugi 2022-03-21 
+	 */
+	protected boolean canPerformAction() {
+		
+		if (ERXApplication.isDevelopmentModeSafe()) {
+			return true;
+		}
+
+		final String password = request().stringFormValueForKey("pw");
+		
+		if( ERXUtilities.stringIsNullOrEmpty( password ) ) {
+			return false;
+		}
+		
+		final Object uglyAssWayToGetThestatisticsStorePassword = ERXUtilities.privateValueForKey(ERXApplication.erxApplication().statisticsStore(), "_password" );
+
+		return password.equals( uglyAssWayToGetThestatisticsStorePassword );
 	}
 
 	/**
