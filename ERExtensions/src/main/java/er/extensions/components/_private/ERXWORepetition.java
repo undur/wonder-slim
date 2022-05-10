@@ -540,13 +540,6 @@ public class ERXWORepetition extends WODynamicGroup {
 		}
 		return _raiseOnUnmatchedObjectDefault;
 	}
-
-	private boolean eoSupport(WOComponent wocomponent) {
-		if (_eoSupport != null) {
-			return _eoSupport.booleanValueInComponent(wocomponent);
-		}
-		return _eoSupportDefault;
-	}
 	
 	@Override
 	public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
