@@ -865,7 +865,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass, WOContext context) {
-		return (T) super.pageWithName(componentClass.getName(), context);
+		return (T) pageWithName(componentClass.getName(), context);
 	}
 
 	/**
