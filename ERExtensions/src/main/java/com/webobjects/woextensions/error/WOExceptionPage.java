@@ -224,7 +224,10 @@ public class WOExceptionPage extends ERXComponent {
 	 * public WOResponse reportException( Throwable exception, WOContext context, NSDictionary extraInfo ) {
 	 *    return ERXExceptionPage.reportException( exception, context, extraInfo );
 	 * }
+	 * 
+	 * @deprecated since this page is now automatically used (Due to it being called WOExceptionPage)
 	 */
+	@Deprecated
 	public static WOResponse reportException( Throwable exception, WOContext context, Map extraInfo ) {
 		WOExceptionPage nextPage = ERXApplication.erxApplication().pageWithName( WOExceptionPage.class, context );
 		nextPage.setException( exception );
