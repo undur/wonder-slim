@@ -121,14 +121,14 @@ public class WOExceptionPage extends ERXComponent {
 	 * @return The source file where the exception originated (from the last line of the stack trace).
 	 */
 	private Path sourceFileContainingError() {
-		String nameOfThrowingClass = firstLineOfTrace().packageClassPath();
-		NSBundle bundle = bundleForClassName( nameOfThrowingClass );
+		final String nameOfThrowingClass = firstLineOfTrace().packageClassPath();
+		final NSBundle bundle = bundleForClassName( nameOfThrowingClass );
 
 		if( bundle == null ) {
 			return null;
 		}
 
-		String path = null;
+		final String path;
 
 		if( NSBundle.mainBundle().getClass().getName().contains( "NSMavenProjectBundle" ) ) { // FIXME: We should probably be referencing the real class once that exists again // Hugi 2021-05-21
 			path = bundle.bundlePath() + pathModifier + "/src/main/java/" + nameOfThrowingClass.replace( ".", "/" ) + ".java";
