@@ -114,7 +114,7 @@ public class WOExceptionPage extends ERXComponent {
 	 * @return true if source should be shown.
 	 */
 	public boolean showSource() {
-		return ERXApplication.isDevelopmentModeSafe() && sourceFileContainingError() != null;
+		return ERXApplication.isDevelopmentModeSafe() && sourceFileContainingError() != null && !sourceFileContainingError().toString().contains( ".jar/" );
 	}
 
 	/**
@@ -147,13 +147,7 @@ public class WOExceptionPage extends ERXComponent {
 		final List<String> lines;
 
 		try {
-			// We don'to try to read source files inside a jar files
-			if( !sourceFileContainingError().toString().contains( ".jar/" ) ) {
-				lines = Files.readAllLines( sourceFileContainingError() );
-			}
-			else {
-				lines = Collections.emptyList();
-			}
+			lines = Files.readAllLines( sourceFileContainingError() );
 		}
 		catch( IOException e ) {
 			logger.error( "Attempt to read source code from '{}' failed", sourceFileContainingError(), e );
