@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSBundle;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.woextensions.error.WOExceptionPage.WOExceptionParser.WOParsedErrorLine;
@@ -225,7 +225,7 @@ public class WOExceptionPage extends ERXComponent {
 	 *    return ERXExceptionPage.reportException( exception, context, extraInfo );
 	 * }
 	 */
-	public static WOResponse reportException( Throwable exception, WOContext context, NSDictionary extraInfo ) {
+	public static WOResponse reportException( Throwable exception, WOContext context, Map extraInfo ) {
 		WOExceptionPage nextPage = ERXApplication.erxApplication().pageWithName( WOExceptionPage.class, context );
 		nextPage.setException( exception );
 		return nextPage.generateResponse();
@@ -276,7 +276,7 @@ public class WOExceptionPage extends ERXComponent {
 		private List _ignoredPackages() {
 			NSBundle bundle;
 			String path, content;
-			NSDictionary dic = null;
+			Map dic = null;
 			List<NSBundle> allBundles = new ArrayList<>(NSBundle.frameworkBundles());
 			List<String> ignored = new ArrayList<>();
 
@@ -286,10 +286,10 @@ public class WOExceptionPage extends ERXComponent {
 				if (path != null) {
 					content = _stringFromFileSafely(path);
 					if (content != null) {
-						dic = (NSDictionary) NSPropertyListSerialization.propertyListFromString(content);
+						dic = (Map) NSPropertyListSerialization.propertyListFromString(content);
 						if (dic != null && dic.containsKey("ignoredPackages")) {
 							@SuppressWarnings("unchecked")
-							List<String> tmpArray = (List<String>) dic.objectForKey("ignoredPackages");
+							List<String> tmpArray = (List<String>) dic.get("ignoredPackages");
 							if (tmpArray != null && tmpArray.size() > 0) {
 								ignored.addAll(tmpArray);
 							}
