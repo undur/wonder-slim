@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -143,10 +144,16 @@ public class WOExceptionPage extends ERXComponent {
 	 * @return The source lines to view in the browser.
 	 */
 	public List<String> lines() {
-		List<String> lines;
+		final List<String> lines;
 
 		try {
-			lines = Files.readAllLines( sourceFileContainingError() );
+			// We don'to try to read source files inside a jar files
+			if( !sourceFileContainingError().toString().contains( ".jar/" ) ) {
+				lines = Files.readAllLines( sourceFileContainingError() );
+			}
+			else {
+				lines = Collections.emptyList();
+			}
 		}
 		catch( IOException e ) {
 			logger.error( "Attempt to read source code from '{}' failed", sourceFileContainingError(), e );
