@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -20,12 +21,9 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
-import com.webobjects.foundation.NSLog;
-import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.woextensions.error.WOExceptionPage.WOExceptionParser.WOParsedErrorLine;
 
@@ -275,14 +273,14 @@ public class WOExceptionPage extends ERXComponent {
 			_parseException();
 		}
 
-		private NSArray _ignoredPackages() {
+		private List _ignoredPackages() {
 			NSBundle bundle;
 			String path, content;
 			NSDictionary dic = null;
-			NSMutableArray<NSBundle> allBundles = new NSMutableArray<>(NSBundle.frameworkBundles());
-			NSMutableArray<String> ignored = new NSMutableArray<>();
+			List<NSBundle> allBundles = new ArrayList<>(NSBundle.frameworkBundles());
+			List<String> ignored = new ArrayList<>();
 
-			for (Enumeration enumerator = allBundles.objectEnumerator(); enumerator.hasMoreElements();) {
+			for (Enumeration enumerator = Collections.enumeration(allBundles); enumerator.hasMoreElements();) {
 				bundle = (NSBundle) enumerator.nextElement();
 				path = WOApplication.application().resourceManager().pathForResourceNamed("WOIgnoredPackage.plist", bundle.name(), null);
 				if (path != null) {
@@ -291,9 +289,9 @@ public class WOExceptionPage extends ERXComponent {
 						dic = (NSDictionary) NSPropertyListSerialization.propertyListFromString(content);
 						if (dic != null && dic.containsKey("ignoredPackages")) {
 							@SuppressWarnings("unchecked")
-							NSArray<String> tmpArray = (NSArray<String>) dic.objectForKey("ignoredPackages");
-							if (tmpArray != null && tmpArray.count() > 0) {
-								ignored.addObjectsFromArray(tmpArray);
+							List<String> tmpArray = (List<String>) dic.objectForKey("ignoredPackages");
+							if (tmpArray != null && tmpArray.size() > 0) {
+								ignored.addAll(tmpArray);
 							}
 						}
 					}
@@ -303,11 +301,11 @@ public class WOExceptionPage extends ERXComponent {
 			return ignored;
 		}
 
-		private void _verifyPackageForLine(WOParsedErrorLine line, NSArray packages) {
+		private void _verifyPackageForLine(WOParsedErrorLine line, List packages) {
 			Enumeration enumerator;
 			String ignoredPackageName, linePackageName;
 			linePackageName = line.packageName();
-			enumerator = packages.objectEnumerator();
+			enumerator = Collections.enumeration(packages);
 
 			while (enumerator.hasMoreElements()) {
 				ignoredPackageName = (String) enumerator.nextElement();
@@ -322,8 +320,8 @@ public class WOExceptionPage extends ERXComponent {
 			StringWriter sWriter = new StringWriter();
 			PrintWriter pWriter = new PrintWriter(sWriter, false);
 			String string;
-			NSArray lines;
-			NSArray ignoredPackage;
+			List lines;
+			List ignoredPackage;
 			WOParsedErrorLine aLine;
 			String line;
 
@@ -341,12 +339,12 @@ public class WOExceptionPage extends ERXComponent {
 												// stack trace
 					string = string.substring(i + 2); // Skip the exception type and
 														// message
-					lines = NSArray.componentsSeparatedByString(string, "\n");
+					lines = Arrays.asList(string.split("\n"));
 					ignoredPackage = _ignoredPackages();
-					size = lines.count();
-					_stackTrace = new NSMutableArray(size);
+					size = lines.size();
+					_stackTrace = new ArrayList(size);
 					for (i = 0; i < size; i++) {
-						line = ((String) lines.objectAtIndex(i)).trim();
+						line = ((String) lines.get(i)).trim();
 						if (line.startsWith("at ")) {
 							// If we don't have an open parenthesis it means that we
 							// have probably reach the latest stack trace.
@@ -358,11 +356,11 @@ public class WOExceptionPage extends ERXComponent {
 				}
 			}
 			catch (Throwable e) {
-				NSLog.err.appendln("WOExceptionParser - exception collecting backtrace data " + e + " - Empty backtrace.");
-				NSLog.err.appendln(e);
+				logger.error("WOExceptionParser - exception collecting backtrace data " + e + " - Empty backtrace.");
+				logger.error( "", e);
 			}
 			if (_stackTrace == null) {
-				_stackTrace = new NSMutableArray();
+				_stackTrace = new ArrayList();
 			}
 		}
 
@@ -412,10 +410,8 @@ public class WOExceptionPage extends ERXComponent {
 						fis.close();
 					}
 					catch (java.io.IOException e) {
-						if (NSLog.debugLoggingAllowedForLevelAndGroups(NSLog.DebugLevelInformational, NSLog.DebugGroupIO)) {
-							NSLog.debug.appendln("Exception while closing file input stream: " + e.getMessage());
-							NSLog.debug.appendln(e);
-						}
+						logger.debug("Exception while closing file input stream: " + e.getMessage());
+						logger.debug("", e);
 					}
 				}
 			}
