@@ -49,16 +49,20 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 		final WOComponent component = context.component();
 		final List<String> containersToUpdate = new ArrayList<>();
 
-		final String updateContainerID = (String) _updateContainerID.valueInComponent(component);
-
-		if( updateContainerID != null ) {
-			containersToUpdate.add( updateContainerID );
+		if( _updateContainerID != null ) {
+			final String updateContainerID = (String) _updateContainerID.valueInComponent(component);
+			
+			if( updateContainerID != null ) {
+				containersToUpdate.add( updateContainerID );
+			}
 		}
 
-		final List<String> updateContainerIDs = (List<String>) _updateContainerIDs.valueInComponent(component);
-		
-		if( updateContainerIDs != null ) {
-			containersToUpdate.addAll( updateContainerIDs );
+		if( _updateContainerIDs != null ) {
+			final List<String> updateContainerIDs = (List<String>) _updateContainerIDs.valueInComponent(component);
+			
+			if( updateContainerIDs != null ) {
+				containersToUpdate.addAll( updateContainerIDs );
+			}
 		}
 		
 		if (!containersToUpdate.isEmpty()) {
