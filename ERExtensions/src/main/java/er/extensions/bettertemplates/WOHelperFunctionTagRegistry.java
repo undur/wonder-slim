@@ -41,8 +41,6 @@ public class WOHelperFunctionTagRegistry {
 // 		FIXME: Disabled on switch to slf4j // Hugi 2022-01-05
 //		WOHelperFunctionTagRegistry.log.setLevel(Level.WARN);
 
-		WOHelperFunctionTagRegistry.registerTagShortcut("ERXLocalizedString", "localized"); // not in 5.4
-
 		WOHelperFunctionTagRegistry.registerTagShortcut("ERXElse", "else");
 		WOHelperFunctionTagRegistry.registerTagShortcut("ERXWOConditional", "if");
 		WOHelperFunctionTagRegistry.registerTagShortcut("ERXWOConditional", "conditional");
