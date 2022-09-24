@@ -235,7 +235,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		if (defaultEncoding != null) {
 			setDefaultEncoding(defaultEncoding);
 		}
-		
 
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
@@ -345,7 +344,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public WOContext createContextForRequest(WORequest request) {
 		final WOContext context = super.createContextForRequest(request);
 
-		// We only want to push in the context the first time it is created, ie we don't want to lose the current context when we create a context for an error page.
+		// We only want to push in the context the first time it is created, i.e we don't want to lose the current context when we create a context for an error page.
 		if (ERXWOContext.currentContext() == null) {
 			ERXWOContext.setCurrentContext(context);
 		}
