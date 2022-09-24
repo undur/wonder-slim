@@ -223,9 +223,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 	}
 
 	/**
-	 * Partial rip from ERXStringUtilities
-	 * 
-	 * FIXME: Could use cleanup // Hugi 2021-11-12 
+	 * Partial rip from ERX StringUtilities
 	 */
 	@Deprecated
 	private static String md5Hex(String str) {

@@ -279,7 +279,7 @@ public abstract class ERXBrowser implements NSKeyValueCoding {
 	 * @param version string
 	 * @return cleaned-up string that only contains the first dot(.) as the floating point indicator.
 	 * 
-	 * Ripped from ERXStringUtilities and moved here, since it's now only used by ERXBrowser
+	 * Ripped from ERX StringUtilities and moved here, since it's now only used by ERXBrowser
 	 */
 	public static String removeExtraDotsFromVersionString( String version ) {
 		int floatingPointIndex = version.indexOf( "." );

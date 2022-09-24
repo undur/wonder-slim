@@ -37,7 +37,7 @@ import er.extensions.foundation.ERXThreadStorage;
  * public Object valueForKeyPath(String keyPath) {
  *   Object value;
  *   if (_shouldTrackStats) {
- *     String logName = ERXStringUtilities.getSimpleClassName(getClass()) + ": " + keyPath;
+ *     String logName = ERX StringUtilities.getSimpleClassName(getClass()) + ": " + keyPath;
  *     ERXStats.markStart(logName);
  *     value = super.valueForKeyPath(keyPath);
  *     ERXStats.markEnd(logName);

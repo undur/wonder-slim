@@ -345,7 +345,7 @@ public class ERXBeanSerializer extends AbstractSerializer {
 	}
 	
 	/**
-	 * Extracted from the now defunct ERXStringUtilities
+	 * Extracted from the now defunct ERX StringUtilities
 	 * 
 	 * Uncapitalizes a given string.
 	 * 

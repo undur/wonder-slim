@@ -100,7 +100,7 @@ public abstract class AjaxSocialNetwork {
 	 * @param key to calculate the display name
 	 * @return display name for the given key
 	 * 
-	 * FIXME: Ripped this from ERXStringUtilities just to use for the name() method. Remove // Hugi 2021-12-18
+	 * FIXME: Ripped this from ERX StringUtilities just to use for the name() method. Remove // Hugi 2021-12-18
 	 */
 	private static String displayNameForKey(String key) {
 		StringBuilder finalString = null;

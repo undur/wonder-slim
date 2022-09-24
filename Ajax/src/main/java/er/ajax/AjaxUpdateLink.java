@@ -279,7 +279,7 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 	/**
 	 * @return The given string with the first letter set to uppercase
 	 * 
-	 * FIXME: Ripped from ERXSTringUtilities, since this is the only remaining usage 
+	 * FIXME: Ripped from ERX StringUtilities, since this is the only remaining usage 
 	 */
 	private static String capitalize( String value ) {
 		String capital = null;
