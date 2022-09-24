@@ -850,7 +850,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Set the application's default encodings
 	 */
 	public void setDefaultEncoding(String encodingName) {
-		log.info("Setting default encoding to '{}'", encodingName); // FIXME: Temporarily setting to info level, while we ensure this is working as intended
+		log.debug("Setting default encoding to '{}'", encodingName);
 		WOMessage.setDefaultEncoding(encodingName);
 		WOMessage.setDefaultURLEncoding(encodingName);
 	}
