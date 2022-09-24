@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class ERXResponseCompression {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXResponseCompression.class);
 
-	private static NSSet<String> _responseCompressionTypes;
+	private static Set<String> _responseCompressionTypes;
 	private static Boolean _responseCompressionEnabled;
 
 	/**
@@ -39,9 +40,9 @@ public class ERXResponseCompression {
 	 * 
 	 * FIXME: Rename the properties to reflect the class name change
 	 */
-	public static NSSet<String> responseCompressionTypes() {
+	public static Set<String> responseCompressionTypes() {
 		if (_responseCompressionTypes == null) {
-			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault("er.extensions.ERXApplication.responseCompressionTypes", new NSArray<String>("application/x-javascript")));
+			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault("er.extensions.ERXApplication.responseCompressionTypes", new NSArray<>("application/x-javascript")));
 		}
 
 		return _responseCompressionTypes;
@@ -68,30 +69,32 @@ public class ERXResponseCompression {
 	 * FIXME: clean up those checks a bit to make it easier to see what's happening.
 	 */
 	public static boolean shouldCompress( final WORequest request, final WOResponse response ) {
-		final String contentType = response.headerForKey("content-type");
-		final String contentEncoding = response.headerForKey("content-encoding");
-		final String acceptEncoding = request.headerForKey("accept-encoding");
+		final String responseContentType = response.headerForKey("content-type");
+		final String responseContentEncoding = response.headerForKey("content-encoding");
+		final String requestAcceptEncoding = request.headerForKey("accept-encoding");
 
-		final boolean contentTypeCheck = !"gzip".equals(contentEncoding) && (contentType != null) && (contentType.startsWith("text/") || responseCompressionTypes().containsObject(contentType));
-		final boolean acceptEncodingCheck = (acceptEncoding != null) && (acceptEncoding.toLowerCase().indexOf("gzip") != -1);
+		final boolean contentTypeCheck = !"gzip".equals(responseContentEncoding) && (responseContentType != null) && (responseContentType.startsWith("text/") || responseCompressionTypes().contains(responseContentType));
+		final boolean acceptEncodingCheck = (requestAcceptEncoding != null) && (requestAcceptEncoding.toLowerCase().indexOf("gzip") != -1);
 		
 		return contentTypeCheck && acceptEncodingCheck;
 	}
 
 	public static WOResponse compressResponse( final WOResponse response ) {
 	
-		long start = System.currentTimeMillis();
-		long inputBytesLength;
-		InputStream contentInputStream = response.contentInputStream();
-		NSData compressedData;
+		final long start = System.currentTimeMillis();
+		final long inputBytesLength;
+		final InputStream contentInputStream = response.contentInputStream();
+		final NSData compressedData;
+
 		if (contentInputStream != null) {
 			inputBytesLength = response.contentInputStreamLength();
 			compressedData = ERXCompressionUtilities.gzipInputStreamAsNSData(contentInputStream, (int) inputBytesLength);
 			response.setContentStream(null, 0, 0);
 		}
 		else {
-			NSData input = response.content();
+			final NSData input = response.content();
 			inputBytesLength = input.length();
+
 			if (inputBytesLength > 0) {
 				compressedData = ERXCompressionUtilities.gzipByteArrayAsNSData(input._bytesNoCopy(), 0, (int) inputBytesLength);
 			}
@@ -99,6 +102,7 @@ public class ERXResponseCompression {
 				compressedData = NSData.EmptyData;
 			}
 		}
+
 		if (inputBytesLength > 0) {
 			if (compressedData == null) {
 				// something went wrong
