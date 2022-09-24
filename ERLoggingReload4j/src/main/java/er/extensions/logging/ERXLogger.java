@@ -25,8 +25,6 @@ import er.extensions.foundation.ERXConfigurationManager;
 
 public class ERXLogger extends Logger {
 
-	public static final String CONFIGURE_LOGGING_WITH_SYSTEM_PROPERTIES = "configureLoggingWithSystemProperties";
-
 	/** logging supprt */
 	public static Logger log;
 	public static Factory factory = null;
