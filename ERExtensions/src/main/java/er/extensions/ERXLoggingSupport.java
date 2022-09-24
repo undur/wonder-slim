@@ -1,35 +1,33 @@
 package er.extensions;
 
-public interface ERXLoggingSupport {
+import java.lang.reflect.InvocationTargetException;
 
-	/**
-	 * Temporary facade while we move logging out of ERExtensions.
-	 * Do some uglylogging while we discover where this method is used. 
-	 */
+/**
+ * Interfaces with the logging implementation. Currently we just delegate
+ */
+
+public class ERXLoggingSupport {
+
+	private static final String LOGGING_BRIDGE_CLASS = "er.extensions.logging.ERXTemporaryLoggingBridge";
+
 	public static void configureLoggingWithSystemProperties() {
-		System.out.println("!!DEBUG!! configureLoggingWithSystemProperties invoked");
-		ERXLoggingSupport.runLoggingBridgeMethod( "configureLoggingWithSystemProperties" );
+		ERXLoggingSupport.runLoggingBridgeMethod("configureLoggingWithSystemProperties");
 	}
 
-	/**
-	 * Temporary facade while we move logging out of ERExtensions.
-	 * Do some uglylogging while we discover where this method is used. 
-	 */
 	public static void reInitConsoleAppenders() {
-		System.out.println("!!DEBUG!! reInitConsoleAppenders invoked");
-		ERXLoggingSupport.runLoggingBridgeMethod( "reInitConsoleAppenders" );
-	
+		ERXLoggingSupport.runLoggingBridgeMethod("reInitConsoleAppenders");
 	}
 
-	private static void runLoggingBridgeMethod( final String methodName ) {
+	private static void runLoggingBridgeMethod(final String methodName) {
 		try {
-			Class<?> bridge = Class.forName("er.extensions.logging.ERXTemporaryLoggingBridge");
+			final Class<?> bridge = Class.forName(LOGGING_BRIDGE_CLASS);
 			bridge.getMethod(methodName, null).invoke(null, null);
 		}
-		catch (Exception e) {
-			System.out.println("Failed to locate the logging bridge or run a method on it. WARNING! SILENT RUNNING!" );
+		catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
+			System.out.println("====== NO LOGGING! WARNING! SILENT RUNNING!");
+			System.out.println("====== Failed to locate class %s or run method %s on it".formatted(LOGGING_BRIDGE_CLASS, methodName));
+			System.out.println("====== NO LOGGING! WARNING! SILENT RUNNING!");
 		}
 	}
-
 }
