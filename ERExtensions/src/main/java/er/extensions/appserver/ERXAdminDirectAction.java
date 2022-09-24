@@ -19,6 +19,7 @@ import com.webobjects.woextensions.events.WOEventDisplayPage;
 import com.webobjects.woextensions.events.WOEventSetupPage;
 import com.webobjects.woextensions.stats.WOStatsPage;
 
+import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
@@ -115,7 +116,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 				java.util.Properties p = System.getProperties();
 				p.put(key, value);
 				System.setProperties(p);
-				ERXApplication.configureLoggingWithSystemProperties();
+				ERXLoggingSupport.configureLoggingWithSystemProperties();
 				for (java.util.Enumeration e = p.keys(); e.hasMoreElements();) {
 					Object k = e.nextElement();
 					if (k.equals(key)) {

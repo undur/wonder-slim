@@ -38,7 +38,7 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 			// WOApplication uses WOOutputPath in its constructor so we need to modify it before calling the constructor.
 			ERXConfigurationManager.defaultManager().initialize();
 
-			ERXApplication.configureLoggingWithSystemProperties();
+			ERXLoggingSupport.configureLoggingWithSystemProperties();
 		}
 		catch (Exception e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);

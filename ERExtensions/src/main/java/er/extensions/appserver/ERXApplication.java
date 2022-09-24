@@ -49,6 +49,7 @@ import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
+import er.extensions.ERXLoggingSupport;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.bettertemplates.ERXBetterTemplates;
 import er.extensions.components._private.ERXWOForm;
@@ -212,7 +213,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			throw new RuntimeException("Your main bundle is \"JavaFoundation\".  You are not launching this WO application properly.  If you are using Eclipse, most likely you launched your WOA as a \"Java Application\" instead of a \"WO Application\".");
 		}
 
-		reInitConsoleAppenders();
+		ERXLoggingSupport.reInitConsoleAppenders();
 
 		if (_loader != null) {
 			_loader._checker.reportErrors();
@@ -1219,36 +1220,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Temporary facade while we move logging out of ERExtensions.
-	 * Do some uglylogging while we discover where this method is used. 
-	 */
-	public static void configureLoggingWithSystemProperties() {
-		System.out.println("!!DEBUG!! configureLoggingWithSystemProperties invoked");
-		runLoggingBridgeMethod( "configureLoggingWithSystemProperties" );
-	}
-
-	/**
-	 * Temporary facade while we move logging out of ERExtensions.
-	 * Do some uglylogging while we discover where this method is used. 
-	 */
-	public static void reInitConsoleAppenders() {
-		System.out.println("!!DEBUG!! reInitConsoleAppenders invoked");
-		runLoggingBridgeMethod( "reInitConsoleAppenders" );
-
-	}
-	
-	private static void runLoggingBridgeMethod( final String methodName ) {
-		try {
-			Class<?> bridge = Class.forName("er.extensions.logging.ERXTemporaryLoggingBridge");
-			bridge.getMethod(methodName, null).invoke(null, null);
-		}
-		catch (Exception e) {
-			System.out.println("Failed to locate the logging bridge or run a method on it. WARNING! SILENT RUNNING!" );
-			e.printStackTrace();
 		}
 	}
 }

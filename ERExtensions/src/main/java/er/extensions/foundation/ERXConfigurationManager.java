@@ -18,7 +18,7 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
 
 import er.extensions.ERXExtensions;
-import er.extensions.appserver.ERXApplication;
+import er.extensions.ERXLoggingSupport;
 
 /**
  * Handles rapid turnaround for system configuration
@@ -262,7 +262,7 @@ public class ERXConfigurationManager {
 
 		ERXProperties.transferPropertiesFromSourceToDest(systemProperties, System.getProperties());
 
-		ERXApplication.configureLoggingWithSystemProperties();
+		ERXLoggingSupport.configureLoggingWithSystemProperties();
 	}
 
 	/**
