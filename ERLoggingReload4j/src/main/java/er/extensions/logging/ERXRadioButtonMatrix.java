@@ -31,12 +31,6 @@ import er.extensions.foundation.ERXUtilities;
  * @binding tableOtherTagString
  */
 public class ERXRadioButtonMatrix extends ERXStatelessComponent {
-	/**
-	 * Do I need to update serialVersionUID?
-	 * See section 5.6 <cite>Type Changes Affecting Serialization</cite> on page 51 of the
-	 * <a href="http://java.sun.com/j2se/1.4/pdf/serial-spec.pdf">Java Object Serialization Spec</a>
-	 */
-	private static final long serialVersionUID = 1L;
 
 	private static final Integer DEFAULT_PADDING = 0;
 	private static final Integer DEFAULT_SPACING = 0;
@@ -44,14 +38,14 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 	private static final String CSS_CLASS_FOR_TABLE_ALONE = "ERXMatrixTable";
 	private static final String CSS_CLASS_FOR_TABLE_CHECKED_DEFAULT = CSS_CLASS_FOR_TABLE_ALONE + "--Checked";
 
-	public ERXRadioButtonMatrix( WOContext aContext ) {
-		super( aContext );
-	}
+	public Object currentItem;
+	public Object _selection;
+	public Number index;
+	public Object uniqueID;
 
-	protected Object currentItem;
-	protected Object _selection;
-	protected Number index;
-	protected Object uniqueID;
+	public ERXRadioButtonMatrix(WOContext aContext) {
+		super(aContext);
+	}
 
 	@Override
 	public void reset() {
@@ -62,9 +56,9 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 		return currentItem;
 	}
 
-	public void setCurrentItem( Object aValue ) {
+	public void setCurrentItem(Object aValue) {
 		currentItem = aValue;
-		setValueForBinding( aValue, "item" );
+		setValueForBinding(aValue, "item");
 	}
 
 	public Number index() {
@@ -72,28 +66,28 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 	}
 
 	public boolean disabled() {
-		return booleanValueForBinding( "disabled", false );
+		return booleanValueForBinding("disabled", false);
 	}
 
-	public void setIndex( Number newIndex ) {
+	public void setIndex(Number newIndex) {
 		index = newIndex;
 	}
 
 	public Object selection() {
-		if( _selection == null ) {
+		if (_selection == null) {
 			// ** only pull this one time
-			_selection = valueForBinding( "selection" );
+			_selection = valueForBinding("selection");
 		}
 
 		return _selection;
 	}
 
-	public void setSelection( String anIndex ) {
-		if( anIndex != null ) {
+	public void setSelection(String anIndex) {
+		if (anIndex != null) {
 			// ** push the selection to the parent
-			NSArray anItemList = (NSArray)valueForBinding( "list" );
-			Object aSelectedObject = anItemList.objectAtIndex( Integer.parseInt( anIndex ) );
-			setValueForBinding( aSelectedObject, "selection" );
+			NSArray anItemList = (NSArray) valueForBinding("list");
+			Object aSelectedObject = anItemList.objectAtIndex(Integer.parseInt(anIndex));
+			setValueForBinding(aSelectedObject, "selection");
 			// ** and force it to be pulled if there's a next time.
 		}
 
@@ -101,7 +95,7 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 	}
 
 	public String isCurrentItemSelected() {
-		if( selection() != null && selection().equals( currentItem ) ) {
+		if (selection() != null && selection().equals(currentItem)) {
 			return "checked";
 		}
 
@@ -110,15 +104,15 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 
 	public String otherTagStringForRadioButton() {
 		boolean isDisabled = disabled();
-		boolean isChecked = !ERXUtilities.stringIsNullOrEmpty( isCurrentItemSelected() );
+		boolean isChecked = !ERXUtilities.stringIsNullOrEmpty(isCurrentItemSelected());
 		return (isDisabled ? "disabled" : "") + (isDisabled && isChecked ? " " : "") + (isChecked ? "checked" : "");
 	}
 
 	@Override
 	public void awake() {
 		super.awake();
-		uniqueID = valueForBinding( "uniqueID" );
-		if( uniqueID == null ) {
+		uniqueID = valueForBinding("uniqueID");
+		if (uniqueID == null) {
 			uniqueID = context().elementID();
 		}
 	}
@@ -131,14 +125,14 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 	}
 
 	@Override
-	public void appendToResponse( WOResponse aResponse, WOContext aContext ) {
-		super.appendToResponse( aResponse, aContext );
+	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
+		super.appendToResponse(aResponse, aContext);
 	}
 
 	@Override
-	public void takeValuesFromRequest( WORequest aRequest, WOContext aContext ) {
-		setSelection( aRequest.stringFormValueForKey( uniqueID() ) );
-		super.takeValuesFromRequest( aRequest, aContext );
+	public void takeValuesFromRequest(WORequest aRequest, WOContext aContext) {
+		setSelection(aRequest.stringFormValueForKey(uniqueID()));
+		super.takeValuesFromRequest(aRequest, aContext);
 	}
 
 	public String uniqueID() {
@@ -146,36 +140,38 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 	}
 
 	public Object cellpadding() {
-		Object v = valueForBinding( "cellpadding" );
+		Object v = valueForBinding("cellpadding");
 
-		if( v != null ) {
+		if (v != null) {
 			return v;
 		}
 		return DEFAULT_PADDING;
 	}
 
 	public Object cellspacing() {
-		Object v = valueForBinding( "cellspacing" );
+		Object v = valueForBinding("cellspacing");
 
-		if( v != null ) {
+		if (v != null) {
 			return v;
 		}
 		return DEFAULT_SPACING;
 	}
 
 	/**
-	 * If the iterated radio button is checked, set the css class of the table that wraps
-	 * the radio button to include the css class CSS_CLASS_FOR_TABLE_CHECKED_DEFAULT.
-	 * This allows css to target the checked radio button, and therefore to be able to render it
-	 * differently.
-	 * If the iterated radio button is not checked, the css class will be set to CSS_CLASS_FOR_TABLE_ALONE
+	 * If the iterated radio button is checked, set the css class of the table
+	 * that wraps the radio button to include the css class
+	 * CSS_CLASS_FOR_TABLE_CHECKED_DEFAULT. This allows css to target the
+	 * checked radio button, and therefore to be able to render it differently.
+	 * If the iterated radio button is not checked, the css class will be set to
+	 * CSS_CLASS_FOR_TABLE_ALONE
 	 *
-	 * @return cssClass - whose value is dependent on whether the radio button is checked
+	 * @return cssClass - whose value is dependent on whether the radio button
+	 *         is checked
 	 */
 	public String cssClassForTableForRadioButton() {
 		String cssClass = CSS_CLASS_FOR_TABLE_ALONE;
-		boolean isChecked = !ERXUtilities.stringIsNullOrEmpty( isCurrentItemSelected() );
-		if( isChecked ) {
+		boolean isChecked = !ERXUtilities.stringIsNullOrEmpty(isCurrentItemSelected());
+		if (isChecked) {
 			cssClass += " " + CSS_CLASS_FOR_TABLE_CHECKED_DEFAULT;
 		}
 		return cssClass;
