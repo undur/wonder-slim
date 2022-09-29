@@ -3,9 +3,9 @@ package er.extensions.logging;
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WORequest;
 
-import er.extensions.appserver.ERXDirectAction;
+import er.extensions.appserver.ERXAdminDirectAction;
 
-public class ERXLog4jAction extends ERXDirectAction {
+public class ERXLog4jAction extends ERXAdminDirectAction {
 
 	public ERXLog4jAction( WORequest r ) {
 		super( r );
