@@ -125,11 +125,6 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 	}
 
 	@Override
-	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
-		super.appendToResponse(aResponse, aContext);
-	}
-
-	@Override
 	public void takeValuesFromRequest(WORequest aRequest, WOContext aContext) {
 		setSelection(aRequest.stringFormValueForKey(uniqueID()));
 		super.takeValuesFromRequest(aRequest, aContext);
@@ -137,14 +132,6 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 
 	public String uniqueID() {
 		return uniqueID.toString();
-	}
-
-	public Integer cellpadding() {
-		return valueForIntegerBinding("cellpadding", DEFAULT_PADDING);
-	}
-
-	public Integer cellspacing() {
-		return valueForIntegerBinding("cellspacing", DEFAULT_SPACING );
 	}
 
 	/**
