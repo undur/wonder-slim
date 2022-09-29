@@ -12,14 +12,7 @@ public class ERXLog4jAction extends ERXAdminDirectAction {
 	}
 
 	/**
-	 * Action used for changing logging settings at runtime. This method is only
-	 * active when WOCachingEnabled is disabled (we take this to mean that the
-	 * application is not in production).
-	 * <h3>Synopsis:</h3> pw=<i>aPassword</i>
-	 * <h3>Form Values:</h3> <b>pw</b> password to be checked against the system
-	 * property <code>er.extensions.ERXLog4JPassword</code>.
-	 *
-	 * @return {@link ERXLog4JConfiguration} for modifying current logging settings.
+	 * @return A page for modifying logging settings
 	 */
 	public WOActionResults log4jAction() {
 
