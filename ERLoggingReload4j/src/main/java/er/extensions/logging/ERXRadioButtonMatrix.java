@@ -14,29 +14,7 @@ import com.webobjects.foundation.NSArray;
 import er.extensions.components.ERXStatelessComponent;
 import er.extensions.foundation.ERXUtilities;
 
-/**
- * Radio button list with lots of more options.
- *
- * @binding list
- * @binding uniqueID
- * @binding item
- * @binding selection
- * @binding maxColumns
- * @binding cellpadding
- * @binding cellspacing
- * @binding width
- * @binding cellAlign
- * @binding cellVAlign
- * @binding cellWidth
- * @binding tableOtherTagString
- */
 public class ERXRadioButtonMatrix extends ERXStatelessComponent {
-
-	private static final Integer DEFAULT_PADDING = 0;
-	private static final Integer DEFAULT_SPACING = 0;
-
-	private static final String CSS_CLASS_FOR_TABLE_ALONE = "ERXMatrixTable";
-	private static final String CSS_CLASS_FOR_TABLE_CHECKED_DEFAULT = CSS_CLASS_FOR_TABLE_ALONE + "--Checked";
 
 	public Object currentItem;
 	public Object _selection;
@@ -50,6 +28,28 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 	@Override
 	public void reset() {
 		invalidateCaches();
+	}
+
+	@Override
+	public void awake() {
+		super.awake();
+		uniqueID = valueForBinding("uniqueID");
+		if (uniqueID == null) {
+			uniqueID = context().elementID();
+		}
+	}
+
+	public void invalidateCaches() {
+		_selection = null;
+		currentItem = null;
+		index = null;
+		uniqueID = null;
+	}
+
+	@Override
+	public void takeValuesFromRequest(WORequest aRequest, WOContext aContext) {
+		setSelection(aRequest.stringFormValueForKey(uniqueID()));
+		super.takeValuesFromRequest(aRequest, aContext);
 	}
 
 	public Object currentItem() {
@@ -108,49 +108,7 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 		return (isDisabled ? "disabled" : "") + (isDisabled && isChecked ? " " : "") + (isChecked ? "checked" : "");
 	}
 
-	@Override
-	public void awake() {
-		super.awake();
-		uniqueID = valueForBinding("uniqueID");
-		if (uniqueID == null) {
-			uniqueID = context().elementID();
-		}
-	}
-
-	public void invalidateCaches() {
-		_selection = null;
-		currentItem = null;
-		index = null;
-		uniqueID = null;
-	}
-
-	@Override
-	public void takeValuesFromRequest(WORequest aRequest, WOContext aContext) {
-		setSelection(aRequest.stringFormValueForKey(uniqueID()));
-		super.takeValuesFromRequest(aRequest, aContext);
-	}
-
 	public String uniqueID() {
 		return uniqueID.toString();
-	}
-
-	/**
-	 * If the iterated radio button is checked, set the css class of the table
-	 * that wraps the radio button to include the css class
-	 * CSS_CLASS_FOR_TABLE_CHECKED_DEFAULT. This allows css to target the
-	 * checked radio button, and therefore to be able to render it differently.
-	 * If the iterated radio button is not checked, the css class will be set to
-	 * CSS_CLASS_FOR_TABLE_ALONE
-	 *
-	 * @return cssClass - whose value is dependent on whether the radio button
-	 *         is checked
-	 */
-	public String cssClassForTableForRadioButton() {
-		String cssClass = CSS_CLASS_FOR_TABLE_ALONE;
-		boolean isChecked = !ERXUtilities.stringIsNullOrEmpty(isCurrentItemSelected());
-		if (isChecked) {
-			cssClass += " " + CSS_CLASS_FOR_TABLE_CHECKED_DEFAULT;
-		}
-		return cssClass;
 	}
 }

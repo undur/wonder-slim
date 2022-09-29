@@ -1,17 +1,9 @@
 <wo:repetition list="$^list" item="$currentItem" index="$index">
-	<wo:genericContainer elementName="table" border="0" cellpadding="0" cellspacing="0" class="$cssClassForTableForRadioButton">
-		<tr>
-			<td>
-				<wo:if condition="$disabled">
-					<wo:element elementName="input" name = "$uniqueID" otherTagString="$isCurrentItemSelected" type="radio" value="$index" disabled="$true" />
-				</wo:if>
-				<wo:if condition="$disabled" negate="$true">
-					<wo:element elementName="input" name="$uniqueID" otherTagString="$otherTagStringForRadioButton" type="radio" value="$index" />
-				</wo:if>
-			</td>
-			<td>
-				<wo:content />
-			</td>
-		</tr>
-	</wo:genericContainer>
+	<wo:if condition="$disabled">
+		<wo:element elementName="input" name="$uniqueID" type="radio" value="$index" otherTagString="$isCurrentItemSelected" disabled="$true" />
+	</wo:if>
+	<wo:if condition="$disabled" negate="$true">
+		<wo:element elementName="input" name="$uniqueID" type="radio" value="$index" otherTagString="$otherTagStringForRadioButton" />
+	</wo:if>
+	<wo:content />
 </wo:repetition>
