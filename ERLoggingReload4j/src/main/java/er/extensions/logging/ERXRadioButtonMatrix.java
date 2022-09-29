@@ -139,22 +139,12 @@ public class ERXRadioButtonMatrix extends ERXStatelessComponent {
 		return uniqueID.toString();
 	}
 
-	public Object cellpadding() {
-		Object v = valueForBinding("cellpadding");
-
-		if (v != null) {
-			return v;
-		}
-		return DEFAULT_PADDING;
+	public Integer cellpadding() {
+		return valueForIntegerBinding("cellpadding", DEFAULT_PADDING);
 	}
 
-	public Object cellspacing() {
-		Object v = valueForBinding("cellspacing");
-
-		if (v != null) {
-			return v;
-		}
-		return DEFAULT_SPACING;
+	public Integer cellspacing() {
+		return valueForIntegerBinding("cellspacing", DEFAULT_SPACING );
 	}
 
 	/**
