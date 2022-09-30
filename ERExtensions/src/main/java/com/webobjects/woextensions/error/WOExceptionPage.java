@@ -136,16 +136,16 @@ public class WOExceptionPage extends ERXComponent {
 
 		final String pathToJavaFileInProject = fullyClassifiedNameOfThrowingClass.replace( ".", "/" ) + ".java";
 
-		final String path;
+		final String pathString;
 
 		if( NSBundle.mainBundle() instanceof NSMavenProjectBundle ) {
-			path = bundle.bundlePath() + pathModifier + "/src/main/java/" + pathToJavaFileInProject;
+			pathString = bundle.bundlePath() + pathModifier + "/src/main/java/" + pathToJavaFileInProject;
 		}
 		else {
-			path = bundle.bundlePath() + pathModifier + "/Sources/" + pathToJavaFileInProject;
+			pathString = bundle.bundlePath() + pathModifier + "/Sources/" + pathToJavaFileInProject;
 		}
 
-		return Paths.get( path );
+		return Paths.get( pathString );
 	}
 
 	/**

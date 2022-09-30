@@ -101,7 +101,6 @@ public class ERXWORepetition extends WODynamicGroup {
 
 	private static boolean _checkHashCodesDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.checkHashCodes", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".checkHashCodes"));
 	private static boolean _raiseOnUnmatchedObjectDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.raiseOnUnmatchedObject", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".raiseOnUnmatchedObject"));
-	private static boolean _eoSupportDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.eoSupport", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".eoSupport"));
 	
 	public static class UnmatchedObjectException extends RuntimeException {
 
