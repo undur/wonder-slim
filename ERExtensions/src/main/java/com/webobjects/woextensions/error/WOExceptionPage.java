@@ -120,20 +120,29 @@ public class WOExceptionPage extends ERXComponent {
 	 * @return The source file where the exception originated (from the last line of the stack trace).
 	 */
 	private Path sourceFileContainingError() {
-		final String nameOfThrowingClass = firstLineOfTrace().packageClassPath();
-		final NSBundle bundle = bundleForClassName( nameOfThrowingClass );
+		String fullyClassifiedNameOfThrowingClass = firstLineOfTrace().packageClassPath();
+		final NSBundle bundle = bundleForClassName( fullyClassifiedNameOfThrowingClass );
 
 		if( bundle == null ) {
 			return null;
 		}
 
+		// If the exception occurs in an inner class, chop the inner class name off the end to get at the name of the containing class 
+		int indexOfInnerClassSeparator = fullyClassifiedNameOfThrowingClass.indexOf("$");
+
+		if( indexOfInnerClassSeparator != -1 ) {
+			fullyClassifiedNameOfThrowingClass = fullyClassifiedNameOfThrowingClass.substring(0,indexOfInnerClassSeparator);
+		}
+
+		final String pathToJavaFileInProject = fullyClassifiedNameOfThrowingClass.replace( ".", "/" ) + ".java";
+
 		final String path;
 
-		if( NSBundle.mainBundle() instanceof NSMavenProjectBundle ) { // FIXME: We should probably be referencing the real class once that exists again // Hugi 2021-05-21
-			path = bundle.bundlePath() + pathModifier + "/src/main/java/" + nameOfThrowingClass.replace( ".", "/" ) + ".java";
+		if( NSBundle.mainBundle() instanceof NSMavenProjectBundle ) {
+			path = bundle.bundlePath() + pathModifier + "/src/main/java/" + pathToJavaFileInProject;
 		}
 		else {
-			path = bundle.bundlePath() + pathModifier + "/Sources/" + nameOfThrowingClass.replace( ".", "/" ) + ".java";
+			path = bundle.bundlePath() + pathModifier + "/Sources/" + pathToJavaFileInProject;
 		}
 
 		return Paths.get( path );
