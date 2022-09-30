@@ -25,6 +25,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSPropertyListSerialization;
+import com.webobjects.foundation.development.NSMavenProjectBundle;
 import com.webobjects.woextensions.error.WOExceptionPage.WOExceptionParser.WOParsedErrorLine;
 
 import er.extensions.appserver.ERXApplication;
@@ -128,7 +129,7 @@ public class WOExceptionPage extends ERXComponent {
 
 		final String path;
 
-		if( NSBundle.mainBundle().getClass().getName().contains( "NSMavenProjectBundle" ) ) { // FIXME: We should probably be referencing the real class once that exists again // Hugi 2021-05-21
+		if( NSBundle.mainBundle() instanceof NSMavenProjectBundle ) { // FIXME: We should probably be referencing the real class once that exists again // Hugi 2021-05-21
 			path = bundle.bundlePath() + pathModifier + "/src/main/java/" + nameOfThrowingClass.replace( ".", "/" ) + ".java";
 		}
 		else {
