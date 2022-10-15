@@ -30,6 +30,7 @@ import com.webobjects.woextensions.error.WOExceptionPage.WOExceptionParser.WOPar
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.components.ERXComponent;
+import er.extensions.foundation.ERXProperties;
 
 /**
  * A nicer version of WOExceptionPage.
@@ -275,20 +276,40 @@ public class WOExceptionPage extends ERXComponent {
 	 * @return A URL for opening the current line in Eclipse using the WOLips server
 	 */
 	public String currentLineURL() {
-		final int port = 9485;// FIXME: read from properties
-		final String password = "smu"; // FIXME: read from properties
-		final String applicationName = application().name(); // FIXMW: While this is the application name, it's not neccessarily the project name
+		// WOExceptionParser returns the string "NA" for lines without a number (native code, synthetic/generated code etc.)
+		final boolean noLineNumber = "NA".equals( currentErrorLine.lineNumber() );
+
+		// No sense in generating a link for a missing line number
+		if( noLineNumber ) {
+			return null;
+		}
+
+		final String wolipsPassword = ERXProperties.stringForKey("wolips.password" );
+		
+		// We can't communicate with the WOLips server if the password isn't set. No link for you.
+		if( wolipsPassword == null ) {
+			return null;
+		}
+
+		final int wolipsPortnumber = ERXProperties.intForKeyWithDefault("wolips.port", 9485 );
+		final String applicationName = application().name();
 		final String className = currentErrorLine.packageName() + "." + currentErrorLine.className();
 		final int lineNumber = currentErrorLine.line();
-		String url = "http://localhost:%s/openJavaFile?pw=%s&app=%s&className=%s&lineNumber=%s".formatted(port, password, applicationName, className, lineNumber );
-		return "javascript:invokeURL('%s')".formatted(url);
+		
+		// Now use our parameters to generate the URL to communicate with the WOLips server. 
+		String url = "http://localhost:%s/openJavaFile?pw=%s&app=%s&className=%s&lineNumber=%s".formatted( wolipsPortnumber, wolipsPassword, applicationName, className, lineNumber );
+
+		// Let's wrap the URL in a javascript method invocation
+		url = "javascript:invokeURL('%s')".formatted(url);
+
+		return url;
 	}
 
 	/**
 	 * @return True if the current line can't be navigated to
 	 */
 	public boolean currentLineDisabled() {
-		return "NA".equals( currentErrorLine.lineNumber() );
+		return currentLineURL() == null;
 	}
 
 	public static class WOExceptionParser {
