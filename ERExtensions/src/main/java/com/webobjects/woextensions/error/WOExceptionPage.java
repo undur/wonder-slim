@@ -271,6 +271,15 @@ public class WOExceptionPage extends ERXComponent {
 		return null;
 	}
 	
+	public String currentLineURL() {
+		final int port = 9485;// FIXME: read from properties
+		final String password = "smu"; // FIXME: read from properties
+		final String applicationName = application().name(); // FIXMW: While this is the application name, it's not neccessarily the project name
+		final String className = currentErrorLine.packageName() + "." + currentErrorLine.className();
+		final int lineNumber = currentErrorLine.line();
+		return "http://localhost:%s/openJavaFile?pw=%s&app=%s&className=%s&lineNumber=%s".formatted(port, password, applicationName, className, lineNumber );
+	}
+
 	public static class WOExceptionParser {
 
 		private List<WOParsedErrorLine> _stackTrace;

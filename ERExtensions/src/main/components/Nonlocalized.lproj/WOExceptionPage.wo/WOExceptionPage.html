@@ -105,7 +105,7 @@
 				<wo:repetition list="$exceptionParser.stackTrace" item="$currentErrorLine">
 					<wo:container elementName="tr" class="$currentRowClass">
 						<td><wo:str value="$currentErrorLine.fileName" /></td>
-						<td><wo:str value="$currentErrorLine.lineNumber" /></td>
+						<td><wo:link href="$currentLineURL"><wo:str value="$currentErrorLine.lineNumber" /></wo:link></td>
 						<td><wo:str value="$currentErrorLine.methodName" /></td>
 						<td><wo:str value="$currentErrorLine.packageName" /></td>
 						<td><wo:str value="$currentBundle.name" /></td>
