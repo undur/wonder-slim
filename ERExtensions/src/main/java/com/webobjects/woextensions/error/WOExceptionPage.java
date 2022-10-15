@@ -271,13 +271,24 @@ public class WOExceptionPage extends ERXComponent {
 		return null;
 	}
 	
+	/**
+	 * @return A URL for opening the current line in Eclipse using the WOLips server
+	 */
 	public String currentLineURL() {
 		final int port = 9485;// FIXME: read from properties
 		final String password = "smu"; // FIXME: read from properties
 		final String applicationName = application().name(); // FIXMW: While this is the application name, it's not neccessarily the project name
 		final String className = currentErrorLine.packageName() + "." + currentErrorLine.className();
 		final int lineNumber = currentErrorLine.line();
-		return "http://localhost:%s/openJavaFile?pw=%s&app=%s&className=%s&lineNumber=%s".formatted(port, password, applicationName, className, lineNumber );
+		String url = "http://localhost:%s/openJavaFile?pw=%s&app=%s&className=%s&lineNumber=%s".formatted(port, password, applicationName, className, lineNumber );
+		return "javascript:invokeURL('%s')".formatted(url);
+	}
+
+	/**
+	 * @return True if the current line can't be navigated to
+	 */
+	public boolean currentLineDisabled() {
+		return "NA".equals( currentErrorLine.lineNumber() );
 	}
 
 	public static class WOExceptionParser {
