@@ -8,8 +8,8 @@
 		<version>8.0.0.slim-SNAPSHOT</version>
 	</parent>
 	<groupId>wonder.ajax</groupId>
-	<artifactId>Ajax</artifactId>
-	<name>Ajax Framework</name>
+	<artifactId>AjaxSlim</artifactId>
+	<name>AjaxSlim Framework</name>
 	<packaging>woframework</packaging>
 
 	<dependencies>
