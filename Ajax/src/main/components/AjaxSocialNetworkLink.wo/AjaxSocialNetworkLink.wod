@@ -1,0 +1,13 @@
+Link : WOHyperlink {
+  href = submissionUrl;
+  class = ^class;
+  id = ^id;
+  style = ^style;
+  target = ^target;
+}
+
+Image : WOImage {
+  framework = socialNetwork.iconFramework;
+  filename = socialNetwork.iconName;
+  alt=alt;
+}
