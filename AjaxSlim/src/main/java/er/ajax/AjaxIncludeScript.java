@@ -36,7 +36,7 @@ public class AjaxIncludeScript extends AjaxDynamicElement {
   protected void addRequiredWebResources(WOResponse res, WOContext context) {
     WOComponent component = context.component();
     String name = (String)_name.valueInComponent(component);
-    String framework = "Ajax";
+    String framework = Ajax.FRAMEWORK_NAME;
     if(_framework!=null) {
       String value = (String)_framework.valueInComponent(component);
       if (value!=null)

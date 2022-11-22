@@ -1,11 +1,8 @@
 package er.ajax;
 
 import java.util.Collection;
-
-import org.jabsorb.JSONSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
@@ -14,7 +11,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-
 import er.extensions.appserver.ERXRedirect;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
@@ -119,7 +115,7 @@ public class AjaxUtils {
 	}
 
 	/**
-	 * Calls {@link #addScriptResourceInHead(WOContext, WOResponse, String, String)} with "Ajax" as framework.
+	 * Calls {@link #addScriptResourceInHead(WOContext, WOResponse, String, String)} with the name of the Ajax framework
 	 * 
 	 * @param context
 	 *            the context
@@ -129,7 +125,7 @@ public class AjaxUtils {
 	 *            the name of the javascript file to add
 	 */
 	public static void addScriptResourceInHead(WOContext context, WOResponse response, String fileName) {
-		AjaxUtils.addScriptResourceInHead(context, response, "Ajax", fileName);
+		AjaxUtils.addScriptResourceInHead(context, response, Ajax.FRAMEWORK_NAME, fileName);
 	}
 
 	/**
@@ -149,7 +145,7 @@ public class AjaxUtils {
 	}
 
 	/**
-	 * Calls {@link #addStylesheetResourceInHead(WOContext, WOResponse, String, String)} with "Ajax" as framework.
+	 * Calls {@link #addStylesheetResourceInHead(WOContext, WOResponse, String, String)} with the name of the Ajax framework
 	 * 
 	 * @param context
 	 *            the context
@@ -159,7 +155,7 @@ public class AjaxUtils {
 	 *            the name of the CSS file to add
 	 */
 	public static void addStylesheetResourceInHead(WOContext context, WOResponse response, String fileName) {
-		AjaxUtils.addStylesheetResourceInHead(context, response, "Ajax", fileName);
+		AjaxUtils.addStylesheetResourceInHead(context, response, Ajax.FRAMEWORK_NAME, fileName);
 	}
 
 	/**
@@ -302,9 +298,9 @@ public class AjaxUtils {
 				if (!strValue.startsWith("[")) {
 					strValue = "[" + strValue + "]";
 				}
-				JSONSerializer serializer = new JSONSerializer();
-				serializer.registerDefaultSerializers();
-				Object objValue = serializer.fromJSON(strValue);
+//				JSONSerializer serializer = new JSONSerializer();
+//				serializer.registerDefaultSerializers();
+				Object objValue = null; // FIXME: BIG BADA-BOOM!
 				if (objValue.getClass().isArray()) {
 					arrayValue = new NSArray((Object[]) objValue);
 				}

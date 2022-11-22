@@ -12,6 +12,12 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXUtilities;
 
 public class Ajax extends ERXFrameworkPrincipal {
+	
+	/**
+	 * Use to reference the actual framework name when including resources
+	 */
+	public static String FRAMEWORK_NAME = "AjaxSlim";
+
 	public static Class[] REQUIRES = new Class[0];
 	private static final Logger log = LoggerFactory.getLogger(Ajax.class);
 

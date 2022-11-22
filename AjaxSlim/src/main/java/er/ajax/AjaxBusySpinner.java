@@ -1,8 +1,5 @@
 package er.ajax;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
@@ -90,7 +87,9 @@ public class AjaxBusySpinner extends AjaxComponent {
 		return (String) valueForBinding("onComplete", "null");
 	}
 	
-	public String spinOpts() throws JSONException {
+	public String spinOpts() throws Exception {
+		throw new Exception( "Yup. Not implemented" );
+		/*
 		String defaults = (String) valueForBinding("spinOpts", "{speed:1,color:'#000',shadow:false,trail:60,width:4,length:7,radius:10,lines:12}");
 		JSONObject json = new JSONObject(defaults);
 		json.putOpt("lines", valueForBinding("lines"));
@@ -102,6 +101,7 @@ public class AjaxBusySpinner extends AjaxComponent {
 		json.putOpt("trail", valueForBinding("trail"));
 		json.putOpt("shadow", valueForBinding("shadow"));
 		return json.toString();
+		*/
 	}
 
 	@Override
