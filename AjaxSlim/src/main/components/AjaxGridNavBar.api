@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo wocomponentcontent = "true" class = "AjaxGridNavbar.java">
+        <binding name = "displayGroup"/>
+        <binding name = "configurationData"/>
+        <binding name = "containerID"/>
+	</wo>
+	
+		
+	<validation message = "'displayGroup' is a required binding">
+        <unbound name = "displayGroup"/>
+    </validation>
+	
+	<validation message = "'configurationData' is a required binding">
+        <unbound name = "configurationData"/>
+    </validation>
+    	
+	<validation message = "'containerID' is a required binding">
+        <unbound name = "containerID"/>
+    </validation>    
+</wodefinitions>
