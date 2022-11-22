@@ -9,6 +9,7 @@
 	<modules>
 		<module>ERExtensions</module>
 		<module>ERLoggingReload4j</module>
+		<module>AjaxSlim</module>
 		<module>Ajax</module>
 	</modules>
 	<properties>
