@@ -272,11 +272,9 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 			response.appendContentString(onRefreshComplete);
 			AjaxUtils.appendScriptFooter(response);
 		}
-		if (AjaxModalDialog.isInDialog(context)) {
-			AjaxUtils.appendScriptHeader(response);
-			response.appendContentString("AMD.contentUpdated();");
-			AjaxUtils.appendScriptFooter(response);
-		}
+		AjaxUtils.appendScriptHeader(response);
+		response.appendContentString("AMD.contentUpdated();");
+		AjaxUtils.appendScriptFooter(response);
 		return null;
 	}
 
