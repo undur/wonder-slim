@@ -269,7 +269,7 @@ public class AjaxAutoComplete extends AjaxComponent {
 			addScriptResourceInHead(res, "prototype.js");
 			addScriptResourceInHead(res, "effects.js");
 			addScriptResourceInHead(res, "controls.js");
-			addScriptResourceInHead(res, "wonder.js");
+			addScriptResourceInHead(res, Scripts.WONDER_JS);
 		}
 	}
 

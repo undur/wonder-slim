@@ -42,7 +42,7 @@ public class AjaxBusyIndicator extends AjaxComponent {
 	protected void addRequiredWebResources(WOResponse res) {
 		addScriptResourceInHead(res, "prototype.js");
 		addScriptResourceInHead(res, "effects.js");
-		addScriptResourceInHead(res, "wonder.js");
+		addScriptResourceInHead(res, Scripts.WONDER_JS);
 	}
 
 	public boolean customStyle() {

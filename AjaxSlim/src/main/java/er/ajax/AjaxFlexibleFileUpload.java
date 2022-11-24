@@ -171,7 +171,7 @@ public class AjaxFlexibleFileUpload extends AjaxFileUpload {
     	}
     	AjaxUtils.addScriptResourceInHead(context, response, "prototype.js");
     	AjaxUtils.addScriptResourceInHead(context, response, "effects.js");
-    	AjaxUtils.addScriptResourceInHead(context, response, "wonder.js");
+    	AjaxUtils.addScriptResourceInHead(context, response, Scripts.WONDER_JS);
     	AjaxUtils.addScriptResourceInHead(context, response, "ajaxupload.js");
     }
     

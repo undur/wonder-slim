@@ -130,7 +130,7 @@ public class AjaxInPlaceEditor extends AjaxDynamicElement {
     AjaxUtils.addScriptResourceInHead(context, response, "builder.js");
 	AjaxUtils.addScriptResourceInHead(context, response, "effects.js");
 	AjaxUtils.addScriptResourceInHead(context, response, "controls.js");
-	AjaxUtils.addScriptResourceInHead(context, response, "wonder.js");
+	AjaxUtils.addScriptResourceInHead(context, response, Scripts.WONDER_JS);
     AjaxUtils.addScriptResourceInHead(context, response, "wonder_inplace.js");
   }
 

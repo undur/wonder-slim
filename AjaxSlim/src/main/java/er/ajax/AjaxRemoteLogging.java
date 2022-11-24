@@ -116,7 +116,7 @@ public class AjaxRemoteLogging extends AjaxDynamicElement {
 	@Override
 	protected void addRequiredWebResources(WOResponse response, WOContext context) {
 		addScriptResourceInHead(context, response, "prototype.js");
-		addScriptResourceInHead(context, response, "wonder.js");
+		addScriptResourceInHead(context, response, Scripts.WONDER_JS);
 	}
 
 	@Override

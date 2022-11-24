@@ -207,7 +207,7 @@ public class AjaxExpansion extends AjaxComponent {
 	protected void addRequiredWebResources(WOResponse response) {
 		addScriptResourceInHead(response, "prototype.js");
 		addScriptResourceInHead(response, "effects.js");
-		addScriptResourceInHead(response, "wonder.js");
+		addScriptResourceInHead(response, Scripts.WONDER_JS);
 	}
 
 	/**

@@ -55,7 +55,7 @@ public class AjaxBusySpinner extends AjaxComponent {
 	protected void addRequiredWebResources(WOResponse res) {
 		addScriptResourceInHead(res, "prototype.js");
 		addScriptResourceInHead(res, "effects.js");
-		addScriptResourceInHead(res, "wonder.js");
+		addScriptResourceInHead(res, Scripts.WONDER_JS);
 		addScriptResourceInHead(res, "spin.js");
 	}
 

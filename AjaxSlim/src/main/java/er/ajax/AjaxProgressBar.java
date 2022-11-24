@@ -64,7 +64,7 @@ public class AjaxProgressBar extends WOComponent {
 		super.appendToResponse(aResponse, aContext);
 		AjaxUtils.addScriptResourceInHead(aContext, aResponse, "prototype.js");
 		AjaxUtils.addScriptResourceInHead(aContext, aResponse, "effects.js");
-		AjaxUtils.addScriptResourceInHead(aContext, aResponse, "wonder.js");
+		AjaxUtils.addScriptResourceInHead(aContext, aResponse, Scripts.WONDER_JS);
 	}
 
 	@Override

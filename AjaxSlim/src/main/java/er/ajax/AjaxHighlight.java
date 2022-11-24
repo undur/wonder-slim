@@ -104,7 +104,7 @@ public class AjaxHighlight extends WODynamicGroup {
 	public void appendToResponse(WOResponse response, WOContext context) {
 		AjaxUtils.addScriptResourceInHead(context, response, "prototype.js");
 		AjaxUtils.addScriptResourceInHead(context, response, "effects.js");
-		AjaxUtils.addScriptResourceInHead(context, response, "wonder.js");
+		AjaxUtils.addScriptResourceInHead(context, response, Scripts.WONDER_JS);
 		WOComponent component = context.component();
 		boolean generateContainer = (_id == null || _elementName != null);
 		String elementName;

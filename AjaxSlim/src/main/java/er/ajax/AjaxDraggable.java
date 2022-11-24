@@ -196,7 +196,7 @@ public class AjaxDraggable extends AjaxComponent {
     addScriptResourceInHead(res, "prototype.js");
 	addScriptResourceInHead(res, "effects.js");
 	addScriptResourceInHead(res, "dragdrop.js");
-	addScriptResourceInHead(res, "wonder.js");
+	addScriptResourceInHead(res, Scripts.WONDER_JS);
   }
 
   @Override
