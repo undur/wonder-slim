@@ -121,7 +121,7 @@ public class AjaxSlider extends AjaxComponent {
      */
     @Override
     protected void addRequiredWebResources(WOResponse res) {
-        addScriptResourceInHead(res, "prototype.js");
+        addScriptResourceInHead(res, Scripts.PROTOTYPE_JS);
     	addScriptResourceInHead(res, "effects.js");
     	addScriptResourceInHead(res, "controls.js");
     	addScriptResourceInHead(res, "slider.js");

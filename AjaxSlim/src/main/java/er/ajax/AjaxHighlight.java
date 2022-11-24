@@ -102,7 +102,7 @@ public class AjaxHighlight extends WODynamicGroup {
 	
 	@Override
 	public void appendToResponse(WOResponse response, WOContext context) {
-		AjaxUtils.addScriptResourceInHead(context, response, "prototype.js");
+		AjaxUtils.addScriptResourceInHead(context, response, Scripts.PROTOTYPE_JS);
 		AjaxUtils.addScriptResourceInHead(context, response, "effects.js");
 		AjaxUtils.addScriptResourceInHead(context, response, Scripts.WONDER_JS);
 		WOComponent component = context.component();

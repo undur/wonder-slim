@@ -169,7 +169,7 @@ public class AjaxFlexibleFileUpload extends AjaxFileUpload {
     	if (ERXComponentUtilities.booleanValueForBinding(this, Keys.injectDefaultCSS, true)) {
     		AjaxUtils.addStylesheetResourceInHead(context, response, "default_ajaxupload.css");
     	}
-    	AjaxUtils.addScriptResourceInHead(context, response, "prototype.js");
+    	AjaxUtils.addScriptResourceInHead(context, response, Scripts.PROTOTYPE_JS);
     	AjaxUtils.addScriptResourceInHead(context, response, "effects.js");
     	AjaxUtils.addScriptResourceInHead(context, response, Scripts.WONDER_JS);
     	AjaxUtils.addScriptResourceInHead(context, response, "ajaxupload.js");

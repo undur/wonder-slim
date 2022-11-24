@@ -107,7 +107,7 @@ public class AjaxFileUpload extends WOComponent {
 	@Override
 	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
 		super.appendToResponse(aResponse, aContext);
-		AjaxUtils.addScriptResourceInHead(aContext, aResponse, "prototype.js");
+		AjaxUtils.addScriptResourceInHead(aContext, aResponse, Scripts.PROTOTYPE_JS);
 		AjaxUtils.addScriptResourceInHead(aContext, aResponse, "effects.js");
 		AjaxUtils.addScriptResourceInHead(aContext, aResponse, Scripts.WONDER_JS);
 	}

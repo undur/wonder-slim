@@ -126,7 +126,7 @@ public class AjaxInPlaceEditor extends AjaxDynamicElement {
 
   @Override
   protected void addRequiredWebResources(WOResponse response, WOContext context) {
-    AjaxUtils.addScriptResourceInHead(context, response, "prototype.js");
+    AjaxUtils.addScriptResourceInHead(context, response, Scripts.PROTOTYPE_JS);
     AjaxUtils.addScriptResourceInHead(context, response, "builder.js");
 	AjaxUtils.addScriptResourceInHead(context, response, "effects.js");
 	AjaxUtils.addScriptResourceInHead(context, response, "controls.js");

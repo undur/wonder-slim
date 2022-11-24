@@ -266,7 +266,7 @@ public class AjaxAutoComplete extends AjaxComponent {
     protected void addRequiredWebResources(WOResponse res) {
 		boolean isDisabled = booleanValueForBinding("disabled", false);
 		if ( !isDisabled ) {
-			addScriptResourceInHead(res, "prototype.js");
+			addScriptResourceInHead(res, Scripts.PROTOTYPE_JS);
 			addScriptResourceInHead(res, "effects.js");
 			addScriptResourceInHead(res, "controls.js");
 			addScriptResourceInHead(res, Scripts.WONDER_JS);

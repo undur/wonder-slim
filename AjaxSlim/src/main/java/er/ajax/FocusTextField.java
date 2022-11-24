@@ -49,7 +49,7 @@ public class FocusTextField extends ERXWOTextField {
 	
 	@Override
 	public void appendToResponse(WOResponse response, WOContext context) {
-		AjaxUtils.addScriptResourceInHead(context, response, "prototype.js");
+		AjaxUtils.addScriptResourceInHead(context, response, Scripts.PROTOTYPE_JS);
 
 		super.appendToResponse(response, context);
 

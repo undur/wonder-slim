@@ -61,7 +61,7 @@ public class AjaxAccordion extends AjaxComponent {
 
   @Override
   protected void addRequiredWebResources(WOResponse response) {
-    addScriptResourceInHead(response, "prototype.js");
+    addScriptResourceInHead(response, Scripts.PROTOTYPE_JS);
     addScriptResourceInHead(response, "rico.js");
   }
 

@@ -177,7 +177,7 @@ public class AjaxSelectionList extends AjaxComponent {
 
 	@Override
 	protected void addRequiredWebResources(WOResponse res) {
-		addScriptResourceInHead(res, "prototype.js");
+		addScriptResourceInHead(res, Scripts.PROTOTYPE_JS);
 		addScriptResourceInHead(res, "AjaxSelectionList.js");
 		addStylesheetResourceInHead(res, "AjaxSelectionList.css");
 	}

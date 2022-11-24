@@ -16,7 +16,7 @@ import com.webobjects.foundation.NSDictionary;
  * dependencies.  However, if you want to do custom Ajax javascript, you may want to
  * include the same library versions that ship in Ajax.framework.
  * 
- * @binding name The name of the javascript file to include ("prototype.js", "effects.js", etc)
+ * @binding name The name of the javascript file to include (Scripts.PROTOTYPE_JS, "effects.js", etc)
  * @binding framework The framework the javascript file resides in, defaults to "Ajax"
  */
 public class AjaxIncludeScript extends AjaxDynamicElement {

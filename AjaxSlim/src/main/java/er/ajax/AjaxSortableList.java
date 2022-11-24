@@ -123,7 +123,7 @@ public class AjaxSortableList extends AjaxComponent {
 
   @Override
   protected void addRequiredWebResources(WOResponse res) {
-    addScriptResourceInHead(res, "prototype.js");
+    addScriptResourceInHead(res, Scripts.PROTOTYPE_JS);
     addScriptResourceInHead(res, "effects.js");
     addScriptResourceInHead(res, "dragdrop.js");
   }
