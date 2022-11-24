@@ -1,3 +1,4 @@
+// FIXME: Just including this as a shorthand for now
 var $ = function( id ) { return document.getElementById( id ); };
 
 function addQueryParameters( someString, additionalParameters) {
@@ -7,6 +8,15 @@ function addQueryParameters( someString, additionalParameters) {
 	else {
 		return someString;
 	}
+}
+
+function invokeUpdate( id, url ) {	
+	const xhttp = new XMLHttpRequest();
+	xhttp.open("GET", url, false);
+	xhttp.send();
+	console.log( "Requested URL: " + url );
+	console.log( "Received content: " + xhttp.responseText )
+	document.getElementById(id).innerHTML = xhttp.responseText;
 }
 
 var AjaxUpdateContainer = {
