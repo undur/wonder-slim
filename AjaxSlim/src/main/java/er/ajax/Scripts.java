@@ -11,25 +11,23 @@ public class Scripts {
 	private static final String EFFECTS_JS = "effects.js";
 
 	public static String wonderJS() {
-		return useNew() ? WONDER_SLIM_JS : WONDER_JS;
+		return useNew ? WONDER_SLIM_JS : WONDER_JS;
 	}
 
 	public static String prototypeJS() {
-		return useNew() ? EMPTY_JS : PROTOTYPE_JS;
+		return useNew ? EMPTY_JS : PROTOTYPE_JS;
 	}
 
 	public static String scriptaculousJS() {
-		return useNew() ? EMPTY_JS : SCRIPTACULOUS_JS;
+		return useNew ? EMPTY_JS : SCRIPTACULOUS_JS;
 	}
 
 	public static String effectsJS() {
-		return useNew() ? EMPTY_JS : EFFECTS_JS;
+		return useNew ? EMPTY_JS : EFFECTS_JS;
 	}
 
 	/**
 	 * Indicates whether we want to use the new script files
 	 */
-	private static boolean useNew() {
-		return true;
-	}
+	public static boolean useNew = true;
 }
