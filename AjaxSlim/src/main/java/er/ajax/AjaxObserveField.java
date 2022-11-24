@@ -71,8 +71,8 @@ public class AjaxObserveField extends AjaxDynamicElement {
 
 	@Override
 	protected void addRequiredWebResources(WOResponse response, WOContext context) {
-		addScriptResourceInHead(context, response, Scripts.PROTOTYPE_JS);
-		addScriptResourceInHead(context, response, Scripts.WONDER_JS);
+		addScriptResourceInHead(context, response, Scripts.prototypeJS());
+		addScriptResourceInHead(context, response, Scripts.wonderJS());
 	}
 
 	public NSMutableDictionary<String, String> createAjaxOptions(WOComponent component) {

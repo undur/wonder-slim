@@ -306,9 +306,9 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 
   @Override
   protected void addRequiredWebResources(WOResponse res, WOContext context) {
-    addScriptResourceInHead(context, res, Scripts.PROTOTYPE_JS);
-	addScriptResourceInHead(context, res, Scripts.EFFECTS_JS);
-    addScriptResourceInHead(context, res, Scripts.WONDER_JS);
+    addScriptResourceInHead(context, res, Scripts.prototypeJS());
+	addScriptResourceInHead(context, res, Scripts.effectsJS());
+    addScriptResourceInHead(context, res, Scripts.wonderJS());
   }
 
   @Override
