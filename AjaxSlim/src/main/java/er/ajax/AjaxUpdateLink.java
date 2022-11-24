@@ -391,7 +391,7 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 	@Override
 	protected void addRequiredWebResources(WOResponse res, WOContext context) {
 		addScriptResourceInHead(context, res, Scripts.PROTOTYPE_JS);
-    	addScriptResourceInHead(context, res, "effects.js");
+    	addScriptResourceInHead(context, res, Scripts.EFFECTS_JS);
 		addScriptResourceInHead(context, res, Scripts.WONDER_JS);
 	}
 

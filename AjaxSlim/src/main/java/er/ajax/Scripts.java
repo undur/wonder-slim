@@ -8,5 +8,5 @@ public class Scripts {
 	public static final String SCRIPTACULOUS_JS = "scriptaculous.js";
 	
 	// Not moved
-	public static final String EFFECTS_JS = "scriptaculous.js";
+	public static final String EFFECTS_JS = "effects.js";
 }
