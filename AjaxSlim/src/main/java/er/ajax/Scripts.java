@@ -2,7 +2,8 @@ package er.ajax;
 
 public class Scripts {
 
-	private static final String WONDER_SLIM_JS = "wonder-slim.js";
+	private static final String WONDER_SLIM_JS = "wonder-slimmer.js";
+//	private static final String WONDER_SLIM_JS = "wonder-slim.js";
 	private static final String EMPTY_JS = "empty.js";
 
 	private static final String WONDER_JS = "wonder.js";
