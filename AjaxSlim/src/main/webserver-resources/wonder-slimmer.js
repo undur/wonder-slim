@@ -1,5 +1,4 @@
 var AUC = {
-
 	register: function(id, options) {
 		if (!options) {
 			options = {};
@@ -10,22 +9,35 @@ var AUC = {
 
 var AUL = {
 	update: function(id, options, elementID, queryParams) {
+		
+		// Just some logging. For fun.
+		console.log( "===== Clicked AjaxUpdateLink =====")
 		console.log( "id: " + id );
 		console.log( "options: " + options );
 		console.log( "elementID: " + elementID );
 		console.log( "queryParams: " + queryParams );
 		
-		invokeUpdate( id, '/Apps/WebObjects/Hugi.woa/ajax/' + elementID + '?_u=someUC');
+		// This is the updateContainer we're going to target
+		var updateContainer = document.getElementById(id);
+		
+		
+//		if( updateContainer ) {
+//			alert('No AjaxUpdateContainer on the page with id ' + id);
+//		}
+
+		var actionUrl = updateContainer.getAttribute('data-updateUrl');
+
+		// We cleverly replace the elementID on the UC to the clicked link's element ID
+		actionUrl = actionUrl.replace(/[^\/]+$/, elementID);
+		actionUrl = actionUrl + '?_u=' + id;
+		invokeUpdate( id, actionUrl );
 	}
 }
 
 function invokeUpdate( id, url ) {
-	console.log( "Requested URL: " + url );
 	const xhttp = new XMLHttpRequest();
 	xhttp.open("GET", url, false);
 	xhttp.send();
-	console.log( "Received content: " + xhttp.responseText )
-
 	var updateContainer = document.getElementById(id);
 	updateContainer.innerHTML = xhttp.responseText;
 }
