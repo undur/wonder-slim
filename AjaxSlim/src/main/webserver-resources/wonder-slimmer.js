@@ -36,8 +36,12 @@ var AUL = {
 
 function invokeUpdate( id, url ) {
 	const xhttp = new XMLHttpRequest();
-	xhttp.open("GET", url, false);
+	xhttp.open("GET", url, true);
+	
+	xhttp.onload = () => {
+		var updateContainer = document.getElementById(id);
+		updateContainer.innerHTML = xhttp.responseText;
+    };
+	
 	xhttp.send();
-	var updateContainer = document.getElementById(id);
-	updateContainer.innerHTML = xhttp.responseText;
 }
