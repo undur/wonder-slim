@@ -88,64 +88,56 @@ public class ERXWOString extends WODynamicElement {
 	@Override
 	public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 		final WOComponent component = wocontext.component();
-		Object valueInComponent = null;
+		Object valueInComponent = _value.valueInComponent(component);
 
-		if (_value != null) {
-			valueInComponent = _value.valueInComponent(component);
+		if (_shouldFormat) {
+			Format format = null;
 
-			if (_shouldFormat) {
-				Format format = null;
+			if (_formatter != null) {
+				format = (Format) _formatter.valueInComponent(component);
+			}
 
-				if (_formatter != null) {
-					format = (Format) _formatter.valueInComponent(component);
-				}
-
-				if (format == null) {
-					if (_dateFormat != null) {
-						String formatString = (String) _dateFormat.valueInComponent(component);
-						if (formatString == null) {
-							format = ERXTimestampFormatter.defaultDateFormatterForObject(formatString);
-						}
-						else {
-							format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
-						}
+			if (format == null) {
+				if (_dateFormat != null) {
+					String formatString = (String) _dateFormat.valueInComponent(component);
+					if (formatString == null) {
+						format = ERXTimestampFormatter.defaultDateFormatterForObject(formatString);
 					}
-					else if (_numberFormat != null) {
-						String formatString = (String) _numberFormat.valueInComponent(component);
-						if (formatString == null) {
-							format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
-						}
-						else {
-							format = ERXNumberFormatter.numberFormatterForPattern(formatString);
-						}
+					else {
+						format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
 					}
 				}
-
-				if (valueInComponent == NSKeyValueCoding.NullValue) {
-					valueInComponent = null;
-				}
-
-				if (format != null) {
-					if (valueInComponent != null) {
-						try {
-							valueInComponent = format.format(valueInComponent);
-						}
-						catch (IllegalArgumentException ex) {
-							log.info("Exception while formatting", ex);
-							valueInComponent = null;
-						}
+				else if (_numberFormat != null) {
+					String formatString = (String) _numberFormat.valueInComponent(component);
+					if (formatString == null) {
+						format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
 					}
-				}
-				else {
-					if (valueInComponent != null) {
-						log.debug("no formatter found! {}", valueInComponent);
+					else {
+						format = ERXNumberFormatter.numberFormatterForPattern(formatString);
 					}
 				}
 			}
-		}
-		else {
-			// FIXME: Why are we logging this? The binding is checked at element construction time // Hugi 2022-03-12
-			log.warn("value binding is null !");
+
+			if (valueInComponent == NSKeyValueCoding.NullValue) {
+				valueInComponent = null;
+			}
+
+			if (format != null) {
+				if (valueInComponent != null) {
+					try {
+						valueInComponent = format.format(valueInComponent);
+					}
+					catch (IllegalArgumentException ex) {
+						log.info("Exception while formatting", ex);
+						valueInComponent = null;
+					}
+				}
+			}
+			else {
+				if (valueInComponent != null) {
+					log.debug("no formatter found! {}", valueInComponent);
+				}
+			}
 		}
 
 		String stringValue = null;
