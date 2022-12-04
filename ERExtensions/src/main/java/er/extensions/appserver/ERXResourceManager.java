@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public class ERXResourceManager extends WOResourceManager {
 	private _NSThreadsafeMutableDictionary<String, WOURLValuedElementData> _urlValuedElementsData;
 	private IVersionManager _versionManager;	
 	private final _NSThreadsafeMutableDictionary _myFrameworkProjectBundles = new _NSThreadsafeMutableDictionary(new NSMutableDictionary(128));
-	private static final NSDictionary<String, String> _mimeTypes = _additionalMimeTypes();
+	private static final Map<String, String> _mimeTypes = _additionalMimeTypes();
 
 	protected ERXResourceManager() {
 		TheAppProjectBundle = _initAppBundle();
@@ -347,26 +348,10 @@ public class ERXResourceManager extends WOResourceManager {
 	 */
 	@Override
 	public NSDictionary _contentTypesDictionary() {
-		return dictionaryWithDictionaryAndDictionary(_mimeTypes, super._contentTypesDictionary());
-	}
-
-	/**
-	 * Creates an immutable dictionary containing all of the keys and objects
-	 * from two dictionaries.
-	 * 
-	 * @param dict1 the first dictionary
-	 * @param dict2 the second dictionary
-	 * @return immutbale dictionary containing the union of the two dictionaries.
-	 */
-	private static <K, V> NSDictionary<K, V> dictionaryWithDictionaryAndDictionary(NSDictionary<? extends K, ? extends V> dict1, NSDictionary<? extends K, ? extends V> dict2) {
-		if (dict1 == null || dict1.allKeys().count() == 0)
-			return (NSDictionary<K, V>) dict2;
-		if (dict2 == null || dict2.allKeys().count() == 0)
-			return (NSDictionary<K, V>) dict1;
-
-		NSMutableDictionary<K, V> result = new NSMutableDictionary(dict2);
-		result.addEntriesFromDictionary(dict1);
-		return new NSDictionary<K, V>(result);
+		final NSMutableDictionary d = new NSMutableDictionary<>();
+		d.putAll(super._contentTypesDictionary());
+		d.putAll(_mimeTypes);
+		return d;
 	}
 
 	/**
@@ -516,7 +501,7 @@ public class ERXResourceManager extends WOResourceManager {
 		String aPathExtension = NSPathUtilities.pathExtension(aResourcePath);
 
 		if(aPathExtension != null && aPathExtension.length() != 0) {
-			String mime = _mimeTypes.objectForKey(aPathExtension.toLowerCase());
+			String mime = _mimeTypes.get(aPathExtension.toLowerCase());
 
 			if(mime != null) {
 				return mime;
@@ -526,7 +511,7 @@ public class ERXResourceManager extends WOResourceManager {
 		return super.contentTypeForResourceNamed(aResourcePath);
 	}
 	
-	private static NSDictionary<String, String> _additionalMimeTypes() {
-		return (NSDictionary<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
+	private static Map<String, String> _additionalMimeTypes() {
+		return (Map<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
 	}
 }
