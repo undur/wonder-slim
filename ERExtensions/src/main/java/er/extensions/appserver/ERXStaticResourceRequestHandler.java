@@ -110,6 +110,14 @@ public class ERXStaticResourceRequestHandler extends WORequestHandler {
 			File file = null;
 			StringBuilder sb = new StringBuilder(documentRoot.length() + uri.length());
 			String wodataKey = request.stringFormValueForKey("wodata");
+
+			// If no ?wodata query parameter is present, check if the path starts with 'jar-data' (which signifies a path inside a jar file).
+			if( wodataKey == null ) {
+				if( request.requestHandlerPath().startsWith("jar-data" ) ) {
+					wodataKey = request.requestHandlerPath().replace("jar-data", "jar:file://" );
+				}
+			}
+
 			if(uri.startsWith("/cgi-bin") && wodataKey != null) {
 				uri = wodataKey;
 				if(uri.startsWith("file:")) {

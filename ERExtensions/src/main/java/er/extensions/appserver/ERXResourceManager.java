@@ -261,7 +261,14 @@ public class ERXResourceManager extends WOResourceManager {
 			String wodata = _NSStringUtilities.concat("wodata", "=", encoded);
 
 			if (context != null) {
-				completeURL = context.urlWithRequestHandlerKey(key, null, wodata);
+				// If the resource is inside a jar-file, replace 'jar:file://' with 'jar-data' (more acceptable as a URL-element).
+				// Then append the resource's path to the URL's path (instead of adding it as a query parameter)
+				if( fileURL.startsWith("jar:file://") ) {
+					completeURL = context.urlWithRequestHandlerKey(key, fileURL.replace("jar:file://", "jar-data"), null);
+				}
+				else {
+					completeURL = context.urlWithRequestHandlerKey(key, null, wodata);
+				}
 			}
 			else {
 				StringBuilder sb = new StringBuilder(request.applicationURLPrefix());
