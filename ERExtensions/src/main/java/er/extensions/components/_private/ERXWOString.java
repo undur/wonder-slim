@@ -59,9 +59,7 @@ public class ERXWOString extends WODynamicElement {
 	private final WOAssociation _valueWhenEmpty;
 
 	/**
-	 * Introduced as a performance enhancement to check.
-	 * 
-	 * FIXME: Shouldn't this just be a local variable inside appendToResponse()? Or is there performance to be gained from using this here? I.e. is the DynamicElement instance reused? // Hugi 2022-03-12 
+	 * Set in the constructor, just indicates if any of the formatter bindings are set.
 	 */
 	private final boolean  _shouldFormat;
 
