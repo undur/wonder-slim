@@ -24,6 +24,7 @@ public class AjaxUtils {
 
 	/**
 	 * If the value is null, this returns "null", otherwise it returns '[value]'.
+	 * 
 	 * @param value the value to quote
 	 * @return the quoted value or "null"
 	 */
@@ -35,7 +36,6 @@ public class AjaxUtils {
 	 * Return whether or not the given request is an Ajax request.
 	 * 
 	 * @param request the request the check
-	 * 
 	 * @return if it an Ajax request the <code>true</code> 
 	 */
 	public static boolean isAjaxRequest(WORequest request) {
@@ -177,11 +177,9 @@ public class AjaxUtils {
 	}
 
 	/**
-	 * Returns an Ajax component action url. Using an ajax component action urls guarantees that caching during your
-	 * ajax request will be handled appropriately.
+	 * Returns an Ajax component action url. Using an ajax component action urls guarantees that caching during your ajax request will be handled appropriately.
 	 * 
-	 * @param context
-	 *            the context of the request
+	 * @param context the context of the request
 	 * @return an ajax request url.
 	 */
 	public static String ajaxComponentActionUrl(WOContext context) {
@@ -265,18 +263,12 @@ public class AjaxUtils {
 	 * @see AjaxResponse#updateDomElement(String, Object, String, String, String)
 	 * @see AjaxResponse#updateDomElement(String, Object)
 	 * 
-	 * @param response
-	 *            The response to append the JavaScript to
-	 * @param id
-	 *            ID of the DOM element to update
-	 * @param value
-	 *            The new value
-	 * @param numberFormat
-	 *            optional number format to format the value with
-	 * @param dateFormat
-	 *            optional date format to format the value with
-	 * @param valueWhenEmpty
-	 *            string to use when value is null
+	 * @param response The response to append the JavaScript to
+	 * @param id ID of the DOM element to update
+	 * @param value The new value
+	 * @param numberFormat optional number format to format the value with
+	 * @param dateFormat optional date format to format the value with
+	 * @param valueWhenEmpty string to use when value is null
 	 */
 	public static void updateDomElement(WOResponse response, String id, Object value, String numberFormat, String dateFormat, String valueWhenEmpty) {
 		if (numberFormat != null && dateFormat != null)
