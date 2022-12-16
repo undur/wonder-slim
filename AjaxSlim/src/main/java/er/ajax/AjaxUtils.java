@@ -18,10 +18,8 @@ import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 
-/**
- * @property er.extensions.ERXResponseRewriter.javascriptTypeAttribute
- */
 public class AjaxUtils {
+
 	private final static Logger log = LoggerFactory.getLogger(AjaxUtils.class);
 
 	/**
