@@ -117,19 +117,6 @@ public abstract class AjaxDynamicElement extends ERXDynamicElement implements IA
 
 	/**
 	 * Adds a stylesheet link tag with a correct resource URL in the HTML head
-	 * tag if it isn't already present in the response.
-	 * 
-	 * @param context context of the transaction
-	 * @param response the current response
-	 * @param framework name of the framework that contains the file
-	 * @param fileName CSS file name
-	 */
-	protected void addStylesheetResourceInHead(WOContext context, WOResponse response, String framework, String fileName) {
-		ERXResponseRewriter.addStylesheetResourceInHead(response, context, framework, fileName);
-	}
-
-	/**
-	 * Adds a stylesheet link tag with a correct resource URL in the HTML head
 	 * tag if it isn't already present in the response. The CSS file will be searched
 	 * within the Ajax framework.
 	 * 
