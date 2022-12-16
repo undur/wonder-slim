@@ -23,7 +23,6 @@ import er.extensions.formatters.ERXTimestampFormatter;
  */
 public class AjaxUtils {
 	private final static Logger log = LoggerFactory.getLogger(AjaxUtils.class);
-	private static final String SECURE_RESOURCES_KEY = "er.ajax.secureResources";
 
 	/**
 	 * If the value is null, this returns "null", otherwise it returns '[value]'.
