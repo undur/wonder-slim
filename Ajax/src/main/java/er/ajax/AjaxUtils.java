@@ -24,8 +24,6 @@ import er.extensions.formatters.ERXTimestampFormatter;
 import er.extensions.foundation.ERXProperties;
 
 /**
- *
- * @property er.ajax.compressed
  * @property er.extensions.ERXResponseRewriter.javascriptTypeAttribute
  */
 public class AjaxUtils {
@@ -110,12 +108,7 @@ public class AjaxUtils {
 	 *            the name of the javascript file to add
 	 */
 	public static void addScriptResourceInHead(WOContext context, WOResponse response, String framework, String fileName) {
-		String processedFileName = fileName;
-		// PROTOTYPE MISC
-		if (ERXProperties.booleanForKey("er.ajax.compressed") && ("prototype.js".equals(fileName) || "scriptaculous.js".equals(fileName))) {
-			processedFileName = "sc-17-proto-15-compressed.js";
-		}
-		ERXResponseRewriter.addScriptResourceInHead(response, context, framework, processedFileName);
+		ERXResponseRewriter.addScriptResourceInHead(response, context, framework, fileName);
 	}
 
 	/**
