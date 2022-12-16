@@ -264,18 +264,6 @@ public class AjaxUtils {
 	}
 
 	/**
-	 * Returns the array bound to the given binding name.
-	 * 
-	 * @param <T> the array type
-	 * @param component the component to resolve against
-	 * @param bindingName the name of the binding
-	 * @return an array (or null)
-	 */
-	public static <T> NSArray<T> arrayValueForBinding(WOComponent component, String bindingName) {
-		return AjaxUtils.arrayValueForObject(component.valueForBinding(bindingName));
-	}
-
-	/**
 	 * Returns the array for the given object.  If the object is a string, it will be parsed as a
 	 * JSON value.
 	 * 
