@@ -88,63 +88,17 @@ public class AjaxUtils {
 	}
 
 	/**
-	 * Adds a script tag with a correct resource URL in the HTML head tag if it isn't already present in the response.
-	 * 
-	 * @param context
-	 *            the context
-	 * @param response
-	 *            the response to write into
-	 * @param framework
-	 *            the framework that contains the file
-	 * @param fileName
-	 *            the name of the javascript file to add
-	 */
-	public static void addScriptResourceInHead(WOContext context, WOResponse response, String framework, String fileName) {
-		ERXResponseRewriter.addScriptResourceInHead(response, context, framework, fileName);
-	}
-
-	/**
-	 * Calls {@link #addScriptResourceInHead(WOContext, WOResponse, String, String)} with the name of the Ajax framework
-	 * 
-	 * @param context
-	 *            the context
-	 * @param response
-	 *            the response to write into
-	 * @param fileName
-	 *            the name of the javascript file to add
+	 * Calls addScriptResourceInHead() with the name of the Ajax framework
 	 */
 	public static void addScriptResourceInHead(WOContext context, WOResponse response, String fileName) {
-		AjaxUtils.addScriptResourceInHead(context, response, Ajax.FRAMEWORK_NAME, fileName);
+		ERXResponseRewriter.addScriptResourceInHead(response, context, Ajax.FRAMEWORK_NAME, fileName);
 	}
 
 	/**
-	 * Calls {@link er.extensions.appserver.ERXResponseRewriter#addStylesheetResourceInHead(WOResponse, WOContext, String, String)}
-	 * 
-	 * @param context
-	 *            the context
-	 * @param response
-	 *            the response to write into
-	 * @param framework
-	 *            the framework that contains the file
-	 * @param fileName
-	 *            the name of the CSS file to add
-	 */
-	public static void addStylesheetResourceInHead(WOContext context, WOResponse response, String framework, String fileName) {
-		ERXResponseRewriter.addStylesheetResourceInHead(response, context, framework, fileName);
-	}
-
-	/**
-	 * Calls {@link #addStylesheetResourceInHead(WOContext, WOResponse, String, String)} with the name of the Ajax framework
-	 * 
-	 * @param context
-	 *            the context
-	 * @param response
-	 *            the response to write into
-	 * @param fileName
-	 *            the name of the CSS file to add
+	 * Calls addStylesheetResourceInHead() with the name of the Ajax framework
 	 */
 	public static void addStylesheetResourceInHead(WOContext context, WOResponse response, String fileName) {
-		AjaxUtils.addStylesheetResourceInHead(context, response, Ajax.FRAMEWORK_NAME, fileName);
+		ERXResponseRewriter.addStylesheetResourceInHead(response, context, Ajax.FRAMEWORK_NAME, fileName);
 	}
 
 	public static boolean shouldHandleRequest(WORequest request, WOContext context, String containerID) {

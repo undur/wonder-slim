@@ -9,6 +9,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 
+import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.components.ERXDynamicElement;
 
@@ -111,7 +112,7 @@ public abstract class AjaxDynamicElement extends ERXDynamicElement implements IA
 	 * @param fileName script file name
 	 */
 	protected void addScriptResourceInHead(WOContext context, WOResponse response, String framework, String fileName) {
-		AjaxUtils.addScriptResourceInHead(context, response, framework, fileName);
+		ERXResponseRewriter.addScriptResourceInHead(response, context, framework, fileName);
 	}
 
 	/**
@@ -137,7 +138,7 @@ public abstract class AjaxDynamicElement extends ERXDynamicElement implements IA
 	 * @param fileName CSS file name
 	 */
 	protected void addStylesheetResourceInHead(WOContext context, WOResponse response, String framework, String fileName) {
-		AjaxUtils.addStylesheetResourceInHead(context, response, framework, fileName);
+		ERXResponseRewriter.addStylesheetResourceInHead(response, context, framework, fileName);
 	}
 
 	/**
