@@ -158,20 +158,6 @@ public class AjaxUtils {
 		AjaxUtils.addStylesheetResourceInHead(context, response, Ajax.FRAMEWORK_NAME, fileName);
 	}
 
-	/**
-	 * Calls {@link er.extensions.appserver.ERXResponseRewriter#addScriptCodeInHead(WOResponse, WOContext, String)}.
-	 * 
-	 * @param response
-	 *            the response to write into
-	 * @param context
-	 *            the context
-	 * @param script
-	 *            the javascript code to insert
-	 */
-	public static void addScriptCodeInHead(WOResponse response, WOContext context, String script) {
-		ERXResponseRewriter.addScriptCodeInHead(response, context, script);
-	}
-
 	public static boolean shouldHandleRequest(WORequest request, WOContext context, String containerID) {
 		String elementID = context.elementID();
 		String senderID = context.senderID();
