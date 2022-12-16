@@ -248,52 +248,6 @@ public class AjaxUtils {
 	}
 
 	/**
-	 * Returns the array for the given object.  If the object is a string, it will be parsed as a
-	 * JSON value.
-	 * 
-	 * @param <T> the array type
-	 * @param value the object value
-	 * @return an array (or null)
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> NSArray<T> arrayValueForObject(Object value) {
-		NSArray arrayValue;
-		if (value == null) {
-			arrayValue = null;
-		}
-		else if (value instanceof NSArray) {
-			arrayValue = (NSArray<T>) value;
-		}
-		else if (value instanceof String) {
-			try {
-				String strValue = ((String) value).trim();
-				if (!strValue.startsWith("[")) {
-					strValue = "[" + strValue + "]";
-				}
-//				JSONSerializer serializer = new JSONSerializer();
-//				serializer.registerDefaultSerializers();
-				Object objValue = null; // FIXME: BIG BADA-BOOM!
-				if (objValue.getClass().isArray()) {
-					arrayValue = new NSArray((Object[]) objValue);
-				}
-				else if (objValue instanceof Collection) {
-					arrayValue = new NSArray((Collection) objValue);
-				}
-				else {
-					arrayValue = new NSArray(objValue);
-				}
-			}
-			catch (Throwable e) {
-				throw new IllegalArgumentException("Failed to convert String to array.", e);
-			}
-		}
-		else {
-			throw new IllegalArgumentException("Unable to convert '" + value + "' to an array.");
-		}
-		return arrayValue;
-	}
-
-	/**
 	 * Returns an Ajax component action url. Using an ajax component action urls guarantees that caching during your
 	 * ajax request will be handled appropriately.
 	 * 
