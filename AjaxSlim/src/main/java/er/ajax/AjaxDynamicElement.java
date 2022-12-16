@@ -112,7 +112,7 @@ public abstract class AjaxDynamicElement extends ERXDynamicElement implements IA
 	 * @param fileName script file name
 	 */
 	protected void addScriptResourceInHead(WOContext context, WOResponse response, String fileName) {
-		AjaxUtils.addScriptResourceInHead(context, response, fileName);
+		ERXResponseRewriter.addScriptResourceInHead(response, context, Ajax.FRAMEWORK_NAME, fileName);
 	}
 
 	/**
@@ -125,6 +125,6 @@ public abstract class AjaxDynamicElement extends ERXDynamicElement implements IA
 	 * @param fileName CSS file name
 	 */
 	protected void addStylesheetResourceInHead(WOContext context, WOResponse response, String fileName) {
-		AjaxUtils.addStylesheetResourceInHead(context, response, fileName);
+		ERXResponseRewriter.addStylesheetResourceInHead(response, context, Ajax.FRAMEWORK_NAME, fileName);
 	}
 }

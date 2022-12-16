@@ -87,20 +87,6 @@ public class AjaxUtils {
 		return response;
 	}
 
-	/**
-	 * Calls addScriptResourceInHead() with the name of the Ajax framework
-	 */
-	public static void addScriptResourceInHead(WOContext context, WOResponse response, String fileName) {
-		ERXResponseRewriter.addScriptResourceInHead(response, context, Ajax.FRAMEWORK_NAME, fileName);
-	}
-
-	/**
-	 * Calls addStylesheetResourceInHead() with the name of the Ajax framework
-	 */
-	public static void addStylesheetResourceInHead(WOContext context, WOResponse response, String fileName) {
-		ERXResponseRewriter.addStylesheetResourceInHead(response, context, Ajax.FRAMEWORK_NAME, fileName);
-	}
-
 	public static boolean shouldHandleRequest(WORequest request, WOContext context, String containerID) {
 		String elementID = context.elementID();
 		String senderID = context.senderID();
