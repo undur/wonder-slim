@@ -248,22 +248,6 @@ public class AjaxUtils {
 	}
 
 	/**
-	 * Returns the array bound to the given association.
-	 * 
-	 * @param <T> the array type
-	 * @param component the component to resolve against
-	 * @param association the association to retrieve a value for
-	 * @return an array (or null)
-	 */
-	public static <T> NSArray<T> arrayValueForAssociation(WOComponent component, WOAssociation association) {
-		NSArray<T> array = null;
-		if (association != null) {
-			array = AjaxUtils.arrayValueForObject(association.valueInComponent(component));
-		}
-		return array;
-	}
-
-	/**
 	 * Returns the array for the given object.  If the object is a string, it will be parsed as a
 	 * JSON value.
 	 * 
