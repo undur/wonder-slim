@@ -12,12 +12,12 @@ public class Scripts {
 	/**
 	 * Experimental JS file (what will probably eventually replace wonder.js)
 	 */
-	private static final String WONDER_SLIMMER_JS = "wonder-slimmer.js";
+	private static final String WONDER_JS_SLIM = "wonder-slimmer.js";
 	
 	/**
 	 * Scratchpad JS-file combining old/new work
 	 */
-	private static final String WONDER_SLIM_JS = "wonder-slim.js";
+	private static final String WONDER_JS_SCRATCHPAD = "wonder-slim.js";
 	
 	/**
 	 * Placeholder for files that will eventually be omitted
@@ -31,7 +31,7 @@ public class Scripts {
 	private static final String EFFECTS_JS = "effects.js";
 
 	public static String wonderJS() {
-		return useNewScripts ? WONDER_SLIMMER_JS : WONDER_JS;
+		return useNewScripts ? WONDER_JS_SLIM : WONDER_JS;
 	}
 
 	public static String prototypeJS() {
