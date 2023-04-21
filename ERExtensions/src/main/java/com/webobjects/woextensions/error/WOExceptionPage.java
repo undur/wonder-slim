@@ -269,6 +269,10 @@ public class WOExceptionPage extends ERXComponent {
 			return "success";
 		}
 
+		if( currentBundle() instanceof NSMavenProjectBundle ) {
+			return "info";
+		}
+
 		return null;
 	}
 	

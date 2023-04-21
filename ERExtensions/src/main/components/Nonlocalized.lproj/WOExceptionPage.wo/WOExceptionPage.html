@@ -29,11 +29,11 @@
 
 			
 			table tr:nth-child(odd) {
-				background-color: rgb(252,252,252);
+				background-color: rgb(253,253,253);
 			}
 			
 			table tr:nth-child(even) {
-				background-color: rgb(245,245,245);
+				background-color: rgb(248,248,248);
 			}
 
 			.filename-container {
@@ -42,7 +42,11 @@
 			}
 
 			tr.success {
-				background-color: rgb(200,240,200) !important;
+				background-color: rgba(200,240,200,0.6) !important;
+			}
+
+			tr.info {
+				background-color: rgba(180,180,240,0.2) !important;
 			}
 
 			.container {
@@ -104,18 +108,18 @@
 			</wo:if>
 			<table>
 				<tr>
+					<th>Package</th>
 					<th>File</th>
 					<th>Line #</th>
 					<th>Method</th>
-					<th>Package</th>
 					<th>Bundle</th>
 				</tr>
 				<wo:repetition list="$exceptionParser.stackTrace" item="$currentErrorLine">
 					<wo:container elementName="tr" class="$currentRowClass">
+						<td><wo:str value="$currentErrorLine.packageName" /></td>
 						<td><wo:str value="$currentErrorLine.fileName" /></td>
 						<td><wo:link href="$currentLineURL" disabled="$currentLineDisabled"><wo:str value="$currentErrorLine.lineNumber" /></wo:link></td>
 						<td><wo:str value="$currentErrorLine.methodName" /></td>
-						<td><wo:str value="$currentErrorLine.packageName" /></td>
 						<td><wo:str value="$currentBundle.name" /></td>
 					</wo:container>
 				</wo:repetition>
