@@ -229,6 +229,21 @@ public class WOExceptionPage extends ERXComponent {
 	}
 
 	/**
+	 * @return Name of the jar file the class producing the error is located in
+	 */
+	public String currentJarName() {
+		try {
+			final String fullClassName = currentErrorLine.packageName() + "." + currentErrorLine.className();
+			final Class<?> klass = Class.forName( fullClassName );
+			final String pathtoJar = klass.getProtectionDomain().getCodeSource().getLocation().toString();
+			return pathtoJar.substring(pathtoJar.lastIndexOf('/')+1);
+		}
+		catch( Exception e ) {
+			return null;
+		}
+	}
+
+	/**
 	 * Provided for convenience when overriding Application.reportException(). Like so:
 	 *
 	 * @Override

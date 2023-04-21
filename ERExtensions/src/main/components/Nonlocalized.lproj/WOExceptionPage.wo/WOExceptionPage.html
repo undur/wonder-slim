@@ -112,7 +112,7 @@
 					<th>File</th>
 					<th>Line #</th>
 					<th>Method</th>
-					<th>Bundle</th>
+					<th>Bundle / jar</th>
 				</tr>
 				<wo:repetition list="$exceptionParser.stackTrace" item="$currentErrorLine">
 					<wo:container elementName="tr" class="$currentRowClass">
@@ -120,7 +120,14 @@
 						<td><wo:str value="$currentErrorLine.fileName" /></td>
 						<td><wo:link href="$currentLineURL" disabled="$currentLineDisabled"><wo:str value="$currentErrorLine.lineNumber" /></wo:link></td>
 						<td><wo:str value="$currentErrorLine.methodName" /></td>
-						<td><wo:str value="$currentBundle.name" /></td>
+						<td>
+							<wo:if condition="$currentBundle">
+								<wo:str value="$currentBundle.name" />
+							</wo:if>
+							<wo:if condition="$currentBundle" negate="$true">
+								<span style="color:rgb(150,150,150)"><wo:str value="$currentJarName" /></span>
+							</wo:if>
+						</td>
 					</wo:container>
 				</wo:repetition>
 			</table>
