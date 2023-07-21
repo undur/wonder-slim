@@ -66,7 +66,7 @@ public class ERXLoader {
 	 */
 	private static NSDictionary propertiesFromArgv;
 
-	JarChecker _checker;
+	ERXJarChecker _checker;
 
 	/**
 	 * Holds the framework names during startup
@@ -157,7 +157,7 @@ public class ERXLoader {
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 		defaultProperties = (Properties) NSProperties._getProperties().clone();
 		allFrameworks = new HashSet<>();
-		_checker = new JarChecker();
+		_checker = new ERXJarChecker();
 
 		for (int var = 0; var < cps.length; var++) {
 			String cpName = cps[var];
@@ -581,7 +581,7 @@ public class ERXLoader {
 	 * 
 	 * @author ak
 	 */
-	public static class JarChecker {
+	public static class ERXJarChecker {
 		private static final Logger startupLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Startup");
 
 		private static class Entry {
