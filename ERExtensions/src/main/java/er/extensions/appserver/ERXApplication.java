@@ -171,7 +171,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
 	public static void setup(String[] argv) {
-		_loader = new ERXLoader(argv);
+//		_loader = new ERXLoader(argv);
 
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
