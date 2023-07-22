@@ -214,11 +214,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		ERXLoggingSupport.reInitConsoleAppenders();
 
-		if (_loader != null) {
-			_loader._checker.reportErrors();
-			_loader._checker = null;
-		}
-
 		didCreateApplication();
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
 

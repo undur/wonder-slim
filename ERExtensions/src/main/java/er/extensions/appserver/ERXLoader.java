@@ -62,8 +62,6 @@ public class ERXLoader {
 	 */
 	private static NSDictionary propertiesFromArgv;
 
-	ERXJarChecker _checker;
-
 	/**
 	 * Holds the framework names during startup
 	 */
@@ -158,7 +156,6 @@ public class ERXLoader {
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 		defaultProperties = (Properties) NSProperties._getProperties().clone();
 		allFrameworks = new HashSet<>();
-		_checker = new ERXJarChecker();
 
 		for (String cpName : cps ) {
 			final String cp = System.getProperty(cpName);
@@ -291,13 +288,6 @@ public class ERXLoader {
 				if (jarLibs.length() > 1) {
 					jarLibs = jarLibs.substring(0, jarLibs.length() - 1);
 					newCP += (newCP.length() > 0 ? File.pathSeparator : "") + jarLibs;
-				}
-
-				String jars[] = newCP.split(File.pathSeparator);
-
-				for (int i = 0; i < jars.length; i++) {
-					String jar = jars[i];
-					_checker.processJar(jar);
 				}
 
 				if (System.getProperty("_DisableClasspathReorder") == null) {
