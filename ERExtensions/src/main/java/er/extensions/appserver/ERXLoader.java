@@ -1,8 +1,6 @@
 package er.extensions.appserver;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +11,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,9 +36,6 @@ import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSKeyValueCoding;
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSMutableSet;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
@@ -52,7 +46,9 @@ import er.extensions.foundation.ERXUtilities;
 /**
  * Responsible for classpath munging and ensuring all bundles are loaded
  * 
- * @property er.extensions.appserver.projectBundleLoading - to see logging this has to be set on the command line by using -Der.extensions.appserver.projectBundleLoading=DEBUG
+ * @property er.extensions.appserver.projectBundleLoading - to see logging this
+ *           has to be set on the command line by using
+ *           -Der.extensions.appserver.projectBundleLoading=DEBUG
  * 
  * @author ak
  */
@@ -74,7 +70,7 @@ public class ERXLoader {
 	Set<String> allFrameworks;
 
 	private Properties allBundleProps;
-	
+
 	/**
 	 * Looks like this is never used?
 	 */
@@ -131,7 +127,7 @@ public class ERXLoader {
 			return bundle.properties();
 		}
 
-		try( InputStream inputStream = bundle.inputStreamForResourcePath(name)) {
+		try (InputStream inputStream = bundle.inputStreamForResourcePath(name)) {
 			if (inputStream == null) {
 				return null;
 			}
@@ -150,7 +146,8 @@ public class ERXLoader {
 	}
 
 	/**
-	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
+	 * Called prior to actually initializing the app. Defines framework load
+	 * order, class path order, checks patches etc.
 	 */
 	public ERXLoader(String[] argv) {
 		String cps[] = new String[] { "java.class.path", "com.webobjects.classpath" };
@@ -210,10 +207,16 @@ public class ERXLoader {
 							debugMsg("Added Jar bundle: " + bundle);
 						}
 					}
-					// MS: This is totally hacked in to make Wonder startup properly with the new rapid turnaround. It's duplicating (poorly)
-					// code from NSProjectBundle. I'm not sure we actually need this anymore, because NSBundle now fires an "all bundles loaded" event.
+					// MS: This is totally hacked in to make Wonder startup
+					// properly with the new rapid turnaround. It's duplicating
+					// (poorly)
+					// code from NSProjectBundle. I'm not sure we actually need
+					// this anymore, because NSBundle now fires an "all bundles
+					// loaded" event.
 					else if (jar.endsWith("/bin") && new File(new File(jar).getParentFile(), ".project").exists()) {
-						// AK: I have no idea if this is checked anywhere else, but this keeps is from having to set it in the VM args.
+						// AK: I have no idea if this is checked anywhere else,
+						// but this keeps is from having to set it in the VM
+						// args.
 						debugMsg("Plain bundle: " + jar);
 						for (File classpathFolder = new File(bundle); classpathFolder != null && classpathFolder.exists(); classpathFolder = classpathFolder.getParentFile()) {
 							File projectFile = new File(classpathFolder, ".project");
@@ -292,7 +295,8 @@ public class ERXLoader {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
 
-	// for logging before logging has been setup and configured by loading the properties files
+	// for logging before logging has been setup and configured by loading the
+	// properties files
 	private void debugMsg(String msg) {
 		if ("DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"))) {
 			System.out.println(msg);
@@ -318,8 +322,8 @@ public class ERXLoader {
 
 // Disabled this since ERXConfigurationManager.isDeployedAsServlet() no longer works // FIXME: Hugi 2021-12-18
 //			if (ERXApplication.isDevelopmentModeSafe() && ERXConfigurationManager.defaultManager().isDeployedAsServlet()) {
-				// bundle-less builds do not appear to work when running in
-				// servlet mode, so make it prefer the legacy bundle style
+			// bundle-less builds do not appear to work when running in
+			// servlet mode, so make it prefer the legacy bundle style
 //				NSBundleFactory.registerBundleFactory(new com.webobjects.foundation.development.NSLegacyBundle.Factory());
 //					throw new RuntimeException( "This was using code from ERFoundation. Killed." );
 //			}
@@ -520,45 +524,29 @@ public class ERXLoader {
 		return false;
 	}
 
-	private static String stringFromJar(String jar, String path) {
-		JarFile f;
-		InputStream is = null;
-		try {
-			if (!new File(jar).exists()) {
-				log.warn("Will not process jar '" + jar + "' because it cannot be found ...");
-				return null;
-			}
-			f = new JarFile(jar);
-			JarEntry e = (JarEntry) f.getEntry(path);
-			if (e != null) {
-				is = f.getInputStream(e);
-				ByteArrayOutputStream bout = new ByteArrayOutputStream();
-				int read = -1;
-				byte[] buf = new byte[1024 * 50];
-				while ((read = is.read(buf)) != -1) {
-					bout.write(buf, 0, read);
-				}
+	/**
+	 * @return The utf-8 encoded string contained in the given jar file
+	 */
+	private static String stringFromJar(final String pathToJar, final String pathInJar) {
 
-				String content = new String(bout.toByteArray(), StandardCharsets.UTF_8);
-				return content;
-			}
+		if (!new File(pathToJar).exists()) {
+			log.warn("Will not process jar '" + pathToJar + "' because it cannot be found ...");
 			return null;
 		}
-		catch (FileNotFoundException e1) {
-			return null;
+
+		try (JarFile jarFile = new JarFile(pathToJar)) {
+			final JarEntry jarEntry = (JarEntry) jarFile.getEntry(pathInJar);
+
+			if (jarEntry == null) {
+				return null;
+			}
+
+			try (InputStream is = jarFile.getInputStream(jarEntry)) {
+				return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+			}
 		}
 		catch (IOException e1) {
 			throw NSForwardException._runtimeExceptionForThrowable(e1);
-		}
-		finally {
-			if (is != null) {
-				try {
-					is.close();
-				}
-				catch (IOException e) {
-					// ignore
-				}
-			}
 		}
 	}
 
