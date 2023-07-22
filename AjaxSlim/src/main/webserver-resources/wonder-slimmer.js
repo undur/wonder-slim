@@ -21,9 +21,9 @@ var AUL = {
 		var updateContainer = document.getElementById(id);
 		
 		
-//		if( updateContainer ) {
-//			alert('No AjaxUpdateContainer on the page with id ' + id);
-//		}
+		if( !updateContainer ) {
+			alert('No AjaxUpdateContainer on the page with id ' + id);
+		}
 
 		var actionUrl = updateContainer.getAttribute('data-updateUrl');
 
