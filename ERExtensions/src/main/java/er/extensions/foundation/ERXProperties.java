@@ -40,7 +40,7 @@ public class ERXProperties {
     private static final Logger configLog = LoggerFactory.getLogger(ERXConfigurationManager.class);
 
     /**
-     * FIXME: This constructor was onl yadded as an experiment, to ensure that no instances are created, so I can eliminate the KVC implementation // Hugi 2022-01-20
+     * All methods on ERXProperties are static, no instances allowed.
      */
     private ERXProperties() {}
 
