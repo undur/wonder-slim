@@ -76,7 +76,11 @@ public class ERXLoader {
 	 */
 	private Properties defaultProperties;
 
+	/**
+	 * URLs to loaded property files get added here, apparently, then nothing is done with them?
+	 */
 	private List<URL> urls = new ArrayList<>();
+	
 	private Properties mainProps;
 	private Properties mainUserProps;
 
@@ -307,7 +311,7 @@ public class ERXLoader {
 		return (allFrameworks != null && allFrameworks.size() == 0);
 	}
 
-	private NSBundle mainBundle() {
+	private static NSBundle mainBundle() {
 		NSBundle mainBundle = null;
 		String mainBundleName = NSProperties._mainBundleName();
 		if (mainBundleName != null) {
