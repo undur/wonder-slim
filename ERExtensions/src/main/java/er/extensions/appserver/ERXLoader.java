@@ -520,7 +520,7 @@ public class ERXLoader {
 		return false;
 	}
 
-	private String stringFromJar(String jar, String path) {
+	private static String stringFromJar(String jar, String path) {
 		JarFile f;
 		InputStream is = null;
 		try {
