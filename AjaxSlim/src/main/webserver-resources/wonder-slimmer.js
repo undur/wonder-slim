@@ -34,6 +34,25 @@ var AUL = {
 	}
 }
 
+/*
+ * Very, very extermely experimental and rudimentary observefield support 
+ */
+var ASB = {
+	observeField: function(updateContainerID, formFieldID, observeFieldFrequency, partial, observeDelay, options) {
+		var fieldElement = document.getElementById( formFieldID );
+
+		console.log( fieldElement );
+		console.log( 'ble' );
+
+		// Invoked if the field is exited (blurred) by user action
+		fieldElement.addEventListener( "blur" , function() {
+			console.log('blurblur');
+		} );		
+		
+		// FIXME: We're not handling frequency/delay etc.
+	}
+}
+
 function invokeUpdate( id, url ) {
 	const xhttp = new XMLHttpRequest();
 	xhttp.open("GET", url, true);
