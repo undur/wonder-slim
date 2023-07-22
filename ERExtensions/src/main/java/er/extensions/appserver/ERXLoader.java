@@ -154,15 +154,15 @@ public class ERXLoader {
 	 * order, class path order, checks patches etc.
 	 */
 	public ERXLoader(String[] argv) {
-		String cps[] = new String[] { "java.class.path", "com.webobjects.classpath" };
+		final List<String> cps = List.of( "java.class.path", "com.webobjects.classpath" );
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 		defaultProperties = (Properties) NSProperties._getProperties().clone();
 		allFrameworks = new HashSet<>();
 		_checker = new ERXJarChecker();
 
-		for (int var = 0; var < cps.length; var++) {
-			String cpName = cps[var];
-			String cp = System.getProperty(cpName);
+		for (String cpName : cps ) {
+			final String cp = System.getProperty(cpName);
+
 			if (cp != null) {
 				String parts[] = cp.split(File.pathSeparator);
 				String normalLibs = "";
@@ -172,6 +172,7 @@ public class ERXLoader {
 				String appPattern = ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase();
 				String folderPattern = ".*?/Resources/Java/?$".toLowerCase();
 				String projectPattern = ".*?/(\\w+)/bin$".toLowerCase();
+
 				for (int i = 0; i < parts.length; i++) {
 					String jar = parts[i];
 					// Windows has \, we need to normalize
@@ -190,8 +191,10 @@ public class ERXLoader {
 					else {
 						jarLibs += jar + File.pathSeparator;
 					}
+
 					String bundle = jar.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
 					String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
+
 					if (bundle.matches("^\\w+$") && !bundle.matches(excludes)) {
 						String info = jar.replaceAll("(.*?[/\\\\]\\w+\\.framework/Resources/).*", "$1Info.plist");
 						if (new File(info).exists()) {
@@ -211,6 +214,7 @@ public class ERXLoader {
 							debugMsg("Added Jar bundle: " + bundle);
 						}
 					}
+
 					// MS: This is totally hacked in to make Wonder startup
 					// properly with the new rapid turnaround. It's duplicating
 					// (poorly)
@@ -273,7 +277,9 @@ public class ERXLoader {
 						}
 					}
 				}
+
 				String newCP = "";
+
 				if (normalLibs.length() > 1) {
 					normalLibs = normalLibs.substring(0, normalLibs.length() - 1);
 					newCP += normalLibs;
@@ -286,16 +292,20 @@ public class ERXLoader {
 					jarLibs = jarLibs.substring(0, jarLibs.length() - 1);
 					newCP += (newCP.length() > 0 ? File.pathSeparator : "") + jarLibs;
 				}
+
 				String jars[] = newCP.split(File.pathSeparator);
+
 				for (int i = 0; i < jars.length; i++) {
 					String jar = jars[i];
 					_checker.processJar(jar);
 				}
+
 				if (System.getProperty("_DisableClasspathReorder") == null) {
 					System.setProperty(cpName, newCP);
 				}
 			}
 		}
+
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
 
