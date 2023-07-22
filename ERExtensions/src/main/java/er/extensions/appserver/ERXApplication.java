@@ -171,7 +171,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
 	public static void setup(String[] argv) {
-//		_loader = new ERXLoader(argv);
+		_loader = new ERXLoader(argv);
 
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
@@ -191,9 +191,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
 		frameworksBaseURL();
 		applicationBaseURL();
+
 		if (System.getProperty("WOFrameworksBaseURL") != null) {
 			setFrameworksBaseURL(System.getProperty("WOFrameworksBaseURL"));
 		}
+
 		if (System.getProperty("WOApplicationBaseURL") != null) {
 			setApplicationBaseURL(System.getProperty("WOApplicationBaseURL"));
 		}
