@@ -221,15 +221,20 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		didCreateApplication();
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
+
 		installPatches();
+
 		_lowMemoryHandler = new ERXLowMemoryHandler();
+
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
+
 		if (_rapidTurnaroundActiveForAnyProject() && isDirectConnectEnabled()) {
 			registerRequestHandler(new ERXStaticResourceRequestHandler(), "_wr_");
 		}
+
 		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
 
-		String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
+		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 
 		if (defaultEncoding != null) {
 			setDefaultEncoding(defaultEncoding);
