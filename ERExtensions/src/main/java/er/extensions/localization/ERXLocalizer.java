@@ -479,7 +479,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 			}
 		}
 		if (shortLanguage != null) {
-			locale = new Locale(shortLanguage);
+			locale = Locale.of(shortLanguage);
 		}
 		else {
 			log.info("Locale for {} not found! Using default locale: {}", aLanguage, Locale.getDefault());
