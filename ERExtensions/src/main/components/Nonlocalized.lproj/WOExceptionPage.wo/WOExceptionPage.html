@@ -90,6 +90,7 @@
 			.time-and-id {
 				float: right;
 				color: gray;
+				text-align: right;
 			}
 		</style>
 		<script>
@@ -103,8 +104,8 @@
 	</head>
 	<body>
 		<div class="container">
-			<p><wo:str value="$exceptionParser.message" /> <div class="time-and-id"><wo:str value="$now" /><br /><wo:str value="$exceptionID" /></div></p>
-			<h3><wo:str value="$exceptionParser.typeException" /><wo:if condition="$exception.cause"> <span style="font-size: smaller; color: gray">(<wo:str value="$exception.cause" />)</span></wo:if></h3>
+			<h3><wo:str value="$exceptionParser.typeException" /><wo:if condition="$exception.cause"> <span style="font-size: smaller; color: gray">(<wo:str value="$exception.cause" />)</span></wo:if></h3> <div class="time-and-id"><wo:str value="$now" /><br /><wo:str value="$exceptionID" /></div>
+			<p><wo:str value="$exceptionParser.message" /></p>
 			<wo:if condition="$showSource">
 	<div class="filename-container"><strong><wo:str value="$firstLineOfTrace.fileName" /></strong></div>
 	<div class="src-container">
