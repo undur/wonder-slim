@@ -691,11 +691,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// We first want to test if we ran out of memory. If so we need to quit ASAP.
 		handlePotentiallyFatalException(exception);
 
-		// Generate a unique exception ID for display in the exception page
+		// Generate a unique exception ID for display in logs/exception page
 		final UUID exceptionID = UUID.randomUUID();
 		
-		// Store the error's id in the context thread's dictionary (so it can be used for display in other locations, notable the exception page)
-		// CHECKME: This is not optimal. Ideally, we'd add the id to the exceptions "metadata" generated below. But it will do for now // Hugi 2024-02-28
+		// Store the error's id in the context thread's dictionary (so it can be used for display in other locations, notably the exception page)
+		// CHECKME: This is not optimal. Ideally, we'd add the id to the exception's "metadata" generated below. But it will do for now // Hugi 2024-02-28
 		ERXThreadStorage.takeValueForKey( exceptionID.toString(), "exceptionID" );
 		
 		// Not a fatal exception, business as usual.
