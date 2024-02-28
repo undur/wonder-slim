@@ -31,6 +31,7 @@ import com.webobjects.woextensions.error.WOExceptionPage.WOExceptionParser.WOPar
 import er.extensions.appserver.ERXApplication;
 import er.extensions.components.ERXComponent;
 import er.extensions.foundation.ERXProperties;
+import er.extensions.foundation.ERXThreadStorage;
 
 /**
  * A nicer version of WOExceptionPage.
@@ -81,8 +82,18 @@ public class WOExceptionPage extends ERXComponent {
 		pathModifier = "";
 	}
 
+	/**
+	 * @return Current time for display in the exception page
+	 */
 	public LocalDateTime now() {
 		return LocalDateTime.now();
+	}
+
+	/**
+	 * @return The ID of the exception, as generated in ERXApplication.handleException(). Helps with tracing user error reports.
+	 */
+	public String exceptionID() {
+		return (String) ERXThreadStorage.valueForKey("exceptionID");
 	}
 
 	/**

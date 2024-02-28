@@ -14,6 +14,7 @@ import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -690,9 +691,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// We first want to test if we ran out of memory. If so we need to quit ASAP.
 		handlePotentiallyFatalException(exception);
 
+		// Generate a unique exception ID for display in the exception page
+		final UUID exceptionID = UUID.randomUUID();
+		
+		// Store the error's id in the context thread's dictionary (so it can be used for display in other locations, notable the exception page)
+		// CHECKME: This is not optimal. Ideally, we'd add the id to the exceptions "metadata" generated below. But it will do for now // Hugi 2024-02-28
+		ERXThreadStorage.takeValueForKey( exceptionID.toString(), "exceptionID" );
+		
 		// Not a fatal exception, business as usual.
 		final NSDictionary extraInfo = ERXUtilities.extraInformationForExceptionInContext(exception, context);
-		log.error("Exception caught: " + exception.getMessage() + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
+		log.error("Exception caught: " + exception.getMessage() + "\nexceptionID: " + exceptionID + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
 		WOResponse response = super.handleException(exception, context);
 		response.setStatus(500);
 		return response;

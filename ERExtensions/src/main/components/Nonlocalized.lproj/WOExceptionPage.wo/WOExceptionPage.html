@@ -86,6 +86,11 @@
 			.error-line {
 				background-color: rgb(255,150,160);
 			}
+			
+			.time-and-id {
+				float: right;
+				color: gray;
+			}
 		</style>
 		<script>
 			// For communicating with the WOLips server
@@ -98,8 +103,8 @@
 	</head>
 	<body>
 		<div class="container">
+			<p><wo:str value="$exceptionParser.message" /> <div class="time-and-id"><wo:str value="$now" /><br /><wo:str value="$exceptionID" /></div></p>
 			<h3><wo:str value="$exceptionParser.typeException" /><wo:if condition="$exception.cause"> <span style="font-size: smaller; color: gray">(<wo:str value="$exception.cause" />)</span></wo:if></h3>
-			<p><wo:str value="$exceptionParser.message" /> <div style="float: right"><wo:str value="$now" /></div></p>
 			<wo:if condition="$showSource">
 	<div class="filename-container"><strong><wo:str value="$firstLineOfTrace.fileName" /></strong></div>
 	<div class="src-container">
