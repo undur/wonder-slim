@@ -12,8 +12,6 @@ A slimmed down version of Project Wonder, containing only the required basics to
 
 ## Usage
 
-If you just want to play around, you can import "testapp" in the repository's root into Eclipse as an Eclipse project and run it.
-
 To use in an existing project you can just change the version for `ERExtensions` and `Ajax` to `8.0.0.slim-SNAPSHOT` in your `pom.xml`. Note that since this project only includes a fraction of the original Wonder frameworks and code, compatibility is likely to be hit and miss.
 
 ## Motivation
