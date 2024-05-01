@@ -56,9 +56,9 @@ Over the years a lot of things have changed in Wonder and WO. To keep compatibil
 
 To keep the build simple, Slim is only built using maven.
 
-### Run on (relatively) modern java
+### Run on modern java
 
-Slim targets Java 17 and does not support older JDKs. This is a part of the simplification of the development and environment through standardization.
+Slim targets Java 21 and does not support older JDKs. This is a part of the simplification of the development and environment through standardization.
 
 ## FAQ
 
