@@ -4,7 +4,7 @@ A slimmed down version of Project Wonder, containing only the required basics to
 
 ## Installation
 
-*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part [here]( https://gist.github.com/hugith/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has different versioning from the real Project Wonder and will not interfere with any other Project Wonder installations*
+*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part [here]( https://gist.github.com/hugithordarson/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has different versioning from the real Project Wonder and will not interfere with any other Project Wonder installations*
 
 1. Clone the repository
 2. Run `mvn clean install` in the cloned repository's root **or**
