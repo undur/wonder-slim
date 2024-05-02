@@ -11,11 +11,11 @@ public class ERXLoggingSupport {
 	private static final String LOGGING_BRIDGE_CLASS = "er.extensions.logging.ERXTemporaryLoggingBridge";
 
 	public static void configureLoggingWithSystemProperties() {
-		ERXLoggingSupport.runLoggingBridgeMethod("configureLoggingWithSystemProperties");
+		runLoggingBridgeMethod("configureLoggingWithSystemProperties");
 	}
 
 	public static void reInitConsoleAppenders() {
-		ERXLoggingSupport.runLoggingBridgeMethod("reInitConsoleAppenders");
+		runLoggingBridgeMethod("reInitConsoleAppenders");
 	}
 
 	private static void runLoggingBridgeMethod(final String methodName) {
