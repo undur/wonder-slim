@@ -25,6 +25,7 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOCookie;
+import com.webobjects.appserver.WOCookie.SameSite;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
@@ -1206,6 +1207,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			}
 			WOCookie cookie = new WOCookie(_proxyBalancerCookieName, _proxyBalancerRoute, _proxyBalancerCookiePath, null, -1, context.request().isSecure(), true);
 			cookie.setExpires(null);
+			cookie.setSameSite(SameSite.LAX);
 			context.response().addCookie(cookie);
 		}
 	}
