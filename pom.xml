@@ -13,6 +13,8 @@
 		<module>Ajax</module>
 	</modules>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
 		<wonder.core.group>wonder.core</wonder.core.group>
 		<wonder.ajax.group>wonder.ajax</wonder.ajax.group>
 		<wonder.version>8.0.0.slim-SNAPSHOT</wonder.version>
