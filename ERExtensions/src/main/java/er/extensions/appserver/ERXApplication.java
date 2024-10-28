@@ -7,6 +7,7 @@
 package er.extensions.appserver;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.BindException;
@@ -55,6 +56,7 @@ import com.webobjects.foundation.NSTimestamp;
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.ERXLoggingSupport;
+import er.extensions.ERXMonitorServer;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.bettertemplates.ERXBetterTemplates;
 import er.extensions.components._private.ERXWOForm;
@@ -261,6 +263,24 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
+		
+		startMonitorServer();
+	}
+
+	private void startMonitorServer() {
+		// We'll only start up the monitor server if a password is set for it
+		final String monitorServerPassword = ERXProperties.stringForKey( "WOMonitorServicePassword" );
+
+		if( monitorServerPassword == null ) {
+			try {
+				// FIXME: This method of obtaining a port for the monitor service absolutely sucks
+				final int monitorServerPort = port().intValue() + 10000;
+				ERXMonitorServer.start( monitorServerPort );
+			}
+			catch( IOException e ) {
+				log.error( "Failed to start up the monitor service", e );
+			}
+		}		
 	}
 
 	/**
