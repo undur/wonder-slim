@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) NetStruxr, Inc. All rights reserved.
  *
  * This software is published under the terms of the NetStruxr
@@ -271,7 +272,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// We'll only start up the monitor server if a password is set for it
 		final String monitorServerPassword = ERXProperties.stringForKey( "WOMonitorServicePassword" );
 
-		if( monitorServerPassword == null ) {
+		if( monitorServerPassword != null ) {
 			try {
 				// FIXME: This method of obtaining a port for the monitor service absolutely sucks
 				final int monitorServerPort = port().intValue() + 10000;
