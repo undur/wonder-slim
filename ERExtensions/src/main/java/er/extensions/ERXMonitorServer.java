@@ -62,12 +62,14 @@ public class ERXMonitorServer {
 				throw new IllegalStateException( "Wrong password" );
 			}
 
-			final String response = threadDumpAsString( true, true );
-			exchange.sendResponseHeaders( 200, response.length() );
 
 			if( exchange.getRequestURI().toString().equals( "/monitor/jstack" ) ) {
+				final String responseString = threadDumpAsString( true, true );
+				final byte[] responseBytes = responseString.getBytes();
+				exchange.sendResponseHeaders( 200, responseBytes.length );
+
 				try( final OutputStream os = exchange.getResponseBody()) {
-					os.write( response.getBytes() );
+					os.write( responseBytes );
 				}
 			}
 			else {
