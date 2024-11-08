@@ -40,7 +40,6 @@ public class ERXMonitorServer {
 
 		// Log the startup time
 		monitorStartupTime = System.currentTimeMillis() - monitorStartupTime;
-		System.out.println( "Started monitor server at address %s in %sms".formatted( server.getAddress(), monitorStartupTime ) );
 		logger.info( "Started monitor server at address {} in {}ms", server.getAddress(), monitorStartupTime );
 	}
 
