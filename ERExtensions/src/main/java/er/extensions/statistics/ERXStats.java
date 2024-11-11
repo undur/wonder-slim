@@ -57,6 +57,7 @@ import er.extensions.foundation.ERXThreadStorage;
  * @property er.extensions.erxStats.max the maximum historical stats to collect (defaults to 1000) 
  */
 public class ERXStats {
+
 	private static final String STATS_INITIALIZED_KEY = "er.extensions.erxStats.initialized";
 	private static final String STATS_START_TIME_KEY = "er.extensions.erxStats.startTime";
 	private static final String STATS_LAST_TIME_KEY = "er.extensions.erxStats.lastTime";
@@ -77,12 +78,11 @@ public class ERXStats {
 		public String Batching = "Batching";
 	}
 	
-	private static NSMutableArray<NSMutableDictionary<String, LogEntry>> _allStatistics = new NSMutableArray<NSMutableDictionary<String, LogEntry>>();
+	private static NSMutableArray<NSMutableDictionary<String, LogEntry>> _allStatistics = new NSMutableArray<>();
 
 	/**
-	 * Initializes the logging system if the property
-	 * er.extensions.erxStats.enabled is true. ERXApplication.dispatchRequest
-	 * will automatically call this.
+	 * Initializes the logging system if the property er.extensions.erxStats.enabled is true.
+	 * ERXApplication.dispatchRequest will automatically call this.
 	 */
 	public static void initStatisticsIfNecessary() {
 		if (areStatisticsEnabled()) {
@@ -90,16 +90,10 @@ public class ERXStats {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private static boolean areStatisticsEnabled() {
 		return ERXProperties.booleanForKey(ERXStats.STATS_ENABLED_KEY);
 	}
-	
-	/**
-	 * 
-	 */
+
 	public static boolean traceCollectingEnabled() {
 		return ERXProperties.booleanForKeyWithDefault(ERXStats.STATS_TRACE_COLLECTING_ENABLED_KEY, false);
 	}
@@ -116,8 +110,6 @@ public class ERXStats {
 	}
 
 	/**
-	 * Returns true if the current thread is tracking statistics.
-	 * 
 	 * @return true if the current thread is tracking statistics
 	 */
 	public static boolean isTrackingStatistics() {
@@ -126,8 +118,6 @@ public class ERXStats {
 	}
 
 	/**
-	 * Returns the statistics for the current thread.
-	 * 
 	 * @return the statistics for the current thread
 	 */
 	@SuppressWarnings("unchecked")
@@ -151,13 +141,13 @@ public class ERXStats {
 	/**
 	 * Returns the log entry for the given key.
 	 * 
-	 * @param key
-	 *            the key to lookup
+	 * @param key the key to lookup
 	 * @return the log entry for the given key
 	 */
 	public static LogEntry logEntryForKey(String key) {
 		LogEntry entry = null;
-		NSMutableDictionary<String, LogEntry> statistics = ERXStats.statistics();
+		final NSMutableDictionary<String, LogEntry> statistics = ERXStats.statistics();
+
 		if (statistics != null) {
 			synchronized (statistics) {
 				entry = statistics.objectForKey(key);
@@ -167,16 +157,15 @@ public class ERXStats {
 				}
 			}
 		}
+
 		return entry;
 	}
 
 	/**
      * Returns the log entry for the given key within the specified logging group.
      *
-     * @param group
-     *            the logging group to search for the key
-     * @param key
-     *            the key to lookup
+     * @param group the logging group to search for the key
+     * @param key the key to lookup
      * @return the log entry for the given key
      */
     public static LogEntry logEntryForKey(String group, String key) {
@@ -184,11 +173,9 @@ public class ERXStats {
     }
 
 	/**
-	 * Returns the aggregate key names for all of the threads that have been
-	 * recorded.
+	 * Returns the aggregate key names for all of the threads that have been recorded.
 	 * 
-	 * @return the aggregate key names for all of the threads that have been
-	 *         recorded
+	 * @return the aggregate key names for all of the threads that have been recorded
 	 */
 	public static NSSet<String> aggregateKeys() {
 		NSMutableSet<String> keys = new NSMutableSet<>();
@@ -202,8 +189,7 @@ public class ERXStats {
 	 * Returns a LogEntry that represents the aggregate data collected for the
 	 * given key in all of the recorded threads.
 	 * 
-	 * @param key
-	 *            the key to lookup aggregate stats for
+	 * @param key the key to lookup aggregate stats for
 	 * @return the aggregate log entry for the given key
 	 */
 	private static LogEntry aggregateLogEntryForKey(String key) {
@@ -239,8 +225,7 @@ public class ERXStats {
 	}
 
 	/**
-	 * Mark the start of a process, call markEnd when it is over to log the
-	 * duration.
+	 * Mark the start of a process, call markEnd when it is over to log the duration.
 	 * 
 	 * @param key the key log to start logging 
 	 */
@@ -252,8 +237,7 @@ public class ERXStats {
 	}
 	
 	/**
-	 * Mark the start of a process, call markEnd when it is over to log the
-	 * duration.
+	 * Mark the start of a process, call markEnd when it is over to log the duration.
 	 * 
 	 * @param key the key log to start logging 
 	 */
@@ -262,8 +246,7 @@ public class ERXStats {
 	}
 
 	/**
-	 * Marks the end of a process, and calls addDuration(..) with the 
-	 * time since markStart.
+	 * Marks the end of a process, and calls addDuration(..) with the time since markStart.
 	 * 
 	 * @param key the key to log under
 	 */
@@ -275,8 +258,7 @@ public class ERXStats {
 	}
 
 	/**
-	 * Marks the end of a process, and calls addDuration(..) with the 
-	 * time since markStart.
+	 * Marks the end of a process, and calls addDuration(..) with the time since markStart.
 	 * 
 	 * @param key the key to log under
 	 */
@@ -320,11 +302,9 @@ public class ERXStats {
 	}
 
 	/**
-	 * Logs the messages since the last call to initStatistics() ordered by some
-	 * key.
+	 * Logs the messages since the last call to initStatistics() ordered by some key.
 	 * 
-	 * @param operation
-	 *            operation to sort on ("sum", "count", "min", "max", "avg")
+	 * @param operation operation to sort on ("sum", "count", "min", "max", "avg")
 	 */
 	public static void logStatisticsForOperation(String operation) {
 		logStatisticsForOperation(log, operation);
@@ -334,8 +314,7 @@ public class ERXStats {
 	 * Logs the messages since the last call to initStatistics() ordered by some
 	 * key. Note that no log message is output if there aren't any values
 	 * 
-	 * @param operation
-	 *            operation to sort on ("sum", "count", "min", "max", "avg", "key")
+	 * @param operation operation to sort on ("sum", "count", "min", "max", "avg", "key")
 	 */
 	public static void logStatisticsForOperation(Logger statsLog, String operation) {
 		if(statsLog.isDebugEnabled()) {
@@ -484,5 +463,4 @@ public class ERXStats {
 			// + "\n" + traces.iterator().next();
 		}
 	}
-
 }

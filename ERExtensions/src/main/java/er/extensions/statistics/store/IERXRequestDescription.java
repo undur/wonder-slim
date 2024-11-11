@@ -2,12 +2,11 @@ package er.extensions.statistics.store;
 
 public interface IERXRequestDescription {
 
-    public String getComponentName();
+	public String getComponentName();
 
-    public String getRequestHandler();
+	public String getRequestHandler();
 
-    public String getAdditionalInfo();
+	public String getAdditionalInfo();
 
-    public RequestDescriptionType getType();
-
+	public RequestDescriptionType getType();
 }

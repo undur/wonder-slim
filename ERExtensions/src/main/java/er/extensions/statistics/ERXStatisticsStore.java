@@ -53,6 +53,7 @@ import er.extensions.statistics.store.IERXStatisticsStoreListener;
  * @author kieran (Oct 14, 2009) - minor changes to capture thread name in middle of the request (useful for {@link er.extensions.appserver.ERXSession#threadName()}}
  */
 public class ERXStatisticsStore extends WOStatisticsStore {
+
 	private static final Logger log = LoggerFactory.getLogger(ERXStatisticsStore.class);
 	private final StopWatchTimer _timer = new StopWatchTimer();
 	protected static Field initMemoryField;
@@ -70,10 +71,10 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 		return _timer;
 	}
 
-    private final IERXStatisticsStoreListener listener;
+    private final IERXStatisticsStoreListener _listener;
 
     public ERXStatisticsStore() {
-        listener = new ERXDumbStatisticsStoreListener();
+        this( new ERXDumbStatisticsStoreListener() );
     }
 
     /**
@@ -83,7 +84,7 @@ public class ERXStatisticsStore extends WOStatisticsStore {
      * @param listener a customer listener to do something 'special' when requests are slow
      */
     public ERXStatisticsStore(IERXStatisticsStoreListener listener) {
-        this.listener = listener;
+    	_listener = listener;
     }
 
     /**
@@ -168,7 +169,7 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 				}
 			
                 IERXRequestDescription requestDescription = descriptionObjectForContext(aContext, aString);
-                listener.log(requestTime, requestDescription);
+                _listener.log(requestTime, requestDescription);
 				if (requestTime > _maximumRequestFatalTime) {
 					log.error("Request did take too long : {}ms request was: {}{}", requestTime, requestDescription, trace);
 				}
@@ -328,7 +329,7 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 						}
 					}
 				}
-                listener.deadlock(deadlocksCount);
+                _listener.deadlock(deadlocksCount);
 			}
 		}
 
