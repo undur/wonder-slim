@@ -100,6 +100,10 @@
 				text-align: right;
 				line-height: 1.1rem;
 			}
+			
+			.class-name {
+				color: gray;
+			}
 		</style>
 		<script>
 			// For communicating with the WOLips server
@@ -125,6 +129,7 @@
 					<th>Package</th>
 					<th>File</th>
 					<th>Line #</th>
+					<th>Class</th>
 					<th>Method</th>
 					<th>Bundle / jar</th>
 				</tr>
@@ -133,6 +138,7 @@
 						<td><wo:str value="$currentErrorLine.packageName" /></td>
 						<td><wo:str value="$currentErrorLine.fileName" /></td>
 						<td><wo:link href="$currentLineURL" disabled="$currentLineDisabled"><wo:str value="$currentErrorLine.lineNumber" /></wo:link></td>
+						<td class="class-name"><wo:str value="$currentErrorLine.className" /></td>
 						<td><wo:str value="$currentErrorLine.methodName" /></td>
 						<td>
 							<wo:if condition="$currentBundle">
