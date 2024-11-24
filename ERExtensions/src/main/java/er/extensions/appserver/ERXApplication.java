@@ -194,7 +194,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 
 		ERXStats.initStatisticsIfNecessary();
-		ERXBetterTemplates.configureWOForBetterTemplates();
+		
+		if( useBetterTemplates() ) {
+			ERXBetterTemplates.configureWOForBetterTemplates();
+		}
 
 		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
 		frameworksBaseURL();
@@ -266,6 +269,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 		
 		startMonitorServer();
+	}
+
+	/**
+	 * Indicates if we want to enable the better (old WOOgnl) template parser
+	 * 
+	 * @return true by default. Override to change.
+	 */
+	private boolean useBetterTemplates() {
+		return true;
 	}
 
 	private void startMonitorServer() {
