@@ -276,7 +276,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * 
 	 * @return true by default. Override to change.
 	 */
-	private boolean useBetterTemplates() {
+	protected boolean useBetterTemplates() {
 		return true;
 	}
 
