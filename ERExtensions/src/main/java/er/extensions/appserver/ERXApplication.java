@@ -195,13 +195,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		ERXStats.initStatisticsIfNecessary();
 		
-		if( useBetterTemplates() ) {
-			ERXBetterTemplates.configureWOForBetterTemplates();
-			log.info( "Better templates are active" );
-		}
-		else {
-			log.info( "Better templates are inactive" );
-		}
 
 		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
 		frameworksBaseURL();
@@ -228,6 +221,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		ERXLoggingSupport.reInitConsoleAppenders();
+
+		if( useBetterTemplates() ) {
+			ERXBetterTemplates.configureWOForBetterTemplates();
+			log.info( "Better templates are active" );
+		}
+		else {
+			log.info( "Better templates are inactive" );
+		}
 
 		didCreateApplication();
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
