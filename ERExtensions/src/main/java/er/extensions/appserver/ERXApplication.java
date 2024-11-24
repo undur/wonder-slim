@@ -197,6 +197,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		
 		if( useBetterTemplates() ) {
 			ERXBetterTemplates.configureWOForBetterTemplates();
+			log.info( "Better templates are active" );
+		}
+		else {
+			log.info( "Better templates are inactive" );
 		}
 
 		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
