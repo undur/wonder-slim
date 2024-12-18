@@ -1092,7 +1092,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				url.openConnection().getContent();
 
 				// Give the murder victim a little time to go to sleep
-				Thread.sleep(1000);
+				// FIXME: We should be querying the application to see if shutdown is complete, instead of waiting for a fixed period // Hugi 2024-12-18
+				Thread.sleep(200);
 	
 				return true;
 			}
