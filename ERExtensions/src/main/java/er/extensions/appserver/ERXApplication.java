@@ -166,6 +166,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
 
 	/**
+	 * Keeps track of whether didFinishLaunching has been invoked. We use this to keep track of whether we can declare variables that are dependent on configuration as constant (as this is written, only applies to isDevelopmentMode)
+	 */
+	private static boolean didFinishLaunchingInvoked = false;
+
+	/**
+	 * Keeps track of whether the application is running in development mode. Set in didFinishLaunching and used after that, since we assume this value will never change after the application has been initialized
+	 */
+	private static boolean isDevelopmentModeCached;
+
+	/**
 	 * Application entry point.
 	 */
 	public static void main(String argv[], Class applicationClass) {
@@ -478,6 +488,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass(), nsBundle.isJar() ) );
 		}
 		System.out.println( "============= LOADED BUNDLES END ===============" );
+		
+		didFinishLaunchingInvoked = true;
+		isDevelopmentModeCached = checkIsDevelopmentMode();
 	}
 
 	/**
@@ -804,27 +817,36 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return _streamingRequestHandlerKeys.containsObject(s);
 	}
 
-	/**
-	 * @return whether or not the current application is in development mode
-	 */
-	public static boolean isDevelopmentModeSafe() {
+	private static boolean checkIsDevelopmentMode() {
 		boolean developmentMode = false;
 		if (ERXProperties.stringForKey("er.extensions.ERXApplication.developmentMode") != null) {
 			developmentMode = ERXProperties.booleanForKey("er.extensions.ERXApplication.developmentMode");
 		}
 		else {
 			String ide = ERXProperties.stringForKey("WOIDE");
-
+			
 			if ("WOLips".equals(ide) || "Xcode".equals(ide)) {
 				developmentMode = true;
 			}
-
+			
 			if (!developmentMode) {
 				developmentMode = ERXProperties.booleanForKey("NSProjectBundleEnabled");
 			}
 		}
-
+		
 		return developmentMode;
+	}
+
+	/**
+	 * @return whether or not the current application is in development mode
+	 */
+	public static boolean isDevelopmentModeSafe() {
+
+		if( didFinishLaunchingInvoked ) {
+			return isDevelopmentModeCached;
+		}
+
+		return checkIsDevelopmentMode();
 	}
 
 	/**
@@ -833,6 +855,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public boolean isDevelopmentMode() {
 		return isDevelopmentModeSafe();
 	}
+
 
 	/**
 	 * This method is called by ERXWOContext and provides the application a hook to rewrite generated URLs.
