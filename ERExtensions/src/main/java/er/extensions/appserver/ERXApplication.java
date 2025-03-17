@@ -1154,14 +1154,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		 * @return The URL we can invoke to kill an NG application running on the given port
 		 */
 		private static URL urlForKillingNGApplicationOnPort( int port ) throws MalformedURLException, URISyntaxException {
-			return new URI( "http://localhost:%s/wa/ng.appserver.privates.NGAdminAction/terminate".formatted(port) ).toURL();
+			return new URI( "http://localhost:%s/wa/NGAdminAction/terminate".formatted(port) ).toURL();
 		}
 
 		/**
 		 * @return true if the application running on the given port number is an ng-objects application
 		 */
 		private static boolean isNGApplicationRunningOnPort( int portNumber ) {
-			final String urlString = String.format( "http://localhost:%s/wa/ng.appserver.privates.NGAdminAction/type", 1200 );
+			final String urlString = String.format( "http://localhost:%s/wa/NGAdminAction/type", 1200 );
 
 			try( InputStream is = new URI( urlString ).toURL().openStream()) {
 				final String type = new String( is.readAllBytes() );
