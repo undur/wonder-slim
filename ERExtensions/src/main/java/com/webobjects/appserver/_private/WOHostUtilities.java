@@ -1,6 +1,12 @@
 package com.webobjects.appserver._private;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +41,10 @@ import er.extensions.foundation.ERXProperties;
  * that you provide</p>
  * 
  * @author Miguel Arroz (survs.com)
- *
+ * 
+ * Experimental addition, Hugi 2025-04-26:
+ * If the '...localhostips' property is not set, we now automatically add all configured ipv4 addresses as local IPs.
+ * This means admin actions will work by default on all interfaces, but you can choose to _restrict_ allowed IPs by providing the property.
  */
 
 public class WOHostUtilities
@@ -72,8 +81,20 @@ public class WOHostUtilities
 			NSLog.err.appendln("<WOHostUtilities>: Couldn't get InetAddress for '127.0.0.1': " + localException3);
 		}
 		
-		NSArray<String> ips = ERXProperties.arrayForKey( LOCALHOST_IPS_PROPERTY_KEY );
+		// First we check if the list of localhost IPs is set by a system property
+		List<String> ips = ERXProperties.arrayForKey( LOCALHOST_IPS_PROPERTY_KEY );
 		
+		// If not set, add all configured IPv4 addresses on the server
+		if( ips == null ) {
+			try {
+				ips = obtainLocalIPs();
+				log.info( "'er.extensions.WOHostUtilities.localhostips' property not set. Using automatically obtained IPs " + ips );
+			}
+			catch (SocketException e) {
+				log.error("An error occurred while automatically obtaining localhost IPs" );
+			}
+		}
+
 		if( ips != null ) {
 			for ( String ip : ips ) {
 				try {
@@ -102,6 +123,38 @@ public class WOHostUtilities
 
 		return localNSMutableArray;
 	}
+
+	/**
+	 * @return List of IPv4 addresses bound to local interfaces
+	 */
+	private static List<String> obtainLocalIPs() throws SocketException {
+
+        final List<String> result = new ArrayList<>();
+
+        final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface iface = interfaces.nextElement();
+
+            // Skip down and loopback interfaces
+            if (!iface.isUp() || iface.isLoopback()) {
+                continue;
+            }
+
+            final Enumeration<InetAddress> addresses = iface.getInetAddresses();
+
+            while (addresses.hasMoreElements()) {
+                final InetAddress addr = addresses.nextElement();
+
+                // Only display IPv4 addresses
+                if (addr instanceof Inet4Address) {
+                	result.add( addr.getHostAddress() );
+                }
+            }
+        }
+
+        return result;
+    }
 
 	static void _addInetAddressArray(InetAddress[] paramArrayOfInetAddress, NSMutableArray paramNSMutableArray)
 	{
