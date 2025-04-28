@@ -42,9 +42,9 @@ import er.extensions.foundation.ERXProperties;
  * 
  * @author Miguel Arroz (survs.com)
  * 
- * Experimental addition, Hugi 2025-04-26:
- * If the '...localhostips' property is not set, we now automatically add all configured ipv4 addresses as local IPs.
- * This means admin actions will work by default on all interfaces, but you can choose to _restrict_ allowed IPs by providing the property.
+ * Addition by hugi, 2025-04-26:
+ * If the '...localhostips' property is not set, we now attempt to automatically add all the server's configured ipv4 addresses as local IPs.
+ * This means admin actions should work by default when invoked from any of the server's IPs - but you can choose to _restrict_ allowed IPs by providing the property.
  */
 
 public class WOHostUtilities
@@ -91,7 +91,7 @@ public class WOHostUtilities
 				log.info( "'er.extensions.WOHostUtilities.localhostips' property not set. Using automatically obtained IPs " + ips );
 			}
 			catch (SocketException e) {
-				log.error("An error occurred while automatically obtaining localhost IPs" );
+				log.error("An error occurred while automatically obtaining localhost IPs", e );
 			}
 		}
 
