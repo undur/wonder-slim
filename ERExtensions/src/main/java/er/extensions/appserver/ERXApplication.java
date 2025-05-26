@@ -16,6 +16,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -179,6 +181,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Application entry point.
 	 */
 	public static void main(String argv[], Class applicationClass) {
+
+		// If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework.
+		// FIXME: proof-of-concept stage work. Can probably be done more... elegantly // Hugi 2025-05-26
+		if( Files.exists(Paths.get("build.properties")) ) {
+			System.out.println("===================================================================================================");
+			System.out.println("== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==");
+			System.out.println("===================================================================================================");
+			System.setProperty("NSProjectBundleEnabled", "true");
+		}
+
 		wasERXApplicationMainInvoked = true;
 		disablePBXProjectWatcher();
 		setup(argv);
