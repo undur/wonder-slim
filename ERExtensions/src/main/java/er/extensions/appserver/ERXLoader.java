@@ -431,13 +431,22 @@ public class ERXLoader {
 			mainUserProps = readProperties(mainBundle, "Properties." + userName);
 			mainProps = readProperties(mainBundle, "Properties");
 		}
+
 		if (mainProps == null) {
 			String woUserDir = NSProperties.getProperty("webobjects.user.dir");
 			if (woUserDir == null) {
 				woUserDir = System.getProperty("user.dir");
 			}
+			
+			// Start by trying to read Properties as if our working directory is a .woa bundle 
 			mainUserProps = readProperties(new File(woUserDir, "Contents" + File.separator + "Resources" + File.separator + "Properties." + userName));
 			mainProps = readProperties(new File(woUserDir, "Contents" + File.separator + "Resources" + File.separator + "Properties"));
+
+			// If no main Properties were found, try assuming our working directory is a maven project with standard structure
+			if (mainProps == null) {
+				mainUserProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "resources" + File.separator + "Properties." + userName));
+				mainProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "resources" + File.separator + "Properties"));
+			}
 		}
 
 		if (mainProps == null) {
