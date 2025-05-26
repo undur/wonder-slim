@@ -447,6 +447,13 @@ public class ERXLoader {
 				mainUserProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "resources" + File.separator + "Properties." + userName));
 				mainProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "resources" + File.separator + "Properties"));
 			}
+			
+			// And finally, check for a Properties file in a maven project using the the "woresources" resource folder name.
+			// FIXME: This is getting ridiculous, we need to change this lookup to a loop (or clean this up in some other way) // Hugi 2025-05-26
+			if (mainProps == null) {
+				mainUserProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "woresources" + File.separator + "Properties." + userName));
+				mainProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "woresources" + File.separator + "Properties"));
+			}
 		}
 
 		if (mainProps == null) {
