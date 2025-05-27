@@ -181,6 +181,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Application entry point.
 	 */
 	public static void main(String argv[], Class applicationClass) {
+		wasERXApplicationMainInvoked = true;
 
 		// If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework.
 		// FIXME: proof-of-concept stage work. Can probably be done more... elegantly // Hugi 2025-05-26
@@ -191,7 +192,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			System.setProperty("NSProjectBundleEnabled", "true");
 		}
 
-		wasERXApplicationMainInvoked = true;
 		disablePBXProjectWatcher();
 		setup(argv);
 		WOApplication.main(argv, applicationClass);
@@ -217,7 +217,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		ERXStats.initStatisticsIfNecessary();
 		
-
 		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
 		frameworksBaseURL();
 		applicationBaseURL();
@@ -235,7 +234,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		if ( _loader != null && !_loader.didLoad()) {
-			throw new RuntimeException("ERXExtensions have not been initialized. Debugging information can be enabled by adding the JVM argument: '-Der.extensions.appserver.projectBundleLoading=DEBUG'. Please report the classpath and the rest of the bundles to the Wonder mailing list: " + "\nRemaining frameworks: " + (_loader == null ? "none" : _loader.allFrameworks) + "\nClasspath: " + System.getProperty("java.class.path"));
+			throw new RuntimeException("ERXExtensions have not been initialized. Debugging information can be enabled by adding the JVM argument: '-Der.extensions.appserver.projectBundleLoading=DEBUG'. Please report the classpath and the rest of the bundles to the Wonder mailing list: " + "\nRemaining frameworks: " + (_loader == null ? "none" : _loader.allFrameworks() ) + "\nClasspath: " + System.getProperty("java.class.path"));
 		}
 
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
@@ -417,18 +416,18 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	@Override
-	public ERXRequest createRequest(String aMethod, String aURL, String anHTTPVersion, Map<String, ? extends List<String>> someHeaders, NSData aContent, Map<String, Object> someInfo) {
+	public ERXRequest createRequest(String method, String url, String httpVersion, Map<String, ? extends List<String>> headers, NSData content, Map<String, Object> info) {
 
 		// Workaround for #3428067 (Apache Server Side Include module will feed "INCLUDED" as the HTTP version, which causes a request object not to be created by an exception.
-		if (anHTTPVersion == null || anHTTPVersion.startsWith("INCLUDED")) {
-			anHTTPVersion = "HTTP/1.0";
+		if (httpVersion == null || httpVersion.startsWith("INCLUDED")) {
+			httpVersion = "HTTP/1.0";
 		}
 
 		if (rewriteDirectConnectURL()) {
-			aURL = adaptorPath() + name() + applicationExtension() + aURL;
+			url = adaptorPath() + name() + applicationExtension() + url;
 		}
 
-		return new ERXRequest(aMethod, aURL, anHTTPVersion, someHeaders, aContent, someInfo);
+		return new ERXRequest(method, url, httpVersion, headers, content, info);
 	}
 
 	/**
@@ -939,13 +938,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns the component for the given class without having to cast. For
-	 * example: MyPage page = ERXApplication.erxApplication().pageWithName(MyPage.class, context);
-	 * 
-	 * @param <T> the type of component to
-	 * @param componentClass the component class to lookup
-	 * @param context the context
-	 * @return the created component
+	 * @return A page constructed from the given component class
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass, WOContext context) {
@@ -953,11 +946,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Calls pageWithName with ERXWOContext.currentContext() for the current thread.
+	 * @return A page constructed from the given component class
 	 * 
-	 * @param <T> the type of component to
-	 * @param componentClass the component class to lookup
-	 * @return the created component
+	 * Renders in the context provided by ERXWOContext.currentContext()
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {

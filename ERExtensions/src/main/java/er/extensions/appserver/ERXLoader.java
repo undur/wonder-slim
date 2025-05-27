@@ -31,7 +31,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
@@ -63,10 +62,13 @@ public class ERXLoader {
 	private static NSDictionary propertiesFromArgv;
 
 	/**
-	 * Holds the framework names during startup
+	 * Holds the framework names during startup.
 	 */
-	Set<String> allFrameworks;
+	private final Set<String> allFrameworks;
 
+	/**
+	 * FIXME: Kinda sorta looks like this field belongs in bundleDidLoad() // Hugi 2025-05-27 
+	 */
 	private Properties allBundleProps;
 
 	/**
@@ -143,32 +145,37 @@ public class ERXLoader {
 	}
 
 	/**
-	 * Called prior to actually initializing the app. Defines framework load
-	 * order, class path order, checks patches etc.
+	 * Called prior to actually initializing the app.
+	 * Defines framework load order, class path order, checks patches etc.
 	 */
 	public ERXLoader(String[] argv) {
-		final List<String> cps = List.of( "java.class.path", "com.webobjects.classpath" );
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 		allFrameworks = new HashSet<>();
+
+		final List<String> cps = List.of( "java.class.path", "com.webobjects.classpath" );
 
 		for (String cpName : cps ) {
 			final String cp = System.getProperty(cpName);
 
 			if (cp != null) {
-				String parts[] = cp.split(File.pathSeparator);
+				final String parts[] = cp.split(File.pathSeparator);
+				final String frameworkPattern = ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase();
+				final String appPattern = ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase();
+				final String folderPattern = ".*?/Resources/Java/?$".toLowerCase();
+				final String projectPattern = ".*?/(\\w+)/bin$".toLowerCase();
+
 				String normalLibs = "";
 				String systemLibs = "";
 				String jarLibs = "";
-				String frameworkPattern = ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase();
-				String appPattern = ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase();
-				String folderPattern = ".*?/Resources/Java/?$".toLowerCase();
-				String projectPattern = ".*?/(\\w+)/bin$".toLowerCase();
 
 				for (int i = 0; i < parts.length; i++) {
-					String jar = parts[i];
+					final String jar = parts[i];
+
 					// Windows has \, we need to normalize
-					String fixedJar = jar.replace(File.separatorChar, '/').toLowerCase();
-					debugMsg("Checking: " + jar);
+					final String fixedJar = jar.replace(File.separatorChar, '/').toLowerCase();
+
+					log("Checking: " + jar);
+
 					// all patched frameworks here
 					if (isSystemJar(jar)) {
 						systemLibs += jar + File.pathSeparator;
@@ -184,41 +191,42 @@ public class ERXLoader {
 					}
 
 					String bundle = jar.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
-					String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
+					final String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
 
 					if (bundle.matches("^\\w+$") && !bundle.matches(excludes)) {
-						String info = jar.replaceAll("(.*?[/\\\\]\\w+\\.framework/Resources/).*", "$1Info.plist");
+						final String info = jar.replaceAll("(.*?[/\\\\]\\w+\\.framework/Resources/).*", "$1Info.plist");
+
 						if (new File(info).exists()) {
 							allFrameworks.add(bundle);
-							debugMsg("Added Real Bundle: " + bundle);
+							log("Added Real Bundle: " + bundle);
 						}
 						else {
-							debugMsg("Omitted: " + info);
+							log("Omitted: " + info);
 						}
 					}
 					else if (jar.endsWith(".jar")) {
-						String info = stringFromJar(jar, "Resources/Info.plist");
-						if (info != null) {
-							NSDictionary dict = (NSDictionary) NSPropertyListSerialization.propertyListFromString(info);
+						final String infoPlistString = stringFromJar(jar, "Resources/Info.plist");
+
+						if (infoPlistString != null) {
+							NSDictionary dict = (NSDictionary) NSPropertyListSerialization.propertyListFromString(infoPlistString);
 							bundle = (String) dict.objectForKey("CFBundleExecutable");
 							allFrameworks.add(bundle);
-							debugMsg("Added Jar bundle: " + bundle);
+							log("Added Jar bundle: " + bundle);
 						}
 					}
 
-					// MS: This is totally hacked in to make Wonder startup
-					// properly with the new rapid turnaround. It's duplicating
-					// (poorly)
-					// code from NSProjectBundle. I'm not sure we actually need
-					// this anymore, because NSBundle now fires an "all bundles
-					// loaded" event.
+					// MS: This is totally hacked in to make Wonder startup properly with the new rapid turnaround.
+					// It's duplicating (poorly) code from NSProjectBundle.
+					// I'm not sure we actually need this anymore, because NSBundle now fires an "all bundles loaded" event.
 					else if (jar.endsWith("/bin") && new File(new File(jar).getParentFile(), ".project").exists()) {
+
 						// AK: I have no idea if this is checked anywhere else,
-						// but this keeps is from having to set it in the VM
-						// args.
-						debugMsg("Plain bundle: " + jar);
+						// but this keeps is from having to set it in the VM args.
+						log("Plain bundle: " + jar);
+
 						for (File classpathFolder = new File(bundle); classpathFolder != null && classpathFolder.exists(); classpathFolder = classpathFolder.getParentFile()) {
-							File projectFile = new File(classpathFolder, ".project");
+							final File projectFile = new File(classpathFolder, ".project");
+
 							if (projectFile.exists()) {
 								try {
 									boolean isBundle = false;
@@ -229,9 +237,8 @@ public class ERXLoader {
 										Element natureContainerNode = (Element) natureNodeList.item(natureNodeNum);
 										Node natureNode = natureContainerNode.getFirstChild();
 										String nodeValue = natureNode.getNodeValue();
-										// AK: we don't actually add apps to
-										// the bundle process (Mike, why
-										// not!?)
+
+										// AK: we don't actually add apps to the bundle process (Mike, why not!?)
 										if (nodeValue != null && nodeValue.startsWith("org.objectstyle.wolips.") && !nodeValue.contains("application")) {
 											isBundle = true;
 										}
@@ -253,10 +260,10 @@ public class ERXLoader {
 										}
 
 										allFrameworks.add(bundleName);
-										debugMsg("Added Binary Bundle (Project bundle): " + bundleName);
+										log("Added Binary Bundle (Project bundle): " + bundleName);
 									}
 									else {
-										debugMsg("Skipping binary bundle: " + jar);
+										log("Skipping binary bundle: " + jar);
 									}
 								}
 								catch (Throwable t) {
@@ -264,7 +271,7 @@ public class ERXLoader {
 								}
 								break;
 							}
-							debugMsg("Skipping, no project: " + projectFile);
+							log("Skipping, no project: " + projectFile);
 						}
 					}
 				}
@@ -293,9 +300,10 @@ public class ERXLoader {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
 
-	// for logging before logging has been setup and configured by loading the
-	// properties files
-	private void debugMsg(String msg) {
+	/**
+	 * For logging before logging has been setup and configured by loading the properties files
+	 */
+	private void log(String msg) {
 		if ("DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"))) {
 			System.out.println(msg);
 		}
@@ -307,28 +315,30 @@ public class ERXLoader {
 
 	private static NSBundle mainBundle() {
 		NSBundle mainBundle = null;
-		String mainBundleName = NSProperties._mainBundleName();
+
+		final String mainBundleName = NSProperties._mainBundleName();
+
 		if (mainBundleName != null) {
 			mainBundle = NSBundle.bundleForName(mainBundleName);
 		}
+
 		if (mainBundle == null) {
 			mainBundle = NSBundle.mainBundle();
 		}
-		if (mainBundle == null) {
-			// AK: when we get here, the main bundle wasn't inited yet so we do
-			// it ourself...
 
-// Disabled this since ERXConfigurationManager.isDeployedAsServlet() no longer works // FIXME: Hugi 2021-12-18
-//			if (ERXApplication.isDevelopmentModeSafe() && ERXConfigurationManager.defaultManager().isDeployedAsServlet()) {
-			// bundle-less builds do not appear to work when running in
-			// servlet mode, so make it prefer the legacy bundle style
-//				NSBundleFactory.registerBundleFactory(new com.webobjects.foundation.development.NSLegacyBundle.Factory());
-//					throw new RuntimeException( "This was using code from ERFoundation. Killed." );
-//			}
+		// If the main bundle hasn't been initalized yet we do it ourselves
+		if (mainBundle == null) {
+			// bundle-less builds do not appear to work when running in servlet mode, so make it prefer the legacy bundle style
+			// Disabled since ERXConfigurationManager.isDeployedAsServlet() no longer works. We need a different method to differentiate between regular/servlet environments // FIXME: Hugi 2021-12-18
+			//			if (ERXApplication.isDevelopmentModeSafe() && ERXConfigurationManager.defaultManager().isDeployedAsServlet()) {
+			//				NSBundleFactory.registerBundleFactory(new com.webobjects.foundation.development.NSLegacyBundle.Factory());
+			//					throw new RuntimeException( "This was using code from ERFoundation. Killed." );
+			//			}
 
 			try {
-				Field ClassPath = NSBundle.class.getDeclaredField("ClassPath");
+				final Field ClassPath = NSBundle.class.getDeclaredField("ClassPath");
 				ClassPath.setAccessible(true);
+
 				if (ClassPath.get(NSBundle.class) != null) {
 					Method init = NSBundle.class.getDeclaredMethod("InitMainBundle");
 					init.setAccessible(true);
@@ -340,8 +350,10 @@ public class ERXLoader {
 				e.printStackTrace();
 				System.exit(1);
 			}
+
 			mainBundle = NSBundle.mainBundle();
 		}
+
 		return mainBundle;
 	}
 
@@ -354,19 +366,21 @@ public class ERXLoader {
 	 * and the WebObjects.properties and finally the command line props.
 	 */
 	public void bundleDidLoad(NSNotification n) {
-		NSBundle bundle = (NSBundle) n.object();
+		final NSBundle bundle = (NSBundle) n.object();
+
 		if (allFrameworks.contains(bundle.name())) {
 			allFrameworks.remove(bundle.name());
-			debugMsg("Loaded " + bundle.name() + ". Remaining: " + allFrameworks);
+			log("Loaded " + bundle.name() + ". Remaining: " + allFrameworks);
 		}
 		else if (bundle.isFramework()) {
-			debugMsg("Loaded unexpected framework bundle '" + bundle.name() + "'. Ensure your build.properties settings like project.name match the bundle name (including case).");
+			log("Loaded unexpected framework bundle '" + bundle.name() + "'. Ensure your build.properties settings like project.name match the bundle name (including case).");
 		}
+
 		if (allBundleProps == null) {
 			allBundleProps = new Properties();
 		}
 
-		String userName = propertyFromCommandLineFirst("user.name");
+		final String userName = propertyFromCommandLineFirst("user.name");
 
 		applyIfUnset(readProperties(bundle, "Properties." + userName));
 		applyIfUnset(readProperties(bundle, null));
@@ -378,12 +392,14 @@ public class ERXLoader {
 			collectMainProps(userName);
 
 			allBundleProps.putAll(mainProps);
+
 			if (mainUserProps != null) {
 				allBundleProps.putAll(mainUserProps);
 			}
 
-			String userHome = propertyFromCommandLineFirst("user.home");
+			final String userHome = propertyFromCommandLineFirst("user.home");
 			Properties userHomeProps = null;
+
 			if (userHome != null && userHome.length() > 0) {
 				userHomeProps = readProperties(new File(userHome, "WebObjects.properties"));
 			}
@@ -410,16 +426,21 @@ public class ERXLoader {
 		}
 	}
 
+	/**
+	 * @return The value of the given property, preferring command line arguments
+	 */
 	private String propertyFromCommandLineFirst(String key) {
-		String result = (String) propertiesFromArgv.valueForKey(key);
-		if (result == null) {
-			result = NSProperties.getProperty(key);
+		final String result = (String) propertiesFromArgv.valueForKey(key);
+
+		if (result != null) {
+			return result;
 		}
-		return result;
+
+		return NSProperties.getProperty(key);
 	}
 
 	private void collectMainProps(String userName) {
-		NSBundle mainBundle = mainBundle();
+		final NSBundle mainBundle = mainBundle();
 
 		if (mainBundle != null) {
 			mainUserProps = readProperties(mainBundle, "Properties." + userName);
@@ -428,6 +449,7 @@ public class ERXLoader {
 
 		if (mainProps == null) {
 			String woUserDir = NSProperties.getProperty("webobjects.user.dir");
+
 			if (woUserDir == null) {
 				woUserDir = System.getProperty("user.dir");
 			}
@@ -518,18 +540,22 @@ public class ERXLoader {
 				return true;
 			}
 		}
+
 		// check maven path
 		if (jar.indexOf("webobjects" + File.separator + "apple") > 0) {
 			return true;
 		}
+
 		// check mac path
 		if (jar.indexOf("System" + File.separator + "Library") > 0) {
 			return true;
 		}
+
 		// check win path
 		if (jar.indexOf("Apple" + File.separator + "Library") > 0) {
 			return true;
 		}
+
 		// if embedded, check explicit names
 		if (jar.matches("Frameworks[/\\\\]Java(Foundation|EOControl|EOAccess|WebObjects).*")) {
 			return true;
@@ -559,21 +585,25 @@ public class ERXLoader {
 				return new String(is.readAllBytes(), StandardCharsets.UTF_8);
 			}
 		}
-		catch (IOException e1) {
-			throw NSForwardException._runtimeExceptionForThrowable(e1);
+		catch (IOException e) {
+			throw NSForwardException._runtimeExceptionForThrowable(e);
 		}
 	}
 
 	/**
-	 * Copies the props from the command line to the static dict propertiesFromArgv.
+	 * Copies properties from the command line to the static dictionary propertiesFromArgv.
 	 */
 	private static void insertCommandLineArguments() {
-		NSArray keys = propertiesFromArgv.allKeys();
-		int count = keys.count();
-		for (int i = 0; i < count; i++) {
-			Object key = keys.objectAtIndex(i);
-			Object value = propertiesFromArgv.objectForKey(key);
+		for( Object key : propertiesFromArgv.allKeys() ) {
+			Object value = propertiesFromArgv.get(key);
 			NSProperties._setProperty((String) key, (String) value);
 		}
+	}
+	
+	/**
+	 * Exposed for logging only
+	 */
+	public Set<String> allFrameworks() {
+		return allFrameworks;
 	}
 }
