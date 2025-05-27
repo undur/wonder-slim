@@ -70,11 +70,6 @@ public class ERXLoader {
 	private Properties allBundleProps;
 
 	/**
-	 * CHECKME: Disabled since this never seems to be read // Hugi 2023-07-22
-	 */
-//	private Properties defaultProperties;
-
-	/**
 	 * URLs to loaded property files get added here, apparently, then nothing is done with them?
 	 */
 	private List<URL> urls = new ArrayList<>();
@@ -154,7 +149,6 @@ public class ERXLoader {
 	public ERXLoader(String[] argv) {
 		final List<String> cps = List.of( "java.class.path", "com.webobjects.classpath" );
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
-//		defaultProperties = (Properties) NSProperties._getProperties().clone(); // CHECKME: Disabled since it never seems to be read // Hugi 2023-07-22
 		allFrameworks = new HashSet<>();
 
 		for (String cpName : cps ) {
