@@ -61,14 +61,14 @@ public class ERXLoader {
 	private static NSDictionary propertiesFromArgv;
 
 	/**
-	 * Properties loaded from bundle properties (gets populated as each bundle gets loaded) 
+	 * All properties loaded from bundle properties (gets populated as each bundle gets loaded) 
 	 */
-	private Properties allBundleProperties;
+	private Properties allBundleProperties = new Properties();
 
 	/**
 	 * Holds the framework names during startup.
 	 */
-	private final Set<String> allFrameworks;
+	private final Set<String> allFrameworks = new HashSet<>();
 
 	/**
 	 * URLs to loaded property files get added here, apparently, then nothing is done with them?
@@ -91,7 +91,6 @@ public class ERXLoader {
 	 */
 	public ERXLoader(String[] argv) {
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
-		allFrameworks = new HashSet<>();
 
 		final List<String> cps = List.of( "java.class.path", "com.webobjects.classpath" );
 
@@ -304,16 +303,12 @@ public class ERXLoader {
 			log("Loaded unexpected framework bundle '" + bundle.name() + "'. Ensure your build.properties settings like project.name match the bundle name (including case).");
 		}
 
-		if (allBundleProperties == null) {
-			allBundleProperties = new Properties();
-		}
-
 		final String userName = propertyFromCommandLineFirst("user.name");
 
 		applyIfUnset(readProperties(bundle, "Properties." + userName), allBundleProperties);
 		applyIfUnset(readProperties(bundle, null), allBundleProperties);
 
-		if (allFrameworks.size() == 0) {
+		if (allFrameworks.isEmpty()) {
 			mainProps = null;
 			mainUserProps = null;
 
@@ -357,6 +352,9 @@ public class ERXLoader {
 		}
 	}
 
+	/**
+	 * FIXME: This should probably return what it's read // Hugi 2025-05-28 
+	 */
 	private void collectMainProps(String userName) {
 		final NSBundle mainBundle = mainBundle();
 
@@ -394,19 +392,19 @@ public class ERXLoader {
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 			try {
-				Enumeration<URL> jarBundles = classLoader.getResources("Resources/Properties");
+				final Enumeration<URL> propertiesFromClassPath = classLoader.getResources("Resources/Properties");
+
+				final String mainBundleName = NSProperties._mainBundleName();
+
+				// Look for a jar file name like: myapp[-1.0][-SNAPSHOT].jar
+				final Pattern mainBundleJarPattern = Pattern.compile("\\b" + mainBundleName.toLowerCase() + "[-\\.\\d]*(snapshot)?\\.jar");
 
 				URL propertiesPath = null;
 				URL userPropertiesPath = null;
-				String mainBundleName = NSProperties._mainBundleName();
 
-				// Look for a jar file name like: myapp[-1.0][-SNAPSHOT].jar
-				Pattern mainBundleJarPattern = Pattern.compile("\\b" + mainBundleName.toLowerCase() + "[-\\.\\d]*(snapshot)?\\.jar");
-
-				while (jarBundles.hasMoreElements()) {
-					URL url = jarBundles.nextElement();
-
-					String urlAsString = url.toString();
+				while (propertiesFromClassPath.hasMoreElements()) {
+					final URL url = propertiesFromClassPath.nextElement();
+					final String urlAsString = url.toString();
 
 					if (mainBundleJarPattern.matcher(urlAsString.toLowerCase()).find()) {
 						try {
@@ -420,6 +418,7 @@ public class ERXLoader {
 						break;
 					}
 				}
+
 				mainProps = readProperties(propertiesPath);
 				mainUserProps = readProperties(userPropertiesPath);
 			}
@@ -608,8 +607,11 @@ public class ERXLoader {
 		}
 	}
 
+	/**
+	 * @return True if we've processed every framework bundle we're avare of
+	 */
 	public boolean didLoad() {
-		return (allFrameworks != null && allFrameworks.size() == 0);
+		return allFrameworks.isEmpty();
 	}
 
 	/**
