@@ -92,13 +92,14 @@ public class ERXLoader {
 	public ERXLoader(String[] argv) {
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 
-		final List<String> cps = List.of( "java.class.path", "com.webobjects.classpath" );
+		final List<String> classpathPropertyNames = List.of( "java.class.path", "com.webobjects.classpath" );
 
-		for (String cpName : cps ) {
-			final String cp = System.getProperty(cpName);
+		for (String classpathPropertyName : classpathPropertyNames ) {
+			final String classpath = System.getProperty(classpathPropertyName);
 
-			if (cp != null) {
-				final String parts[] = cp.split(File.pathSeparator);
+			if (classpath != null) {
+				final String[] classpathElements = classpath.split(File.pathSeparator);
+
 				final String frameworkPattern = ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase();
 				final String appPattern = ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase();
 				final String folderPattern = ".*?/Resources/Java/?$".toLowerCase();
@@ -108,33 +109,32 @@ public class ERXLoader {
 				String systemLibs = "";
 				String jarLibs = "";
 
-				for (int i = 0; i < parts.length; i++) {
-					final String jar = parts[i];
+				for (final String classpathElement : classpathElements) {
 
-					// Windows has \, we need to normalize
-					final String fixedJar = jar.replace(File.separatorChar, '/').toLowerCase();
+					// Windows uses backslashes so we need to normalize the element
+					final String normalizedClasspathElement = classpathElement.replace(File.separatorChar, '/').toLowerCase();
 
-					log("Checking: " + jar);
+					log("Checking: " + classpathElement);
 
 					// all patched frameworks here
-					if (isSystemJar(jar)) {
-						systemLibs += jar + File.pathSeparator;
+					if (isSystemJar(classpathElement)) {
+						systemLibs += classpathElement + File.pathSeparator;
 					}
-					else if (fixedJar.matches(frameworkPattern) || fixedJar.matches(appPattern) || fixedJar.matches(folderPattern)) {
-						normalLibs += jar + File.pathSeparator;
+					else if (normalizedClasspathElement.matches(frameworkPattern) || normalizedClasspathElement.matches(appPattern) || normalizedClasspathElement.matches(folderPattern)) {
+						normalLibs += classpathElement + File.pathSeparator;
 					}
-					else if (fixedJar.matches(projectPattern) || fixedJar.matches(".*?/erfoundation.jar") || fixedJar.matches(".*?/erwebobjects.jar")) {
-						normalLibs += jar + File.pathSeparator;
+					else if (normalizedClasspathElement.matches(projectPattern) || normalizedClasspathElement.matches(".*?/erfoundation.jar") || normalizedClasspathElement.matches(".*?/erwebobjects.jar")) {
+						normalLibs += classpathElement + File.pathSeparator;
 					}
 					else {
-						jarLibs += jar + File.pathSeparator;
+						jarLibs += classpathElement + File.pathSeparator;
 					}
 
-					String bundle = jar.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
+					String bundle = classpathElement.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
 					final String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
 
 					if (bundle.matches("^\\w+$") && !bundle.matches(excludes)) {
-						final String info = jar.replaceAll("(.*?[/\\\\]\\w+\\.framework/Resources/).*", "$1Info.plist");
+						final String info = classpathElement.replaceAll("(.*?[/\\\\]\\w+\\.framework/Resources/).*", "$1Info.plist");
 
 						if (new File(info).exists()) {
 							allFrameworks.add(bundle);
@@ -144,8 +144,8 @@ public class ERXLoader {
 							log("Omitted: " + info);
 						}
 					}
-					else if (jar.endsWith(".jar")) {
-						final String infoPlistString = stringFromJar(jar, "Resources/Info.plist");
+					else if (classpathElement.endsWith(".jar")) {
+						final String infoPlistString = stringFromJar(classpathElement, "Resources/Info.plist");
 
 						if (infoPlistString != null) {
 							NSDictionary dict = (NSDictionary) NSPropertyListSerialization.propertyListFromString(infoPlistString);
@@ -158,11 +158,11 @@ public class ERXLoader {
 					// MS: This is totally hacked in to make Wonder startup properly with the new rapid turnaround.
 					// It's duplicating (poorly) code from NSProjectBundle.
 					// I'm not sure we actually need this anymore, because NSBundle now fires an "all bundles loaded" event.
-					else if (jar.endsWith("/bin") && new File(new File(jar).getParentFile(), ".project").exists()) {
+					else if (classpathElement.endsWith("/bin") && new File(new File(classpathElement).getParentFile(), ".project").exists()) {
 
 						// AK: I have no idea if this is checked anywhere else,
 						// but this keeps is from having to set it in the VM args.
-						log("Plain bundle: " + jar);
+						log("Plain bundle: " + classpathElement);
 
 						for (File classpathFolder = new File(bundle); classpathFolder != null && classpathFolder.exists(); classpathFolder = classpathFolder.getParentFile()) {
 							final File projectFile = new File(classpathFolder, ".project");
@@ -203,7 +203,7 @@ public class ERXLoader {
 										log("Added Binary Bundle (Project bundle): " + bundleName);
 									}
 									else {
-										log("Skipping binary bundle: " + jar);
+										log("Skipping binary bundle: " + classpathElement);
 									}
 								}
 								catch (Throwable t) {
@@ -232,7 +232,7 @@ public class ERXLoader {
 				}
 
 				if (System.getProperty("_DisableClasspathReorder") == null) {
-					System.setProperty(cpName, newCP);
+					System.setProperty(classpathPropertyName, newCP);
 				}
 			}
 		}
@@ -240,6 +240,9 @@ public class ERXLoader {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
 
+	/**
+	 * @return The main bundle, attempting various creative methods
+	 */
 	private static NSBundle mainBundle() {
 		NSBundle mainBundle = null;
 
@@ -262,26 +265,33 @@ public class ERXLoader {
 			//					throw new RuntimeException( "This was using code from ERFoundation. Killed." );
 			//			}
 
-			try {
-				final Field ClassPath = NSBundle.class.getDeclaredField("ClassPath");
-				ClassPath.setAccessible(true);
-
-				if (ClassPath.get(NSBundle.class) != null) {
-					Method init = NSBundle.class.getDeclaredMethod("InitMainBundle");
-					init.setAccessible(true);
-					init.invoke(NSBundle.class);
-				}
-			}
-			catch (Exception e) {
-				System.err.println(e);
-				e.printStackTrace();
-				System.exit(1);
-			}
+			initMainBundle();
 
 			mainBundle = NSBundle.mainBundle();
 		}
 
 		return mainBundle;
+	}
+
+	/**
+	 * Attempts to initialize the main bundle by stabbing at NSBundle's private internals through reflection
+	 */
+	private static void initMainBundle() {
+		try {
+			final Field ClassPath = NSBundle.class.getDeclaredField("ClassPath");
+			ClassPath.setAccessible(true);
+
+			if (ClassPath.get(NSBundle.class) != null) {
+				Method init = NSBundle.class.getDeclaredMethod("InitMainBundle");
+				init.setAccessible(true);
+				init.invoke(NSBundle.class);
+			}
+		}
+		catch (Exception e) {
+			System.err.println(e);
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	/**
