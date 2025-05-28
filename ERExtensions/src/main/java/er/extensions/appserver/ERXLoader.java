@@ -86,6 +86,11 @@ public class ERXLoader {
 	private Properties mainUserProps;
 
 	/**
+	 * Allows us to specify in code if debug logging should be enabled for this awesomeness
+	 */
+	private static boolean _loggingEnabled = false;
+
+	/**
 	 * Called prior to actually initializing the app.
 	 * Defines framework load order, class path order, checks patches etc.
 	 */
@@ -611,10 +616,31 @@ public class ERXLoader {
 	/**
 	 * For logging before logging has been setup and configured by loading the properties files
 	 */
-	private void log(String msg) {
-		if ("DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"))) {
+	private static void log(String msg) {
+		if (loggingEnabled()) {
 			System.out.println(msg);
 		}
+	}
+
+	/**
+	 * @return true if debugging is enabled for ERXLoader
+	 * 
+	 * CHECKME: We should probably start by initializing _DebugEnabled from the property // Hugi 2025-05-28
+	 */
+	private static boolean loggingEnabled() {
+
+		if( _loggingEnabled ) {
+			return true;
+		}
+
+		return "DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"));
+	}
+
+	/**
+	 * Allows us to specify in code if debug logging should be enabled for this awesomeness 
+	 */
+	public static void enableLogging() {
+		_loggingEnabled = true;
 	}
 
 	/**
