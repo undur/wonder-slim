@@ -521,9 +521,7 @@ public class ERXLoader {
 			return;
 		}
 
-		for (Iterator iter = bundleProps.entrySet().iterator(); iter.hasNext();) {
-			Map.Entry entry = (Map.Entry) iter.next();
-
+		for (Map.Entry entry : bundleProps.entrySet()) {
 			if (!allBundleProps.containsKey(entry.getKey())) {
 				allBundleProps.setProperty((String) entry.getKey(), (String) entry.getValue());
 			}
