@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -57,9 +56,14 @@ public class ERXLoader {
 	private static final Logger log = LoggerFactory.getLogger(ERXLoader.class);
 
 	/**
-	 * Command line arguments passed to the main method
+	 * Properties passed to the application's main method
 	 */
 	private static NSDictionary propertiesFromArgv;
+
+	/**
+	 * Properties loaded from bundle properties (gets populated as each bundle gets loaded) 
+	 */
+	private Properties allBundleProperties;
 
 	/**
 	 * Holds the framework names during startup.
@@ -67,82 +71,19 @@ public class ERXLoader {
 	private final Set<String> allFrameworks;
 
 	/**
-	 * FIXME: Kinda sorta looks like this field belongs in bundleDidLoad() // Hugi 2025-05-27 
-	 */
-	private Properties allBundleProps;
-
-	/**
 	 * URLs to loaded property files get added here, apparently, then nothing is done with them?
 	 */
 	private List<URL> urls = new ArrayList<>();
 	
+	/**
+	 * Properties loaded from main property files (Properties)
+	 */
 	private Properties mainProps;
+	
+	/**
+	 * Properties loaded from user property files (Properties.[username])
+	 */
 	private Properties mainUserProps;
-
-	private Properties readProperties(File file) {
-		if (!file.exists()) {
-			return null;
-		}
-
-		try {
-			URL url = file.toURI().toURL();
-			return readProperties(url);
-		}
-		catch (MalformedURLException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	private Properties readProperties(URL url) {
-		if (url == null) {
-			return null;
-		}
-
-		try {
-			Properties result = new Properties();
-			result.load(url.openStream());
-			urls.add(url);
-			return result;
-		}
-		catch (MalformedURLException exception) {
-			exception.printStackTrace();
-			return null;
-		}
-		catch (IOException exception) {
-			return null;
-		}
-	}
-
-	private Properties readProperties(NSBundle bundle, String name) {
-		if (bundle == null) {
-			return null;
-		}
-		if (name == null) {
-			URL url = bundle.pathURLForResourcePath("Properties");
-			if (url != null) {
-				urls.add(url);
-			}
-			return bundle.properties();
-		}
-
-		try (InputStream inputStream = bundle.inputStreamForResourcePath(name)) {
-			if (inputStream == null) {
-				return null;
-			}
-			Properties result = new Properties();
-			result.load(inputStream);
-			urls.add(bundle.pathURLForResourcePath(name));
-			return result;
-		}
-		catch (MalformedURLException exception) {
-			exception.printStackTrace();
-			return null;
-		}
-		catch (IOException exception) {
-			return null;
-		}
-	}
 
 	/**
 	 * Called prior to actually initializing the app.
@@ -300,19 +241,6 @@ public class ERXLoader {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
 
-	/**
-	 * For logging before logging has been setup and configured by loading the properties files
-	 */
-	private void log(String msg) {
-		if ("DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"))) {
-			System.out.println(msg);
-		}
-	}
-
-	public boolean didLoad() {
-		return (allFrameworks != null && allFrameworks.size() == 0);
-	}
-
 	private static NSBundle mainBundle() {
 		NSBundle mainBundle = null;
 
@@ -376,14 +304,14 @@ public class ERXLoader {
 			log("Loaded unexpected framework bundle '" + bundle.name() + "'. Ensure your build.properties settings like project.name match the bundle name (including case).");
 		}
 
-		if (allBundleProps == null) {
-			allBundleProps = new Properties();
+		if (allBundleProperties == null) {
+			allBundleProperties = new Properties();
 		}
 
 		final String userName = propertyFromCommandLineFirst("user.name");
 
-		applyIfUnset(readProperties(bundle, "Properties." + userName));
-		applyIfUnset(readProperties(bundle, null));
+		applyIfUnset(readProperties(bundle, "Properties." + userName), allBundleProperties);
+		applyIfUnset(readProperties(bundle, null), allBundleProperties);
 
 		if (allFrameworks.size() == 0) {
 			mainProps = null;
@@ -391,10 +319,10 @@ public class ERXLoader {
 
 			collectMainProps(userName);
 
-			allBundleProps.putAll(mainProps);
+			allBundleProperties.putAll(mainProps);
 
 			if (mainUserProps != null) {
-				allBundleProps.putAll(mainUserProps);
+				allBundleProperties.putAll(mainUserProps);
 			}
 
 			final String userHome = propertyFromCommandLineFirst("user.home");
@@ -405,38 +333,28 @@ public class ERXLoader {
 			}
 
 			if (userHomeProps != null) {
-				allBundleProps.putAll(userHomeProps);
+				allBundleProperties.putAll(userHomeProps);
 			}
 
 			Properties props = NSProperties._getProperties();
-			props.putAll(allBundleProps);
+			props.putAll(allBundleProperties);
 
 			NSProperties._setProperties(props);
 
 			insertCommandLineArguments();
+
 			if (userHomeProps != null) {
 				urls.add(0, urls.remove(urls.size() - 1));
 			}
+
 			if (mainUserProps != null) {
 				urls.add(0, urls.remove(urls.size() - 1));
 			}
+
 			urls.add(0, urls.remove(urls.size() - 1));
-			// System.out.print(urls);
+
 			NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.AllBundlesLoadedNotification, NSKeyValueCoding.NullValue));
 		}
-	}
-
-	/**
-	 * @return The value of the given property, preferring command line arguments
-	 */
-	private String propertyFromCommandLineFirst(String key) {
-		final String result = (String) propertiesFromArgv.valueForKey(key);
-
-		if (result != null) {
-			return result;
-		}
-
-		return NSProperties.getProperty(key);
 	}
 
 	private void collectMainProps(String userName) {
@@ -515,15 +433,33 @@ public class ERXLoader {
 		}
 	}
 
-	private void applyIfUnset(Properties bundleProps) {
+	/**
+	 * @return The value of the given property, preferring command line arguments
+	 */
+	private static String propertyFromCommandLineFirst(String key) {
+		final String result = (String) propertiesFromArgv.valueForKey(key);
 
-		if (bundleProps == null) {
+		if (result != null) {
+			return result;
+		}
+
+		return NSProperties.getProperty(key);
+	}
+
+	/**
+	 * Applies properties from [newProperties] to [properties] that are not currently set
+	 */
+	private static void applyIfUnset(Properties newProperties, Properties properties) {
+
+		if (newProperties == null) {
 			return;
 		}
 
-		for (Map.Entry entry : bundleProps.entrySet()) {
-			if (!allBundleProps.containsKey(entry.getKey())) {
-				allBundleProps.setProperty((String) entry.getKey(), (String) entry.getValue());
+		for (Map.Entry entry : newProperties.entrySet()) {
+			if (!properties.containsKey(entry.getKey())) {
+				final String key = (String) entry.getKey();
+				final String value = (String) entry.getValue();
+				properties.setProperty(key, value);
 			}
 		}
 	}
@@ -597,7 +533,85 @@ public class ERXLoader {
 			NSProperties._setProperty((String) key, (String) value);
 		}
 	}
-	
+
+	private Properties readProperties(File file) {
+		if (!file.exists()) {
+			return null;
+		}
+
+		try {
+			URL url = file.toURI().toURL();
+			return readProperties(url);
+		}
+		catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private Properties readProperties(URL url) {
+		if (url == null) {
+			return null;
+		}
+
+		try {
+			Properties result = new Properties();
+			result.load(url.openStream());
+			urls.add(url);
+			return result;
+		}
+		catch (MalformedURLException exception) {
+			exception.printStackTrace();
+			return null;
+		}
+		catch (IOException exception) {
+			return null;
+		}
+	}
+
+	private Properties readProperties(NSBundle bundle, String name) {
+		if (bundle == null) {
+			return null;
+		}
+		if (name == null) {
+			URL url = bundle.pathURLForResourcePath("Properties");
+			if (url != null) {
+				urls.add(url);
+			}
+			return bundle.properties();
+		}
+
+		try (InputStream inputStream = bundle.inputStreamForResourcePath(name)) {
+			if (inputStream == null) {
+				return null;
+			}
+			Properties result = new Properties();
+			result.load(inputStream);
+			urls.add(bundle.pathURLForResourcePath(name));
+			return result;
+		}
+		catch (MalformedURLException exception) {
+			exception.printStackTrace();
+			return null;
+		}
+		catch (IOException exception) {
+			return null;
+		}
+	}
+
+	/**
+	 * For logging before logging has been setup and configured by loading the properties files
+	 */
+	private void log(String msg) {
+		if ("DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"))) {
+			System.out.println(msg);
+		}
+	}
+
+	public boolean didLoad() {
+		return (allFrameworks != null && allFrameworks.size() == 0);
+	}
+
 	/**
 	 * Exposed for logging only
 	 */
