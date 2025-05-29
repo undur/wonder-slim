@@ -419,6 +419,9 @@ public class ERXLoader {
 	 * FIXME: This should probably return what it's read // Hugi 2025-05-28 
 	 */
 	private void collectMainProps(String username) {
+
+		log("Invoking collectMainProps()");
+
 		final NSBundle mainBundle = mainBundle();
 
 		if (mainBundle != null) {
