@@ -149,9 +149,9 @@ public class ERXLoader {
 	}
 
 	private enum CPEType {
-		System(20),
-		Normal(10),
-		Jar(30);
+		Normal(10), // FIXME: I have absolutely no idea what is meant by "normal", not all that descriptive // Hugi 2025-05-29
+		System(20), // FIXME: This seems to mean "Is any WebObjects library"? // Hugi 2025-05-29
+		Jar(30); // FIXME: These are not "jars", it's a catch-all for "everything else", really // Hugi 2025-05-29
 		
 		int _order;
 		
@@ -167,6 +167,9 @@ public class ERXLoader {
 		}
 	}
 
+	/**
+	 * Represents a single classpath entry and allows us to query that entry for various metadata 
+	 */
 	public record ClasspathEntry( String string ) {
 
 		/**
@@ -181,11 +184,7 @@ public class ERXLoader {
 				return CPEType.System;
 			}
 
-			if ( matchesAny( normalizedString(), CPEPattern.Framework, CPEPattern.App, CPEPattern.Folder ) ) {
-				return CPEType.Normal;
-			}
-
-			if ( matchesAny( normalizedString(), CPEPattern.Project, CPEPattern.ERFoundation, CPEPattern.ERWebObjects ) ) {
+			if ( matchesAny( normalizedString(), CPEPattern.Framework, CPEPattern.App, CPEPattern.Folder, CPEPattern.Project, CPEPattern.ERFoundation, CPEPattern.ERWebObjects ) ) {
 				return CPEType.Normal;
 			}
 
@@ -195,16 +194,50 @@ public class ERXLoader {
 		public int order() {
 			return type().order();
 		}
-	}
+		
+		private static boolean isSystemJar(String jar) {
 
-	private static boolean matchesAny( String string, CPEPattern... patterns ) {
-		for (CPEPattern cpePattern : patterns) {
-			if( cpePattern.matches(string) ) {
+			// check system path
+			String systemRoot = System.getProperty("WORootDirectory");
+
+			if (systemRoot != null) {
+				if (jar.startsWith(systemRoot)) {
+					return true;
+				}
+			}
+
+			// check maven path
+			if (jar.indexOf("webobjects" + File.separator + "apple") > 0) {
 				return true;
 			}
+
+			// check mac path
+			if (jar.indexOf("System" + File.separator + "Library") > 0) {
+				return true;
+			}
+
+			// check win path
+			if (jar.indexOf("Apple" + File.separator + "Library") > 0) {
+				return true;
+			}
+
+			// if embedded, check explicit names
+			if (jar.matches("Frameworks[/\\\\]Java(Foundation|EOControl|EOAccess|WebObjects).*")) {
+				return true;
+			}
+
+			return false;
 		}
-		
-		return false;
+
+		private static boolean matchesAny( String string, CPEPattern... patterns ) {
+			for (CPEPattern cpePattern : patterns) {
+				if( cpePattern.matches(string) ) {
+					return true;
+				}
+			}
+			
+			return false;
+		}
 	}
 
 	private void reorderClasspath() {
@@ -215,12 +248,12 @@ public class ERXLoader {
 				log( "Reording classpath property '%s'. It is null, so nothing done".formatted(classpathPropertyName) );
 			}
 			else {
-				log( "Reording classpath property '%s'. Unmodified value is:\n%s".formatted( classpathPropertyName, String.join("\n", classpathString.split(File.pathSeparator) ) ) );
+				log( "Reording classpath property '%s'. Unmodified entries are:\n%s".formatted( classpathPropertyName, String.join("\n", classpathString.split(File.pathSeparator) ) ) );
 
 				final String[] classpathElements = classpathString.split(File.pathSeparator);
 
-				// Construct a list of ClasspathEntries from the string elements of the original classpath
-				// and order it by the ordering specified by each ClasspathEntry's type
+				// Construct a list of ClasspathEntries from the string elements of the original classpath.
+				// Order it by the ordering specified by each ClasspathEntry's type.
 				final List<ClasspathEntry> classPathEntries = Arrays
 					.stream(classpathElements)
 					.map(ClasspathEntry::new) // Generate a new ClasspathEntry from each string on the classpath
@@ -229,11 +262,9 @@ public class ERXLoader {
 
 				log( "We've reordered the classpath, here's the ordered list of classpath entries along with their associated types" );
 
-				for (ClasspathEntry classpathEntry : classPathEntries) {
-					log( classpathEntry.type() + " :: " + classpathEntry.string() );
-				}
+				classPathEntries.forEach( cpe -> log( cpe.type() + " :: " + cpe.string() ) );
 
-				// Generate a new classpath string from the ordered list
+				// Generate a new classpath string from the ordered list and set it
 				final String reorderedClasspathString = classPathEntries
 					.stream()
 					.map(ClasspathEntry::string)
@@ -242,7 +273,7 @@ public class ERXLoader {
 				System.setProperty(classpathPropertyName, reorderedClasspathString);
 
 				// Finally, everything below here is just logging
-				log( "Handled classpath from property '%s'. Modified value is:\n%s".formatted( classpathPropertyName, String.join("\n", reorderedClasspathString.split(File.pathSeparator) ) ) );
+				log( "Handled classpath from property '%s'. Modified entries are:\n%s".formatted( classpathPropertyName, String.join("\n", reorderedClasspathString.split(File.pathSeparator) ) ) );
 				
 				if( classpathString.equals(reorderedClasspathString ) ) {
 					log( "CLASSPATH '%s' WAS NOT MODIFIED AT ALL".formatted(classpathPropertyName) );
@@ -600,40 +631,6 @@ public class ERXLoader {
 				properties.setProperty(key, value);
 			}
 		}
-	}
-
-	private static boolean isSystemJar(String jar) {
-
-		// check system path
-		String systemRoot = System.getProperty("WORootDirectory");
-
-		if (systemRoot != null) {
-			if (jar.startsWith(systemRoot)) {
-				return true;
-			}
-		}
-
-		// check maven path
-		if (jar.indexOf("webobjects" + File.separator + "apple") > 0) {
-			return true;
-		}
-
-		// check mac path
-		if (jar.indexOf("System" + File.separator + "Library") > 0) {
-			return true;
-		}
-
-		// check win path
-		if (jar.indexOf("Apple" + File.separator + "Library") > 0) {
-			return true;
-		}
-
-		// if embedded, check explicit names
-		if (jar.matches("Frameworks[/\\\\]Java(Foundation|EOControl|EOAccess|WebObjects).*")) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
