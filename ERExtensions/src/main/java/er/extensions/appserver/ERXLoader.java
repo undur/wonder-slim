@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
@@ -121,6 +122,12 @@ public class ERXLoader {
 			reorderClasspath();
 		}
 
+		// FIXME:
+		// Note that in the old Loader, operations here were invoked as a part of classpath ordering,
+		// meaning they were invoked in the order specified by the classpath _before_ it was reordered.
+		// Invoking this separately means these operations now occur in the order specified by the reordered classpath.
+		// I doubt this is significant, but it bears keeping in mind while we're working on this.
+		// Hugi 2025-05-29
 		doRandomStuffToClasspathElements();
 
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
@@ -130,6 +137,7 @@ public class ERXLoader {
 	 * A pattern describing a type of classpath entry 
 	 */
 	private enum CPEPattern {
+		System( ClasspathEntry::isSystemJar ),
 		Framework( ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase() ),
 		App( ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase() ),
 		Folder( ".*?/Resources/Java/?$".toLowerCase() ),
@@ -137,14 +145,18 @@ public class ERXLoader {
 		ERFoundation( ".*?/erfoundation.jar" ),
 		ERWebObjects( ".*?/erwebobjects.jar" );
 		
-		String _regex;
+		Function<String,Boolean> _function;
 		
 		CPEPattern( String regex ) {
-			_regex = regex;
+			_function = str -> str.matches( regex );
+		}
+		
+		CPEPattern( Function<String,Boolean> function ) {
+			_function = function;
 		}
 		
 		public boolean matches( String cpeString ) {
-			return cpeString.matches(_regex);
+			return _function.apply(cpeString);
 		}
 	}
 
@@ -176,11 +188,12 @@ public class ERXLoader {
 		 * Windows uses backslashes so we  might need to normalize the element 
 		 */
 		public String normalizedString() {
-			return string.replace(File.separatorChar, '/').toLowerCase();
+			return string().replace(File.separatorChar, '/').toLowerCase();
 		}
 		
 		public CPEType type() {
-			if (isSystemJar(string())) {
+			// FIXME: Note that in only this case, we're not working with the normalized string. That should be easier to work with than the platform-dependent string, so we should fix that // Hugi 2025-05-29
+			if (matchesAny( string(), CPEPattern.System ) ) {
 				return CPEType.System;
 			}
 
@@ -195,7 +208,7 @@ public class ERXLoader {
 			return type().order();
 		}
 		
-		private static boolean isSystemJar(String jar) {
+		public static boolean isSystemJar(String jar) {
 
 			// check system path
 			String systemRoot = System.getProperty("WORootDirectory");
