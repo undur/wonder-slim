@@ -295,7 +295,7 @@ public class ERXLoader {
 				final String[] classpathElements = classpath.split(File.pathSeparator);
 				
 				for (final String classpathElement : classpathElements) {
-					doRandomStuffToClasspathElement(classpathElement);
+					doRandomStuffToClasspathElement(new ClasspathEntry( classpathElement ));
 				}
 			}
 		}
@@ -304,7 +304,11 @@ public class ERXLoader {
 	/**
 	 * FIXME: Here's where we're going to have to do a lot of cleanup // Hugi 2025-05-29
 	 */
-	private void doRandomStuffToClasspathElement(final String classpathElement) {
+	private void doRandomStuffToClasspathElement(final ClasspathEntry classpathEntry) {
+		
+		// FIXME: We want to try to eliminate direct operations on the string // Hugi 2025-05-29
+		final String classpathElement = classpathEntry.string();
+
 		String bundle = classpathElement.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
 		final String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
 
