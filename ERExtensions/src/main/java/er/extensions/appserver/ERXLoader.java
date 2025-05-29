@@ -588,6 +588,7 @@ public class ERXLoader {
 	}
 
 	private Properties readProperties(File file) {
+		
 		if (!file.exists()) {
 			return null;
 		}
@@ -603,6 +604,7 @@ public class ERXLoader {
 	}
 
 	private Properties readProperties(URL url) {
+
 		if (url == null) {
 			return null;
 		}
@@ -623,9 +625,11 @@ public class ERXLoader {
 	}
 
 	private Properties readProperties(NSBundle bundle, String name) {
+
 		if (bundle == null) {
 			return null;
 		}
+
 		if (name == null) {
 			URL url = bundle.pathURLForResourcePath("Properties");
 			if (url != null) {
