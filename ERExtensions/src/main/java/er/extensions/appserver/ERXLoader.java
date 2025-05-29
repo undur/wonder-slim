@@ -123,6 +123,38 @@ public class ERXLoader {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
 
+	/**
+	 * A pattern describing a type of classpath entry 
+	 */
+	private enum CPEPattern {
+		Framework( ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase() ),
+		App( ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase() ),
+		Folder( ".*?/Resources/Java/?$".toLowerCase() ),
+		Project( ".*?/(\\w+)/bin$".toLowerCase() ),
+		ERFoundation( ".*?/erfoundation.jar" ),
+		ERWebObjects( ".*?/erwebobjects.jar" );
+		
+		String _regex;
+		
+		CPEPattern( String regex ) {
+			_regex = regex;
+		}
+		
+		public boolean matches( String string ) {
+			return string.matches(_regex);
+		}
+	}
+
+	private static boolean matchesAny( String string, CPEPattern... patterns ) {
+		for (CPEPattern cpePattern : patterns) {
+			if( cpePattern.matches(string) ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	private void reorderClasspath() {
 		for (final String classpathPropertyName : CLASSPATH_PROPERTY_NAMES ) {
 			final String classpath = System.getProperty(classpathPropertyName);
@@ -132,11 +164,6 @@ public class ERXLoader {
 			}
 			else {
 				log( "Reording classpath property '%s'. Unmodified value is:\n%s".formatted( classpathPropertyName, String.join("\n", classpath.split(File.pathSeparator) ) ) );
-
-				final String frameworkPattern = ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase();
-				final String appPattern = ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase();
-				final String folderPattern = ".*?/Resources/Java/?$".toLowerCase();
-				final String projectPattern = ".*?/(\\w+)/bin$".toLowerCase();
 
 				final List<String> normalLibs = new ArrayList<>();
 				final List<String> systemLibs = new ArrayList<>();
@@ -153,10 +180,10 @@ public class ERXLoader {
 					if (isSystemJar(classpathElement)) {
 						systemLibs.add( classpathElement );
 					}
-					else if (normalizedClasspathElement.matches(frameworkPattern) || normalizedClasspathElement.matches(appPattern) || normalizedClasspathElement.matches(folderPattern)) {
+					else if ( matchesAny( normalizedClasspathElement, CPEPattern.Framework, CPEPattern.App, CPEPattern.Folder ) ) {
 						normalLibs.add( classpathElement );
 					}
-					else if (normalizedClasspathElement.matches(projectPattern) || normalizedClasspathElement.matches(".*?/erfoundation.jar") || normalizedClasspathElement.matches(".*?/erwebobjects.jar")) {
+					else if ( matchesAny( normalizedClasspathElement, CPEPattern.Project, CPEPattern.ERFoundation, CPEPattern.ERWebObjects ) ) {
 						normalLibs.add( classpathElement );
 					}
 					else {
