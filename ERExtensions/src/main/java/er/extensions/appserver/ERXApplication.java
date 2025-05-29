@@ -94,8 +94,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * The horrible thing that does horrible things
+	 * 
+	 * FIXME: Temporarily disabled while we figure out if it actually is needed at all 	// Hugi 2025-05-29
 	 */
-	private static ERXLoader _loader;
+//	private static ERXLoader _loader;
 
 	/**
 	 * Notification to get posted when terminate() is called.
@@ -185,12 +187,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		// If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework.
 		// FIXME: proof-of-concept stage work. Can probably be done more... elegantly // Hugi 2025-05-26
-//		if( Files.exists(Paths.get("build.properties")) ) {
-//			System.out.println("===================================================================================================");
-//			System.out.println("== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==");
-//			System.out.println("===================================================================================================");
-//			System.setProperty("NSProjectBundleEnabled", "true");
-//		}
+		if( Files.exists(Paths.get("build.properties")) ) {
+			System.out.println("===================================================================================================");
+			System.out.println("== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==");
+			System.out.println("===================================================================================================");
+			System.setProperty("NSProjectBundleEnabled", "true");
+		}
 
 		disablePBXProjectWatcher();
 		setup(argv);
@@ -201,7 +203,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
 	public static void setup(String[] argv) {
-		_loader = new ERXLoader(argv);
+//		_loader = new ERXLoader(argv);
 
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
@@ -233,9 +235,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			log.warn("\n\nIt seems that your application class " + application().getClass().getName() + " did not call " + ERXApplication.class.getName() + ".main(argv[], applicationClass) method. " + "Please modify your Application.java as the followings so that " + ERXConfigurationManager.class.getName() + " can provide its " + "rapid turnaround feature completely. \n\n" + "Please change Application.java like this: \n" + "public static void main(String argv[]) { \n" + "    ERXApplication.main(argv, Application.class); \n" + "}\n\n");
 		}
 
-		if ( _loader != null && !_loader.didLoad()) {
-			throw new RuntimeException("ERXExtensions have not been initialized. Debugging information can be enabled by adding the JVM argument: '-Der.extensions.appserver.projectBundleLoading=DEBUG'. Please report the classpath and the rest of the bundles to the Wonder mailing list: " + "\nRemaining frameworks: " + (_loader == null ? "none" : _loader.allFrameworks() ) + "\nClasspath: " + System.getProperty("java.class.path"));
-		}
+//		if ( _loader != null && !_loader.didLoad()) {
+//			throw new RuntimeException("ERXExtensions have not been initialized. Debugging information can be enabled by adding the JVM argument: '-Der.extensions.appserver.projectBundleLoading=DEBUG'. Please report the classpath and the rest of the bundles to the Wonder mailing list: " + "\nRemaining frameworks: " + (_loader == null ? "none" : _loader.allFrameworks() ) + "\nClasspath: " + System.getProperty("java.class.path"));
+//		}
 
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
 			throw new RuntimeException("Your main bundle is \"JavaFoundation\".  You are not launching this WO application properly.  If you are using Eclipse, most likely you launched your WOA as a \"Java Application\" instead of a \"WO Application\".");
