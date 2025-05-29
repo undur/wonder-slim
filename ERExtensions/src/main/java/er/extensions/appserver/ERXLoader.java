@@ -41,11 +41,21 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 import er.extensions.foundation.ERXUtilities;
 
 /**
- * Responsible for classpath munging and ensuring all bundles are loaded
+ * Responsible for classpath munging and ensuring all bundles are loaded.
  * 
- * @property er.extensions.appserver.projectBundleLoading - to see logging this
- *           has to be set on the command line by using
- *           -Der.extensions.appserver.projectBundleLoading=DEBUG
+ * To be precise about what this does.
+ * 
+ * 1. Reorders the classpath, ensuring libraries are loaded and initialized in a "WO-friendly order"
+ * 2. Checks classpath entries to see which are framework bundles. These will get added to 'allFrameworks' and will then receive some further special treatment during bundle loading 
+ * 3. Apparently attempts to check if one of the classpath entries is a WOLips project, if so, assumes we're doing development and sets NSProjectBundleEnabled=true
+ * 4. Loads properties from jar files where present (Whether this is happening in the correct order needs to be checked)
+ * 5. Keeps track of all loaded property files in [urls]. But nothing seems to be done with this variable, so I have no idea why
+ * 6. More stuff...
+ * 
+ * Since this class does it's stuff before logging has been initialized, it has it's own logging.
+ * To enable logging, set -Der.extensions.appserver.projectBundleLoading=DEBUG or invoke enableLogging()
+ * 
+ * Classpath reordering can be disabled by setting -D_DisableClasspathReorder=true
  * 
  * @author ak
  */
