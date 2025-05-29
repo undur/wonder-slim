@@ -105,6 +105,7 @@ public class ERXLoader {
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 
 		reorderClasspath();
+		doRandomStuffToClasspathElements();
 
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
@@ -150,8 +151,6 @@ public class ERXLoader {
 					else {
 						jarLibs.add( classpathElement );
 					}
-
-					doRandomStuffToClasspathElement(classpathElement);
 				}
 
 				// Now collect all our re-ordered classpath element
@@ -179,7 +178,18 @@ public class ERXLoader {
 	}
 
 	private void doRandomStuffToClasspathElements() {
-		
+		for (final String classpathPropertyName : CLASSPATH_PROPERTY_NAMES ) {
+			final String classpath = System.getProperty(classpathPropertyName);
+			log( "Doing random stuff to classpath property '%s'".formatted(classpathPropertyName) );
+
+			if( classpath != null ) {
+				final String[] classpathElements = classpath.split(File.pathSeparator);
+				
+				for (final String classpathElement : classpathElements) {
+					doRandomStuffToClasspathElement(classpathElement);
+				}
+			}
+		}
 	}
 
 	/**
