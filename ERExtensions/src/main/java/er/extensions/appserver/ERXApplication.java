@@ -185,12 +185,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		// If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework.
 		// FIXME: proof-of-concept stage work. Can probably be done more... elegantly // Hugi 2025-05-26
-		if( Files.exists(Paths.get("build.properties")) ) {
-			System.out.println("===================================================================================================");
-			System.out.println("== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==");
-			System.out.println("===================================================================================================");
-			System.setProperty("NSProjectBundleEnabled", "true");
-		}
+//		if( Files.exists(Paths.get("build.properties")) ) {
+//			System.out.println("===================================================================================================");
+//			System.out.println("== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==");
+//			System.out.println("===================================================================================================");
+//			System.setProperty("NSProjectBundleEnabled", "true");
+//		}
 
 		disablePBXProjectWatcher();
 		setup(argv);
