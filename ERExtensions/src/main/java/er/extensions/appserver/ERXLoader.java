@@ -66,6 +66,8 @@ import er.extensions.foundation.ERXUtilities;
  * 
  * Classpath reordering can be disabled by setting -D_DisableClasspathReorder=true
  * 
+ * FIXME: OK, if wonder is after WO on the original classpath, it seems we're prematurely starting application initialization when bundleDidLoad() gets invoked on JavaEOAccess. We need to check that out // Hugi 2025-05-29 
+ * 
  * @author ak
  */
 
@@ -385,6 +387,8 @@ public class ERXLoader {
 					final File projectFile = new File(classpathFolder, ".project");
 
 					if (projectFile.exists()) {
+						log("Found project: " + projectFile);
+
 						try {
 							boolean isBundle = false;
 							Document projectDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(projectFile);
@@ -398,6 +402,7 @@ public class ERXLoader {
 
 								// AK: we don't actually add apps to the bundle process (Mike, why not!?)
 								if (nodeValue != null && nodeValue.startsWith("org.objectstyle.wolips.") && !nodeValue.contains("application")) {
+									log( "Marking as bundle: " + bundle );
 									isBundle = true;
 								}
 							}
@@ -430,7 +435,6 @@ public class ERXLoader {
 						}
 						break;
 					}
-					log("Skipping, no project: " + projectFile);
 				}
 			}
 		}
