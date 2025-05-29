@@ -27,11 +27,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
@@ -333,6 +335,7 @@ public class ERXLoader {
 		final String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
 
 		if (bundle.matches("^\\w+$") && !bundle.matches(excludes)) {
+			log( "doRandomStuffToClasspathElement() : first : " + classpathEntry );
 			final String info = classpathElement.replaceAll("(.*?[/\\\\]\\w+\\.framework/Resources/).*", "$1Info.plist");
 
 			if (new File(info).exists()) {
@@ -344,6 +347,7 @@ public class ERXLoader {
 			}
 		}
 		else if (classpathElement.endsWith(".jar")) {
+			log( "doRandomStuffToClasspathElement() : second : " + classpathEntry );
 			final String infoPlistString = stringFromJar(classpathElement, "Resources/Info.plist");
 
 			if (infoPlistString != null) {
@@ -353,64 +357,71 @@ public class ERXLoader {
 				log("Added Jar bundle: " + bundle);
 			}
 		}
+		else {
+			log( "doRandomStuffToClasspathElement() : third : " + classpathEntry );
 
-		// MS: This is totally hacked in to make Wonder startup properly with the new rapid turnaround.
-		// It's duplicating (poorly) code from NSProjectBundle.
-		// I'm not sure we actually need this anymore, because NSBundle now fires an "all bundles loaded" event.
-		else if (classpathElement.endsWith("/bin") && new File(new File(classpathElement).getParentFile(), ".project").exists()) {
+			final boolean isAntProject = classpathElement.endsWith("/bin") && new File(new File(classpathElement).getParentFile(), ".project").exists();
+			final boolean isMavenProject = classpathElement.endsWith("/target/classes") && new File(new File(classpathElement).getParentFile().getParent(), ".project").exists();
 
-			// AK: I have no idea if this is checked anywhere else,
-			// but this keeps is from having to set it in the VM args.
-			log("Plain bundle: " + classpathElement);
+			log( "isAntProject: " + isAntProject );
+			log( "isMavenProject: " + isMavenProject );
+			log("bundle: " + bundle );
 
-			for (File classpathFolder = new File(bundle); classpathFolder != null && classpathFolder.exists(); classpathFolder = classpathFolder.getParentFile()) {
-				final File projectFile = new File(classpathFolder, ".project");
+			if (isAntProject || isMavenProject) {
+				// AK: I have no idea if this is checked anywhere else,
+				// but this keeps is from having to set it in the VM args.
 
-				if (projectFile.exists()) {
-					try {
-						boolean isBundle = false;
-						Document projectDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(projectFile);
-						projectDocument.normalize();
-						NodeList natureNodeList = projectDocument.getElementsByTagName("nature");
-						for (int natureNodeNum = 0; !isBundle && natureNodeNum < natureNodeList.getLength(); natureNodeNum++) {
-							Element natureContainerNode = (Element) natureNodeList.item(natureNodeNum);
-							Node natureNode = natureContainerNode.getFirstChild();
-							String nodeValue = natureNode.getNodeValue();
+				for (File classpathFolder = new File(bundle); classpathFolder != null && classpathFolder.exists(); classpathFolder = classpathFolder.getParentFile()) {
+					final File projectFile = new File(classpathFolder, ".project");
 
-							// AK: we don't actually add apps to the bundle process (Mike, why not!?)
-							if (nodeValue != null && nodeValue.startsWith("org.objectstyle.wolips.") && !nodeValue.contains("application")) {
-								isBundle = true;
-							}
-						}
-						if (isBundle) {
-							System.setProperty("NSProjectBundleEnabled", "true");
-							String bundleName = classpathFolder.getName();
+					if (projectFile.exists()) {
+						try {
+							boolean isBundle = false;
+							Document projectDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(projectFile);
+							projectDocument.normalize();
+							NodeList natureNodeList = projectDocument.getElementsByTagName("nature");
 
-							File buildPropertiesFile = new File(classpathFolder, "build.properties");
-							if (buildPropertiesFile.exists()) {
-								Properties buildProperties = new Properties();
-								buildProperties.load(new FileReader(buildPropertiesFile));
-								if (buildProperties.get("project.name") != null) {
-									// the project folder might
-									// be named differently than
-									// the actual bundle name
-									bundleName = (String) buildProperties.get("project.name");
+							for (int natureNodeNum = 0; !isBundle && natureNodeNum < natureNodeList.getLength(); natureNodeNum++) {
+								Element natureContainerNode = (Element) natureNodeList.item(natureNodeNum);
+								Node natureNode = natureContainerNode.getFirstChild();
+								String nodeValue = natureNode.getNodeValue();
+
+								// AK: we don't actually add apps to the bundle process (Mike, why not!?)
+								if (nodeValue != null && nodeValue.startsWith("org.objectstyle.wolips.") && !nodeValue.contains("application")) {
+									isBundle = true;
 								}
 							}
 
-							allFrameworks.add(bundleName);
-							log("Added Binary Bundle (Project bundle): " + bundleName);
+							if (isBundle) {
+								System.setProperty("NSProjectBundleEnabled", "true");
+								String bundleName = classpathFolder.getName();
+
+								File buildPropertiesFile = new File(classpathFolder, "build.properties");
+								if (buildPropertiesFile.exists()) {
+									Properties buildProperties = new Properties();
+									buildProperties.load(new FileReader(buildPropertiesFile));
+									if (buildProperties.get("project.name") != null) {
+										// the project folder might
+										// be named differently than
+										// the actual bundle name
+										bundleName = (String) buildProperties.get("project.name");
+									}
+								}
+
+								allFrameworks.add(bundleName);
+								log("Added Binary Bundle (Project bundle): " + bundleName);
+							}
+							else {
+								log("Skipping binary bundle: " + classpathElement);
+							}
 						}
-						else {
-							log("Skipping binary bundle: " + classpathElement);
+						catch (IOException | SAXException | ParserConfigurationException t) {
+							System.err.println("Skipping '" + projectFile + "': " + t);
 						}
+						break;
 					}
-					catch (Throwable t) {
-						System.err.println("Skipping '" + projectFile + "': " + t);
-					}
-					break;
+					log("Skipping, no project: " + projectFile);
 				}
-				log("Skipping, no project: " + projectFile);
 			}
 		}
 	}
