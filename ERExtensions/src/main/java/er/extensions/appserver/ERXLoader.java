@@ -103,7 +103,10 @@ public class ERXLoader {
 	public ERXLoader(String[] argv) {
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 
-		reorderClasspath();
+		if (System.getProperty("_DisableClasspathReorder") == null) {
+			reorderClasspath();
+		}
+
 		doRandomStuffToClasspathElements();
 
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
@@ -135,8 +138,6 @@ public class ERXLoader {
 					// Windows uses backslashes so we need to normalize the element
 					final String normalizedClasspathElement = classpathElement.replace(File.separatorChar, '/').toLowerCase();
 
-					log("Checking: " + classpathElement);
-
 					// all patched frameworks here
 					if (isSystemJar(classpathElement)) {
 						systemLibs.add( classpathElement );
@@ -160,9 +161,7 @@ public class ERXLoader {
 				
 				final String reorderedClasspath = String.join( File.pathSeparator, allLibs );
 
-				if (System.getProperty("_DisableClasspathReorder") == null) {
-					System.setProperty(classpathPropertyName, reorderedClasspath);
-				}
+				System.setProperty(classpathPropertyName, reorderedClasspath);
 				
 				log( "Handled classpath from property '%s'. Modified value is:\n%s".formatted( classpathPropertyName, String.join("\n", reorderedClasspath.split(File.pathSeparator) ) ) );
 				
