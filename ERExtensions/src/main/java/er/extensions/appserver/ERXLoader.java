@@ -99,10 +99,16 @@ public class ERXLoader {
 
 		final List<String> classpathPropertyNames = List.of( "java.class.path", "com.webobjects.classpath" );
 
-		for (String classpathPropertyName : classpathPropertyNames ) {
+		for (final String classpathPropertyName : classpathPropertyNames ) {
 			final String classpath = System.getProperty(classpathPropertyName);
 
-			if (classpath != null) {
+
+			if( classpath == null ) {
+				log( "Classpath from property '%s' is null".formatted(classpathPropertyName) );
+			}
+			else {
+				log( "Handling classpath from property '%s'. Original, unmodified value is:\n%s".formatted( classpathPropertyName, String.join("\n", classpath.split(File.pathSeparator) ) ) );
+
 				final String[] classpathElements = classpath.split(File.pathSeparator);
 
 				final String frameworkPattern = ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase();
@@ -239,6 +245,15 @@ public class ERXLoader {
 				if (System.getProperty("_DisableClasspathReorder") == null) {
 					System.setProperty(classpathPropertyName, newCP);
 				}
+				
+				log( "Handled classpath from property '%s'. Modified value is:\n%s".formatted( classpathPropertyName, String.join("\n", newCP.split(File.pathSeparator) ) ) );
+				
+				if( classpath.equals(newCP ) ) {
+					log( "CLASSPATH '%s' WAS NOT MODIFIED AT ALL".formatted(classpathPropertyName) );
+				}
+				else {
+					log( "CLASSPATH '%s' WAS MODIFIED".formatted(classpathPropertyName) );
+				}
 			}
 		}
 
@@ -318,12 +333,14 @@ public class ERXLoader {
 			log("Loaded unexpected framework bundle '" + bundle.name() + "'. Ensure your build.properties settings like project.name match the bundle name (including case).");
 		}
 
-		final String userName = propertyFromCommandLineFirst("user.name");
+		final String userName = propertyCheckingArgvFirst("user.name");
 
 		applyIfUnset(readProperties(bundle, "Properties." + userName), allBundleProperties);
 		applyIfUnset(readProperties(bundle, null), allBundleProperties);
 
 		if (allFrameworks.isEmpty()) {
+			log( "We've loaded all framework bundles. Now handling '%s'".formatted(bundle.name()) );
+
 			mainProps = null;
 			mainUserProps = null;
 
@@ -335,7 +352,7 @@ public class ERXLoader {
 				allBundleProperties.putAll(mainUserProps);
 			}
 
-			final String userHome = propertyFromCommandLineFirst("user.home");
+			final String userHome = propertyCheckingArgvFirst("user.home");
 			Properties userHomeProps = null;
 
 			if (userHome != null && userHome.length() > 0) {
@@ -450,7 +467,7 @@ public class ERXLoader {
 	/**
 	 * @return The value of the given property, preferring command line arguments
 	 */
-	private static String propertyFromCommandLineFirst(String key) {
+	private static String propertyCheckingArgvFirst(String key) {
 		final String result = (String) propertiesFromArgv.valueForKey(key);
 
 		if (result != null) {
@@ -614,26 +631,29 @@ public class ERXLoader {
 	}
 
 	/**
-	 * For logging before logging has been setup and configured by loading the properties files
+	 * Since most of the work here is performed before any actual logging has been set up or configured, we have to do it ourselves
 	 */
-	private static void log(String msg) {
+	private static void log(String message) {
 		if (loggingEnabled()) {
-			System.out.println(msg);
+			System.out.println( "== ERXLoader : " + message);
 		}
 	}
 
 	/**
 	 * @return true if debugging is enabled for ERXLoader
 	 * 
-	 * CHECKME: We should probably start by initializing _DebugEnabled from the property // Hugi 2025-05-28
+	 * CHECKME: We should probably start by initializing _debugEnabled from the property // Hugi 2025-05-28
 	 */
 	private static boolean loggingEnabled() {
-
+		// FIXME: While we're working on this, we're enabling logging globally. Disable once we're done // Hugi 2025-05-29
+		return true;
+		/*
 		if( _loggingEnabled ) {
 			return true;
 		}
 
 		return "DEBUG".equals(System.getProperty("er.extensions.appserver.projectBundleLoading"));
+		*/
 	}
 
 	/**
