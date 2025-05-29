@@ -45,7 +45,7 @@ import er.extensions.foundation.ERXUtilities;
  * 
  * To be precise about what this does.
  * 
- * 1. Reorders the classpath, ensuring libraries are loaded and initialized in a "WO-friendly order"
+ * 1. Reorders the classpath, ensuring libraries and frameworks are loaded and initialized in a "WO-friendly order"
  * 2. Checks classpath entries to see which are framework bundles. These will get added to 'allFrameworks' and will then receive some further special treatment during bundle loading 
  * 3. Apparently attempts to check if one of the classpath entries is a WOLips project, if so, assumes we're doing development and sets NSProjectBundleEnabled=true
  * 4. Loads properties from jar files where present (Whether this is happening in the correct order needs to be checked)
@@ -70,7 +70,7 @@ public class ERXLoader {
 	private static final List<String> CLASSPATH_PROPERTY_NAMES = List.of( "java.class.path", "com.webobjects.classpath" );
 
 	/**
-	 * Properties passed to the application's main method
+	 * Properties parsed from the application's main method arguments (command line arguments) 
 	 */
 	private static NSDictionary propertiesFromArgv;
 
@@ -107,8 +107,9 @@ public class ERXLoader {
 	private static boolean _loggingEnabled = false;
 
 	/**
-	 * Called prior to actually initializing the app.
-	 * Defines framework load order, class path order, checks patches etc.
+	 * Initializes and runs this thing
+	 * 
+	 * @param argv The arguments passed to the application's man method (a.k.a. command line arguments)
 	 */
 	public ERXLoader(String[] argv) {
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
