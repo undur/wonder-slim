@@ -12,6 +12,8 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -140,8 +143,57 @@ public class ERXLoader {
 			_regex = regex;
 		}
 		
-		public boolean matches( String string ) {
-			return string.matches(_regex);
+		public boolean matches( String cpeString ) {
+			return cpeString.matches(_regex);
+		}
+	}
+
+	private enum CPEType {
+		System(20),
+		Normal(10),
+		Jar(30);
+		
+		int _order;
+		
+		CPEType( int order ) {
+			_order = order;
+		}
+		
+		/**
+		 * @return The int we use to order the classpath. Lower values mean we're earlier in the classpath
+		 */
+		public int order() {
+			return _order;
+		}
+	}
+
+	public record ClasspathEntry( String string ) {
+
+		/**
+		 * Windows uses backslashes so we  might need to normalize the element 
+		 */
+		public String normalizedString() {
+			return string.replace(File.separatorChar, '/').toLowerCase();
+		}
+		
+		public CPEType type() {
+			if (isSystemJar(string())) {
+				return CPEType.System;
+			}
+
+			if ( matchesAny( normalizedString(), CPEPattern.Framework, CPEPattern.App, CPEPattern.Folder ) ) {
+				return CPEType.Normal;
+			}
+
+			if ( matchesAny( normalizedString(), CPEPattern.Project, CPEPattern.ERFoundation, CPEPattern.ERWebObjects ) ) {
+				return CPEType.Normal;
+			}
+
+			return CPEType.Jar;
+		}
+		
+		public int order() {
+			return type().order();
 		}
 	}
 
@@ -157,53 +209,42 @@ public class ERXLoader {
 
 	private void reorderClasspath() {
 		for (final String classpathPropertyName : CLASSPATH_PROPERTY_NAMES ) {
-			final String classpath = System.getProperty(classpathPropertyName);
+			final String classpathString = System.getProperty(classpathPropertyName);
 
-			if( classpath == null ) {
+			if( classpathString == null ) {
 				log( "Reording classpath property '%s'. It is null, so nothing done".formatted(classpathPropertyName) );
 			}
 			else {
-				log( "Reording classpath property '%s'. Unmodified value is:\n%s".formatted( classpathPropertyName, String.join("\n", classpath.split(File.pathSeparator) ) ) );
+				log( "Reording classpath property '%s'. Unmodified value is:\n%s".formatted( classpathPropertyName, String.join("\n", classpathString.split(File.pathSeparator) ) ) );
 
-				final List<String> normalLibs = new ArrayList<>();
-				final List<String> systemLibs = new ArrayList<>();
-				final List<String> jarLibs = new ArrayList<>();
+				final String[] classpathElements = classpathString.split(File.pathSeparator);
 
-				final String[] classpathElements = classpath.split(File.pathSeparator);
+				// Construct a list of ClasspathEntries from the string elements of the original classpath
+				// and order it by the ordering specified by each ClasspathEntry's type
+				final List<ClasspathEntry> classPathEntries = Arrays
+					.stream(classpathElements)
+					.map(ClasspathEntry::new) // Generate a new ClasspathEntry from each string on the classpath
+					.sorted( Comparator.comparing(ClasspathEntry::order)) // Order the ClasspathEntries using the ordering specified by the jar's type
+					.toList();
 
-				for (final String classpathElement : classpathElements) {
+				log( "We've reordered the classpath, here's the ordered list of classpath entries along with their associated types" );
 
-					// Windows uses backslashes so we need to normalize the element
-					final String normalizedClasspathElement = classpathElement.replace(File.separatorChar, '/').toLowerCase();
-
-					// all patched frameworks here
-					if (isSystemJar(classpathElement)) {
-						systemLibs.add( classpathElement );
-					}
-					else if ( matchesAny( normalizedClasspathElement, CPEPattern.Framework, CPEPattern.App, CPEPattern.Folder ) ) {
-						normalLibs.add( classpathElement );
-					}
-					else if ( matchesAny( normalizedClasspathElement, CPEPattern.Project, CPEPattern.ERFoundation, CPEPattern.ERWebObjects ) ) {
-						normalLibs.add( classpathElement );
-					}
-					else {
-						jarLibs.add( classpathElement );
-					}
+				for (ClasspathEntry classpathEntry : classPathEntries) {
+					log( classpathEntry.type() + " :: " + classpathEntry.string() );
 				}
 
-				// Now collect all our re-ordered classpath element
-				final List<String> allLibs = new ArrayList<>();
-				allLibs.addAll(normalLibs);
-				allLibs.addAll(systemLibs);
-				allLibs.addAll(jarLibs);
-				
-				final String reorderedClasspath = String.join( File.pathSeparator, allLibs );
+				// Generate a new classpath string from the ordered list
+				final String reorderedClasspathString = classPathEntries
+					.stream()
+					.map(ClasspathEntry::string)
+					.collect( Collectors.joining(File.pathSeparator));
+	
+				System.setProperty(classpathPropertyName, reorderedClasspathString);
 
-				System.setProperty(classpathPropertyName, reorderedClasspath);
+				// Finally, everything below here is just logging
+				log( "Handled classpath from property '%s'. Modified value is:\n%s".formatted( classpathPropertyName, String.join("\n", reorderedClasspathString.split(File.pathSeparator) ) ) );
 				
-				log( "Handled classpath from property '%s'. Modified value is:\n%s".formatted( classpathPropertyName, String.join("\n", reorderedClasspath.split(File.pathSeparator) ) ) );
-				
-				if( classpath.equals(reorderedClasspath ) ) {
+				if( classpathString.equals(reorderedClasspathString ) ) {
 					log( "CLASSPATH '%s' WAS NOT MODIFIED AT ALL".formatted(classpathPropertyName) );
 				}
 				else {
@@ -561,7 +602,7 @@ public class ERXLoader {
 		}
 	}
 
-	private boolean isSystemJar(String jar) {
+	private static boolean isSystemJar(String jar) {
 
 		// check system path
 		String systemRoot = System.getProperty("WORootDirectory");
