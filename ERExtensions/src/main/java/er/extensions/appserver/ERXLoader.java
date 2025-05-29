@@ -399,7 +399,11 @@ public class ERXLoader {
 
 			NSProperties._setProperties(props);
 
-			insertCommandLineArguments();
+			// Add properties from the command line
+			for( Object key : propertiesFromArgv.allKeys() ) {
+				Object value = propertiesFromArgv.get(key);
+				NSProperties._setProperty((String) key, (String) value);
+			}
 
 			if (userHomeProps != null) {
 				urls.add(0, urls.remove(urls.size() - 1));
@@ -586,16 +590,6 @@ public class ERXLoader {
 		}
 		catch (IOException e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
-		}
-	}
-
-	/**
-	 * Copies properties from the command line to the static dictionary propertiesFromArgv.
-	 */
-	private static void insertCommandLineArguments() {
-		for( Object key : propertiesFromArgv.allKeys() ) {
-			Object value = propertiesFromArgv.get(key);
-			NSProperties._setProperty((String) key, (String) value);
 		}
 	}
 
