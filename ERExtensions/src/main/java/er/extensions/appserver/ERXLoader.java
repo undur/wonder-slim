@@ -232,7 +232,7 @@ public class ERXLoader {
 			// check system path
 			String systemRoot = System.getProperty("WORootDirectory");
 
-			if (systemRoot != null) {
+			if (systemRoot != null && !systemRoot.isBlank()) {
 				if (jar.startsWith(systemRoot)) {
 					return true;
 				}
