@@ -418,11 +418,11 @@ public class ERXLoader {
 	/**
 	 * FIXME: This should probably return what it's read // Hugi 2025-05-28 
 	 */
-	private void collectMainProps(String userName) {
+	private void collectMainProps(String username) {
 		final NSBundle mainBundle = mainBundle();
 
 		if (mainBundle != null) {
-			mainUserProps = readProperties(mainBundle, "Properties." + userName);
+			mainUserProps = readProperties(mainBundle, "Properties." + username);
 			mainProps = readProperties(mainBundle, "Properties");
 		}
 
@@ -434,19 +434,19 @@ public class ERXLoader {
 			}
 			
 			// Start by trying to read Properties as if our working directory is a .woa bundle 
-			mainUserProps = readProperties(new File(woUserDir, "Contents" + File.separator + "Resources" + File.separator + "Properties." + userName));
+			mainUserProps = readProperties(new File(woUserDir, "Contents" + File.separator + "Resources" + File.separator + "Properties." + username));
 			mainProps = readProperties(new File(woUserDir, "Contents" + File.separator + "Resources" + File.separator + "Properties"));
 
 			// If no main Properties were found, try assuming our working directory is a maven project with standard structure
 			if (mainProps == null) {
-				mainUserProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "resources" + File.separator + "Properties." + userName));
+				mainUserProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "resources" + File.separator + "Properties." + username));
 				mainProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "resources" + File.separator + "Properties"));
 			}
 			
 			// And finally, check for a Properties file in a maven project using the the "woresources" resource folder name.
 			// FIXME: This is getting ridiculous, we need to change this lookup to a loop (or clean this up in some other way) // Hugi 2025-05-26
 			if (mainProps == null) {
-				mainUserProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "woresources" + File.separator + "Properties." + userName));
+				mainUserProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "woresources" + File.separator + "Properties." + username));
 				mainProps = readProperties(new File(woUserDir, "src" + File.separator + "main" + File.separator + "woresources" + File.separator + "Properties"));
 			}
 		}
@@ -472,7 +472,7 @@ public class ERXLoader {
 					if (mainBundleJarPattern.matcher(urlAsString.toLowerCase()).find()) {
 						try {
 							propertiesPath = new URL(URLDecoder.decode(urlAsString, StandardCharsets.UTF_8));
-							userPropertiesPath = new URL(propertiesPath.toExternalForm() + userName);
+							userPropertiesPath = new URL(propertiesPath.toExternalForm() + username);
 						}
 						catch (MalformedURLException exception) {
 							exception.printStackTrace();
