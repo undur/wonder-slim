@@ -141,9 +141,11 @@ public class ERXLoader {
 		Framework( ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase() ),
 		App( ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase() ),
 		Folder( ".*?/Resources/Java/?$".toLowerCase() ),
-		Project( ".*?/(\\w+)/bin$".toLowerCase() ),
-		ERFoundation( ".*?/erfoundation.jar" ),
-		ERWebObjects( ".*?/erwebobjects.jar" );
+		AntProject( ".*?/(\\w+)/bin$".toLowerCase() ),
+		MavenProject( str -> str.contains("target/classes") ),
+		ERFoundation( str -> str.contains("ERFoundation") ),
+		ERWebObjects( str -> str.contains("ERWebObjects") ),
+		ERExtensions( str -> str.contains("ERExtensions") );
 		
 		Function<String,Boolean> _function;
 		
@@ -162,8 +164,9 @@ public class ERXLoader {
 
 	private enum CPEType {
 		Normal(10), // FIXME: I have absolutely no idea what is meant by "normal", not all that descriptive // Hugi 2025-05-29
-		System(20), // FIXME: This seems to mean "Is any WebObjects library"? // Hugi 2025-05-29
-		Jar(30); // FIXME: These are not "jars", it's a catch-all for "everything else", really // Hugi 2025-05-29
+		WebObjectsHack(20), // Defines any library that overrides WO functionality and thus must be aded on the classpath before WebObjects
+		WebObjects(30), // Defines the built-in WebObjects libraries
+		Jar(40); // FIXME: These are not "jars", it's a catch-all for "everything else", really // Hugi 2025-05-29
 		
 		int _order;
 		
@@ -194,11 +197,15 @@ public class ERXLoader {
 		public CPEType type() {
 			// FIXME: Note that in only this case, we're not working with the normalized string. That should be easier to work with than the platform-dependent string, so we should fix that // Hugi 2025-05-29
 			if (matchesAny( string(), CPEPattern.System ) ) {
-				return CPEType.System;
+				return CPEType.WebObjects;
 			}
 
-			if ( matchesAny( normalizedString(), CPEPattern.Framework, CPEPattern.App, CPEPattern.Folder, CPEPattern.Project, CPEPattern.ERFoundation, CPEPattern.ERWebObjects ) ) {
+			if ( matchesAny( normalizedString(), CPEPattern.Framework, CPEPattern.App, CPEPattern.Folder, CPEPattern.AntProject, CPEPattern.MavenProject ) ) {
 				return CPEType.Normal;
+			}
+
+			if (matchesAny( string(), CPEPattern.ERFoundation, CPEPattern.ERWebObjects, CPEPattern.ERExtensions ) ) {
+				return CPEType.WebObjectsHack;
 			}
 
 			return CPEType.Jar;
@@ -220,7 +227,7 @@ public class ERXLoader {
 			}
 
 			// check maven path
-			if (jar.indexOf("webobjects" + File.separator + "apple") > 0) {
+			if (jar.indexOf("com/webobjects") > 0) {
 				return true;
 			}
 
