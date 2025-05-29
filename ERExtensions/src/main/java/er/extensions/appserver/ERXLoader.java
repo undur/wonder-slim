@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -79,6 +80,8 @@ public class ERXLoader {
 
 	/**
 	 * URLs to loaded property files get added here, apparently, then nothing is done with them?
+	 * 
+	 * FIXME: What exactly is the point of keeping track if this? // Hugi 2025-05-29
 	 */
 	private List<URL> urls = new ArrayList<>();
 	
@@ -598,8 +601,7 @@ public class ERXLoader {
 			return readProperties(url);
 		}
 		catch (MalformedURLException e) {
-			e.printStackTrace();
-			return null;
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -615,15 +617,14 @@ public class ERXLoader {
 			urls.add(url);
 			return result;
 		}
-		catch (MalformedURLException exception) {
-			exception.printStackTrace();
-			return null;
-		}
-		catch (IOException exception) {
-			return null;
+		catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 
+	/**
+	 * FIXME: Why are we going two apparently identical ways to load properties here, based on if [name] is null? Why not just invoke with "Properties"? // Hugi 2025-05-29 
+	 */
 	private Properties readProperties(NSBundle bundle, String name) {
 
 		if (bundle == null) {
@@ -632,27 +633,27 @@ public class ERXLoader {
 
 		if (name == null) {
 			URL url = bundle.pathURLForResourcePath("Properties");
+
 			if (url != null) {
 				urls.add(url);
 			}
+
 			return bundle.properties();
 		}
 
 		try (InputStream inputStream = bundle.inputStreamForResourcePath(name)) {
+
 			if (inputStream == null) {
 				return null;
 			}
+
 			Properties result = new Properties();
 			result.load(inputStream);
 			urls.add(bundle.pathURLForResourcePath(name));
 			return result;
 		}
-		catch (MalformedURLException exception) {
-			exception.printStackTrace();
-			return null;
-		}
-		catch (IOException exception) {
-			return null;
+		catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 
