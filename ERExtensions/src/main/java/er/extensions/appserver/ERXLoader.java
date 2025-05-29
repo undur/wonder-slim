@@ -116,9 +116,9 @@ public class ERXLoader {
 				final String folderPattern = ".*?/Resources/Java/?$".toLowerCase();
 				final String projectPattern = ".*?/(\\w+)/bin$".toLowerCase();
 
-				String normalLibs = "";
-				String systemLibs = "";
-				String jarLibs = "";
+				final List<String> normalLibs = new ArrayList<>();
+				final List<String> systemLibs = new ArrayList<>();
+				final List<String> jarLibs = new ArrayList<>();
 
 				for (final String classpathElement : classpathElements) {
 
@@ -129,16 +129,16 @@ public class ERXLoader {
 
 					// all patched frameworks here
 					if (isSystemJar(classpathElement)) {
-						systemLibs += classpathElement + File.pathSeparator;
+						systemLibs.add( classpathElement );
 					}
 					else if (normalizedClasspathElement.matches(frameworkPattern) || normalizedClasspathElement.matches(appPattern) || normalizedClasspathElement.matches(folderPattern)) {
-						normalLibs += classpathElement + File.pathSeparator;
+						normalLibs.add( classpathElement );
 					}
 					else if (normalizedClasspathElement.matches(projectPattern) || normalizedClasspathElement.matches(".*?/erfoundation.jar") || normalizedClasspathElement.matches(".*?/erwebobjects.jar")) {
-						normalLibs += classpathElement + File.pathSeparator;
+						normalLibs.add( classpathElement );
 					}
 					else {
-						jarLibs += classpathElement + File.pathSeparator;
+						jarLibs.add( classpathElement );
 					}
 
 					String bundle = classpathElement.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
@@ -227,28 +227,21 @@ public class ERXLoader {
 					}
 				}
 
-				String newCP = "";
-
-				if (normalLibs.length() > 1) {
-					normalLibs = normalLibs.substring(0, normalLibs.length() - 1);
-					newCP += normalLibs;
-				}
-				if (systemLibs.length() > 1) {
-					systemLibs = systemLibs.substring(0, systemLibs.length() - 1);
-					newCP += (newCP.length() > 0 ? File.pathSeparator : "") + systemLibs;
-				}
-				if (jarLibs.length() > 1) {
-					jarLibs = jarLibs.substring(0, jarLibs.length() - 1);
-					newCP += (newCP.length() > 0 ? File.pathSeparator : "") + jarLibs;
-				}
+				// Now collect all our re-ordered classpath element
+				final List<String> allLibs = new ArrayList<>();
+				allLibs.addAll(normalLibs);
+				allLibs.addAll(systemLibs);
+				allLibs.addAll(jarLibs);
+				
+				final String reorderedClasspath = String.join( File.pathSeparator, allLibs );
 
 				if (System.getProperty("_DisableClasspathReorder") == null) {
-					System.setProperty(classpathPropertyName, newCP);
+					System.setProperty(classpathPropertyName, reorderedClasspath);
 				}
 				
-				log( "Handled classpath from property '%s'. Modified value is:\n%s".formatted( classpathPropertyName, String.join("\n", newCP.split(File.pathSeparator) ) ) );
+				log( "Handled classpath from property '%s'. Modified value is:\n%s".formatted( classpathPropertyName, String.join("\n", reorderedClasspath.split(File.pathSeparator) ) ) );
 				
-				if( classpath.equals(newCP ) ) {
+				if( classpath.equals(reorderedClasspath ) ) {
 					log( "CLASSPATH '%s' WAS NOT MODIFIED AT ALL".formatted(classpathPropertyName) );
 				}
 				else {
