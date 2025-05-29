@@ -109,8 +109,6 @@ public class ERXLoader {
 			else {
 				log( "Handling classpath from property '%s'. Original, unmodified value is:\n%s".formatted( classpathPropertyName, String.join("\n", classpath.split(File.pathSeparator) ) ) );
 
-				final String[] classpathElements = classpath.split(File.pathSeparator);
-
 				final String frameworkPattern = ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase();
 				final String appPattern = ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase();
 				final String folderPattern = ".*?/Resources/Java/?$".toLowerCase();
@@ -119,6 +117,8 @@ public class ERXLoader {
 				final List<String> normalLibs = new ArrayList<>();
 				final List<String> systemLibs = new ArrayList<>();
 				final List<String> jarLibs = new ArrayList<>();
+
+				final String[] classpathElements = classpath.split(File.pathSeparator);
 
 				for (final String classpathElement : classpathElements) {
 
