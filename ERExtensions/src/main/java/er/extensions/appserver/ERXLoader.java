@@ -56,6 +56,13 @@ public class ERXLoader {
 	private static final Logger log = LoggerFactory.getLogger(ERXLoader.class);
 
 	/**
+	 * Names of properties storing classpaths.
+	 * 
+	 * FIXME: I'm not actually sure why we're including com.webobjects.classpath? I mean... It doesn't do any harm, but does it ever have a value? 	// Hugi 2025-05-29
+	 */
+	private static final List<String> CLASSPATH_PROPERTY_NAMES = List.of( "java.class.path", "com.webobjects.classpath" );
+
+	/**
 	 * Properties passed to the application's main method
 	 */
 	private static NSDictionary propertiesFromArgv;
@@ -97,17 +104,20 @@ public class ERXLoader {
 	public ERXLoader(String[] argv) {
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 
-		final List<String> classpathPropertyNames = List.of( "java.class.path", "com.webobjects.classpath" );
+		reorderClasspath();
 
-		for (final String classpathPropertyName : classpathPropertyNames ) {
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
+	}
+
+	private void reorderClasspath() {
+		for (final String classpathPropertyName : CLASSPATH_PROPERTY_NAMES ) {
 			final String classpath = System.getProperty(classpathPropertyName);
 
-
 			if( classpath == null ) {
-				log( "Classpath from property '%s' is null".formatted(classpathPropertyName) );
+				log( "Reording classpath property '%s'. It is null, so nothing done".formatted(classpathPropertyName) );
 			}
 			else {
-				log( "Handling classpath from property '%s'. Original, unmodified value is:\n%s".formatted( classpathPropertyName, String.join("\n", classpath.split(File.pathSeparator) ) ) );
+				log( "Reording classpath property '%s'. Unmodified value is:\n%s".formatted( classpathPropertyName, String.join("\n", classpath.split(File.pathSeparator) ) ) );
 
 				final String frameworkPattern = ".*?/(\\w+)\\.framework/Resources/Java/\\1.jar".toLowerCase();
 				final String appPattern = ".*?/(\\w+)\\.woa/Contents/Resources/Java/\\1.jar".toLowerCase();
@@ -166,11 +176,16 @@ public class ERXLoader {
 				}
 			}
 		}
-
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
 	}
 
-	public void doRandomStuffToClasspathElement(final String classpathElement) {
+	private void doRandomStuffToClasspathElements() {
+		
+	}
+
+	/**
+	 * FIXME: Here's where we're going to have to do a lot of cleanup // Hugi 2025-05-29
+	 */
+	private void doRandomStuffToClasspathElement(final String classpathElement) {
 		String bundle = classpathElement.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
 		final String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
 
