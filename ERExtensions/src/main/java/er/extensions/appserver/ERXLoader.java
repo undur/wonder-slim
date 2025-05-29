@@ -11,6 +11,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -113,11 +116,18 @@ public class ERXLoader {
 	private static boolean _loggingEnabled = false;
 
 	/**
+	 * An optional logfile we can use for storing our log 
+	 */
+	private static Path _logfile;
+
+	/**
 	 * Initializes and runs this thing
 	 * 
 	 * @param argv The arguments passed to the application's man method (a.k.a. command line arguments)
 	 */
 	public ERXLoader(String[] argv) {
+		log( "Constructing ERXLoader with arguments: " + Arrays.asList( argv ) );
+
 		propertiesFromArgv = NSProperties.valuesFromArgv(argv);
 
 		if (System.getProperty("_DisableClasspathReorder") == null) {
@@ -766,7 +776,20 @@ public class ERXLoader {
 	 */
 	private static void log(String message) {
 		if (loggingEnabled()) {
-			System.out.println( "== ERXLoader : " + message);
+			String logmessage = "== ERXLoader : " + message;
+
+			System.out.println( logmessage);
+			
+			// If a logfile is set, we also append to that.
+			if( _logfile != null ) {
+				try {
+					logmessage += "\n";
+					Files.write(_logfile, logmessage.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE );
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -794,6 +817,12 @@ public class ERXLoader {
 		_loggingEnabled = true;
 	}
 
+	/**
+	 * Allows us to specify in code if debug logging should be enabled for this awesomeness 
+	 */
+	public static void setLogFile( final Path path ) {
+		_logfile = path;
+	}
 	/**
 	 * @return True if we've processed every framework bundle we're avare of
 	 */
