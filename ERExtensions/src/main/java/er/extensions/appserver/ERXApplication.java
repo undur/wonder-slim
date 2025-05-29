@@ -240,7 +240,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 //		}
 
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
-			throw new RuntimeException("Your main bundle is \"JavaFoundation\".  You are not launching this WO application properly.  If you are using Eclipse, most likely you launched your WOA as a \"Java Application\" instead of a \"WO Application\".");
+			throw new RuntimeException("Your main bundle is \"JavaFoundation\". Are you sure ERExtensions is the first <dependency> in your pom? And if you're developing; are you sure your working directory is your application's project?");
 		}
 
 		ERXLoggingSupport.reInitConsoleAppenders();
