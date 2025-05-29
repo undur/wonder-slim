@@ -76,7 +76,7 @@ public class ERXLoader {
 	/**
 	 * Properties parsed from the application's main method arguments (command line arguments) 
 	 */
-	private static NSDictionary propertiesFromArgv;
+	private static Map propertiesFromArgv;
 
 	/**
 	 * All properties loaded from bundle properties (gets populated as each bundle gets loaded) 
@@ -524,7 +524,7 @@ public class ERXLoader {
 			NSProperties._setProperties(props);
 
 			// Add properties from the command line
-			for( Object key : propertiesFromArgv.allKeys() ) {
+			for( Object key : propertiesFromArgv.keySet() ) {
 				Object value = propertiesFromArgv.get(key);
 				NSProperties._setProperty((String) key, (String) value);
 			}
@@ -630,7 +630,7 @@ public class ERXLoader {
 	 * @return The value of the given property, preferring command line arguments
 	 */
 	private static String propertyCheckingArgvFirst(String key) {
-		final String result = (String) propertiesFromArgv.valueForKey(key);
+		final String result = (String) propertiesFromArgv.get(key);
 
 		if (result != null) {
 			return result;
