@@ -141,90 +141,7 @@ public class ERXLoader {
 						jarLibs.add( classpathElement );
 					}
 
-					String bundle = classpathElement.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
-					final String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
-
-					if (bundle.matches("^\\w+$") && !bundle.matches(excludes)) {
-						final String info = classpathElement.replaceAll("(.*?[/\\\\]\\w+\\.framework/Resources/).*", "$1Info.plist");
-
-						if (new File(info).exists()) {
-							allFrameworks.add(bundle);
-							log("Added Real Bundle: " + bundle);
-						}
-						else {
-							log("Omitted: " + info);
-						}
-					}
-					else if (classpathElement.endsWith(".jar")) {
-						final String infoPlistString = stringFromJar(classpathElement, "Resources/Info.plist");
-
-						if (infoPlistString != null) {
-							NSDictionary dict = (NSDictionary) NSPropertyListSerialization.propertyListFromString(infoPlistString);
-							bundle = (String) dict.objectForKey("CFBundleExecutable");
-							allFrameworks.add(bundle);
-							log("Added Jar bundle: " + bundle);
-						}
-					}
-
-					// MS: This is totally hacked in to make Wonder startup properly with the new rapid turnaround.
-					// It's duplicating (poorly) code from NSProjectBundle.
-					// I'm not sure we actually need this anymore, because NSBundle now fires an "all bundles loaded" event.
-					else if (classpathElement.endsWith("/bin") && new File(new File(classpathElement).getParentFile(), ".project").exists()) {
-
-						// AK: I have no idea if this is checked anywhere else,
-						// but this keeps is from having to set it in the VM args.
-						log("Plain bundle: " + classpathElement);
-
-						for (File classpathFolder = new File(bundle); classpathFolder != null && classpathFolder.exists(); classpathFolder = classpathFolder.getParentFile()) {
-							final File projectFile = new File(classpathFolder, ".project");
-
-							if (projectFile.exists()) {
-								try {
-									boolean isBundle = false;
-									Document projectDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(projectFile);
-									projectDocument.normalize();
-									NodeList natureNodeList = projectDocument.getElementsByTagName("nature");
-									for (int natureNodeNum = 0; !isBundle && natureNodeNum < natureNodeList.getLength(); natureNodeNum++) {
-										Element natureContainerNode = (Element) natureNodeList.item(natureNodeNum);
-										Node natureNode = natureContainerNode.getFirstChild();
-										String nodeValue = natureNode.getNodeValue();
-
-										// AK: we don't actually add apps to the bundle process (Mike, why not!?)
-										if (nodeValue != null && nodeValue.startsWith("org.objectstyle.wolips.") && !nodeValue.contains("application")) {
-											isBundle = true;
-										}
-									}
-									if (isBundle) {
-										System.setProperty("NSProjectBundleEnabled", "true");
-										String bundleName = classpathFolder.getName();
-
-										File buildPropertiesFile = new File(classpathFolder, "build.properties");
-										if (buildPropertiesFile.exists()) {
-											Properties buildProperties = new Properties();
-											buildProperties.load(new FileReader(buildPropertiesFile));
-											if (buildProperties.get("project.name") != null) {
-												// the project folder might
-												// be named differently than
-												// the actual bundle name
-												bundleName = (String) buildProperties.get("project.name");
-											}
-										}
-
-										allFrameworks.add(bundleName);
-										log("Added Binary Bundle (Project bundle): " + bundleName);
-									}
-									else {
-										log("Skipping binary bundle: " + classpathElement);
-									}
-								}
-								catch (Throwable t) {
-									System.err.println("Skipping '" + projectFile + "': " + t);
-								}
-								break;
-							}
-							log("Skipping, no project: " + projectFile);
-						}
-					}
+					doRandomStuffToClasspathElement(classpathElement);
 				}
 
 				// Now collect all our re-ordered classpath element
@@ -251,6 +168,93 @@ public class ERXLoader {
 		}
 
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), "NSBundleDidLoadNotification", null);
+	}
+
+	public void doRandomStuffToClasspathElement(final String classpathElement) {
+		String bundle = classpathElement.replaceAll(".*?[/\\\\](\\w+)\\.framework.*", "$1");
+		final String excludes = "(JavaVM|JavaWebServicesSupport|JavaEODistribution|JavaWebServicesGeneration|JavaWebServicesClient)";
+
+		if (bundle.matches("^\\w+$") && !bundle.matches(excludes)) {
+			final String info = classpathElement.replaceAll("(.*?[/\\\\]\\w+\\.framework/Resources/).*", "$1Info.plist");
+
+			if (new File(info).exists()) {
+				allFrameworks.add(bundle);
+				log("Added Real Bundle: " + bundle);
+			}
+			else {
+				log("Omitted: " + info);
+			}
+		}
+		else if (classpathElement.endsWith(".jar")) {
+			final String infoPlistString = stringFromJar(classpathElement, "Resources/Info.plist");
+
+			if (infoPlistString != null) {
+				NSDictionary dict = (NSDictionary) NSPropertyListSerialization.propertyListFromString(infoPlistString);
+				bundle = (String) dict.objectForKey("CFBundleExecutable");
+				allFrameworks.add(bundle);
+				log("Added Jar bundle: " + bundle);
+			}
+		}
+
+		// MS: This is totally hacked in to make Wonder startup properly with the new rapid turnaround.
+		// It's duplicating (poorly) code from NSProjectBundle.
+		// I'm not sure we actually need this anymore, because NSBundle now fires an "all bundles loaded" event.
+		else if (classpathElement.endsWith("/bin") && new File(new File(classpathElement).getParentFile(), ".project").exists()) {
+
+			// AK: I have no idea if this is checked anywhere else,
+			// but this keeps is from having to set it in the VM args.
+			log("Plain bundle: " + classpathElement);
+
+			for (File classpathFolder = new File(bundle); classpathFolder != null && classpathFolder.exists(); classpathFolder = classpathFolder.getParentFile()) {
+				final File projectFile = new File(classpathFolder, ".project");
+
+				if (projectFile.exists()) {
+					try {
+						boolean isBundle = false;
+						Document projectDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(projectFile);
+						projectDocument.normalize();
+						NodeList natureNodeList = projectDocument.getElementsByTagName("nature");
+						for (int natureNodeNum = 0; !isBundle && natureNodeNum < natureNodeList.getLength(); natureNodeNum++) {
+							Element natureContainerNode = (Element) natureNodeList.item(natureNodeNum);
+							Node natureNode = natureContainerNode.getFirstChild();
+							String nodeValue = natureNode.getNodeValue();
+
+							// AK: we don't actually add apps to the bundle process (Mike, why not!?)
+							if (nodeValue != null && nodeValue.startsWith("org.objectstyle.wolips.") && !nodeValue.contains("application")) {
+								isBundle = true;
+							}
+						}
+						if (isBundle) {
+							System.setProperty("NSProjectBundleEnabled", "true");
+							String bundleName = classpathFolder.getName();
+
+							File buildPropertiesFile = new File(classpathFolder, "build.properties");
+							if (buildPropertiesFile.exists()) {
+								Properties buildProperties = new Properties();
+								buildProperties.load(new FileReader(buildPropertiesFile));
+								if (buildProperties.get("project.name") != null) {
+									// the project folder might
+									// be named differently than
+									// the actual bundle name
+									bundleName = (String) buildProperties.get("project.name");
+								}
+							}
+
+							allFrameworks.add(bundleName);
+							log("Added Binary Bundle (Project bundle): " + bundleName);
+						}
+						else {
+							log("Skipping binary bundle: " + classpathElement);
+						}
+					}
+					catch (Throwable t) {
+						System.err.println("Skipping '" + projectFile + "': " + t);
+					}
+					break;
+				}
+				log("Skipping, no project: " + projectFile);
+			}
+		}
 	}
 
 	/**
