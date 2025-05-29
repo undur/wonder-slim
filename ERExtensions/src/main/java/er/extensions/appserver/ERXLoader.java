@@ -24,8 +24,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -53,8 +51,6 @@ import er.extensions.foundation.ERXUtilities;
  */
 
 public class ERXLoader {
-
-	private static final Logger log = LoggerFactory.getLogger(ERXLoader.class);
 
 	/**
 	 * Names of properties storing classpaths.
@@ -183,6 +179,7 @@ public class ERXLoader {
 	private void doRandomStuffToClasspathElements() {
 		for (final String classpathPropertyName : CLASSPATH_PROPERTY_NAMES ) {
 			final String classpath = System.getProperty(classpathPropertyName);
+
 			log( "Doing random stuff to classpath property '%s'".formatted(classpathPropertyName) );
 
 			if( classpath != null ) {
@@ -560,7 +557,7 @@ public class ERXLoader {
 	private static String stringFromJar(final String pathToJar, final String pathInJar) {
 
 		if (!new File(pathToJar).exists()) {
-			log.warn("Will not process jar '" + pathToJar + "' because it cannot be found ...");
+			log("Will not process jar '%s' because it cannot be found ...".formatted( pathToJar));
 			return null;
 		}
 
