@@ -501,6 +501,8 @@ public class ERXLoader {
 	public void bundleDidLoad(NSNotification n) {
 		final NSBundle bundle = (NSBundle) n.object();
 
+		log( "Invoking bundleDidLoad() for : " + bundle.name());
+
 		if (allFrameworks.contains(bundle.name())) {
 			allFrameworks.remove(bundle.name());
 			log("Loaded " + bundle.name() + ". Remaining: " + allFrameworks);
