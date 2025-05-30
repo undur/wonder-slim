@@ -318,7 +318,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * 
 	 * FIXME: Move all the environment/setup validation stuff to a separate class at some point. Keep ERXApplication all nice and clean // Hugi 2025-05-30
 	 */
-	private void checkClasspathValidity() throws Exception {
+	private static void checkClasspathValidity() throws Exception {
 		final String[] classpathElements = System.getProperty("java.class.path").split(File.pathSeparator);
 		
 		boolean foundERFoundation = false;
@@ -342,7 +342,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			
 			if( cpeLowercase.contains("javawebobjects") || cpeLowercase.contains("javafoundation") ) {
 				if( !foundERFoundation || !foundERWebObjects || !foundERExtensions ) {
-					throw new IllegalStateException("ERExtensions must be loaded before JavaWebObjects and JavaFoundation. The best way to ensure this is to make ERExtensions is your first <dependency>");
+					throw new IllegalStateException("Whoops. ERFoundation, ERWebObjects and ERExtensions must appear earlier on the classpath than JavaFoundation and JavaWebObjects. The best way to ensure this is to make ERExtensions is your first <dependency>");
 				}
 			}
 		}
