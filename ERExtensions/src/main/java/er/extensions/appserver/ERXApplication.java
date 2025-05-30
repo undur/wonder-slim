@@ -184,19 +184,22 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public static void main(String argv[], Class applicationClass) {
 		wasERXApplicationMainInvoked = true;
+		useProjectBundleIfDeveloping();
+		disablePBXProjectWatcher();
+		setup(argv);
+		WOApplication.main(argv, applicationClass);
+	}
 
-		// If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework.
-		// FIXME: proof-of-concept stage work. Can probably be done more... elegantly // Hugi 2025-05-26
+	/**
+	 * If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework by setting NSProjectBundleEnabled=true
+	 */
+	private static void useProjectBundleIfDeveloping() {
 		if( Files.exists(Paths.get("build.properties")) ) {
 			System.out.println("===================================================================================================");
 			System.out.println("== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==");
 			System.out.println("===================================================================================================");
 			System.setProperty("NSProjectBundleEnabled", "true");
 		}
-
-		disablePBXProjectWatcher();
-		setup(argv);
-		WOApplication.main(argv, applicationClass);
 	}
 
 	/**
