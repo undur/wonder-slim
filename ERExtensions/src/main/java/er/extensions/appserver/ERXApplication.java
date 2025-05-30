@@ -245,6 +245,19 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		ERXLoggingSupport.reInitConsoleAppenders();
 
+		try {
+			checkClasspathValidity();
+		}
+		catch (Exception e) {
+			System.out.println( """
+					==============================================================================================
+					== %s
+					==============================================================================================
+					""".formatted(e.getMessage()));
+			e.printStackTrace();
+			System.exit(0);
+		}
+
 		if( useBetterTemplates() ) {
 			ERXBetterTemplates.configureWOForBetterTemplates();
 			log.info( "Better templates are active" );
@@ -297,6 +310,42 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 		
 		startMonitorServer();
+	}
+
+	/**
+	 * Ensure ERFoundation, ERWebObjects and ERExtensions are earlier on the classpath than JavaFoundation and JavaWebObjects.
+	 * These libraries contain "patch classes" that override classes from the WO frameworks.
+	 * 
+	 * FIXME: Move all the environment/setup validation stuff to a separate class at some point. Keep ERXApplication all nice and clean // Hugi 2025-05-30
+	 */
+	private void checkClasspathValidity() throws Exception {
+		final String[] classpathElements = System.getProperty("java.class.path").split(File.pathSeparator);
+		
+		boolean foundERFoundation = false;
+		boolean foundERWebObjects = false;
+		boolean foundERExtensions = false;
+		
+		for (String cpe : classpathElements) {
+			final String cpeLowercase = cpe.toLowerCase();
+
+			if( cpeLowercase.contains("erfoundation") ) {
+				foundERFoundation = true;
+			}
+
+			if( cpeLowercase.contains("erwebobjects") ) {
+				foundERWebObjects = true;
+			}
+
+			if( cpeLowercase.contains("erextensions") ) {
+				foundERExtensions = true;
+			}
+			
+			if( cpeLowercase.contains("javawebobjects") || cpeLowercase.contains("javafoundation") ) {
+				if( !foundERFoundation || !foundERWebObjects || !foundERExtensions ) {
+					throw new IllegalStateException("ERExtensions must be loaded before JavaWebObjects and JavaFoundation. The best way to ensure this is to make ERExtensions is your first <dependency>");
+				}
+			}
+		}
 	}
 
 	/**
