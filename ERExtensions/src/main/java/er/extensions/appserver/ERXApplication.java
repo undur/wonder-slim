@@ -546,8 +546,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		log.info( String.format( "Startup time %s ms: ", _startupTimeInMilliseconds ) );
 
 		System.out.println( "============= LOADED BUNDLES START =============" );
+		System.out.println( String.format( "%-22s : %-65s : %s", "-- Name --", "-- Bundle class --", "-- isJar --" ) );
 		for( NSBundle nsBundle : NSBundle._allBundlesReally() ) {
-			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass(), nsBundle.isJar() ) );
+			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass().getName(), nsBundle.isJar() ) );
 		}
 		System.out.println( "============= LOADED BUNDLES END ===============" );
 		
