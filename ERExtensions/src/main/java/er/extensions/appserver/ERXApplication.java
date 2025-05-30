@@ -93,13 +93,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final ERXLowMemoryHandler _lowMemoryHandler;
 
 	/**
-	 * The horrible thing that does horrible things
-	 * 
-	 * FIXME: Temporarily disabled while we figure out if it actually is needed at all 	// Hugi 2025-05-29
-	 */
-//	private static ERXLoader _loader;
-
-	/**
 	 * Notification to get posted when terminate() is called.
 	 */
 	public static final String ApplicationWillTerminateNotification = "ApplicationWillTerminateNotification";
@@ -206,8 +199,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
 	public static void setup(String[] argv) {
-//		_loader = new ERXLoader(argv);
-
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
 
@@ -237,10 +228,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		if (!isDeployedAsServlet() && !wasERXApplicationMainInvoked ) {
 			log.warn("\n\nIt seems that your application class " + application().getClass().getName() + " did not call " + ERXApplication.class.getName() + ".main(argv[], applicationClass) method. " + "Please modify your Application.java as the followings so that " + ERXConfigurationManager.class.getName() + " can provide its " + "rapid turnaround feature completely. \n\n" + "Please change Application.java like this: \n" + "public static void main(String argv[]) { \n" + "    ERXApplication.main(argv, Application.class); \n" + "}\n\n");
 		}
-
-//		if ( _loader != null && !_loader.didLoad()) {
-//			throw new RuntimeException("ERXExtensions have not been initialized. Debugging information can be enabled by adding the JVM argument: '-Der.extensions.appserver.projectBundleLoading=DEBUG'. Please report the classpath and the rest of the bundles to the Wonder mailing list: " + "\nRemaining frameworks: " + (_loader == null ? "none" : _loader.allFrameworks() ) + "\nClasspath: " + System.getProperty("java.class.path"));
-//		}
 
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
 			throw new RuntimeException("Your main bundle is \"JavaFoundation\". Are you sure ERExtensions is the first <dependency> in your pom? And if you're developing; are you sure your working directory is your application's project?");
