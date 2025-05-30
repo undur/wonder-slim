@@ -188,9 +188,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	private static void useProjectBundleIfDeveloping() {
 		if( Files.exists(Paths.get("build.properties")) ) {
-			System.out.println("===================================================================================================");
-			System.out.println("== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==");
-			System.out.println("===================================================================================================");
+			System.out.print( """
+								===================================================================================================
+								== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==
+								===================================================================================================
+								""");
 			System.setProperty("NSProjectBundleEnabled", "true");
 		}
 	}
