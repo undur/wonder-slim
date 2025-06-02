@@ -228,7 +228,22 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		if (!isDeployedAsServlet() && !wasERXApplicationMainInvoked ) {
-			log.warn("\n\nIt seems that your application class " + application().getClass().getName() + " did not call " + ERXApplication.class.getName() + ".main(argv[], applicationClass) method. " + "Please modify your Application.java as the followings so that " + ERXConfigurationManager.class.getName() + " can provide its " + "rapid turnaround feature completely. \n\n" + "Please change Application.java like this: \n" + "public static void main(String argv[]) { \n" + "    ERXApplication.main(argv, Application.class); \n" + "}\n\n");
+			log.warn(
+					"""
+					
+					==============================================================================================
+					It seems that your application class %s did not call %s.main(argv[], applicationClass) method.
+					Please modify your Application.java as the followings so that %s can provide its rapid turnaround feature completely.
+					
+					public static void main(String argv[]) {
+						ERXApplication.main(argv, Application.class);
+					}
+					==============================================================================================
+
+					""".formatted(
+					application().getClass().getName(),
+					ERXApplication.class.getName(),
+					ERXConfigurationManager.class.getName()));
 		}
 
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
@@ -242,9 +257,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		catch (Exception e) {
 			System.out.println( """
+
 					==============================================================================================
 					== %s
 					==============================================================================================
+
 					""".formatted(e.getMessage()));
 			e.printStackTrace();
 			System.exit(0);
