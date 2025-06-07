@@ -211,7 +211,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	public ERXApplication() {
-		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 
 		ERXStats.initStatisticsIfNecessary();
 		
@@ -282,6 +281,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		_lowMemoryHandler = new ERXLowMemoryHandler();
 
+		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
 
 		if (_rapidTurnaroundActiveForAnyProject() && isDirectConnectEnabled()) {
