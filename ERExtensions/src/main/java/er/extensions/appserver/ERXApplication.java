@@ -264,10 +264,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("finishInitialization"), WOApplication.ApplicationWillFinishLaunchingNotification, null);
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("didFinishLaunching"), WOApplication.ApplicationDidFinishLaunchingNotification, null);
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("addBalancerRouteCookieByNotification"), WORequestHandler.DidHandleRequestNotification, null);
-
 		_replaceApplicationPathPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
 		if (_replaceApplicationPathPattern != null && _replaceApplicationPathPattern.length() == 0) {
 			_replaceApplicationPathPattern = null;
@@ -284,12 +280,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 		
 		startMonitorServer();
+
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("finishInitialization"), WOApplication.ApplicationWillFinishLaunchingNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("didFinishLaunching"), WOApplication.ApplicationDidFinishLaunchingNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("addBalancerRouteCookieByNotification"), WORequestHandler.DidHandleRequestNotification, null);
 	}
 
 	/**
 	 * Run some environment validation. If any of those checks fail, we log the error and exit.
 	 */
-	public void checkEnvironment() {
+	private void checkEnvironment() {
 		try {
 			checkERXApplicationMainInvoked();
 			checkMainBundleIsNotJavaFoundation();
