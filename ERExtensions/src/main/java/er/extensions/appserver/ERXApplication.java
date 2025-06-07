@@ -212,6 +212,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	public ERXApplication() {
 
+		// FIXME: Figure out why this is getting initialized here and document it // Hugi 2025-06-07
 		ERXStats.initStatisticsIfNecessary();
 		
 		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
@@ -226,32 +227,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			setApplicationBaseURL(System.getProperty("WOApplicationBaseURL"));
 		}
 
-		if (!isDeployedAsServlet() && !wasERXApplicationMainInvoked ) {
-			log.warn(
-					"""
-					
-					==============================================================================================
-					It seems that your application class %s did not call %s.main(argv[], applicationClass) method.
-					Please modify your Application.java as the followings so that %s can provide its rapid turnaround feature completely.
-					
-					public static void main(String argv[]) {
-						ERXApplication.main(argv, Application.class);
-					}
-					==============================================================================================
-
-					""".formatted(
-					application().getClass().getName(),
-					ERXApplication.class.getName(),
-					ERXConfigurationManager.class.getName()));
-		}
-
-		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
-			throw new RuntimeException("Your main bundle is \"JavaFoundation\". Are you sure ERExtensions is the first <dependency> in your pom? And if you're developing; are you sure your working directory is your application's project?");
-		}
-
+		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
 		ERXLoggingSupport.reInitConsoleAppenders();
 
+		// Run some environment validation. If any of the following checks fails, we log the error and exit.
 		try {
+			checkERXApplicationMainInvoked();
+			checkMainBundleIsNotJavaFoundation();
 			checkClasspathValidity();
 		}
 		catch (Exception e) {
@@ -263,7 +245,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 					""".formatted(e.getMessage()));
 			e.printStackTrace();
-			System.exit(0);
+			System.exit(1);
 		}
 
 		if( useBetterTemplates() ) {
@@ -283,12 +265,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
+		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
 
 		if (_rapidTurnaroundActiveForAnyProject() && isDirectConnectEnabled()) {
 			registerRequestHandler(new ERXStaticResourceRequestHandler(), "_wr_");
 		}
-
-		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 
@@ -322,10 +303,41 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
+	 * Ensure ERXApplication.main() was invoked when running the application (as opposed to WOApplication.main()) 
+	 */
+	private void checkERXApplicationMainInvoked() throws Exception {
+		if (!isDeployedAsServlet() && !wasERXApplicationMainInvoked ) {
+			throw new IllegalStateException(
+					"""
+					
+					==============================================================================================
+					It seems that your application class %s did not call %s.main(argv[], applicationClass) method.
+					Please modify your Application.java as the followings so that %s can provide its rapid turnaround feature completely.
+					
+					public static void main(String argv[]) {
+						ERXApplication.main(argv, Application.class);
+					}
+					==============================================================================================
+
+					""".formatted(
+					application().getClass().getName(),
+					ERXApplication.class.getName(),
+					ERXConfigurationManager.class.getName()));
+		}
+	}
+
+	/**
+	 * Ensure the main bundle's name isn't JavaFoundation, since if it is, something is seriously wrong
+	 */
+	private void checkMainBundleIsNotJavaFoundation() throws Exception {
+		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
+			throw new IllegalStateException("Your main bundle is \"JavaFoundation\". Are you sure ERExtensions is the first <dependency> in your pom? And if you're developing; are you sure your working directory is your application's project?");
+		}
+	}
+
+	/**
 	 * Ensure ERFoundation, ERWebObjects and ERExtensions are earlier on the classpath than JavaFoundation and JavaWebObjects.
 	 * These libraries contain "patch classes" that override classes from the WO frameworks.
-	 * 
-	 * FIXME: Move all the environment/setup validation stuff to a separate class at some point. Keep ERXApplication all nice and clean // Hugi 2025-05-30
 	 */
 	private static void checkClasspathValidity() throws Exception {
 		final String[] classpathElements = System.getProperty("java.class.path").split(File.pathSeparator);
