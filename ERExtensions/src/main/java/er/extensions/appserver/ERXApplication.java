@@ -230,23 +230,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
 		ERXLoggingSupport.reInitConsoleAppenders();
 
-		// Run some environment validation. If any of the following checks fails, we log the error and exit.
-		try {
-			checkERXApplicationMainInvoked();
-			checkMainBundleIsNotJavaFoundation();
-			checkClasspathValidity();
-		}
-		catch (Exception e) {
-			System.out.println( """
-
-					==============================================================================================
-					== %s
-					==============================================================================================
-
-					""".formatted(e.getMessage()));
-			e.printStackTrace();
-			System.exit(1);
-		}
+		checkEnvironment();
 
 		if( useBetterTemplates() ) {
 			ERXBetterTemplates.configureWOForBetterTemplates();
@@ -300,6 +284,28 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 		
 		startMonitorServer();
+	}
+
+	/**
+	 * Run some environment validation. If any of those checks fail, we log the error and exit.
+	 */
+	public void checkEnvironment() {
+		try {
+			checkERXApplicationMainInvoked();
+			checkMainBundleIsNotJavaFoundation();
+			checkClasspathValidity();
+		}
+		catch (Exception e) {
+			System.out.println( """
+
+					==============================================================================================
+					== %s
+					==============================================================================================
+
+					""".formatted(e.getMessage()));
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	/**
