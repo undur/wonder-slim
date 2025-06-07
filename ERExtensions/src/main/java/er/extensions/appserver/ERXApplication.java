@@ -335,7 +335,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Ensure the main bundle's name isn't JavaFoundation, since if it is, something is seriously wrong
 	 */
-	private void checkMainBundleIsNotJavaFoundation() throws Exception {
+	private static void checkMainBundleIsNotJavaFoundation() throws Exception {
 		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
 			throw new IllegalStateException("Your main bundle is \"JavaFoundation\". Are you sure ERExtensions is the first <dependency> in your pom? And if you're developing; are you sure your working directory is your application's project?");
 		}
