@@ -83,16 +83,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static final Logger statsLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Statistics");
 
 	/**
-	 * Indicates if ERXApplication.main() has been invoked (so we can check that application actually did so)
-	 */
-	private static boolean wasERXApplicationMainInvoked = false;
-
-	/**
-	 * Watches the state of the application's memory heap and handles low memory situations
-	 */
-	private final ERXLowMemoryHandler _lowMemoryHandler;
-
-	/**
 	 * Notification to get posted when terminate() is called.
 	 */
 	public static final String ApplicationWillTerminateNotification = "ApplicationWillTerminateNotification";
@@ -111,7 +101,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Notification to post when all application initialization processes are complete
 	 */
 	public static final String ApplicationDidFinishInitializationNotification = "NSApplicationDidFinishInitializationNotification";
-
+	
 	/**
 	 * The path rewriting pattern to match (@see _rewriteURL)
 	 */
@@ -158,6 +148,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private String _publicHost;
 
 	/**
+	 * Watches the state of the application's memory heap and handles low memory situations
+	 */
+	private final ERXLowMemoryHandler _lowMemoryHandler;
+
+	/**
 	 * The time taken from invoking main, until the end of the application constructor
 	 */
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
@@ -166,6 +161,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Keeps track of whether didFinishLaunching has been invoked. We use this to keep track of whether we can declare variables that are dependent on configuration as constant (as this is written, only applies to isDevelopmentMode)
 	 */
 	private static boolean didFinishLaunchingInvoked = false;
+
+	/**
+	 * Indicates if ERXApplication.main() has been invoked (so we can check that application actually did so)
+	 */
+	private static boolean wasERXApplicationMainInvoked = false;
 
 	/**
 	 * Keeps track of whether the application is running in development mode. Set in didFinishLaunching and used after that, since we assume this value will never change after the application has been initialized
