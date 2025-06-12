@@ -108,7 +108,6 @@ public class ERXPatcher {
 	 */
 	public static class DynamicElementsPatches {
 		public static boolean cleanupXHTML = false;
-		private static Boolean appendComponentIdentifier;
 		public static boolean suppressValueBindingSlow = false;
 		
 		private DynamicElementsPatches() {
@@ -957,26 +956,20 @@ public class ERXPatcher {
 		 * <code>componentIdentifier</code> entry in the context's mutableUserInfo. This is useful for setting CSS
 		 * entries you don't have to code for.
 		 * 
-		 * FIXME: Go through the functionality here. Do we need this? // Hugi 2025-06-12
+		 * FIXME: Deprecated and deactivated in preparation for deletion // Hugi 2025-06-12
 		 */
+		@Deprecated
 		public static void appendIdentifierTagAndValue(WODynamicElement element, WOAssociation id, WOResponse response, WOContext context) {
-			if (id == null && appendComponentIdentifier()) {
-				NSMutableDictionary dict = ERXWOContext.contextDictionary();
-				String componentIdentifier = (String) dict.objectForKey("componentIdentifier");
-				if (componentIdentifier != null) {
-					response._appendTagAttributeAndValue("id", componentIdentifier, true);
-					dict.removeObjectForKey("componentIdentifier");
-				}
-			}
+//			if (id == null && appendComponentIdentifier()) {
+//				NSMutableDictionary dict = ERXWOContext.contextDictionary();
+//				String componentIdentifier = (String) dict.objectForKey("componentIdentifier");
+//				if (componentIdentifier != null) {
+//					response._appendTagAttributeAndValue("id", componentIdentifier, true);
+//					dict.removeObjectForKey("componentIdentifier");
+//				}
+//			}
 		}
 
-		public static boolean appendComponentIdentifier() {
-			if(appendComponentIdentifier == null) {
-				appendComponentIdentifier = Boolean.valueOf(ERXProperties.booleanForKeyWithDefault("er.extensions.foundation.ERXPatcher.DynamicElementsPatches.appendComponentIdentifier", true));
-			}
-			return appendComponentIdentifier.booleanValue();
-		}
-		
 		/**
 		 * Fixing up the response for XHTML and adding the element to the array of generated element IDs, so we can use
 		 * JavaScript later on. If the given element is an input element, it adds a dictionary {type=element.class,
