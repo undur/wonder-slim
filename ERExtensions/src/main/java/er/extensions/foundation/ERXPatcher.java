@@ -1,9 +1,7 @@
 package er.extensions.foundation;
 
 import java.lang.reflect.Constructor;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
@@ -23,7 +21,6 @@ import com.webobjects.appserver._private.WOGenericElement;
 import com.webobjects.appserver._private.WOHiddenField;
 import com.webobjects.appserver._private.WOImage;
 import com.webobjects.appserver._private.WOImageButton;
-import com.webobjects.appserver._private.WOInput;
 import com.webobjects.appserver._private.WOJavaScript;
 import com.webobjects.appserver._private.WOPasswordField;
 import com.webobjects.appserver._private.WOPopUpButton;
@@ -37,29 +34,17 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation._NSUtilities;
 
 import er.extensions.appserver.ERXSession;
-import er.extensions.appserver.ERXWOContext;
 import er.extensions.components._private.ERXWOHyperlink;
 import er.extensions.components._private.ERXWOSwitchComponent;
 
 /**
  * Wrapper around the WO-private NSUtilities which allows for some Objective-C-Style poseAs. Using these methods may or may not break in the future.
  */
-public class ERXPatcher {
 
-	/**
-	 * Returns the class registered for the name <code>className</code>.
-	 * Uses the private WebObjects class cache.
-	 * 
-	 * @param className class name
-	 * @return class for the registered name or null
-	 */
-	public static Class classForName(String className) {
-		return _NSUtilities.classWithName(className);
-	}
+public class ERXPatcher {
 
 	/**
 	 * Sets the class registered for the name <code>className</code> to the given class.
@@ -73,8 +58,8 @@ public class ERXPatcher {
 	}
 
 	public static synchronized void installPatches() {
-		DynamicElementsPatches.cleanupXHTML = ERXValueUtilities.booleanValueWithDefault(System.getProperty("er.extensions.ERXPatcher.cleanupXHTML"), false);
-		DynamicElementsPatches.suppressValueBindingSlow = ERXValueUtilities.booleanValueWithDefault(System.getProperty("er.extensions.ERXPatcher.suppressValueBindingSlow"), false);
+//		DynamicElementsPatches.cleanupXHTML = ERXValueUtilities.booleanValueWithDefault(System.getProperty("er.extensions.ERXPatcher.cleanupXHTML"), false);
+//		DynamicElementsPatches.suppressValueBindingSlow = ERXValueUtilities.booleanValueWithDefault(System.getProperty("er.extensions.ERXPatcher.suppressValueBindingSlow"), false);
 		ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
@@ -107,11 +92,10 @@ public class ERXPatcher {
 	 * Also <code>WOJavaScript</code> is not replaced, even if it is not XHTML-conform.
 	 */
 	public static class DynamicElementsPatches {
-		public static boolean cleanupXHTML = false;
-		public static boolean suppressValueBindingSlow = false;
+		public static final boolean cleanupXHTML = false;
+		private static final boolean suppressValueBindingSlow = false;
 		
-		private DynamicElementsPatches() {
-		}
+		private DynamicElementsPatches() {}
 
 		public static class SubmitButton extends WOSubmitButton {
 
@@ -953,432 +937,21 @@ public class ERXPatcher {
 
 		/**
 		 * Allows you to set the component ID without actually touching the HTML code, by adding a
-		 * <code>componentIdentifier</code> entry in the context's mutableUserInfo. This is useful for setting CSS
-		 * entries you don't have to code for.
+		 * <code>componentIdentifier</code> entry in the context's mutableUserInfo. This is useful for setting CSS entries you don't have to code for.
 		 * 
 		 * FIXME: Deprecated and deactivated in preparation for deletion // Hugi 2025-06-12
 		 */
 		@Deprecated
-		public static void appendIdentifierTagAndValue(WODynamicElement element, WOAssociation id, WOResponse response, WOContext context) {
-//			if (id == null && appendComponentIdentifier()) {
-//				NSMutableDictionary dict = ERXWOContext.contextDictionary();
-//				String componentIdentifier = (String) dict.objectForKey("componentIdentifier");
-//				if (componentIdentifier != null) {
-//					response._appendTagAttributeAndValue("id", componentIdentifier, true);
-//					dict.removeObjectForKey("componentIdentifier");
-//				}
-//			}
-		}
+		public static void appendIdentifierTagAndValue(WODynamicElement element, WOAssociation id, WOResponse response, WOContext context) {}
 
 		/**
 		 * Fixing up the response for XHTML and adding the element to the array of generated element IDs, so we can use
 		 * JavaScript later on. If the given element is an input element, it adds a dictionary {type=element.class,
 		 * name=element.elementID} to ERXWOContext.contextDictionary().objectForKey("elementArray")
 		 * 
-		 * FIXME:
-		 * Scheduled for deletion.
-		 * We've completely disabled this, since I don't really see a reason for keeping it around.
-		 * Cleaning up XHTML this way feels... wrong (as Mike points out in the inline comment)
-		 * and the contextDictionary's elementArray only seems used by ERXJSInputValidator, which we've already thrown out
-		 *  // Hugi 2025-06-12 
+		 * FIXME: Deprecated and deactivated in preparation for deletion // Hugi 2025-06-12
 		 */
 		@Deprecated
-		public static void processResponse(WODynamicElement element, WOResponse response, WOContext context, int priorOffset, String name) {
-			// MS: I'm not a fan of the cleanupXHTML impl -- seems really heavy-handed. I'd rather
-			// patch busted components to generate XHTML more selectively, but I'm open for a
-			// discussion on this one.
-//			if (cleanupXHTML/* || ERXResponse.isXHTML(response)*/) {
-//				correctResponse(response, priorOffset);
-//			}
-//			if (element instanceof WOInput) {
-//				NSMutableDictionary dict = ERXWOContext.contextDictionary();
-//				NSMutableArray elementArray = (NSMutableArray) dict.objectForKey("elementArray");
-//				if (elementArray == null) {
-//					elementArray = new NSMutableArray(10);
-//				}
-//				elementArray.addObject(new NSDictionary(new Object[] { element.getClass().getName(), name == null ? "NULL" : name }, new String[] { "type", "name" }));
-//				dict.setObjectForKey(elementArray, "elementArray");
-//			}
-		}
-
-		/**
-		 * Corrects the response of dynamic elements to be XHTML-conformant. <code>input</code>- and <code>img</code>-tags
-		 * will be closed correctly, all attribute values will be quoted and attributes without a value like
-		 * <code>disabled</code> will get a quoted value. All attribute-values with uncorrectly escaped ampersands
-		 * (&amp;) will be corrected. E.g. <code>&quot;w&amp;amp;auml;hlen&quot;</code> will become
-		 * <code>&quot;w&amp;auml;hlen&quot;</code>.
-		 * <p>
-		 * This method would normally be called in the following way:
-		 * <pre><code>
-		 * public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-		 * 	String pre = woresponse.contentString();
-		 * 	super.appendToResponse(woresponse, wocontext);
-		 * 	correctResponse(woresponse, pre.length(), pre);
-		 * }
-		 * </code></pre>
-		 * 
-		 * @param response
-		 *            the response to be corrected.
-		 * @param start
-		 *            the offset to start from.
-		 */
-		public static final void correctResponse(WOResponse response, int start) {
-			String string = response.contentString();
-			int length = string.length();
-			StringBuffer buf = new StringBuffer(length);
-			// buf.append(string.substring(0, start));
-			char[] characters = new char[start];
-			string.getChars(0, start, characters, 0);
-			buf.append(characters);
-
-			for (int i = start; i < length; i++) {
-				char ch = string.charAt(i);
-
-				switch (ch) {
-
-				case '<':
-					buf.append('<');
-					i = consumeTag(string, i + 1, buf);
-					break;
-
-				case '>':
-					break;
-
-				default:
-					buf.append(ch);
-					break;
-				}
-			}
-
-			response.setContent(buf.toString());
-		}
-
-		private static final int consumeTag(String string, int index, StringBuffer buf) {
-			StringBuilder tagName = new StringBuilder();
-			int i = index;
-			int length = string.length();
-
-			for (; i < length; i++) {
-				char ch = string.charAt(i);
-
-				if ( isWhiteSpace(ch) || ch == '>' ) {
-					break;
-				}
-				tagName.append(ch);
-			}
-
-			buf.append(tagName);
-
-			for (; i < length; i++) {
-				char ch = string.charAt(i);
-				
-				if( isWhiteSpace(ch) ) {
-					buf.append(ch);
-					// Consume white space
-				} else if( ch == '=' ) {
-					buf.append(ch);
-					i = consumeAttributeValue(string, i + 1, buf);
-				} else if( ch == '>' ) {
-					String t = tagName.toString();
-
-					if ("img".equals(t) || "input".equals(t) || "link".equals(t) ) {
-						buf.append(" /");
-					}
-					
-					buf.append(ch);
-					
-					return i - 1;
-				} else if (ch == '/' && i+1 < length && string.charAt(i+1) == '>') {
-					continue;
-				} else {
-					i = consumeAttributeName(string, i, buf);
-				}
-
-			}
-
-			return length;
-		}
-
-		// FIXME This only works with attribute="value". W3C states one can use attribute='value'. This
-		// method won't support quotes, only double-quotes
-		private static final int consumeAttributeValue(String string, int index, StringBuffer buf) {
-			int length = string.length();
-			boolean hasQuotes;
-			int i = index;
-		
-			while( isWhiteSpace( string.charAt(i) ) ) {
-				i++; // Consume white spaces
-			}
-
-			buf.append('"');
-
-			if (string.charAt(i) != '"') {
-				hasQuotes = false;
-			}
-			else {
-				hasQuotes = true;
-				i++;
-			}
-
-			for (; i < length; i++) {
-				char ch = string.charAt(i);
-				buf.append(ch);
-
-				switch (ch) {
-
-				case '&':
-					// check if there is &amp; when it should not
-					if (i + 5 < length && string.substring(i + 1, i + 4).equals("amp")) {
-						int semi = string.indexOf(';', i + 5);
-						if (semi != -1) {
-							String ent = string.substring(i + 5, semi);
-							if (EntityTable.getDefaultEntityTable().entityCode("&" + ent) != 0) {
-								// we have a valid entity. thank you, Apple!
-								buf.append(ent).append(';');
-								i = semi;
-							}
-						}
-					}
-					break;
-				case '"':
-
-					if (hasQuotes) {
-						return i;
-					}
-					hasQuotes = true;
-
-				case ' ':
-
-					if (!hasQuotes) {
-						buf.deleteCharAt(buf.length() - 1);
-						buf.append("\"");
-						return i - 1;
-					}
-
-				case '>':
-
-					if (!hasQuotes) {
-						buf.deleteCharAt(buf.length() - 1);
-						buf.append("\"");
-						return i - 1;
-					}
-
-				default:
-				}
-			}
-
-			return length;
-		}
-
-		private static final int consumeAttributeName(String string, int index, StringBuffer buf) {
-			StringBuilder attName = new StringBuilder();
-			int length = string.length();
-			boolean afterWhiteSpace = false;
-			
-			for (int i = index; i < length; i++) {
-				char ch = string.charAt(i);
-
-				if( ch == '=' ) {
-					buf.append(attName);
-					return i - 1;
-				} else if( isWhiteSpace(ch) ) {
-					afterWhiteSpace = true;
-					// Just consume the white space, do nothing
-				} else if( ch == '>' ) {
-					buf.append(attName).append("=\"").append(attName).append("\"");
-					return i - 1;
-				} else {
-					if( afterWhiteSpace ) {
-						buf.append(attName).append("=\"").append(attName).append("\"");
-						return i - 2;
-					}
-					attName.append(ch);
-				}
-			}
-
-			return length;
-		}
-		
-		/**
-		 * Returns true if ch is an white space character, false otherwise.
-		 * 
-		 * @param ch
-		 * @return true if ch is white space character, false otherwise.
-		 */
-		private static final boolean isWhiteSpace( char ch ) {
-			return ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
-		}
-
-		/**
-		 * This method adds missing quotes to the given attribute string. E.g.
-		 * <code>type=text name=&quot;mytext&quot;</code> will be corrected to
-		 * <code>type=&quot;text&quot; name=&quot;mytext&quot;</code>
-		 * 
-		 * @param atts
-		 *            a string of attributes.
-		 * 
-		 * @return the corrected string.
-		 */
-		public static final String addQuotes(String atts) {
-			int len = atts.length();
-			boolean attVal = false;
-			boolean addQuote = false;
-			StringBuffer buf = null;
-			int i;
-
-			for (i = 0; i < len; i++) {
-				char ch = atts.charAt(i);
-
-				if (buf != null) {
-					buf.append(ch);
-				}
-
-				if (ch == '=' && !attVal) {
-					attVal = true;
-
-					if (atts.charAt(i + 1) != '"') {
-						buf = getBuffer(atts, i, buf);
-						buf.append('"');
-						addQuote = true;
-					}
-
-				}
-				else if (ch == ' ') {
-					if (addQuote && attVal) {
-						buf = getBuffer(atts, i, buf);
-						buf.deleteCharAt(buf.length() - 1);
-						buf.append("\" ");
-						addQuote = false;
-						attVal = false;
-					}
-
-				}
-				else if (ch == '"') {
-					attVal = false;
-					addQuote = false;
-				}
-			}
-
-			if (addQuote && attVal) {
-				buf = getBuffer(atts, i, buf);
-				buf.append('"');
-				addQuote = false;
-				attVal = false;
-			}
-
-			if (buf != null) {
-				return buf.toString();
-
-			}
-			return atts;
-		}
-
-		private static final StringBuffer getBuffer(String src, int len, StringBuffer buf) {
-			if (buf == null) {
-				StringBuffer ret = new StringBuffer();
-
-				for (int j = 0; j <= len; j++) {
-					ret.append(src.charAt(j));
-				}
-
-				return ret;
-			}
-			return buf;
-		}
-
-	}
-
-	/*
-	 * the rest is shamelessly copied over from jtidy, but I put it here to avoid having to add it to ERJars for the
-	 * moment
-	 */
-	public static class Entity {
-		public String name;
-		public short code;
-
-		public Entity(String string, int i) {
-			name = string;
-			code = (short) i;
-		}
-
-		public Entity(String string, short i) {
-			name = string;
-			code = i;
-		}
-	}
-
-	public static class EntityTable {
-		private Map<String, Entity> entityHashtable = new Hashtable<>();
-		private static EntityTable defaultEntityTable = null;
-		private static Entity[] entities = { new Entity("nbsp", 160), new Entity("iexcl", 161), new Entity("cent", 162), new Entity("pound", 163), new Entity("curren", 164), new Entity("yen", 165), new Entity("brvbar", 166), new Entity("sect", 167), new Entity("uml", 168), new Entity("copy", 169), new Entity("ordf", 170), new Entity("laquo", 171), new Entity("not", 172), new Entity("shy", 173), new Entity("reg", 174), new Entity("macr", 175), new Entity("deg", 176), new Entity("plusmn", 177), new Entity("sup2", 178), new Entity("sup3", 179), new Entity("acute", 180), new Entity("micro", 181), new Entity("para", 182), new Entity("middot", 183), new Entity("cedil", 184), new Entity("sup1", 185), new Entity("ordm", 186), new Entity("raquo", 187), new Entity("frac14", 188), new Entity("frac12", 189),
-				new Entity("frac34", 190), new Entity("iquest", 191), new Entity("Agrave", 192), new Entity("Aacute", 193), new Entity("Acirc", 194), new Entity("Atilde", 195), new Entity("Auml", 196), new Entity("Aring", 197), new Entity("AElig", 198), new Entity("Ccedil", 199), new Entity("Egrave", 200), new Entity("Eacute", 201), new Entity("Ecirc", 202), new Entity("Euml", 203), new Entity("Igrave", 204), new Entity("Iacute", 205), new Entity("Icirc", 206), new Entity("Iuml", 207), new Entity("ETH", 208), new Entity("Ntilde", 209), new Entity("Ograve", 210), new Entity("Oacute", 211), new Entity("Ocirc", 212), new Entity("Otilde", 213), new Entity("Ouml", 214), new Entity("times", 215), new Entity("Oslash", 216), new Entity("Ugrave", 217), new Entity("Uacute", 218), new Entity("Ucirc", 219),
-				new Entity("Uuml", 220), new Entity("Yacute", 221), new Entity("THORN", 222), new Entity("szlig", 223), new Entity("agrave", 224), new Entity("aacute", 225), new Entity("acirc", 226), new Entity("atilde", 227), new Entity("auml", 228), new Entity("aring", 229), new Entity("aelig", 230), new Entity("ccedil", 231), new Entity("egrave", 232), new Entity("eacute", 233), new Entity("ecirc", 234), new Entity("euml", 235), new Entity("igrave", 236), new Entity("iacute", 237), new Entity("icirc", 238), new Entity("iuml", 239), new Entity("eth", 240), new Entity("ntilde", 241), new Entity("ograve", 242), new Entity("oacute", 243), new Entity("ocirc", 244), new Entity("otilde", 245), new Entity("ouml", 246), new Entity("divide", 247), new Entity("oslash", 248), new Entity("ugrave", 249),
-				new Entity("uacute", 250), new Entity("ucirc", 251), new Entity("uuml", 252), new Entity("yacute", 253), new Entity("thorn", 254), new Entity("yuml", 255), new Entity("fnof", 402), new Entity("Alpha", 913), new Entity("Beta", 914), new Entity("Gamma", 915), new Entity("Delta", 916), new Entity("Epsilon", 917), new Entity("Zeta", 918), new Entity("Eta", 919), new Entity("Theta", 920), new Entity("Iota", 921), new Entity("Kappa", 922), new Entity("Lambda", 923), new Entity("Mu", 924), new Entity("Nu", 925), new Entity("Xi", 926), new Entity("Omicron", 927), new Entity("Pi", 928), new Entity("Rho", 929), new Entity("Sigma", 931), new Entity("Tau", 932), new Entity("Upsilon", 933), new Entity("Phi", 934), new Entity("Chi", 935), new Entity("Psi", 936), new Entity("Omega", 937),
-				new Entity("alpha", 945), new Entity("beta", 946), new Entity("gamma", 947), new Entity("delta", 948), new Entity("epsilon", 949), new Entity("zeta", 950), new Entity("eta", 951), new Entity("theta", 952), new Entity("iota", 953), new Entity("kappa", 954), new Entity("lambda", 955), new Entity("mu", 956), new Entity("nu", 957), new Entity("xi", 958), new Entity("omicron", 959), new Entity("pi", 960), new Entity("rho", 961), new Entity("sigmaf", 962), new Entity("sigma", 963), new Entity("tau", 964), new Entity("upsilon", 965), new Entity("phi", 966), new Entity("chi", 967), new Entity("psi", 968), new Entity("omega", 969), new Entity("thetasym", 977), new Entity("upsih", 978), new Entity("piv", 982), new Entity("bull", 8226), new Entity("hellip", 8230), new Entity("prime", 8242),
-				new Entity("Prime", 8243), new Entity("oline", 8254), new Entity("frasl", 8260), new Entity("weierp", 8472), new Entity("image", 8465), new Entity("real", 8476), new Entity("trade", 8482), new Entity("alefsym", 8501), new Entity("larr", 8592), new Entity("uarr", 8593), new Entity("rarr", 8594), new Entity("darr", 8595), new Entity("harr", 8596), new Entity("crarr", 8629), new Entity("lArr", 8656), new Entity("uArr", 8657), new Entity("rArr", 8658), new Entity("dArr", 8659), new Entity("hArr", 8660), new Entity("forall", 8704), new Entity("part", 8706), new Entity("exist", 8707), new Entity("empty", 8709), new Entity("nabla", 8711), new Entity("isin", 8712), new Entity("notin", 8713), new Entity("ni", 8715), new Entity("prod", 8719), new Entity("sum", 8721), new Entity("minus", 8722),
-				new Entity("lowast", 8727), new Entity("radic", 8730), new Entity("prop", 8733), new Entity("infin", 8734), new Entity("ang", 8736), new Entity("and", 8743), new Entity("or", 8744), new Entity("cap", 8745), new Entity("cup", 8746), new Entity("int", 8747), new Entity("there4", 8756), new Entity("sim", 8764), new Entity("cong", 8773), new Entity("asymp", 8776), new Entity("ne", 8800), new Entity("equiv", 8801), new Entity("le", 8804), new Entity("ge", 8805), new Entity("sub", 8834), new Entity("sup", 8835), new Entity("nsub", 8836), new Entity("sube", 8838), new Entity("supe", 8839), new Entity("oplus", 8853), new Entity("otimes", 8855), new Entity("perp", 8869), new Entity("sdot", 8901), new Entity("lceil", 8968), new Entity("rceil", 8969), new Entity("lfloor", 8970),
-				new Entity("rfloor", 8971), new Entity("lang", 9001), new Entity("rang", 9002), new Entity("loz", 9674), new Entity("spades", 9824), new Entity("clubs", 9827), new Entity("hearts", 9829), new Entity("diams", 9830), new Entity("quot", 34), new Entity("amp", 38), new Entity("lt", 60), new Entity("gt", 62), new Entity("OElig", 338), new Entity("oelig", 339), new Entity("Scaron", 352), new Entity("scaron", 353), new Entity("Yuml", 376), new Entity("circ", 710), new Entity("tilde", 732), new Entity("ensp", 8194), new Entity("emsp", 8195), new Entity("thinsp", 8201), new Entity("zwnj", 8204), new Entity("zwj", 8205), new Entity("lrm", 8206), new Entity("rlm", 8207), new Entity("ndash", 8211), new Entity("mdash", 8212), new Entity("lsquo", 8216), new Entity("rsquo", 8217),
-				new Entity("sbquo", 8218), new Entity("ldquo", 8220), new Entity("rdquo", 8221), new Entity("bdquo", 8222), new Entity("dagger", 8224), new Entity("Dagger", 8225), new Entity("permil", 8240), new Entity("lsaquo", 8249), new Entity("rsaquo", 8250), new Entity("euro", 8364) };
-
-		public short entityCode(String string) {
-			if (string.length() <= 1)
-				return (short) 0;
-			if (string.charAt(1) == '#') {
-				int i = 0;
-				try {
-					if (string.length() >= 4 && string.charAt(2) == 'x')
-						i = Integer.parseInt(string.substring(3), 16);
-					else if (string.length() >= 3)
-						i = Integer.parseInt(string.substring(2));
-				}
-				catch (NumberFormatException numberformatexception) {
-					/* empty */
-				}
-				return (short) i;
-			}
-			Entity entity = lookup(string.substring(1));
-			if (entity != null)
-				return entity.code;
-			return (short) 0;
-		}
-
-		public String entityName(short i) {
-			String string = null;
-			for (Entity entity : entityHashtable.values()) {
-				if (entity.code == i) {
-					string = entity.name;
-					break;
-				}
-			}
-			return string;
-		}
-
-		public static EntityTable getDefaultEntityTable() {
-			if (defaultEntityTable == null) {
-				defaultEntityTable = new EntityTable();
-				for (int i = 0; i < entities.length; i++)
-					defaultEntityTable.install(entities[i]);
-			}
-			return defaultEntityTable;
-		}
-
-		public Entity install(String string, short i) {
-			Entity entity = lookup(string);
-			if (entity == null) {
-				entity = new Entity(string, i);
-				entityHashtable.put(string, entity);
-			}
-			else
-				entity.code = i;
-			return entity;
-		}
-
-		public Entity install(Entity entity) {
-			return entityHashtable.put(entity.name, entity);
-		}
-
-		public Entity lookup(String string) {
-			return entityHashtable.get(string);
-		}
+		public static void processResponse(WODynamicElement element, WOResponse response, WOContext context, int priorOffset, String name) {}
 	}
 }
