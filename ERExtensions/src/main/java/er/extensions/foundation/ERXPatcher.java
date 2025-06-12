@@ -956,6 +956,8 @@ public class ERXPatcher {
 		 * Allows you to set the component ID without actually touching the HTML code, by adding a
 		 * <code>componentIdentifier</code> entry in the context's mutableUserInfo. This is useful for setting CSS
 		 * entries you don't have to code for.
+		 * 
+		 * FIXME: Go through the functionality here. Do we need this? // Hugi 2025-06-12
 		 */
 		public static void appendIdentifierTagAndValue(WODynamicElement element, WOAssociation id, WOResponse response, WOContext context) {
 			if (id == null && appendComponentIdentifier()) {
@@ -979,23 +981,31 @@ public class ERXPatcher {
 		 * Fixing up the response for XHTML and adding the element to the array of generated element IDs, so we can use
 		 * JavaScript later on. If the given element is an input element, it adds a dictionary {type=element.class,
 		 * name=element.elementID} to ERXWOContext.contextDictionary().objectForKey("elementArray")
+		 * 
+		 * FIXME:
+		 * Scheduled for deletion.
+		 * We've completely disabled this, since I don't really see a reason for keeping it around.
+		 * Cleaning up XHTML this way feels... wrong (as Mike points out in the inline comment)
+		 * and the contextDictionary's elementArray only seems used by ERXJSInputValidator, which we've already thrown out
+		 *  // Hugi 2025-06-12 
 		 */
+		@Deprecated
 		public static void processResponse(WODynamicElement element, WOResponse response, WOContext context, int priorOffset, String name) {
 			// MS: I'm not a fan of the cleanupXHTML impl -- seems really heavy-handed. I'd rather
 			// patch busted components to generate XHTML more selectively, but I'm open for a
 			// discussion on this one.
-			if (cleanupXHTML/* || ERXResponse.isXHTML(response)*/) {
-				correctResponse(response, priorOffset);
-			}
-			if (element instanceof WOInput) {
-				NSMutableDictionary dict = ERXWOContext.contextDictionary();
-				NSMutableArray elementArray = (NSMutableArray) dict.objectForKey("elementArray");
-				if (elementArray == null) {
-					elementArray = new NSMutableArray(10);
-				}
-				elementArray.addObject(new NSDictionary(new Object[] { element.getClass().getName(), name == null ? "NULL" : name }, new String[] { "type", "name" }));
-				dict.setObjectForKey(elementArray, "elementArray");
-			}
+//			if (cleanupXHTML/* || ERXResponse.isXHTML(response)*/) {
+//				correctResponse(response, priorOffset);
+//			}
+//			if (element instanceof WOInput) {
+//				NSMutableDictionary dict = ERXWOContext.contextDictionary();
+//				NSMutableArray elementArray = (NSMutableArray) dict.objectForKey("elementArray");
+//				if (elementArray == null) {
+//					elementArray = new NSMutableArray(10);
+//				}
+//				elementArray.addObject(new NSDictionary(new Object[] { element.getClass().getName(), name == null ? "NULL" : name }, new String[] { "type", "name" }));
+//				dict.setObjectForKey(elementArray, "elementArray");
+//			}
 		}
 
 		/**
