@@ -92,7 +92,7 @@ public class ERXPatcher {
 	 * Also <code>WOJavaScript</code> is not replaced, even if it is not XHTML-conform.
 	 */
 	public static class DynamicElementsPatches {
-		public static final boolean cleanupXHTML = false;
+		private static final boolean cleanupXHTML = false;
 		private static final boolean suppressValueBindingSlow = false;
 		
 		private DynamicElementsPatches() {}

@@ -200,18 +200,4 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 		stringbuffer.append('>');
 		return stringbuffer.toString();
 	}
-	
-	/**
-	 * Overridden to make output XML compatible.
-	 */
-    @Override
-    public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-        WOResponse newResponse = ERXPatcher.DynamicElementsPatches.cleanupXHTML ? new WOResponse() : woresponse;
-        super.appendToResponse(newResponse, wocontext);
-        
-        ERXPatcher.DynamicElementsPatches.processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-        if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-        	woresponse.appendContentString(newResponse.contentString());
-        }
-    }
 }
