@@ -104,6 +104,8 @@ public class ERXPatcher {
 			/**
 			 * Appends the attribute "value" to the response. First tries to get a localized version and if that fails,
 			 * uses the supplied value as the default
+			 * 
+			 * FIXME: Hmm… Looks like localization (what I think is the only functionality this method provides) is disabled/commented out? // Hugi 2025-06-13
 			 */
 			@Override
 			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {
@@ -138,6 +140,8 @@ public class ERXPatcher {
 			/**
 			 * Appends the attribute "value" to the response. First tries to get a localized version and if that fails,
 			 * uses the supplied value as the default
+			 * 
+			 * FIXME: Hmm… Looks like localization (what I think is the only functionality this method provides) is disabled/commented out? // Hugi 2025-06-13
 			 */
 			@Override
 			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {
