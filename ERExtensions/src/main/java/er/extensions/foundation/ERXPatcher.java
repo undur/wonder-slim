@@ -7,7 +7,6 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.appserver.WODynamicElement;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
@@ -58,8 +57,6 @@ public class ERXPatcher {
 	}
 
 	public static synchronized void installPatches() {
-//		DynamicElementsPatches.cleanupXHTML = ERXValueUtilities.booleanValueWithDefault(System.getProperty("er.extensions.ERXPatcher.cleanupXHTML"), false);
-//		DynamicElementsPatches.suppressValueBindingSlow = ERXValueUtilities.booleanValueWithDefault(System.getProperty("er.extensions.ERXPatcher.suppressValueBindingSlow"), false);
 		ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
@@ -92,7 +89,6 @@ public class ERXPatcher {
 	 * Also <code>WOJavaScript</code> is not replaced, even if it is not XHTML-conform.
 	 */
 	public static class DynamicElementsPatches {
-		private static final boolean cleanupXHTML = false;
 		private static final boolean suppressValueBindingSlow = false;
 		
 		private DynamicElementsPatches() {}
@@ -127,17 +123,6 @@ public class ERXPatcher {
 				}
 			}
 
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
-
 			/*
 			 * logs the action name into session's dictionary with a key = ERXActionLogging
 			 */
@@ -149,7 +134,6 @@ public class ERXPatcher {
 				}
 				return result;
 			}
-
 		}
 
 		public static class ResetButton extends WOResetButton {
@@ -173,34 +157,12 @@ public class ERXPatcher {
 					}
 				}
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 		}
 
 		public static class GenericContainer extends WOGenericContainer {
 
 			public GenericContainer(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, null);
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
 			}
 		}
 
@@ -209,17 +171,6 @@ public class ERXPatcher {
 			public GenericElement(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, null);
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 		}
 
 		public static class Image extends WOImage {
@@ -227,39 +178,12 @@ public class ERXPatcher {
 			public Image(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, null);
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 		}
 
 		public static class ActiveImage extends WOActiveImage {
 
 			public ActiveImage(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-			}
-
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
 			}
 
 			/*
@@ -290,17 +214,6 @@ public class ERXPatcher {
 
 				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
 					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
-				}
-			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
 				}
 			}
 			
@@ -336,17 +249,6 @@ public class ERXPatcher {
 					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 			
 			/**
 			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
@@ -373,19 +275,7 @@ public class ERXPatcher {
 
 			/* select element shouldn't worry about value attribute */
 			@Override
-			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {
-			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
+			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {}
 			
 			/**
 			 * Overridden to stop swallowing all exceptions and properly handle
@@ -458,17 +348,6 @@ public class ERXPatcher {
 				super(aName, associations, element);
 				_loggedSlow = suppressValueBindingSlow;
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 			
 			/**
 			 * Overridden to stop swallowing all exceptions and properly handle
@@ -539,34 +418,12 @@ public class ERXPatcher {
 			public CheckBox(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 		}
 
 		public static class CheckBoxList extends WOCheckBoxList {
 
 			public CheckBoxList(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
 			}
 			
 			/**
@@ -649,17 +506,6 @@ public class ERXPatcher {
 					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 			
 			/**
 			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
@@ -682,17 +528,6 @@ public class ERXPatcher {
 			public ImageButton(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 		}
 
 		public static class PasswordField extends WOPasswordField {
@@ -709,17 +544,6 @@ public class ERXPatcher {
 
 				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
 					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
-				}
-			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
 				}
 			}
 			
@@ -744,34 +568,12 @@ public class ERXPatcher {
 			public RadioButton(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
 			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
-			}
 		}
 
 		public static class RadioButtonList extends WORadioButtonList {
 
 			public RadioButtonList(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-			}
-
-			@Override
-			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
-				super.appendToResponse(newResponse, wocontext);
-
-				processResponse(this, newResponse, wocontext, 0, nameInContext(wocontext, wocontext.component()));
-				if (ERXPatcher.DynamicElementsPatches.cleanupXHTML) {
-					woresponse.appendContentString(newResponse.contentString());
-				}
 			}
 			
 			/**
@@ -856,15 +658,5 @@ public class ERXPatcher {
 				}
 			}
 		}
-
-		/**
-		 * Fixing up the response for XHTML and adding the element to the array of generated element IDs, so we can use
-		 * JavaScript later on. If the given element is an input element, it adds a dictionary {type=element.class,
-		 * name=element.elementID} to ERXWOContext.contextDictionary().objectForKey("elementArray")
-		 * 
-		 * FIXME: Deprecated and deactivated in preparation for deletion // Hugi 2025-06-12
-		 */
-		@Deprecated
-		public static void processResponse(WODynamicElement element, WOResponse response, WOContext context, int priorOffset, String name) {}
 	}
 }
