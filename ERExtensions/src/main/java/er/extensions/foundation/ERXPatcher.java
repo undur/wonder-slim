@@ -12,18 +12,12 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOActiveImage;
 import com.webobjects.appserver._private.WOBrowser;
-import com.webobjects.appserver._private.WOCheckBox;
 import com.webobjects.appserver._private.WOCheckBoxList;
 import com.webobjects.appserver._private.WOConstantValueAssociation;
-import com.webobjects.appserver._private.WOGenericContainer;
-import com.webobjects.appserver._private.WOGenericElement;
 import com.webobjects.appserver._private.WOHiddenField;
-import com.webobjects.appserver._private.WOImage;
-import com.webobjects.appserver._private.WOImageButton;
 import com.webobjects.appserver._private.WOJavaScript;
 import com.webobjects.appserver._private.WOPasswordField;
 import com.webobjects.appserver._private.WOPopUpButton;
-import com.webobjects.appserver._private.WORadioButton;
 import com.webobjects.appserver._private.WORadioButtonList;
 import com.webobjects.appserver._private.WOResetButton;
 import com.webobjects.appserver._private.WOSubmitButton;
@@ -60,19 +54,13 @@ public class ERXPatcher {
 		ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
-		ERXPatcher.setClassForName(DynamicElementsPatches.GenericElement.class, "WOGenericElement");
-		// ERXPatcher.setClassForName(DynamicElementsPatches.GenericContainer.class, "WOGenericContainer"); // FIXME: Find out why this is no longer active. Perhaps accidentally removed 18 years ago in db080fed55a420228a5b6bb33d4662d465f343cd ? // Hugi 2022-03-12
-		ERXPatcher.setClassForName(DynamicElementsPatches.Image.class, "WOImage");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ActiveImage.class, "WOActiveImage");
 		ERXPatcher.setClassForName(DynamicElementsPatches.Text.class, "WOText");
 		ERXPatcher.setClassForName(DynamicElementsPatches.PopUpButton.class, "WOPopUpButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.Browser.class, "WOBrowser");
-		ERXPatcher.setClassForName(DynamicElementsPatches.CheckBox.class, "WOCheckBox");
 		ERXPatcher.setClassForName(DynamicElementsPatches.CheckBoxList.class, "WOCheckBoxList");
 		ERXPatcher.setClassForName(DynamicElementsPatches.HiddenField.class, "WOHiddenField");
-		ERXPatcher.setClassForName(DynamicElementsPatches.ImageButton.class, "WOImageButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.PasswordField.class, "WOPasswordField");
-		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButton.class, "WORadioButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
 		ERXPatcher.setClassForName(DynamicElementsPatches.JavaScript.class, "WOJavaScript");
 		ERXPatcher.setClassForName(ERXWOHyperlink.class, "WOHyperlink");
@@ -156,27 +144,6 @@ public class ERXPatcher {
 						response._appendTagAttributeAndValue("value", string, escapeHTMLInContext(context));
 					}
 				}
-			}
-		}
-
-		public static class GenericContainer extends WOGenericContainer {
-
-			public GenericContainer(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-			}
-		}
-
-		public static class GenericElement extends WOGenericElement {
-
-			public GenericElement(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-			}
-		}
-
-		public static class Image extends WOImage {
-
-			public Image(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
 			}
 		}
 
@@ -413,13 +380,6 @@ public class ERXPatcher {
 
 		}
 
-		public static class CheckBox extends WOCheckBox {
-
-			public CheckBox(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-			}
-		}
-
 		public static class CheckBoxList extends WOCheckBoxList {
 
 			public CheckBoxList(String aName, NSDictionary associations, WOElement element) {
@@ -523,13 +483,6 @@ public class ERXPatcher {
 			}
 		}
 
-		public static class ImageButton extends WOImageButton {
-
-			public ImageButton(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-			}
-		}
-
 		public static class PasswordField extends WOPasswordField {
 			protected WOAssociation _readonly;
 
@@ -560,13 +513,6 @@ public class ERXPatcher {
 				if (!readOnly) {
 					super.takeValuesFromRequest(aRequest, wocontext);
 				}
-			}
-		}
-
-		public static class RadioButton extends WORadioButton {
-
-			public RadioButton(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
 			}
 		}
 
