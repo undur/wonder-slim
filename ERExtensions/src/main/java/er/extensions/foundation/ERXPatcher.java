@@ -82,8 +82,6 @@ public class ERXPatcher {
 	}
 
 	public static class DynamicElementsPatches {
-		private static final boolean suppressValueBindingSlow = false;
-		
 		private DynamicElementsPatches() {}
 
 		public static class SubmitButton extends WOSubmitButton {
@@ -246,7 +244,6 @@ public class ERXPatcher {
 
 			public PopUpButton(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-				_loggedSlow = suppressValueBindingSlow;
 			}
 
 			/* select element shouldn't worry about value attribute */
@@ -322,7 +319,6 @@ public class ERXPatcher {
 
 			public Browser(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-				_loggedSlow = suppressValueBindingSlow;
 			}
 			
 			/**
