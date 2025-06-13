@@ -51,20 +51,20 @@ public class ERXPatcher {
 	}
 
 	public static synchronized void installPatches() {
-		ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
-		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
-		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ActiveImage.class, "WOActiveImage");
-		ERXPatcher.setClassForName(DynamicElementsPatches.Text.class, "WOText");
-		ERXPatcher.setClassForName(DynamicElementsPatches.PopUpButton.class, "WOPopUpButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.Browser.class, "WOBrowser");
 		ERXPatcher.setClassForName(DynamicElementsPatches.CheckBoxList.class, "WOCheckBoxList");
 		ERXPatcher.setClassForName(DynamicElementsPatches.HiddenField.class, "WOHiddenField");
-		ERXPatcher.setClassForName(DynamicElementsPatches.PasswordField.class, "WOPasswordField");
-		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
-		ERXPatcher.setClassForName(DynamicElementsPatches.JavaScript.class, "WOJavaScript");
 		ERXPatcher.setClassForName(ERXWOHyperlink.class, "WOHyperlink");
+		ERXPatcher.setClassForName(DynamicElementsPatches.JavaScript.class, "WOJavaScript");
+		ERXPatcher.setClassForName(DynamicElementsPatches.PasswordField.class, "WOPasswordField");
+		ERXPatcher.setClassForName(DynamicElementsPatches.PopUpButton.class, "WOPopUpButton");
+		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
+		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
+		ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
 		ERXPatcher.setClassForName(ERXWOSwitchComponent.class, "WOSwitchComponent");
+		ERXPatcher.setClassForName(DynamicElementsPatches.Text.class, "WOText");
+		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
 	}
 
 	/**
