@@ -14,13 +14,18 @@ import com.webobjects.appserver._private.WOActiveImage;
 import com.webobjects.appserver._private.WOBrowser;
 import com.webobjects.appserver._private.WOCheckBoxList;
 import com.webobjects.appserver._private.WOConstantValueAssociation;
+import com.webobjects.appserver._private.WOForm;
 import com.webobjects.appserver._private.WOHiddenField;
+import com.webobjects.appserver._private.WOHyperlink;
 import com.webobjects.appserver._private.WOJavaScript;
 import com.webobjects.appserver._private.WOPasswordField;
 import com.webobjects.appserver._private.WOPopUpButton;
 import com.webobjects.appserver._private.WORadioButtonList;
+import com.webobjects.appserver._private.WORepetition;
 import com.webobjects.appserver._private.WOResetButton;
+import com.webobjects.appserver._private.WOString;
 import com.webobjects.appserver._private.WOSubmitButton;
+import com.webobjects.appserver._private.WOSwitchComponent;
 import com.webobjects.appserver._private.WOText;
 import com.webobjects.appserver._private.WOTextField;
 import com.webobjects.foundation.NSArray;
@@ -45,38 +50,34 @@ import er.extensions.localization.ERXLocalizer;
 public class ERXPatcher {
 
 	/**
-	 * Sets the class registered for the name <code>className</code> to the given class.
-	 * Changes the private WebObjects class cache.
-	 * 
-	 * @param clazz class object
-	 * @param className name for the class - normally clazz.getName()
+	 * Register a class by simple name in the _NSUtilities simple classname lookup (used for e.g. elements/components/directaction) 
 	 */
-	public static void setClassForName(Class clazz, String className) {
-		_NSUtilities.setClassForName(clazz, className);
+	private static void replaceClass(Class replacementClass, Class classToReplace) {
+		_NSUtilities.setClassForName(replacementClass, classToReplace.getSimpleName());
 	}
 
 	public static synchronized void installPatches() {
-		ERXPatcher.setClassForName(DynamicElementsPatches.ActiveImage.class, "WOActiveImage");
-		ERXPatcher.setClassForName(DynamicElementsPatches.Browser.class, "WOBrowser");
-		ERXPatcher.setClassForName(DynamicElementsPatches.CheckBoxList.class, "WOCheckBoxList");
-		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
-		ERXPatcher.setClassForName(DynamicElementsPatches.HiddenField.class, "WOHiddenField");
-		ERXPatcher.setClassForName(ERXWOHyperlink.class, "WOHyperlink");
-		ERXPatcher.setClassForName(DynamicElementsPatches.JavaScript.class, "WOJavaScript");
-		ERXPatcher.setClassForName(DynamicElementsPatches.PasswordField.class, "WOPasswordField");
-		ERXPatcher.setClassForName(DynamicElementsPatches.PopUpButton.class, "WOPopUpButton");
-		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
-		ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition");
-		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
-		ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
-		ERXPatcher.setClassForName(ERXWOSwitchComponent.class, "WOSwitchComponent");
-		ERXPatcher.setClassForName(DynamicElementsPatches.Text.class, "WOText");
-		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField"); // FIXME: Made redundant by ERXWOTextField // Hugi 2025-06-13
+		replaceClass(DynamicElementsPatches.ActiveImage.class, WOActiveImage.class);
+		replaceClass(DynamicElementsPatches.Browser.class, WOBrowser.class);
+		replaceClass(DynamicElementsPatches.CheckBoxList.class, WOCheckBoxList.class);
+		replaceClass(ERXWOForm.class, WOForm.class);
+		replaceClass(DynamicElementsPatches.HiddenField.class, WOHiddenField.class);
+		replaceClass(ERXWOHyperlink.class, WOHyperlink.class);
+		replaceClass(DynamicElementsPatches.JavaScript.class, WOJavaScript.class);
+		replaceClass(DynamicElementsPatches.PasswordField.class, WOPasswordField.class);
+		replaceClass(DynamicElementsPatches.PopUpButton.class, WOPopUpButton.class);
+		replaceClass(DynamicElementsPatches.RadioButtonList.class, WORadioButtonList.class);
+		replaceClass(ERXWORepetition.class, WORepetition.class);
+		replaceClass(DynamicElementsPatches.ResetButton.class, WOResetButton.class);
+		replaceClass(DynamicElementsPatches.SubmitButton.class, WOSubmitButton.class);
+		replaceClass(ERXWOSwitchComponent.class, WOSwitchComponent.class);
+		replaceClass(DynamicElementsPatches.Text.class, WOText.class);
+		replaceClass(DynamicElementsPatches.TextField.class, WOTextField.class); // FIXME: Made redundant by ERXWOTextField // Hugi 2025-06-13
 		
 		// FIXME: We should probably always install these, regardless of whether localization is enabled // Hugi 2025-06-13
 		if (ERXLocalizer.isLocalizationEnabled()) {
-			ERXPatcher.setClassForName(ERXWOString.class, "WOString");
-			ERXPatcher.setClassForName(ERXWOTextField.class, "WOTextField");
+			replaceClass(ERXWOString.class, WOString.class);
+			replaceClass(ERXWOTextField.class, WOTextField.class);
 		}
 	}
 
