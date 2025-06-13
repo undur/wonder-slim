@@ -30,8 +30,13 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation._NSUtilities;
 
 import er.extensions.appserver.ERXSession;
+import er.extensions.components._private.ERXWOForm;
 import er.extensions.components._private.ERXWOHyperlink;
+import er.extensions.components._private.ERXWORepetition;
+import er.extensions.components._private.ERXWOString;
 import er.extensions.components._private.ERXWOSwitchComponent;
+import er.extensions.components._private.ERXWOTextField;
+import er.extensions.localization.ERXLocalizer;
 
 /**
  * Wrapper around the WO-private NSUtilities which allows for some Objective-C-Style poseAs. Using these methods may or may not break in the future.
@@ -54,17 +59,25 @@ public class ERXPatcher {
 		ERXPatcher.setClassForName(DynamicElementsPatches.ActiveImage.class, "WOActiveImage");
 		ERXPatcher.setClassForName(DynamicElementsPatches.Browser.class, "WOBrowser");
 		ERXPatcher.setClassForName(DynamicElementsPatches.CheckBoxList.class, "WOCheckBoxList");
+		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
 		ERXPatcher.setClassForName(DynamicElementsPatches.HiddenField.class, "WOHiddenField");
 		ERXPatcher.setClassForName(ERXWOHyperlink.class, "WOHyperlink");
 		ERXPatcher.setClassForName(DynamicElementsPatches.JavaScript.class, "WOJavaScript");
 		ERXPatcher.setClassForName(DynamicElementsPatches.PasswordField.class, "WOPasswordField");
 		ERXPatcher.setClassForName(DynamicElementsPatches.PopUpButton.class, "WOPopUpButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.RadioButtonList.class, "WORadioButtonList");
+		ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition");
 		ERXPatcher.setClassForName(DynamicElementsPatches.ResetButton.class, "WOResetButton");
 		ERXPatcher.setClassForName(DynamicElementsPatches.SubmitButton.class, "WOSubmitButton");
 		ERXPatcher.setClassForName(ERXWOSwitchComponent.class, "WOSwitchComponent");
 		ERXPatcher.setClassForName(DynamicElementsPatches.Text.class, "WOText");
-		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField");
+		ERXPatcher.setClassForName(DynamicElementsPatches.TextField.class, "WOTextField"); // FIXME: Made redundant by ERXWOTextField // Hugi 2025-06-13
+		
+		// FIXME: We should probably always install these, regardless of whether localization is enabled // Hugi 2025-06-13
+		if (ERXLocalizer.isLocalizationEnabled()) {
+			ERXPatcher.setClassForName(ERXWOString.class, "WOString");
+			ERXPatcher.setClassForName(ERXWOTextField.class, "WOTextField");
+		}
 	}
 
 	/**

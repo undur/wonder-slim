@@ -62,10 +62,6 @@ import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXMonitorServer;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.bettertemplates.ERXBetterTemplates;
-import er.extensions.components._private.ERXWOForm;
-import er.extensions.components._private.ERXWORepetition;
-import er.extensions.components._private.ERXWOString;
-import er.extensions.components._private.ERXWOTextField;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXMutableURL;
@@ -73,7 +69,6 @@ import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.localization.ERXLocalizer;
 import er.extensions.statistics.ERXStats;
 
 public abstract class ERXApplication extends ERXAjaxApplication {
@@ -408,15 +403,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		if (contextClassName().equals("WOContext")) {
 			setContextClassName(ERXWOContext.class.getName());
-		}
-
-		ERXPatcher.setClassForName(ERXWOForm.class, "WOForm");
-		ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition");
-
-		// use our localizing string class works around #3574558
-		if (ERXLocalizer.isLocalizationEnabled()) {
-			ERXPatcher.setClassForName(ERXWOString.class, "WOString");
-			ERXPatcher.setClassForName(ERXWOTextField.class, "WOTextField");
 		}
 	}
 
