@@ -40,7 +40,6 @@ import er.extensions.components._private.ERXWORepetition;
 import er.extensions.components._private.ERXWOString;
 import er.extensions.components._private.ERXWOSwitchComponent;
 import er.extensions.components._private.ERXWOTextField;
-import er.extensions.localization.ERXLocalizer;
 
 /**
  * Contains some of Wonder's patches for WO's built in dynamic elements  
@@ -67,16 +66,11 @@ public class ERXPatcher {
 		replaceClass(DynamicElementsPatches.PopUpButton.class, WOPopUpButton.class);
 		replaceClass(DynamicElementsPatches.RadioButtonList.class, WORadioButtonList.class);
 		replaceClass(ERXWORepetition.class, WORepetition.class);
+		replaceClass(ERXWOString.class, WOString.class);
 		replaceClass(DynamicElementsPatches.SubmitButton.class, WOSubmitButton.class);
 		replaceClass(ERXWOSwitchComponent.class, WOSwitchComponent.class);
 		replaceClass(DynamicElementsPatches.Text.class, WOText.class);
-		replaceClass(DynamicElementsPatches.TextField.class, WOTextField.class); // FIXME: Made redundant by ERXWOTextField // Hugi 2025-06-13
-		
-		// FIXME: We should probably always install these, regardless of whether localization is enabled // Hugi 2025-06-13
-		if (ERXLocalizer.isLocalizationEnabled()) {
-			replaceClass(ERXWOString.class, WOString.class);
-			replaceClass(ERXWOTextField.class, WOTextField.class);
-		}
+		replaceClass(ERXWOTextField.class, WOTextField.class);
 	}
 
 	public static class DynamicElementsPatches {
@@ -119,39 +113,6 @@ public class ERXPatcher {
 				return result;
 			}
 
-		}
-
-		public static class TextField extends WOTextField {
-			protected WOAssociation _readonly;
-
-			public TextField(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-				_readonly = _associations.removeObjectForKey("readonly");
-			}
-
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-
-				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
-					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
-				}
-			}
-			
-			/**
-			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
-			 */
-			@Override
-			public void takeValuesFromRequest(WORequest aRequest, WOContext wocontext) {
-				WOComponent aComponent = wocontext.component();
-				Boolean readOnly = false;
-				if (_readonly != null) {
-					readOnly = _readonly.booleanValueInComponent(aComponent);
-				}
-				if (!readOnly) {
-					super.takeValuesFromRequest(aRequest, wocontext);
-				}
-			}
 		}
 
 		public static class Text extends WOText {
