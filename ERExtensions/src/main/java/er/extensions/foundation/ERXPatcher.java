@@ -102,12 +102,6 @@ public class ERXPatcher {
 			public SubmitButton(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
 			}
-
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
-			}
 			
 			protected String _valueStringInContext(WOContext context) {
 				String valueString = null;
@@ -164,12 +158,6 @@ public class ERXPatcher {
 				super(aName, associations, element);
 			}
 
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
-			}
-
 			/**
 			 * Appends the attribute "value" to the response. First tries to get a localized version and if that fails,
 			 * uses the supplied value as the default
@@ -205,12 +193,6 @@ public class ERXPatcher {
 			}
 
 			@Override
-			public void appendAttributesToResponse(WOResponse woresponse, WOContext wocontext) {
-				super.appendAttributesToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
-			}
-
-			@Override
 			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
 				super.appendToResponse(newResponse, wocontext);
@@ -229,12 +211,6 @@ public class ERXPatcher {
 			}
 
 			@Override
-			public void appendAttributesToResponse(WOResponse woresponse, WOContext wocontext) {
-				super.appendAttributesToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
-			}
-
-			@Override
 			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
 				super.appendToResponse(newResponse, wocontext);
@@ -250,12 +226,6 @@ public class ERXPatcher {
 
 			public Image(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-			}
-
-			@Override
-			public void appendAttributesToResponse(WOResponse woresponse, WOContext wocontext) {
-				super.appendAttributesToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
 			}
 
 			@Override
@@ -279,12 +249,6 @@ public class ERXPatcher {
 			@Override
 			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
 				super._appendNameAttributeToResponse(woresponse, wocontext);
-			}
-
-			@Override
-			protected void appendConstantAttributesToResponse(WOResponse woresponse, WOContext wocontext) {
-				super.appendConstantAttributesToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
 			}
 
 			@Override
@@ -323,7 +287,7 @@ public class ERXPatcher {
 			@Override
 			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
 				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
+
 				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
 					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
@@ -367,7 +331,7 @@ public class ERXPatcher {
 			@Override
 			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
 				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
+
 				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
 					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
@@ -405,12 +369,6 @@ public class ERXPatcher {
 			public PopUpButton(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
 				_loggedSlow = suppressValueBindingSlow;
-			}
-
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
 			}
 
 			/* select element shouldn't worry about value attribute */
@@ -502,12 +460,6 @@ public class ERXPatcher {
 			}
 
 			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
-			}
-
-			@Override
 			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
 				super.appendToResponse(newResponse, wocontext);
@@ -589,12 +541,6 @@ public class ERXPatcher {
 			}
 
 			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
-			}
-
-			@Override
 			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
 				super.appendToResponse(newResponse, wocontext);
@@ -610,12 +556,6 @@ public class ERXPatcher {
 
 			public CheckBoxList(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-			}
-
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
 			}
 
 			@Override
@@ -704,7 +644,7 @@ public class ERXPatcher {
 			@Override
 			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
 				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
+
 				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
 					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
@@ -744,12 +684,6 @@ public class ERXPatcher {
 			}
 
 			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
-			}
-
-			@Override
 			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
 				super.appendToResponse(newResponse, wocontext);
@@ -772,7 +706,7 @@ public class ERXPatcher {
 			@Override
 			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
 				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
+
 				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
 					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
@@ -812,12 +746,6 @@ public class ERXPatcher {
 			}
 
 			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
-			}
-
-			@Override
 			public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 				WOResponse newResponse = cleanupXHTML ? new WOResponse() : woresponse;
 				super.appendToResponse(newResponse, wocontext);
@@ -833,12 +761,6 @@ public class ERXPatcher {
 
 			public RadioButtonList(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
-			}
-
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-				appendIdentifierTagAndValue(this, _id, woresponse, wocontext);
 			}
 
 			@Override
@@ -934,15 +856,6 @@ public class ERXPatcher {
 				}
 			}
 		}
-
-		/**
-		 * Allows you to set the component ID without actually touching the HTML code, by adding a
-		 * <code>componentIdentifier</code> entry in the context's mutableUserInfo. This is useful for setting CSS entries you don't have to code for.
-		 * 
-		 * FIXME: Deprecated and deactivated in preparation for deletion // Hugi 2025-06-12
-		 */
-		@Deprecated
-		public static void appendIdentifierTagAndValue(WODynamicElement element, WOAssociation id, WOResponse response, WOContext context) {}
 
 		/**
 		 * Fixing up the response for XHTML and adding the element to the array of generated element IDs, so we can use
