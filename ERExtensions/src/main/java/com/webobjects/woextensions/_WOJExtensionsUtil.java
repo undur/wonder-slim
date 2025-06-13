@@ -22,9 +22,10 @@ public class _WOJExtensionsUtil {
 	public static Object valueForBindingOrNull(String binding, WOComponent component) {
 
 		// FIXME: I don't actually think we want to allow this to be null // Hugi 2022-03-21
-		if (binding == null) {
-			return null;
-		}
+		// FIXME: Disabled // Hugi 2025-06-13
+//		if (binding == null) {
+//			return null;
+//		}
 
 		Object result = component.valueForBinding(binding);
 
