@@ -146,7 +146,7 @@ public class ERXWOString extends WODynamicElement {
 			stringValue = valueInComponent.toString();
 		}
 
-		if ((stringValue == null || stringValue.length() == 0) && _valueWhenEmpty != null) {
+		if ((stringValue == null || stringValue.isEmpty()) && _valueWhenEmpty != null) {
 			stringValue = (String) _valueWhenEmpty.valueInComponent(component);
 			woresponse.appendContentString(stringValue);
 		}
