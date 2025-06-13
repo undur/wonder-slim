@@ -22,7 +22,6 @@ import com.webobjects.appserver._private.WOPasswordField;
 import com.webobjects.appserver._private.WOPopUpButton;
 import com.webobjects.appserver._private.WORadioButtonList;
 import com.webobjects.appserver._private.WORepetition;
-import com.webobjects.appserver._private.WOResetButton;
 import com.webobjects.appserver._private.WOString;
 import com.webobjects.appserver._private.WOSubmitButton;
 import com.webobjects.appserver._private.WOSwitchComponent;
@@ -68,7 +67,6 @@ public class ERXPatcher {
 		replaceClass(DynamicElementsPatches.PopUpButton.class, WOPopUpButton.class);
 		replaceClass(DynamicElementsPatches.RadioButtonList.class, WORadioButtonList.class);
 		replaceClass(ERXWORepetition.class, WORepetition.class);
-		replaceClass(DynamicElementsPatches.ResetButton.class, WOResetButton.class);
 		replaceClass(DynamicElementsPatches.SubmitButton.class, WOSubmitButton.class);
 		replaceClass(ERXWOSwitchComponent.class, WOSwitchComponent.class);
 		replaceClass(DynamicElementsPatches.Text.class, WOText.class);
@@ -126,31 +124,6 @@ public class ERXPatcher {
 					ERXSession.anySession().setObjectForKey(toString(), "ERXActionLogging");
 				}
 				return result;
-			}
-		}
-
-		public static class ResetButton extends WOResetButton {
-
-			public ResetButton(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-			}
-
-			/**
-			 * Appends the attribute "value" to the response. First tries to get a localized version and if that fails,
-			 * uses the supplied value as the default
-			 * 
-			 * FIXME: Hmm… Looks like localization (what I think is the only functionality this method provides) is disabled/commented out? // Hugi 2025-06-13
-			 */
-			@Override
-			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {
-				if (_value != null) {
-					Object object = _value.valueInComponent(context.component());
-					if (object != null) {
-						String string = object.toString();
-						// string = ERXLocalizer.currentLocalizer().localizedStringForKeyWithDefault(string);
-						response._appendTagAttributeAndValue("value", string, escapeHTMLInContext(context));
-					}
-				}
 			}
 		}
 
