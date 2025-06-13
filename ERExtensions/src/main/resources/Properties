@@ -85,18 +85,6 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 # er.extensions.ERXBrowserFactory.BrowserClassName=er.extensions.appserver.ERXBasicBrowser
 
 #########################################################################
-# ERXPatcher 
-#########################################################################
-## Set to true if you need XHTML from the dynamic elements. Note that this can
-## slow down your app
-er.extensions.ERXPatcher.cleanupXHTML=false
-
-## Set to true to suppress warning message from inputs:
-## takeValuesFromRequest() Warning: Avoid using the 'value' binding as it 
-## is much slower than omitting it, and it is just cosmetic.
-er.extensions.ERXPatcher.suppressValueBindingSlow=false
-
-#########################################################################
 # ERXApplication 
 #########################################################################
 ## Base directory for statistics logging
