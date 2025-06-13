@@ -87,32 +87,6 @@ public class ERXPatcher {
 			public SubmitButton(String aName, NSDictionary associations, WOElement element) {
 				super(aName, associations, element);
 			}
-			
-			protected String _valueStringInContext(WOContext context) {
-				String valueString = null;
-				Object value = _value.valueInComponent(context.component());
-				if (value != null) {
-					valueString = value.toString();
-				}
-				return valueString;
-			}
-
-			/**
-			 * Appends the attribute "value" to the response. First tries to get a localized version and if that fails,
-			 * uses the supplied value as the default
-			 * 
-			 * FIXME: Hmm… Looks like localization (what I think is the only functionality this method provides) is disabled/commented out? // Hugi 2025-06-13
-			 */
-			@Override
-			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {
-				if (_value != null) {
-					String valueString = _valueStringInContext(context);
-					if (valueString != null) {
-						// stringValue = ERXLocalizer.currentLocalizer().localizedStringForKeyWithDefault(stringValue);
-						response._appendTagAttributeAndValue("value", valueString, escapeHTMLInContext(context));
-					}
-				}
-			}
 
 			/*
 			 * logs the action name into session's dictionary with a key = ERXActionLogging
