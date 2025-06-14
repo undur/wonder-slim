@@ -14,7 +14,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODynamicElementCreationException;
 import com.webobjects.appserver._private.WODynamicGroup;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
@@ -115,16 +114,16 @@ public class ERXWORepetition extends WODynamicGroup {
 		private List<Object> list;
 		private Object[] array;
 
-		private ListWrapper(Object object) {
-			if (object != null) {
-				if (object instanceof List) {
-					list = (List<Object>) object;
+		private ListWrapper(Object wrapped) {
+			if (wrapped != null) {
+				if (wrapped instanceof List) {
+					list = (List<Object>) wrapped;
 				}
-				else if (object instanceof Object[]) {
-					array = (Object[]) object;
+				else if (wrapped instanceof Object[]) {
+					array = (Object[]) wrapped;
 				}
 				else {
-					throw new IllegalArgumentException("Evaluating 'list' binding returned a " + object.getClass().getName() + " when it should return java.util.List or an Object[]");
+					throw new IllegalArgumentException("Evaluating 'list' binding returned a " + wrapped.getClass().getName() + " when it should return java.util.List or an Object[]");
 				}
 			}
 		}
@@ -160,7 +159,7 @@ public class ERXWORepetition extends WODynamicGroup {
 		/**
 		 * @return The collection we're working on.
 		 */
-		private Object representedCollection() {
+		private Object wrapped() {
 			if( list != null ) {
 				return list;
 			}
@@ -256,11 +255,11 @@ public class ERXWORepetition extends WODynamicGroup {
 	/**
 	 * Prepares the WOContext for the loop iteration.
 	 */
-	private void _prepareForIterationWithIndex(ListWrapper context, int index, WOContext wocontext, WOComponent wocomponent, boolean checkHashCodes) {
+	private void _prepareForIterationWithIndex(ListWrapper list, int index, WOContext wocontext, WOComponent wocomponent, boolean checkHashCodes) {
 		Object object = null;
 
 		if (_item != null) {
-			object = context.objectAtIndex(index);
+			object = list.objectAtIndex(index);
 			_item._setValueNoValidation(object, wocomponent);
 		}
 
@@ -345,10 +344,10 @@ public class ERXWORepetition extends WODynamicGroup {
 		return indexString;
 	}
 
-	private int _count(ListWrapper context, WOComponent wocomponent) {
+	private int _count(ListWrapper list, WOComponent wocomponent) {
 		int count;
 		if (_list != null) {
-			count = context.count();
+			count = list.count();
 		}
 		else {
 			Object object = _count.valueInComponent(wocomponent);
@@ -387,15 +386,15 @@ public class ERXWORepetition extends WODynamicGroup {
 	@Override
 	public void takeValuesFromRequest(WORequest worequest, WOContext wocontext) {
 		WOComponent wocomponent = wocontext.component();
-		ListWrapper context = listWrapper(wocomponent);
+		ListWrapper list = listWrapper(wocomponent);
 
-		int count = _count(context, wocomponent);
+		int count = _count(list, wocomponent);
 		boolean checkHashCodes = checkHashCodes(wocomponent);
 		if (log.isDebugEnabled()) {
 			log.debug("takeValuesFromRequest: {} - {}", wocontext.elementID(), wocontext.request().formValueKeys());
 		}
 		for (int index = 0; index < count; index++) {
-			_prepareForIterationWithIndex(context, index, wocontext, wocomponent, checkHashCodes);
+			_prepareForIterationWithIndex(list, index, wocontext, wocomponent, checkHashCodes);
 			super.takeValuesFromRequest(worequest, wocontext);
 		}
 		if (count > 0) {
@@ -406,9 +405,9 @@ public class ERXWORepetition extends WODynamicGroup {
 	@Override
 	public WOActionResults invokeAction(WORequest worequest, WOContext wocontext) {
 		WOComponent wocomponent = wocontext.component();
-		ListWrapper repetitionContext = listWrapper(wocomponent);
+		ListWrapper list = listWrapper(wocomponent);
 
-		int count = _count(repetitionContext, wocomponent);
+		int count = _count(list, wocomponent);
 
 		WOActionResults woactionresults = null;
 		String indexString = _indexOfChosenItem(worequest, wocontext);
@@ -429,8 +428,8 @@ public class ERXWORepetition extends WODynamicGroup {
 					if (_uniqueKey == null) {
 						int hashCode = Integer.parseInt(indexString);
 						int otherHashCode = 0;
-						for (int i = 0; i < repetitionContext.count() && !found; i++) {
-							Object o = repetitionContext.objectAtIndex(i);
+						for (int i = 0; i < list.count() && !found; i++) {
+							Object o = list.objectAtIndex(i);
 							otherHashCode = hashCodeForObject(wocomponent, o);
 							if (otherHashCode == hashCode) {
 								object = o;
@@ -441,14 +440,14 @@ public class ERXWORepetition extends WODynamicGroup {
 						if (found) {
 							log.debug("Found object: {} vs {}", otherHashCode, hashCode);
 						} else {
-							log.warn("Wrong object: {} vs {} (array = {})", otherHashCode, hashCode, repetitionContext.representedCollection());
+							log.warn("Wrong object: {} vs {} (array = {})", otherHashCode, hashCode, list.wrapped());
 						}
 					}
 					else {
 						String key = indexString;
 						String otherKey = null;
-						for (int i = 0; i < repetitionContext.count() && !found; i++) {
-							Object o = repetitionContext.objectAtIndex(i);
+						for (int i = 0; i < list.count() && !found; i++) {
+							Object o = list.objectAtIndex(i);
 							otherKey = keyForObject(wocomponent, o);
 							if (otherKey.equals(key)) {
 								object = o;
@@ -459,7 +458,7 @@ public class ERXWORepetition extends WODynamicGroup {
 						if (found) {
 							log.debug("Found object: {} vs {}", otherKey, key);
 						} else {
-							log.warn("Wrong object: {} vs {} (array = {})", otherKey, key, repetitionContext.representedCollection());
+							log.warn("Wrong object: {} vs {} (array = {})", otherKey, key, list.wrapped());
 						}
 					}
 
@@ -474,13 +473,13 @@ public class ERXWORepetition extends WODynamicGroup {
 					}
 				}
 				else {
-					if (index >= repetitionContext.count()) {
+					if (index >= list.count()) {
 						if (raiseOnUnmatchedObject(wocomponent)) {
 							throw new UnmatchedObjectException();
 						}
 						return wocontext.page();
 					}
-					object = repetitionContext.objectAtIndex(index);
+					object = list.objectAtIndex(index);
 				}
 				_item._setValueNoValidation(object, wocomponent);
 			}
@@ -494,7 +493,7 @@ public class ERXWORepetition extends WODynamicGroup {
 		}
 		else {
 			for (int i = 0; i < count && woactionresults == null; i++) {
-				_prepareForIterationWithIndex(repetitionContext, i, wocontext, wocomponent, checkHashCodes);
+				_prepareForIterationWithIndex(list, i, wocontext, wocomponent, checkHashCodes);
 				woactionresults = super.invokeAction(worequest, wocontext);
 			}
 			if (count > 0) {
@@ -507,14 +506,14 @@ public class ERXWORepetition extends WODynamicGroup {
 	@Override
 	public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 		final WOComponent wocomponent = wocontext.component();
-		final ListWrapper context = listWrapper(wocomponent);
+		final ListWrapper list = listWrapper(wocomponent);
 
-		final int count = _count(context, wocomponent);
+		final int count = _count(list, wocomponent);
 		final boolean checkHashCodes = checkHashCodes(wocomponent);
 		log.debug("appendToResponse: {}", wocontext.elementID());
 
 		for (int index = 0; index < count; index++) {
-			_prepareForIterationWithIndex(context, index, wocontext, wocomponent, checkHashCodes);
+			_prepareForIterationWithIndex(list, index, wocontext, wocomponent, checkHashCodes);
 			appendChildrenToResponse(woresponse, wocontext);
 		}
 		if (count > 0) {
