@@ -148,6 +148,72 @@ public class ERXPatcher {
 			}
 		}
 
+		public static class HiddenField extends WOHiddenField {
+			protected WOAssociation _readonly;
+
+			public HiddenField(String aName, NSDictionary associations, WOElement element) {
+				super(aName, associations, element);
+				_readonly = _associations.removeObjectForKey("readonly");
+			}
+
+			@Override
+			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
+				super._appendNameAttributeToResponse(woresponse, wocontext);
+
+				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
+					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
+				}
+			}
+			
+			/**
+			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
+			 */
+			@Override
+			public void takeValuesFromRequest(WORequest aRequest, WOContext wocontext) {
+				WOComponent aComponent = wocontext.component();
+				Boolean readOnly = false;
+				if (_readonly != null) {
+					readOnly = _readonly.booleanValueInComponent(aComponent);
+				}
+				if (!readOnly) {
+					super.takeValuesFromRequest(aRequest, wocontext);
+				}
+			}
+		}
+
+		public static class PasswordField extends WOPasswordField {
+			protected WOAssociation _readonly;
+
+			public PasswordField(String aName, NSDictionary associations, WOElement element) {
+				super(aName, associations, element);
+				_readonly = _associations.removeObjectForKey("readonly");
+			}
+
+			@Override
+			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
+				super._appendNameAttributeToResponse(woresponse, wocontext);
+
+				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
+					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
+				}
+			}
+			
+			/**
+			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
+			 */
+			@Override
+			public void takeValuesFromRequest(WORequest aRequest, WOContext wocontext) {
+				WOComponent aComponent = wocontext.component();
+				Boolean readOnly = false;
+				if (_readonly != null) {
+					readOnly = _readonly.booleanValueInComponent(aComponent);
+				}
+				if (!readOnly) {
+					super.takeValuesFromRequest(aRequest, wocontext);
+				}
+			}
+		}
+
 		public static class PopUpButton extends WOPopUpButton {
 
 			public PopUpButton(String aName, NSDictionary associations, WOElement element) {
@@ -361,72 +427,6 @@ public class ERXPatcher {
 				return aListClass;
 			}
 
-		}
-
-		public static class HiddenField extends WOHiddenField {
-			protected WOAssociation _readonly;
-
-			public HiddenField(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-				_readonly = _associations.removeObjectForKey("readonly");
-			}
-
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-
-				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
-					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
-				}
-			}
-			
-			/**
-			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
-			 */
-			@Override
-			public void takeValuesFromRequest(WORequest aRequest, WOContext wocontext) {
-				WOComponent aComponent = wocontext.component();
-				Boolean readOnly = false;
-				if (_readonly != null) {
-					readOnly = _readonly.booleanValueInComponent(aComponent);
-				}
-				if (!readOnly) {
-					super.takeValuesFromRequest(aRequest, wocontext);
-				}
-			}
-		}
-
-		public static class PasswordField extends WOPasswordField {
-			protected WOAssociation _readonly;
-
-			public PasswordField(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-				_readonly = _associations.removeObjectForKey("readonly");
-			}
-
-			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
-
-				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
-					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
-				}
-			}
-			
-			/**
-			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
-			 */
-			@Override
-			public void takeValuesFromRequest(WORequest aRequest, WOContext wocontext) {
-				WOComponent aComponent = wocontext.component();
-				Boolean readOnly = false;
-				if (_readonly != null) {
-					readOnly = _readonly.booleanValueInComponent(aComponent);
-				}
-				if (!readOnly) {
-					super.takeValuesFromRequest(aRequest, wocontext);
-				}
-			}
 		}
 
 		public static class RadioButtonList extends WORadioButtonList {
