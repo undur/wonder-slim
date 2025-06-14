@@ -67,11 +67,11 @@ import er.extensions.foundation.ERXValueUtilities;
  * @binding item the current item in the iteration
  * @binding count the total number of items to iterate over
  * @binding index the current index in the iteration
+ * 
  * @binding uniqueKey a String keypath on item (relative to item, not relative to the component) returning a value whose toString() is unique for this component
  * @binding checkHashCodes if true, checks the validity of repetition references during the RR loop
  * @binding raiseOnUnmatchedObject if true, an exception is thrown when the repetition does not find a matching object
  * @binding debugHashCodes if true, prints out hashcodes for each entry in the repetition as it is traversed
- * @binding batchFetch a comma-separated list of keypaths on the "list" array binding to batch fetch
  * @binding eoSupport try to use globalIDs to determine the hashCode for EOs
  * @binding notFoundMarker used for the item in the repetition if checkHashCodes is true, don't bind directly to null as that will be translated to false
  * 
@@ -96,8 +96,10 @@ public class ERXWORepetition extends WODynamicGroup {
 	private final WOAssociation _debugHashCodes;
 	private final WOAssociation _notFoundMarker;
 
+	/**
+	 * FIXME: We're keeping this one around for a bit since we might want to implement something similar (although not specifically tied to EOs) // Hugi 2025-06-14
+	 */
 	private final WOAssociation _eoSupport;
-	private final WOAssociation _batchFetch;
 
 	private static final boolean _checkHashCodesDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.checkHashCodes", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".checkHashCodes"));
 	private static final boolean _raiseOnUnmatchedObjectDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.raiseOnUnmatchedObject", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".raiseOnUnmatchedObject"));
@@ -183,7 +185,6 @@ public class ERXWORepetition extends WODynamicGroup {
 		_raiseOnUnmatchedObject = associations.objectForKey("raiseOnUnmatchedObject");
 		_debugHashCodes = associations.objectForKey("debugHashCodes");
 		_eoSupport = associations.objectForKey("eoSupport");
-		_batchFetch = associations.objectForKey("batchFetch");
 		_notFoundMarker = associations.objectForKey("notFoundMarker");
 		
 		if (_list == null && _count == null) {
@@ -367,31 +368,15 @@ public class ERXWORepetition extends WODynamicGroup {
 		return count;
 	}
 
-	private ListWrapper listWrapper(WOComponent component) {
+	private ListWrapper list(WOComponent component) {
 		final Object list = _list != null ? _list.valueInComponent(component) : null;
-
-		/*
-		if(list instanceof NSArray) {
-			if (_batchFetch != null) {
-				String batchFetchKeyPaths = (String)_batchFetch.valueInComponent(wocomponent);
-				if (batchFetchKeyPaths != null) {
-					NSArray<String> keyPaths = NSArray.componentsSeparatedByString(batchFetchKeyPaths, ",");
-					if (keyPaths.count() > 0) {
-						ERXBatchFetchUtilities.batchFetch((NSArray)list, keyPaths, true);
-					}
-				}
-			}
-			ERXDatabaseContextDelegate.setCurrentBatchObjects((NSArray)list);
-		}
-		*/
-
 		return new ListWrapper(list);
 	}
 
 	@Override
 	public void takeValuesFromRequest(WORequest request, WOContext context) {
 		final WOComponent component = context.component();
-		final ListWrapper list = listWrapper(component);
+		final ListWrapper list = list(component);
 
 		final int count = _count(list, component);
 		final boolean checkHashCodes = checkHashCodes(component);
@@ -414,7 +399,7 @@ public class ERXWORepetition extends WODynamicGroup {
 	public WOActionResults invokeAction(WORequest request, WOContext context) {
 		
 		final WOComponent wocomponent = context.component();
-		final ListWrapper list = listWrapper(wocomponent);
+		final ListWrapper list = list(wocomponent);
 
 		final int count = _count(list, wocomponent);
 
@@ -532,7 +517,7 @@ public class ERXWORepetition extends WODynamicGroup {
 	public void appendToResponse(WOResponse response, WOContext context) {
 		
 		final WOComponent component = context.component();
-		final ListWrapper list = listWrapper(component);
+		final ListWrapper list = list(component);
 
 		final int count = _count(list, component);
 		final boolean checkHashCodes = checkHashCodes(component);
