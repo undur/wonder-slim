@@ -110,12 +110,12 @@ public class ERXWORepetition extends WODynamicGroup {
 	 * 
 	 * FIXME: Do we _actually_ want null safety here? // Hugi 2025-06-14
 	 */
-	private static class Context {
+	private static class ListWrapper {
 
 		private List<Object> list;
 		private Object[] array;
 
-		private Context(Object object) {
+		private ListWrapper(Object object) {
 			if (object != null) {
 				if (object instanceof List) {
 					list = (List<Object>) object;
@@ -256,7 +256,7 @@ public class ERXWORepetition extends WODynamicGroup {
 	/**
 	 * Prepares the WOContext for the loop iteration.
 	 */
-	private void _prepareForIterationWithIndex(Context context, int index, WOContext wocontext, WOComponent wocomponent, boolean checkHashCodes) {
+	private void _prepareForIterationWithIndex(ListWrapper context, int index, WOContext wocontext, WOComponent wocomponent, boolean checkHashCodes) {
 		Object object = null;
 
 		if (_item != null) {
@@ -345,7 +345,7 @@ public class ERXWORepetition extends WODynamicGroup {
 		return indexString;
 	}
 
-	private int _count(Context context, WOComponent wocomponent) {
+	private int _count(ListWrapper context, WOComponent wocomponent) {
 		int count;
 		if (_list != null) {
 			count = context.count();
@@ -363,8 +363,9 @@ public class ERXWORepetition extends WODynamicGroup {
 		return count;
 	}
 
-	private Context createContext(WOComponent wocomponent) {
-		Object list = (_list != null ? _list.valueInComponent(wocomponent) : null);
+	private ListWrapper listWrapper(WOComponent wocomponent) {
+		final Object list = _list != null ? _list.valueInComponent(wocomponent) : null;
+
 		/*
 		if(list instanceof NSArray) {
 			if (_batchFetch != null) {
@@ -379,13 +380,14 @@ public class ERXWORepetition extends WODynamicGroup {
 			ERXDatabaseContextDelegate.setCurrentBatchObjects((NSArray)list);
 		}
 		*/
-		return new Context(list);
+
+		return new ListWrapper(list);
 	}
 
 	@Override
 	public void takeValuesFromRequest(WORequest worequest, WOContext wocontext) {
 		WOComponent wocomponent = wocontext.component();
-		Context context = createContext(wocomponent);
+		ListWrapper context = listWrapper(wocomponent);
 
 		int count = _count(context, wocomponent);
 		boolean checkHashCodes = checkHashCodes(wocomponent);
@@ -404,7 +406,7 @@ public class ERXWORepetition extends WODynamicGroup {
 	@Override
 	public WOActionResults invokeAction(WORequest worequest, WOContext wocontext) {
 		WOComponent wocomponent = wocontext.component();
-		Context repetitionContext = createContext(wocomponent);
+		ListWrapper repetitionContext = listWrapper(wocomponent);
 
 		int count = _count(repetitionContext, wocomponent);
 
@@ -505,7 +507,7 @@ public class ERXWORepetition extends WODynamicGroup {
 	@Override
 	public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
 		final WOComponent wocomponent = wocontext.component();
-		final Context context = createContext(wocomponent);
+		final ListWrapper context = listWrapper(wocomponent);
 
 		final int count = _count(context, wocomponent);
 		final boolean checkHashCodes = checkHashCodes(wocomponent);
