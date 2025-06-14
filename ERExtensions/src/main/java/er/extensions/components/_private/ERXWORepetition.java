@@ -131,7 +131,7 @@ public class ERXWORepetition extends WODynamicGroup {
 		/**
 		 * @return Size of the contained list 
 		 */
-		private int count() {
+		private int size() {
 			if (list != null) {
 				return list.size();
 			}
@@ -145,7 +145,7 @@ public class ERXWORepetition extends WODynamicGroup {
 		/**
 		 * @return object at index the index
 		 */
-		private Object objectAtIndex(int i) {
+		private Object get(int i) {
 			if (list != null) {
 				return list.get(i);
 			}
@@ -259,7 +259,7 @@ public class ERXWORepetition extends WODynamicGroup {
 		Object object = null;
 
 		if (_item != null) {
-			object = list.objectAtIndex(index);
+			object = list.get(index);
 			_item._setValueNoValidation(object, wocomponent);
 		}
 
@@ -347,7 +347,7 @@ public class ERXWORepetition extends WODynamicGroup {
 	private int _count(ListWrapper list, WOComponent wocomponent) {
 		int count;
 		if (_list != null) {
-			count = list.count();
+			count = list.size();
 		}
 		else {
 			Object object = _count.valueInComponent(wocomponent);
@@ -428,8 +428,8 @@ public class ERXWORepetition extends WODynamicGroup {
 					if (_uniqueKey == null) {
 						int hashCode = Integer.parseInt(indexString);
 						int otherHashCode = 0;
-						for (int i = 0; i < list.count() && !found; i++) {
-							Object o = list.objectAtIndex(i);
+						for (int i = 0; i < list.size() && !found; i++) {
+							Object o = list.get(i);
 							otherHashCode = hashCodeForObject(wocomponent, o);
 							if (otherHashCode == hashCode) {
 								object = o;
@@ -446,8 +446,8 @@ public class ERXWORepetition extends WODynamicGroup {
 					else {
 						String key = indexString;
 						String otherKey = null;
-						for (int i = 0; i < list.count() && !found; i++) {
-							Object o = list.objectAtIndex(i);
+						for (int i = 0; i < list.size() && !found; i++) {
+							Object o = list.get(i);
 							otherKey = keyForObject(wocomponent, o);
 							if (otherKey.equals(key)) {
 								object = o;
@@ -473,13 +473,13 @@ public class ERXWORepetition extends WODynamicGroup {
 					}
 				}
 				else {
-					if (index >= list.count()) {
+					if (index >= list.size()) {
 						if (raiseOnUnmatchedObject(wocomponent)) {
 							throw new UnmatchedObjectException();
 						}
 						return wocontext.page();
 					}
-					object = list.objectAtIndex(index);
+					object = list.get(index);
 				}
 				_item._setValueNoValidation(object, wocomponent);
 			}
