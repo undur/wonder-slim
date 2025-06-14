@@ -63,20 +63,20 @@ public class ERXWOString extends WODynamicElement {
 	 */
 	private final boolean  _shouldFormat;
 
-	public ERXWOString(String s, NSDictionary nsdictionary, WOElement woelement) {
+	public ERXWOString(String name, NSDictionary associations, WOElement template) {
 		super(null, null, null);
-		_value = (WOAssociation) nsdictionary.objectForKey("value");
+		_value = (WOAssociation) associations.objectForKey("value");
 
 		// [value] is the only required binding
 		if (_value == null) {
 			throw new WODynamicElementCreationException("<" + getClass().getName() + "> ( no 'value' attribute specified.");
 		}
 
-		_valueWhenEmpty = (WOAssociation) nsdictionary.objectForKey("valueWhenEmpty");
-		_escapeHTML = (WOAssociation) nsdictionary.objectForKey("escapeHTML");
-		_dateFormat = (WOAssociation) nsdictionary.objectForKey("dateformat");
-		_numberFormat = (WOAssociation) nsdictionary.objectForKey("numberformat");
-		_formatter = (WOAssociation) nsdictionary.objectForKey("formatter");
+		_valueWhenEmpty = (WOAssociation) associations.objectForKey("valueWhenEmpty");
+		_escapeHTML = (WOAssociation) associations.objectForKey("escapeHTML");
+		_dateFormat = (WOAssociation) associations.objectForKey("dateformat");
+		_numberFormat = (WOAssociation) associations.objectForKey("numberformat");
+		_formatter = (WOAssociation) associations.objectForKey("formatter");
 
 		_shouldFormat = _dateFormat != null || _numberFormat != null || _formatter != null;
 
@@ -86,8 +86,8 @@ public class ERXWOString extends WODynamicElement {
 	}
 
 	@Override
-	public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-		final WOComponent component = wocontext.component();
+	public void appendToResponse(WOResponse response, WOContext context) {
+		final WOComponent component = context.component();
 		Object valueInComponent = _value.valueInComponent(component);
 
 		if (_shouldFormat) {
@@ -99,16 +99,18 @@ public class ERXWOString extends WODynamicElement {
 
 			if (format == null) {
 				if (_dateFormat != null) {
-					String formatString = (String) _dateFormat.valueInComponent(component);
+					final String formatString = (String) _dateFormat.valueInComponent(component);
+
 					if (formatString == null) {
-						format = ERXTimestampFormatter.defaultDateFormatterForObject(formatString);
+						format = ERXTimestampFormatter.defaultDateFormatterForObject(formatString); // FIXME: Uh... Shouldn't this be obtaining a formatter for valueInComponent instead of the formatString? // Hugi 2025-06-14
 					}
 					else {
 						format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
 					}
 				}
 				else if (_numberFormat != null) {
-					String formatString = (String) _numberFormat.valueInComponent(component);
+					final String formatString = (String) _numberFormat.valueInComponent(component);
+
 					if (formatString == null) {
 						format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
 					}
@@ -148,7 +150,7 @@ public class ERXWOString extends WODynamicElement {
 
 		if ((stringValue == null || stringValue.isEmpty()) && _valueWhenEmpty != null) {
 			stringValue = (String) _valueWhenEmpty.valueInComponent(component);
-			woresponse.appendContentString(stringValue);
+			response.appendContentString(stringValue);
 		}
 		else if (stringValue != null) {
 			boolean escapeHTML = true;
@@ -158,10 +160,10 @@ public class ERXWOString extends WODynamicElement {
 			}
 
 			if (escapeHTML) {
-				woresponse.appendContentHTMLString(stringValue);
+				response.appendContentHTMLString(stringValue);
 			}
 			else {
-				woresponse.appendContentString(stringValue);
+				response.appendContentString(stringValue);
 			}
 		}
 	}
