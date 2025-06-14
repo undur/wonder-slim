@@ -112,24 +112,19 @@ public class ERXWORepetition extends WODynamicGroup {
 	 */
 	private static class Context {
 
-		private NSArray<Object> nsarray;
 		private List<Object> list;
 		private Object[] array;
 
 		private Context(Object object) {
 			if (object != null) {
-				if (object instanceof NSArray) {
-					nsarray = (NSArray<Object>) object;
-				}
-				else if (object instanceof List) {
+				if (object instanceof List) {
 					list = (List<Object>) object;
 				}
 				else if (object instanceof Object[]) {
 					array = (Object[]) object;
 				}
 				else {
-					throw new IllegalArgumentException("Evaluating 'list' binding returned a " + object.getClass().getName() +
-							" when it should return either a NSArray, an Object[] array or a java.util.List .");
+					throw new IllegalArgumentException("Evaluating 'list' binding returned a " + object.getClass().getName() + " when it should return java.util.List or an Object[]");
 				}
 			}
 		}
@@ -138,15 +133,13 @@ public class ERXWORepetition extends WODynamicGroup {
 		 * @return Size of the contained list 
 		 */
 		private int count() {
-			if (nsarray != null) {
-				return nsarray.count();
-			}
-			else if (list != null) {
+			if (list != null) {
 				return list.size();
 			}
 			else if (array != null) {
 				return array.length;
 			}
+
 			return 0;
 		}
 
@@ -154,15 +147,27 @@ public class ERXWORepetition extends WODynamicGroup {
 		 * @return object at index the index
 		 */
 		private Object objectAtIndex(int i) {
-			if (nsarray != null) {
-				return nsarray.objectAtIndex(i);
-			}
-			else if (list != null) {
+			if (list != null) {
 				return list.get(i);
 			}
 			else if (array != null) {
 				return array[i];
 			}
+
+			return null;
+		}
+		
+		/**
+		 * @return The collection we're working on.
+		 */
+		private Object representedCollection() {
+			if( list != null ) {
+				return list;
+			}
+			else if( array != null ) {
+				return array;
+			}
+			
 			return null;
 		}
 	}
@@ -434,7 +439,7 @@ public class ERXWORepetition extends WODynamicGroup {
 						if (found) {
 							log.debug("Found object: {} vs {}", otherHashCode, hashCode);
 						} else {
-							log.warn("Wrong object: {} vs {} (array = {})", otherHashCode, hashCode, repetitionContext.nsarray);
+							log.warn("Wrong object: {} vs {} (array = {})", otherHashCode, hashCode, repetitionContext.representedCollection());
 						}
 					}
 					else {
@@ -452,7 +457,7 @@ public class ERXWORepetition extends WODynamicGroup {
 						if (found) {
 							log.debug("Found object: {} vs {}", otherKey, key);
 						} else {
-							log.warn("Wrong object: {} vs {} (array = {})", otherKey, key, repetitionContext.nsarray);
+							log.warn("Wrong object: {} vs {} (array = {})", otherKey, key, repetitionContext.representedCollection());
 						}
 					}
 
