@@ -12,7 +12,6 @@ import com.webobjects.foundation.NSDictionary;
 import er.extensions.appserver.ERXSession;
 import er.extensions.foundation.ERXProperties;
 
-
 /**
  * Enhancement to WOHyperlink. Don't use this class directly, it is patched 
  * automatically into the runtime system on application startup. Just use WOHyperlink.
@@ -31,19 +30,16 @@ import er.extensions.foundation.ERXProperties;
  * @author david Logging
  * @author ak WONoContentElement fix, senderID fix, double-quote fix
  */
+
 public class ERXWOHyperlink extends WOHyperlink {
-    /**
+
+	/**
      * Defines if the hyperlink adds a default <code>rel="nofollow"</code> if an action is bound.
      */
     private static boolean defaultNoFollow = ERXProperties.booleanForKey("er.extensions.ERXHyperlink.defaultNoFollow");
-    
-    /**
-     * @param arg0
-     * @param arg1
-     * @param arg2
-     */
-    public ERXWOHyperlink(String arg0, NSDictionary arg1, WOElement arg2) {
-        super(arg0, arg1, arg2);
+
+    public ERXWOHyperlink(String name, NSDictionary associations, WOElement template) {
+        super(name, associations, template);
     }
 
     /**
@@ -53,25 +49,31 @@ public class ERXWOHyperlink extends WOHyperlink {
     @Override
     public WOActionResults invokeAction(WORequest request, WOContext context) {
         WOActionResults result = super.invokeAction(request, context);
+
         if(result != null && (result instanceof WONoContentElement)) {
             result = context.page();
         }
+
         if(result == null) {
-            String sender = context.senderID();
-            String element = context.elementID();
-            if(sender.startsWith(element) && !element.equals(sender)) {
+            final String senderID = context.senderID();
+            final String elementID = context.elementID();
+
+            if(senderID.startsWith(elementID) && !elementID.equals(senderID)) {
                 result = invokeChildrenAction(request, context);
             }
         }
+
         if (result != null && ERXSession.anySession() != null) {
         	ERXSession.anySession().setObjectForKey(toString(), "ERXActionLogging");
         }
+
         return result;
     }
  
     @Override
     public void appendAttributesToResponse(final WOResponse response, WOContext context) {
     	super.appendAttributesToResponse(response, context);
+
     	if (defaultNoFollow && _action != null) {
     		response.appendContentString(" rel=\"nofollow\"");
     	}
