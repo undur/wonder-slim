@@ -13,11 +13,9 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOActiveImage;
 import com.webobjects.appserver._private.WOBrowser;
 import com.webobjects.appserver._private.WOCheckBoxList;
-import com.webobjects.appserver._private.WOConstantValueAssociation;
 import com.webobjects.appserver._private.WOForm;
 import com.webobjects.appserver._private.WOHiddenField;
 import com.webobjects.appserver._private.WOHyperlink;
-import com.webobjects.appserver._private.WOJavaScript;
 import com.webobjects.appserver._private.WOPasswordField;
 import com.webobjects.appserver._private.WOPopUpButton;
 import com.webobjects.appserver._private.WORadioButtonList;
@@ -61,7 +59,6 @@ public class ERXPatcher {
 		replaceClass(ERXWOForm.class, WOForm.class);
 		replaceClass(DynamicElementsPatches.HiddenField.class, WOHiddenField.class);
 		replaceClass(ERXWOHyperlink.class, WOHyperlink.class);
-		replaceClass(DynamicElementsPatches.JavaScript.class, WOJavaScript.class);
 		replaceClass(DynamicElementsPatches.PasswordField.class, WOPasswordField.class);
 		replaceClass(DynamicElementsPatches.PopUpButton.class, WOPopUpButton.class);
 		replaceClass(DynamicElementsPatches.RadioButtonList.class, WORadioButtonList.class);
@@ -74,6 +71,7 @@ public class ERXPatcher {
 	}
 
 	public static class DynamicElementsPatches {
+
 		private DynamicElementsPatches() {}
 
 		public static class SubmitButton extends WOSubmitButton {
@@ -356,7 +354,6 @@ public class ERXPatcher {
 				}
 				return aListClass;
 			}
-
 		}
 
 		public static class CheckBoxList extends WOCheckBoxList {
@@ -426,7 +423,6 @@ public class ERXPatcher {
 				}
 				return aListClass;
 			}
-
 		}
 
 		public static class RadioButtonList extends WORadioButtonList {
@@ -495,26 +491,6 @@ public class ERXPatcher {
 						aListClass = value.getClass();
 				}
 				return aListClass;
-			}
-
-		}
-		
-		public static class JavaScript extends WOJavaScript {
-			private WOAssociation _language;
-			
-			public JavaScript(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
-				if (_language == null) {
-					_language = (WOAssociation) associations.objectForKey("language");
-				}
-			}
-			
-			@Override
-			protected void setLanguage(String s) {
-				super.setLanguage(s);
-				if (s != null) {
-					_language = new WOConstantValueAssociation(s);
-				}
 			}
 		}
 	}
