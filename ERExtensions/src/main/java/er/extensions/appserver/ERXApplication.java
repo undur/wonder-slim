@@ -132,7 +132,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private String _proxyBalancerCookiePath = null;
 
 	/**
-	 * The public host to use for complete url without request from a server (in background tasks)
+	 * Host name used for URL generation when no request is present (for example, in background tasks)
 	 */
 	private String _publicHost;
 
@@ -358,7 +358,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			
 			if( cpeLowercase.contains("javawebobjects") || cpeLowercase.contains("javafoundation") ) {
 				if( !foundERFoundation || !foundERWebObjects || !foundERExtensions ) {
-					throw new IllegalStateException("Whoops. ERFoundation, ERWebObjects and ERExtensions must appear earlier on the classpath than JavaFoundation and JavaWebObjects. The best way to ensure this is to make ERExtensions is your first <dependency>");
+					throw new IllegalStateException("Whoops. ERFoundation, ERWebObjects and ERExtensions must appear earlier on the classpath than JavaFoundation and JavaWebObjects. The best way to ensure this is to make ERExtensions the first <dependency> in your pom file");
 				}
 			}
 		}
@@ -604,8 +604,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		refuseNewSessions(true);
 	}
 
-	protected WOTimer _killTimer;
-
 	/**
 	 * Bugfix for WO component loading. It fixes:
 	 * 
@@ -681,6 +679,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		resetKillTimer(isRefusingNewSessions());
 	}
 
+	protected WOTimer _killTimer;
+
 	/**
 	 * Sets the kill timer.
 	 */
@@ -711,6 +711,40 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
+	 * Cached computed name
+	 */
+	private String _cachedApplicationName;
+
+	/**
+	 * Adds the ability to completely change the applications name by setting the System property <b>ERApplicationName</b>.
+	 * Will also append the <code>nameSuffix</code> if one is set.
+	 * 
+	 * @return the computed name of the application.
+	 */
+	@Override
+	public String name() {
+		if (_cachedApplicationName == null) {
+			synchronized (this) {
+				_cachedApplicationName = System.getProperty("ERApplicationName");
+
+				if (_cachedApplicationName == null) {
+					_cachedApplicationName = super.name();
+				}
+
+				if (_cachedApplicationName != null) {
+					String suffix = nameSuffix();
+
+					if (suffix != null && suffix.length() > 0) {
+						_cachedApplicationName += suffix;
+					}
+				}
+			}
+		}
+
+		return _cachedApplicationName;
+	}
+
+	/**
 	 * The name suffix is appended to the current name of the application. This adds the ability to add
 	 * a useful suffix to differentiate between different sets of applications on the same machine.
 	 * 
@@ -725,40 +759,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Cached computed name
-	 */
-	private String _userDefaultName;
-
-	/**
-	 * Adds the ability to completely change the applications name by setting the System property <b>ERApplicationName</b>.
-	 * Will also append the <code>nameSuffix</code> if one is set.
-	 * 
-	 * @return the computed name of the application.
-	 */
-	@Override
-	public String name() {
-		if (_userDefaultName == null) {
-			synchronized (this) {
-				_userDefaultName = System.getProperty("ERApplicationName");
-
-				if (_userDefaultName == null) {
-					_userDefaultName = super.name();
-				}
-
-				if (_userDefaultName != null) {
-					String suffix = nameSuffix();
-
-					if (suffix != null && suffix.length() > 0) {
-						_userDefaultName += suffix;
-					}
-				}
-			}
-		}
-
-		return _userDefaultName;
-	}
-
-	/**
 	 * @return the name of the application executable (from WOApplication.name())
 	 */
 	public String rawName() {
@@ -768,9 +768,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Workaround for WO 5.2 DirectAction lock-ups. As the super-implementation is empty,
 	 * it is fairly safe to override here to call the normal exception handling earlier than usual.
+	 * 
+	 * FIXME: Since this is a fix for WO 5.2, do we still need it in 5.4.3?
 	 */
-	// NOTE: if you use WO 5.1, comment out this method, otherwise it won't compile.
-	// CHECKME this was created for WO 5.2, do we still need this for 5.4.3?
 	@Override
 	public WOResponse handleActionRequestError(WORequest aRequest, Exception exception, String reason, WORequestHandler aHandler, String actionClassName, String actionName, Class actionClass, WOAction actionInstance) {
 		WOContext context = actionInstance != null ? actionInstance.context() : null;
@@ -825,7 +825,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		
 		// Not a fatal exception, business as usual.
 		final NSDictionary extraInfo = ERXUtilities.extraInformationForExceptionInContext(exception, context);
+
 		log.error("Exception caught: " + exception.getMessage() + "\nexceptionID: " + exceptionID + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
+
 		WOResponse response = super.handleException(exception, context);
 		response.setStatus(500);
 		return response;
@@ -1291,6 +1293,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 	}
 
+	/**
+	 * @return Host name used for URL generation when no request is present (for example, in background tasks)
+	 */
 	public String publicHost() {
 		return _publicHost;
 	}
