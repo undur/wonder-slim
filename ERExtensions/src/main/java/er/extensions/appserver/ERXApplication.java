@@ -9,13 +9,8 @@ package er.extensions.appserver;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.BindException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -64,7 +59,6 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.bettertemplates.ERXBetterTemplates;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
-import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
@@ -1137,111 +1131,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		catch (NSForwardException e) {
 			Throwable rootCause = ERXExceptionUtilities.getMeaningfulThrowable(e);
-			if ((rootCause instanceof BindException) && DevelopmentInstanceStopper.stopPreviousDevInstance()) {
+			if ((rootCause instanceof BindException) && ERXDevelopmentInstanceStopper.stopPreviousDevInstance()) {
 				return super.adaptorWithName(aClassName, anArgsDictionary);
 			}
 			throw e;
 		}
 	}
 
-	private static class DevelopmentInstanceStopper {
-
-		/**
-		 * Terminates a different instance of the same application that may already be running, only in dev mode.
-		 * Set the property "er.extensions.ERXApplication.allowMultipleDevInstances" to "true" if you need to run multiple dev instances.
-		 * 
-		 * @return true if a previously running instance was stopped.
-		 */
-		private static boolean stopPreviousDevInstance() {
-
-			if (!isDevelopmentModeSafe() || ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.allowMultipleDevInstances", false)) {
-				return false;
-			}
-	
-			if (!(application().wasMainInvoked())) {
-				return false;
-			}
-	
-			try {
-				int port = application().port().intValue();
-
-				final boolean isNGApplication = isNGApplicationRunningOnPort(port);
-				
-				final URL url;
-
-				if( isNGApplication ) {
-					log.info("Detected NG application already running on port " + port);
-					url = urlForKillingNGApplicationOnPort(port);
-				}
-				else {
-					log.info("Assuming WO application already running on port " + port);
-					url = urlForKillingWOApplicationOnPort(port);
-				}
-
-				log.info("Attempting to stop previously running instance on port %s using URL %s".formatted(port,url) );
-	
-				url.openConnection().getContent();
-
-				// Give the murder victim a little time to go to sleep
-				// FIXME: We should be querying the application to see if shutdown is complete, instead of waiting for a fixed period // Hugi 2024-12-18
-				Thread.sleep(2000);
-	
-				return true;
-			}
-			catch (Throwable e) {
-				return true;
-			}
-
-		}
-
-		/**
-		 * @return The URL we can invoke to kill a WO application running on the given port
-		 */
-		private static URL urlForKillingWOApplicationOnPort( int port ) throws MalformedURLException {
-			ERXMutableURL adapterUrl = new ERXMutableURL(application().cgiAdaptorURL());
-
-			if (application().host() == null) {
-				adapterUrl.setHost("localhost");
-			}
-
-			adapterUrl.appendPath(application().name() + application().applicationExtension());
-
-			if (application().isDirectConnectEnabled()) {
-				adapterUrl.setPort(port);
-			}
-			else {
-				adapterUrl.appendPath("-" + port);
-			}
-
-			adapterUrl.appendPath(application().directActionRequestHandlerKey() + "/stop");
-
-			return adapterUrl.toURL();
-		}
-		
-		/**
-		 * @return The URL we can invoke to kill an NG application running on the given port
-		 */
-		private static URL urlForKillingNGApplicationOnPort( int port ) throws MalformedURLException, URISyntaxException {
-			return new URI( "http://localhost:%s/wa/NGAdminAction/terminate".formatted(port) ).toURL();
-		}
-
-		/**
-		 * @return true if the application running on the given port number is an ng-objects application
-		 */
-		private static boolean isNGApplicationRunningOnPort( int portNumber ) {
-			final String urlString = String.format( "http://localhost:%s/wa/NGAdminAction/type", 1200 );
-
-			try( InputStream is = new URI( urlString ).toURL().openStream()) {
-				final String type = new String( is.readAllBytes() );
-				return "ng".equals( type );
-			}
-			catch( Throwable e ) {
-				return false;
-			}
-		}
-	}
-
-	protected void _debugValueForDeclarationNamed(WOComponent component, String verb, String aDeclarationName, String aDeclarationType, String aBindingName, String anAssociationDescription, Object aValue) {
+	private static void _debugValueForDeclarationNamed(WOComponent component, String verb, String aDeclarationName, String aDeclarationType, String aBindingName, String anAssociationDescription, Object aValue) {
 		if (aValue instanceof String) {
 			StringBuilder stringbuffer = new StringBuilder(((String) aValue).length() + 2);
 			stringbuffer.append('"');
