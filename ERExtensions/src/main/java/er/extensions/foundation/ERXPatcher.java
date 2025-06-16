@@ -45,29 +45,29 @@ import er.extensions.components._private.ERXWOTextField;
 
 public class ERXPatcher {
 
-	/**
-	 * Register a class by simple name in the _NSUtilities simple classname lookup (used for e.g. elements/components/directaction) 
-	 */
-	private static void replaceClass(Class replacementClass, Class classToReplace) {
-		_NSUtilities.setClassForName(replacementClass, classToReplace.getSimpleName());
+	public static synchronized void installPatches() {
+		replaceClass(WOActiveImage.class, DynamicElementsPatches.ActiveImage.class);
+		replaceClass(WOBrowser.class, DynamicElementsPatches.Browser.class);
+		replaceClass(WOCheckBoxList.class, DynamicElementsPatches.CheckBoxList.class);
+		replaceClass(WOForm.class, ERXWOForm.class);
+		replaceClass(WOHiddenField.class, DynamicElementsPatches.HiddenField.class);
+		replaceClass(WOHyperlink.class, ERXWOHyperlink.class);
+		replaceClass(WOPasswordField.class, DynamicElementsPatches.PasswordField.class);
+		replaceClass(WOPopUpButton.class, DynamicElementsPatches.PopUpButton.class);
+		replaceClass(WORadioButtonList.class, DynamicElementsPatches.RadioButtonList.class);
+		replaceClass(WORepetition.class, ERXWORepetition.class);
+		replaceClass(WOString.class, ERXWOString.class);
+		replaceClass(WOSubmitButton.class, DynamicElementsPatches.SubmitButton.class);
+		replaceClass(WOSwitchComponent.class, ERXWOSwitchComponent.class);
+		replaceClass(WOText.class, DynamicElementsPatches.Text.class);
+		replaceClass(WOTextField.class, ERXWOTextField.class);
 	}
 
-	public static synchronized void installPatches() {
-		replaceClass(DynamicElementsPatches.ActiveImage.class, WOActiveImage.class);
-		replaceClass(DynamicElementsPatches.Browser.class, WOBrowser.class);
-		replaceClass(DynamicElementsPatches.CheckBoxList.class, WOCheckBoxList.class);
-		replaceClass(ERXWOForm.class, WOForm.class);
-		replaceClass(DynamicElementsPatches.HiddenField.class, WOHiddenField.class);
-		replaceClass(ERXWOHyperlink.class, WOHyperlink.class);
-		replaceClass(DynamicElementsPatches.PasswordField.class, WOPasswordField.class);
-		replaceClass(DynamicElementsPatches.PopUpButton.class, WOPopUpButton.class);
-		replaceClass(DynamicElementsPatches.RadioButtonList.class, WORadioButtonList.class);
-		replaceClass(ERXWORepetition.class, WORepetition.class);
-		replaceClass(ERXWOString.class, WOString.class);
-		replaceClass(DynamicElementsPatches.SubmitButton.class, WOSubmitButton.class);
-		replaceClass(ERXWOSwitchComponent.class, WOSwitchComponent.class);
-		replaceClass(DynamicElementsPatches.Text.class, WOText.class);
-		replaceClass(ERXWOTextField.class, WOTextField.class);
+	/**
+	 * Register a class by simple name in the _NSUtilities simple class name lookup (used for e.g. elements/components/directactions) 
+	 */
+	private static void replaceClass(final Class classToReplace, final Class replacementClass) {
+		_NSUtilities.setClassForName(replacementClass, classToReplace.getSimpleName());
 	}
 
 	public static class DynamicElementsPatches {
@@ -76,57 +76,54 @@ public class ERXPatcher {
 
 		public static class SubmitButton extends WOSubmitButton {
 
-			public SubmitButton(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public SubmitButton(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 			}
 
-			/*
-			 * logs the action name into session's dictionary with a key = ERXActionLogging
-			 */
 			@Override
-			public WOActionResults invokeAction(WORequest arg0, WOContext arg1) {
-				WOActionResults result = super.invokeAction(arg0, arg1);
+			public WOActionResults invokeAction(WORequest request, WOContext context) {
+				final WOActionResults result = super.invokeAction(request, context);
+
 				if (result != null && _action != null && ERXSession.anySession() != null) {
 					ERXSession.anySession().setObjectForKey(toString(), "ERXActionLogging");
 				}
+
 				return result;
 			}
 		}
 
 		public static class ActiveImage extends WOActiveImage {
 
-			public ActiveImage(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public ActiveImage(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 			}
 
-			/*
-			 * logs the action name into session's dictionary with a key = ERXActionLogging if log is set to debug.
-			 */
 			@Override
-			public WOActionResults invokeAction(WORequest arg0, WOContext arg1) {
-				WOActionResults result = super.invokeAction(arg0, arg1);
+			public WOActionResults invokeAction(WORequest request, WOContext context) {
+				final WOActionResults result = super.invokeAction(request, context);
+
 				if (result != null && ERXSession.anySession() != null) {
 					ERXSession.anySession().setObjectForKey(toString(), "ERXActionLogging");
 				}
+
 				return result;
 			}
-
 		}
 
 		public static class Text extends WOText {
 			protected WOAssociation _readonly;
 
-			public Text(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public Text(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 				_readonly = _associations.removeObjectForKey("readonly");
 			}
 
 			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
+			protected void _appendNameAttributeToResponse(WOResponse response, WOContext context) {
+				super._appendNameAttributeToResponse(response, context);
 
-				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
-					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
+				if (_readonly != null && _readonly.booleanValueInComponent(context.component())) {
+					response._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
 			}
 			
@@ -134,14 +131,15 @@ public class ERXPatcher {
 			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
 			 */
 			@Override
-			public void takeValuesFromRequest(WORequest aRequest, WOContext wocontext) {
-				WOComponent aComponent = wocontext.component();
-				Boolean readOnly = false;
+			public void takeValuesFromRequest(WORequest request, WOContext context) {
+				boolean readOnly = false;
+
 				if (_readonly != null) {
-					readOnly = _readonly.booleanValueInComponent(aComponent);
+					readOnly = _readonly.booleanValueInComponent(context.component());
 				}
+
 				if (!readOnly) {
-					super.takeValuesFromRequest(aRequest, wocontext);
+					super.takeValuesFromRequest(request, context);
 				}
 			}
 		}
@@ -149,17 +147,17 @@ public class ERXPatcher {
 		public static class HiddenField extends WOHiddenField {
 			protected WOAssociation _readonly;
 
-			public HiddenField(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public HiddenField(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 				_readonly = _associations.removeObjectForKey("readonly");
 			}
 
 			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
+			protected void _appendNameAttributeToResponse(WOResponse response, WOContext context) {
+				super._appendNameAttributeToResponse(response, context);
 
-				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
-					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
+				if (_readonly != null && _readonly.booleanValueInComponent(context.component())) {
+					response._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
 			}
 			
@@ -167,14 +165,15 @@ public class ERXPatcher {
 			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
 			 */
 			@Override
-			public void takeValuesFromRequest(WORequest aRequest, WOContext wocontext) {
-				WOComponent aComponent = wocontext.component();
-				Boolean readOnly = false;
+			public void takeValuesFromRequest(WORequest request, WOContext context) {
+				boolean readOnly = false;
+
 				if (_readonly != null) {
-					readOnly = _readonly.booleanValueInComponent(aComponent);
+					readOnly = _readonly.booleanValueInComponent(context.component());
 				}
+
 				if (!readOnly) {
-					super.takeValuesFromRequest(aRequest, wocontext);
+					super.takeValuesFromRequest(request, context);
 				}
 			}
 		}
@@ -182,17 +181,17 @@ public class ERXPatcher {
 		public static class PasswordField extends WOPasswordField {
 			protected WOAssociation _readonly;
 
-			public PasswordField(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public PasswordField(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 				_readonly = _associations.removeObjectForKey("readonly");
 			}
 
 			@Override
-			protected void _appendNameAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-				super._appendNameAttributeToResponse(woresponse, wocontext);
+			protected void _appendNameAttributeToResponse(WOResponse response, WOContext context) {
+				super._appendNameAttributeToResponse(response, context);
 
-				if (_readonly != null && _readonly.booleanValueInComponent(wocontext.component())) {
-					woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
+				if (_readonly != null && _readonly.booleanValueInComponent(context.component())) {
+					response._appendTagAttributeAndValue("readonly", "readonly", false);
 				}
 			}
 			
@@ -200,84 +199,89 @@ public class ERXPatcher {
 			 * If readonly attribute is set to <code>true</code> prevent the takeValuesFromRequest.
 			 */
 			@Override
-			public void takeValuesFromRequest(WORequest aRequest, WOContext wocontext) {
-				WOComponent aComponent = wocontext.component();
-				Boolean readOnly = false;
+			public void takeValuesFromRequest(WORequest request, WOContext context) {
+				boolean readOnly = false;
+
 				if (_readonly != null) {
-					readOnly = _readonly.booleanValueInComponent(aComponent);
+					readOnly = _readonly.booleanValueInComponent(context.component());
 				}
+
 				if (!readOnly) {
-					super.takeValuesFromRequest(aRequest, wocontext);
+					super.takeValuesFromRequest(request, context);
 				}
 			}
 		}
 
 		public static class PopUpButton extends WOPopUpButton {
 
-			public PopUpButton(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public PopUpButton(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 			}
 
-			/* select element shouldn't worry about value attribute */
+			/**
+			 * select element shouldn't worry about value attribute
+			 * 
+			 * FIXME: We should really look into this and explain better // Hugi 2025-06-16
+			 */
 			@Override
 			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {}
 			
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
-				WOInputListJavaCollectionsFix.setSelectionListInContext(context, selections, _selections, _list );
+				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections, _list );
 			}
 		}
 
 		public static class Browser extends WOBrowser {
 
-			public Browser(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public Browser(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 			}
 			
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
-				WOInputListJavaCollectionsFix.setSelectionListInContext(context, selections, _selections, _list );
+				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections, _list );
 			}
 		}
 
 		public static class CheckBoxList extends WOCheckBoxList {
 
-			public CheckBoxList(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public CheckBoxList(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 			}
 			
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
-				WOInputListJavaCollectionsFix.setSelectionListInContext(context, selections, _selections, _list );
+				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections, _list );
 			}
 		}
 
 		public static class RadioButtonList extends WORadioButtonList {
 
-			public RadioButtonList(String aName, NSDictionary associations, WOElement element) {
-				super(aName, associations, element);
+			public RadioButtonList(String name, NSDictionary associations, WOElement element) {
+				super(name, associations, element);
 			}
 			
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
-				WOInputListJavaCollectionsFix.setSelectionListInContext(context, selections, _selections, _list );
+				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections, _list );
 			}
 		}
 	}
 	
 	/**
-	 * Wrapper class for fixes to WOInputList 
+	 * Patch methods for WOInputList's subclasses, adding support for java collections  
 	 */
-	private static class WOInputListJavaCollectionsFix {
+	private static class ERXWOInputListPatch {
 
 		/**
 		 * Overridden to stop swallowing all exceptions and properly handle listClassInContext(WOContext) returning an NSArray.
 		 */
-		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation _selections, final WOAssociation _list ) {
+		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation selectionsAssociation, final WOAssociation listAssociation ) {
 
-			if(_selections != null && _selections.isValueSettable()) {
+			if(selectionsAssociation != null && selectionsAssociation.isValueSettable()) {
 				try {
-					final Class resultClass = listClassInContext(context, _list);
+					final Class resultClass = listClassInContext(context, listAssociation);
 					Object result = resultClass.newInstance();
 
 					if(result instanceof NSMutableArray) {
@@ -297,11 +301,11 @@ public class ERXPatcher {
 							((List)result).addAll(selections);
 						}
 					}
-					_selections.setValue(result, context.component());
-                }
+					selectionsAssociation.setValue(result, context.component());
+				}
 				catch(Exception exception) {
-                	throw NSForwardException._runtimeExceptionForThrowable(exception); // WOInputList ignores exceptions. We throw. Like real men.
-                }
+					throw NSForwardException._runtimeExceptionForThrowable(exception); // WOInputList ignores exceptions. We throw. Like real men.
+				}
 			}
 		}
 		
