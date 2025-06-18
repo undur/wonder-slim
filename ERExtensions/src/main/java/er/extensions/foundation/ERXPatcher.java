@@ -275,6 +275,8 @@ public class ERXPatcher {
 
 		/**
 		 * Overridden to stop swallowing all exceptions and properly handle listClassInContext(WOContext) returning an NSArray.
+		 * 
+		 * FIXME: This entire functionality needs some refactoring, and probably just re-thinking in general, // Hugi 2025-06-18
 		 */
 		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation selectionsAssociation, final WOAssociation listAssociation ) {
 
