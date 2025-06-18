@@ -42,8 +42,6 @@ public class ERXResponseRewriter {
 
 	private static final String ADDED_RESOURCES_KEY = "ERXResponseRewriter.addedResources";
 
-	private static final String PENDING_INSERTS_KEY = "ERXResponseRewriter.pendingInserts";
-
 	private static final String SECURE_RESOURCES_KEY = "er.ajax.secureResources";
 
 	private static final String ORIGINAL_CONTEXT_ID_KEY = "_originalContextID";
