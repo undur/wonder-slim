@@ -270,27 +270,26 @@ public class ERXPatcher {
 	private static class ERXWOInputListPatch {
 
 		/**
-		 * Overridden to not swallow exceptions and improve creation of collection created by the "selections" binding
+		 * Overridden to (1) not swallow exceptions and (2) improve creation of the value that gets pushed to the "selections" binding
 		 */
 		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation selectionsAssociation, final WOAssociation listAssociation ) {
 
 			if(selectionsAssociation != null && selectionsAssociation.isValueSettable()) {
 				try {
 					final Class<? extends List> listClass = listClassInContext(context, listAssociation);
-					final List newSelectionsList = listClass.newInstance();
-					newSelectionsList.addAll(selections);
-					System.out.println( "New list is: " + newSelectionsList );
-					selectionsAssociation.setValue(newSelectionsList, context.component());
+					final List list = listClass.newInstance();
+					list.addAll(selections);
+					selectionsAssociation.setValue(list, context.component());
 				}
-				catch(Exception exception) {
-					throw NSForwardException._runtimeExceptionForThrowable(exception); // WOInputList ignores exceptions. We throw. Like real men.
+				catch(Exception e) {
+					throw NSForwardException._runtimeExceptionForThrowable(e); // WOInputList's implementation ignores exceptions. We throw. Like real men.
 				}
 			}
 		}
 		
 		/**
-		 * If the list association is bound to a non-null value, return the class of the bound value, unless it's it's an NSArray (or subclass), then return NSMutableArray. 
-		 * If the list association is not bound or resolves to null, defaults to NSMutableArray.
+		 * If list association is bound to a non-null value, return the bound value's class, unless it's an NSArray (or subclass), then return NSMutableArray.class. 
+		 * If list association is not bound or resolves to null, defaults to NSMutableArray.
 		 */
 		private static Class<? extends List> listClassInContext(final WOContext context, final WOAssociation listAssociation) {
 
