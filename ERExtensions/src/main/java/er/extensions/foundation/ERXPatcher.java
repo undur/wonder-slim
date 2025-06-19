@@ -267,42 +267,20 @@ public class ERXPatcher {
 			}
 		}
 	}
-	
-	/**
-	 * Patch methods for WOInputList's subclasses, adding support for java collections  
-	 */
+
 	private static class ERXWOInputListPatch {
 
 		/**
-		 * Overridden to stop swallowing all exceptions and properly handle listClassInContext(WOContext) returning an NSArray.
-		 * 
-		 * FIXME: This entire functionality needs some refactoring, and probably just re-thinking in general, // Hugi 2025-06-18
+		 * Overridden to not swallow exceptions and improve creation of collection created by the "selections" binding
 		 */
 		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation selectionsAssociation, final WOAssociation listAssociation ) {
 
 			if(selectionsAssociation != null && selectionsAssociation.isValueSettable()) {
 				try {
-					final Class resultClass = listClassInContext(context, listAssociation);
-					Object result = resultClass.newInstance();
-
-					if(result instanceof NSMutableArray) {
-						((NSMutableArray)result).addObjects(selections.toArray());
-					}
-					else if (result instanceof NSArray) {
-						// If "result" is an instanceof NSArray, we need to assign a new NSArray instance containing the contents
-						// of the "selections" parameter instead of calling addAll(Collection) on the existing instance.
-						// We use reflection to do the assignment in case resultClass is actually a subclass of NSArray.
-						final Class nsArrayArgTypes[] = new Class[] {List.class, Boolean.TYPE};
-						final Constructor nsArrayConstructor = resultClass.getConstructor(nsArrayArgTypes);
-						final Object nsArrayConstructorArgs[] = new Object[] {selections, Boolean.TRUE};
-						result = nsArrayConstructor.newInstance(nsArrayConstructorArgs);
-					}
-					else { 
-						if(result instanceof List) {
-							((List)result).addAll(selections);
-						}
-					}
-					selectionsAssociation.setValue(result, context.component());
+					final Class<? extends List> listClass = listClassInContext(context, listAssociation);
+					final List newSelectionsList = listClass.newInstance();
+					newSelectionsList.addAll(selections);
+					selectionsAssociation.setValue(newSelectionsList, context.component());
 				}
 				catch(Exception exception) {
 					throw NSForwardException._runtimeExceptionForThrowable(exception); // WOInputList ignores exceptions. We throw. Like real men.
@@ -311,25 +289,20 @@ public class ERXPatcher {
 		}
 		
 		/**
-		 * Overridden to return an NSMutableArray by default 8rather than an NSArray)
-		 * 
-		 * @return A <b>mutable</b> Class that implements {@link List}
+		 * If the list association is bound to a non-null value, return the class of the bound value, unless it's it's an NSArray (or subclass), then return NSMutableArray. 
+		 * If the list association is not bound or resolves to null, defaults to NSMutableArray.
 		 */
-		private static Class<List> listClassInContext(final WOContext context, final WOAssociation _list ) {
-			Class listClass = NSMutableArray.class;
+		private static Class<? extends List> listClassInContext(final WOContext context, final WOAssociation listAssociation) {
 
-			if (_list != null) {
-				final Object value = _list.valueInComponent(context.component());
+			if (listAssociation != null) {
+				final Object listValue = listAssociation.valueInComponent(context.component());
 
-				if (value instanceof NSArray) {
-					listClass = NSMutableArray.class;
-				}
-				else if (value instanceof List) {
-					listClass = value.getClass();
+				if( listValue != null && !(listValue instanceof NSArray) ) {
+					return (Class<? extends List>) listValue.getClass();
 				}
 			}
 
-			return listClass;
+			return NSMutableArray.class;
 		}
 	}
 }
