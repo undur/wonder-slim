@@ -288,17 +288,15 @@ public class ERXPatcher {
 		}
 		
 		/**
-		 * If list association is bound to a non-null value, return the bound value's class, unless it's an NSArray (or subclass), then return NSMutableArray.class. 
-		 * If list association is not bound or resolves to null, defaults to NSMutableArray.
+		 * If list association resolves to a non-null value, return the bound value's class, unless it's an NSArray (or subclass), then return NSMutableArray.class. 
+		 * If list association resolves to null, defaults to NSMutableArray.class.
 		 */
 		private static Class<? extends List> listClassInContext(final WOContext context, final WOAssociation listAssociation) {
 
-			if (listAssociation != null) {
-				final Object listValue = listAssociation.valueInComponent(context.component());
+			final Object listValue = listAssociation.valueInComponent(context.component());
 
-				if( listValue != null && !(listValue instanceof NSArray) ) {
-					return (Class<? extends List>) listValue.getClass();
-				}
+			if( listValue != null && !(listValue instanceof NSArray) ) {
+				return (Class<? extends List>) listValue.getClass();
 			}
 
 			return NSMutableArray.class;
