@@ -1,6 +1,5 @@
 package er.extensions.foundation;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 import com.webobjects.appserver.WOActionResults;
@@ -280,6 +279,7 @@ public class ERXPatcher {
 					final Class<? extends List> listClass = listClassInContext(context, listAssociation);
 					final List newSelectionsList = listClass.newInstance();
 					newSelectionsList.addAll(selections);
+					System.out.println( "New list is: " + newSelectionsList );
 					selectionsAssociation.setValue(newSelectionsList, context.component());
 				}
 				catch(Exception exception) {
