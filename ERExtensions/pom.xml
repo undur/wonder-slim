@@ -2,42 +2,56 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>undur</groupId>
 		<artifactId>undur-reactor</artifactId>
 		<version>8.0.0.slim-SNAPSHOT</version>
 	</parent>
+
 	<groupId>wonder.core</groupId>
 	<artifactId>ERExtensions</artifactId>
 	<name>ERExtensions Framework</name>
 	<packaging>woframework</packaging>
 
 	<dependencies>
+		<!-- Closed source fixes and patches from Apple -->
 		<dependency>
-			<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 			<groupId>wonder.core</groupId>
 			<artifactId>ERFoundation</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<!-- Closed source fixes and patches from Apple -->
 		<dependency>
-			<!-- FIXME: Black box closed source code. We must lose this eventually // Hugi 2020-10-15 -->
 			<groupId>wonder.core</groupId>
 			<artifactId>ERWebObjects</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<!--
+			Dependency declared since JavaWebObjects needs it but fails to declare it as a
+		dependency.
+			We include this for convenience, to ensure it gets pulled  into our apps
+		(without having to declare the dependency explicitly every time)
+		-->
 		<dependency>
-			<!--  CHECKME: Use a bom? This dependency is only declared because JavaWebObjects requires it, but fails to declare it. So we include it for convenience to pull it into our apps -->
 			<groupId>${webobjects.group}</groupId>
 			<artifactId>JavaEOAccess</artifactId>
 			<version>${webobjects.version}</version>
 		</dependency>
+		<!-- Xerces used to be a part of JavaXML.framework (that we now
+		exclude) and is required by at least WOXMLCoder,
+		WOMessage.contentDOMDocument() and others
+		-->
 		<dependency>
-			<!-- CHECKME: Use a bom? Xerces used to be a part of JavaXML.framework and is required by at least WOXMLCoder, WOMessage.contentDOMDocument() and others -->
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
 			<version>2.12.2</version>
 			<scope>runtime</scope>
 			<exclusions>
+				<!--
+					APIs provided by xml-apis is provided by the java.xml module in  JDK releases > 9.
+					Allowing it to get pulled in by xerces will cause problems with project compilation.
+				-->
 				<exclusion>
 					<groupId>xml-apis</groupId>
 					<artifactId>xml-apis</artifactId>

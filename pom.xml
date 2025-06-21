@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>undur</groupId>
 	<artifactId>undur-reactor</artifactId>
 	<version>8.0.0.slim-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Wonder reactor</name>
+	<name>wonder-slim reactor</name>
+
 	<modules>
 		<module>ERExtensions</module>
 		<module>ERLoggingReload4j</module>
 		<module>AjaxSlim</module>
 		<module>Ajax</module>
 	</modules>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -22,6 +25,7 @@
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
 	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -65,6 +69,7 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>${webobjects.group}</groupId>
@@ -88,6 +93,7 @@
 			<version>2.0.17</version>
 		</dependency>
 	</dependencies>
+
 	<repositories>
 		<repository>
 			<id>wocommunity.releases</id>
