@@ -16,7 +16,6 @@ import com.webobjects.appserver._private.WOHiddenField;
 import com.webobjects.appserver._private.WOHyperlink;
 import com.webobjects.appserver._private.WOPasswordField;
 import com.webobjects.appserver._private.WOPopUpButton;
-import com.webobjects.appserver._private.WORadioButtonList;
 import com.webobjects.appserver._private.WORepetition;
 import com.webobjects.appserver._private.WOString;
 import com.webobjects.appserver._private.WOSubmitButton;
@@ -51,7 +50,6 @@ public class ERXPatcher {
 		replaceClass(WOHyperlink.class, ERXWOHyperlink.class);
 		replaceClass(WOPasswordField.class, DynamicElementsPatches.PasswordField.class);
 		replaceClass(WOPopUpButton.class, DynamicElementsPatches.PopUpButton.class);
-		replaceClass(WORadioButtonList.class, DynamicElementsPatches.RadioButtonList.class);
 		replaceClass(WORepetition.class, ERXWORepetition.class);
 		replaceClass(WOString.class, ERXWOString.class);
 		replaceClass(WOSubmitButton.class, DynamicElementsPatches.SubmitButton.class);
@@ -218,15 +216,10 @@ public class ERXPatcher {
 			/**
 			 * select element shouldn't worry about value attribute
 			 * 
-			 * FIXME: We should really look into this and explain better // Hugi 2025-06-16
+			 * FIXME: We should really look into what this does and document it a little better // Hugi 2025-06-16
 			 */
 			@Override
 			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {}
-			
-			@Override
-			protected void setSelectionListInContext(WOContext context, List selections) {
-				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections);
-			}
 		}
 
 		public static class Browser extends WOBrowser {
@@ -244,18 +237,6 @@ public class ERXPatcher {
 		public static class CheckBoxList extends WOCheckBoxList {
 
 			public CheckBoxList(String name, NSDictionary associations, WOElement element) {
-				super(name, associations, element);
-			}
-			
-			@Override
-			protected void setSelectionListInContext(WOContext context, List selections) {
-				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections);
-			}
-		}
-
-		public static class RadioButtonList extends WORadioButtonList {
-
-			public RadioButtonList(String name, NSDictionary associations, WOElement element) {
 				super(name, associations, element);
 			}
 			
