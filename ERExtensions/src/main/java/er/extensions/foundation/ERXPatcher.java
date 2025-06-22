@@ -23,7 +23,6 @@ import com.webobjects.appserver._private.WOSwitchComponent;
 import com.webobjects.appserver._private.WOText;
 import com.webobjects.appserver._private.WOTextField;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation._NSUtilities;
 
@@ -255,13 +254,8 @@ public class ERXPatcher {
 		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation selectionsAssociation ) {
 
 			if(selectionsAssociation != null && selectionsAssociation.isValueSettable()) {
-				try {
-					final List wrappedSelections = new NSMutableArray(selections);
-					selectionsAssociation.setValue(wrappedSelections, context.component());
-				}
-				catch(Exception e) {
-					throw NSForwardException._runtimeExceptionForThrowable(e); // WOInputList's implementation ignores exceptions. We throw. Like real men.
-				}
+				final List wrappedSelections = new NSMutableArray(selections);
+				selectionsAssociation.setValue(wrappedSelections, context.component());
 			}
 		}
 	}
