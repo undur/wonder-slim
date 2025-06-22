@@ -78,6 +78,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Notification to post when all bundles were loaded but before their principal was called
+	 * 
+	 * FIXME: This notification was posted by the (ERX)Loader. We need to implement at least that part again if we want to keep it // Hugi 2025-06-22 
 	 */
 	public static final String AllBundlesLoadedNotification = "NSBundleAllBundlesLoaded";
 
