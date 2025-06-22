@@ -23,7 +23,6 @@ import com.webobjects.appserver._private.WOSubmitButton;
 import com.webobjects.appserver._private.WOSwitchComponent;
 import com.webobjects.appserver._private.WOText;
 import com.webobjects.appserver._private.WOTextField;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableArray;
@@ -226,7 +225,7 @@ public class ERXPatcher {
 			
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
-				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections, _list );
+				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections);
 			}
 		}
 
@@ -238,7 +237,7 @@ public class ERXPatcher {
 			
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
-				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections, _list );
+				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections);
 			}
 		}
 
@@ -250,7 +249,7 @@ public class ERXPatcher {
 			
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
-				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections, _list );
+				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections);
 			}
 		}
 
@@ -262,7 +261,7 @@ public class ERXPatcher {
 			
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
-				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections, _list );
+				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections);
 			}
 		}
 	}
@@ -272,13 +271,12 @@ public class ERXPatcher {
 		/**
 		 * Overridden to (1) not swallow exceptions and (2) improve creation of the value that gets pushed to the "selections" binding
 		 */
-		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation selectionsAssociation, final WOAssociation listAssociation ) {
+		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation selectionsAssociation ) {
 
 			if(selectionsAssociation != null && selectionsAssociation.isValueSettable()) {
 				try {
-					final List list = new NSMutableArray<>();
-					list.addAll(selections);
-					selectionsAssociation.setValue(list, context.component());
+					final List wrappedSelections = new NSMutableArray(selections);
+					selectionsAssociation.setValue(wrappedSelections, context.component());
 				}
 				catch(Exception e) {
 					throw NSForwardException._runtimeExceptionForThrowable(e); // WOInputList's implementation ignores exceptions. We throw. Like real men.
