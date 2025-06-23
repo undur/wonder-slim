@@ -206,7 +206,7 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 		response._appendTagAttributeAndValue( "href", href, false );
 		response._appendTagAttributeAndValue( "media", mediaType(), false );
 		response._appendContentAsciiString( "/>" );
-		response.appendContentString("\n");
+//		response.appendContentString("\n"); // FIXME: Disabling this experimentally. In a propertly formatted HTML document, this stylesheet will be in it's own line anyway // Hugi 2025-06-23
 		boolean inserted = true;
 		if( !inline ) {
 			String stylesheetLink = response.contentString();
