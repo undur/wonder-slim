@@ -3,15 +3,13 @@ package er.extensions;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import com.webobjects.foundation.NSKeyValueCoding;
 
 import sun.misc.Unsafe;
 
 /**
- * Horrifying hack for accessing methods on java's private inner classes (such
- * as the List implementation returned by Java's List.of())
+ * Hack for allowing KVC to access methods on private inner classes (such as the List implementation returned by Java's List.of())
  */
 
 public class ERXKVCReflectionHack {
@@ -24,7 +22,7 @@ public class ERXKVCReflectionHack {
 	}
 
 	/**
-	 * Our butt-ugly ValueAccessor implementation
+	 * Our butt-ugly ValueAccessor implementation, which will try to open access to the method
 	 */
 	public static class HackedDefaultValueAccessor extends NSKeyValueCoding.ValueAccessor {
 
@@ -41,34 +39,35 @@ public class ERXKVCReflectionHack {
 		@Override
 		public Object methodValue(Object object, Method method) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 
-			// FIXME: We might want to implement this in a different way? (for example, based on a known set of private classes)
-			// Or grant access if IllegalAccessException is thrown? (sounds bad for performance, though)
-			// Or perhaps we just don't need to check for anything at all and just always invoke setAccessible?
-			// Needs testing. // Hugi 2025-06-24
-
-			if( !method.canAccess(object) ) {
-				method.setAccessible(true);
+			// If invocation fails, make method accessible and attempt reinvocation
+			// Since the method object we're working with comes from the KVC cache, invocation should fail only once per key per class.
+			// That makes me breathe a little easier WRT the induced performance penalty.
+			try {
+				return method.invoke(object);
 			}
-
-			return method.invoke(object);
+			catch( IllegalAccessException e ) {
+				// FIXME: Perform additional checks before granting access? This might a bit of an accessibility carte blanche // Hugi 2025-06-24
+				method.setAccessible(true);
+				return method.invoke(object);
+			}
 		}
 
 		@Override
 		public void setMethodValue(Object object, Method method, Object value) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 
-			// CHECKME: We might possibly not want to override here? accessibility errors will primarily cause grief on immutable objects // Hugi 2025-06-24
-
-			if( !method.canAccess(object) ) {
-				method.setAccessible(true);
+			// @See same logic in methodValue()
+			try {
+				method.invoke(object, value);
 			}
-
-			method.invoke(object, value);
+			catch( IllegalAccessException e ) {
+				method.setAccessible(true);
+				method.invoke(object, value);
+			}
 		}
 	}
 
 	/**
-	 * Horrid hack to allow us to set NSKeyValueCoding's default value accessor
-	 * (which is declared final and static)
+	 * A pretty horrifying way to to set NSKeyValueCoding's default value accessor (which is final and static, so needs workarounds to be set)
 	 */
 	private static void setFinalStaticField(Class<?> clazz, String fieldName, Object newValue) {
 		try {
@@ -89,15 +88,5 @@ public class ERXKVCReflectionHack {
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	/**
-	 * A little test
-	 */
-	public static void main(String[] args) throws Throwable {
-//		enable();
-		List<String> names = List.of("Hugi", "Paul", "Marc");
-		System.out.println(NSKeyValueCoding.DefaultImplementation.valueForKey(names, "size"));
-		System.out.println(names.getClass());
 	}
 }
