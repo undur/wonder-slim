@@ -171,7 +171,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		wasERXApplicationMainInvoked = true;
 		useProjectBundleIfDeveloping();
 		disablePBXProjectWatcher();
-//		ERXKVCReflectionHack.enable();
+		ERXKVCReflectionHack.enable();
 		setup(argv);
 		WOApplication.main(argv, applicationClass);
 	}
