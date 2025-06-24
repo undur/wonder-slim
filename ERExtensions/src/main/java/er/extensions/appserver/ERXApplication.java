@@ -53,6 +53,7 @@ import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
+import er.extensions.ERXKVCReflectionHack;
 import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXMonitorServer;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
@@ -170,6 +171,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		wasERXApplicationMainInvoked = true;
 		useProjectBundleIfDeveloping();
 		disablePBXProjectWatcher();
+//		ERXKVCReflectionHack.enable();
 		setup(argv);
 		WOApplication.main(argv, applicationClass);
 	}
