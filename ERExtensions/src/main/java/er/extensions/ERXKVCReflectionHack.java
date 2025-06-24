@@ -40,17 +40,28 @@ public class ERXKVCReflectionHack {
 
 		@Override
 		public Object methodValue(Object object, Method method) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-			// FIXME: We probably want to invoke setAccessible conditionally (for example, based on object type or the method's accessibility). Or do it if IllegalAccessException is thrown? // Hugi 2025-06-24
-			method.setAccessible(true);
+
+			// FIXME: We might want to implement this in a different way? (for example, based on a known set of private classes)
+			// Or grant access if IllegalAccessException is thrown? (sounds bad for performance, though)
+			// Or perhaps we just don't need to check for anything at all and just always invoke setAccessible?
+			// Needs testing. // Hugi 2025-06-24
+
+			if( !method.canAccess(object) ) {
+				method.setAccessible(true);
+			}
+
 			return method.invoke(object);
 		}
 
 		@Override
 		public void setMethodValue(Object object, Method method, Object value) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-			// CHECKME: We might possibly not want to override here.
-			// Accessibility errors will primarily cause us grief on
-			// immutable objects, and generally, objects we don't mutate // Hugi 2025-06-24
-			method.setAccessible(true);
+
+			// CHECKME: We might possibly not want to override here? accessibility errors will primarily cause grief on immutable objects // Hugi 2025-06-24
+
+			if( !method.canAccess(object) ) {
+				method.setAccessible(true);
+			}
+
 			method.invoke(object, value);
 		}
 	}
@@ -84,8 +95,9 @@ public class ERXKVCReflectionHack {
 	 * A little test
 	 */
 	public static void main(String[] args) throws Throwable {
-		enable();
+//		enable();
 		List<String> names = List.of("Hugi", "Paul", "Marc");
 		System.out.println(NSKeyValueCoding.DefaultImplementation.valueForKey(names, "size"));
+		System.out.println(names.getClass());
 	}
 }
