@@ -115,11 +115,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private Integer _sslPort;
 
 	/**
-	 * Tracks whether or not _addAdditionalAdaptors has been called yet.
-	 */
-	private boolean _initializedAdaptors = false;
-
-	/**
 	 * To support load balancing with mod_proxy
 	 */
 	private String _proxyBalancerRoute;
@@ -150,25 +145,30 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
 
 	/**
+	 * Tracks whether or not _addAdditionalAdaptors has been called yet.
+	 */
+	private boolean _initializedAdaptors = false;
+
+	/**
 	 * Keeps track of whether didFinishLaunching has been invoked. We use this to keep track of whether we can declare variables that are dependent on configuration as constant (as this is written, only applies to isDevelopmentMode)
 	 */
-	private static boolean didFinishLaunchingInvoked = false;
+	private static boolean _didFinishLaunchingInvoked = false;
 
 	/**
 	 * Indicates if ERXApplication.main() has been invoked (so we can check that application actually did so)
 	 */
-	private static boolean wasERXApplicationMainInvoked = false;
+	private static boolean _wasERXApplicationMainInvoked = false;
 
 	/**
 	 * Keeps track of whether the application is running in development mode. Set in didFinishLaunching and used after that, since we assume this value will never change after the application has been initialized
 	 */
-	private static boolean isDevelopmentModeCached;
+	private static boolean _isDevelopmentModeCached;
 
 	/**
 	 * Application entry point.
 	 */
 	public static void main(String argv[], Class applicationClass) {
-		wasERXApplicationMainInvoked = true;
+		_wasERXApplicationMainInvoked = true;
 		useProjectBundleIfDeveloping();
 		ERXKVCReflectionHack.enable();
 		disablePBXProjectWatcher();
@@ -305,7 +305,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Ensure ERXApplication.main() was invoked when running the application (as opposed to WOApplication.main()) 
 	 */
 	private void checkERXApplicationMainInvoked() throws Exception {
-		if (!isDeployedAsServlet() && !wasERXApplicationMainInvoked ) {
+		if (!isDeployedAsServlet() && !_wasERXApplicationMainInvoked ) {
 			throw new IllegalStateException(
 					"""
 					
@@ -563,8 +563,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		System.out.println( "============= LOADED BUNDLES END ===============" );
 		
-		didFinishLaunchingInvoked = true;
-		isDevelopmentModeCached = checkIsDevelopmentMode();
+		_didFinishLaunchingInvoked = true;
+		_isDevelopmentModeCached = checkIsDevelopmentMode();
 	}
 
 	/**
@@ -918,8 +918,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public static boolean isDevelopmentModeSafe() {
 
-		if( didFinishLaunchingInvoked ) {
-			return isDevelopmentModeCached;
+		if( _didFinishLaunchingInvoked ) {
+			return _isDevelopmentModeCached;
 		}
 
 		return checkIsDevelopmentMode();
@@ -931,7 +931,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public boolean isDevelopmentMode() {
 		return isDevelopmentModeSafe();
 	}
-
 
 	/**
 	 * This method is called by ERXWOContext and provides the application a hook to rewrite generated URLs.
@@ -1261,7 +1260,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Empty array for adaptorExtensions
 	 */
-	private static String[] EMPTY_STRING_ARRAY = {};
+	private static final String[] EMPTY_STRING_ARRAY = {};
 
 	/**
 	 * Override default implementation WHICH returns {".dll", ".exe"} and therefore prohibits IIS as WebServer.
