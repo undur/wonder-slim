@@ -9,22 +9,24 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import sun.misc.Unsafe;
 
 /**
- * Hack for allowing KVC to access methods on private inner classes (such as the List implementation returned by Java's List.of())
+ * Hack that allows KVC to access methods on private inner classes implementing public classes, such as the List implementation returned by Java's List.of()
+ * 
+ * CHECKME: Rename to something a little more descriptive // Hugi 2025-06-25
  */
 
 public class ERXKVCReflectionHack {
 
 	/**
-	 * Enable the hack. May the Lord bless you and protect you.
+	 * Make our ValueAccessor KVC's default method of resolving keys on plain java objects
 	 */
 	public static void enable() {
-		setFinalStaticField(NSKeyValueCoding.ValueAccessor.class, "_defaultValueAccessor", new HackedDefaultValueAccessor());
+		setFinalStaticField(NSKeyValueCoding.ValueAccessor.class, "_defaultValueAccessor", new AccessGrantingValueAccessor());
 	}
 
 	/**
-	 * Our butt-ugly ValueAccessor implementation, which will try to open access to the method
+	 * A ValueAccessor that attempts to open access to methods that initially throw IllegalAccessException upon invocation   
 	 */
-	public static class HackedDefaultValueAccessor extends NSKeyValueCoding.ValueAccessor {
+	private static class AccessGrantingValueAccessor extends NSKeyValueCoding.ValueAccessor {
 
 		@Override
 		public Object fieldValue(Object object, Field field) throws IllegalArgumentException, IllegalAccessException {
@@ -39,14 +41,16 @@ public class ERXKVCReflectionHack {
 		@Override
 		public Object methodValue(Object object, Method method) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 
-			// If invocation fails, make method accessible and attempt reinvocation
-			// Since the method object we're working with comes from the KVC cache, invocation should fail only once per key per class.
+			// If invocation of the method fails, try to make it accessible and then attempt reinvocation
+			// Since the method object we're working with comes from the KVC cache, invocation should fail only once per key per class
+			// meaning we usually just go down the happy path, meaning this should mostly work exactly like 
 			// That makes me breathe a little easier WRT the induced performance penalty.
 			try {
 				return method.invoke(object);
 			}
 			catch( IllegalAccessException e ) {
-				// FIXME: Perform additional checks before granting access? This might a bit of an accessibility carte blanche // Hugi 2025-06-24
+				// CHECKME: Perform additional checks before granting access? This might be a bit of an accessibility carte blanche // Hugi 2025-06-24
+				// CHECKME: We should at least keep a record of classes/keys we do this for // Hugi 2025-06-25 
 				method.setAccessible(true);
 				return method.invoke(object);
 			}
@@ -67,7 +71,11 @@ public class ERXKVCReflectionHack {
 	}
 
 	/**
-	 * A pretty horrifying way to to set NSKeyValueCoding's default value accessor (which is final and static, so needs workarounds to be set)
+	 * A pretty horrifying way to to set NSKeyValueCoding's default value accessor (which is final and static, so needs workarounds to be set).
+	 * We can assume that this way of hacking in the value accessor will stop working in the somewhat near future, but by then we'll hopefully have a better solution.
+	 * 
+	 * @see https://stackoverflow.com/questions/61141836/change-static-final-field-in-java-12
+	 * @see https://openjdk.org/jeps/471
 	 */
 	private static void setFinalStaticField(Class<?> clazz, String fieldName, Object newValue) {
 		try {
