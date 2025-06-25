@@ -21,6 +21,9 @@ public class ERXKVCReflectionHack {
 	 */
 	public static void enable() {
 		setFinalStaticField(NSKeyValueCoding.ValueAccessor.class, "_defaultValueAccessor", new AccessGrantingValueAccessor());
+		
+		// CHECKME: We're not using standard logging since we're activating this before the application's logging has been set up. Not an ideal situation // Hugi 2025-06-25
+		System.out.println("== Enabled " + ERXKVCReflectionHack.class.getSimpleName());
 	}
 
 	/**
