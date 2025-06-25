@@ -122,17 +122,17 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * To support load balancing with mod_proxy
 	 */
-	private String _proxyBalancerRoute = null;
+	private String _proxyBalancerRoute;
 
 	/**
 	 * To support load balancing with mod_proxy
 	 */
-	private String _proxyBalancerCookieName = null;
+	private String _proxyBalancerCookieName;
 
 	/**
 	 * To support load balancing with mod_proxy
 	 */
-	private String _proxyBalancerCookiePath = null;
+	private String _proxyBalancerCookiePath;
 
 	/**
 	 * Host name used for URL generation when no request is present (for example, in background tasks)
