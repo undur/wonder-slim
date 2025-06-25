@@ -46,8 +46,7 @@ public class ERXKVCReflectionHack {
 
 			// If invocation of the method fails, try to make it accessible and then attempt reinvocation
 			// Since the method object we're working with comes from the KVC cache, invocation should fail only once per key per class
-			// meaning we usually just go down the happy path, meaning this should mostly work exactly like 
-			// That makes me breathe a little easier WRT the induced performance penalty.
+			// meaning we usually go down the happy path, so this should mostly work pretty much like KVC's built in default value accessor. 
 			try {
 				return method.invoke(object);
 			}
