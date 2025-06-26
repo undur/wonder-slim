@@ -14,53 +14,45 @@ import com.webobjects.eocontrol.EOEvent;
 
 public class WOEventRow extends WOComponent {
 
-    public EOEvent 	object;
-    public EOEvent 	event;
-    public WOEventDisplayPage	controller;
-    public int	displayMode;
-    
-    public WOEventRow(WOContext aContext)  {
-        super(aContext);
-    }
+	public EOEvent object;
+	public EOEvent event;
+	public WOEventDisplayPage controller;
+	public int displayMode;
 
-    public String loopCount()
-    {
-        if (object == event)
-            return "1x";
-        else
-            return ((EOAggregateEvent)object).events().count()+"x";
-    }
+	public WOEventRow(WOContext aContext) {
+		super(aContext);
+	}
 
-    public String eventDuration()
-    {
-        return controller.durationOfEvent(object)+" ms";
-    }
+	public String loopCount() {
+		if (object == event)
+			return "1x";
+		else
+			return ((EOAggregateEvent) object).events().count() + "x";
+	}
 
-    public String comment()
-    {
-        return object.comment();
-    }
+	public String eventDuration() {
+		return controller.durationOfEvent(object) + " ms";
+	}
 
-    public String title()
-    {
-        return object.title();
-    }
+	public String comment() {
+		return object.comment();
+	}
 
-    //--------------------------------------------------
+	public String title() {
+		return object.title();
+	}
 
-    public String hyperlinkTitle()
-    {
-        return title();
-    }
+	// --------------------------------------------------
 
-    public String descriptionTitle()
-    {
-        return comment();
-    }
+	public String hyperlinkTitle() {
+		return title();
+	}
 
-    public double percentOfMaxTime()
-    {
-        return (double)controller.durationOfEvent(object) / (double)controller.topmostDurationValue();
-    }
+	public String descriptionTitle() {
+		return comment();
+	}
 
+	public double percentOfMaxTime() {
+		return (double) controller.durationOfEvent(object) / (double) controller.topmostDurationValue();
+	}
 }

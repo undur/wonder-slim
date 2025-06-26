@@ -14,58 +14,55 @@ import com.webobjects.woextensions._WOJExtensionsUtil;
 
 public class WOAggregateEventRow extends WOEventRow {
 
-    public WOAggregateEventRow(WOContext aContext)  {
-        super(aContext);
-    }
+	public WOAggregateEventRow(WOContext aContext) {
+		super(aContext);
+	}
 
-    @Override
-    public boolean synchronizesVariablesWithBindings() {
-        // Do not sync with the bindings
-        return false;
-    }
+	@Override
+	public boolean synchronizesVariablesWithBindings() {
+		// Do not sync with the bindings
+		return false;
+	}
 
-    public EOAggregateEvent object()
-    {
-        return (EOAggregateEvent)_WOJExtensionsUtil.valueForBindingOrNull("object",this);
-    }
+	public EOAggregateEvent object() {
+		return (EOAggregateEvent) _WOJExtensionsUtil.valueForBindingOrNull("object", this);
+	}
 
-    public WOEventDisplayPage controller()    {
-        return (WOEventDisplayPage)_WOJExtensionsUtil.valueForBindingOrNull("controller",this);
-    }
+	public WOEventDisplayPage controller() {
+		return (WOEventDisplayPage) _WOJExtensionsUtil.valueForBindingOrNull("controller", this);
+	}
 
-    public int displayMode()
-    {
-        int result = 1;
-        Object resultStr = valueForBinding("displayMode");
-        if (resultStr != null) {
-            try {
-                result = Integer.parseInt(resultStr.toString());
-            } catch (NumberFormatException e) {
-                throw new IllegalStateException("WOAggregateEventRow - problem parsing int from displayMode binding "+e);
-            }
-        }
-        return result;
-    }
-    
-    public EOEvent event()
-    {
-        return object().events().objectAtIndex(0);
-    }
+	public int displayMode() {
+		int result = 1;
+		Object resultStr = valueForBinding("displayMode");
+		if (resultStr != null) {
+			try {
+				result = Integer.parseInt(resultStr.toString());
+			}
+			catch (NumberFormatException e) {
+				throw new IllegalStateException("WOAggregateEventRow - problem parsing int from displayMode binding " + e);
+			}
+		}
+		return result;
+	}
 
-    public String displayComponentName()
-    {
-        WOEventDisplayPage ctr;
-        int level, group;
-        EOEvent obj;
+	public EOEvent event() {
+		return object().events().objectAtIndex(0);
+	}
 
-        obj = object();
-        ctr = controller();
-        level = ctr.displayLevelForEvent(obj);
-        group = ctr.groupTagForDisplayLevel(level);
+	public String displayComponentName() {
+		WOEventDisplayPage ctr;
+		int level, group;
+		EOEvent obj;
 
-        if (group != -1)
-            return "WOEventRow";
-        else
-            return event().displayComponentName();
-    }
+		obj = object();
+		ctr = controller();
+		level = ctr.displayLevelForEvent(obj);
+		group = ctr.groupTagForDisplayLevel(level);
+
+		if (group != -1)
+			return "WOEventRow";
+		else
+			return event().displayComponentName();
+	}
 }

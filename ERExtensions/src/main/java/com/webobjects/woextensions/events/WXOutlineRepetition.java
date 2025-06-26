@@ -12,15 +12,12 @@ import com.webobjects.appserver.WOContext;
 
 public class WXOutlineRepetition extends WOComponent {
 
-    public WXOutlineRepetition(WOContext aContext)  {
-        super(aContext);
-    }
+	public WXOutlineRepetition(WOContext aContext) {
+		super(aContext);
+	}
 
-    /////////////
-    // No-Sync
-    ////////////
-    @Override
-    public boolean synchronizesVariablesWithBindings() {
-        return false;
-    }
+	@Override
+	public boolean synchronizesVariablesWithBindings() {
+		return false;
+	}
 }

@@ -13,38 +13,37 @@ import com.webobjects.appserver.WOContext;
 
 public class WXOutlineControl extends WOComponent {
 
-    protected int _anchor;
+	protected int _anchor;
 
-    protected static int _counter = 0;
+	protected static int _counter = 0;
 
-    public WXOutlineControl(WOContext aContext)  {
-        super(aContext);
-        // just a hack to get a unique anchor in a thread safe manner.
-        synchronized(WOApplication.application()) {
-            _counter++;
-            _anchor = _counter;
-        }
-    }
+	public WXOutlineControl(WOContext aContext) {
+		super(aContext);
+		// just a hack to get a unique anchor in a thread safe manner.
+		synchronized (WOApplication.application()) {
+			_counter++;
+			_anchor = _counter;
+		}
+	}
 
-    /////////////
-    // No-Sync
-    ////////////
-    @Override
-    public boolean synchronizesVariablesWithBindings() {
-        return false;
-    }
-    
-    public int fragmentIdentifier() { return _anchor; }
+	@Override
+	public boolean synchronizesVariablesWithBindings() {
+		return false;
+	}
 
-    public WXOutlineEntry currentEntry() {
-        return (WXOutlineEntry)session().objectForKey("_outlineEntry");
-    }
+	public int fragmentIdentifier() {
+		return _anchor;
+	}
 
-    public int indentation() {
-        return currentEntry().nestingLevel() * 20;
-    }
+	public WXOutlineEntry currentEntry() {
+		return (WXOutlineEntry) session().objectForKey("_outlineEntry");
+	}
 
-    public String currentToggleImageName() {
-        return (currentEntry().isExpanded()) ? "DownTriangle.gif": "RightTriangle.gif";
-    }
+	public int indentation() {
+		return currentEntry().nestingLevel() * 20;
+	}
+
+	public String currentToggleImageName() {
+		return (currentEntry().isExpanded()) ? "DownTriangle.gif" : "RightTriangle.gif";
+	}
 }

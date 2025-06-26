@@ -12,12 +12,13 @@ import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WORequest;
 
 public class WOEventSetup extends WODirectAction {
-    public WOEventSetup(WORequest aRequest)  {
-        super(aRequest);
-    }
 
-    @Override
-    public WOActionResults defaultAction() {
-        return pageWithName("WOEventSetupPage");
-    }
+	public WOEventSetup(WORequest aRequest) {
+		super(aRequest);
+	}
+
+	@Override
+	public WOActionResults defaultAction() {
+		return pageWithName("WOEventSetupPage");
+	}
 }

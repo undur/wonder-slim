@@ -21,111 +21,112 @@ import com.webobjects.foundation.NSSelector;
 
 public class WOEventSetupPage extends WOEventPage {
 
-    public Class	currentClass;
-    public String	currentEventDescription;
-    public int		currentIndex;
+	public Class currentClass;
+	public String currentEventDescription;
+	public int currentIndex;
 
-    protected static final _ClassNameComparator _classNameAscendingComparator = new _ClassNameComparator(EOSortOrdering.CompareAscending);
-    
-    public WOEventSetupPage(WOContext aContext) {
-        super(aContext);
-    }
+	protected static final _ClassNameComparator _classNameAscendingComparator = new _ClassNameComparator(EOSortOrdering.CompareAscending);
 
-    public NSArray registeredEventClasses() {
-        NSMutableArray	classes;
+	public WOEventSetupPage(WOContext aContext) {
+		super(aContext);
+	}
 
+	public NSArray registeredEventClasses() {
+		NSMutableArray classes;
 
-        classes = new NSMutableArray();
-        classes.setArray(EOEventCenter.registeredEventClasses());
-        
-        try {
-            classes.sortUsingComparator(_classNameAscendingComparator);
-        } catch (NSComparator.ComparisonException e) {
-            throw NSForwardException._runtimeExceptionForThrowable(e);
-        }
+		classes = new NSMutableArray();
+		classes.setArray(EOEventCenter.registeredEventClasses());
 
-        return classes;
-    }
+		try {
+			classes.sortUsingComparator(_classNameAscendingComparator);
+		}
+		catch (NSComparator.ComparisonException e) {
+			throw NSForwardException._runtimeExceptionForThrowable(e);
+		}
 
-    public boolean isClassRegisteredForLogging() {
-         return EOEventCenter.recordsEventsForClass(currentClass);
-    }
+		return classes;
+	}
 
-    public void setIsClassRegisteredForLogging(boolean yn) {
-         EOEventCenter.setRecordsEvents(yn, currentClass);
-    }
+	public boolean isClassRegisteredForLogging() {
+		return EOEventCenter.recordsEventsForClass(currentClass);
+	}
 
-    protected void _setAllRegisteredEvents(boolean tf) {
-        NSArray	registered;
-        int i, n;
-        Class c;
+	public void setIsClassRegisteredForLogging(boolean yn) {
+		EOEventCenter.setRecordsEvents(yn, currentClass);
+	}
 
-        registered = EOEventCenter.registeredEventClasses();
-        int count = registered.count();
-        for (i = 0, n = count; i < n; i++) {
-            c = (Class)registered.objectAtIndex(i);
-            EOEventCenter.setRecordsEvents(tf, c);
-        }
-    }
-    
-    public WOComponent selectAll() {
-        _setAllRegisteredEvents(true);
-        return null;
-    }
+	protected void _setAllRegisteredEvents(boolean tf) {
+		NSArray registered;
+		int i, n;
+		Class c;
 
-    public WOComponent clearAll() {
-        _setAllRegisteredEvents(false);
-        return null;
-    }
-    
-    public NSArray currentEventDescriptions() {
-        NSMutableArray<String> descs;
-        NSDictionary<String,String> map;
+		registered = EOEventCenter.registeredEventClasses();
+		int count = registered.count();
+		for (i = 0, n = count; i < n; i++) {
+			c = (Class) registered.objectAtIndex(i);
+			EOEventCenter.setRecordsEvents(tf, c);
+		}
+	}
 
-        map = EOEvent.eventTypeDescriptions(currentClass);
+	public WOComponent selectAll() {
+		_setAllRegisteredEvents(true);
+		return null;
+	}
 
-        descs = new NSMutableArray<>();
-        descs.setArray(map.allValues());
-        descs.removeObject(map.objectForKey(EOEvent.EventGroupName));
-        try {
-            descs.sortUsingComparator(NSComparator.AscendingStringComparator);
-        } catch (NSComparator.ComparisonException e) {
-            throw NSForwardException._runtimeExceptionForThrowable(e);
-        }
-        descs.insertObjectAtIndex(map.objectForKey(EOEvent.EventGroupName), 0);
+	public WOComponent clearAll() {
+		_setAllRegisteredEvents(false);
+		return null;
+	}
 
-        return descs;
-    }
+	public NSArray currentEventDescriptions() {
+		NSMutableArray<String> descs;
+		NSDictionary<String, String> map;
 
-    public boolean isClassName() {
-        return (currentIndex == 0);
-    }
+		map = EOEvent.eventTypeDescriptions(currentClass);
 
-    private static class _ClassNameComparator extends NSComparator {
-    	protected boolean _compareAscending;
+		descs = new NSMutableArray<>();
+		descs.setArray(map.allValues());
+		descs.removeObject(map.objectForKey(EOEvent.EventGroupName));
+		try {
+			descs.sortUsingComparator(NSComparator.AscendingStringComparator);
+		}
+		catch (NSComparator.ComparisonException e) {
+			throw NSForwardException._runtimeExceptionForThrowable(e);
+		}
+		descs.insertObjectAtIndex(map.objectForKey(EOEvent.EventGroupName), 0);
 
-    	public _ClassNameComparator(NSSelector comparator) {
-    		super();
-    		_compareAscending = (comparator == EOSortOrdering.CompareAscending);
-    	}
+		return descs;
+	}
 
-    	@Override
-    	public int compare(Object c1, Object c2) throws NSComparator.ComparisonException {
-    		if (!(c1 instanceof Class) || !(c2 instanceof Class) || (c1 == null) || (c2 == null))
-    			throw new NSComparator.ComparisonException("<" + getClass().getName() + " Unable to compare classes. Either one of the arguments is not a Class or is null. Comparison was made with " + c1 + " and " + c2 + ".");
+	public boolean isClassName() {
+		return (currentIndex == 0);
+	}
 
-    		Class class1, class2;
-    		class1 = (Class) c1;
-    		class2 = (Class) c2;
+	private static class _ClassNameComparator extends NSComparator {
+		protected boolean _compareAscending;
 
-    		int result = class1.getName().compareTo(class2.getName());
-    		if (result == 0) {
-    			return result;
-    		}
-    		if (!_compareAscending) {
-    			result = 0 - result;
-    		}
-    		return result > 0 ? 1 : -1;
-    	}
-    }
+		public _ClassNameComparator(NSSelector comparator) {
+			super();
+			_compareAscending = (comparator == EOSortOrdering.CompareAscending);
+		}
+
+		@Override
+		public int compare(Object c1, Object c2) throws NSComparator.ComparisonException {
+			if (!(c1 instanceof Class) || !(c2 instanceof Class) || (c1 == null) || (c2 == null))
+				throw new NSComparator.ComparisonException("<" + getClass().getName() + " Unable to compare classes. Either one of the arguments is not a Class or is null. Comparison was made with " + c1 + " and " + c2 + ".");
+
+			Class class1, class2;
+			class1 = (Class) c1;
+			class2 = (Class) c2;
+
+			int result = class1.getName().compareTo(class2.getName());
+			if (result == 0) {
+				return result;
+			}
+			if (!_compareAscending) {
+				result = 0 - result;
+			}
+			return result > 0 ? 1 : -1;
+		}
+	}
 }
