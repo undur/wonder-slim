@@ -41,27 +41,31 @@ public class ERXKVCReflectionHack {
 			field.set(object, value);
 		}
 
+		/**
+		 * KVC will use this to invoke the method represented by a key.
+		 * Our change is that if invocation fails with an IllegalAccessException, we try to make the method accessible and then attempt reinvocation.
+		 * Since the method object we're working with comes from the KVC cache, invocation should fail only once per key per class.
+		 * This means we'll usually be going down the "happy path" so this should work pretty much like KVC's built in default value accessor.
+		 * 
+		 * CHECKME: Perform additional checks before granting access? This might be a bit of an accessibility carte blanche // Hugi 2025-06-24
+		 * CHECKME: Keep a record of classes/keys we do this for // Hugi 2025-06-25
+		 */
 		@Override
 		public Object methodValue(Object object, Method method) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-
-			// If invocation of the method fails, try to make it accessible and then attempt reinvocation
-			// Since the method object we're working with comes from the KVC cache, invocation should fail only once per key per class
-			// meaning we usually go down the happy path, so this should mostly work pretty much like KVC's built in default value accessor. 
 			try {
 				return method.invoke(object);
 			}
 			catch( IllegalAccessException e ) {
-				// CHECKME: Perform additional checks before granting access? This might be a bit of an accessibility carte blanche // Hugi 2025-06-24
-				// CHECKME: We should at least keep a record of classes/keys we do this for // Hugi 2025-06-25 
 				method.setAccessible(true);
 				return method.invoke(object);
 			}
 		}
 
+		/**
+		 * Does exactly the same thing as methodValue()
+		 */
 		@Override
 		public void setMethodValue(Object object, Method method, Object value) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-
-			// @See same logic in methodValue()
 			try {
 				method.invoke(object, value);
 			}
