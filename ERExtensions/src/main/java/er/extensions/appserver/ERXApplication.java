@@ -1271,8 +1271,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	public void addBalancerRouteCookieByNotification(NSNotification notification) {
-		if (notification.object() instanceof WOContext) {
-			addBalancerRouteCookie((WOContext) notification.object());
+		if (notification.object() instanceof WOContext wocontext) {
+			addBalancerRouteCookie(wocontext);
 		}
 	}
 
