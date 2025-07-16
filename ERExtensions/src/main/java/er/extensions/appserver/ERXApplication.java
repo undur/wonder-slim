@@ -177,20 +177,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework by setting NSProjectBundleEnabled=true
-	 */
-	private static void useProjectBundleIfDeveloping() {
-		if( Files.exists(Paths.get("build.properties")) ) {
-			System.setProperty("NSProjectBundleEnabled", "true");
-			System.out.print( """
-								===================================================================================================
-								== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==
-								===================================================================================================
-								""");
-		}
-	}
-
-	/**
 	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
 	 */
 	public static void setup(String[] argv) {
@@ -1315,6 +1301,20 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework by setting NSProjectBundleEnabled=true
+	 */
+	private static void useProjectBundleIfDeveloping() {
+		if( Files.exists(Paths.get("build.properties")) ) {
+			System.setProperty("NSProjectBundleEnabled", "true");
+			System.out.print( """
+				===================================================================================================
+				== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==
+				===================================================================================================
+				""");
 		}
 	}
 }
