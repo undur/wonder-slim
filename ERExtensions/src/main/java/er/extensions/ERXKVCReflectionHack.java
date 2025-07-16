@@ -9,9 +9,8 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import sun.misc.Unsafe;
 
 /**
- * Hack that allows KVC to access methods on private inner classes implementing public classes, such as the List implementation returned by Java's List.of()
- * 
- * CHECKME: Rename to something a little more descriptive // Hugi 2025-06-25
+ * Hack that allows KVC to access methods on private classes that implement public interfaces,
+ * examples being the List implementations returned by methods like List.of() and Stream.toList().
  */
 
 public class ERXKVCReflectionHack {
@@ -22,7 +21,7 @@ public class ERXKVCReflectionHack {
 	public static void enable() {
 		setFinalStaticField(NSKeyValueCoding.ValueAccessor.class, "_defaultValueAccessor", new AccessGrantingValueAccessor());
 		
-		// CHECKME: We're not using standard logging since we're activating this before the application's logging has been set up. Not an ideal situation // Hugi 2025-06-25
+		// Not using standard logging since we activate this as soon as possible, and that's before the application's logging has been initialized.
 		System.out.println("== Enabled " + ERXKVCReflectionHack.class.getSimpleName());
 	}
 
@@ -42,13 +41,11 @@ public class ERXKVCReflectionHack {
 		}
 
 		/**
-		 * KVC will use this to invoke the method represented by a key.
-		 * Our change is that if invocation fails with an IllegalAccessException, we try to make the method accessible and then attempt reinvocation.
-		 * Since the method object we're working with comes from the KVC cache, invocation should fail only once per key per class.
-		 * This means we'll usually be going down the "happy path" so this should work pretty much like KVC's built in default value accessor.
+		 * Used by KVC to invoke a method.
+		 * Our change is that if invocation fails with an IllegalAccessException, we try making the method accessible and then attempt re-invocation.
 		 * 
-		 * CHECKME: Perform additional checks before granting access? This might be a bit of an accessibility carte blanche // Hugi 2025-06-24
-		 * CHECKME: Keep a record of classes/keys we do this for // Hugi 2025-06-25
+		 * Since the Method object passed in should be coming from the KVC cache, invocation should fail only once per key per class.
+		 * This means we'll usually be going down the "happy path", i.e. after the first invocation this should work pretty much exactly like KVC's built in default value accessor.
 		 */
 		@Override
 		public Object methodValue(Object object, Method method) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
@@ -78,7 +75,7 @@ public class ERXKVCReflectionHack {
 
 	/**
 	 * A pretty horrifying way to to set NSKeyValueCoding's default value accessor (which is final and static, so needs workarounds to be set).
-	 * We can assume that this way of hacking in the value accessor will stop working in the somewhat near future, but by then we'll hopefully have a better solution.
+	 * We can assume that this way of hacking in the value accessor will stop working sometime soon after JDK 25, but by then we'll hopefully have a better solution.
 	 * 
 	 * @see https://stackoverflow.com/questions/61141836/change-static-final-field-in-java-12
 	 * @see https://openjdk.org/jeps/471
