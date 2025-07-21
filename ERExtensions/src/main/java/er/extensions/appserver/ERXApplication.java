@@ -57,7 +57,6 @@ import er.extensions.ERXKVCReflectionHack;
 import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXMonitorServer;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.bettertemplates.ERXBetterTemplates;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXPatcher;
@@ -65,6 +64,7 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.statistics.ERXStats;
+import parsley.Parsley;
 
 public abstract class ERXApplication extends ERXAjaxApplication {
 
@@ -191,6 +191,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	public ERXApplication() {
 
+		// Register and initialize the parsley template parser
+		Parsley.register();
+		Parsley.showInlineRenderingErrors( isDevelopmentModeSafe() );
+
 		// FIXME: Figure out why this is getting initialized here and document it // Hugi 2025-06-07
 		ERXStats.initStatisticsIfNecessary();
 		
@@ -210,14 +214,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		ERXLoggingSupport.reInitConsoleAppenders();
 
 		checkEnvironment();
-
-		if( useBetterTemplates() ) {
-			ERXBetterTemplates.configureWOForBetterTemplates();
-			log.info( "Better templates are active" );
-		}
-		else {
-			log.info( "Better templates are inactive" );
-		}
 
 		didCreateApplication();
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
@@ -352,15 +348,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Indicates if we want to enable the better (old WOOgnl) template parser
-	 * 
-	 * @return true by default. Override to change.
-	 */
-	protected boolean useBetterTemplates() {
-		return true;
 	}
 
 	private void startMonitorServer() {
@@ -1173,11 +1160,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * The set of component names that have binding debug enabled
-	 */
-	private NSMutableSet<String> _debugComponents = new NSMutableSet<>();
-
-	/**
 	 * Little bit better binding debug output than the original.
 	 */
 	@Override
@@ -1199,39 +1181,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			component = component.parent();
 		}
 		_debugValueForDeclarationNamed(component, " <== ", aDeclarationName, aDeclarationType, aBindingName, anAssociationDescription, aValue);
-	}
-
-	/**
-	 * Turns on/off binding debugging for the given component. Binding debugging
-	 * requires using the BetterTemplates parser and setting bettertemplates.debugSupport=true.
-	 * 
-	 * @param debugEnabled whether or not to enable debugging
-	 * @param componentName the component name to enable debugging for
-	 */
-	public void setDebugEnabledForComponent(boolean debugEnabled, String componentName) {
-		if (debugEnabled) {
-			_debugComponents.addObject(componentName);
-		}
-		else {
-			_debugComponents.removeObject(componentName);
-		}
-	}
-
-	/**
-	 * Returns whether or not binding debugging is enabled for the given component
-	 * 
-	 * @param componentName the component name
-	 * @return whether or not binding debugging is enabled for the given component
-	 */
-	public boolean debugEnabledForComponent(String componentName) {
-		return _debugComponents.containsObject(componentName);
-	}
-
-	/**
-	 * Turns off binding debugging for all components.
-	 */
-	public void clearDebugEnabledForAllComponents() {
-		_debugComponents.removeAllObjects();
 	}
 
 	/**
