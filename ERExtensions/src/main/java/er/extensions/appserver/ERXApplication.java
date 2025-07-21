@@ -45,7 +45,6 @@ import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSMutableSet;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSPropertyListSerialization;

@@ -18,7 +18,6 @@ import com.webobjects.foundation.NSValidation;
 
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
-import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXUtilities.ERXPrivateer;
 
 /**
