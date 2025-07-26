@@ -90,6 +90,14 @@ public class WOExceptionPage extends ERXComponent {
 	}
 
 	/**
+	 * Set the exception ID for display in the page.
+	 * 
+	 * The value is stored with the current thread. Not optimal, but we don't have a reference to the page instance when it's being generated. 
+	 */
+	public static void setExceptionID( final String exceptionID ) {
+		ERXThreadStorage.takeValueForKey( exceptionID, "exceptionID" );
+	}
+	/**
 	 * @return The ID of the exception, as generated in ERXApplication.handleException(). Helps with tracing user error reports.
 	 */
 	public String exceptionID() {

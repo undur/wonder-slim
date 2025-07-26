@@ -137,7 +137,7 @@ public class ERXUtilities {
 	 * @param context the current context
 	 * @return dictionary containing extra information for the current context.
 	 */
-	public static NSMutableDictionary extraInformationForExceptionInContext(Exception e, WOContext context) {
+	public static NSMutableDictionary extraInformationForExceptionInContext(WOContext context) {
 		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
 		extraInfo.addEntriesFromDictionary(informationForContext(context));
 		extraInfo.addEntriesFromDictionary(informationForBundles());

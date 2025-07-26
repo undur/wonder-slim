@@ -49,6 +49,7 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
+import com.webobjects.woextensions.error.WOExceptionPage;
 
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
@@ -770,42 +771,39 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Overridden to log extra information about state when exception is handled.
+	 * Overridden to:
+	 * 
+	 * - Check for (and handle) OutOfMemoryError
+	 * - Set an Exception ID that's displayed to the user and logged, making exceptions easier to handle) 
+	 * - Log some more information about state before passing the exception to WOApplication to handle
+	 * - Set the status of an error response to 500 (WO itself returns 200 which isn't great)  
 	 */
 	@Override
 	public WOResponse handleException(Exception exception, WOContext context) {
-		// We first want to test if we ran out of memory. If so we need to quit ASAP.
-		handlePotentiallyFatalException(exception);
+
+		// Get the original throwable
+		final Throwable originalThrowable = ERXExceptionUtilities.originalThrowable(exception);
+
+		// Check if we ran out of memory. If so we need to quit ASAP.
+		if( _lowMemoryHandler.shouldQuit( originalThrowable ) ) {
+			Runtime.getRuntime().exit(1);
+		}
 
 		// Generate a unique exception ID for display in logs/exception page
 		final UUID exceptionID = UUID.randomUUID();
-		
-		// Store the error's id in the context thread's dictionary (so it can be used for display in other locations, notably the exception page)
-		// CHECKME: This is not optimal. Ideally, we'd add the id to the exception's "metadata" generated below. But it will do for now // Hugi 2024-02-28
-		ERXThreadStorage.takeValueForKey( exceptionID.toString(), "exceptionID" );
-		
+
+		// Store the exception ID with the current thread for display in the exception page
+		WOExceptionPage.setExceptionID(exceptionID.toString());
+
 		// Not a fatal exception, business as usual.
-		final NSDictionary extraInfo = ERXUtilities.extraInformationForExceptionInContext(exception, context);
+		final NSDictionary extraInfo = ERXUtilities.extraInformationForExceptionInContext(context);
+		final String extraInfoString = NSPropertyListSerialization.stringFromPropertyList(extraInfo);
 
-		log.error("Exception caught: " + exception.getMessage() + "\nexceptionID: " + exceptionID + "\nExtra info: " + NSPropertyListSerialization.stringFromPropertyList(extraInfo) + "\n", exception);
+		log.error("Exception caught: " + originalThrowable.getMessage() + "\nexceptionID: " + exceptionID + "\nExtra info: " + extraInfoString + "\n", exception);
 
-		WOResponse response = super.handleException(exception, context);
+		final WOResponse response = super.handleException(exception, context);
 		response.setStatus(500);
 		return response;
-	}
-
-	/**
-	 * Handles the potentially fatal OutOfMemoryError by quitting the application ASAP.
-	 * Broken out into a separate method to make custom error handling easier, ie. generating your own error pages in production, etc.
-	 * 
-	 * @param exception to check if it is a fatal exception.
-	 */
-	public void handlePotentiallyFatalException(Exception exception) {
-		Throwable throwable = ERXExceptionUtilities.originalThrowable(exception);
-
-		if( _lowMemoryHandler.shouldQuit( throwable ) ) {
-			Runtime.getRuntime().exit(1);
-		}
 	}
 
 	public WOResponse dispatchRequest(WORequest request) {
