@@ -60,7 +60,7 @@ public class ERXResponseCompression {
 			_responseCompressionEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.responseCompressionEnabled", false) ? Boolean.TRUE : Boolean.FALSE;
 		}
 
-		return _responseCompressionEnabled.booleanValue();
+		return _responseCompressionEnabled;
 	}
 
 	/**
