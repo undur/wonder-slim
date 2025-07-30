@@ -1,0 +1,24 @@
+<wo:form style="margin: 20px">
+	<wo:popUpButton selection="$selectedExceptionClass" list="$application.exceptionManager.exceptionClasses" item="$currentExceptionClass" displayString="$currentExceptionClass.name" noSelectionString="All..." /> <wo:AjaxSubmitButton action="$context.page" updateContainerID="exceptionsUC" value="Filter" />
+</wo:form>
+
+<wo:AjaxUpdateContainer elementName="span" id="exceptionsUC">
+	<table class="table table-sm table-condensed table-striped table-bordered">
+		<tr>
+			<th>Date/time</th>
+			<th>id</th>
+			<th>Type</th>
+			<th>Message</th>
+			<th>Extra info</th>
+		</tr>
+		<wo:repetition list="$exceptions" item="$current">
+			<tr>
+				<td><wo:ERXDate value="$current.dateTime" /></td>
+				<td><wo:str value="$current.id" /></td>
+				<td><wo:str value="$current.throwable.class.simpleName" /></td>
+				<td><wo:str value="$current.throwable.message" /></td>
+				<td style="font-size: small; white-space: pre"><wo:str value="$current.extraInfoString" /></td>
+			</tr>
+		</wo:repetition>
+	</table>
+</wo:AjaxUpdateContainer>
