@@ -2,6 +2,7 @@ package er.extensions.admin;
 
 import java.util.List;
 
+import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 
@@ -15,11 +16,10 @@ import er.extensions.appserver.ERXExceptionManager.LoggedException;
 public class ERXExceptionManagementPage extends WOComponent {
 
 	public LoggedException current;
+	public LoggedException selected;
 
 	public Class<?> currentExceptionClass;
 	public Class<?> selectedExceptionClass;
-
-	public StackTraceElement ste;
 
     public ERXExceptionManagementPage(WOContext context) {
         super(context);
@@ -39,5 +39,10 @@ public class ERXExceptionManagementPage extends WOComponent {
     	}
     	
     	return list.reversed();
+    }
+    
+    public WOActionResults selectException() {
+    	selected = current;
+    	return null;
     }
 }

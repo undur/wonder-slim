@@ -1,5 +1,7 @@
 package er.extensions.appserver;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +24,12 @@ public class ERXExceptionManager {
 		
 		public String extraInfoString() {
 			return NSPropertyListSerialization.stringFromPropertyList(extraInfo);
+		}
+		
+		public String stackTraceString() {
+			final StringWriter sw = new StringWriter();
+			throwable().printStackTrace(new PrintWriter(sw));
+			return sw.toString();
 		}
 	}
 
