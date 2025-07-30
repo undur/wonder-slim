@@ -9,6 +9,7 @@
 			<th>id</th>
 			<th>Type</th>
 			<th>Message</th>
+			<th>Stack trace</th>
 			<th>Extra info</th>
 		</tr>
 		<wo:repetition list="$exceptions" item="$current">
@@ -17,7 +18,12 @@
 				<td><wo:str value="$current.id" /></td>
 				<td><wo:str value="$current.throwable.class.simpleName" /></td>
 				<td><wo:str value="$current.throwable.message" /></td>
-				<td style="font-size: small; white-space: pre"><wo:str value="$current.extraInfoString" /></td>
+				<td style="font-size: 10px">
+					<wo:repetition list="$current.throwable.stackTrace" item="$ste"><wo:str value="$ste.className" />::<wo:str value="$ste.methodName" />
+						<wo:str value="$ste.lineNumber" /><br>
+					</wo:repetition>
+				</td>
+				<td style="font-size: 10px; white-space: pre"><wo:str value="$current.extraInfoString" /></td>
 			</tr>
 		</wo:repetition>
 	</table>

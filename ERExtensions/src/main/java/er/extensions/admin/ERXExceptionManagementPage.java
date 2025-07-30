@@ -14,10 +14,12 @@ import er.extensions.appserver.ERXExceptionManager.LoggedException;
 
 public class ERXExceptionManagementPage extends WOComponent {
 
+	public LoggedException current;
+
 	public Class<?> currentExceptionClass;
 	public Class<?> selectedExceptionClass;
 
-	public LoggedException current;
+	public StackTraceElement ste;
 
     public ERXExceptionManagementPage(WOContext context) {
         super(context);
