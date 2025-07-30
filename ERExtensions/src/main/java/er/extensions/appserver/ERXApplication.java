@@ -805,7 +805,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		final NSDictionary extraInfo = ERXUtilities.extraInformationForExceptionInContext(context);
 		final String extraInfoString = NSPropertyListSerialization.stringFromPropertyList(extraInfo);
 
-		log.error("Exception caught: " + originalThrowable.getMessage() + "\nexceptionID: " + exceptionID + "\nExtra info: " + extraInfoString + "\n", exception);
+		log.error( "Exception caught: %s\nexceptionID: %s\nExtra info: %s\n".formatted( originalThrowable.getMessage(), exceptionID, extraInfoString ), exception );
 		
 		_exceptionManager.log(originalThrowable, LocalDateTime.now(), exceptionID, extraInfo);
 
