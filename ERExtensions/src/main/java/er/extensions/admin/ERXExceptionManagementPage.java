@@ -38,6 +38,6 @@ public class ERXExceptionManagementPage extends WOComponent {
     				.toList();
     	}
     	
-    	return list;
+    	return list.reversed();
     }
 }
