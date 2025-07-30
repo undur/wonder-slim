@@ -140,6 +140,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final ERXLowMemoryHandler _lowMemoryHandler;
 
 	/**
+	 * Keeps track of exceptions logged by handleException()
+	 */
+	private final ERXExceptionManager _exceptionManager;
+
+	/**
 	 * The time taken from invoking main, until the end of the application constructor
 	 */
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
@@ -221,6 +226,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		installPatches();
 
 		_lowMemoryHandler = new ERXLowMemoryHandler();
+		_exceptionManager = new ERXExceptionManager();
 
 		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
@@ -790,20 +796,26 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		// Generate a unique exception ID for display in logs/exception page
-		final UUID exceptionID = UUID.randomUUID();
+		final String exceptionID = UUID.randomUUID().toString();
 
 		// Store the exception ID with the current thread for display in the exception page
-		WOExceptionPage.setExceptionID(exceptionID.toString());
+		WOExceptionPage.setExceptionID(exceptionID);
 
 		// Not a fatal exception, business as usual.
 		final NSDictionary extraInfo = ERXUtilities.extraInformationForExceptionInContext(context);
 		final String extraInfoString = NSPropertyListSerialization.stringFromPropertyList(extraInfo);
 
 		log.error("Exception caught: " + originalThrowable.getMessage() + "\nexceptionID: " + exceptionID + "\nExtra info: " + extraInfoString + "\n", exception);
+		
+		_exceptionManager.log(originalThrowable, LocalDateTime.now(), exceptionID, extraInfo);
 
 		final WOResponse response = super.handleException(exception, context);
 		response.setStatus(500);
 		return response;
+	}
+
+	public ERXExceptionManager exceptionManager() {
+		return _exceptionManager;
 	}
 
 	public WOResponse dispatchRequest(WORequest request) {
