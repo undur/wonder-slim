@@ -16,23 +16,13 @@ import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotificationCenter;
 
-import er.extensions.foundation.ERXProperties;
-
 /**
  * Patch to prevent direct access to components via /wo/pagename.wo URLs
- * @property ERXDirectComponentAccessAllowed set to true to restore the original behavior. Default is false.
  */
-public class ERXComponentRequestHandler extends WORequestHandler
-{
-	private boolean _directComponentAccessAllowed;
 
-	public ERXComponentRequestHandler() {
-		super();
-		setDirectComponentAccessAllowed(ERXProperties.booleanForKeyWithDefault("ERXDirectComponentAccessAllowed", false));
-	}
+public class ERXComponentRequestHandler extends WORequestHandler {
 
-	public static NSDictionary requestHandlerValuesForRequest(WORequest aRequest)
-	{
+	public static NSDictionary requestHandlerValuesForRequest(WORequest aRequest) {
 		NSMutableDictionary aDictionary = new NSMutableDictionary();
 		NSArray pathArray = aRequest.requestHandlerPathArray();
 		String lastObject = null;
@@ -379,13 +369,5 @@ public class ERXComponentRequestHandler extends WORequestHandler
 		}
 
 		return aResponse;
-	}
-
-	public boolean isDirectComponentAccessAllowed() {
-		return _directComponentAccessAllowed;
-	}
-
-	public void setDirectComponentAccessAllowed(boolean directComponentAccessAllowed) {
-		_directComponentAccessAllowed = directComponentAccessAllowed;
 	}
 }

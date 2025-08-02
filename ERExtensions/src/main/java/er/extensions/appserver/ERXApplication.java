@@ -228,7 +228,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_lowMemoryHandler = new ERXLowMemoryHandler();
 		_exceptionManager = new ERXExceptionManager();
 
-		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
+		// ERXComponentRequestHandler's supposed only change from the original one is that it prevents access to components by name.
+		// It's used by default. If you don't want to use it, set ERXDirectComponentAccessAllowed=true.
+		// CHECKME: This is a little iffy since the component request handler is a pretty core part of the framework. 
+		// We should really just always use our version and handle that property within the component request handler itself
+		if (!ERXProperties.booleanForKeyWithDefault("ERXDirectComponentAccessAllowed", false)) {
+			registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
+		}
+
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
 
