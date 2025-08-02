@@ -245,9 +245,9 @@ public class ERXComponentRequestHandler extends WORequestHandler {
 			
 			// FIXME: OK, so I don't *think* the component request handler should ever perform session creation.
 			// When allowed to create a session, it really overrides the actual mechanism for handling a missing session AND the defaultRequestHandler mechanism, and just tries to construct a component with the name "Main" (potentially just resulting in a WOPageNotFoundException). 
-			// During regular use of this handler, a session should already exist. The only situation where I think it's required is if we're performing direct named page access (which this handler is not supposed to allow).
+			// During regular use of this handler, a session should already exist. The only situation where I can see session creation as required is upon direct named page access (which this handler is not supposed to allow).
 			// So, instead of creating a session if one is missing, we just go directly to handling a session restoration error.
-			// This isn't really optimal because we didn't actually fail to "restore" a session, there should be separate error handling for a missing session when it should be present. But I guess this is close enough.
+			// This isn't really optimal because we didn't actually fail to "restore" a known session ID, there should really be separate error handling for a missing session ID when expected. But I guess this is close enough.
 			// This might fail if this request handler is your application's default request handler (haven't tried it). But that's something you'd explicitly have to do,
 			// and I don't know why you'd ever do that (until we decide for some reason that we need to completely replace WO's component request handler). 
 			// Hugi 2025-08-02
