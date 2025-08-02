@@ -242,9 +242,25 @@ public class ERXComponentRequestHandler extends WORequestHandler {
 		String aSessionID = (String)someElements.objectForKey(WOApplication.application().sessionIdKey());
 
 		if (aSessionID == null) {
-			aSession = anApplication._initializeSessionInContext(aContext);
-			if (aSession == null)
-				errorResponse = anApplication.handleSessionCreationErrorInContext(aContext);
+			
+			// FIXME: OK, so I don't *think* the component request handler should ever perform session creation.
+			// When allowed to create a session, it really overrides the actual mechanism for handling a missing session, trying to construct a component with the name "Main" (usually resulting in a WOPageNotFoundException). 
+			// For any regular use of this request handler, a session should already exist. The only situation where I think it's required is if we're performing named page access (which this handler is not supposed to allow).
+			// So, instead of creating a missing session, just go directly to handling an error for a missing session.
+			// This might fail if you set this request handler as your application's default request handler,bBut that's something you'd explicitly have to do.
+			// And I don't know why you'd ever do that (until we decide for some reason that we need to completely replace WO's component request handler) 
+			// Hugi 2025-08-02
+
+			errorResponse = anApplication.handleSessionRestorationErrorInContext( aContext );
+
+			/*
+			 * Old logic, where this request handler was allowed to create a new session
+			 *
+			aSession = anApplication._initializeSessionInContext( aContext );
+			if( aSession == null ) {
+				errorResponse = anApplication.handleSessionCreationErrorInContext( aContext );
+			}	
+			*/
 		}
 		else {
 			aSession = anApplication.restoreSessionWithID(aSessionID, aContext);
