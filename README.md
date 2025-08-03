@@ -1,40 +1,49 @@
 # wonder-slim
 
-A slimmed down version of Project Wonder, containing only the required basics to create and run a modern WO application.
+A slimmed down version of Project Wonder, containing only the required basics to create and run a modern WO application on a modern JDK.
 
 ## Installation
 
-*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part [here]( https://gist.github.com/hugithordarson/d2ba6da9e4942f4ece95d7a721159cd1). Don't fear, this project has different versioning from the real Project Wonder and will not interfere with any other Project Wonder installations*
+*To use this project your machine must be set up for WO development using maven. If you haven't done that, see the "Let's set it up" part [here]( https://gist.github.com/hugithordarson/d2ba6da9e4942f4ece95d7a721159cd1). And no fear, this project has different artifact IDs than the original Project Wonder and thus will not interfere with any other Project Wonder projects or installations*
 
 1. Clone the repository
-2. Run `mvn clean install` in the cloned repository's root **or**
-3. …alternatively, Import the projects into your Eclipse workspace (using `Import existing projects into workspace`).
+2. Run `mvn clean install` in the cloned repository's root
+
+If you only plan on using this from within Eclipse, you don't need to perform an installation, instead you can just import slim's projects into your Eclipse workspace (using `Import existing projects into workspace`).
 
 ## Usage
 
-To use in an existing project you can just change the version for `ERExtensions` and `Ajax` to `8.0.0.slim-SNAPSHOT` in your `pom.xml`. Note that since this project only includes a fraction of the original Wonder frameworks and code, compatibility is likely to be hit and miss.
+To use in an existing project
+
+ * change the version for `ERExtensions` and `Ajax` to `8.0.0.slim-SNAPSHOT` in your `pom.xml`.
+ * Remove `JavaWOExtensions` and `WOOgnl` if present.
+
+Note that since this project only includes a fraction of the original Wonder frameworks and code, compatibility may be hit and miss. And if you're using *any* Project Wonder frameworks other than those that we've adopted, don't expect them to work.
 
 ## Motivation
 
-Project Wonder is an old and storied collection of frameworks that's had many contributors. Over the years, it's accumulated a *lot* of cruft. This is an experimental project to see how Wonder can be improved, not by adding stuff but by *removing* stuff.
+Project Wonder is a huge collection of frameworks that's had many contributors and has accumulated a lot of cruft over the years. This project aims to improve and simplify Wonder not by adding stuff but by *removing* stuff, cleaning house and understanding and documenting what's left.
 
-Below I enumerate a few primary goals of wonder-slim (from here on called just "Slim"), they all share the same **ultimate goal**, to make Wonder smaller, more manageable and maintainable, enabling faster development and delivery of features and improvements.
+Below I enumerate a few primary goals of wonder-slim (from here on called just "Slim"), they all share the same **ultimate goal**, to have a small, understandable, standardized, manageable and maintainable way to run WO applications in a modern environment and enabling faster development and delivery of features and improvements.
 
 ## Primary goals
 
 ### Separation of concerns and focus on basics
 
-Project Wonder has a multitude of features and frameworks. This project is about the minimal subset that's required to create and run a modern basic WO application, nothing more, nothing less.
+The original Project Wonder consists of a multitude of features and frameworks. This project is about the minimal subset that's required to create and run a modern basic WO application, nothing more, nothing less.
 
-For this reason, the project picks four frameworks from Project Wonder as baseline, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOGNL`. `JavaWOExtensions` and `ERExtensions` have been combined since they serve a similar purpose. `WOOGNL` has also been integrated into `ERExtensions` in the package `er.extensions.bettertemplates` and has lost it's dependency on OGNL (meaning it no longer supports OGNL expressions, just regular keyPaths and other standard associations).
+For this reason, the project picks four frameworks from Project Wonder as baseline, `ERExtensions`, `JavaWOExtensions`, `Ajax` and `WOOgnl`.
 
-### **Loosen the ties between WOF and EOF**
+* `JavaWOExtensions` has been combined with `ERExtensions` since there's no point in keeping them separate.
+* `WOOgnl` has been refactored and moved to the new framework `Parsley`. `ERExtensions` depends on `Parsley`, enables it by default and uses it's syntax (WOOgnl's syntax, mostly) for it's templates. It's also lost it's dependency on OGNL, meaning it no longer supports OGNL expressions, just regular keyPaths and other standard associations supported by WO itself.
 
-This is really just an extension of "separate concerns", but since EOF is a huge part of many projects it merits a separate mention.
+### Standardize on `WOOgnl`/`Parsley` template syntax
 
-A web framework and a persistence framework are separate things and this project focuses only on the "web" part. Therefore, everything EOF-related has been removed. Note that this does not preclude EOF usage, because although EOF is not *part* of *this* project it doesn't mean EOF can't *integrate* well with it. But I consider that a separate effort.
+Most modern WO apps that use inline bindings probably use `WOOgnl`'s syntax. As mentioned above, we've refactored the `WOOgnl` template parser into the new parser `Parsley` and enabled it by default. This shouldn't change anything for applications that only use WO's old style folder/multi-file templates since they're supported as well. It just enables inline bindings by default, allowing us to use them in the frameworks' templates.
 
-For this reason, Slim's frameworks (notably ERExtensions) no longer do anything EOF-related nor does it use any code from JavaEOControl or JavaEOAccess. A WO application using it will still have to import these frameworks (due to JavaWebObjects referencing some classes there, such as WOEvent inheriting from EOEvent, WOSession having an EOEditingContext etc.)
+### Run on modern java
+
+Slim's sources target JDK 21 and it runs fine up to and including JDK 24. We do not support older JDKs.
 
 ### Reduce the number of external dependencies
 
@@ -52,13 +61,17 @@ This makes it easier to integrate with the java ecosystem when using and contrib
 
 Over the years a lot of things have changed in Wonder and WO. To keep compatibility, newer releases often allow changes to be hidden, for example by keeping deprecated code around and activating it conditionally by looking at projects to see if they're "old" or by setting a property. This makes the codebase larger, harder to understand and harder to maintain. So to simplify development, "old" code is being removed and with it the option of doing things "the old way", whatever that may be.
 
-### Use Maven only
+### **Loosen the ties between WOF and EOF**
 
-To keep the build simple, Slim is only built using maven.
+This is really just an extension of "separate concerns", but since EOF forms a large part of many projects it merits a separate mention.
 
-### Run on modern java
+A web framework and a persistence framework are separate things and this project focuses on the "web" part. Therefore, everything EOF-related has been removed. Note that this does not preclude EOF usage, because although EOF is not *part* of *this* project it doesn't mean EOF can't *integrate* well with it. But I consider that a separate effort. EOF is by far the largest and most complex part of the entire WO stack, I don't use it myself so testing with it is hard, and this makes maintenance and development much easier.
 
-Slim targets Java 21 and does not support older JDKs. This is a part of the simplification of the development and environment through standardization.
+So. Slim's frameworks (notably `ERExtensions`) no longer do anything EOF-related nor does it use any code from `JavaEOControl` or `JavaEOAccess`.
+
+### Maven only
+
+To keep the project simple, Slim is built using maven and officially only supports maven-style projects.
 
 ## FAQ
 
@@ -66,21 +79,21 @@ Slim targets Java 21 and does not support older JDKs. This is a part of the simp
 
 ### So, this just leaves Project Wonder behind?
 
-No. While this is a usable framework in and off itself, it's also something of an exercise to just learn to navigate the Wonder Sources and WO's architecture, understand what's there, what's actually used, what can be improved etc. Hopefully, some of the refactorings and cleanups can be backported to Wonder itself, so everyone benefits. 
+On it's own, yes it does. I no longer have any projects that use the original Project Wonder, making contributing to it somewhat difficult. But anyone can feel fre to use the knowledge, refactoring and cleanup and backport it to the original Wonder. It's all there for the taking.
 
-In a perfect world, this effort might work it's way directly into Wonder itself. But that would require a huge effort, due to the huge amount of (highly interconnected) code in current Project Wonder.
+The original idea was to make this a cleanup of Project Wonder itself. But as of now I think that would require a huge effort, due to the huge amount of (highly interconnected) code and functionality found in Wonder's frameworks. And seeing the state of Wonder development in the past few years, it's difficult to see much happening there.
 
 ### Do you use it?
 
-Yes. I've used Slim in all of my active projects instead of Project Wonder for a while now. It's very nice to have an understandable, easily modifiable and (comparably) small base of framework code with a limited set of dependencies.
+Yes. I've used Slim in all of my projects instead of Project Wonder for half a decade now. It's extremely nice to base one's projects on an understandable, easily modifiable and (comparably) small set of framework code with a limited set of dependencies.
 
 ### Can I use it?
 
-Sure. But be aware that the real question is probably "should I use it". I'm moving fast and breaking things at the moment and I'm not doing any releases, stable or otherwise. If there's interest in the project I might consider changing that.
+Sure. It's made to be used. But be aware that the real question is probably "should I use it". If you want to stay with EOF and Project Wonder's highly integrated world, it might not be for you. I'm also not doing any stable releases at the moment, but if anyone decides to use Slim, I'll change that.
 
 ### Can I change it?
 
-Yes! Please! I'd love to get both feedback and contributions.
+Yes! Please! I'd love both feedback and contributions.
 
 ## Attribution
-I should mention that this is not my own project. It's merely an organization of over two decades of work of dozens, even hundreds of people. To emphasize this, I've chosen to go the way of cloning the existing Wonder repository and keep attribution and history of the source files in question as much as possible. I have much love and respect for past contributors, many of whom are friends and colleagues.
+Finally, I should mention that this isn't really my own project. It's merely an organization of over two decades of work of dozens, even hundreds of people. To emphasize this I chose the way of forking the existing Wonder repository to conserve the history of the sources. I have much love and respect for past contributors, from whose work I've massively benefited from through the years, and many of whom are friends and colleagues.
