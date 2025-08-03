@@ -41,6 +41,11 @@ public class ERXExceptionManagementPage extends WOComponent {
     	return list.reversed();
     }
     
+    public WOActionResults filter() {
+    	selected = null;
+    	return null;
+    }
+
     public WOActionResults selectException() {
     	selected = current;
     	return null;

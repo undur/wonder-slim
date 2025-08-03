@@ -1,5 +1,5 @@
 <wo:form style="margin: 20px">
-	<wo:popUpButton selection="$selectedExceptionClass" list="$application.exceptionManager.exceptionClasses" item="$currentExceptionClass" displayString="$currentExceptionClass.name" noSelectionString="All..." /> <wo:AjaxSubmitButton action="$context.page" updateContainerID="exceptionsUC" value="Filter" />
+	<wo:popUpButton selection="$selectedExceptionClass" list="$application.exceptionManager.exceptionClasses" item="$currentExceptionClass" displayString="$currentExceptionClass.name" noSelectionString="All..." /> <wo:AjaxSubmitButton action="$filter" updateContainerID="exceptionsUC" value="Filter" />
 </wo:form>
 
 <wo:AjaxUpdateContainer elementName="span" id="exceptionsUC">
