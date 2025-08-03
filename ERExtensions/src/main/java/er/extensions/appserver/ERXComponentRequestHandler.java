@@ -21,7 +21,7 @@ import com.webobjects.foundation.NSNotificationCenter;
 
 public class ERXComponentRequestHandler extends WORequestHandler {
 
-	public static NSDictionary requestHandlerValuesForRequest(WORequest aRequest) {
+	private static NSDictionary requestHandlerValuesForRequest(WORequest aRequest) {
 		NSMutableDictionary aDictionary = new NSMutableDictionary();
 		NSArray pathArray = aRequest.requestHandlerPathArray();
 		String lastObject = null;
@@ -280,7 +280,7 @@ public class ERXComponentRequestHandler extends WORequestHandler {
 		return aResponse;
 	}
 
-	WOResponse _handleRequest(WORequest aRequest) {
+	private WOResponse _handleRequest(WORequest aRequest) {
 		WOContext aContext = null;
 		WOResponse aResponse;
 
