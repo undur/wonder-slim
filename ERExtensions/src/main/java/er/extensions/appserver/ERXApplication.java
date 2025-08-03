@@ -203,17 +203,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// FIXME: Figure out why this is getting initialized here and document it // Hugi 2025-06-07
 		ERXStats.initStatisticsIfNecessary();
 		
-		// WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
-		frameworksBaseURL();
-		applicationBaseURL();
-
-		if (System.getProperty("WOFrameworksBaseURL") != null) {
-			setFrameworksBaseURL(System.getProperty("WOFrameworksBaseURL"));
-		}
-
-		if (System.getProperty("WOApplicationBaseURL") != null) {
-			setApplicationBaseURL(System.getProperty("WOApplicationBaseURL"));
-		}
+		fixBaseURLs();
 
 		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
 		ERXLoggingSupport.reInitConsoleAppenders();
@@ -272,6 +262,24 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("finishInitialization"), WOApplication.ApplicationWillFinishLaunchingNotification, null);
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("didFinishLaunching"), WOApplication.ApplicationDidFinishLaunchingNotification, null);
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("addBalancerRouteCookieByNotification"), WORequestHandler.DidHandleRequestNotification, null);
+	}
+
+	/**
+	 * WOFrameworksBaseURL and WOApplicationBaseURL properties are broken in 5.4. This is the workaround.
+	 * 
+	 * This comes from Wonder, I haven't validated if this is still required in 5.4.3 // Hugi 2025-08-03
+	 */
+	private void fixBaseURLs() {
+		frameworksBaseURL();
+		applicationBaseURL();
+
+		if (System.getProperty("WOFrameworksBaseURL") != null) {
+			setFrameworksBaseURL(System.getProperty("WOFrameworksBaseURL"));
+		}
+
+		if (System.getProperty("WOApplicationBaseURL") != null) {
+			setApplicationBaseURL(System.getProperty("WOApplicationBaseURL"));
+		}
 	}
 
 	/**
