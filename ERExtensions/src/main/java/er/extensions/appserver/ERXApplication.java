@@ -242,13 +242,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		configureStatisticsLogging();
 
 		_replaceApplicationPathPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
+
 		if (_replaceApplicationPathPattern != null && _replaceApplicationPathPattern.length() == 0) {
 			_replaceApplicationPathPattern = null;
 		}
+
 		_replaceApplicationPathReplace = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.replace");
 
 		if (_replaceApplicationPathPattern == null && rewriteDirectConnectURL()) {
 			_replaceApplicationPathPattern = "/cgi-bin/WebObjects/" + name() + applicationExtension();
+
 			if (_replaceApplicationPathReplace == null) {
 				_replaceApplicationPathReplace = "";
 			}
@@ -497,14 +500,17 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * The default log rotation frequency is 24 hours, but can be changed by setting in milliseconds the property <code>er.extensions.ERXApplication.StatisticsLogRotationFrequency</code>
 	 */
 	public void configureStatisticsLogging() {
-		String statisticsBasePath = System.getProperty("er.extensions.ERXApplication.StatisticsBaseLogPath");
+		final String statisticsBasePath = System.getProperty("er.extensions.ERXApplication.StatisticsBaseLogPath");
+
 		if (statisticsBasePath != null) {
 			// Defaults to a single day
-			int rotationFrequency = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.StatisticsLogRotationFrequency", 24 * 60 * 60 * 1000);
-			String logPath = statisticsBasePath + File.separator + name() + "-" + ERXConfigurationManager.defaultManager().hostName() + "-" + port() + ".log";
+			final int rotationFrequency = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.StatisticsLogRotationFrequency", 24 * 60 * 60 * 1000);
+			final String logPath = statisticsBasePath + File.separator + name() + "-" + ERXConfigurationManager.defaultManager().hostName() + "-" + port() + ".log";
+
 			if (log.isDebugEnabled()) {
 				log.debug("Configured statistics logging to file path \"" + logPath + "\" with rotation frequency: " + rotationFrequency);
 			}
+
 			statisticsStore().setLogFile(logPath, rotationFrequency);
 		}
 	}
