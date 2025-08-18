@@ -210,8 +210,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		checkEnvironment();
 
-		// FIXME: Why is this done here? Shouldn't this method be invoked at the end of the constructor? // Hugi 2025-08-03
-		didCreateApplication();
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
 
 		installPatches();
@@ -552,8 +550,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Override this to perform application initialization.
 	 */
 	public void finishInitialization() {}
-
-	protected void didCreateApplication() {}
 
 	/**
 	 * Called when the application posts {@link WOApplication#ApplicationDidFinishLaunchingNotification}.
