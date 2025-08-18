@@ -2,9 +2,9 @@
 er.extensions.load.Properties.framework.ERExtensions=load
 er.extensions.ERExtensions.hasLocalization=true
 
-# ERExtensions Framework Properties
-# These properties are pushed into the Java system properties for  applications linking against to this framework
-# You can override them from the application's Properties file or  command-line arguments.
+## ERExtensions Framework Properties
+## These properties are pushed into the Java system properties for  applications linking against to this framework
+## You can override them from the application's Properties file or  command-line arguments.
 
 #########################################################################
 # ERXProperties
@@ -21,8 +21,7 @@ er.extensions.ERExtensions.hasLocalization=true
 # Localizer
 #########################################################################
 
-## Is localization enabled (as a lot of the components are already localized, it's
-## kind of mandatory now to turn it on)
+## Is localization enabled (as a lot of the components are already localized, it's kind of mandatory now to turn it on)
 er.extensions.ERXLocalizer.isLocalizationEnabled = true
 
 ## The order in which localized files are searched (first entry wins)
@@ -31,8 +30,7 @@ er.extensions.ERXLocalizer.isLocalizationEnabled = true
 ## Which files to search
 er.extensions.ERXLocalizer.fileNamesToWatch = ("Localizable.strings","ValidationTemplate.strings")
 
-## The default language for localization. This gets chosen if the request 
-## languages array results in no match.
+## The default language for localization. This gets chosen if the request languages array results in no match.
 er.extensions.ERXLocalizer.defaultLanguage = English
 
 ## Currently supported languages
@@ -41,13 +39,11 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 ## We actually support a lot of other languages, but they are probably not maintained
 # er.extensions.ERXLocalizer.availableLanguages = (English,German,French,Norwegian,Japanese,Italian)
 
-## These should go away. It's special handling for Japanese, but would be
-## better refactored into a general pluralizing strategy
+## These should go away. It's special handling for Japanese, but would be better refactored into a general pluralizing strategy
 # er.extensions.ERXLocalizer.pluralFormClassName = er.extensions.localization.ERXLocalizer
 # er.extensions.ERXLocalizer.nonPluralFormClassName = er.extensions.localization.ERXNonPluralFormLocalizer
 
-## This tells ERXWOString/ERXWOText to use localized 
-## formatters. 
+## This tells ERXWOString/ERXWOText to use localized formatters. 
 # er.extensions.ERXLocalizer.useLocalizedFormatters = true
 
 ## Which characters to ignore when formatting
@@ -56,25 +52,20 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 ## Allows you to override the locale for a language
 # er.extensions.ERXLocalizer.German.locale = de
 
-## Fallback to localized value in default language when key is not found for current language.
-## Default is false.
+## Fallback to localized value in default language when key is not found for current language. Default is false.
 # er.extensions.ERXLocalizer.fallbackToDefaultLanguage = false
 
 #########################################################################
 # Request and Encoding
 #########################################################################
-## This is the one-stop-shop for setting the default encoding everywhere.
-## When in doubt, set this one.
+## This is the one-stop-shop for setting the default encoding everywhere. When in doubt, set this one.
 # er.extensions.ERXApplication.DefaultEncoding=UTF-8
 
-## If true, the browser's form value encoding is set, it will override
-## your application encoding for a given request.
+## If true, the browser's form value encoding is set, it will override your application encoding for a given request.
 # er.extensions.ERXRequest.BrowserFormValueEncodingOverrideEnabled=true
 
-## If true, all https:// URL generation will be disabled and converted
-## into http:// URLs. If you are running in DirectConnct, this will 
-## allow you to specify secure forms and links without actually having
-## to setup SSL. 
+## If true, all https:// URL generation will be disabled and converted into http:// URLs.
+## If you are running in DirectConnct, this will allow you to specify secure forms and links without actually having to setup SSL. 
 # er.extensions.ERXRequest.secureDisabled=false
 
 #########################################################################
@@ -101,20 +92,19 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 ## to display the stats after the RR loop
 # log4j.category.er.extensions.ERXApplication.Statistics=DEBUG
 
-## When set, starts refusing new session once memory is filled up to this 
-## threshold, which results in a more responsive app. If mem comes available again
-## the app again starts to accept new session.
+## When set, starts refusing new session once memory is filled up to this threshold, which results in a more responsive app.
+## If mem comes available again the app again starts to accept new session.
 # er.extensions.ERXApplication.memoryThreshold=0.90
 
 ## Enable reponse compression when user agent accepts gzip
 # er.extensions.ERXApplication.responseCompressionEnabled = true
 
 ### run control
-# time in seconds in how long the app should stay alive
+## time in seconds in how long the app should stay alive
 # ERTimeToLive=180000
-# time in seconds after which the app should start to refuse new sessions
+## time in seconds after which the app should start to refuse new sessions
 # ERTimeToDie=180000
-# time in seconds in which to kill the app after starting to refuse new sessions
+## time in seconds in which to kill the app after starting to refuse new sessions
 # ERTimeToKill=1800
 
 ## Handling of low memory conditions. Reserve X KB to keep as last-ditch reserve
@@ -140,14 +130,12 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 # ERXSession
 #########################################################################
 
-# If you are using SSL and want to use secure session cookies, set to true
-#
+## If you are using SSL and want to use secure session cookies, set to true
 # er.extensions.ERXSession.useSecureSessionCookies=false
 
-# If you want to set the SameSite policy for session and instance cookies
-# you can set this property to one of the following values:
-# LAX, NORMAL, STRICT
-#
+## If you want to set the SameSite policy for session and instance cookies
+## you can set this property to one of the following values:
+## LAX, NORMAL, STRICT
 # er.extensions.ERXSession.cookies.SameSite=STRICT
 
 #########################################################################
@@ -186,13 +174,12 @@ er.extensions.ERXWOForm.multipleSubmitDefault=true
 ##   echo changeit
 ##   where you should replace "changeit" for whatever password you selected in the previous step.
 ## * Set the following property to true
-#er.extensions.ERXApplication.ssl.enabled=true
+# er.extensions.ERXApplication.ssl.enabled=true
 
-## (optional) To specify an SSL host name other than what is returned from a call to
-## application.host(), you can override it below  
-#er.extensions.ERXApplication.ssl.host=localhost
+## (optional) To specify an SSL host name other than what is returned from a call to application.host(), you can override it below  
+# er.extensions.ERXApplication.ssl.host=localhost
 
 ## (optional) To select an SSL port other than 443, uncomment the following. If you are already running Apache with SSL,
 ## you probably want to set this.  If the port number is 0, the SSL port will be automatically assigned (using the same
 ## mechanism that WO uses to set the regular port) 
-#er.extensions.ERXApplication.ssl.port=0
+# er.extensions.ERXApplication.ssl.port=0
