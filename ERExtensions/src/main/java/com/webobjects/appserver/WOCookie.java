@@ -13,8 +13,7 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestamp;
 
-public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandling,
-		NSKeyValueCodingAdditions, Serializable {
+public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandling, NSKeyValueCodingAdditions, Serializable {
 
 	String _name;
 	String _value;
@@ -25,6 +24,7 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 	int _timeout;
 	boolean _isHttpOnly;
 	SameSite _sameSite;
+
 	@Deprecated
 	static final SimpleDateFormat TheDateFormat;
 
@@ -32,10 +32,9 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 		TheDateFormat = new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss 'GMT'", new DateFormatSymbols(Locale.US));
 		TheDateFormat.setTimeZone(NSTimeZone.timeZoneWithName("GMT", true));
 	}
-	
+
 	/**
-	 * Formatter to use when handling timestamp columns. Each thread has its own
-	 * copy.
+	 * Formatter to use when handling timestamp columns. Each thread has its own copy.
 	 */
 	private static final ThreadLocal<SimpleDateFormat> TIMESTAMP_FORMATTER = new ThreadLocal<SimpleDateFormat>() {
 		@Override
@@ -47,14 +46,12 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 	};
 
 	@Deprecated
-	public static WOCookie cookieWithName(final String name, final String value, final String path,
-			final String domain, final NSTimestamp expires, final boolean isSecure) {
+	public static WOCookie cookieWithName(final String name, final String value, final String path, final String domain, final NSTimestamp expires, final boolean isSecure) {
 		return new WOCookie(name, value, path, domain, expires, isSecure);
 	}
 
 	@Deprecated
-	public static WOCookie cookieWithName(final String name, final String value, final String path,
-			final String domain, final int timeout, final boolean isSecure) {
+	public static WOCookie cookieWithName(final String name, final String value, final String path, final String domain, final int timeout, final boolean isSecure) {
 		return new WOCookie(name, value, path, domain, timeout, isSecure);
 	}
 
@@ -63,16 +60,16 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 		return new WOCookie(name, value);
 	}
 
-	public WOCookie(final String name, final String value, final String path, final String domain,
-			final NSTimestamp expires, final boolean isSecure) {
+	public WOCookie(final String name, final String value, final String path, final String domain, final NSTimestamp expires, final boolean isSecure) {
 		this(name, value, path, domain, expires, isSecure, false);
 	}
 
-	public WOCookie(final String name, final String value, final String path, final String domain,
-			final NSTimestamp expires, final boolean isSecure, final boolean httpOnly) {
+	public WOCookie(final String name, final String value, final String path, final String domain, final NSTimestamp expires, final boolean isSecure, final boolean httpOnly) {
+
 		if (name == null) {
 			throw new IllegalArgumentException("Cookie may not have null name.");
 		}
+
 		_name = name;
 		_value = value;
 		_path = path;
@@ -84,13 +81,11 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 		setTimeOut(-1);
 	}
 
-	public WOCookie(final String name, final String value, final String path, final String domain, final int timeout,
-			final boolean isSecure) {
+	public WOCookie(final String name, final String value, final String path, final String domain, final int timeout, final boolean isSecure) {
 		this(name, value, path, domain, timeout, isSecure, false);
 	}
 
-	public WOCookie(final String name, final String value, final String path, final String domain, final int timeout,
-			final boolean isSecure, final boolean httpOnly) {
+	public WOCookie(final String name, final String value, final String path, final String domain, final int timeout, final boolean isSecure, final boolean httpOnly) {
 		if (name == null) {
 			throw new IllegalArgumentException("Cookie may not have null name.");
 		}
@@ -110,16 +105,11 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 
 	@Override
 	public String toString() {
-		String expiresString = _expires != null ? new StringBuilder().append(" expires=")
-				.append(TIMESTAMP_FORMATTER.get().format(_expires)).toString() : "";
+		String expiresString = _expires != null ? new StringBuilder().append(" expires=").append(TIMESTAMP_FORMATTER.get().format(_expires)).toString() : "";
 		String expires = _timeout < 0 ? "" : new StringBuilder().append(" max-age=").append(_timeout).toString();
-		String sameSite = _sameSite == SameSite.NORMAL ? "" :
-			new StringBuilder().append(" SameSite=").append(_sameSite.toString().toLowerCase()).toString();
+		String sameSite = _sameSite == SameSite.NORMAL ? "" : new StringBuilder().append(" SameSite=").append(_sameSite.toString().toLowerCase()).toString();
 
-		return new StringBuilder().append('<').append(getClass().getName()).append(" name=").append(_name)
-				.append(" value=").append(_value).append(" path=").append(_path).append(" domain=").append(_domain)
-				.append(expiresString).append(expires).append(" isSecure=").append(_isSecure)
-				.append(" isHttpOnly=").append(_isHttpOnly).append(sameSite).append('>').toString();
+		return new StringBuilder().append('<').append(getClass().getName()).append(" name=").append(_name).append(" value=").append(_value).append(" path=").append(_path).append(" domain=").append(_domain).append(expiresString).append(expires).append(" isSecure=").append(_isSecure).append(" isHttpOnly=").append(_isHttpOnly).append(sameSite).append('>').toString();
 	}
 
 	public String headerString() {
@@ -134,9 +124,11 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 			header.append("\"");
 			header.append(_value);
 			header.append("\"");
-		} else if (_value == null) {
+		}
+		else if (_value == null) {
 			header.append(' ');
-		} else {
+		}
+		else {
 			header.append(_value);
 		}
 		if (!isRequest) {
@@ -148,7 +140,8 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 				header.append(_timeout);
 				if (_timeout == 0) {
 					localExpires = new NSTimestamp(0L);
-				} else {
+				}
+				else {
 					localExpires = new NSTimestamp(System.currentTimeMillis() + (_timeout * 1000));
 				}
 			}
