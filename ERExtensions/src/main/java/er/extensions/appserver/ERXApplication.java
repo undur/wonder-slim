@@ -210,8 +210,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		checkEnvironment();
 
-		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
-
 		installPatches();
 
 		_lowMemoryHandler = new ERXLowMemoryHandler();
@@ -264,6 +262,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("finishInitialization"), WOApplication.ApplicationWillFinishLaunchingNotification, null);
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("didFinishLaunching"), WOApplication.ApplicationDidFinishLaunchingNotification, null);
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("addBalancerRouteCookieByNotification"), WORequestHandler.DidHandleRequestNotification, null);
+
+		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
 	}
 
 	/**
