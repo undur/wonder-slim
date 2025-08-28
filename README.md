@@ -21,6 +21,8 @@ To use in an existing project:
  * You'll probably want `ERLoggingReload4j` framework as a dependency as well if you want logging. It's currently the only implementation of our "logging bridge".
  * Remove `JavaWOExtensions` and `WOOgnl` if present (`JavaWOExtensions` is now a part of `ERExtensions` and `WOOgnl` has been replaced by Parsley)
 
+_Do not use the `AjaxSlim` framework. It's work in progress that really should have gotten it's own repository_
+
 Since this project only includes a fraction of the original Wonder frameworks and code, compatibility with existing projects **will** be hit and miss. And if you're using *any* frameworks from Project Wonder other than those we've adopted, don't expect them to work.
 
 ## Motivation
