@@ -13,12 +13,15 @@ If you only plan on using this from within Eclipse, you don't need to perform an
 
 ## Usage
 
-To use in an existing project
+First, [here's a sample project](https://github.com/undur/wonder-slim-sample) that demonstrates the most basic `pom.xml` that includes ERExtensions, Ajax and logging.
+ 
+To use in an existing project:
 
- * Change the version for `ERExtensions` and `Ajax` to `8.0.0.slim-SNAPSHOT` in your `pom.xml`.
- * Remove `JavaWOExtensions` and `WOOgnl` if present.
+ * Change the version for `ERExtensions` (and `Ajax`, if present) to `8.0.0.slim-SNAPSHOT` in your `pom.xml`.
+ * You'll probably want `ERLoggingReload4j` framework as a dependency as well if you want logging. It's currently the only implementation of our "logging bridge".
+ * Remove `JavaWOExtensions` and `WOOgnl` if present (`JavaWOExtensions` is now a part of `ERExtensions` and `WOOgnl` has been replaced by Parsley)
 
-Since this project only includes a fraction of the original Wonder frameworks and code, compatibility may be hit and miss. And if you're using *any* frameworks from Project Wonder other than those that we've adopted, don't expect them to work.
+Since this project only includes a fraction of the original Wonder frameworks and code, compatibility with existing projects **will** be hit and miss. And if you're using *any* frameworks from Project Wonder other than those we've adopted, don't expect them to work.
 
 ## Motivation
 
