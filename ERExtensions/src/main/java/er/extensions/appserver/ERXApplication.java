@@ -256,6 +256,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Workaround for broken 'WOFrameworksBaseURL' and 'WOApplicationBaseURL' properties in 5.4.
 	 * Discussion of the fix can be seen in a webobjects-dev thread from Ricardo on 2009-03-14:
 	 * https://lists.apple.com/archives/webobjects-dev/2009/Mar/msg00477.html
+	 * 
+	 * As of 2025-08-30 I haven't validated whether this is still required.
+	 * But since the mail is written after WO's last release, I assume it is // Hugi
 	 */
 	private void fixBaseURLs() {
 		frameworksBaseURL();
