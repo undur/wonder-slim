@@ -239,21 +239,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		_replaceApplicationPathPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
-
-		if (_replaceApplicationPathPattern != null && _replaceApplicationPathPattern.length() == 0) {
-			_replaceApplicationPathPattern = null;
-		}
-
-		_replaceApplicationPathReplace = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.replace");
-
-		if (_replaceApplicationPathPattern == null && rewriteDirectConnectURL()) {
-			_replaceApplicationPathPattern = "/cgi-bin/WebObjects/" + name() + applicationExtension();
-
-			if (_replaceApplicationPathReplace == null) {
-				_replaceApplicationPathReplace = "";
-			}
-		}
+		configureReplaceApplicationPath();
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 		
@@ -512,6 +498,27 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			}
 
 			statisticsStore().setLogFile(logPath, rotationFrequency);
+		}
+	}
+
+	/**
+	 * Invoked from the constructor to initialize the replaceApplicationPath
+	 */
+	private void configureReplaceApplicationPath() {
+		_replaceApplicationPathPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
+
+		if (_replaceApplicationPathPattern != null && _replaceApplicationPathPattern.length() == 0) {
+			_replaceApplicationPathPattern = null;
+		}
+
+		_replaceApplicationPathReplace = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.replace");
+
+		if (_replaceApplicationPathPattern == null && rewriteDirectConnectURL()) {
+			_replaceApplicationPathPattern = "/cgi-bin/WebObjects/" + name() + applicationExtension();
+
+			if (_replaceApplicationPathReplace == null) {
+				_replaceApplicationPathReplace = "";
+			}
 		}
 	}
 
