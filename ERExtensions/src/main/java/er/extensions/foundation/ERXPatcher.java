@@ -224,7 +224,8 @@ public class ERXPatcher {
 			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {}
 			
 			/**
-			 * Overridden to
+			 * Overridden to:
+			 * 
 			 * - add support for java arrays
 			 * - throw an exception if [list] is bound to an unknown/unhandled type
 			 * 
@@ -243,7 +244,7 @@ public class ERXPatcher {
 				}
 				
 				if( bindingValue.getClass().isArray() ) {
-					// Feels a little convoluted, but we need to be a little verbose to make sure we're handling
+					// A little lengthy, but we need to go this way to ensure we're handling arrays of any primitive type (not just Object[])
 					final int length = Array.getLength(bindingValue);
 			        return IntStream
 			        		.range(0, length)
@@ -251,7 +252,7 @@ public class ERXPatcher {
 			                .toList();
 				}
 				
-				throw new IllegalArgumentException( "[list] binding returned an object of class '%s'. Wwe only support java.util.List and java arrays".formatted(bindingValue.getClass()) );
+				throw new IllegalArgumentException( "[list] binding returned an object of class '%s'. We only support java.util.List and java arrays".formatted(bindingValue.getClass()) );
 			}
 		}
 
