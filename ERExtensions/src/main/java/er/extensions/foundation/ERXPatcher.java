@@ -1,6 +1,9 @@
 package er.extensions.foundation;
 
+import java.lang.reflect.Array;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
@@ -219,6 +222,37 @@ public class ERXPatcher {
 			 */
 			@Override
 			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {}
+			
+			/**
+			 * Overridden to
+			 * - add support for java arrays
+			 * - throw an exception if [list] is bound to an unknown/unhandled type
+			 * 
+			 * CHECKME: Should probably be applied to all list inputs // Hugi 2025-09-11
+			 */
+			protected List listInContext(WOContext context) {
+
+				final Object bindingValue = _list.valueInComponent(context.component());
+
+				if( bindingValue == null ) {
+					return Collections.emptyList();
+				}
+
+				if (bindingValue instanceof List list ) {
+					return list;
+				}
+				
+				if( bindingValue.getClass().isArray() ) {
+					// Feels a little convoluted, but we need to be a little verbose to make sure we're handling
+					final int length = Array.getLength(bindingValue);
+			        return IntStream
+			        		.range(0, length)
+			                .mapToObj(i -> Array.get(bindingValue, i))
+			                .toList();
+				}
+				
+				throw new IllegalArgumentException( "[list] binding returned an object of class '%s'. Wwe only support java.util.List and java arrays".formatted(bindingValue.getClass()) );
+			}
 		}
 
 		public static class Browser extends WOBrowser {
