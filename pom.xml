@@ -16,7 +16,7 @@
 	</modules>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.release>21</maven.compiler.release>
 
 		<wonder.core.group>wonder.core</wonder.core.group>
 		<wonder.ajax.group>wonder.ajax</wonder.ajax.group>
@@ -31,20 +31,10 @@
 			<plugin>
 				<groupId>is.rebbi</groupId>
 				<artifactId>vermilingua-maven-plugin</artifactId>
-				<version>1.0.3</version>
+				<version>1.0.4-SNAPSHOT</version>
 				<extensions>true</extensions>
 				<configuration>
 					<woresourcesFolderName>resources</woresourcesFolderName>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>21</source>
-					<target>21</target>
-					<encoding>utf8</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
