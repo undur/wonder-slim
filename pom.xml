@@ -31,7 +31,7 @@
 			<plugin>
 				<groupId>is.rebbi</groupId>
 				<artifactId>vermilingua-maven-plugin</artifactId>
-				<version>1.0.4-SNAPSHOT</version>
+				<version>1.0.4</version>
 				<extensions>true</extensions>
 				<configuration>
 					<woresourcesFolderName>resources</woresourcesFolderName>
