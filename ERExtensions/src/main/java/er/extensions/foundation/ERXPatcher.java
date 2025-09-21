@@ -222,37 +222,10 @@ public class ERXPatcher {
 			 */
 			@Override
 			protected void _appendValueAttributeToResponse(WOResponse response, WOContext context) {}
-			
-			/**
-			 * Overridden to:
-			 * 
-			 * - add support for java arrays
-			 * - throw an exception if [list] is bound to an unknown/unhandled type
-			 * 
-			 * CHECKME: Should probably be applied to all list inputs // Hugi 2025-09-11
-			 */
+
+			@Override
 			protected List listInContext(WOContext context) {
-
-				final Object bindingValue = _list.valueInComponent(context.component());
-
-				if( bindingValue == null ) {
-					return Collections.emptyList();
-				}
-
-				if (bindingValue instanceof List list ) {
-					return list;
-				}
-				
-				if( bindingValue.getClass().isArray() ) {
-					// A little lengthy, but we need to go this way to ensure we're handling arrays of any primitive type (not just Object[])
-					final int length = Array.getLength(bindingValue);
-			        return IntStream
-			        		.range(0, length)
-			                .mapToObj(i -> Array.get(bindingValue, i))
-			                .toList();
-				}
-				
-				throw new IllegalArgumentException( "[list] binding returned an object of class '%s'. We only support java.util.List and java arrays".formatted(bindingValue.getClass()) );
+				return ERXWOInputListPatch.listInContext(context, _list);
 			}
 		}
 
@@ -261,7 +234,12 @@ public class ERXPatcher {
 			public Browser(String name, NSDictionary associations, WOElement element) {
 				super(name, associations, element);
 			}
-			
+
+			@Override
+			protected List listInContext(WOContext context) {
+				return ERXWOInputListPatch.listInContext(context, _list);
+			}
+
 			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
 				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections);
@@ -275,16 +253,27 @@ public class ERXPatcher {
 			}
 			
 			@Override
+			protected List listInContext(WOContext context) {
+				return ERXWOInputListPatch.listInContext(context, _list);
+			}
+
+			@Override
 			protected void setSelectionListInContext(WOContext context, List selections) {
 				ERXWOInputListPatch.setSelectionListInContext(context, selections, _selections);
 			}
 		}
 	}
 
+	/**
+	 * Contains fixes applicable to the subclasses of WOInputList
+	 */
 	private static class ERXWOInputListPatch {
 
 		/**
-		 * Overridden to (1) not swallow exceptions and (2) improve creation of the value that gets pushed to the "selections" binding
+		 * Overridden to:
+		 * 
+		 * - improve creation of the value that gets pushed to the "selections" binding
+		 * - not swallow exceptions
 		 */
 		private static void setSelectionListInContext(final WOContext context, final List selections, final WOAssociation selectionsAssociation ) {
 
@@ -292,6 +281,36 @@ public class ERXPatcher {
 				final List wrappedSelections = new NSMutableArray(selections);
 				selectionsAssociation.setValue(wrappedSelections, context.component());
 			}
+		}
+		
+		/**
+		 * Overridden to:
+		 * 
+		 * - add support for java arrays
+		 * - throw an exception if [list] is bound to an unknown/unhandled type
+		 */
+		private static List listInContext( final WOContext context, final WOAssociation listAssociation ) {
+
+			final Object bindingValue = listAssociation.valueInComponent(context.component());
+
+			if( bindingValue == null ) {
+				return Collections.emptyList();
+			}
+
+			if (bindingValue instanceof List list ) {
+				return list;
+			}
+			
+			if( bindingValue.getClass().isArray() ) {
+				// A little lengthy, but we need to go this way to ensure we're handling arrays of any primitive type (not just Object[])
+				final int length = Array.getLength(bindingValue);
+		        return IntStream
+		        		.range(0, length)
+		                .mapToObj(i -> Array.get(bindingValue, i))
+		                .toList();
+			}
+			
+			throw new IllegalArgumentException( "[list] binding returned an object of class '%s'. We only support java.util.List and java arrays".formatted(bindingValue.getClass()) );
 		}
 	}
 }
