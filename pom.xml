@@ -18,6 +18,9 @@
 	<properties>
 		<maven.compiler.release>21</maven.compiler.release>
 
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
 		<wonder.core.group>wonder.core</wonder.core.group>
 		<wonder.ajax.group>wonder.ajax</wonder.ajax.group>
 		<wonder.version>8.0.0.slim-SNAPSHOT</wonder.version>
@@ -40,7 +43,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.6.1</version>
 				<executions>
 					<execution>
 						<id>enforce-maven</id>
@@ -50,7 +53,7 @@
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>3.8.1</version>
+									<version>3.9.0</version>
 								</requireMavenVersion>
 							</rules>
 						</configuration>
