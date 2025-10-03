@@ -42,7 +42,7 @@ import er.extensions.foundation.ERXUtilities;
  * @author ak
  * @author mschrag
  */
-public class ERXResourceManager extends WOResourceManager {
+public class ERXResourceManager extends ERXResourceManagerBase {
 	private static Logger log = LoggerFactory.getLogger(ERXResourceManager.class);
 	private WODeployedBundle TheAppProjectBundle;
 	private _NSThreadsafeMutableDictionary<String, WOURLValuedElementData> _urlValuedElementsData;
