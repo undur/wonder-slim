@@ -34,7 +34,7 @@ public class ERXResponseCompression {
 	 * checks the value of
 	 * <code>er.extensions.ERXApplication.responseCompressionTypes</code> for
 	 * mime types that allow response compression in addition to text/* types.
-	 * The default is ("application/x-javascript")
+	 * The default is ("text/javascript")
 	 * 
 	 * @return an array of mime type strings
 	 * 
@@ -42,7 +42,7 @@ public class ERXResponseCompression {
 	 */
 	public static Set<String> responseCompressionTypes() {
 		if (_responseCompressionTypes == null) {
-			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault("er.extensions.ERXApplication.responseCompressionTypes", new NSArray<>("application/x-javascript")));
+			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault("er.extensions.ERXApplication.responseCompressionTypes", new NSArray<>("text/javascript")));
 		}
 
 		return _responseCompressionTypes;

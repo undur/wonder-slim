@@ -163,7 +163,7 @@ public class ERXJavaScript extends WOHTMLDynamicElement {
 				if(render) {
 					WOResponse newresponse = new WOResponse();
 					super.appendChildrenToResponse(newresponse, wocontext);
-					newresponse.setHeader("application/x-javascript", "content-type");
+					newresponse.setHeader("text/javascript", "content-type");
 					cache.setObjectForKey(newresponse, key);
 				}
 				src = wocontext.directActionURLForActionNamed(Script.class.getName() + "/" + key, null);
