@@ -143,6 +143,12 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			response.setContent(bytes);
 			response.setHeader(contentLength, "content-length");
 			response.setHeader(contentType, "content-type");
+
+			// FIXME: Temporary client-side caching. This should be user controllable // Hugi 2025-10-04
+			if( _useCache ) {
+				response.setHeader("public, max-age=3600", "cache-control" );
+			}
+
 			return response;
 		}
 
