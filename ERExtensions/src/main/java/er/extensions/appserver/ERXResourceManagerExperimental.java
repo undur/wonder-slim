@@ -77,13 +77,17 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 
 		@Override
 		public WOResponse handleRequest(WORequest request) {
-			
-			// Decode the URL. String before first slash is the framework, everything after that is the resource name
 			final String path = request.requestHandlerPath();
 			final int firstSlashIndex = path.indexOf('/');
 			final String frameworkName = path.substring( 0, firstSlashIndex );
 			final String resourceName = path.substring(firstSlashIndex+1, path.length());	
+			return responseForResource(frameworkName, resourceName);
+		}
 
+		/**
+		 * @return A response for the given resource
+		 */
+		public WOResponse responseForResource(final String frameworkName, final String resourceName) {
 			final ERXResourceManagerExperimental resourceManager = (ERXResourceManagerExperimental) WOApplication.application().resourceManager();
 
 			if( !resourceManager.isWebServerResource( resourceName, frameworkName, NSArray.emptyArray() ) ) {
