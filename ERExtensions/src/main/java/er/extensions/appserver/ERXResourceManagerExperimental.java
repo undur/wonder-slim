@@ -21,7 +21,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 	/**
 	 * Experimental URL generation. In this scheme, urls will only contain frameworkName, resourceName and language. It's then the job of the request handler to resolve the location of the actual data to serve
 	 * 
-	 * URL format: MyApp.woa/_sr_/[framework]/resourceName?languages=[lang1,lang2,lang3]
+	 * URL format: MyApp.woa/res/[framework]/resourceName?languages=[lang1,lang2,lang3]
 	 */
 	@Override
 	public String urlForResourceNamed(String resourceName, String frameworkName, NSArray<String> languages, WORequest request) {

@@ -56,6 +56,7 @@ import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.ERXKVCReflectionHack;
 import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXMonitorServer;
+import er.extensions.appserver.ERXResourceManagerExperimental.ERXWebServerResourceRequestHandler;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
@@ -228,6 +229,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		if (_rapidTurnaroundActiveForAnyProject() && isDirectConnectEnabled()) {
 			registerRequestHandler(new ERXStaticResourceRequestHandler(), "_wr_");
+		}
+
+		if( serveWebServerResourcesThroughApplication() ) {
+			registerRequestHandler( new ERXResourceManagerExperimental.ERXWebServerResourceRequestHandler(), ERXWebServerResourceRequestHandler.KEY );			
 		}
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
@@ -427,8 +432,20 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 	}
 
+	/**
+	 * Override to return true if you'd like to serve webserver resources through your application
+	 */
+	protected boolean serveWebServerResourcesThroughApplication() {
+		return false;
+	}
+
 	@Override
 	public WOResourceManager createResourceManager() {
+
+		if( serveWebServerResourcesThroughApplication() ) {
+			return new ERXResourceManagerExperimental();
+		}
+
 		return new ERXResourceManager();
 	}
 
