@@ -12,19 +12,20 @@ import com.webobjects.foundation.NSArray;
 
 /**
  * Experimental nicer URL generation for WO webserver resources.
+ * URL only contain frameworkName, resourceName and languages. It's then the job of the request handler to resolve the location of the actual data to serve
  * 
- * FIXME: Currently uses a very basic check to see if the resource is a Webserver resources or not. So don't use this if you don't want to accidentally share your EOModels and Property files with the world. // Hugi 2025-10-04  
- * FIXME: Currently does not handle localized resources // Hugi 2025-10-04
- * FIXME: We should be using streaming resources (need to figure how to obtain a resource's content-length first) // Hugi 2025-10-04
- * FIXME: The request handler needs some caching // Hugi 2025-10-04
+ * FIXME: Currently uses a very basic check to see if the resource is an actual WebServerResource (and not a private/internal/application resource) // Hugi 2025-10-04  
+ * FIXME: Currently no handling of localized resources // Hugi 2025-10-04
+ * FIXME: Should be constructing streaming responses // Hugi 2025-10-04
+ * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
+ * FIXME: Missing a nice way to control client-side resource caching (i.e. set caching headers) // Hugi 2025-10-04
+ * FIXME: We need to decide which features of the old ERXResourceManager need implementation here as well (URL rewriting etc.) // Hugi 2025-10-04  
  */
 
 public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 
 	/**
-	 * Experimental URL generation. In this scheme, urls will only contain frameworkName, resourceName and language. It's then the job of the request handler to resolve the location of the actual data to serve
-	 * 
-	 * URL format: MyApp.woa/res/[framework]/resourceName?languages=[lang1,lang2,lang3]
+	 * Generates a URL for the given resource. Format: .../App.woa/res/[framework]/[resourceName]?languages=[lang1,lang2,lang3]
 	 */
 	@Override
 	public String urlForResourceNamed(String resourceName, String frameworkName, NSArray<String> languages, WORequest request) {
@@ -77,9 +78,19 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 
 	public static class ERXWebServerResourceRequestHandler extends WORequestHandler {
 
+		/**
+		 * Default request handler key
+		 */
 		public static final String KEY = "res";
 
+		/**
+		 * Indicates if we want to enable in-memory caching of resources
+		 */
 		private final boolean _useCache;
+		
+		/**
+		 * In-memory resource cache. Stores everything! Forever! Which isn't great. FIXME: Needs work // Hugi 2025-10-04
+		 */
 		private final Map<String,CachedResource> _cache = new ConcurrentHashMap<>();
 
 		public ERXWebServerResourceRequestHandler() {
@@ -92,30 +103,26 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			final String path = request.requestHandlerPath();
 
 			if( _useCache ) {
-				final CachedResource cachedResource = _cache.get(path);
-				
-				if( cachedResource != null ) {
-					return cachedResource.response();
-				}
+				return _cache.computeIfAbsent(path, bork -> new CachedResource( responseForPath(path) )).response();
 			}
-			
+
+			return responseForPath(path);
+		}
+
+		/**
+		 * @return A response for the given request handler path
+		 */
+		private WOResponse responseForPath(final String path) {
 			final int firstSlashIndex = path.indexOf('/');
 			final String frameworkName = path.substring( 0, firstSlashIndex );
 			final String resourceName = path.substring(firstSlashIndex+1, path.length());
-
-			final WOResponse responseForResource = responseForResource(frameworkName, resourceName);
-			
-			if( _useCache ) {
-				_cache.put(path, new CachedResource(responseForResource));
-			}
-
-			return responseForResource;
+			return responseForResource(frameworkName, resourceName);
 		}
 
 		/**
 		 * @return A response for the given resource
 		 */
-		public WOResponse responseForResource(final String frameworkName, final String resourceName) {
+		private WOResponse responseForResource(final String frameworkName, final String resourceName) {
 			final ERXResourceManagerExperimental resourceManager = (ERXResourceManagerExperimental) WOApplication.application().resourceManager();
 
 			final byte[] bytes = resourceManager.bytesForResourceNamed(resourceName, frameworkName, null);
@@ -152,6 +159,9 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			return response;
 		}
 
+		/**
+		 * Entry for our resource cache
+		 */
 		private record CachedResource( WOResponse response ) {}
 	}
 }
