@@ -21,7 +21,8 @@ import com.webobjects.foundation.NSDictionary;
  * FIXME: Properly construct streaming responses // Hugi 2025-10-04
  * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
  * FIXME: Missing a nice way to control client-side resource caching (i.e. set caching headers) // Hugi 2025-10-04
- * FIXME: We need to decide which features of the old ERXResourceManager need implementation here as well (URL rewriting etc.) // Hugi 2025-10-04  
+ * FIXME: We need to decide which features of the old ERXResourceManager need implementation here as well (URL rewriting etc.) // Hugi 2025-10-04
+ * FIXME: We need to look into resource mime-types in general. Perhaps extend Wonder's mechanism of adding content types, allowing the user to add his own? // Hugi 2025-10-04   
  */
 
 public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
@@ -96,7 +97,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 		private final Map<String,CachedResourceResponse> _cache = new ConcurrentHashMap<>();
 
 		public ERXWebServerResourceRequestHandler() {
-			_useCache = !ERXApplication.isDevelopmentModeSafe();
+			_useCache = ERXApplication.isDevelopmentModeSafe();
 		}
 
 		@Override
