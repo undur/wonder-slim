@@ -97,7 +97,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 		private final Map<String,CachedResourceResponse> _cache = new ConcurrentHashMap<>();
 
 		public ERXWebServerResourceRequestHandler() {
-			_useCache = ERXApplication.isDevelopmentModeSafe();
+			_useCache = !ERXApplication.isDevelopmentModeSafe();
 		}
 
 		@Override
