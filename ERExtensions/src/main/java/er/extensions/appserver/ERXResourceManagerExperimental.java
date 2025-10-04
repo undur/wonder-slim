@@ -1,21 +1,19 @@
 package er.extensions.appserver;
 
-import java.util.Objects;
-
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
-import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 
 /**
  * Experimental nicer URL generation for WO webserver resources.
  * 
- * FIXME: Currently serves all resources, Webserver or not. So don't use this if you don't want to share your EOModels and Property files with the world. // Hugi 2025-10-04  
+ * FIXME: Currently uses a very basic check to see if the resource is a Webserver resources or not. So don't use this if you don't want to accidentally share your EOModels and Property files with the world. // Hugi 2025-10-04  
  * FIXME: Currently does not handle localized resources // Hugi 2025-10-04
- * FIXME: We should be using streaming resources (requires us to figure how to get the content-length for a resource first) // Hugi 2025-10-04
+ * FIXME: We should be using streaming resources (need to figure how to obtain a resource's content-length first) // Hugi 2025-10-04
+ * FIXME: The request handler needs some caching // Hugi 2025-10-04
  */
 
 public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
@@ -36,9 +34,19 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 	}
 
 	/**
-	 * Horrid way to desperately attempt to get a request
+	 * @return true if the given resource is a webserver (public) resource
+	 * 
+	 * FIXME: Experimental implementation, wouldn't deem this 100% reliable // Hugi 2025-10-04
+	 */
+	public boolean isWebServerResource( String resourceName, String frameworkName, NSArray<String> languages ) {
+		final String path = super.urlForResourceNamed(resourceName, frameworkName, languages, null );
+		return path != null && (path.contains("WebServerResources") || path.contains("webserver-resources"));
+	}
+
+	/**
+	 * Horrid way to desperately attempt to get a context
 	 *  
-	 * FIXME: This sucks. Ideally we'd be able to generate that URL without WOContext's assistance // Hugi 2025-10-04
+	 * FIXME: This sucks. Ideally we'd be able to generate URLs without WOContext's help // Hugi 2025-10-04
 	 */
 	private static WOContext context( final WORequest request ) {
 		WOContext context = null; 
@@ -71,7 +79,14 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			final String frameworkName = path.substring( 0, firstSlashIndex );
 			final String resourceName = path.substring(firstSlashIndex+1, path.length());	
 
-			final WOResourceManager resourceManager = WOApplication.application().resourceManager();
+			final ERXResourceManagerExperimental resourceManager = (ERXResourceManagerExperimental) WOApplication.application().resourceManager();
+
+			if( !resourceManager.isWebServerResource( resourceName, frameworkName, NSArray.emptyArray() ) ) {
+				final WOResponse response = new WOResponse();
+				response.setStatus(403);
+				response.setContent("Resource '[%s]/[%s]' forbidden".formatted(frameworkName, resourceName) );
+				return response;
+			}
 
 			final byte[] bytes = resourceManager.bytesForResourceNamed(resourceName, frameworkName, null);
 			
