@@ -2,6 +2,8 @@
 	"js" = "text/javascript";
 	"svg" = "image/svg+xml";
 	"eot" = "application/vnd.ms-fontobject";
-	"ttf" = "application/octet-stream";
-	"woff" = "application/font-woff";
+	"otf" = "font/otf";
+	"ttf" = "font/ttf";
+	"woff" = "font/woff";
+	"woff2" = "font/woff2";
 }
