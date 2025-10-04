@@ -39,11 +39,12 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 	/**
 	 * @return true if the given resource is a webserver (public) resource
 	 * 
-	 * FIXME: Experimental implementation, wouldn't deem this 100% reliable // Hugi 2025-10-04
+	 * FIXME: Experimental implementation, wouldn't deem this reliable // Hugi 2025-10-04
 	 */
 	public boolean isWebServerResource( String resourceName, String frameworkName, NSArray<String> languages ) {
 		final String path = super.urlForResourceNamed(resourceName, frameworkName, languages, null );
 		
+		// FIXME: Determining whether a non-existent resource is a webserver resources or not is almost a philosophical question // Hugi 2025-10-04
 		if( path == null ) {
 			return false;
 		}
@@ -117,13 +118,6 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 		public WOResponse responseForResource(final String frameworkName, final String resourceName) {
 			final ERXResourceManagerExperimental resourceManager = (ERXResourceManagerExperimental) WOApplication.application().resourceManager();
 
-			if( !resourceManager.isWebServerResource( resourceName, frameworkName, NSArray.emptyArray() ) ) {
-				final WOResponse response = new WOResponse();
-				response.setStatus(403);
-				response.setContent("Resource '[%s]/[%s]' forbidden".formatted(frameworkName, resourceName) );
-				return response;
-			}
-
 			final byte[] bytes = resourceManager.bytesForResourceNamed(resourceName, frameworkName, null);
 			
 			// Resource not found, 404
@@ -131,6 +125,13 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 				final WOResponse response = new WOResponse();
 				response.setStatus(404);
 				response.setContent("Resource '[%s]/[%s]' not found".formatted(frameworkName, resourceName) );
+				return response;
+			}
+
+			if( !resourceManager.isWebServerResource( resourceName, frameworkName, NSArray.emptyArray() ) ) {
+				final WOResponse response = new WOResponse();
+				response.setStatus(403);
+				response.setContent("Resource '[%s]/[%s]' forbidden".formatted(frameworkName, resourceName) );
 				return response;
 			}
 
