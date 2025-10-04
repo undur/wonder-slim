@@ -1,5 +1,8 @@
 package er.extensions.appserver;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
@@ -75,13 +78,37 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 
 		public static final String KEY = "res";
 
+		private final boolean _useCache;
+		private final Map<String,CachedResource> _cache = new ConcurrentHashMap<>();
+
+		public ERXWebServerResourceRequestHandler() {
+			_useCache = !ERXApplication.isDevelopmentModeSafe();
+		}
+
 		@Override
 		public WOResponse handleRequest(WORequest request) {
+			
 			final String path = request.requestHandlerPath();
+
+			if( _useCache ) {
+				final CachedResource cachedResource = _cache.get(path);
+				
+				if( cachedResource != null ) {
+					return cachedResource.response();
+				}
+			}
+			
 			final int firstSlashIndex = path.indexOf('/');
 			final String frameworkName = path.substring( 0, firstSlashIndex );
-			final String resourceName = path.substring(firstSlashIndex+1, path.length());	
-			return responseForResource(frameworkName, resourceName);
+			final String resourceName = path.substring(firstSlashIndex+1, path.length());
+
+			final WOResponse responseForResource = responseForResource(frameworkName, resourceName);
+			
+			if( _useCache ) {
+				_cache.put(path, new CachedResource(responseForResource));
+			}
+
+			return responseForResource;
 		}
 
 		/**
@@ -117,5 +144,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			response.setHeader(contentType, "content-type");
 			return response;
 		}
+
+		private record CachedResource( WOResponse response ) {}
 	}
 }
