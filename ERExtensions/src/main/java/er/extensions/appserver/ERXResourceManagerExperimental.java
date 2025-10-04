@@ -40,7 +40,12 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 	 */
 	public boolean isWebServerResource( String resourceName, String frameworkName, NSArray<String> languages ) {
 		final String path = super.urlForResourceNamed(resourceName, frameworkName, languages, null );
-		return path != null && (path.contains("WebServerResources") || path.contains("webserver-resources"));
+		
+		if( path == null ) {
+			return false;
+		}
+
+		return path.contains("WebServerResources") || path.contains("webserver-resources");
 	}
 
 	/**
