@@ -1,5 +1,6 @@
 package er.extensions.appserver;
 
+import java.io.ByteArrayInputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,6 +10,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
+import com.webobjects.foundation.NSDictionary;
 
 /**
  * Experimental nicer URL generation for WO webserver resources.
@@ -16,7 +18,7 @@ import com.webobjects.foundation.NSArray;
  * 
  * FIXME: Currently uses a very basic check to see if the resource is an actual WebServerResource (and not a private/internal/application resource) // Hugi 2025-10-04  
  * FIXME: Currently no handling of localized resources // Hugi 2025-10-04
- * FIXME: Should be constructing streaming responses // Hugi 2025-10-04
+ * FIXME: Properly construct streaming responses // Hugi 2025-10-04
  * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
  * FIXME: Missing a nice way to control client-side resource caching (i.e. set caching headers) // Hugi 2025-10-04
  * FIXME: We need to decide which features of the old ERXResourceManager need implementation here as well (URL rewriting etc.) // Hugi 2025-10-04  
@@ -91,7 +93,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 		/**
 		 * In-memory resource cache. Stores everything! Forever! Which isn't great. FIXME: Needs work // Hugi 2025-10-04
 		 */
-		private final Map<String,CachedResource> _cache = new ConcurrentHashMap<>();
+		private final Map<String,CachedResourceResponse> _cache = new ConcurrentHashMap<>();
 
 		public ERXWebServerResourceRequestHandler() {
 			_useCache = !ERXApplication.isDevelopmentModeSafe();
@@ -103,7 +105,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			final String path = request.requestHandlerPath();
 
 			if( _useCache ) {
-				return _cache.computeIfAbsent(path, bork -> new CachedResource( responseForPath(path) )).response();
+				return _cache.computeIfAbsent(path, bork -> new CachedResourceResponse( responseForPath(path) )).streamingResponse();
 			}
 
 			return responseForPath(path);
@@ -161,7 +163,32 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 
 		/**
 		 * Entry for our resource cache
+		 * 
+		 * FIXME:
+		 * Silly caching strategy. First request will return the original byte[] response,
+		 * subsequent responses will be streaming. Needs cleanup. // Hugi 2025-10-04 
 		 */
-		private record CachedResource( WOResponse response ) {}
+		private class CachedResourceResponse {
+			
+			private final int _status;
+			private final NSDictionary _headers;
+			private final byte[] _content;
+			private long _length;
+
+			public CachedResourceResponse( final WOResponse response ) {
+				_status = response.status();
+				_headers = response.headers();
+				_content = response.content()._bytesNoCopy();
+				_length = _content.length;
+			}
+
+			public WOResponse streamingResponse() {
+				final WOResponse response = new WOResponse();
+				response.setStatus( _status );
+				response.setHeaders(_headers);
+				response.setContentStream(new ByteArrayInputStream( _content ), 32000, _length);
+				return response;
+			}
+		}
 	}
 }
