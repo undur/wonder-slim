@@ -173,7 +173,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			private final int _status;
 			private final NSDictionary _headers;
 			private final byte[] _content;
-			private long _length;
+			private final long _length;
 
 			public CachedResourceResponse( final WOResponse response ) {
 				_status = response.status();
