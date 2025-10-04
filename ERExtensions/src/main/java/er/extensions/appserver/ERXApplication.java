@@ -227,12 +227,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
 
-		if (_rapidTurnaroundActiveForAnyProject() && isDirectConnectEnabled()) {
-			registerRequestHandler(new ERXStaticResourceRequestHandler(), "_wr_");
-		}
-
 		if( serveWebServerResourcesThroughApplication() ) {
 			registerRequestHandler( new ERXResourceManagerExperimental.ERXWebServerResourceRequestHandler(), ERXWebServerResourceRequestHandler.KEY );			
+		}
+		else if (_rapidTurnaroundActiveForAnyProject() && isDirectConnectEnabled()) {
+			// If WS-resources are being served through the app, all resources should work fine. If not, we have to enable this hack for loading jar-resources during development.
+			registerRequestHandler(new ERXStaticResourceRequestHandler(), "_wr_");
 		}
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
