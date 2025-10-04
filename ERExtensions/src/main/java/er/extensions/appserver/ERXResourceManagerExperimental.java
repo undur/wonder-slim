@@ -164,9 +164,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 		/**
 		 * Entry for our resource cache
 		 * 
-		 * FIXME:
-		 * Silly caching strategy. First request will return the original byte[] response,
-		 * subsequent responses will be streaming. Needs cleanup. // Hugi 2025-10-04 
+		 * FIXME: A little silly caching strategy (constructing the streaming response from a non-streaming one). Also; we're not streaming in dev mode // Hugi 2025-10-04 
 		 */
 		private class CachedResourceResponse {
 			
@@ -178,7 +176,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			public CachedResourceResponse( final WOResponse response ) {
 				_status = response.status();
 				_headers = response.headers();
-				_content = response.content()._bytesNoCopy();
+				_content = response.content().bytes();
 				_length = _content.length;
 			}
 
