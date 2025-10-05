@@ -436,7 +436,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Override to return true if you'd like to serve webserver resources through your application
 	 */
 	protected boolean serveWebServerResourcesThroughApplication() {
-		return false;
+		return true;
 	}
 
 	@Override
