@@ -16,19 +16,20 @@ import com.webobjects.foundation.NSDictionary;
  * ResourceManager/RequestHandler implementations. For serving web server resources through the application (rather than the web server "split install")
  * 
  * URLs look the same in development and production, containing frameworkName, resourceName and languages.
- * The request handler looks at the URL, finds the data to and serves it up.
+ * The request handler looks at the URL, finds the data and serves it.
  * This means serving of resources is entirely controlled from within the application and works identically in development and production.
  *
  * Work to do before labeling this "totally ready":
  * 
  * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
  * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
- * TODO: Look into a better ways to check if a resource is an actual WebServerResource (and not a private/internal/application resource) // Hugi 2025-10-04  
+ * TODO: Look into better ways to check if a resource is an actual WebServerResource (and not a private/internal/application resource) // Hugi 2025-10-04  
  * TODO: Handle localized resources // Hugi 2025-10-04
  * TODO: ERXResourceManager's "resource versioning" is nice, we need that // Hugi 2025-10-05
  * TODO: Cleanup in construction of the response cache // Hugi 2025-10-04
  * TODO: Go over the old ERXResourceManager thoroughly and see if we're missing any required features // Hugi 2025-10-04
- * TODO: Look into resource mime-types in general. Should probably extend Wonder's mechanism of adding content types, allowing the user to add his own // Hugi 2025-10-04   
+ * TODO: Look into resource mime-types in general. Should probably extend Wonder's mechanism of adding content types, allowing the user to add his own // Hugi 2025-10-04
+ * TODO: We might want to look into resource post-processing. E.g. for templating in resources // Hugi 2025-10-05   
  */
 
 public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
