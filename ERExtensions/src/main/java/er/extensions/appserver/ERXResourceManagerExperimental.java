@@ -13,16 +13,22 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 
 /**
- * Experimental nicer URL generation for WO webserver resources.
- * URL only contain frameworkName, resourceName and languages. It's then the job of the request handler to resolve the location of the actual data to serve
+ * ResourceManager/RequestHandler implementations. For serving web server resources through the application (rather than the web server "split install")
  * 
- * FIXME: Currently uses a very basic check to see if the resource is an actual WebServerResource (and not a private/internal/application resource) // Hugi 2025-10-04  
- * FIXME: Currently no handling of localized resources // Hugi 2025-10-04
- * FIXME: Properly construct streaming responses // Hugi 2025-10-04
+ * URLs look the same in development and production, containing frameworkName, resourceName and languages.
+ * The request handler looks at the URL, finds the data to and serves it up.
+ * This means serving of resources is entirely controlled from within the application and works identically in development and production.
+ *
+ * Work to do before labeling this "totally ready":
+ * 
  * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
- * FIXME: Missing a nice way to control client-side resource caching (i.e. set caching headers) // Hugi 2025-10-04
- * FIXME: We need to decide which features of the old ERXResourceManager need implementation here as well (URL rewriting etc.) // Hugi 2025-10-04
- * FIXME: We need to look into resource mime-types in general. Perhaps extend Wonder's mechanism of adding content types, allowing the user to add his own? // Hugi 2025-10-04   
+ * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
+ * TODO: Look into a better ways to check if a resource is an actual WebServerResource (and not a private/internal/application resource) // Hugi 2025-10-04  
+ * TODO: Handle localized resources // Hugi 2025-10-04
+ * TODO: ERXResourceManager's "resource versioning" is nice, we need that // Hugi 2025-10-05
+ * TODO: Cleanup in construction of the response cache // Hugi 2025-10-04
+ * TODO: Go over the old ERXResourceManager thoroughly and see if we're missing any required features // Hugi 2025-10-04
+ * TODO: Look into resource mime-types in general. Should probably extend Wonder's mechanism of adding content types, allowing the user to add his own // Hugi 2025-10-04   
  */
 
 public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
@@ -41,25 +47,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 	}
 
 	/**
-	 * @return true if the given resource is a webserver (public) resource
-	 * 
-	 * FIXME: Experimental implementation, wouldn't deem this reliable // Hugi 2025-10-04
-	 */
-	public boolean isWebServerResource( String resourceName, String frameworkName, NSArray<String> languages ) {
-		final String path = super.urlForResourceNamed(resourceName, frameworkName, languages, null );
-		
-		// FIXME: Determining whether a non-existent resource is a webserver resources or not is almost a philosophical question // Hugi 2025-10-04
-		if( path == null ) {
-			return false;
-		}
-
-		return path.contains("WebServerResources") || path.contains("webserver-resources");
-	}
-
-	/**
-	 * Horrid way to desperately attempt to get a context
-	 *  
-	 * FIXME: This sucks. Ideally we'd be able to generate URLs without WOContext's help // Hugi 2025-10-04
+	 * Every way to get a context
 	 */
 	private static WOContext context( final WORequest request ) {
 		WOContext context = null; 
@@ -77,6 +65,19 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 		}
 		
 		return context;
+	}
+
+	/**
+	 * @return true if the given resource exists and is a webserver (public) resource
+	 */
+	private boolean isWebServerResource( String resourceName, String frameworkName, NSArray<String> languages ) {
+		final String path = super.urlForResourceNamed(resourceName, frameworkName, languages, null );
+		
+		if( path == null ) {
+			return false;
+		}
+
+		return path.contains("WebServerResources") || path.contains("webserver-resources");
 	}
 
 	public static class ERXWebServerResourceRequestHandler extends WORequestHandler {
@@ -138,6 +139,8 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 				return response;
 			}
 
+			// Resource isn't a webserver resource, 403
+			// TODO: Actually, this should probably be a 404 (identical to the non-existent response) // Hugi 2025-10-05
 			if( !resourceManager.isWebServerResource( resourceName, frameworkName, NSArray.emptyArray() ) ) {
 				final WOResponse response = new WOResponse();
 				response.setStatus(403);
@@ -154,7 +157,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			response.setHeader(contentLength, "content-length");
 			response.setHeader(contentType, "content-type");
 
-			// FIXME: Temporary client-side caching. This should be user controllable // Hugi 2025-10-04
+			// FIXME: Temporarily setting one hour client-side caching (in production). This should be user controllable // Hugi 2025-10-04
 			if( _useCache ) {
 				response.setHeader("public, max-age=3600", "cache-control" );
 			}
@@ -165,7 +168,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 		/**
 		 * Entry for our resource cache
 		 * 
-		 * FIXME: A little silly caching strategy (constructing the streaming response from a non-streaming one). Also; we're not streaming in dev mode // Hugi 2025-10-04 
+		 * TODO: A little silly caching strategy (constructing the streaming response from a non-streaming one). Also; we're not streaming in dev mode // Hugi 2025-10-04 
 		 */
 		private class CachedResourceResponse {
 			
