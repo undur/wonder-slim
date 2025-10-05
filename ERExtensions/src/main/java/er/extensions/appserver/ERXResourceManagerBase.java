@@ -2,11 +2,13 @@ package er.extensions.appserver;
 
 import java.util.Map;
 
+import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 
+import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
 
 /**
@@ -56,5 +58,43 @@ public class ERXResourceManagerBase extends WOResourceManager {
 
 	private static Map<String, String> _additionalMimeTypes() {
 		return (Map<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
+	}
+
+	/**
+	 * Returns whether or not complete resource URLs should be generated.
+	 * 
+	 * @param context the context
+	 * @return whether or not complete resource URLs should be generated
+	 */
+	public static boolean _shouldGenerateCompleteResourceURL(WOContext context) {
+		return context instanceof ERXWOContext && ((ERXWOContext)context)._generatingCompleteResourceURLs() && !ERXApplication.erxApplication().rewriteDirectConnectURL();
+	}
+
+	/**
+	 * Returns a fully qualified URL for the given partial resource URL (i.e. turns /whatever into http://server/whatever).
+	 *  
+	 * @param url the partial resource URL
+	 * @param secure whether or not to generate a secure URL
+	 * @param context the current context
+	 * @return the complete URL
+	 */
+	public static String _completeURLForResource(String url, Boolean secure, WOContext context) {
+		String completeUrl;
+		boolean requestIsSecure = ERXRequest.isRequestSecure(context.request());
+		boolean resourceIsSecure = (secure == null) ? requestIsSecure : secure.booleanValue();
+	
+		if ((resourceIsSecure && ERXProperties.stringForKey("er.extensions.ERXResourceManager.secureResourceUrlPrefix") == null) || (!resourceIsSecure && ERXProperties.stringForKey("er.extensions.ERXResourceManager.resourceUrlPrefix") == null)) {
+			StringBuffer sb = new StringBuffer();
+			String serverPortStr = context.request()._serverPort();
+			int serverPort = (serverPortStr == null) ? 0 : Integer.parseInt(serverPortStr);
+			context.request()._completeURLPrefix(sb, resourceIsSecure, serverPort);
+			sb.append(url);
+			completeUrl = sb.toString();
+		}
+		else {
+			completeUrl = url;
+		}
+	
+		return completeUrl;
 	}
 }

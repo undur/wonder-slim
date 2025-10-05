@@ -734,10 +734,10 @@ public class ERXResponseRewriter {
 						languages = context.session().languages();
 					}
 					url = rm.urlForResourceNamed(fileName, framework, languages, context.request());
-					boolean generateCompleteResourceURLs = ERXResourceManager._shouldGenerateCompleteResourceURL(context);
+					boolean generateCompleteResourceURLs = ERXResourceManagerBase._shouldGenerateCompleteResourceURL(context);
 					boolean secureAllResources = ERXProperties.booleanForKey(ERXResponseRewriter.SECURE_RESOURCES_KEY) && !ERXRequest.isRequestSecure(context.request());
 					if (generateCompleteResourceURLs || secureAllResources) {
-						url = ERXResourceManager._completeURLForResource(url, secureAllResources ? Boolean.TRUE : null, context);
+						url = ERXResourceManagerBase._completeURLForResource(url, secureAllResources ? Boolean.TRUE : null, context);
 					}
 				}
 				String html = startTag + url + endTag + "\n";

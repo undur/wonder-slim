@@ -18,7 +18,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.appserver.ERXResourceManager;
+import er.extensions.appserver.ERXResourceManagerBase;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXExpiringCache;
@@ -90,8 +90,8 @@ public class ERXStyleSheet extends ERXStatelessComponent {
 			String name = styleSheetName();
 			if( name != null ) {
 				url = application().resourceManager().urlForResourceNamed( name, styleSheetFrameworkName(), languages(), context().request() );
-				if( ERXResourceManager._shouldGenerateCompleteResourceURL( context() ) ) {
-					url = ERXResourceManager._completeURLForResource( url, null, context() );
+				if( ERXResourceManagerBase._shouldGenerateCompleteResourceURL( context() ) ) {
+					url = ERXResourceManagerBase._completeURLForResource( url, null, context() );
 				}
 			}
 		}

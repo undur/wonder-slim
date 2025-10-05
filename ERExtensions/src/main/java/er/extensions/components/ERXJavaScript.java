@@ -20,7 +20,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation._NSStringUtilities;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.appserver.ERXResourceManager;
+import er.extensions.appserver.ERXResourceManagerBase;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.foundation.ERXExpiringCache;
 import er.extensions.foundation.ERXProperties;
@@ -143,8 +143,8 @@ public class ERXJavaScript extends WOHTMLDynamicElement {
 						if(src == null) {
 							src = wocomponent.baseURL() + "/" + srcFromBindings;
 						}
-						else if (ERXResourceManager._shouldGenerateCompleteResourceURL(wocontext)) {
-							src = ERXResourceManager._completeURLForResource(src, null, wocontext);
+						else if (ERXResourceManagerBase._shouldGenerateCompleteResourceURL(wocontext)) {
+							src = ERXResourceManagerBase._completeURLForResource(src, null, wocontext);
 						}
 					} else {
 						log.warn("relative fragment URL {}", srcFromBindings);
@@ -214,8 +214,8 @@ public class ERXJavaScript extends WOHTMLDynamicElement {
 						throw new WODynamicElementCreationException("<" + getClass().getName() + "> : cannot find script file '" + filename + "'");
 					}
 					script = _NSStringUtilities.stringFromPathURL(url);
-					if (ERXResourceManager._shouldGenerateCompleteResourceURL(wocontext)) {
-						script = ERXResourceManager._completeURLForResource(script, null, wocontext);
+					if (ERXResourceManagerBase._shouldGenerateCompleteResourceURL(wocontext)) {
+						script = ERXResourceManagerBase._completeURLForResource(script, null, wocontext);
 					}
 				}
 				woresponse.appendContentString(script);
