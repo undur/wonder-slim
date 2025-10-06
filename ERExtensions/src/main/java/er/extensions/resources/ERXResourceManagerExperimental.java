@@ -30,7 +30,6 @@ import er.extensions.appserver.ERXWOContext;
  * TODO: Handle localized resources // Hugi 2025-10-04
  * TODO: ERXResourceManager's "resource versioning" is nice, we need that // Hugi 2025-10-05
  * TODO: Go over the old ERXResourceManager thoroughly and see if we're missing any required features // Hugi 2025-10-04
- * TODO: Look into resource mime-types in general. Should probably extend Wonder's mechanism of adding content types, allowing the user to add his own // Hugi 2025-10-04
  * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05   
  */
 

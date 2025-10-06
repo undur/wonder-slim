@@ -1,5 +1,6 @@
 package er.extensions.resources;
 
+import java.util.Collections;
 import java.util.Map;
 
 import com.webobjects.appserver.WOContext;
@@ -35,14 +36,19 @@ public class ERXResourceManagerBase extends WOResourceManager {
 	 * FIXME A little hack to allow us to initialize the content types after the resource manager's creation. Should happen in constructor // Hugi 2025-10-06
 	 */
 	public void _initContentTypes() {
-
-		// FIXME: Read a file of the same name from the "app" namespace as well (allowing the user to add/override mimeTypes) // Hugi 2025-10-06
-		var _additionalMimeTypes = (Map<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
-		
 		final NSMutableDictionary d = new NSMutableDictionary<>();
 		d.putAll(super._contentTypesDictionary());
-		d.putAll(_additionalMimeTypes);
+		d.putAll(additionalContentTypesFromBunde("ERExtensions"));
+		d.putAll(additionalContentTypesFromBunde("app"));
 		_contentTypes = d.immutableClone();
+	}
+
+	/**
+	 * @return MimeTypes obtained from the file "AdditionalMimeTypes.plist" in the given bundle. Empty map if file not present/empty.
+	 */
+	private static Map<String,String> additionalContentTypesFromBunde( final String bundleName ) {
+		final Map<String, String> m = (Map<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", bundleName, null, "UTF-8");
+		return m != null ? m : Collections.emptyMap(); 
 	}
 
 	/**
