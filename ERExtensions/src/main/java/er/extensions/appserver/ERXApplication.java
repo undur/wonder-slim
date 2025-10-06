@@ -64,6 +64,7 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.resources.ERXResourceManager;
+import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.resources.ERXResourceManagerExperimental;
 import er.extensions.resources.ERXStaticResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerExperimental.ERXWebServerResourceRequestHandler;
@@ -258,6 +259,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("addBalancerRouteCookieByNotification"), WORequestHandler.DidHandleRequestNotification, null);
 
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
+		
+		// FIXME: Quick fix for our resource manager's initialization issue. Fix // Hugi 2025-10-06
+		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {
+			rmb._initContentTypes(); 
+		}
 	}
 
 	/**
