@@ -1,4 +1,4 @@
-package er.extensions.appserver;
+package er.extensions.resources;
 
 import java.util.Map;
 
@@ -8,6 +8,9 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 
+import er.extensions.appserver.ERXApplication;
+import er.extensions.appserver.ERXRequest;
+import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
 

@@ -23,6 +23,7 @@ import com.webobjects.foundation.NSNotificationCenter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
+import er.extensions.resources.ERXResourceManagerBase;
 
 /**
  * ERXResponseRewriter provides several utilities for manipulating a WOResponse

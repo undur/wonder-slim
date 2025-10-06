@@ -56,7 +56,6 @@ import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.ERXKVCReflectionHack;
 import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXMonitorServer;
-import er.extensions.appserver.ERXResourceManagerExperimental.ERXWebServerResourceRequestHandler;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
@@ -64,6 +63,10 @@ import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
+import er.extensions.resources.ERXResourceManager;
+import er.extensions.resources.ERXResourceManagerExperimental;
+import er.extensions.resources.ERXStaticResourceRequestHandler;
+import er.extensions.resources.ERXResourceManagerExperimental.ERXWebServerResourceRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 

@@ -20,10 +20,10 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation._NSStringUtilities;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.appserver.ERXResourceManagerBase;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.foundation.ERXExpiringCache;
 import er.extensions.foundation.ERXProperties;
+import er.extensions.resources.ERXResourceManagerBase;
 
 /**
  * Modern version of a javascript component. 

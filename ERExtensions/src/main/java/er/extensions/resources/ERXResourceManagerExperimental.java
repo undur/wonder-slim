@@ -1,4 +1,4 @@
-package er.extensions.appserver;
+package er.extensions.resources;
 
 import java.io.ByteArrayInputStream;
 import java.util.Map;
@@ -11,6 +11,9 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
+
+import er.extensions.appserver.ERXApplication;
+import er.extensions.appserver.ERXWOContext;
 
 /**
  * ResourceManager/RequestHandler implementations. For serving web server resources through the application (rather than the web server "split install")

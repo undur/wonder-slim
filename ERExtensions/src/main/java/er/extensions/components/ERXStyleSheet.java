@@ -18,10 +18,10 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.appserver.ERXResourceManagerBase;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXExpiringCache;
+import er.extensions.resources.ERXResourceManagerBase;
 
 /**
  * Adds a style sheet to a page. You can either supply a complete URL, a file

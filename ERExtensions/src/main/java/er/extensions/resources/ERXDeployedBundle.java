@@ -1,4 +1,4 @@
-package er.extensions.appserver;
+package er.extensions.resources;
 
 import java.io.File;
 

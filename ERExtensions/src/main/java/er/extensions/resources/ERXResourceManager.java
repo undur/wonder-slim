@@ -1,4 +1,4 @@
-package er.extensions.appserver;
+package er.extensions.resources;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -27,6 +27,8 @@ import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation._NSStringUtilities;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 
+import er.extensions.appserver.ERXApplication;
+import er.extensions.appserver.ERXRequest;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
@@ -52,7 +54,7 @@ public class ERXResourceManager extends WOResourceManager {
 	private final _NSThreadsafeMutableDictionary _myFrameworkProjectBundles = new _NSThreadsafeMutableDictionary(new NSMutableDictionary(128));
 	private IVersionManager _versionManager;	
 
-	protected ERXResourceManager() {
+	public ERXResourceManager() {
 		TheAppProjectBundle = _initAppBundle();
 		_initFrameworkProjectBundles();
 
