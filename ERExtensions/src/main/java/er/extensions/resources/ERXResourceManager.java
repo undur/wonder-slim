@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +18,9 @@ import com.webobjects.appserver._private.WOURLEncoder;
 import com.webobjects.appserver._private.WOURLValuedElementData;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation._NSStringUtilities;
 import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 
@@ -31,7 +28,6 @@ import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXUtilities;
 
 /**
  * Replacement of the WOResourceManager which adds:
@@ -45,7 +41,7 @@ import er.extensions.foundation.ERXUtilities;
  * @author mschrag
  */
 
-public class ERXResourceManager extends WOResourceManager {
+public class ERXResourceManager extends ERXResourceManagerBase {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXResourceManager.class);
 
@@ -442,52 +438,5 @@ public class ERXResourceManager extends WOResourceManager {
 			}
 			return resourceUrl;
 		}
-	}
-	
-	/* ----------------------------------------- */
-	/* FIXME: Below here is code that actually belongs in the base resource manager but was causing us some grief with class initialization. Check out // Hugi 2025-10-04
-	/* ----------------------------------------- */
-
-	/**
-	 * Contains mimeTypes registered in the application
-	 */
-	private static final Map<String, String> _mimeTypes = _additionalMimeTypes();
-
-	/**
-	 * Overridden to supply additional mime types that are not present in the JavaWebObjects framework.
-	 * 
-	 * @param aResourcePath file path of the resource, or just file name of the resource, as only the extension is required
-	 * @return HTTP content type for the named resource specified by <code>aResourcePath</code>
-	 */
-	@Override
-	public String contentTypeForResourceNamed(String aResourcePath) {
-		String aPathExtension = NSPathUtilities.pathExtension(aResourcePath);
-
-		if(aPathExtension != null && aPathExtension.length() != 0) {
-			String mime = _mimeTypes.get(aPathExtension.toLowerCase());
-
-			if(mime != null) {
-				return mime;
-			}
-		}
-
-		return super.contentTypeForResourceNamed(aResourcePath);
-	}
-	
-	/**
-	 * Overrides the original implementation appending the additionalMimeTypes to the content types dictionary.
-	 *
-	 * @return a dictionary containing the original mime types supported along with the additional mime types contributed by this class.
-	 */
-	@Override
-	public NSDictionary _contentTypesDictionary() {
-		final NSMutableDictionary d = new NSMutableDictionary<>();
-		d.putAll(super._contentTypesDictionary());
-		d.putAll(_mimeTypes);
-		return d;
-	}
-
-	private static Map<String, String> _additionalMimeTypes() {
-		return (Map<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", "ERExtensions", null, "UTF-8");
 	}
 }
