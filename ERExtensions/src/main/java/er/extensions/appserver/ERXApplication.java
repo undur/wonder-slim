@@ -66,8 +66,8 @@ import er.extensions.foundation.ERXUtilities;
 import er.extensions.resources.ERXResourceManager;
 import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.resources.ERXResourceManagerExperimental;
-import er.extensions.resources.ERXStaticResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerExperimental.ERXWebServerResourceRequestHandler;
+import er.extensions.resources.ERXStaticResourceRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 
@@ -313,7 +313,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Ensure ERXApplication.main() was invoked when running the application (as opposed to WOApplication.main()) 
 	 */
 	private void checkERXApplicationMainInvoked() throws Exception {
-		if (!isDeployedAsServlet() && !_wasERXApplicationMainInvoked ) {
+		if (!_wasERXApplicationMainInvoked ) {
 			throw new IllegalStateException( "Your application's main() did not invoke ERXApplication.main() as it should. Did you accidentally invoke WOApplication.main()?" );
 		}
 	}
@@ -486,15 +486,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		return new ERXRequest(method, url, httpVersion, headers, content, info);
-	}
-
-	/**
-	 * Determines if an application is deployed as servlet (contextClassName() is set WOServletContext or ERXWOServletContext)
-	 * 
-	 * @return true if the application is deployed as servlet.
-	 */
-	public boolean isDeployedAsServlet() {
-		return contextClassName().contains("Servlet");
 	}
 
 	/**
