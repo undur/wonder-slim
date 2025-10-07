@@ -1,10 +1,13 @@
-package er.extensions.appserver;
+package er.extensions.browser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
+
+import er.extensions.appserver.ERXDirectAction;
+import er.extensions.appserver.ERXSession;
 
 /**
  * <code>ERXBasicBrowser</code> is a concrete subclass of {@link ERXBrowser}

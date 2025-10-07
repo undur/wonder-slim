@@ -1,4 +1,4 @@
-package er.extensions.appserver;
+package er.extensions.browser;
 
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCoding;

@@ -1,4 +1,4 @@
-package er.extensions.appserver;
+package er.extensions.browser;
 
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -15,6 +15,8 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.appserver.ERXDirectAction;
+import er.extensions.appserver.ERXSession;
 import er.extensions.foundation.ERXUtilities;
 
 /**
