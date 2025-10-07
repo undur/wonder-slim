@@ -109,7 +109,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			final String path = request.requestHandlerPath();
 
 			if( _useCache ) {
-				return _cache.computeIfAbsent(path, bork -> new CachedResourceResponse( responseForPath(path) )).streamingResponse();
+				return _cache.computeIfAbsent(path, __ -> new CachedResourceResponse( responseForPath(path) )).streamingResponse();
 			}
 
 			return responseForPath(path);
@@ -133,20 +133,11 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 
 			final byte[] bytes = resourceManager.bytesForResourceNamed(resourceName, frameworkName, null);
 			
-			// Resource not found, 404
-			if( bytes == null ) {
+			// Resource not found or isn't a webserver resource -> 404
+			if( bytes == null || !resourceManager.isWebServerResource( resourceName, frameworkName, NSArray.emptyArray() ) ) {
 				final WOResponse response = new WOResponse();
 				response.setStatus(404);
 				response.setContent("Resource '[%s]/[%s]' not found".formatted(frameworkName, resourceName) );
-				return response;
-			}
-
-			// Resource isn't a webserver resource, 403
-			// TODO: Actually, this should probably be a 404 (identical to the non-existent response) // Hugi 2025-10-05
-			if( !resourceManager.isWebServerResource( resourceName, frameworkName, NSArray.emptyArray() ) ) {
-				final WOResponse response = new WOResponse();
-				response.setStatus(403);
-				response.setContent("Resource '[%s]/[%s]' forbidden".formatted(frameworkName, resourceName) );
 				return response;
 			}
 
