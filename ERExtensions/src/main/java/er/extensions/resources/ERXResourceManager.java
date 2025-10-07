@@ -48,7 +48,6 @@ public class ERXResourceManager extends ERXResourceManagerBase {
 	private final WODeployedBundle TheAppProjectBundle;
 	private final _NSThreadsafeMutableDictionary<String, WOURLValuedElementData> _urlValuedElementsData;
 	private final _NSThreadsafeMutableDictionary _myFrameworkProjectBundles = new _NSThreadsafeMutableDictionary(new NSMutableDictionary(128));
-	private IVersionManager _versionManager;	
 
 	public ERXResourceManager() {
 		TheAppProjectBundle = _initAppBundle();
@@ -64,42 +63,7 @@ public class ERXResourceManager extends ERXResourceManagerBase {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
 		}
 
-		String versionManagerClassName = ERXProperties.stringForKeyWithDefault("er.extensions.ERXResourceManager.versionManager", "default");
-
-		if ("default".equals(versionManagerClassName)) {
-			_versionManager = new DefaultVersionManager();
-		}
-		else if ("properties".equals(versionManagerClassName)) {
-			_versionManager = new PropertiesVersionManager();
-		}
-		else {
-			try {
-				_versionManager = Class.forName(versionManagerClassName).asSubclass(IVersionManager.class).newInstance();
-			}
-			catch (java.lang.InstantiationException e) {
-				throw new RuntimeException("Unable to create the specified version manager '" + versionManagerClassName + ".", e);
-			}
-			catch (java.lang.IllegalAccessException e) {
-				throw new RuntimeException("Unable to create the specified version manager '" + versionManagerClassName + ".", e);
-			}
-			catch (ClassNotFoundException e) {
-				throw NSForwardException._runtimeExceptionForThrowable(e);
-			}
-		}
-	}
-
-	/**
-	 * Set the version manager to use for this resource manager.
-	 */
-	public void setVersionManager(IVersionManager versionManager) {
-		_versionManager = versionManager;
-	}
-	
-	/**
-	 * @return the current version manager for this resource manager.
-	 */
-	public IVersionManager versionManager() {
-		return _versionManager;
+		initVersionManager();
 	}
 
     private void _initFrameworkProjectBundles() {
@@ -342,6 +306,37 @@ public class ERXResourceManager extends ERXResourceManagerBase {
 		return wourlvaluedelementdata;
 	}
 
+	/* --------------------------------------------------------------------------- */
+	/* Below here is the version manager */
+	/* --------------------------------------------------------------------------- */
+
+	private IVersionManager _versionManager;
+
+	public void initVersionManager() {
+		String versionManagerClassName = ERXProperties.stringForKeyWithDefault("er.extensions.ERXResourceManager.versionManager", "default");
+
+		if ("default".equals(versionManagerClassName)) {
+			_versionManager = new DefaultVersionManager();
+		}
+		else if ("properties".equals(versionManagerClassName)) {
+			_versionManager = new PropertiesVersionManager();
+		}
+		else {
+			try {
+				_versionManager = Class.forName(versionManagerClassName).asSubclass(IVersionManager.class).newInstance();
+			}
+			catch (java.lang.InstantiationException e) {
+				throw new RuntimeException("Unable to create the specified version manager '" + versionManagerClassName + ".", e);
+			}
+			catch (java.lang.IllegalAccessException e) {
+				throw new RuntimeException("Unable to create the specified version manager '" + versionManagerClassName + ".", e);
+			}
+			catch (ClassNotFoundException e) {
+				throw NSForwardException._runtimeExceptionForThrowable(e);
+			}
+		}
+	}
+
 	/**
 	 * IVersionManager provides an interface for adding version numbers to
 	 * WebServerResources. This allows you to turn on "infinite" expiration
@@ -373,9 +368,6 @@ public class ERXResourceManager extends ERXResourceManagerBase {
 	 */
 	public static class DefaultVersionManager implements IVersionManager {
 
-		/**
-		 * @return resourceUrl
-		 */
 		public String versionedUrlForResourceNamed(String resourceUrl, String name, String bundleName, NSArray<String> languages, WORequest request) {
 			return resourceUrl;
 		}
