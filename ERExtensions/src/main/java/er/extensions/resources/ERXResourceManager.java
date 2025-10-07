@@ -265,9 +265,9 @@ public class ERXResourceManager extends ERXResourceManagerBase {
 	
 	protected String _postprocessURL(String url, String bundleName) {
 
-		if (WOApplication.application() instanceof ERXApplication) {
-			WODeployedBundle bundle = _cachedBundleForFrameworkNamed(bundleName);
-			return ERXApplication.erxApplication()._rewriteResourceURL(url, bundle);
+		if (WOApplication.application() instanceof ERXApplication app) {
+			final WODeployedBundle bundle = _cachedBundleForFrameworkNamed(bundleName);
+			return app._rewriteResourceURL(url, bundle);
 		}
 
 		return url;
