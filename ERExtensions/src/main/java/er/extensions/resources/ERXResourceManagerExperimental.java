@@ -72,8 +72,8 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 	/**
 	 * @return true if the given resource exists and is a webserver (public) resource
 	 */
-	private boolean isWebServerResource( String resourceName, String frameworkName, NSArray<String> languages ) {
-		final String path = super.urlForResourceNamed(resourceName, frameworkName, languages, null );
+	private boolean isWebServerResource( String resourceName, String frameworkName ) {
+		final String path = super.urlForResourceNamed(resourceName, frameworkName, null, null );
 		
 		if( path == null ) {
 			return false;
@@ -134,7 +134,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 			final byte[] bytes = resourceManager.bytesForResourceNamed(resourceName, frameworkName, null);
 			
 			// Resource not found or isn't a webserver resource -> 404
-			if( bytes == null || !resourceManager.isWebServerResource( resourceName, frameworkName, NSArray.emptyArray() ) ) {
+			if( bytes == null || !resourceManager.isWebServerResource( resourceName, frameworkName ) ) {
 				final WOResponse response = new WOResponse();
 				response.setStatus(404);
 				response.setContent("Resource '[%s]/[%s]' not found".formatted(frameworkName, resourceName) );
