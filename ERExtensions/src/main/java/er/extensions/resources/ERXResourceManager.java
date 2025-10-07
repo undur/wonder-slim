@@ -1,7 +1,6 @@
 package er.extensions.resources;
 
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 
@@ -26,7 +25,6 @@ import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXRequest;
-import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -36,7 +34,6 @@ import er.extensions.foundation.ERXProperties;
  * <li> resource versioning (for better caching control)
  * </ul>
  * 
- * @property er.extensions.ERXResourceManager.versionManager the class name of the version manager to use (or "default", or "properties")
  * @author ak
  * @author mschrag
  */
@@ -62,8 +59,6 @@ public class ERXResourceManager extends ERXResourceManagerBase {
 		catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
 			throw NSForwardException._runtimeExceptionForThrowable(e);
 		}
-
-		initVersionManager();
 	}
 
     private void _initFrameworkProjectBundles() {
@@ -258,7 +253,7 @@ public class ERXResourceManager extends ERXResourceManagerBase {
 			}
 		}
 
-		completeURL = _versionManager.versionedUrlForResourceNamed(completeURL, name, bundleName, languages, request);
+//		completeURL = _versionManager.versionedUrlForResourceNamed(completeURL, name, bundleName, languages, request);
 		completeURL = _postprocessURL(completeURL, bundleName);
 		return completeURL;
 	}
@@ -304,131 +299,5 @@ public class ERXResourceManager extends ERXResourceManagerBase {
 		}
 
 		return wourlvaluedelementdata;
-	}
-
-	/* --------------------------------------------------------------------------- */
-	/* Below here is the version manager */
-	/* --------------------------------------------------------------------------- */
-
-	private IVersionManager _versionManager;
-
-	public void initVersionManager() {
-		String versionManagerClassName = ERXProperties.stringForKeyWithDefault("er.extensions.ERXResourceManager.versionManager", "default");
-
-		if ("default".equals(versionManagerClassName)) {
-			_versionManager = new DefaultVersionManager();
-		}
-		else if ("properties".equals(versionManagerClassName)) {
-			_versionManager = new PropertiesVersionManager();
-		}
-		else {
-			try {
-				_versionManager = Class.forName(versionManagerClassName).asSubclass(IVersionManager.class).newInstance();
-			}
-			catch (java.lang.InstantiationException e) {
-				throw new RuntimeException("Unable to create the specified version manager '" + versionManagerClassName + ".", e);
-			}
-			catch (java.lang.IllegalAccessException e) {
-				throw new RuntimeException("Unable to create the specified version manager '" + versionManagerClassName + ".", e);
-			}
-			catch (ClassNotFoundException e) {
-				throw NSForwardException._runtimeExceptionForThrowable(e);
-			}
-		}
-	}
-
-	/**
-	 * IVersionManager provides an interface for adding version numbers to
-	 * WebServerResources. This allows you to turn on "infinite" expiration
-	 * dates in mod_expires, and instead control reloading by changing the
-	 * resource's URL. As an example, you might append a version number as a
-	 * query string on the URL (whatever.gif?1).
-	 * 
-	 * @author mschrag
-	 */
-	public static interface IVersionManager {
-
-		/**
-		 * Returns the variant of the given resource URL adjusted to include version information.
-		 * 
-		 * @param resourceUrl the original resource URL
-		 * @param name the name of the resource being loaded
-		 * @param bundleName the name of the bundle that contains the resource
-		 * @param languages the languages requested
-		 * @param request the request
-		 * @return a versioned variant of the resourceUrl
-		 */
-		public String versionedUrlForResourceNamed(String resourceUrl, String name, String bundleName, NSArray<String> languages, WORequest request);
-	}
-
-	/**
-	 * DefaultVersionManager just returns the resourceUrl unmodified.
-	 * 
-	 * @author mschrag
-	 */
-	public static class DefaultVersionManager implements IVersionManager {
-
-		public String versionedUrlForResourceNamed(String resourceUrl, String name, String bundleName, NSArray<String> languages, WORequest request) {
-			return resourceUrl;
-		}
-	}
-
-	/**
-     * Implementation of the IVersionManager interface which provides the
-     * ability to control resource version numbers with Properties settings,
-     * and appends the query parameter "?xxx" to WebServerResource URLs.
-	 *
-	 * @property er.extensions.ERXResourceManager.versionManager.default the
-	 *           default version to use when an explicit version is not
-	 *           specified, defaults to app startup time. Ideally you should set
-	 *           this explicitly when you deploy, or multiple instance
-	 *           deployments will end up with different version numbers for the
-	 *           same resource.
-	 * @property er.extensions.ERXResourceManager.versionManager.[bundleName].[resourceName]
-	 *           the version to send for the specified resource. If not set
-	 *           explicitly, the app default version will be used instead.
-	 *          
-	 * @author mschrag
-	 */
-	public static class PropertiesVersionManager implements IVersionManager {
-
-		private static Logger log = LoggerFactory.getLogger(ERXResourceManager.class);
-		private String _defaultVersion;
-
-		public PropertiesVersionManager() {
-			String key = "er.extensions.ERXResourceManager.versionManager.default";
-			_defaultVersion = ERXProperties.stringForKey(key);
-
-			if (_defaultVersion == null) {
-				_defaultVersion = String.valueOf(System.currentTimeMillis());
-			}
-		}
-
-		public String versionedUrlForResourceNamed(String resourceUrl, String name, String bundleName, NSArray<String> languages, WORequest request) {
-
-			if (bundleName == null) {
-				bundleName = "app";
-			}
-
-			String key = "er.extensions.ERXResourceManager.versionManager." + bundleName + "." + name;
-			String version = ERXProperties.stringForKey(key);
-			if (version == null) {
-				version = _defaultVersion;
-			}
-			else if ("none".equals(version) || version.length() == 0) {
-				version = null;
-			}
-			if (version != null) {
-				try {
-					ERXMutableURL url = new ERXMutableURL(resourceUrl);
-					url.addQueryParameter("", version);
-					resourceUrl = url.toExternalForm();
-				}
-				catch (MalformedURLException e) {
-					log.error("Failed to construct URL from '{}'.", resourceUrl, e);
-				}
-			}
-			return resourceUrl;
-		}
 	}
 }
