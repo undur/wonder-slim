@@ -3,6 +3,7 @@ package er.extensions.routes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,18 +19,18 @@ import com.webobjects.foundation.NSMutableDictionary;
 import er.extensions.appserver.ERXRequest;
 
 /**
- * Contains a list of handlers for URLs
- *
- * Routing allows a couple of types of wildcards
- *
- * - Named parameters are prefixed with a colon
- * - Positional parameters are a star
+ * Route handling.
+ * 
+ * TODO: Having some docs here would be nice // Hugi 2025-10-09
  */
 
 public class RouteTable {
 
 	private static final Logger logger = LoggerFactory.getLogger( RouteTable.class );
 
+	/**
+	 * Invoked when no route was found to handle a given URL
+	 */
 	private static final NotFoundRouteHandler NOT_FOUND_ROUTE_HANDLER = new NotFoundRouteHandler();
 
 	/**
@@ -95,7 +96,6 @@ public class RouteTable {
 	/**
 	 * @return The requested URL
 	 *
-	 * Either
 	 *  - from the "URL"query parameter (usually used for development)
 	 *  - or from the redirect_url header provided by Apache's 404 handler
 	 */
@@ -109,28 +109,30 @@ public class RouteTable {
 		return url;
 	}
 
+	/**
+	 * @return Route URL usable for development (i.e. invoking the direct action directly)
+	 */
+	public static String urlForDevelopment( String url, final WOContext context ) {
+		final NSMutableDictionary<String, Object> params = new NSMutableDictionary<>( url, "url" );
+		url = context.directActionURLForActionNamed( RouteAction.class.getSimpleName() + "/handler", params );
+		url = url.replace( "&", "&amp;" );
+		return url;
+	}
+
 	public void map( final String pattern, final RouteHandler routeHandler ) {
 		_routes.add( new Route( pattern, routeHandler ) );
 	}
 
 	public void map( final String pattern, final BiFunction<WrappedURL, WOContext, WOActionResults> biFunction ) {
-		final BiFunctionRouteHandler routeHandler = new BiFunctionRouteHandler( biFunction );
-		map( pattern, routeHandler );
+		map( pattern, new BiFunctionRouteHandler( biFunction ) );
+	}
+	
+	public void map( final String pattern, final Function<WORequest, WOActionResults> biFunction ) {
+		map( pattern, new FunctionRouteHandler( biFunction ) );
 	}
 
 	public void mapComponent( final String pattern, final Class<? extends WOComponent> componentClass ) {
-		final ComponentRouteHandler routeHandler = new ComponentRouteHandler( componentClass );
-		map( pattern, routeHandler );
-	}
-
-	/**
-	 * @return The route usable for development (i.e. invoking the direct action directly)
-	 */
-	public static String urlForDevelopment( String url, WOContext context ) {
-		final NSMutableDictionary<String, Object> params = new NSMutableDictionary<>( url, "url" );
-		url = context.directActionURLForActionNamed( RouteAction.class.getSimpleName() + "/handler", params );
-		url = url.replace( "&", "&amp;" );
-		return url;
+		map( pattern, new ComponentRouteHandler( componentClass ) );
 	}
 
 	/**
@@ -164,17 +166,30 @@ public class RouteTable {
 			return response;
 		}
 	}
+	
+	public static class FunctionRouteHandler extends RouteHandler {
+		private Function<WORequest, WOActionResults> _function;
+		
+		public FunctionRouteHandler( final Function<WORequest, WOActionResults> function ) {
+			_function = function;
+		}
+		
+		@Override
+		public WOActionResults handle( WrappedURL url, WOContext context ) {
+			return _function.apply(context.request());
+		}
+	}
 
 	public static class BiFunctionRouteHandler extends RouteHandler {
-		private BiFunction<WrappedURL, WOContext, WOActionResults> _biFunction;
+		private BiFunction<WrappedURL, WOContext, WOActionResults> _function;
 
-		public BiFunctionRouteHandler( final BiFunction<WrappedURL, WOContext, WOActionResults> biFunction ) {
-			_biFunction = biFunction;
+		public BiFunctionRouteHandler( final BiFunction<WrappedURL, WOContext, WOActionResults> function ) {
+			_function = function;
 		}
 
 		@Override
 		public WOActionResults handle( WrappedURL url, WOContext context ) {
-			return _biFunction.apply( url, context );
+			return _function.apply( url, context );
 		}
 	}
 
