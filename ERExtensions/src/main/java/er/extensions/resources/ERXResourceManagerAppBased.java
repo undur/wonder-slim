@@ -33,7 +33,7 @@ import er.extensions.appserver.ERXWOContext;
  * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05   
  */
 
-public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
+public class ERXResourceManagerAppBased extends ERXResourceManagerBase {
 
 	/**
 	 * Generates a URL for the given resource. Format: .../App.woa/res/[framework]/[resourceName]?languages=[lang1,lang2,lang3]
@@ -129,7 +129,7 @@ public class ERXResourceManagerExperimental extends ERXResourceManagerBase {
 		 * @return A response for the given resource
 		 */
 		private WOResponse responseForResource(final String frameworkName, final String resourceName) {
-			final ERXResourceManagerExperimental resourceManager = (ERXResourceManagerExperimental) WOApplication.application().resourceManager();
+			final ERXResourceManagerAppBased resourceManager = (ERXResourceManagerAppBased) WOApplication.application().resourceManager();
 
 			final byte[] bytes = resourceManager.bytesForResourceNamed(resourceName, frameworkName, null);
 			
