@@ -72,12 +72,10 @@ import er.extensions.foundation.ERXValueUtilities;
  * @binding checkHashCodes if true, checks the validity of repetition references during the RR loop
  * @binding raiseOnUnmatchedObject if true, an exception is thrown when the repetition does not find a matching object
  * @binding debugHashCodes if true, prints out hashcodes for each entry in the repetition as it is traversed
- * @binding eoSupport try to use globalIDs to determine the hashCode for EOs
  * @binding notFoundMarker used for the item in the repetition if checkHashCodes is true, don't bind directly to null as that will be translated to false
  * 
  * @property er.extensions.ERXWORepetition.checkHashCodes add hash codes to element IDs so backtracking can be controlled
  * @property er.extensions.ERXWORepetition.raiseOnUnmatchedObject if an object wasn't found, raise an exception (if unset, the wrong object is used)
- * @property er.extensions.ERXWORepetition.eoSupport use hash code of GlobalID instead of object's hash code if it is an EO
  * 
  * @author ak
  */
@@ -95,11 +93,6 @@ public class ERXWORepetition extends WODynamicGroup {
 	private final WOAssociation _raiseOnUnmatchedObject;
 	private final WOAssociation _debugHashCodes;
 	private final WOAssociation _notFoundMarker;
-
-	/**
-	 * FIXME: We're keeping this one around for a bit since we might want to implement something similar (although not specifically tied to EOs) // Hugi 2025-06-14
-	 */
-	private final WOAssociation _eoSupport;
 
 	private static final boolean _checkHashCodesDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.checkHashCodes", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".checkHashCodes"));
 	private static final boolean _raiseOnUnmatchedObjectDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.raiseOnUnmatchedObject", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".raiseOnUnmatchedObject"));
@@ -184,7 +177,6 @@ public class ERXWORepetition extends WODynamicGroup {
 		_checkHashCodes = associations.objectForKey("checkHashCodes");
 		_raiseOnUnmatchedObject = associations.objectForKey("raiseOnUnmatchedObject");
 		_debugHashCodes = associations.objectForKey("debugHashCodes");
-		_eoSupport = associations.objectForKey("eoSupport");
 		_notFoundMarker = associations.objectForKey("notFoundMarker");
 		
 		if (_list == null && _count == null) {
