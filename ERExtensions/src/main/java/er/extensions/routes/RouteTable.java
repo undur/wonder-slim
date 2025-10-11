@@ -150,10 +150,6 @@ public class RouteTable {
 			 */
 			RouteHandler routeHandler ) {}
 
-	public static abstract class RouteHandler {
-		public abstract WOActionResults handle( WrappedURL url, WOContext context );
-	}
-
 	/**
 	 * For returning 404
 	 */
