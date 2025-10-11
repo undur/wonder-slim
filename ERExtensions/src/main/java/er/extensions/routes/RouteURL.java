@@ -8,7 +8,7 @@ import java.util.Objects;
  * - only stores the path (no hostname, no protocol) - does not differentiate between relative and absolute urls
  */
 
-public class WrappedURL {
+public class RouteURL {
 
 	/**
 	 * The URL string this object was generated from.
@@ -30,7 +30,7 @@ public class WrappedURL {
 	 *
 	 * FIXME: We're currently stripping away starting and ending slashes. We'll want to look into if that's generally desired behaviour // Hugi 2021-12-28
 	 */
-	private WrappedURL( final String sourceURL ) {
+	private RouteURL( final String sourceURL ) {
 		Objects.requireNonNull( sourceURL );
 		_sourceURL = sourceURL;
 
@@ -47,8 +47,8 @@ public class WrappedURL {
 		_parsedURL = parsedURL;
 	}
 
-	public static WrappedURL create( final String sourceURL ) {
-		return new WrappedURL( sourceURL );
+	public static RouteURL create( final String sourceURL ) {
+		return new RouteURL( sourceURL );
 	}
 
 	public String sourceURL() {

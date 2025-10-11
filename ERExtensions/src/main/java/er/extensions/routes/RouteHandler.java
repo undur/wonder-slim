@@ -10,5 +10,5 @@ import com.webobjects.appserver.WOContext;
 
 public abstract class RouteHandler {
 
-	public abstract WOActionResults handle( WrappedURL url, WOContext context );
+	public abstract WOActionResults handle( RouteURL url, WOContext context );
 }

@@ -90,7 +90,7 @@ public class RouteTable {
 			routeHandler = NOT_FOUND_ROUTE_HANDLER;
 		}
 
-		return routeHandler.handle( WrappedURL.create( routeURL ), request.context() );
+		return routeHandler.handle( RouteURL.create( routeURL ), request.context() );
 	}
 
 	/**
@@ -123,7 +123,7 @@ public class RouteTable {
 		_routes.add( new Route( pattern, routeHandler ) );
 	}
 
-	public void map( final String pattern, final BiFunction<WrappedURL, WOContext, WOActionResults> function ) {
+	public void map( final String pattern, final BiFunction<RouteURL, WOContext, WOActionResults> function ) {
 		map( pattern, new BiFunctionRouteHandler( function ) );
 	}
 	
@@ -155,7 +155,7 @@ public class RouteTable {
 	 */
 	public static class NotFoundRouteHandler extends RouteHandler {
 		@Override
-		public WOActionResults handle( final WrappedURL url, WOContext context ) {
+		public WOActionResults handle( final RouteURL url, WOContext context ) {
 			final WOResponse response = new WOResponse();
 			response.setStatus( 404 );
 			response.setContent( "No route found for URL: " + url );
@@ -171,20 +171,20 @@ public class RouteTable {
 		}
 		
 		@Override
-		public WOActionResults handle( WrappedURL url, WOContext context ) {
+		public WOActionResults handle( RouteURL url, WOContext context ) {
 			return _function.apply(context.request());
 		}
 	}
 
 	public static class BiFunctionRouteHandler extends RouteHandler {
-		private BiFunction<WrappedURL, WOContext, WOActionResults> _function;
+		private BiFunction<RouteURL, WOContext, WOActionResults> _function;
 
-		public BiFunctionRouteHandler( final BiFunction<WrappedURL, WOContext, WOActionResults> function ) {
+		public BiFunctionRouteHandler( final BiFunction<RouteURL, WOContext, WOActionResults> function ) {
 			_function = function;
 		}
 
 		@Override
-		public WOActionResults handle( WrappedURL url, WOContext context ) {
+		public WOActionResults handle( RouteURL url, WOContext context ) {
 			return _function.apply( url, context );
 		}
 	}
@@ -197,7 +197,7 @@ public class RouteTable {
 		}
 
 		@Override
-		public WOActionResults handle( WrappedURL url, WOContext context ) {
+		public WOActionResults handle( RouteURL url, WOContext context ) {
 			return WOApplication.application().pageWithName( _componentClass.getName(), context );
 		}
 	}
