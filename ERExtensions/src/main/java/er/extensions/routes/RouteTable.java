@@ -123,12 +123,12 @@ public class RouteTable {
 		_routes.add( new Route( pattern, routeHandler ) );
 	}
 
-	public void map( final String pattern, final BiFunction<WrappedURL, WOContext, WOActionResults> biFunction ) {
-		map( pattern, new BiFunctionRouteHandler( biFunction ) );
+	public void map( final String pattern, final BiFunction<WrappedURL, WOContext, WOActionResults> function ) {
+		map( pattern, new BiFunctionRouteHandler( function ) );
 	}
 	
-	public void map( final String pattern, final Function<WORequest, WOActionResults> biFunction ) {
-		map( pattern, new FunctionRouteHandler( biFunction ) );
+	public void map( final String pattern, final Function<WORequest, WOActionResults> function ) {
+		map( pattern, new FunctionRouteHandler( function ) );
 	}
 
 	public void mapComponent( final String pattern, final Class<? extends WOComponent> componentClass ) {
