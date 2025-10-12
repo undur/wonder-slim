@@ -78,7 +78,7 @@ public class ERXAppRunner {
 			// Odds are you are only using this method for test cases and development mode
 			System.setProperty("er.extensions.ERXApplication.developmentMode", "true");
 			ERXApplication.primeApplication(mainBundleName, mainBundleURL, applicationSubclass.getName());
-			// NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.ApplicationDidCreateNotification, WOApplication.application()));
+			// NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXNotification.ApplicationDidCreateNotification.id(), WOApplication.application()));
 		}
 		catch (IOException e) {
 			throw new NSForwardException(e);

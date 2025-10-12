@@ -10,7 +10,7 @@ import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
-import er.extensions.appserver.ERXApplication;
+import er.extensions.appserver.ERXApplication.ERXNotification;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
@@ -22,7 +22,7 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 
 	@Override
 	protected void initialize() {
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), ERXApplication.AllBundlesLoadedNotification, null);
+		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("bundleDidLoad"), ERXNotification.AllBundlesLoadedNotification.id(), null);
 	}
 
 	public void bundleDidLoad(NSNotification n) {

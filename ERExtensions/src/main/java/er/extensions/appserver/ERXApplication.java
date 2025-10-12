@@ -77,27 +77,43 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static final Logger requestHandlingLog = LoggerFactory.getLogger("er.extensions.ERXApplication.RequestHandling");
 	private static final Logger statsLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Statistics");
 
-	/**
-	 * Notification to get posted when terminate() is called.
-	 */
-	public static final String ApplicationWillTerminateNotification = "ApplicationWillTerminateNotification";
+	public enum ERXNotification {
+		
+		/**
+		 * Notification to get posted when terminate() is called.
+		 */
+		ApplicationWillTerminateNotification( "ApplicationWillTerminateNotification" ),
+	
+		/**
+		 * Notification to post when all bundles were loaded but before their principal was called
+		 * 
+		 * FIXME: This notification was posted by the (ERX)Loader. We need to implement at least that part again if we want to keep it // Hugi 2025-06-22 
+		 */
+		AllBundlesLoadedNotification( "NSBundleAllBundlesLoaded" ),
+	
+		/**
+		 * Notification to post when all bundles were loaded but before their principal was called
+		 */
+		ApplicationDidCreateNotification( "NSApplicationDidCreateNotification" ),
+	
+		/**
+		 * Notification to post when all application initialization processes are complete
+		 */
+		ApplicationDidFinishInitializationNotification ( "NSApplicationDidFinishInitializationNotification" );
+		
+		private String _id;
 
-	/**
-	 * Notification to post when all bundles were loaded but before their principal was called
-	 * 
-	 * FIXME: This notification was posted by the (ERX)Loader. We need to implement at least that part again if we want to keep it // Hugi 2025-06-22 
-	 */
-	public static final String AllBundlesLoadedNotification = "NSBundleAllBundlesLoaded";
-
-	/**
-	 * Notification to post when all bundles were loaded but before their principal was called
-	 */
-	public static final String ApplicationDidCreateNotification = "NSApplicationDidCreateNotification";
-
-	/**
-	 * Notification to post when all application initialization processes are complete
-	 */
-	public static final String ApplicationDidFinishInitializationNotification = "NSApplicationDidFinishInitializationNotification";
+		ERXNotification( String id ) {
+			_id = id;
+		}
+		
+		/**
+		 * @return The string identifier of the notifiation
+		 */
+		public String id() {
+			return _id;
+		}
+	}
 	
 	/**
 	 * The path rewriting pattern to match (@see _rewriteURL)
@@ -258,7 +274,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("didFinishLaunching"), WOApplication.ApplicationDidFinishLaunchingNotification, null);
 		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("addBalancerRouteCookieByNotification"), WORequestHandler.DidHandleRequestNotification, null);
 
-		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ApplicationDidCreateNotification, this));
+		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXNotification.ApplicationDidCreateNotification.id(), this));
 		
 		// FIXME: Quick fix for our resource manager's initialization issue. Fix // Hugi 2025-10-06
 		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {
@@ -550,7 +566,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public final void finishInitialization(NSNotification n) {
 		finishInitialization();
-		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.ApplicationDidFinishInitializationNotification, this));
+		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXNotification.ApplicationDidFinishInitializationNotification.id(), this));
 	}
 
 	/**
@@ -1227,7 +1243,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	@Override
 	public void terminate() {
-		NSNotificationCenter.defaultCenter().postNotification(ApplicationWillTerminateNotification, this);
+		NSNotificationCenter.defaultCenter().postNotification(ERXNotification.ApplicationWillTerminateNotification.id(), this);
 		super.terminate();
 	}
 

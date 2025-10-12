@@ -11,7 +11,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
-import er.extensions.appserver.ERXApplication;
+import er.extensions.appserver.ERXApplication.ERXNotification;
 import er.extensions.foundation.ERXUtilities;
 
 /** 
@@ -83,7 +83,7 @@ public abstract class ERXFrameworkPrincipal {
          * @param n notification that is posted after the WOApplication has been constructed, but before the application is ready for accepting requests.
          */
         public final void willFinishInitialization(NSNotification n) {
-            NSNotificationCenter.defaultCenter().removeObserver(this, ERXApplication.ApplicationDidCreateNotification, null);
+            NSNotificationCenter.defaultCenter().removeObserver(this, ERXNotification.ApplicationDidCreateNotification.id(), null);
             for (ERXFrameworkPrincipal principal : launchingFrameworks) {
                 principal.finishInitialization();
                 log.debug("Finished initialization after launch: " + principal);
@@ -135,12 +135,12 @@ public abstract class ERXFrameworkPrincipal {
                 center.addObserver(observer,
                         ERXUtilities.notificationSelector("willFinishInitialization"),
                         // WOApplication.ApplicationWillFinishLaunchingNotification,
-                        ERXApplication.ApplicationDidCreateNotification,
+                        ERXNotification.ApplicationDidCreateNotification.id(),
                         null);
                 center.addObserver(observer,
                 		ERXUtilities.notificationSelector("didFinishInitialization"),
                         // WOApplication.ApplicationWillFinishLaunchingNotification,
-                        ERXApplication.ApplicationDidFinishInitializationNotification,
+                		ERXNotification.ApplicationDidFinishInitializationNotification.id(),
                         null);
             }
             if (initializedFrameworks.objectForKey(c.getName()) == null) {

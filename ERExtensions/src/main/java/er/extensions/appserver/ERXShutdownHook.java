@@ -8,6 +8,8 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
+import er.extensions.appserver.ERXApplication.ERXNotification;
+
 
 /**
  * Use this to register shutdown hooks instead of directly using Runtime.addShutdownHook().
@@ -61,7 +63,7 @@ public abstract class ERXShutdownHook extends Thread {
 						}
 
 						if ( ! ERXApplication.erxApplication().getIsTerminating()) {
-							NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXApplication.ApplicationWillTerminateNotification, NSKeyValueCoding.NullValue));
+							NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXNotification.ApplicationWillTerminateNotification.id(), NSKeyValueCoding.NullValue));
 						}
 
 						System.out.println( "APPLICATION SHUTDOWN SEQUENCE COMPLETE" );
