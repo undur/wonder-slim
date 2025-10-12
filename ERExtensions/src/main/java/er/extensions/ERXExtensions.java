@@ -10,7 +10,7 @@ import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
-import er.extensions.appserver.ERXApplication.ERXNotification;
+import er.extensions.appserver.ERXNotification;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;

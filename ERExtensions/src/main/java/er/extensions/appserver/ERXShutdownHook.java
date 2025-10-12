@@ -8,8 +8,6 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
-import er.extensions.appserver.ERXApplication.ERXNotification;
-
 
 /**
  * Use this to register shutdown hooks instead of directly using Runtime.addShutdownHook().

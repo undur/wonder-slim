@@ -11,7 +11,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
-import er.extensions.appserver.ERXApplication.ERXNotification;
+import er.extensions.appserver.ERXNotification;
 import er.extensions.foundation.ERXUtilities;
 
 /** 

@@ -64,9 +64,9 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.resources.ERXResourceManager;
-import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.resources.ERXResourceManagerAppBased;
 import er.extensions.resources.ERXResourceManagerAppBased.ERXWebServerResourceRequestHandler;
+import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.resources.ERXStaticResourceRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
@@ -77,44 +77,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static final Logger requestHandlingLog = LoggerFactory.getLogger("er.extensions.ERXApplication.RequestHandling");
 	private static final Logger statsLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Statistics");
 
-	public enum ERXNotification {
-		
-		/**
-		 * Notification to get posted when terminate() is called.
-		 */
-		ApplicationWillTerminateNotification( "ApplicationWillTerminateNotification" ),
-	
-		/**
-		 * Notification to post when all bundles were loaded but before their principal was called
-		 * 
-		 * FIXME: This notification was posted by the (ERX)Loader. We need to implement at least that part again if we want to keep it // Hugi 2025-06-22 
-		 */
-		AllBundlesLoadedNotification( "NSBundleAllBundlesLoaded" ),
-	
-		/**
-		 * Notification to post when all bundles were loaded but before their principal was called
-		 */
-		ApplicationDidCreateNotification( "NSApplicationDidCreateNotification" ),
-	
-		/**
-		 * Notification to post when all application initialization processes are complete
-		 */
-		ApplicationDidFinishInitializationNotification ( "NSApplicationDidFinishInitializationNotification" );
-		
-		private String _id;
-
-		ERXNotification( String id ) {
-			_id = id;
-		}
-		
-		/**
-		 * @return The string identifier of the notifiation
-		 */
-		public String id() {
-			return _id;
-		}
-	}
-	
 	/**
 	 * The path rewriting pattern to match (@see _rewriteURL)
 	 */
