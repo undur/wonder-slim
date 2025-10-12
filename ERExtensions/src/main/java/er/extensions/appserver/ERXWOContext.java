@@ -246,6 +246,23 @@ public class ERXWOContext extends ERXAjaxContext {
 		return url;
 	}
 
+	public String safeElementID() {
+		return safeIdentifierName(elementID());
+	}
+
+	@Override
+	protected String relativeURLWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString) {
+		String result = super.relativeURLWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString);
+		if(IS_DEV && !WOApplication.application().isDirectConnectEnabled()) {
+			String extension = "." + WOApplication.application().applicationExtension();
+			String replace = extension + "/-" + WOApplication.application().port();
+			if(!result.contains(replace) && result.contains(extension)) {
+				result = result.replace(extension, replace);
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Removes session ID query key/value pair from the given URL string.
 	 * 
@@ -570,22 +587,5 @@ public class ERXWOContext extends ERXAjaxContext {
 			}
 		}
 		return url;
-	}
-	
-	public String safeElementID() {
-		return safeIdentifierName(elementID());
-	}
-
-	@Override
-	protected String relativeURLWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString) {
-		String result = super.relativeURLWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString);
-		if(IS_DEV && !WOApplication.application().isDirectConnectEnabled()) {
-			String extension = "." + WOApplication.application().applicationExtension();
-			String replace = extension + "/-" + WOApplication.application().port();
-			if(!result.contains(replace) && result.contains(extension)) {
-				result = result.replace(extension, replace);
-			}
-		}
-		return result;
 	}
 }
