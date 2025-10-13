@@ -46,23 +46,23 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	private static final Logger log = LoggerFactory.getLogger(ERXSession.class);
 
 	/**
-	 * Notification name that is posted when a session is about to sleep.
+	 * Notification posted when a session is about to sleep.
 	 */
 	public static final String SessionWillSleepNotification = "SessionWillSleepNotification";
 
 	/**
-	 * The SameSite to set for session and instance cookies
+	 * SameSite for session and instance cookies
 	 */
-	private static SameSite _sameSite = ERXProperties.enumValueForKey(SameSite.class, "er.extensions.ERXSession.cookies.SameSite");
+	private static final SameSite _sameSite = ERXProperties.enumValueForKey(SameSite.class, "er.extensions.ERXSession.cookies.SameSite");
 
 	/**
-	 * The localizer used for this session
+	 * Localizer used for this session
 	 */
 	transient private ERXLocalizer _localizer;
 
 	/**
-	 * special variable to hold language name only for when session object gets
-	 * serialized. Do not use this value to get the language name; use {@link #language} method instead.
+	 * special variable to hold language name only for when session object gets serialized.
+	 * Do not use this value to get the language name; use {@link #language} method instead.
 	 */
 	private String _serializableLanguageName;
 
@@ -93,8 +93,10 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * @return the observer object for this session. If it doesn't ever exist, one will be created.
 	 */
 	public Observer observer() {
-		if (_observer == null)
+		if (_observer == null) {
 			_observer = new Observer(this);
+		}
+
 		return _observer;
 	}
 
@@ -129,7 +131,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 				return;
 			}
 
-			String currentLanguage = session._localizer.language();
+			final String currentLanguage = session._localizer.language();
 			session._localizer = ERXLocalizer.localizerForLanguage(currentLanguage);
 			log.debug("Detected changes in the localizers. Reset reference to {} localizer for session {}", currentLanguage, session.sessionID());
 		}
@@ -154,9 +156,12 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	public ERXLocalizer localizer() {
 		if (_localizer == null) {
 			_localizer = ERXLocalizer.localizerForLanguages(languages());
-			if (!WOApplication.application().isCachingEnabled())
+
+			if (!WOApplication.application().isCachingEnabled()) {
 				observer().registerForLocalizationDidResetNotification();
+			}
 		}
+
 		return _localizer;
 	}
 
@@ -179,17 +184,22 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * @see #setLanguages
 	 */
 	public void setLanguage(String language) {
-		ERXLocalizer newLocalizer = ERXLocalizer.localizerForLanguage(language);
+		final ERXLocalizer newLocalizer = ERXLocalizer.localizerForLanguage(language);
+
 		if (!newLocalizer.equals(_localizer)) {
-			if (_localizer == null && !WOApplication.application().isCachingEnabled())
+			if (_localizer == null && !WOApplication.application().isCachingEnabled()) {
 				observer().registerForLocalizationDidResetNotification();
+			}
 
 			_localizer = newLocalizer;
 			ERXLocalizer.setCurrentLocalizer(_localizer);
 
-			NSMutableArray languageList = new NSMutableArray(_localizer.language());
-			if (!languageList.containsObject("Nonlocalized"))
+			final NSMutableArray languageList = new NSMutableArray(_localizer.language());
+
+			if (!languageList.containsObject("Nonlocalized")) {
 				languageList.addObject("Nonlocalized");
+			}
+
 			setLanguages(languageList);
 		}
 	}
@@ -209,10 +219,13 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	@Override
 	public void setLanguages(NSArray languageList) {
 		super.setLanguages(languageList);
-		ERXLocalizer newLocalizer = ERXLocalizer.localizerForLanguages(languageList);
+
+		final ERXLocalizer newLocalizer = ERXLocalizer.localizerForLanguages(languageList);
+
 		if (!newLocalizer.equals(_localizer)) {
-			if (_localizer == null && !WOApplication.application().isCachingEnabled())
+			if (_localizer == null && !WOApplication.application().isCachingEnabled()) {
 				observer().registerForLocalizationDidResetNotification();
+			}
 
 			_localizer = newLocalizer;
 			ERXLocalizer.setCurrentLocalizer(_localizer);
@@ -223,8 +236,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * Returns the NSArray of language names available for this application.
 	 * This is simply a cover method of
 	 * {@link er.extensions.localization.ERXLocalizer#availableLanguages}, but
-	 * will be convenient for binding to dynamic elements like language selector
-	 * popup.
+	 * will be convenient for binding to dynamic elements like language selector popup.
 	 * 
 	 * @return NSArray of language name strings available for this application
 	 * @see #availableLanguagesForThisSession
@@ -241,11 +253,9 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * language array
 	 * ({@link er.extensions.localization.ERXLocalizer#availableLanguages()}).
 	 * <p>
-	 * Note that the order of the resulting language names is not defined at
-	 * this moment.
+	 * Note that the order of the resulting language names is not defined at this moment.
 	 * 
-	 * @return NSArray of language name strings available for this particular
-	 *         session
+	 * @return NSArray of language name strings available for this particular session
 	 * @see #availableLanguagesForTheApplication
 	 * @see ERXRequest#browserLanguages()
 	 * @see er.extensions.localization.ERXLocalizer#availableLanguages
@@ -261,28 +271,29 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * Returns the browser object representing the web browser's "user-agent"
+	 * @return Browser object representing the web browser's "user-agent"
 	 * string. You can obtain browser name, version, platform and Mozilla
 	 * version, etc. through this object. <br>
-	 * Good for WOConditional's condition binding to deal with different browser
-	 * versions.
-	 * 
-	 * @return browser object
+	 * Good for WOConditional's condition binding to deal with different browser versions.
 	 */
 	public ERXBrowser browser() {
 		if (_browser == null && context() != null) {
-			WORequest request = context().request();
+			final WORequest request = context().request();
+
 			if (request != null) {
-				ERXBrowserFactory browserFactory = ERXBrowserFactory.factory();
+				final ERXBrowserFactory browserFactory = ERXBrowserFactory.factory();
+
 				if (request instanceof ERXRequest) {
 					_browser = ((ERXRequest) request).browser();
 				}
 				else {
 					_browser = browserFactory.browserMatchingRequest(request);
 				}
+
 				browserFactory.retainBrowser(_browser);
 			}
 		}
+
 		return _browser;
 	}
 
@@ -310,9 +321,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 
 	}
 
-	/**
-	 * Overridden to post the notification that the session will sleep.
-	 */
 	@Override
 	public void sleep() {
 		NSNotificationCenter.defaultCenter().postNotification(SessionWillSleepNotification, this);
@@ -349,15 +357,15 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 */
 	private Boolean _didBacktrack = null;
 
-	/** flag to indicate if the last action was a direct action */
+	/**
+	 * flag to indicate if the last action was a direct action
+	 */
 	public boolean lastActionWasDA = false;
 
 	/**
-	 * Utility method that gets the context ID string from the passed in
-	 * request.
+	 * Utility method that gets the context ID string from the passed in request.
 	 * 
-	 * @param aRequest
-	 *            request to get the context id from
+	 * @param aRequest request to get the context id from
 	 * @return the context id as a string
 	 */
 	private String requestsContextID(WORequest aRequest) {
@@ -409,9 +417,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * Bringing application into KVC.
-	 * 
-	 * @return the application object
+	 * @return Cast application
 	 */
 	public ERXApplication application() {
 		return ERXApplication.erxApplication();
@@ -427,11 +433,14 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 			NSNotificationCenter.defaultCenter().removeObserver(_observer);
 			_observer = null;
 		}
+
 		if (_browser != null) {
 			ERXBrowserFactory.factory().releaseBrowser(_browser);
 			_browser = null;
 		}
+
 		log.debug("Will terminate, sessionId is {}", sessionID());
+
 		super.terminate();
 	}
 
@@ -531,8 +540,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 
 		int lastIndex = superString.lastIndexOf(">");
 		String toStr;
-		if (lastIndex > 0) { // ignores if ">" is the first char (lastIndex ==
-								// 0)
+		if (lastIndex > 0) { // ignores if ">" is the first char (lastIndex == 0)
 			toStr = superString.substring(0, lastIndex - 1) + thisString + ">";
 		}
 		else {
