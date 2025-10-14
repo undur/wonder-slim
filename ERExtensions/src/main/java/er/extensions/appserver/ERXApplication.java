@@ -1230,18 +1230,24 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	public void addBalancerRouteCookie(WOContext context) {
 		if (context != null && context.request() != null && context.response() != null) {
+
+			// FIXME: Shouldn't we be doing this during application initialization? // Hugi 2025-10-14
 			if (_proxyBalancerRoute == null) {
 				_proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase();
 				_proxyBalancerRoute = "." + _proxyBalancerRoute.replace('.', '_');
 			}
+
 			if (_proxyBalancerCookieName == null) {
 				_proxyBalancerCookieName = ("routeid_" + name()).toLowerCase();
 				_proxyBalancerCookieName = _proxyBalancerCookieName.replace('.', '_');
 			}
+
 			if (_proxyBalancerCookiePath == null) {
-				_proxyBalancerCookiePath = (System.getProperty("FixCookiePath") != null) ? System.getProperty("FixCookiePath") : "/";
+				var p = System.getProperty("FixCookiePath");
+				_proxyBalancerCookiePath = p != null ? p : "/";
 			}
-			WOCookie cookie = new WOCookie(_proxyBalancerCookieName, _proxyBalancerRoute, _proxyBalancerCookiePath, null, -1, context.request().isSecure(), true);
+
+			final WOCookie cookie = new WOCookie(_proxyBalancerCookieName, _proxyBalancerRoute, _proxyBalancerCookiePath, null, -1, context.request().isSecure(), true);
 			cookie.setExpires(null);
 			cookie.setSameSite(SameSite.LAX);
 			context.response().addCookie(cookie);
