@@ -236,7 +236,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this, "didFinishLaunching");
 		ERXNotification.DidHandleRequestNotification.addObserver(this, "addBalancerRouteCookieByNotification");
 
-		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXNotification.ApplicationDidCreateNotification.id(), this));
+		ERXNotification.ApplicationDidCreateNotification.postNotification(this);
 		
 		// FIXME: Quick fix for our resource manager's initialization issue. Fix // Hugi 2025-10-06
 		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {

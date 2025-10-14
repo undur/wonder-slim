@@ -2,6 +2,7 @@ package er.extensions.appserver;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequestHandler;
+import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
 import er.extensions.foundation.ERXUtilities;
@@ -68,9 +69,16 @@ public enum ERXNotification {
 	}
 	
 	/**
-	 * Register invoke [methodName] on [observer] when the notification is posted
+	 * Register an [observer] that will invoke [methodName] when a notification is posted
 	 */
 	public void addObserver( final Object observer, final String methodName ) {
 		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector(methodName), this.id(), null);
+	}
+	
+	/**
+	 * Post a notification with the attached [object]
+	 */
+	public void postNotification( final Object object ) {
+		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(this.id(), object));
 	}
 }
