@@ -46,7 +46,6 @@ import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
-import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.woextensions.error.WOExceptionPage;
@@ -533,7 +532,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public final void finishInitialization(NSNotification n) {
 		finishInitialization();
-		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXNotification.ApplicationDidFinishInitializationNotification.id(), this));
+		ERXNotification.ApplicationDidFinishInitializationNotification.postNotification(this);
 	}
 
 	/**
@@ -1211,7 +1210,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	@Override
 	public void terminate() {
-		NSNotificationCenter.defaultCenter().postNotification(ERXNotification.ApplicationWillTerminateNotification.id(), this);
+		ERXNotification.ApplicationWillTerminateNotification.postNotification(this);
 		super.terminate();
 	}
 

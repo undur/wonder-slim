@@ -13,7 +13,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSNotificationCenter;
 
 /**
  * Patch to prevent direct access to components via /wo/pagename.wo URLs
@@ -305,7 +304,7 @@ public class ERXComponentRequestHandler extends WORequestHandler {
 				aContext._setSenderID(aSenderID);
 				anApplication.awake();
 				aResponse = _dispatchWithPreparedApplication(anApplication, aContext, requestHandlerValues);
-				NSNotificationCenter.defaultCenter().postNotification(WORequestHandler.DidHandleRequestNotification, aContext);
+				ERXNotification.DidHandleRequestNotification.postNotification(aContext);
 
 				anApplication.sleep();
 			}

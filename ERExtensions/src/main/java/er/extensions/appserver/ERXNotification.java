@@ -72,13 +72,13 @@ public enum ERXNotification {
 	 * Register an [observer] that will invoke [methodName] when a notification is posted
 	 */
 	public void addObserver( final Object observer, final String methodName ) {
-		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector(methodName), this.id(), null);
+		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector(methodName), id(), null);
 	}
 	
 	/**
 	 * Post a notification with the attached [object]
 	 */
 	public void postNotification( final Object object ) {
-		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(this.id(), object));
+		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(id(), object));
 	}
 }
