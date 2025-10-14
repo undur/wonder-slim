@@ -232,9 +232,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		
 		startMonitorServer();
 
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("finishInitialization"), WOApplication.ApplicationWillFinishLaunchingNotification, null);
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("didFinishLaunching"), WOApplication.ApplicationDidFinishLaunchingNotification, null);
-		NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("addBalancerRouteCookieByNotification"), WORequestHandler.DidHandleRequestNotification, null);
+		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this, "finishInitialization");
+		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this, "didFinishLaunching");
+		ERXNotification.DidHandleRequestNotification.addObserver(this, "addBalancerRouteCookieByNotification");
 
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXNotification.ApplicationDidCreateNotification.id(), this));
 		

@@ -1,9 +1,14 @@
 package er.extensions.appserver;
 
+import com.webobjects.appserver.WOApplication;
+import com.webobjects.appserver.WORequestHandler;
+import com.webobjects.foundation.NSNotificationCenter;
+
+import er.extensions.foundation.ERXUtilities;
+
 /**
- * Notifications posted by us
- * 
- * FIXME: Go through these and see which, if any, deserve to survive // Hugi 2025-10-12
+ * Static references to notification types.
+ * Nicer than a string to keep track of where which notifications get observed and posted
  */
 
 public enum ERXNotification {
@@ -28,8 +33,27 @@ public enum ERXNotification {
 	/**
 	 * Notification to post when all application initialization processes are complete
 	 */
-	ApplicationDidFinishInitializationNotification ( "NSApplicationDidFinishInitializationNotification" );
+	ApplicationDidFinishInitializationNotification ( "NSApplicationDidFinishInitializationNotification" ),
 	
+	/**
+	 * FIXME: Docs 	// Hugi 2025-10-14
+	 */
+	ApplicationDidDispatchRequestNotification( WOApplication.ApplicationDidDispatchRequestNotification ),
+
+	/**
+	 * FIXME: Docs 	// Hugi 2025-10-14
+	 */
+	DidHandleRequestNotification( WORequestHandler.DidHandleRequestNotification ),
+	/**
+	 * FIXME: Docs 	// Hugi 2025-10-14
+	 */
+	ApplicationWillFinishLaunchingNotification( WOApplication.ApplicationWillFinishLaunchingNotification ),
+
+	/**
+	 * FIXME: Docs 	// Hugi 2025-10-14
+	 */
+	ApplicationDidFinishLaunchingNotification( WOApplication.ApplicationDidFinishLaunchingNotification );
+
 	private String _id;
 
 	ERXNotification( String id ) {
@@ -41,5 +65,12 @@ public enum ERXNotification {
 	 */
 	public String id() {
 		return _id;
+	}
+	
+	/**
+	 * Register invoke [methodName] on [observer] when the notification is posted
+	 */
+	public void addObserver( final Object observer, final String methodName ) {
+		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector(methodName), this.id(), null);
 	}
 }

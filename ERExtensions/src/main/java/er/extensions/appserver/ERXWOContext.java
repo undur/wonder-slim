@@ -69,7 +69,7 @@ public class ERXWOContext extends ERXAjaxContext {
 				if (observer == null) {
 					observer = new Observer();
 
-					NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector("applicationDidHandleRequest"), WOApplication.ApplicationDidDispatchRequestNotification, null);
+					ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( observer, "applicationDidHandleRequest" );
 				}
 			}
 		}
