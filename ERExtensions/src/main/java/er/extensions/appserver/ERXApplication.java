@@ -1227,18 +1227,17 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return EMPTY_STRING_ARRAY;
 	}
 
-	public void addBalancerRouteCookieByNotification(NSNotification notification) {
-		if (notification.object() instanceof WOContext wocontext) {
-			addBalancerRouteCookie(wocontext);
-		}
-	}
-
-	public void addBalancerRouteCookie(WOContext context) {
-		if (context != null && context.request() != null && context.response() != null) {
-			final WOCookie cookie = new WOCookie(_proxyBalancerCookieName, _proxyBalancerRoute, _proxyBalancerCookiePath, null, -1, context.request().isSecure(), true);
-			cookie.setExpires(null);
-			cookie.setSameSite(SameSite.LAX);
-			context.response().addCookie(cookie);
+	/**
+	 * Invoked on DidHandleRequestNotification to add the "balancer route cookie" to the current context's response 
+	 */
+	public void addBalancerRouteCookieByNotification(final NSNotification notification) {
+		if (notification.object() instanceof WOContext context) {
+			if (context.request() != null && context.response() != null) {
+				final WOCookie cookie = new WOCookie(_proxyBalancerCookieName, _proxyBalancerRoute, _proxyBalancerCookiePath, null, -1, context.request().isSecure(), true);
+				cookie.setExpires(null);
+				cookie.setSameSite(SameSite.LAX);
+				context.response().addCookie(cookie);
+			}
 		}
 	}
 
