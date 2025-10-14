@@ -100,22 +100,22 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * To support load balancing with mod_proxy
 	 */
-	private String _proxyBalancerRoute;
+	private final String _proxyBalancerRoute;
 
 	/**
 	 * To support load balancing with mod_proxy
 	 */
-	private String _proxyBalancerCookieName;
+	private final String _proxyBalancerCookieName;
 
 	/**
 	 * To support load balancing with mod_proxy
 	 */
-	private String _proxyBalancerCookiePath;
+	private final String _proxyBalancerCookiePath;
 
 	/**
 	 * Host name used for URL generation when no request is present (for example, in background tasks)
 	 */
-	private String _publicHost;
+	private final String _publicHost;
 
 	/**
 	 * Watches the state of the application's memory heap and handles low memory situations
@@ -229,7 +229,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		configureReplaceApplicationPath();
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
-		
+
 		startMonitorServer();
 
 		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this, "finishInitialization");
@@ -242,6 +242,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {
 			rmb._initContentTypes(); 
 		}
+		
+		final String fixCookiePathProperty = System.getProperty("FixCookiePath");
+		_proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase().replace('.', '_');
+		_proxyBalancerCookieName = ("routeid_" + name()).toLowerCase().replace('.', '_');
+		_proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
 	}
 
 	/**
@@ -1230,23 +1235,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	public void addBalancerRouteCookie(WOContext context) {
 		if (context != null && context.request() != null && context.response() != null) {
-
-			// FIXME: Shouldn't we be doing this during application initialization? // Hugi 2025-10-14
-			if (_proxyBalancerRoute == null) {
-				_proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase();
-				_proxyBalancerRoute = "." + _proxyBalancerRoute.replace('.', '_');
-			}
-
-			if (_proxyBalancerCookieName == null) {
-				_proxyBalancerCookieName = ("routeid_" + name()).toLowerCase();
-				_proxyBalancerCookieName = _proxyBalancerCookieName.replace('.', '_');
-			}
-
-			if (_proxyBalancerCookiePath == null) {
-				var p = System.getProperty("FixCookiePath");
-				_proxyBalancerCookiePath = p != null ? p : "/";
-			}
-
 			final WOCookie cookie = new WOCookie(_proxyBalancerCookieName, _proxyBalancerRoute, _proxyBalancerCookiePath, null, -1, context.request().isSecure(), true);
 			cookie.setExpires(null);
 			cookie.setSameSite(SameSite.LAX);
