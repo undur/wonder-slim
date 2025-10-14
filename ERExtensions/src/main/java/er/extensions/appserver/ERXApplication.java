@@ -888,24 +888,25 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return _streamingRequestHandlerKeys.containsObject(s);
 	}
 
+	/**
+	 * @return true if we're currently running in dev mode
+	 */
 	private static boolean checkIsDevelopmentMode() {
-		boolean developmentMode = false;
+
+		// If dev mode explicitly set, use that
 		if (ERXProperties.stringForKey("er.extensions.ERXApplication.developmentMode") != null) {
-			developmentMode = ERXProperties.booleanForKey("er.extensions.ERXApplication.developmentMode");
+			return ERXProperties.booleanForKey("er.extensions.ERXApplication.developmentMode");
 		}
-		else {
-			String ide = ERXProperties.stringForKey("WOIDE");
-			
-			if ("WOLips".equals(ide) || "Xcode".equals(ide)) {
-				developmentMode = true;
-			}
-			
-			if (!developmentMode) {
-				developmentMode = ERXProperties.booleanForKey("NSProjectBundleEnabled");
-			}
+
+		// If IDE set, we're in dev mode
+		final String woide = ERXProperties.stringForKey("WOIDE");
+
+		if ("WOLips".equals(woide) || "Xcode".equals(woide)) {
+			return true;
 		}
-		
-		return developmentMode;
+
+		// If NSProjectBundleEnabled, we're absolutely definitely in development
+		return ERXProperties.booleanForKey("NSProjectBundleEnabled");
 	}
 
 	/**
