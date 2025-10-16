@@ -79,7 +79,7 @@ public class ERXResponseCompression {
 		return contentTypeCheck && acceptEncodingCheck;
 	}
 
-	public static WOResponse compressResponse( final WOResponse response ) {
+	public static void compressResponse( final WOResponse response ) {
 	
 		final long start = System.currentTimeMillis();
 		final long inputBytesLength;
@@ -117,8 +117,6 @@ public class ERXResponseCompression {
 				}
 			}
 		}
-		
-		return response;
 	}
 	
 	private static class ERXCompressionUtilities {

@@ -846,7 +846,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	public WOResponse dispatchRequest(WORequest request) {
-		WOResponse response;
+		final WOResponse response;
 
 		if (requestHandlingLog.isDebugEnabled()) {
 			requestHandlingLog.debug("{}", request);
@@ -868,7 +868,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		if( ERXResponseCompression.responseCompressionEnabled() ) {
 			if( ERXResponseCompression.shouldCompress( request, response ) ) {
-				response = ERXResponseCompression.compressResponse( response );
+				ERXResponseCompression.compressResponse( response );
 			}
 		}
 
