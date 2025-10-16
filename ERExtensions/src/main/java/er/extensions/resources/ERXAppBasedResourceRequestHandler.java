@@ -12,7 +12,7 @@ import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXApplication;
 
-public class ERXWebServerResourceRequestHandler extends WORequestHandler {
+public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 
 	/**
 	 * Default request handler key
@@ -29,7 +29,7 @@ public class ERXWebServerResourceRequestHandler extends WORequestHandler {
 	 */
 	private final Map<String,CachedResourceResponse> _cache = new ConcurrentHashMap<>();
 
-	public ERXWebServerResourceRequestHandler() {
+	public ERXAppBasedResourceRequestHandler() {
 		_useCache = !ERXApplication.isDevelopmentModeSafe();
 	}
 
@@ -59,7 +59,7 @@ public class ERXWebServerResourceRequestHandler extends WORequestHandler {
 	 * @return A response for the given resource
 	 */
 	private WOResponse responseForResource(final String frameworkName, final String resourceName) {
-		final ERXResourceManagerAppBased resourceManager = (ERXResourceManagerAppBased) WOApplication.application().resourceManager();
+		final ERXAppBasedResourceManager resourceManager = (ERXAppBasedResourceManager) WOApplication.application().resourceManager();
 
 		final byte[] bytes = resourceManager.bytesForResourceNamed(resourceName, frameworkName, null);
 		

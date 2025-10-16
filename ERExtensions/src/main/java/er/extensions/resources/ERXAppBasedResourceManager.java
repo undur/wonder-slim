@@ -24,7 +24,7 @@ import er.extensions.appserver.ERXWOContext;
  * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05   
  */
 
-public class ERXResourceManagerAppBased extends ERXResourceManagerBase {
+public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 
 	/**
 	 * Generates a URL for the given resource. Format: .../App.woa/res/[framework]/[resourceName]?languages=[lang1,lang2,lang3]
@@ -36,7 +36,7 @@ public class ERXResourceManagerAppBased extends ERXResourceManagerBase {
 			frameworkName = "app";
 		}
 		
-		return context( request ).urlWithRequestHandlerKey(ERXWebServerResourceRequestHandler.KEY, frameworkName + "/" + resourceName, null);
+		return context( request ).urlWithRequestHandlerKey(ERXAppBasedResourceRequestHandler.KEY, frameworkName + "/" + resourceName, null);
 	}
 
 	/**
