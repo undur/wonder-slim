@@ -132,7 +132,7 @@ public class RouteTable {
 		map( pattern, new FunctionRouteHandler( function ) );
 	}
 
-	public void mapComponent( final String pattern, final Class<? extends WOComponent> componentClass ) {
+	public void map( final String pattern, final Class<? extends WOComponent> componentClass ) {
 		map( pattern, new ComponentRouteHandler( componentClass ) );
 	}
 
