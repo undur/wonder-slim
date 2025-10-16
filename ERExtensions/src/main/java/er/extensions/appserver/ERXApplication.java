@@ -152,21 +152,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static boolean _isDevelopmentModeCached;
 
 	/**
-	 * Application entry point.
+	 * Application entry point
 	 */
 	public static void main(String argv[], Class applicationClass) {
 		_wasERXApplicationMainInvoked = true;
 		useProjectBundleIfDeveloping();
 		ERXKVCReflectionHack.enable();
 		disablePBXProjectWatcher();
-		setup(argv);
-		WOApplication.main(argv, applicationClass);
-	}
 
-	/**
-	 * Called prior to actually initializing the app. Defines framework load order, class path order, checks patches etc.
-	 */
-	public static void setup(String[] argv) {
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
 
@@ -174,6 +167,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			ERXShutdownHook.useMe();
 			ERXShutdownHook.initERXShutdownHook();
 		}
+
+		WOApplication.main(argv, applicationClass);
 	}
 
 	public ERXApplication() {
