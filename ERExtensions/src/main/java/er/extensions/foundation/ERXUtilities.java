@@ -133,20 +133,20 @@ public class ERXUtilities {
 	 * Also, in case the top-level exception was a EOGeneralAdaptorException,
 	 * then you also get the failed ops and the sql exception.
 	 * 
-	 * @param e exception
 	 * @param context the current context
 	 * @return dictionary containing extra information for the current context.
 	 */
 	public static NSMutableDictionary extraInformationForExceptionInContext(WOContext context) {
-		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
+		final NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
 		extraInfo.addEntriesFromDictionary(informationForContext(context));
 		extraInfo.addEntriesFromDictionary(informationForBundles());
 		return extraInfo;
 	}
 
 	private static NSMutableDictionary<String, Object> informationForBundles() {
-		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
-		NSMutableDictionary<String, Object> bundleVersions = new NSMutableDictionary<String, Object>();
+		final NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
+		final NSMutableDictionary<String, Object> bundleVersions = new NSMutableDictionary<String, Object>();
+
 		for (Enumeration bundles = NSBundle._allBundlesReally().objectEnumerator(); bundles.hasMoreElements();) {
 			NSBundle bundle = (NSBundle) bundles.nextElement();
 			String version = versionStringForFrameworkNamed(bundle.name());
@@ -156,11 +156,13 @@ public class ERXUtilities {
 			bundleVersions.setObjectForKey(version, bundle.name());
 		}
 		extraInfo.setObjectForKey(bundleVersions, "Bundles");
+
 		return extraInfo;
 	}
 
 	private static NSMutableDictionary<String, Object> informationForContext(WOContext context) {
-		NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
+		final NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
+		
 		if (context != null) {
 			if (context.page() != null) {
 				extraInfo.setObjectForKey(context.page().name(), "CurrentPage");
@@ -168,19 +170,6 @@ public class ERXUtilities {
 					extraInfo.setObjectForKey(context.component().name(), "CurrentComponent");
 					if (context.component().parent() != null) {
 						extraInfo.setObjectForKey(ERXWOContext.componentPath(context), "CurrentComponentHierarchy");
-					}
-				}
-				// If this is a D2W component, get its D2W-related information
-				// from ERDirectToWeb.
-				NSSelector d2wSelector = new NSSelector("d2wContext");
-				if (d2wSelector.implementedByObject(context.page())) {
-					try {
-						Class erDirectToWebClazz = Class.forName("er.directtoweb.ERDirectToWeb");
-						NSSelector infoSelector = new NSSelector("informationForContext", new Class[] { WOContext.class });
-						NSDictionary d2wExtraInfo = (NSDictionary) infoSelector.invoke(erDirectToWebClazz, context);
-						extraInfo.addEntriesFromDictionary(d2wExtraInfo);
-					}
-					catch (Exception e) {
 					}
 				}
 			}
@@ -204,6 +193,7 @@ public class ERXUtilities {
 				extraInfo.setObjectForKey(context.session(), "Session");
 			}
 		}
+
 		return extraInfo;
 	}
 	
