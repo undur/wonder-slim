@@ -576,16 +576,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Used to instantiate a WOComponent when no context is available, typically outside of a session
-	 * 
-	 * @param pageName The name of the WOComponent to instantiate
-	 * @return created WOComponent with the given name
-	 */
-	public static WOComponent instantiatePage(String pageName) {
-		return application().pageWithName(pageName, ERXWOContext.newContext());
-	}
-
-	/**
 	 * Stops the application from handling any new requests. Will still handle requests from existing sessions.
 	 */
 	public void startRefusingSessions() {
