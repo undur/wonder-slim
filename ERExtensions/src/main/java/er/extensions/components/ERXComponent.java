@@ -45,6 +45,22 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
+	 * Override and return true for any components to which you would like to allow page level access.
+	 * 
+	 * @return true by default
+	 */
+	protected boolean isPageAccessAllowed() {
+		return true;
+	}
+
+	/**
+	 * Override to provide custom security checks. It is not necessary to call super on this method.
+	 * 
+	 * @throws SecurityException if the security check fails
+	 */
+	protected void checkAccess() throws SecurityException {}
+
+	/**
 	 * _checkAccess is called prior to all three phases of the R-R loop to
 	 * ensure that the user has permission to access this component. You should
 	 * override checkAccess to implement addition security checks.
@@ -55,6 +71,7 @@ public abstract class ERXComponent extends WOComponent {
 		if (!isPageAccessAllowed() && _isPage()) {
 			throw new SecurityException("You are not allowed to directly access the component '" + name() + "'.");
 		}
+
 		if (shouldCheckAccess()) {
 			checkAccess();
 		}
@@ -471,22 +488,5 @@ public abstract class ERXComponent extends WOComponent {
 	 */
 	protected NSArray<String> additionalJavascriptFiles() {
 		return null;
-	}
-
-	/**
-	 * Override and return true for any components to which you would like to allow page level access.
-	 * 
-	 * @return true by default
-	 */
-	protected boolean isPageAccessAllowed() {
-		return true;
-	}
-
-	/**
-	 * Override to provide custom security checks. It is not necessary to call super on this method.
-	 * 
-	 * @throws SecurityException if the security check fails
-	 */
-	protected void checkAccess() throws SecurityException {
 	}
 }
