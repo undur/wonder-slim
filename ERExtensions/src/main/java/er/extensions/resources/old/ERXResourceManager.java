@@ -1,4 +1,4 @@
-package er.extensions.resources;
+package er.extensions.resources.old;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -31,6 +31,7 @@ import com.webobjects.foundation._NSThreadsafeMutableDictionary;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.foundation.ERXProperties;
+import er.extensions.resources.ERXResourceManagerBase;
 
 /**
  * Replacement of the WOResourceManager which adds:

@@ -62,11 +62,11 @@ import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.resources.ERXResourceManager;
 import er.extensions.resources.ERXResourceManagerAppBased;
 import er.extensions.resources.ERXResourceManagerBase;
-import er.extensions.resources.ERXStaticResourceRequestHandler;
 import er.extensions.resources.ERXWebServerResourceRequestHandler;
+import er.extensions.resources.old.ERXResourceManager;
+import er.extensions.resources.old.ERXStaticResourceRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 

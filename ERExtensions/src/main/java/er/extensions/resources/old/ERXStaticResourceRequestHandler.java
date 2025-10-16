@@ -1,4 +1,4 @@
-package er.extensions.resources;
+package er.extensions.resources.old;
 
 import java.io.File;
 import java.io.FileInputStream;
