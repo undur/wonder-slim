@@ -64,9 +64,9 @@ import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.resources.ERXResourceManager;
 import er.extensions.resources.ERXResourceManagerAppBased;
-import er.extensions.resources.ERXResourceManagerAppBased.ERXWebServerResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.resources.ERXStaticResourceRequestHandler;
+import er.extensions.resources.ERXWebServerResourceRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 
@@ -204,7 +204,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
 
 		if( serveWebServerResourcesThroughApplication() ) {
-			registerRequestHandler( new ERXResourceManagerAppBased.ERXWebServerResourceRequestHandler(), ERXWebServerResourceRequestHandler.KEY );			
+			registerRequestHandler( new ERXWebServerResourceRequestHandler(), ERXWebServerResourceRequestHandler.KEY );			
 		}
 		else if (_rapidTurnaroundActiveForAnyProject() && isDirectConnectEnabled()) {
 			// If WS-resources are being served through the app, all resources should work fine. If not, we have to enable this hack for loading jar-resources during development.
