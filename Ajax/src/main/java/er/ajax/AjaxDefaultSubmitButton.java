@@ -9,7 +9,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.browser.ERXBrowser;
 import er.extensions.browser.ERXBrowserFactory;
-import er.extensions.components._private.ERXWOForm;
+import er.extensions.components.ERXWOForm;
 
 /**
  * Invisible form submit button that can be included as the first element in an Ajax submitted form so that hitting

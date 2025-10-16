@@ -30,12 +30,12 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation._NSUtilities;
 
 import er.extensions.appserver.ERXSession;
-import er.extensions.components._private.ERXWOForm;
-import er.extensions.components._private.ERXWOHyperlink;
-import er.extensions.components._private.ERXWORepetition;
-import er.extensions.components._private.ERXWOString;
-import er.extensions.components._private.ERXWOSwitchComponent;
-import er.extensions.components._private.ERXWOTextField;
+import er.extensions.components.ERXWOForm;
+import er.extensions.components.ERXWOHyperlink;
+import er.extensions.components.ERXWORepetition;
+import er.extensions.components.ERXWOString;
+import er.extensions.components.ERXWOSwitchComponent;
+import er.extensions.components.ERXWOTextField;
 
 /**
  * Contains some of Wonder's patches for WO's built in dynamic elements  

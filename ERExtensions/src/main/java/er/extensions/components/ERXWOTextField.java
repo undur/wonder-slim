@@ -1,4 +1,4 @@
-package er.extensions.components._private;
+package er.extensions.components;
 
 import java.math.BigDecimal;
 import java.text.Format;
