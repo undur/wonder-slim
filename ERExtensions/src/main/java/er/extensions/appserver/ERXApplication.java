@@ -749,13 +749,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * @return the name of the application executable (from WOApplication.name())
-	 */
-	public String rawName() {
-		return super.name();
-	}
-
-	/**
 	 * Workaround for WO 5.2 DirectAction lock-ups. As the super-implementation is empty,
 	 * it is fairly safe to override here to call the normal exception handling earlier than usual.
 	 * 
