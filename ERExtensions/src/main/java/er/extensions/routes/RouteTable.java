@@ -90,7 +90,7 @@ public class RouteTable {
 			routeHandler = NOT_FOUND_ROUTE_HANDLER;
 		}
 
-		return routeHandler.handle( RouteURL.create( routeURL ), request.context() );
+		return routeHandler.handle( new RouteInvocation( routeURL, request ) );
 	}
 
 	/**
@@ -123,11 +123,12 @@ public class RouteTable {
 		_routes.add( new Route( pattern, routeHandler ) );
 	}
 
+	@Deprecated
 	public void map( final String pattern, final BiFunction<RouteURL, WOContext, WOActionResults> function ) {
 		map( pattern, new BiFunctionRouteHandler( function ) );
 	}
 	
-	public void map( final String pattern, final Function<WORequest, WOActionResults> function ) {
+	public void map( final String pattern, final Function<RouteInvocation, WOActionResults> function ) {
 		map( pattern, new FunctionRouteHandler( function ) );
 	}
 
@@ -155,24 +156,24 @@ public class RouteTable {
 	 */
 	public static class NotFoundRouteHandler extends RouteHandler {
 		@Override
-		public WOActionResults handle( final RouteURL url, WOContext context ) {
+		public WOActionResults handle( final RouteInvocation invocation ) {
 			final WOResponse response = new WOResponse();
 			response.setStatus( 404 );
-			response.setContent( "No route found for URL: " + url );
+			response.setContent( "No route found for URL: " + invocation.url() );
 			return response;
 		}
 	}
 	
 	public static class FunctionRouteHandler extends RouteHandler {
-		private Function<WORequest, WOActionResults> _function;
+		private Function<RouteInvocation, WOActionResults> _function;
 		
-		public FunctionRouteHandler( final Function<WORequest, WOActionResults> function ) {
+		public FunctionRouteHandler( final Function<RouteInvocation, WOActionResults> function ) {
 			_function = function;
 		}
 		
 		@Override
-		public WOActionResults handle( RouteURL url, WOContext context ) {
-			return _function.apply(context.request());
+		public WOActionResults handle( RouteInvocation routeRequest ) {
+			return _function.apply(routeRequest);
 		}
 	}
 
@@ -184,8 +185,8 @@ public class RouteTable {
 		}
 
 		@Override
-		public WOActionResults handle( RouteURL url, WOContext context ) {
-			return _function.apply( url, context );
+		public WOActionResults handle( RouteInvocation invocation ) {
+			return _function.apply( invocation.routeURL(), invocation.request().context() );
 		}
 	}
 
@@ -197,8 +198,8 @@ public class RouteTable {
 		}
 
 		@Override
-		public WOActionResults handle( RouteURL url, WOContext context ) {
-			return WOApplication.application().pageWithName( _componentClass.getName(), context );
+		public WOActionResults handle( RouteInvocation invocation ) {
+			return WOApplication.application().pageWithName( _componentClass.getName(), invocation.request().context() );
 		}
 	}
 }
