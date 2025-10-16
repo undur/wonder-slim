@@ -892,19 +892,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	private static boolean checkIsDevelopmentMode() {
 
-		// If dev mode explicitly set, use that
 		if (ERXProperties.stringForKey("er.extensions.ERXApplication.developmentMode") != null) {
 			return ERXProperties.booleanForKey("er.extensions.ERXApplication.developmentMode");
 		}
 
-		// If IDE set, we're in dev mode
 		final String woide = ERXProperties.stringForKey("WOIDE");
 
 		if ("WOLips".equals(woide) || "Xcode".equals(woide)) {
 			return true;
 		}
 
-		// If NSProjectBundleEnabled, we're absolutely definitely in development
 		return ERXProperties.booleanForKey("NSProjectBundleEnabled");
 	}
 
@@ -912,12 +909,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @return whether or not the current application is in development mode
 	 */
 	public static boolean isDevelopmentModeSafe() {
-
-		if( _didFinishLaunchingInvoked ) {
-			return _isDevelopmentModeCached;
-		}
-
-		return checkIsDevelopmentMode();
+		return _didFinishLaunchingInvoked ? _isDevelopmentModeCached : checkIsDevelopmentMode();
 	}
 
 	/**
@@ -928,7 +920,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * This method is called by ERXWOContext and provides the application a hook to rewrite generated URLs.
+	 * Hook to rewrite generated URLs. Invoked by ERXWOContext.
 	 * 
 	 * You can also set "er.extensions.replaceApplicationPath.pattern" to the pattern
 	 * to match and "er.extensions.replaceApplicationPath.replace" to the value to replace it with.
@@ -942,23 +934,20 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [PT,L]
 	 * </code>
 	 * 
-	 * or Apache 1.3: <code>
-	 * RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [P,L]
-	 * </code>
-	 *
 	 * @param url the URL to rewrite
 	 * @return the rewritten URL
 	 */
-	public String _rewriteURL(String url) {
-		String processedURL = url;
+	public String _rewriteURL(final String url) {
+
 		if (url != null && _replaceApplicationPathPattern != null && _replaceApplicationPathReplace != null) {
-			processedURL = processedURL.replaceFirst(_replaceApplicationPathPattern, _replaceApplicationPathReplace);
+			return url.replaceFirst(_replaceApplicationPathPattern, _replaceApplicationPathReplace);
 		}
-		return processedURL;
+
+		return url;
 	}
 
 	/**
-	 * This method is called by ERXResourceManager and provides the application a hook to rewrite generated URLs for resources.
+	 * Hook for rewriting generated resource URLs. Invoked by ERXResourceManager. 
 	 *
 	 * @param url the URL to rewrite
 	 * @param bundle the bundle the resource is located in
@@ -980,10 +969,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	@Override
 	public String directConnectURL() {
-		String directConnectURL = super.directConnectURL();
+		final String directConnectURL = super.directConnectURL();
+
 		if (rewriteDirectConnectURL()) {
-			directConnectURL = _rewriteURL(directConnectURL);
+			return _rewriteURL(directConnectURL);
 		}
+
 		return directConnectURL;
 	}
 
@@ -1014,21 +1005,18 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns whether or not DirectConnect SSL should be enabled. If you set
-	 * this, please review the DirectConnect SSL section of the ERExtensions
-	 * sample Properties file to learn more about how to properly configure it.
-	 * 
-	 * @return whether or not DirectConnect SSL should be enabled
+	 * @return whether or not DirectConnect SSL should be enabled.
 	 * @property er.extensions.ERXApplication.ssl.enabled
+	 * 
+	 * If you set this, please review the DirectConnect SSL section of the ERExtensions
+	 * sample Properties file to learn more about how to properly configure it.
 	 */
 	public boolean sslEnabled() {
 		return ERXProperties.booleanForKey("er.extensions.ERXApplication.ssl.enabled");
 	}
 
 	/**
-	 * Returns the host name that will be used to bind the SSL socket to (defaults to host()).
-	 * 
-	 * @return the SSL socket host
+	 * @return The host name that will be used to bind the SSL socket to (defaults to host()).
 	 * @property er.extensions.ERXApplication.ssl.host
 	 */
 	public String sslHost() {
@@ -1040,8 +1028,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Sets an SSL host override.
-	 * 
 	 * @param sslHost an SSL host override
 	 */
 	public void _setSslHost(String sslHost) {
@@ -1049,9 +1035,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Returns the SSL port that will be used for DirectConnect SSL (defaults to 443). A value of 0 will cause WO to autogenerate an SSL port number.
-	 * 
-	 * @return the SSL port that will be used for DirectConnect SSL
+	 * @return Returns the SSL port that will be used for DirectConnect SSL (defaults to 443). A value of 0 will cause WO to autogenerate an SSL port number.
 	 * @property er.extensions.ERXApplication.ssl.port
 	 */
 	public int sslPort() {
@@ -1066,9 +1050,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Sets an SSL port override (called back by the ERXSecureAdaptor)
-	 * 
-	 * @param sslPort an ssl port override
+	 * @param sslPort an SSL port override (called back by the ERXSecureAdaptor)
 	 */
 	public void _setSslPort(int sslPort) {
 		_sslPort = sslPort;
