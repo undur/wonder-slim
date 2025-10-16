@@ -1,5 +1,6 @@
 package er.extensions.admin;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.webobjects.appserver.WOActionResults;
@@ -14,6 +15,8 @@ import er.extensions.appserver.ERXExceptionManager.LoggedException;
  */
 
 public class ERXExceptionManagementPage extends WOComponent {
+
+	private static final DateTimeFormatter DATE_WITH_TIME_FORMAT = DateTimeFormatter.ofPattern( "yyyy-MM-dd HH:mm" );
 
 	public LoggedException current;
 	public LoggedException selected;
@@ -49,5 +52,9 @@ public class ERXExceptionManagementPage extends WOComponent {
     public WOActionResults selectException() {
     	selected = current;
     	return null;
+    }
+    
+    public String currentDateTimeFormatted() {
+    	return current.dateTime().format(DATE_WITH_TIME_FORMAT);
     }
 }

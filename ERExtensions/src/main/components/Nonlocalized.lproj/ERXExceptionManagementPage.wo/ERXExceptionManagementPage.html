@@ -12,7 +12,7 @@
 		</tr>
 		<wo:repetition list="$exceptions" item="$current">
 			<tr>
-				<td><wo:link action="$selectException"><wo:ERXDate value="$current.dateTime" /></wo:link></td>
+				<td><wo:link action="$selectException"><wo:str value="$currentDateTimeFormatted" /></wo:link></td>
 				<td><wo:str value="$current.id" /></td>
 				<td><wo:str value="$current.throwable.class.simpleName" /></td>
 				<td><wo:str value="$current.throwable.message" /></td>
