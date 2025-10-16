@@ -221,7 +221,9 @@ public class ERXUtilities {
     }
 
 	/**
-	 * Wrapper class for everything related to that single method for obtaining a private field/method value 
+	 * Wrapper class for everything related to that single method for obtaining a private field/method value
+	 * 
+	 * FIXME: Delete and replace with a couple of methods // Hugi 2025-10-16
 	 */
 	public static class ERXPrivateer {
 
