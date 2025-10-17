@@ -226,12 +226,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		startMonitorServer();
 
-		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this, "finishInitialization");
-		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this, "didFinishLaunching");
-		ERXNotification.DidHandleRequestNotification.addObserver(this, "addBalancerRouteCookieByNotification");
-
-		ERXNotification.ApplicationDidCreateNotification.postNotification(this);
-		
 		// FIXME: Quick fix for our resource manager's initialization issue. Fix // Hugi 2025-10-06
 		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {
 			rmb._initContentTypes(); 
@@ -241,6 +235,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase().replace('.', '_');
 		_proxyBalancerCookieName = ("routeid_" + name()).toLowerCase().replace('.', '_');
 		_proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
+
+		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this, "finishInitialization");
+		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this, "didFinishLaunching");
+		ERXNotification.DidHandleRequestNotification.addObserver(this, "addBalancerRouteCookieByNotification");
+		
+		ERXNotification.ApplicationDidCreateNotification.postNotification(this);
 	}
 
 	/**
