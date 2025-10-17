@@ -22,6 +22,7 @@ import er.extensions.components.ERXWOComponentContent;
  * @author Charles Lloyd
  * @binding templateName
  */
+
 public class ERXWOTemplate extends WODynamicElement {
 
     private WOAssociation _templateName;
@@ -30,10 +31,13 @@ public class ERXWOTemplate extends WODynamicElement {
     public ERXWOTemplate(String s, NSDictionary associations, WOElement woelement) {
         super(s, associations, woelement);
         _templateName = (WOAssociation) associations.objectForKey("templateName");
+
         if(_templateName == null || !_templateName.isValueConstant()) {
             //throw new IllegalStateException("You must bind 'templateName' to a constant string: " + associations);
         }
+
         _template = woelement;
+
         if(_template == null) {
         	_template = new WONoContentElement();
         }
