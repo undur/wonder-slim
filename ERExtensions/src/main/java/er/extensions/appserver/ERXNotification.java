@@ -15,49 +15,50 @@ import er.extensions.foundation.ERXUtilities;
 public enum ERXNotification {
 	
 	/**
-	 * Notification to get posted when terminate() is called.
+	 * Posted when ERXApplication.terminate() is called (and before WOApplication.terminate() is invoked)
 	 */
 	ApplicationWillTerminateNotification( "ApplicationWillTerminateNotification" ),
 
 	/**
-	 * Notification to post when all bundles were loaded but before their principal was called
+	 * Posted when all bundles were loaded but before their principal was called
 	 * 
 	 * FIXME: This notification was posted by the (ERX)Loader. We need to implement at least that part again if we want to keep it // Hugi 2025-06-22 
 	 */
 	AllBundlesLoadedNotification( "NSBundleAllBundlesLoaded" ),
 
 	/**
-	 * Notification to post when all bundles were loaded but before their principal was called
+	 * Posted at the very end of the ERXApplication constructor
 	 */
 	ApplicationDidCreateNotification( "NSApplicationDidCreateNotification" ),
 
 	/**
-	 * Notification to post when all application initialization processes are complete
+	 * Posted when all application initialization processes are complete (after ERXApplication.finishInitialization() has been run)
 	 */
 	ApplicationDidFinishInitializationNotification ( "NSApplicationDidFinishInitializationNotification" ),
 	
 	/**
-	 * FIXME: Docs 	// Hugi 2025-10-14
+	 * FIXME: Docs?	// Hugi 2025-10-14
+	 */
+	ApplicationWillFinishLaunchingNotification( WOApplication.ApplicationWillFinishLaunchingNotification ),
+	
+	/**
+	 * FIXME: Docs?	// Hugi 2025-10-14
+	 */
+	ApplicationDidFinishLaunchingNotification( WOApplication.ApplicationDidFinishLaunchingNotification ),
+
+	/**
+	 * Posted just before WOApplication.dispatchRequest() returns
 	 */
 	ApplicationDidDispatchRequestNotification( WOApplication.ApplicationDidDispatchRequestNotification ),
 
 	/**
-	 * FIXME: Docs 	// Hugi 2025-10-14
+	 * Posted by request handler's at some point when they consider the request handled (what constitutes "handled" is for them to decide)
 	 */
-	DidHandleRequestNotification( WORequestHandler.DidHandleRequestNotification ),
-	/**
-	 * FIXME: Docs 	// Hugi 2025-10-14
-	 */
-	ApplicationWillFinishLaunchingNotification( WOApplication.ApplicationWillFinishLaunchingNotification ),
-
-	/**
-	 * FIXME: Docs 	// Hugi 2025-10-14
-	 */
-	ApplicationDidFinishLaunchingNotification( WOApplication.ApplicationDidFinishLaunchingNotification );
+	DidHandleRequestNotification( WORequestHandler.DidHandleRequestNotification );
 
 	private String _id;
 
-	ERXNotification( String id ) {
+	private ERXNotification( String id ) {
 		_id = id;
 	}
 	
