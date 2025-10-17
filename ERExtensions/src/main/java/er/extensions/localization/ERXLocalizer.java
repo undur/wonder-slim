@@ -464,7 +464,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 
 		// Let's go fishing
 		if (shortLanguage == null) {
-			NSDictionary<String, Object> dict = ERXUtilities.dictionaryFromPropertyList("Languages", "JavaWebObjects");
+			NSDictionary<String, Object> dict = ERXUtilities.readDictionaryPlistFromBundleResource("Languages", "JavaWebObjects");
 			if (dict != null) {
 				NSArray<String> keys = dict.allKeysForObject(aLanguage);
 				if (keys.count() > 0) {
@@ -545,18 +545,18 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		Object plist = null;
 
 		try {
-			plist = ERXUtilities.readPropertyListFromFileInFramework(fileName, aFrameWorkName, languageList, System.getProperty("file.encoding"));
+			plist = ERXUtilities.readPropertyListFromBundleResource(fileName, aFrameWorkName, languageList, System.getProperty("file.encoding"));
 		}
 		catch (IllegalArgumentException e) {
 			try {
 				// BUGFIX: we didnt use an encoding before, so java tried to
 				// guess the encoding. Now some Localizable.strings plists
 				// are encoded in MacRoman whereas others are UTF-16.
-				plist = ERXUtilities.readPropertyListFromFileInFramework(fileName, aFrameWorkName, languageList, "utf-16");
+				plist = ERXUtilities.readPropertyListFromBundleResource(fileName, aFrameWorkName, languageList, "utf-16");
 			}
 			catch (IllegalArgumentException e1) {
 				// OK, whatever it is, try to parse it!
-				plist = ERXUtilities.readPropertyListFromFileInFramework(fileName, aFrameWorkName, languageList, "utf-8");
+				plist = ERXUtilities.readPropertyListFromBundleResource(fileName, aFrameWorkName, languageList, "utf-8");
 			}
 		}
 

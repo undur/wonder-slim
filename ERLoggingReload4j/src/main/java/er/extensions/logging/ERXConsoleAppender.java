@@ -110,7 +110,7 @@ public class ERXConsoleAppender extends ConsoleAppender {
 						URL path = WOApplication.application().resourceManager().pathURLForResourceNamed(skipPatternsFile, framework, null);
 						if (path != null) {
 							try {
-								NSArray<String> skipPatternStrings = (NSArray<String>) ERXUtilities.readPropertyListFromFileInFramework(skipPatternsFile, framework, (NSArray)null, "utf-8");
+								NSArray<String> skipPatternStrings = (NSArray<String>) ERXUtilities.readPropertyListFromBundleResource(skipPatternsFile, framework, (NSArray)null, "utf-8");
 								if (skipPatternStrings != null) {
 									for (String skipPatternString : skipPatternStrings) {
 										try {

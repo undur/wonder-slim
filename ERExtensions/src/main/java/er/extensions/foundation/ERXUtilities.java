@@ -53,7 +53,7 @@ public class ERXUtilities {
 	 * @param encoding the encoding used with <code>fileName</code>
 	 * @return de-serialized object from the plist formatted file specified.
 	 */
-	public static Object readPropertyListFromFileInFramework(String fileName, String frameWorkName, NSArray<String> languageList, String encoding) {
+	public static Object readPropertyListFromBundleResource(String fileName, String frameWorkName, NSArray<String> languageList, String encoding) {
 		try( InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(fileName, frameWorkName, languageList)) {
 
 			if( stream == null ) {
@@ -75,8 +75,8 @@ public class ERXUtilities {
 	 * @param bundle NSBundle to which the resource belongs.
 	 * @return NSDictionary de-serialized from the property list.
 	 */
-	public static NSDictionary dictionaryFromPropertyList(String name, String bundleName) {
-		String string = ERXUtilities.stringFromResource(name, "plist", bundleName);
+	public static NSDictionary readDictionaryPlistFromBundleResource(String name, String bundleName) {
+		String string = ERXUtilities.readStringFromBundleResource(name, "plist", bundleName);
 		return (NSDictionary<?, ?>) NSPropertyListSerialization.propertyListFromString(string);
 	}
 
@@ -88,7 +88,7 @@ public class ERXUtilities {
 	 * @param bundle to look for the resource in
 	 * @return string of the given file specified in the bundle
 	 */
-	public static String stringFromResource(String name, String extension, String bundleName) {
+	public static String readStringFromBundleResource(String name, String extension, String bundleName) {
 
 		NSBundle bundle = NSBundle.bundleForName(bundleName);
 	

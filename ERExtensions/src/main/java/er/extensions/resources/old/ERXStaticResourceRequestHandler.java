@@ -90,7 +90,7 @@ public class ERXStaticResourceRequestHandler extends WORequestHandler {
 		if (_documentRoot == null) {
 			_documentRoot = ERXProperties.stringForKey("WODocumentRoot");
 			if(_documentRoot == null) {
-				NSDictionary dict = ERXUtilities.dictionaryFromPropertyList("WebServerConfig", "JavaWebObjects");
+				NSDictionary dict = ERXUtilities.readDictionaryPlistFromBundleResource("WebServerConfig", "JavaWebObjects");
 				_documentRoot = (String) dict.objectForKey("DocumentRoot");
 			}
 		}

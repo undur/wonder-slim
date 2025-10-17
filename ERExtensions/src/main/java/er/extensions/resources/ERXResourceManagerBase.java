@@ -47,7 +47,7 @@ public class ERXResourceManagerBase extends WOResourceManager {
 	 * @return MimeTypes obtained from the file "AdditionalMimeTypes.plist" in the given bundle. Empty map if file not present/empty.
 	 */
 	private static Map<String,String> additionalContentTypesFromBunde( final String bundleName ) {
-		final Map<String, String> m = (Map<String, String>)ERXUtilities.readPropertyListFromFileInFramework("AdditionalMimeTypes.plist", bundleName, null, "UTF-8");
+		final Map<String, String> m = (Map<String, String>)ERXUtilities.readPropertyListFromBundleResource("AdditionalMimeTypes.plist", bundleName, null, "UTF-8");
 		return m != null ? m : Collections.emptyMap(); 
 	}
 
