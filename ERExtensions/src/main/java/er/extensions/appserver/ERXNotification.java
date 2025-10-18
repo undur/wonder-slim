@@ -1,7 +1,7 @@
 package er.extensions.appserver;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 
 import com.webobjects.appserver.WOApplication;
@@ -74,7 +74,7 @@ public enum ERXNotification {
 	}
 	
 	/**
-	 * Register an [observer] that will invoke [methodName] when a notification is posted
+	 * Register an [observer] that will invoke [methodName] when the notification is posted
 	 */
 	public void addObserver( final Object observer, final String methodName ) {
 		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector(methodName), id(), null);
@@ -85,17 +85,16 @@ public enum ERXNotification {
 	 * 
 	 * FIXME: Experimental. Primitive. Ooga Booga Booga // Hugi 2025-10-18
 	 */
-	private static final List<Object> retainedObservers = new ArrayList<>();
+	private static final Set<Object> _retainedObservers = new CopyOnWriteArraySet<>();
 
 	/**
-	 * Register an [observer] that will invoke [methodName] when a notification is posted
+	 * Register the given Consumer to be invoked when the notification is posted
 	 * 
-	 * FIXME: Experimental // Hugi 2025-10-18
 	 * FIXME: Don't think NSNotificationCenter retains observers so we're explicitly retaining them ourselves _forever_ at the moment // Hugi 2025-10-18
 	 */
 	public void addObserver( final Consumer<NSNotification> notificationConsumer ) {
 		final GenericObserver observer = new GenericObserver( notificationConsumer );
-		retainedObservers.add( observer );
+		_retainedObservers.add( observer );
 		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector("consume"), id(), null);
 	}
 
