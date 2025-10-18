@@ -23,8 +23,6 @@ public class ERXWOContext extends ERXAjaxContext {
 	private boolean _generateCompleteURLs;
 	private boolean _generateCompleteResourceURLs;
 	
-	private static final boolean IS_DEV = ERXApplication.isDevelopmentModeSafe();
-
 	private static final String CONTEXT_KEY = "wocontext";
 	private static final String CONTEXT_DICTIONARY_KEY = "ERXWOContext.dict";
 
@@ -248,7 +246,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	@Override
 	protected String relativeURLWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString) {
 		String result = super.relativeURLWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString);
-		if(IS_DEV && !WOApplication.application().isDirectConnectEnabled()) {
+		if(ERXApplication.isDevelopmentModeSafe() && !WOApplication.application().isDirectConnectEnabled()) {
 			String extension = "." + WOApplication.application().applicationExtension();
 			String replace = extension + "/-" + WOApplication.application().port();
 			if(!result.contains(replace) && result.contains(extension)) {
