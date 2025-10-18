@@ -48,68 +48,34 @@ public class ERXUtilities {
 	 * @param encoding the encoding used with <code>fileName</code>
 	 * @return de-serialized object from the plist formatted file specified.
 	 */
-	public static Object readPropertyListFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, String encoding) {
-		try( final InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(filename, frameworkName, languages)) {
+	public static Object readPListFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, String encoding) {
+		return NSPropertyListSerialization.propertyListFromString(readStringFromBundleResource( filename, frameworkName, languages, encoding));
+	}
 
+	/**
+	 * Reads a file in from the file system for the given set of languages and then
+	 * parses the file as if it were a property list, using the specified encoding.
+	 *
+	 * @param filename name of the file
+	 * @param frameworkName name of the framework, <code>null</code> or 'app' for the application bundle.
+	 * @param languages language list search order
+	 * @param encoding the encoding used with <code>fileName</code>
+	 * @return de-serialized object from the plist formatted file specified.
+	 */
+	public static String readStringFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, String encoding) {
+		try( final InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(filename, frameworkName, languages)) {
+			
 			if( stream == null ) {
 				return null;
 			}
-
-			final String stringFromFile = new String(stream.readAllBytes(), encoding);
-			return NSPropertyListSerialization.propertyListFromString(stringFromFile);
+			
+			return new String(stream.readAllBytes(), encoding);
 		}
 		catch (IOException ioe) {
 			throw new UncheckedIOException(ioe);
 		}
 	}
 
-	/**
-	 * Creates an NSDictionary from a resource associated with a given bundle that is in property list format.
-	 * 
-	 * @param filename name of the file or resource.
-	 * @param bundle NSBundle to which the resource belongs.
-	 * @return NSDictionary de-serialized from the property list.
-	 */
-	public static NSDictionary readDictionaryPlistFromBundleResource(final String filename, final String bundleName) {
-		final String string = ERXUtilities.readStringFromBundleResource(filename +".plist", bundleName);
-		return (NSDictionary<?, ?>) NSPropertyListSerialization.propertyListFromString(string);
-	}
-
-	/**
-	 * Retrieves a given string for a given name, extension and bundle.
-	 * 
-	 * @param filename of the resource, including extensions
-	 * @param bundle to look for the resource in
-	 * @return string content of the given file specified in the bundle
-	 */
-	public static String readStringFromBundleResource(final String filename, final String bundleName) {
-
-		NSBundle bundle = NSBundle.bundleForName(bundleName);
-	
-		if (bundle == null) {
-			bundle = NSBundle.mainBundle();
-		}
-
-		final String path = bundle.resourcePathForLocalizedResourceNamed(filename, null);
-	
-		if( path == null ) {
-			return null;
-		}
-
-		try (final InputStream stream = bundle.inputStreamForResourcePath(path)) {
-
-			if (stream == null) {
-				return null;
-			}
-
-			return new String(stream.readAllBytes());
-		}
-		catch (IOException ioe) {
-			throw new UncheckedIOException(ioe);
-//				log.warn("IOException when stringFromResource({}.{} in bundle {}", filename, extension, bundle.name());
-		}
-	}
-	
 	/**
 	 * @return true if [string] is null or empty
 	 */

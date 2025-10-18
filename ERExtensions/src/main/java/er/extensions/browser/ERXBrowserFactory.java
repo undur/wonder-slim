@@ -404,7 +404,7 @@ public class ERXBrowserFactory {
     private boolean isRobot(String userAgent) {
     	synchronized (robotExpressions) {
 			if(robotExpressions.count()==0) {
-				String strings = ERXUtilities.readStringFromBundleResource("robots.txt", "ERExtensions");
+				String strings = ERXUtilities.readStringFromBundleResource("robots.txt", "ERExtensions", null, "utf-8");
 				for (String item : NSArray.componentsSeparatedByString(strings, "\n")) {
 					if(item.trim().length() > 0 && item.charAt(0) != '#') {
 						robotExpressions.addObject(Pattern.compile(item));
