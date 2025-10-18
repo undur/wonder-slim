@@ -1,5 +1,7 @@
 package er.extensions.appserver;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.webobjects.appserver.WOApplication;
@@ -79,12 +81,22 @@ public enum ERXNotification {
 	}
 
 	/**
+	 * Keeps references to observers added using lambda-style syntax (so they don't get garbage collected)
+	 * 
+	 * FIXME: Experimental. Primitive. Ooga Booga Booga // Hugi 2025-10-18
+	 */
+	private static final List<Object> retainedObservers = new ArrayList<>();
+
+	/**
 	 * Register an [observer] that will invoke [methodName] when a notification is posted
 	 * 
-	 * FIXME: This functionality is experimental. Not sure NSNotificationCenter retains objects it's watching, might have to do that explicitly // Hugi 2025-10-18
+	 * FIXME: Experimental // Hugi 2025-10-18
+	 * FIXME: Don't think NSNotificationCenter retains observers so we're explicitly retaining them ourselves _forever_ at the moment // Hugi 2025-10-18
 	 */
 	public void addObserver( final Consumer<NSNotification> notificationConsumer ) {
-		NSNotificationCenter.defaultCenter().addObserver(new GenericObserver( notificationConsumer ), ERXUtilities.notificationSelector("consume"), id(), null);
+		final GenericObserver observer = new GenericObserver( notificationConsumer );
+		retainedObservers.add( observer );
+		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector("consume"), id(), null);
 	}
 
 	/**
