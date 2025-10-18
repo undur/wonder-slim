@@ -14,9 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
@@ -32,8 +29,6 @@ import er.extensions.appserver.ERXWOContext;
 
 public class ERXUtilities {
 
-	private static final Logger log = LoggerFactory.getLogger(ERXUtilities.class);
-
 	private static final Class[] NotificationClassArray = { com.webobjects.foundation.NSNotification.class };
 
 	/**
@@ -47,14 +42,14 @@ public class ERXUtilities {
 	 * Reads a file in from the file system for the given set of languages and then
 	 * parses the file as if it were a property list, using the specified encoding.
 	 *
-	 * @param fileName name of the file
-	 * @param frameWorkName name of the framework, <code>null</code> or 'app' for the application bundle.
-	 * @param languageList language list search order
+	 * @param filename name of the file
+	 * @param frameworkName name of the framework, <code>null</code> or 'app' for the application bundle.
+	 * @param languages language list search order
 	 * @param encoding the encoding used with <code>fileName</code>
 	 * @return de-serialized object from the plist formatted file specified.
 	 */
-	public static Object readPropertyListFromBundleResource(String fileName, String frameWorkName, NSArray<String> languageList, String encoding) {
-		try( InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(fileName, frameWorkName, languageList)) {
+	public static Object readPropertyListFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, String encoding) {
+		try( final InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(filename, frameworkName, languages)) {
 
 			if( stream == null ) {
 				return null;
@@ -71,24 +66,23 @@ public class ERXUtilities {
 	/**
 	 * Creates an NSDictionary from a resource associated with a given bundle that is in property list format.
 	 * 
-	 * @param name name of the file or resource.
+	 * @param filename name of the file or resource.
 	 * @param bundle NSBundle to which the resource belongs.
 	 * @return NSDictionary de-serialized from the property list.
 	 */
-	public static NSDictionary readDictionaryPlistFromBundleResource(String name, String bundleName) {
-		String string = ERXUtilities.readStringFromBundleResource(name, "plist", bundleName);
+	public static NSDictionary readDictionaryPlistFromBundleResource(final String filename, final String bundleName) {
+		final String string = ERXUtilities.readStringFromBundleResource(filename +".plist", bundleName);
 		return (NSDictionary<?, ?>) NSPropertyListSerialization.propertyListFromString(string);
 	}
 
 	/**
 	 * Retrieves a given string for a given name, extension and bundle.
 	 * 
-	 * @param name of the resource
-	 * @param extension of the resource, example: txt or rtf
+	 * @param filename of the resource, including extensions
 	 * @param bundle to look for the resource in
-	 * @return string of the given file specified in the bundle
+	 * @return string content of the given file specified in the bundle
 	 */
-	public static String readStringFromBundleResource(String name, String extension, String bundleName) {
+	public static String readStringFromBundleResource(final String filename, final String bundleName) {
 
 		NSBundle bundle = NSBundle.bundleForName(bundleName);
 	
@@ -96,19 +90,24 @@ public class ERXUtilities {
 			bundle = NSBundle.mainBundle();
 		}
 
-		String path = bundle.resourcePathForLocalizedResourceNamed(name + (extension == null || extension.length() == 0 ? "" : "." + extension), null);
+		final String path = bundle.resourcePathForLocalizedResourceNamed(filename, null);
 	
-		if (path != null) {
-			try( InputStream stream = bundle.inputStreamForResourcePath(path)) {
-				byte bytes[] = stream.readAllBytes();
-				return new String(bytes);
-			}
-			catch (IOException e) {
-				log.warn("IOException when stringFromResource({}.{} in bundle {}", name, extension, bundle.name());
-			}
+		if( path == null ) {
+			return null;
 		}
-	
-		return null;
+
+		try (final InputStream stream = bundle.inputStreamForResourcePath(path)) {
+
+			if (stream == null) {
+				return null;
+			}
+
+			return new String(stream.readAllBytes());
+		}
+		catch (IOException ioe) {
+			throw new UncheckedIOException(ioe);
+//				log.warn("IOException when stringFromResource({}.{} in bundle {}", filename, extension, bundle.name());
+		}
 	}
 	
 	/**
