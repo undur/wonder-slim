@@ -21,20 +21,29 @@ import er.extensions.foundation.ERXThreadStorage;
 
 public class ERXWOContext extends ERXAjaxContext {
 
-	private static Observer observer;
 	private boolean _generateCompleteURLs;
 	private boolean _generateCompleteResourceURLs;
 	
 	private static final boolean IS_DEV = ERXApplication.isDevelopmentModeSafe();
 
-	public static final String CONTEXT_KEY = "wocontext";
-	public static final String CONTEXT_DICTIONARY_KEY = "ERXWOContext.dict";
+	private static final String CONTEXT_KEY = "wocontext";
+	private static final String CONTEXT_DICTIONARY_KEY = "ERXWOContext.dict";
+
+	/**
+	 * The context observer is created and registered once pr. application and will handle resetting
+	 * currentContext and the context dictionary for every request dispatch
+	 */
+	private static final Observer observer = new Observer();
 
 	public static class Observer {
-		public void applicationDidHandleRequest(NSNotification n) {
+		public void applicationDidDispatchRequest(NSNotification n) {
 			ERXWOContext.setCurrentContext(null);
 			ERXThreadStorage.removeValueForKey(ERXWOContext.CONTEXT_DICTIONARY_KEY);
 		}
+	}
+
+	static {
+		ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( observer, "applicationDidDispatchRequest" );
 	}
 
 	/**
@@ -62,20 +71,13 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	public static NSMutableDictionary contextDictionary() {
-		if (observer == null) {
-			synchronized (ERXWOContext.class) {
-				if (observer == null) {
-					observer = new Observer();
-
-					ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( observer, "applicationDidHandleRequest" );
-				}
-			}
-		}
 		NSMutableDictionary contextDictionary = ERXWOContext._contextDictionary();
+
 		if (contextDictionary == null) {
 			contextDictionary = new NSMutableDictionary();
 			ERXThreadStorage.takeValueForKey(contextDictionary, ERXWOContext.CONTEXT_DICTIONARY_KEY);
 		}
+
 		return contextDictionary;
 	}
 
