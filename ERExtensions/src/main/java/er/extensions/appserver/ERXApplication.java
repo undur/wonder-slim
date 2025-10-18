@@ -240,9 +240,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_sslHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.ssl.host", host());
 		_sslPort = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.ssl.port", 443);
 
-		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this, "finishInitialization");
-		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this, "didFinishLaunching");
-		ERXNotification.DidHandleRequestNotification.addObserver(this, "addBalancerRouteCookieByNotification");
+		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this::finishInitialization);
+		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this::didFinishLaunching);
+		ERXNotification.DidHandleRequestNotification.addObserver(this::addBalancerRouteCookieByNotification);
 		
 		ERXNotification.ApplicationDidCreateNotification.postNotification(this);
 	}
