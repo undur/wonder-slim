@@ -63,8 +63,8 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.resources.ERXAppBasedResourceManager;
-import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
+import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.resources.old.ERXResourceManager;
 import er.extensions.resources.old.ERXStaticResourceRequestHandler;
 import er.extensions.statistics.ERXStats;
@@ -235,6 +235,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase().replace('.', '_');
 		_proxyBalancerCookieName = ("routeid_" + name()).toLowerCase().replace('.', '_');
 		_proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
+
+		// FIXME: We might potentially have to initialize these later, since I'm not sure host() is ready — and apparently the SSL adaptor invokes setSSLPort after starting // Hugi 2025-10-18
+		_sslHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.ssl.host", host());
+		_sslPort = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.ssl.port", 443);
 
 		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this, "finishInitialization");
 		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this, "didFinishLaunching");
@@ -998,11 +1002,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @property er.extensions.ERXApplication.ssl.host
 	 */
 	public String sslHost() {
-		String sslHost = _sslHost;
-		if (sslHost == null) {
-			sslHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.ssl.host", host());
-		}
-		return sslHost;
+		return _sslHost;
 	}
 
 	/**
@@ -1017,14 +1017,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @property er.extensions.ERXApplication.ssl.port
 	 */
 	public int sslPort() {
-		int sslPort;
-		if (_sslPort != null) {
-			sslPort = _sslPort.intValue();
-		}
-		else {
-			sslPort = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.ssl.port", 443);
-		}
-		return sslPort;
+		return _sslPort;
 	}
 
 	/**
