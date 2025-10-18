@@ -1,5 +1,7 @@
 package er.extensions.appserver;
 
+import java.util.function.Consumer;
+
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.foundation.NSNotification;
@@ -75,11 +77,36 @@ public enum ERXNotification {
 	public void addObserver( final Object observer, final String methodName ) {
 		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector(methodName), id(), null);
 	}
-	
+
+	/**
+	 * Register an [observer] that will invoke [methodName] when a notification is posted
+	 * 
+	 * FIXME: This functionality is experimental. Not sure NSNotificationCenter retains objects it's watching, might have to do that explicitly // Hugi 2025-10-18
+	 */
+	public void addObserver( final Consumer<NSNotification> notificationConsumer ) {
+		NSNotificationCenter.defaultCenter().addObserver(new GenericObserver( notificationConsumer ), ERXUtilities.notificationSelector("consume"), id(), null);
+	}
+
 	/**
 	 * Post a notification with the attached [object]
 	 */
 	public void postNotification( final Object object ) {
 		NSNotificationCenter.defaultCenter().postNotification(new NSNotification(id(), object));
+	}
+	
+	/**
+	 * Wraps a Notification Consumer so we can register observers using lambda syntax
+	 */
+	public static class GenericObserver {
+		
+		private final Consumer<NSNotification> _consumer;
+		
+		public GenericObserver( Consumer<NSNotification> consumer ) {
+			_consumer = consumer;
+		}
+		
+		public void consume( NSNotification n ) {
+			_consumer.accept(n);
+		}
 	}
 }
