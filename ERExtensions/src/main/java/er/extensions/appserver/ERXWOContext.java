@@ -12,7 +12,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
-import com.webobjects.foundation.NSNotification;
 
 import er.extensions.appserver.ajax.ERXAjaxContext;
 import er.extensions.foundation.ERXMutableURL;
@@ -30,20 +29,13 @@ public class ERXWOContext extends ERXAjaxContext {
 	private static final String CONTEXT_DICTIONARY_KEY = "ERXWOContext.dict";
 
 	/**
-	 * The context observer is created and registered once pr. application and will handle resetting
-	 * currentContext and the context dictionary for every request dispatch
+	 * An observer object registered for resetting currentContext() and contextDictionary() on every request dispatch
 	 */
-	private static final Observer observer = new Observer();
-
-	public static class Observer {
-		public void applicationDidDispatchRequest(NSNotification n) {
-			ERXWOContext.setCurrentContext(null);
-			ERXThreadStorage.removeValueForKey(ERXWOContext.CONTEXT_DICTIONARY_KEY);
-		}
-	}
-
 	static {
-		ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( observer, "applicationDidDispatchRequest" );
+		ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( notification -> {
+			ERXWOContext.setCurrentContext(null);
+			ERXThreadStorage.removeValueForKey(ERXWOContext.CONTEXT_DICTIONARY_KEY);			
+		});
 	}
 
 	/**
