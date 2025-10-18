@@ -27,7 +27,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	private static final String CONTEXT_DICTIONARY_KEY = "ERXWOContext.dict";
 
 	/**
-	 * An observer object registered for resetting currentContext() and contextDictionary() on every request dispatch
+	 * Register an observer for resetting currentContext() and contextDictionary() after request dispatch
 	 */
 	static {
 		ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( notification -> {
@@ -153,10 +153,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		return (ERXWOContext) app.createContextForRequest(dummyRequest);
 	}
 	
-	public <T extends ERXRequest> T erxRequest() {
-		return (T) request();
-	}
-
 	public NSMutableDictionary mutableUserInfo() {
 		return contextDictionary();
 	}
