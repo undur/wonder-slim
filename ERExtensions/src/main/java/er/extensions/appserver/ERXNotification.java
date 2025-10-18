@@ -109,16 +109,10 @@ public enum ERXNotification {
 	/**
 	 * Wraps a Notification Consumer so we can register observers using lambda syntax
 	 */
-	public static class GenericObserver {
-		
-		private final Consumer<NSNotification> _consumer;
-		
-		public GenericObserver( Consumer<NSNotification> consumer ) {
-			_consumer = consumer;
-		}
+	public record GenericObserver( Consumer<NSNotification> consumer ) {
 		
 		public void consume( NSNotification n ) {
-			_consumer.accept(n);
+			consumer.accept(n);
 		}
 	}
 }
