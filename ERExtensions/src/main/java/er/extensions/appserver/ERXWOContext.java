@@ -36,14 +36,18 @@ public class ERXWOContext extends ERXAjaxContext {
 		});
 	}
 
+	public ERXWOContext(WORequest worequest) {
+		super(worequest);
+	}
+
 	/**
 	 * @return The existing session if any is given in the form values or URL, or else <code>null</code>
 	 */
 	public WOSession existingSession() {
-		String sessionID = _requestSessionID();
+		final String requestSessionID = _requestSessionID();
 
-		if (!super.hasSession() && sessionID != null) {
-			WOApplication.application().restoreSessionWithID(sessionID, this);
+		if (!super.hasSession() && requestSessionID != null) {
+			WOApplication.application().restoreSessionWithID(requestSessionID, this);
 		}
 
 		return _session();
@@ -54,10 +58,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	 */
 	@Override
 	public boolean hasSession() {
-		if (super.hasSession()) {
-			return true;
-		}
-		return existingSession() != null;
+		return super.hasSession() || existingSession() != null; 
 	}
 
 	public static NSMutableDictionary contextDictionary() {
@@ -82,10 +83,6 @@ public class ERXWOContext extends ERXAjaxContext {
 	protected static NSMutableDictionary _contextDictionary() {
 		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(ERXWOContext.CONTEXT_DICTIONARY_KEY);
 		return contextDictionary;
-	}
-
-	public ERXWOContext(WORequest worequest) {
-		super(worequest);
 	}
 	
 	@Override
