@@ -190,9 +190,12 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * one instance of your app deployed). 
 	 */
 	protected void _preprocessURL() {
-		if (ERXProperties.booleanForKey("er.extensions.ERXWOContext.forceRemoveApplicationNumber")) {
-			_url().setApplicationNumber(null);
-		}
+// 		FIXME: We've disabled forceRemoveApplicationNumber this as it isn't documented anywhere and funcitonality is unclear. But we might want to keep  it // Hugi 2025-10-18
+//		In any case, the number of invocations to this method are huge so not doing the property lookup is probably a performance gain (although not huge)
+//		
+//		if (ERXProperties.booleanForKey("er.extensions.ERXWOContext.forceRemoveApplicationNumber")) {
+//			_url().setApplicationNumber(null);
+//		}
 	}
 
 	protected String _postprocessURL(String url) {
