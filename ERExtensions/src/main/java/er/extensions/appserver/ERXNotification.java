@@ -49,9 +49,14 @@ public enum ERXNotification {
 	 * FIXME: Docs?	// Hugi 2025-10-14
 	 */
 	ApplicationDidFinishLaunchingNotification( WOApplication.ApplicationDidFinishLaunchingNotification ),
+	
+	/**
+	 * Posted before WOApplication.dispatchRequest() actually handles the request it's main work. Notification object is the request about to be handled.
+	 */
+	ApplicationWillDispatchRequestNotification( WOApplication.ApplicationWillDispatchRequestNotification ),
 
 	/**
-	 * Posted just before WOApplication.dispatchRequest() returns
+	 * Posted before WOApplication.dispatchRequest() returns. Notification object is the response about to be returned.
 	 */
 	ApplicationDidDispatchRequestNotification( WOApplication.ApplicationDidDispatchRequestNotification ),
 
