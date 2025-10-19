@@ -21,7 +21,7 @@ public class ERXTimestampFormatter extends NSTimestampFormatter {
 	 */
 	private static final Map<String, NSTimestampFormatter> _repository = new Hashtable<>();
 
-	protected static final String DefaultKey = "ERXTimestampFormatter.DefaultKey";
+	private static final String DefaultKey = "ERXTimestampFormatter.DefaultKey";
 
 	/**
 	 * The default pattern used in the UI
@@ -33,16 +33,29 @@ public class ERXTimestampFormatter extends NSTimestampFormatter {
 		_repository.put(DefaultKey, new ERXTimestampFormatter());
 	}
 
+	public ERXTimestampFormatter() {
+		super();
+	}
+
+	public ERXTimestampFormatter(String pattern) {
+		super(pattern);
+	}
+
+	public ERXTimestampFormatter(String pattern, DateFormatSymbols symbols) {
+		super(pattern, symbols);
+	}
+
 	/**
 	 * The default pattern used by WOString and friends when no pattern is set.
 	 * Looks like this only for compatibility's sake.
 	 */
 	public static Format defaultDateFormatterForObject(Object object) {
-		Format result = null;
-		if (object != null && object instanceof NSTimestamp) {
-			result = dateFormatterForPattern("%Y/%m/%d");
+
+		if (object instanceof NSTimestamp) {
+			return dateFormatterForPattern("%Y/%m/%d");
 		}
-		return result;
+
+		return null;
 	}
 
 	/**
@@ -52,6 +65,7 @@ public class ERXTimestampFormatter extends NSTimestampFormatter {
 	 */
 	public static NSTimestampFormatter dateFormatterForPattern(String pattern) {
 		NSTimestampFormatter formatter;
+
 		if (ERXLocalizer.useLocalizedFormatters()) {
 			ERXLocalizer localizer = ERXLocalizer.currentLocalizer();
 			formatter = (NSTimestampFormatter) localizer.localizedDateFormatForKey(pattern);
@@ -65,6 +79,7 @@ public class ERXTimestampFormatter extends NSTimestampFormatter {
 				}
 			}
 		}
+
 		return formatter;
 	}
 
@@ -86,18 +101,5 @@ public class ERXTimestampFormatter extends NSTimestampFormatter {
 				}
 			}
 		}
-	}
-
-	
-	public ERXTimestampFormatter() {
-		super();
-	}
-
-	public ERXTimestampFormatter(String arg0) {
-		super(arg0);
-	}
-
-	public ERXTimestampFormatter(String arg0, DateFormatSymbols arg1) {
-		super(arg0, arg1);
 	}
 }

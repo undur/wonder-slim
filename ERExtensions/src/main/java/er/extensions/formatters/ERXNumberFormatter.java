@@ -31,8 +31,11 @@ import er.extensions.localization.ERXLocalizer;
  */
 public class ERXNumberFormatter extends NSNumberFormatter {
 
-	/** holds a reference to the repository */
+	/**
+	 * Holds a reference to the repository
+	 */
 	private static Map<String, NSNumberFormatter> _repository = new Hashtable<>();
+	
 	protected static final String DefaultKey = "ERXNumberFormatter.DefaultKey";
 	
 	static {
@@ -45,45 +48,54 @@ public class ERXNumberFormatter extends NSNumberFormatter {
 	private String _operator;
     private String _stringForNegativeInfinity = "-Inf";
     private String _stringForPositiveInfinity = "+Inf";
-	 
+
+    public ERXNumberFormatter() {}
+
+    public ERXNumberFormatter(String pattern) {
+    	super(pattern);
+    }
+    
     /**
-     * Returns the default shared instance
-     * @return shared instance
+     * @return the default shared instance
      */
     public static NSNumberFormatter sharedInstance() {
          return numberFormatterForPattern(DefaultKey);
     }
 
-	/**
-	 * @param object
-	 */
 	public static Format defaultNumberFormatterForObject(Object object) {
 		Format result = null;
+
 		if(object != null && !(object instanceof String)) {
-			if((object instanceof Double) || (object instanceof BigDecimal) || (object instanceof Float))
+			if((object instanceof Double) || (object instanceof BigDecimal) || (object instanceof Float)) {
 				result = numberFormatterForPattern("#,##0.00;-(#,##0.00)");
-			else if(object instanceof Number)
+			}
+			else if(object instanceof Number) {
 				result = numberFormatterForPattern("0");
+			}
 		}
+
 		return result;
 	}
 
 	/**
-     * Returns a shared instance for the specified pattern.
-     * @return shared instance of formatter
+     * @return A shared formatter instance for the specified pattern
      */
     public static NSNumberFormatter numberFormatterForPattern(String pattern) {
     	NSNumberFormatter formatter;
+
     	if(ERXLocalizer.useLocalizedFormatters()) {
     		ERXLocalizer localizer = ERXLocalizer.currentLocalizer();
     		formatter = (NSNumberFormatter)localizer.localizedNumberFormatForKey(pattern);
-    	} else {
+    	}
+    	else {
     		formatter = _repository.get(pattern);
+
     		if(formatter == null) {
     			formatter = new ERXNumberFormatter(pattern);
     			_repository.put(pattern, formatter);
     		}
     	}
+
     	return formatter;
     }
     
@@ -94,27 +106,16 @@ public class ERXNumberFormatter extends NSNumberFormatter {
     	if(ERXLocalizer.useLocalizedFormatters()) {
     		ERXLocalizer localizer = ERXLocalizer.currentLocalizer();
     		localizer.setLocalizedNumberFormatForKey(formatter, pattern);
-    	} else {
+    	}
+    	else {
     		if(formatter == null) {
     			_repository.remove(pattern);
-    		} else {
+    		}
+    		else {
     			_repository.put(pattern, formatter);
     		}
     	}
     }
-    
-    /**
-     * Public constructor
-     */
-    public ERXNumberFormatter(String pattern) {
-    	super(pattern);
-    }
-
-    /**
-	 * 
-	 */
-	public ERXNumberFormatter() {
-	}
 	
 	public void setIgnoredChars(String value) {
 		_ignoredChars = value;
@@ -167,8 +168,7 @@ public class ERXNumberFormatter extends NSNumberFormatter {
 	
 	
 	/**
-	 * Override this in your subclass to provide for other operations when formatting a value.
-	 * @param value
+	 * Override in a subclass to provide for other operations when formatting a value.
 	 */
 	protected BigDecimal performFormat(BigDecimal value) {
 		if("*".equals(_operator)) {
@@ -182,7 +182,6 @@ public class ERXNumberFormatter extends NSNumberFormatter {
 	
 	/**
 	 * Override this in your subclass to provide for other operations when parsing a value.
-	 * @param value
 	 */
 	protected BigDecimal performParse(BigDecimal value) {
 		if("*".equals(_operator)) {
@@ -195,8 +194,8 @@ public class ERXNumberFormatter extends NSNumberFormatter {
 	}
 	
 	/**
-     * Strips out the ignored characters and optionally performs an operation on the value
-     * from the string to be parsed.
+     * Strips out the ignored characters and optionally performs an operation on the value from the string to be parsed.
+     * 
      * @param aString to be parsed
      * @return the parsed object
      */
