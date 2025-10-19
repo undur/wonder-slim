@@ -10,6 +10,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormatSymbols;
 import java.text.Format;
 import java.util.Enumeration;
@@ -464,7 +466,7 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 
 		// Let's go fishing
 		if (shortLanguage == null) {
-			NSDictionary<String, Object> dict = (NSDictionary<String, Object>) ERXUtilities.readPListFromBundleResource("Languages", "JavaWebObjects", null, "utf-8");
+			NSDictionary<String, Object> dict = (NSDictionary<String, Object>) ERXUtilities.readPListFromBundleResource("Languages", "JavaWebObjects", null, StandardCharsets.UTF_8);
 			if (dict != null) {
 				NSArray<String> keys = dict.allKeysForObject(aLanguage);
 				if (keys.count() > 0) {
@@ -545,18 +547,18 @@ public class ERXLocalizer implements NSKeyValueCoding, NSKeyValueCodingAdditions
 		Object plist = null;
 
 		try {
-			plist = ERXUtilities.readPListFromBundleResource(fileName, aFrameWorkName, languageList, System.getProperty("file.encoding"));
+			plist = ERXUtilities.readPListFromBundleResource(fileName, aFrameWorkName, languageList, Charset.defaultCharset());
 		}
 		catch (IllegalArgumentException e) {
 			try {
 				// BUGFIX: we didnt use an encoding before, so java tried to
 				// guess the encoding. Now some Localizable.strings plists
 				// are encoded in MacRoman whereas others are UTF-16.
-				plist = ERXUtilities.readPListFromBundleResource(fileName, aFrameWorkName, languageList, "utf-16");
+				plist = ERXUtilities.readPListFromBundleResource(fileName, aFrameWorkName, languageList, StandardCharsets.UTF_16);
 			}
 			catch (IllegalArgumentException e1) {
 				// OK, whatever it is, try to parse it!
-				plist = ERXUtilities.readPListFromBundleResource(fileName, aFrameWorkName, languageList, "utf-8");
+				plist = ERXUtilities.readPListFromBundleResource(fileName, aFrameWorkName, languageList, StandardCharsets.UTF_8);
 			}
 		}
 

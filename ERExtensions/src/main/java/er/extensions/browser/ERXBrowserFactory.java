@@ -1,5 +1,6 @@
 package er.extensions.browser;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
@@ -404,7 +405,7 @@ public class ERXBrowserFactory {
     private boolean isRobot(String userAgent) {
     	synchronized (robotExpressions) {
 			if(robotExpressions.count()==0) {
-				String strings = ERXUtilities.readStringFromBundleResource("robots.txt", "ERExtensions", null, "utf-8");
+				String strings = ERXUtilities.readStringFromBundleResource("robots.txt", "ERExtensions", null, StandardCharsets.UTF_8);
 				for (String item : NSArray.componentsSeparatedByString(strings, "\n")) {
 					if(item.trim().length() > 0 && item.charAt(0) != '#') {
 						robotExpressions.addObject(Pattern.compile(item));

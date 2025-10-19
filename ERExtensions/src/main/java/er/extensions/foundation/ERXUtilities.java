@@ -12,6 +12,7 @@ import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 
 import com.webobjects.appserver.WOApplication;
@@ -39,37 +40,35 @@ public class ERXUtilities {
 	}
 
 	/**
-	 * Reads a file in from the file system for the given set of languages and then
-	 * parses the file as if it were a property list, using the specified encoding.
+	 * Read and parse a string plist resource
 	 *
 	 * @param filename name of the file
-	 * @param frameworkName name of the framework, <code>null</code> or 'app' for the application bundle.
+	 * @param frameworkName name of framework containing resource, <code>null</code> or 'app' for the application bundle
 	 * @param languages language list search order
-	 * @param encoding the encoding used with <code>fileName</code>
-	 * @return de-serialized object from the plist formatted file specified.
+	 * @param encoding string encoding of the resource
+	 * @return de-serialized plist from the resource
 	 */
-	public static Object readPListFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, String encoding) {
-		return NSPropertyListSerialization.propertyListFromString(readStringFromBundleResource( filename, frameworkName, languages, encoding));
+	public static Object readPListFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, Charset charset) {
+		return NSPropertyListSerialization.propertyListFromString(readStringFromBundleResource( filename, frameworkName, languages, charset));
 	}
 
 	/**
-	 * Reads a file in from the file system for the given set of languages and then
-	 * parses the file as if it were a property list, using the specified encoding.
+	 * Read a string resource 
 	 *
 	 * @param filename name of the file
-	 * @param frameworkName name of the framework, <code>null</code> or 'app' for the application bundle.
+	 * @param frameworkName name of framework containing resource, <code>null</code> or 'app' for the application bundle
 	 * @param languages language list search order
-	 * @param encoding the encoding used with <code>fileName</code>
-	 * @return de-serialized object from the plist formatted file specified.
+	 * @param charset string Charset of the resource
+	 * @return string content of the resource
 	 */
-	public static String readStringFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, String encoding) {
+	public static String readStringFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, Charset charset) {
 		try( final InputStream stream = WOApplication.application().resourceManager().inputStreamForResourceNamed(filename, frameworkName, languages)) {
 			
 			if( stream == null ) {
 				return null;
 			}
 			
-			return new String(stream.readAllBytes(), encoding);
+			return new String(stream.readAllBytes(), charset);
 		}
 		catch (IOException ioe) {
 			throw new UncheckedIOException(ioe);

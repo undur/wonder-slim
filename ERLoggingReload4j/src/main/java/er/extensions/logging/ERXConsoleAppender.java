@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
 
@@ -110,7 +111,7 @@ public class ERXConsoleAppender extends ConsoleAppender {
 						URL path = WOApplication.application().resourceManager().pathURLForResourceNamed(skipPatternsFile, framework, null);
 						if (path != null) {
 							try {
-								NSArray<String> skipPatternStrings = (NSArray<String>) ERXUtilities.readPListFromBundleResource(skipPatternsFile, framework, (NSArray)null, "utf-8");
+								NSArray<String> skipPatternStrings = (NSArray<String>) ERXUtilities.readPListFromBundleResource(skipPatternsFile, framework, (NSArray)null, StandardCharsets.UTF_8);
 								if (skipPatternStrings != null) {
 									for (String skipPatternString : skipPatternStrings) {
 										try {
