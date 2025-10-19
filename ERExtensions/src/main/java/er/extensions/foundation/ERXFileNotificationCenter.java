@@ -43,7 +43,7 @@ public class ERXFileNotificationCenter {
 	/**
 	 * Contains the name of the notification that is posted when a file changes.
 	 */
-	public static final String FileDidChange = "FileDidChange";
+	private static final String FileDidChange = "FileDidChange";
 
 	/**
 	 * holds a reference to the default file notification center
@@ -170,7 +170,7 @@ public class ERXFileNotificationCenter {
 	 * @param file the file to lookup a cache key for
 	 * @return the absolute path of the file
 	 */
-	protected String cacheKeyForFile(File file) {
+	private String cacheKeyForFile(File file) {
 		return file.getAbsolutePath();
 	}
 
@@ -182,7 +182,7 @@ public class ERXFileNotificationCenter {
 	 * @param file the file to lookup a cache value for
 	 * @return a value representing the current version of this file
 	 */
-	protected Object cacheValueForFile(File file) {
+	private Object cacheValueForFile(File file) {
 		if (_symlinkSupport) {
 			try {
 				// MS: We want to compute the last modified time on the
@@ -209,7 +209,7 @@ public class ERXFileNotificationCenter {
 	 * 
 	 * @param file file to record the last modified date
 	 */
-	public void registerLastModifiedDateForFile(File file) {
+	private void registerLastModifiedDateForFile(File file) {
 		if (file != null) {
 			// Note that if the file doesn't exist, it will be registered with a
 			// 0
@@ -226,7 +226,7 @@ public class ERXFileNotificationCenter {
 	 * @param file file to compare last modified date.
 	 * @return if the file has changed since the last time the <code>lastModified</code> value was recorded.
 	 */
-	public boolean hasFileChanged(File file) {
+	private boolean hasFileChanged(File file) {
 		if (file == null)
 			throw new RuntimeException("Attempting to check if a null file has been changed");
 		Object previousCacheValue = _lastModifiedByFilePath.objectForKey(cacheKeyForFile(file));
@@ -239,7 +239,7 @@ public class ERXFileNotificationCenter {
 	 * 
 	 * @param file file that has changed
 	 */
-	protected void fileHasChanged(File file) {
+	private void fileHasChanged(File file) {
 		NSMutableSet observers = (NSMutableSet) _observersByFilePath.objectForKey(cacheKeyForFile(file));
 		if (observers == null)
 			log.warn("Unable to find observers for file: {}", file);
