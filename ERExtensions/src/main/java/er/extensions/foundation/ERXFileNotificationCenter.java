@@ -218,7 +218,7 @@ public class ERXFileNotificationCenter {
 	 * @return if the file has changed since the last time the <code>lastModified</code> value was recorded.
 	 */
 	private boolean hasFileChanged(File file) {
-		Objects.requireNonNull("Attempting to check if a null file has been changed");
+		Objects.requireNonNull( file, "Attempting to check if a null file has been changed");
 
 		Object previousCacheValue = _lastModifiedByFilePath.objectForKey(cacheKeyForFile(file));
 		return previousCacheValue == null || !previousCacheValue.equals(cacheValueForFile(file));
