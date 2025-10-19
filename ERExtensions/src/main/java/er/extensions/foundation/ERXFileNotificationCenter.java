@@ -37,6 +37,7 @@ import er.extensions.appserver.ERXApplication;
  * </p>
  */
 public class ERXFileNotificationCenter {
+
 	private static final Logger log = LoggerFactory.getLogger(ERXFileNotificationCenter.class);
 
 	/**
@@ -48,6 +49,53 @@ public class ERXFileNotificationCenter {
 	 * holds a reference to the default file notification center
 	 */
 	private static ERXFileNotificationCenter _defaultCenter;
+
+	/**
+	 * collections of observers by file path
+	 */
+	private final NSMutableDictionary _observersByFilePath = new NSMutableDictionary();
+
+	/**
+	 * cache for last modified dates of files by file path
+	 */
+	private final NSMutableDictionary _lastModifiedByFilePath = new NSMutableDictionary();
+
+	/**
+	 * flag to tell if caching is enabled, set in the object constructor
+	 */
+	private final boolean _isDevelopmentMode;
+
+	/**
+	 * The last time we checked files. We only check if !WOCachingEnabled or if
+	 * there is a CheckFilesPeriod set
+	 */
+	private long _lastCheckMillis = System.currentTimeMillis();
+
+	/**
+	 * FIXME: ??
+	 */
+	private boolean _symlinkSupport;
+
+	/**
+	 * Default constructor. If you are in development mode then this object will
+	 * register for the notification
+	 * {@link com.webobjects.appserver.WOApplication#ApplicationWillDispatchRequestNotification}
+	 * which will enable it to check if files have changed at the end of every
+	 * request-response loop. If WOCaching is enabled then this object will not
+	 * register for anything and will generate warning messages if observers are
+	 * registered with caching enabled.
+	 */
+	private ERXFileNotificationCenter() {
+		_isDevelopmentMode = ERXApplication.isDevelopmentModeSafe();
+
+		if (_isDevelopmentMode || checkFilesPeriod() > 0) {
+			log.debug("Caching disabled.  Registering for notification: {}", WOApplication.ApplicationWillDispatchRequestNotification);
+			NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("checkIfFilesHaveChanged"), WOApplication.ApplicationWillDispatchRequestNotification, null);
+		}
+
+		// MS: In case we are touching properties before they're fully materialized or messed up from a failed reload, lets use System.props here
+		_symlinkSupport = Boolean.valueOf(System.getProperty("ERXFileNotificationCenter.symlinkSupport", "true"));
+	}
 
 	/**
 	 * @return the singleton instance of file notification center
@@ -65,53 +113,6 @@ public class ERXFileNotificationCenter {
 	 */
 	private static int checkFilesPeriod() {
 		return ERXProperties.intForKeyWithDefault("er.extensions.ERXFileNotificationCenter.CheckFilesPeriod", 0);
-	}
-
-	/**
-	 * collections of observers by file path
-	 */
-	private NSMutableDictionary _observersByFilePath = new NSMutableDictionary();
-
-	/**
-	 * cache for last modified dates of files by file path
-	 */
-	private NSMutableDictionary _lastModifiedByFilePath = new NSMutableDictionary();
-
-	/**
-	 * flag to tell if caching is enabled, set in the object constructor
-	 */
-	private boolean developmentMode;
-
-	/**
-	 * The last time we checked files. We only check if !WOCachingEnabled or if
-	 * there is a CheckFilesPeriod set
-	 */
-	private long lastCheckMillis = System.currentTimeMillis();
-
-	/**
-	 * FIXME: ??
-	 */
-	private boolean symlinkSupport;
-
-	/**
-	 * Default constructor. If you are in development mode then this object will
-	 * register for the notification
-	 * {@link com.webobjects.appserver.WOApplication#ApplicationWillDispatchRequestNotification}
-	 * which will enable it to check if files have changed at the end of every
-	 * request-response loop. If WOCaching is enabled then this object will not
-	 * register for anything and will generate warning messages if observers are
-	 * registered with caching enabled.
-	 */
-	private ERXFileNotificationCenter() {
-		developmentMode = ERXApplication.isDevelopmentModeSafe();
-
-		if (developmentMode || checkFilesPeriod() > 0) {
-			log.debug("Caching disabled.  Registering for notification: {}", WOApplication.ApplicationWillDispatchRequestNotification);
-			NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("checkIfFilesHaveChanged"), WOApplication.ApplicationWillDispatchRequestNotification, null);
-		}
-
-		// MS: In case we are touching properties before they're fully materialized or messed up from a failed reload, lets use System.props here
-		symlinkSupport = Boolean.valueOf(System.getProperty("ERXFileNotificationCenter.symlinkSupport", "true"));
 	}
 
 	/**
@@ -150,7 +151,7 @@ public class ERXFileNotificationCenter {
 			throw new RuntimeException("Attempting to register null observer for file: " + file);
 		if (selector == null)
 			throw new RuntimeException("Attempting to register null selector for file: " + file);
-		if (!developmentMode && checkFilesPeriod() == 0) {
+		if (!_isDevelopmentMode && checkFilesPeriod() == 0) {
 			log.info("Registering an observer when file checking is disabled (WOCaching must be " +
 					"disabled or the er.extensions.ERXFileNotificationCenter.CheckFilesPeriod " +
 					"property must be set).  This observer will not ever by default be called: {}", file);
@@ -191,7 +192,7 @@ public class ERXFileNotificationCenter {
 	 * @return a value representing the current version of this file
 	 */
 	protected Object cacheValueForFile(File file) {
-		if (symlinkSupport) {
+		if (_symlinkSupport) {
 			try {
 				// MS: We want to compute the last modified time on the
 				// destination of a (possibly)
@@ -276,11 +277,11 @@ public class ERXFileNotificationCenter {
 	public void checkIfFilesHaveChanged(NSNotification n) {
 		int checkPeriod = checkFilesPeriod();
 
-		if (!developmentMode && (checkPeriod == 0 || System.currentTimeMillis() - lastCheckMillis < 1000 * checkPeriod)) {
+		if (!_isDevelopmentMode && (checkPeriod == 0 || System.currentTimeMillis() - _lastCheckMillis < 1000 * checkPeriod)) {
 			return;
 		}
 
-		lastCheckMillis = System.currentTimeMillis();
+		_lastCheckMillis = System.currentTimeMillis();
 
 		log.debug("Checking if files have changed");
 		for (Enumeration e = _lastModifiedByFilePath.keyEnumerator(); e.hasMoreElements();) {
