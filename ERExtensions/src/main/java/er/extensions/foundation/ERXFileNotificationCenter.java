@@ -116,15 +116,6 @@ public class ERXFileNotificationCenter {
 	}
 
 	/**
-	 * When the file notification center is garbage collected it removes itself as an observer from the NSNotificationCenter. Not doing this will cause exceptions.
-	 */
-	@Override
-	public void finalize() throws Throwable {
-		NSNotificationCenter.defaultCenter().removeObserver(this);
-		super.finalize();
-	}
-
-	/**
 	 * Used to register file observers for a particular file.
 	 * 
 	 * @param observer object to be notified when a file changes
