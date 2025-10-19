@@ -71,8 +71,24 @@ public abstract class ERXFrameworkPrincipal {
 
     private static final List<ERXFrameworkPrincipal> launchingFrameworks = new ArrayList<>();
 
+    private static Observer observer;
+
     public static class Observer {
         
+    	private Observer() {
+            final NSNotificationCenter center = NSNotificationCenter.defaultCenter();
+
+            center.addObserver(this,
+                    ERXUtilities.notificationSelector("willFinishInitialization"),
+                    ERXNotification.ApplicationDidCreateNotification.id(),
+                    null);
+
+            center.addObserver(this,
+            		ERXUtilities.notificationSelector("didFinishInitialization"),
+            		ERXNotification.ApplicationDidFinishInitializationNotification.id(),
+                    null);
+    	}
+
         /**
          * Notification method called when the WOApplication posts the notification 'ApplicationDidCreateNotification'.
          * This method handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
@@ -105,8 +121,6 @@ public abstract class ERXFrameworkPrincipal {
         }
     }
     
-    private static Observer observer;
-    
     /**
      * Gets the shared framework principal instance for a given class.
      * 
@@ -133,18 +147,6 @@ public abstract class ERXFrameworkPrincipal {
         try {
             if(observer == null) {
                 observer = new Observer();
-
-                final NSNotificationCenter center = NSNotificationCenter.defaultCenter();
-
-                center.addObserver(observer,
-                        ERXUtilities.notificationSelector("willFinishInitialization"),
-                        ERXNotification.ApplicationDidCreateNotification.id(),
-                        null);
-
-                center.addObserver(observer,
-                		ERXUtilities.notificationSelector("didFinishInitialization"),
-                		ERXNotification.ApplicationDidFinishInitializationNotification.id(),
-                        null);
             }
 
             if (initializedFrameworks.get(c.getName()) == null) {
