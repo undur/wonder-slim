@@ -154,7 +154,7 @@ public class RouteTable {
 	/**
 	 * For returning 404
 	 */
-	public static class NotFoundRouteHandler extends RouteHandler {
+	public static class NotFoundRouteHandler implements RouteHandler {
 		@Override
 		public WOActionResults handle( final RouteInvocation invocation ) {
 			final WOResponse response = new WOResponse();
@@ -164,7 +164,7 @@ public class RouteTable {
 		}
 	}
 	
-	public static class FunctionRouteHandler extends RouteHandler {
+	public static class FunctionRouteHandler implements RouteHandler {
 		private Function<RouteInvocation, WOActionResults> _function;
 		
 		public FunctionRouteHandler( final Function<RouteInvocation, WOActionResults> function ) {
@@ -177,7 +177,7 @@ public class RouteTable {
 		}
 	}
 
-	public static class BiFunctionRouteHandler extends RouteHandler {
+	public static class BiFunctionRouteHandler implements RouteHandler {
 		private BiFunction<RouteURL, WOContext, WOActionResults> _function;
 
 		public BiFunctionRouteHandler( final BiFunction<RouteURL, WOContext, WOActionResults> function ) {
@@ -190,7 +190,7 @@ public class RouteTable {
 		}
 	}
 
-	public static class ComponentRouteHandler extends RouteHandler {
+	public static class ComponentRouteHandler implements RouteHandler {
 		private Class<? extends WOComponent> _componentClass;
 
 		public ComponentRouteHandler( final Class<? extends WOComponent> componentClass ) {
