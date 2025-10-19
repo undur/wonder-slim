@@ -76,22 +76,20 @@ public abstract class ERXFrameworkPrincipal {
     public static class Observer {
         
     	private Observer() {
-            final NSNotificationCenter center = NSNotificationCenter.defaultCenter();
-
-            center.addObserver(this,
+            NSNotificationCenter.defaultCenter().addObserver(this,
                     ERXUtilities.notificationSelector("willFinishInitialization"),
                     ERXNotification.ApplicationDidCreateNotification.id(),
                     null);
 
-            center.addObserver(this,
+            NSNotificationCenter.defaultCenter().addObserver(this,
             		ERXUtilities.notificationSelector("didFinishInitialization"),
             		ERXNotification.ApplicationDidFinishInitializationNotification.id(),
                     null);
     	}
 
         /**
-         * Notification method called when the WOApplication posts the notification 'ApplicationDidCreateNotification'.
-         * This method handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
+         * Invoked when WOApplication posts 'ApplicationDidCreateNotification'.
+         * Handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
          * 
          * @param n notification that is posted after the WOApplication has been constructed, but before the application is ready for accepting requests.
          */
@@ -105,10 +103,8 @@ public abstract class ERXFrameworkPrincipal {
         }
         
         /**
-         * Notification method called when the WOApplication posts the notification 'ApplicationDidFinishInitializationNotification'.
-         * This method handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
-         * 
-         * @param n notification that is posted after the WOApplication has been constructed, but before the application is ready for accepting requests.
+         * Invoked when WOApplication posts 'ApplicationDidFinishInitializationNotification'.
+         * Handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
          */
         public final void didFinishInitialization(NSNotification n) {
             NSNotificationCenter.defaultCenter().removeObserver(this);
@@ -122,25 +118,27 @@ public abstract class ERXFrameworkPrincipal {
     }
     
     /**
-     * Gets the shared framework principal instance for a given class.
-     * 
-     * @param c principal class for a given framework
-     * @return framework principal initializer
+     * @return The shared framework principal instance for the given class.
      */
-    public static<T extends ERXFrameworkPrincipal> T sharedInstance(Class<T> c) {
-        return (T)initializedFrameworks.get(c.getName());
+    public static <T extends ERXFrameworkPrincipal> T sharedInstance(Class<T> principalClass) {
+        return (T)initializedFrameworks.get(principalClass.getName());
     }
     
     /**
-     * Sets up a given framework principal class to receive notification when it is safe for the framework to be initialized.
-     * 
-     * @param c principal class
+     * @return true if the given principal class has been initialized
      */
-    public static void setUpFrameworkPrincipalClass(Class c) {
+    private static boolean isInitialized( Class<? extends ERXFrameworkPrincipal> principalClass ) {
+    	return initializedFrameworks.containsKey(principalClass.getName());
+    }
 
-    	log("setUpFrameworkPrincipalClass for " + c.getSimpleName());
+    /**
+     * Sets up the given framework principal class to receive notification when it is safe for the framework to be initialized.
+     */
+    public static void setUpFrameworkPrincipalClass(Class<? extends ERXFrameworkPrincipal> principalClass) {
 
-        if (initializedFrameworks.get(c.getName()) != null) {
+    	log("setUpFrameworkPrincipalClass for " + principalClass.getSimpleName());
+
+        if (isInitialized(principalClass)) {
         	return;
         }
 
@@ -149,14 +147,16 @@ public abstract class ERXFrameworkPrincipal {
                 observer = new Observer();
             }
 
-            if (initializedFrameworks.get(c.getName()) == null) {
+			if (!isInitialized(principalClass)) {
                 try {
-                    Field f = c.getField("REQUIRES");
-                    Class requires[] = (Class[]) f.get(c);
+                    final Field requiresField = principalClass.getField("REQUIRES");
+                    final Class requires[] = (Class[]) requiresField.get(principalClass);
+
                     for (int i = 0; i < requires.length; i++) {
-                    	Class requirement = requires[i];
-                    	if(initializedFrameworks.get(requirement.getName()) == null) {
-                    		setUpFrameworkPrincipalClass(requirement);
+                    	final Class requiredPrincipalClass = requires[i];
+
+                    	if(!isInitialized(requiredPrincipalClass)) {
+                    		setUpFrameworkPrincipalClass(requiredPrincipalClass);
                     	}
                     }
                 }
@@ -164,22 +164,21 @@ public abstract class ERXFrameworkPrincipal {
                     // No REQUIRES field present
                 }
                 catch (IllegalAccessException e) {
-                    log("Can't read field REQUIRES from " + c.getName() + ", check if it is 'public static Class[] REQUIRES= new Class[] {...}' in this class");
-                    throw NSForwardException._runtimeExceptionForThrowable(e);
+                	throw new RuntimeException( "Can't read REQUIRES field on " + principalClass.getName(), e );
                 }
 
-                if(initializedFrameworks.get(c.getName()) == null) {
-                	ERXFrameworkPrincipal principal = (ERXFrameworkPrincipal)c.newInstance();
-                	initializedFrameworks.put(c.getName(),principal);
+                if(!isInitialized(principalClass)) {
+                	ERXFrameworkPrincipal principal = principalClass.newInstance();
+                	initializedFrameworks.put(principalClass.getName(),principal);
                 	principal.initialize();
                 	launchingFrameworks.add(principal);
 
-                	log("Initialized : " + c.getName());
+                	log("Initialized : " + principalClass.getName());
                 }
 
             }
             else {
-            	log("Was already inited: " + c.getName());
+            	log("Already initialized: " + principalClass.getName());
             }
         }
         catch (InstantiationException | IllegalAccessException e) {
