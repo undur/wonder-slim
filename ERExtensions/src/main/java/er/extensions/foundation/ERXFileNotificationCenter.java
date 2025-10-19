@@ -44,34 +44,53 @@ public class ERXFileNotificationCenter {
 	 */
 	public static final String FileDidChange = "FileDidChange";
 
-	/** holds a reference to the default file notification center */
+	/**
+	 * holds a reference to the default file notification center
+	 */
 	private static ERXFileNotificationCenter _defaultCenter;
 
 	/**
 	 * @return the singleton instance of file notification center
 	 */
 	public static ERXFileNotificationCenter defaultCenter() {
-		if (_defaultCenter == null)
+		if (_defaultCenter == null) {
 			_defaultCenter = new ERXFileNotificationCenter();
+		}
+
 		return _defaultCenter;
 	}
 
-	/** In seconds. 0 means we will not regularly check files. */
+	/**
+	 * In seconds. 0 means we will not regularly check files.
+	 */
 	private static int checkFilesPeriod() {
 		return ERXProperties.intForKeyWithDefault("er.extensions.ERXFileNotificationCenter.CheckFilesPeriod", 0);
 	}
 
-	/** collections of observers by file path */
+	/**
+	 * collections of observers by file path
+	 */
 	private NSMutableDictionary _observersByFilePath = new NSMutableDictionary();
-	/** cache for last modified dates of files by file path */
+
+	/**
+	 * cache for last modified dates of files by file path
+	 */
 	private NSMutableDictionary _lastModifiedByFilePath = new NSMutableDictionary();
-	/** flag to tell if caching is enabled, set in the object constructor */
+
+	/**
+	 * flag to tell if caching is enabled, set in the object constructor
+	 */
 	private boolean developmentMode;
+
 	/**
 	 * The last time we checked files. We only check if !WOCachingEnabled or if
 	 * there is a CheckFilesPeriod set
 	 */
 	private long lastCheckMillis = System.currentTimeMillis();
+
+	/**
+	 * FIXME: ??
+	 */
 	private boolean symlinkSupport;
 
 	/**
@@ -83,7 +102,7 @@ public class ERXFileNotificationCenter {
 	 * register for anything and will generate warning messages if observers are
 	 * registered with caching enabled.
 	 */
-	public ERXFileNotificationCenter() {
+	private ERXFileNotificationCenter() {
 		developmentMode = ERXApplication.isDevelopmentModeSafe();
 
 		if (developmentMode || checkFilesPeriod() > 0) {
@@ -92,17 +111,12 @@ public class ERXFileNotificationCenter {
 			NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("checkIfFilesHaveChanged"), WOApplication.ApplicationWillDispatchRequestNotification, null);
 		}
 
-		// MS: In case we are touching properties before they're fully
-		// materialized or messed up from a failed reload, lets use System.props
-		// here
+		// MS: In case we are touching properties before they're fully materialized or messed up from a failed reload, lets use System.props here
 		symlinkSupport = Boolean.valueOf(System.getProperty("ERXFileNotificationCenter.symlinkSupport", "true"));
 	}
 
 	/**
-	 * When the file notification center is garbage collected it removes itself
-	 * as an observer from the
-	 * {@link com.webobjects.foundation.NSNotificationCenter
-	 * NSNotificationCenter}. Not doing this will cause exceptions.
+	 * When the file notification center is garbage collected it removes itself as an observer from the NSNotificationCenter. Not doing this will cause exceptions.
 	 */
 	@Override
 	public void finalize() throws Throwable {
@@ -113,12 +127,9 @@ public class ERXFileNotificationCenter {
 	/**
 	 * Used to register file observers for a particular file.
 	 * 
-	 * @param observer
-	 *            object to be notified when a file changes
-	 * @param selector
-	 *            selector to be invoked on the observer when the file changes.
-	 * @param filePath
-	 *            location of the file
+	 * @param observer object to be notified when a file changes
+	 * @param selector selector to be invoked on the observer when the file changes.
+	 * @param filePath location of the file
 	 */
 	public void addObserver(Object observer, NSSelector selector, String filePath) {
 		if (filePath == null)
@@ -129,12 +140,9 @@ public class ERXFileNotificationCenter {
 	/**
 	 * Used to register file observers for a particular file.
 	 * 
-	 * @param observer
-	 *            object to be notified when a file changes
-	 * @param selector
-	 *            selector to be invoked on the observer when the file changes.
-	 * @param file
-	 *            file to watch for changes
+	 * @param observer object to be notified when a file changes
+	 * @param selector selector to be invoked on the observer when the file changes.
+	 * @param file file to watch for changes
 	 */
 	public void addObserver(Object observer, NSSelector selector, File file) {
 		if (file == null)
@@ -168,8 +176,7 @@ public class ERXFileNotificationCenter {
 	 * canonical path) so that we make sure to lookup files using their original
 	 * sym links rather than resolving them at registration time.
 	 * 
-	 * @param file
-	 *            the file to lookup a cache key for
+	 * @param file the file to lookup a cache key for
 	 * @return the absolute path of the file
 	 */
 	protected String cacheKeyForFile(File file) {
@@ -181,8 +188,7 @@ public class ERXFileNotificationCenter {
 	 * returns the lastModified date of the canonicalized version of this file,
 	 * meaning that we compare the lastModified of the target of symlinks.
 	 * 
-	 * @param file
-	 *            the file to lookup a cache value for
+	 * @param file the file to lookup a cache value for
 	 * @return a value representing the current version of this file
 	 */
 	protected Object cacheValueForFile(File file) {
@@ -210,8 +216,7 @@ public class ERXFileNotificationCenter {
 	/**
 	 * Records the last modified date of the file for future comparison.
 	 * 
-	 * @param file
-	 *            file to record the last modified date
+	 * @param file file to record the last modified date
 	 */
 	public void registerLastModifiedDateForFile(File file) {
 		if (file != null) {
@@ -227,10 +232,8 @@ public class ERXFileNotificationCenter {
 	 * Compares the last modified date of the file with the last recorded
 	 * modification date.
 	 * 
-	 * @param file
-	 *            file to compare last modified date.
-	 * @return if the file has changed since the last time the
-	 *         <code>lastModified</code> value was recorded.
+	 * @param file file to compare last modified date.
+	 * @return if the file has changed since the last time the <code>lastModified</code> value was recorded.
 	 */
 	public boolean hasFileChanged(File file) {
 		if (file == null)
@@ -243,8 +246,7 @@ public class ERXFileNotificationCenter {
 	 * Only used internally. Notifies all of the observers who have been
 	 * registered for the given file.
 	 * 
-	 * @param file
-	 *            file that has changed
+	 * @param file file that has changed
 	 */
 	protected void fileHasChanged(File file) {
 		NSMutableSet observers = (NSMutableSet) _observersByFilePath.objectForKey(cacheKeyForFile(file));
@@ -270,9 +272,7 @@ public class ERXFileNotificationCenter {
 	 * loop. It is here that all of the currently watched files are checked to
 	 * see if they have any changes.
 	 * 
-	 * @param n
-	 *            NSNotification notification posted from the
-	 *            NSNotificationCenter.
+	 * @param n notification posted from the NSNotificationCenter.
 	 */
 	public void checkIfFilesHaveChanged(NSNotification n) {
 		int checkPeriod = checkFilesPeriod();
@@ -350,8 +350,7 @@ public class ERXFileNotificationCenter {
 		/**
 		 * Retains a reference to the object.
 		 * 
-		 * @param object
-		 *            object to be retained.
+		 * @param object object to be retained.
 		 */
 		public static void retain(Object object) {
 			synchronized (_retainerSet) {
@@ -362,8 +361,7 @@ public class ERXFileNotificationCenter {
 		/**
 		 * Releases the reference to the object.
 		 * 
-		 * @param object
-		 *            object to be released.
+		 * @param object object to be released.
 		 */
 		public static void release(Object object) {
 			synchronized (_retainerSet) {
@@ -380,7 +378,6 @@ public class ERXFileNotificationCenter {
 		 */
 		public static boolean isObjectRetained(Object object) {
 			synchronized (_retainerSet) {
-
 				return _retainerSet.containsObject(object);
 			}
 		}
