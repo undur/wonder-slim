@@ -19,15 +19,16 @@ public class XXLifecycleListenerHack {
 
 
 	public static void activate() {
-		System.out.println("Enable lifecycle event logging");
+		System.out.println(" ==> Enabled initialization lifecycle event logging");
 
+		// Lifecycle events, ca. in the order they get posted
 		List.of(
-				ERXNotification.ApplicationWillFinishLaunchingNotification.id(),
-				ERXNotification.ApplicationDidFinishLaunchingNotification.id(),
-				ERXNotification.AllBundlesLoadedNotification.id(),
+				ERXNotification.AllBundlesLoadedNotification.id(), // Not currently posted, but should probably be here in the lifecycle
 				ERXNotification.ApplicationDidCreateNotification.id(),
 				ERXNotification.ApplicationDidFinishInitializationNotification.id(),
-				ERXNotification.ApplicationDidFinishLaunchingNotification.id() )
+				ERXNotification.ApplicationWillFinishLaunchingNotification.id(),
+				ERXNotification.ApplicationDidFinishLaunchingNotification.id()
+				)
 		.forEach( notificationName -> {
 			NSNotificationCenter.defaultCenter().addObserver(new LifeCycleObserver(), ERXUtilities.notificationSelector("logLifecycleEvent"), notificationName, null);
 		});
