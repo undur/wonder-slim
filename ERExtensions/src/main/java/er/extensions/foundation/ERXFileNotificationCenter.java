@@ -9,6 +9,7 @@ package er.extensions.foundation;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +31,11 @@ import er.extensions.appserver.ERXApplication;
  * observer to this center and be notified when the file changes. Files' last
  * modification dates are checked at the end of every request-response loop.
  * 
- * <p>
  * It should be noted that the current version of the file notification center
  * will retain a reference to each registered observer. This is not ideal and
  * will be corrected in the future.
- * </p>
  */
+
 public class ERXFileNotificationCenter {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXFileNotificationCenter.class);
@@ -46,9 +46,14 @@ public class ERXFileNotificationCenter {
 	private static final String FileDidChange = "FileDidChange";
 
 	/**
+	 * Flag to indicate if caching is enabled
+	 */
+	private static final boolean _isDevelopmentMode = ERXApplication.isDevelopmentModeSafe();
+
+	/**
 	 * holds a reference to the default file notification center
 	 */
-	private static ERXFileNotificationCenter _defaultCenter;
+	private static final ERXFileNotificationCenter _defaultCenter = new ERXFileNotificationCenter();
 
 	/**
 	 * collections of observers by file path
@@ -61,20 +66,14 @@ public class ERXFileNotificationCenter {
 	private final NSMutableDictionary _lastModifiedByFilePath = new NSMutableDictionary();
 
 	/**
-	 * flag to tell if caching is enabled, set in the object constructor
-	 */
-	private final boolean _isDevelopmentMode;
-
-	/**
-	 * The last time we checked files. We only check if !WOCachingEnabled or if
-	 * there is a CheckFilesPeriod set
+	 * The last time we checked files. We only check if !WOCachingEnabled or if there is a CheckFilesPeriod set
 	 */
 	private long _lastCheckMillis = System.currentTimeMillis();
 
 	/**
-	 * FIXME: ??
+	 * FIXME: Docs // Hugi 2025-10-19
 	 */
-	private boolean _symlinkSupport;
+	private final boolean _symlinkSupport;
 
 	/**
 	 * Default constructor. If you are in development mode then this object will
@@ -86,7 +85,6 @@ public class ERXFileNotificationCenter {
 	 * registered with caching enabled.
 	 */
 	private ERXFileNotificationCenter() {
-		_isDevelopmentMode = ERXApplication.isDevelopmentModeSafe();
 
 		if (_isDevelopmentMode || checkFilesPeriod() > 0) {
 			log.debug("Caching disabled.  Registering for notification: {}", WOApplication.ApplicationWillDispatchRequestNotification);
@@ -101,10 +99,6 @@ public class ERXFileNotificationCenter {
 	 * @return the singleton instance of file notification center
 	 */
 	public static ERXFileNotificationCenter defaultCenter() {
-		if (_defaultCenter == null) {
-			_defaultCenter = new ERXFileNotificationCenter();
-		}
-
 		return _defaultCenter;
 	}
 
@@ -116,48 +110,51 @@ public class ERXFileNotificationCenter {
 	}
 
 	/**
-	 * Used to register file observers for a particular file.
+	 * Register file observer for a file
 	 * 
 	 * @param observer object to be notified when a file changes
 	 * @param selector selector to be invoked on the observer when the file changes.
 	 * @param filePath location of the file
 	 */
 	public void addObserver(Object observer, NSSelector selector, String filePath) {
-		if (filePath == null)
-			throw new RuntimeException("Attempting to register observer for null filePath.");
+		Objects.requireNonNull(filePath);
+
 		addObserver(observer, selector, new File(filePath));
 	}
 
 	/**
-	 * Used to register file observers for a particular file.
+	 * Register file observer for a File
 	 * 
 	 * @param observer object to be notified when a file changes
 	 * @param selector selector to be invoked on the observer when the file changes.
 	 * @param file file to watch for changes
 	 */
 	public void addObserver(Object observer, NSSelector selector, File file) {
-		if (file == null)
-			throw new RuntimeException("Attempting to register a null file.");
-		if (observer == null)
-			throw new RuntimeException("Attempting to register null observer for file: " + file);
-		if (selector == null)
-			throw new RuntimeException("Attempting to register null selector for file: " + file);
+		Objects.requireNonNull(observer, "Attempting to register null observer for file: " + file);
+		Objects.requireNonNull(selector, "Attempting to register null selector for file: " + file);
+		Objects.requireNonNull(file, "Attempting to register a null file." );
+
 		if (!_isDevelopmentMode && checkFilesPeriod() == 0) {
 			log.info("Registering an observer when file checking is disabled (WOCaching must be " +
 					"disabled or the er.extensions.ERXFileNotificationCenter.CheckFilesPeriod " +
 					"property must be set).  This observer will not ever by default be called: {}", file);
 		}
+
 		String filePath = cacheKeyForFile(file);
+
 		log.debug("Registering Observer for file at path: {}", filePath);
+
 		// Register last modified date.
 		registerLastModifiedDateForFile(file);
-		// FIXME: This retains the observer. This is not ideal. With the 1.3 JDK
-		// we can use a ReferenceQueue to maintain weak references.
+
+		// FIXME: This retains the observer. This is not ideal. With the 1.3 JDK we can use a ReferenceQueue to maintain weak references.
 		NSMutableSet observerSet = (NSMutableSet) _observersByFilePath.objectForKey(filePath);
+
 		if (observerSet == null) {
 			observerSet = new NSMutableSet();
 			_observersByFilePath.setObjectForKey(observerSet, filePath);
 		}
+
 		observerSet.addObject(new _ObserverSelectorHolder(observer, selector));
 	}
 
@@ -185,19 +182,17 @@ public class ERXFileNotificationCenter {
 	private Object cacheValueForFile(File file) {
 		if (_symlinkSupport) {
 			try {
-				// MS: We want to compute the last modified time on the
-				// destination of a (possibly)
-				// symlinked file. On OS X, the lastModified of the sym link
-				// itself matches the
-				// lastModified of the referenced file, but I didn't want to
-				// presume that behavior.
-				File canonicalizedFile = file.getCanonicalFile();
-				return canonicalizedFile.getPath() + ":" + Long.valueOf(canonicalizedFile.lastModified());
+				// MS: We want to compute the last modified time on the destination of a (possibly)
+				// symlinked file. On OS X, the lastModified of the sym link itself matches the
+				// lastModified of the referenced file, but I didn't want to presume that behavior.
+				File canonicalFile = file.getCanonicalFile();
+				return canonicalFile.getPath() + ":" + Long.valueOf(canonicalFile.lastModified());
 			}
 			catch (IOException e) {
-				// MS: return a zero to match the previous semantics from
-				// calling file.lastModified() on a missing file.
+
+				// MS: return a zero to match the previous semantics from calling file.lastModified() on a missing file.
 				log.warn("Failed to determine the lastModified time on '{}': {}", file, e.getMessage());
+
 				return Long.valueOf(0);
 			}
 		}
@@ -211,24 +206,20 @@ public class ERXFileNotificationCenter {
 	 */
 	private void registerLastModifiedDateForFile(File file) {
 		if (file != null) {
-			// Note that if the file doesn't exist, it will be registered with a
-			// 0
-			// lastModified time by virtue of the semantics of
-			// File.lastModified.
+			// Note that if the file doesn't exist, it will be registered with a 0 lastModified time by virtue of the semantics of File.lastModified.
 			_lastModifiedByFilePath.setObjectForKey(cacheValueForFile(file), cacheKeyForFile(file));
 		}
 	}
 
 	/**
-	 * Compares the last modified date of the file with the last recorded
-	 * modification date.
+	 * Compares the last modified date of the file with the last recorded modification date.
 	 * 
 	 * @param file file to compare last modified date.
 	 * @return if the file has changed since the last time the <code>lastModified</code> value was recorded.
 	 */
 	private boolean hasFileChanged(File file) {
-		if (file == null)
-			throw new RuntimeException("Attempting to check if a null file has been changed");
+		Objects.requireNonNull("Attempting to check if a null file has been changed");
+
 		Object previousCacheValue = _lastModifiedByFilePath.objectForKey(cacheKeyForFile(file));
 		return previousCacheValue == null || !previousCacheValue.equals(cacheValueForFile(file));
 	}
@@ -240,13 +231,17 @@ public class ERXFileNotificationCenter {
 	 * @param file file that has changed
 	 */
 	private void fileHasChanged(File file) {
-		NSMutableSet observers = (NSMutableSet) _observersByFilePath.objectForKey(cacheKeyForFile(file));
-		if (observers == null)
+		final NSMutableSet observers = (NSMutableSet) _observersByFilePath.objectForKey(cacheKeyForFile(file));
+
+		if (observers == null) {
 			log.warn("Unable to find observers for file: {}", file);
+		}
 		else {
-			NSNotification notification = new NSNotification(FileDidChange, file);
+			final NSNotification notification = new NSNotification(FileDidChange, file);
+
 			for (Enumeration e = observers.objectEnumerator(); e.hasMoreElements();) {
 				_ObserverSelectorHolder holder = (_ObserverSelectorHolder) e.nextElement();
+
 				try {
 					holder.selector.invoke(holder.observer, notification);
 				}
@@ -254,6 +249,7 @@ public class ERXFileNotificationCenter {
 					log.error("Catching exception when invoking method on observer: {}", ex, ex);
 				}
 			}
+
 			registerLastModifiedDateForFile(file);
 		}
 	}
@@ -275,8 +271,10 @@ public class ERXFileNotificationCenter {
 		_lastCheckMillis = System.currentTimeMillis();
 
 		log.debug("Checking if files have changed");
+
 		for (Enumeration e = _lastModifiedByFilePath.keyEnumerator(); e.hasMoreElements();) {
 			File file = new File((String) e.nextElement());
+
 			if (file.exists() && hasFileChanged(file)) {
 				fileHasChanged(file);
 			}
@@ -285,37 +283,9 @@ public class ERXFileNotificationCenter {
 
 	/**
 	 * Simple observer-selector holder class.
+	 * 
+	 * @param observer Observing object FIXME: Should be a weak reference
+	 * @param selector Selector to call on observer 
 	 */
-	public static class _ObserverSelectorHolder {
-		/** Observing object */
-		// FIXME: Should be a weak reference
-		public Object observer;
-		/** Selector to call on observer */
-		public NSSelector selector;
-
-		/** Constructs a holder given an observer and a selector */
-		public _ObserverSelectorHolder(Object obs, NSSelector sel) {
-			observer = obs;
-			selector = sel;
-		}
-
-		@Override
-		public int hashCode() {
-			return (observer == null ? 1 : observer.hashCode()) * (selector == null ? 1 : selector.hashCode());
-		}
-
-		/**
-		 * Overridden to return true if the object being compared has the same
-		 * observer-selector pair.
-		 * 
-		 * @param osh
-		 *            object to be compared
-		 * @return result of comparison
-		 */
-		@Override
-		public boolean equals(Object osh) {
-			return osh != null && osh instanceof _ObserverSelectorHolder && ((_ObserverSelectorHolder) osh).selector.equals(selector) &&
-					((_ObserverSelectorHolder) osh).observer.equals(observer);
-		}
-	}
+	public record _ObserverSelectorHolder( Object observer, NSSelector selector) {}
 }
