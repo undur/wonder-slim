@@ -167,14 +167,14 @@ public abstract class ERXFrameworkPrincipal {
                     // No REQUIRES field present
                 }
                 catch (IllegalAccessException e) {
-                	throw new RuntimeException( "Can't read REQUIRES field on " + principalClass.getName(), e );
+                	throw new RuntimeException( "Can't read REQUIRES field on framework principal" + principalClass.getName(), e );
                 }
 
                 if(!isInitialized(principalClass)) {
-                	ERXFrameworkPrincipal principal = principalClass.newInstance();
-                	initializedFrameworks.put(principalClass.getName(),principal);
-                	principal.initialize();
-                	launchingFrameworks.add(principal);
+                	final ERXFrameworkPrincipal principalInstance = principalClass.newInstance();
+                	initializedFrameworks.put(principalClass.getName(),principalInstance);
+                	principalInstance.initialize();
+                	launchingFrameworks.add(principalInstance);
 
                 	log("initialize() on " + principalClass.getName());
                 }
