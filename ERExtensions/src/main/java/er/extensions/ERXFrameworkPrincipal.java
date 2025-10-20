@@ -98,8 +98,10 @@ public abstract class ERXFrameworkPrincipal {
 
             for (ERXFrameworkPrincipal principal : launchingFrameworks) {
                 principal.finishInitialization();
-                log("finishInitialization for " + principal.getClass().getSimpleName());
+                log("finishInitialization() on " + principal.getClass().getSimpleName());
             }
+            
+            log("finishInitialization completed" );
         }
         
         /**
@@ -111,9 +113,10 @@ public abstract class ERXFrameworkPrincipal {
 
             for (ERXFrameworkPrincipal principal : launchingFrameworks) {
                 principal.didFinishInitialization();
+                log("didFinishInitialization() on " + principal.getClass().getSimpleName());
             }
             
-            log("didFinishInitialization");
+            log("didFinishInitialization completed");
         }
     }
     
@@ -173,7 +176,7 @@ public abstract class ERXFrameworkPrincipal {
                 	principal.initialize();
                 	launchingFrameworks.add(principal);
 
-                	log("Initialized : " + principalClass.getName());
+                	log("initialize() on " + principalClass.getName());
                 }
 
             }
