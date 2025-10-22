@@ -374,7 +374,6 @@ public class ERXWOContext extends ERXAjaxContext {
      * @param prefix String to prefix source with to make it a valid identifier name
      * @return source converted to a name suitable for use as an identifier in JavaScript
      */
-	@Deprecated
     public static String safeIdentifierName(String source, String prefix) {
     	return safeIdentifierName(source, prefix, '_');
     }
