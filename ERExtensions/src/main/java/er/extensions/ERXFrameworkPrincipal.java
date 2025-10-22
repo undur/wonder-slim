@@ -155,9 +155,7 @@ public abstract class ERXFrameworkPrincipal {
                     final Field requiresField = principalClass.getField("REQUIRES");
                     final Class requires[] = (Class[]) requiresField.get(principalClass);
 
-                    for (int i = 0; i < requires.length; i++) {
-                    	final Class requiredPrincipalClass = requires[i];
-
+                    for (final Class requiredPrincipalClass : requires) {
                     	if(!isInitialized(requiredPrincipalClass)) {
                     		setUpFrameworkPrincipalClass(requiredPrincipalClass);
                     	}
