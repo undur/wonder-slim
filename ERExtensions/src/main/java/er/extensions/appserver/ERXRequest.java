@@ -46,14 +46,14 @@ public  class ERXRequest extends WORequest {
     /**
      * Headers to check for the client IP-address 
      */
-    private static final String[] HOST_ADDRESS_KEYS = {"x-forwarded-for", "pc-remote-addr", "remote_host", "remote_addr", "remote_user", "x-webobjects-remote-addr"};
+    private static final String[] HOST_ADDRESS_HEADERS = {"x-forwarded-for", "pc-remote-addr", "remote_host", "remote_addr", "remote_user", "x-webobjects-remote-addr"};
 
     /**
      * 'Host' is the official HTTP 1.1 header for the host name in the request URL, so this should be checked first. @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
      * when the app is behind a reverse proxy 'Host' will contain the proxy address instead of the requested one so check first for 'x-forwarded-host' @see http://httpd.apache.org/docs/2.2/mod/mod_proxy.html#x-headers
      * Fallback headers such as server_name will screw up your complete URL generation for secure domains that have wildcard subdomains since it returns sth like *.domain.com for host name
      */
-    private static final String[] HOST_NAME_KEYS = {"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"};
+    private static final String[] HOST_NAME_HEADERS = {"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"};
     
     /**
      * FIXME: Docs missing // Hugi 2025-10-22
@@ -571,35 +571,38 @@ public  class ERXRequest extends WORequest {
     }
 
     /**
-     * Returns the remote client host address. Works in various setups, like
-     * direct connect, deployed etc. If no host name can be found, returns "UNKNOWN".
-     * 
-     * @return remote client host address
+     * @return The remote client host address. Works in various setups, like direct connect, deployed etc. If no host address is found, returns "UNKNOWN".
      */
     public String remoteHostAddress() {
-        if (WOApplication.application().isDirectConnectEnabled()) {
+        
+    	if (WOApplication.application().isDirectConnectEnabled()) {
             if (_originatingAddress() != null) {
                 return _originatingAddress().getHostAddress();
             }
         }
-        for (String key : HOST_ADDRESS_KEYS) {
-        	String remoteAddressHeaderValue = headerForKey(key); 
+
+        for (final String headerName : HOST_ADDRESS_HEADERS) {
+        	final String remoteAddressHeaderValue = headerForKey(headerName);
+
 			if (remoteAddressHeaderValue != null) {
 				return remoteAddressHeaderValue;
 			}
 		}
+
         return UNKNOWN_HOST;
     }
     
     /**
-     * @return The remote client host name. If no host name can be found, returns "UNKNOWN".
+     * @return The remote client host name. If no host name is found, returns "UNKNOWN".
      */
     public String remoteHostName() {
-    	for (String key : HOST_NAME_KEYS) {
-			if (headerForKey(key) != null) {
-				return headerForKey(key);
+
+    	for (final String headerName : HOST_NAME_HEADERS) {
+			if (headerForKey(headerName) != null) {
+				return headerForKey(headerName);
 			}
 		}
+
     	return UNKNOWN_HOST;
     }
 
