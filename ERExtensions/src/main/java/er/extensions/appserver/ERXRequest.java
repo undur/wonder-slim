@@ -2,7 +2,6 @@ package er.extensions.appserver;
 
 import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -569,19 +568,6 @@ public  class ERXRequest extends WORequest {
             }
         }
         return sessionID;
-    }
-    
-    /**
-     * Utility method to set credentials for basic authorization.
-     * 
-     * @param userName the user name
-     * @param password the password
-     */
-    public void setCredentials(String userName, String password) {
-        String up = userName + ":" + password;
-        byte[] bytes = up.getBytes();
-        String encodedString = Base64.getEncoder().encodeToString(bytes);
-        setHeader("Basic " +  encodedString, "authorization");
     }
 
     /**
