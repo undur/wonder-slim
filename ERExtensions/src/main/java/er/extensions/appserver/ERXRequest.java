@@ -45,19 +45,26 @@ public  class ERXRequest extends WORequest {
     private static final String X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL = ERXProperties.stringForKeyWithDefault("er.extensions.appserver.ERXRequest.xForwardedProtoHeaderKeyForSsl", "x-forwarded-proto");
     private static final NSArray<String> HOST_ADDRESS_KEYS = new NSArray<>(new String[]{"x-forwarded-for", "pc-remote-addr", "remote_host", "remote_addr", "remote_user", "x-webobjects-remote-addr"});
 
-    // 'Host' is the official HTTP 1.1 header for the host name in the request URL, so this should be checked first.
-    // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
-    // when the app is behind a reverse proxy 'Host' will contain the proxy address instead of the requested one so check first for 'x-forwarded-host'
-    // @see http://httpd.apache.org/docs/2.2/mod/mod_proxy.html#x-headers
-    // Fallback headers such as server_name will screw up your complete URL generation for secure domains that have wildcard subdomains since it returns sth like *.domain.com for host name
+    /**
+     * 'Host' is the official HTTP 1.1 header for the host name in the request URL, so this should be checked first. @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
+     * when the app is behind a reverse proxy 'Host' will contain the proxy address instead of the requested one so check first for 'x-forwarded-host' @see http://httpd.apache.org/docs/2.2/mod/mod_proxy.html#x-headers
+     * Fallback headers such as server_name will screw up your complete URL generation for secure domains that have wildcard subdomains since it returns sth like *.domain.com for host name
+     */
     private static final NSArray<String> HOST_NAME_KEYS = new NSArray<>(new String[]{"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"});
     
+    /**
+     * FIXME: Docs missing // Hugi 2025-10-22
+     */
     private static Boolean isBrowserFormValueEncodingOverrideEnabled;
 
-    /** NSArray to keep browserLanguages in. */
+    /**
+     * NSArray to keep browserLanguages in
+     */
     private NSArray<String> _browserLanguages;
 
-    /** holds a reference to the browser object */
+    /**
+     * Holds a reference to the browser object
+     */
     private ERXBrowser _browser;
 
     /**
@@ -75,17 +82,17 @@ public  class ERXRequest extends WORequest {
     private NSDictionary<String, NSArray<String>> _cookieDictionary;
     
     /**
-     * Returns a ERXRequest object initialized with the specified parameters.
+     * Initializes a ERXRequest object with the specified parameters
      * 
-     * @param aMethod a "GET", "POST" or "HEAD", may not be <code>null</code>. If <code>null</code>, or not one of the allowed methods, an IllegalArgumentException will be thrown
-     * @param aURL a URL, may not be null or an IllegalArgumentException will be thrown
-     * @param anHTTPVersion  the version of HTTP used when sending the message, may not be <code>null</code> or an IllegalArgumentException will be thrown
-     * @param someHeaders  a dictionary whose String keys correspond to header names and whose values are arrays of one or more strings corresponding to the values of each header
-     * @param aContent the HTML content
-     * @param aUserInfoDictionary java.util.Map that contains any information that the WORequest object wants to pass along to other objects
+     * @param method a "GET", "POST" or "HEAD", may not be <code>null</code>. If <code>null</code>, or not one of the allowed methods, an IllegalArgumentException will be thrown
+     * @param url a URL, may not be null or an IllegalArgumentException will be thrown
+     * @param httpVersion  the version of HTTP used when sending the message, may not be <code>null</code> or an IllegalArgumentException will be thrown
+     * @param headers  a dictionary whose String keys correspond to header names and whose values are arrays of one or more strings corresponding to the values of each header
+     * @param content the HTML content
+     * @param userInfo java.util.Map that contains any information that the WORequest object wants to pass along to other objects
      */
-    public ERXRequest(String aMethod, String aURL, String anHTTPVersion, Map someHeaders, NSData aContent, Map aUserInfoDictionary) {
-        super(aMethod, aURL, anHTTPVersion, someHeaders, aContent, aUserInfoDictionary);
+    public ERXRequest(String method, String url, String httpVersion, Map headers, NSData content, Map userInfo) {
+        super(method, url, httpVersion, headers, content, userInfo);
 
         if (isBrowserFormValueEncodingOverrideEnabled() && browser().formValueEncoding() != null) {
             setDefaultFormValueEncoding(browser().formValueEncoding());
@@ -132,56 +139,63 @@ public  class ERXRequest extends WORequest {
 	}
 
     /**
-     * Returns <code>true</code> if er.extensions.ERXRequest.secureDisabled is true.
-     * Defaults to <code>false</code>.
-     * 
-     * @return <code>true</code> if er.extensions.ERXRequest.secureDisabled is true
+     * @return true if er.extensions.ERXRequest.secureDisabled is true. Defaults to false.
      */
     public static boolean _isSecureDisabled() {
         return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXRequest.secureDisabled", false);
     }
     
     /**
-     * Returns <code>true</code> if er.extensions.ERXRequest.secureDisabled is true.
-     * 
      * @return <code>true</code> if er.extensions.ERXRequest.secureDisabled is true
      */
     public boolean isSecureDisabled() {
     	return _secureDisabled;
     }
     
+    /**
+     * FIXME: Docs missing // Hugi 2025-10-22 
+     */
     public boolean isBrowserFormValueEncodingOverrideEnabled() {
         if (isBrowserFormValueEncodingOverrideEnabled == null) {
             isBrowserFormValueEncodingOverrideEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXRequest.BrowserFormValueEncodingOverrideEnabled", false) ? Boolean.TRUE : Boolean.FALSE;
         }
+
         return isBrowserFormValueEncodingOverrideEnabled.booleanValue();
     }
 
+    /**
+     * FIXME: I have no idea why is here. Figure out and document. Added in this commit: https://github.com/wocommunity/wonder/commit/51106ce8b93372d88d0df2520003225b93f39f5a // Hugi 2025-10-22
+     */
     @Override
     public WOContext context() {
     	return _context();
     }
     
-    /** Returns a cooked version of the languages the user has set in his Browser.
+    /**
+     * Returns a cooked version of the languages the user has set in his Browser.
      * Adds "Nonlocalized" and {@link er.extensions.localization.ERXLocalizer#defaultLanguage()} if not
      * already present. Transforms regionalized en_us to English_US as a key.
+     * 
      * @return cooked version of user's languages
      */
 	@Override
-    @SuppressWarnings("unchecked")
 	public NSArray<String> browserLanguages() {
         if (_browserLanguages == null) {
         	NSMutableArray<String> languageKeys = new NSMutableArray<>();
             NSArray<String> fixedLanguages = null;
             String string = headerForKey("accept-language");
+
             if (string != null) {
                 NSArray<String> rawLanguages = NSArray.componentsSeparatedByString(string, ",");
                 fixedLanguages = fixAbbreviationArray(rawLanguages);
+
                 for (Enumeration<String> e = fixedLanguages.objectEnumerator(); e.hasMoreElements();) {
 					String languageKey = e.nextElement();
 					String language = WOProperties.TheLanguageDictionary.objectForKey(languageKey);
+
 					if(language == null) {
 						int index = languageKey.indexOf('_');
+
 						if(index > 0) {
 							String mainLanguageKey = languageKey.substring(0, index);
 							String region = languageKey.substring(index);
@@ -196,7 +210,9 @@ public  class ERXRequest extends WORequest {
 					}
 				}
             }
+
             languageKeys.addObject("Nonlocalized");
+
             if(!languageKeys.containsObject(ERXLocalizer.defaultLanguage())) {
                 languageKeys.addObject(ERXLocalizer.defaultLanguage());
             }
@@ -208,6 +224,7 @@ public  class ERXRequest extends WORequest {
     @Override
 	public String stringFormValueForKey(String key) {
     	String result = super.stringFormValueForKey(key);
+
     	if (result == null && "wodata".equals(key)) {
     	    // AK: yet another crappy 5.4 fix, WODynamicURL changed packages
     		String requestHandlerKey = (String)valueForKeyPath("_uriDecomposed.requestHandlerKey");
@@ -238,11 +255,8 @@ public  class ERXRequest extends WORequest {
         return aDate == null ? null : new NSTimestamp(aDate);
     }
 
-
 	/**
-     * Gets the ERXBrowser associated with the user-agent of
-     * the request.
-     * @return browser object for the request
+     * @return The ERXBrowser associated with the user-agent of the request.
      */
     public ERXBrowser browser() {
         if (_browser == null) {
@@ -250,11 +264,14 @@ public  class ERXRequest extends WORequest {
             _browser = browserFactory.browserMatchingRequest(this);
             browserFactory.retainBrowser(_browser);            
         }
+
         return _browser;
     }
 
     /**
      * Cleaning up retain count on the browser.
+     * 
+     * FIXME: Finalization is dead, remove // Hugi 2025-10-22
      */
     @Override
 	public void finalize() throws Throwable {
@@ -265,9 +282,7 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
-     * Returns whether or not this request is secure.
-     * 
-     * @return whether or not this request is secure
+     * @return Whether or not this request is secure
      */
     @Override
     public boolean isSecure() {
@@ -276,8 +291,6 @@ public  class ERXRequest extends WORequest {
     
     /**
      * Add the protocol, server and port parts of this request to a StringBuffer.
-     * @param stringbuffer 
-     * 
      */
 	public void _completeURLPrefix(StringBuffer stringbuffer) {
 		_completeURLPrefix(stringbuffer, isSecure(), 0);
@@ -286,31 +299,37 @@ public  class ERXRequest extends WORequest {
     /**
      * Add the protocol, server and port parts to a StringBuffer to build an URL to this app.
      * if port is set to 0, this request port will be used.
-     * @param stringbuffer 
+     * 
      * @param secure generate a https url
      * @param port the port number to use, 0 this request port  
-     * 
      */
 	@Override
 	public void _completeURLPrefix(StringBuffer stringbuffer, boolean secure, int port) {
+
     	if (_secureDisabled) {
     		secure = false;
     	}
     	
     	String serverName = _serverName();
         String portStr;
+
         if (port == 0) {
         	String sslPort = String.valueOf(ERXApplication.erxApplication().sslPort());
         	portStr = secure ? sslPort : _serverPort();
-        } else {
+        }
+        else {
         	portStr = WOShared.unsignedIntString(port);
         }
+
         if (secure) {
         	stringbuffer.append("https://");
-        } else {
+        }
+        else {
         	stringbuffer.append("http://");
         }
+
    		stringbuffer.append(serverName);
+
    		if(portStr != null && WOApplication.application().isDirectConnectEnabled() && ((secure && !"443".equals(portStr)) || (!secure && !"80".equals(portStr)))) {
    			stringbuffer.append(':');
    			stringbuffer.append(portStr);
@@ -318,9 +337,7 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
-     * Returns whether or not the given request is secure.
-     * MS: I found this somewhere else a while ago, but I have no idea where or
-     * I'd give attribution.
+     * MS: I found this somewhere else a while ago, but I have no idea where or I'd give attribution.
      * 
      * @param request the request to check
      * @return whether or not the given request is secure.
@@ -328,8 +345,7 @@ public  class ERXRequest extends WORequest {
     public static boolean isRequestSecure(WORequest request) {
         boolean isRequestSecure = false;
         
-        // Depending on the adaptor the incoming port can be found in one of two
-        // places.
+        // Depending on the adaptor the incoming port can be found in one of two places
         if (request != null) {
         	
 	        String serverPort = request.headerForKey("SERVER_PORT");
@@ -402,7 +418,9 @@ public  class ERXRequest extends WORequest {
 
     private final static NSComparator COMPARE_Qs = new _LanguageComparator();
 
-    /** Translates ("de", "en-us;q=0.33", "en", "en-gb;q=0.66") to ("de", "en_gb", "en-us", "en").
+    /**
+     * Translates ("de", "en-us;q=0.33", "en", "en-gb;q=0.66") to ("de", "en_gb", "en-us", "en").
+     * 
      * @param languages NSArray of Strings
      * @return sorted NSArray of normalized Strings
      */
@@ -442,6 +460,7 @@ public  class ERXRequest extends WORequest {
     /**
      * Parses all cookies one at a time catch parse exception which just discards
      * that cookie and not all cookies. It uses java.net.HttpCookie as a parser.
+     * 
      * @return a dictionary of cookies, parsed one cookie at a time
      */
     private NSDictionary _cookieDictionary() {
@@ -504,25 +523,23 @@ public  class ERXRequest extends WORequest {
      * 
      * @return <code>true</code> if the session ID can be obtained from the form values or a cookie.
      */
-    @Override
+	@Override
 	public boolean isSessionIDInRequest() {
-        ERXApplication app = (ERXApplication)WOApplication.application();
-        
-        if (app.isStreamingRequestHandlerKey(requestHandlerKey())) {
-            return false;
-        }
-            return super.isSessionIDInRequest();
-        }
-    
+		ERXApplication app = (ERXApplication) WOApplication.application();
+
+		if (app.isStreamingRequestHandlerKey(requestHandlerKey())) {
+			return false;
+		}
+
+		return super.isSessionIDInRequest();
+	}
 
     /**
      * Overridden because the super implementation would pull in all 
      * content even if the request is supposed to be streaming and thus 
-     * very large. Will now look for the session ID only in the cookie
-     * values.
+     * very large. Will now look for the session ID only in the cookie values.
      * 
-     * @param inCookiesFirst
-     *            define if session ID should be searched first in cookie
+     * @param inCookiesFirst define if session ID should be searched first in cookie
      */
     @Override
 	protected String _getSessionIDFromValuesOrCookie(boolean inCookiesFirst) {
@@ -553,10 +570,8 @@ public  class ERXRequest extends WORequest {
     /**
      * Utility method to set credentials for basic authorization.
      * 
-     * @param userName
-     *            the user name
-     * @param password
-     *            the password
+     * @param userName the user name
+     * @param password the password
      */
     public void setCredentials(String userName, String password) {
         String up = userName + ":" + password;
@@ -567,8 +582,7 @@ public  class ERXRequest extends WORequest {
 
     /**
      * Returns the remote client host address. Works in various setups, like
-     * direct connect, deployed etc. If no host name can be found,
-     * returns "UNKNOWN".
+     * direct connect, deployed etc. If no host name can be found, returns "UNKNOWN".
      * 
      * @return remote client host address
      */
@@ -588,10 +602,7 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
-     * Returns the remote client host name. If no host name can be found,
-     * returns "UNKNOWN".
-     * 
-     * @return remote client host name
+     * @return The remote client host name. If no host name can be found, returns "UNKNOWN".
      */
     public String remoteHostName() {
     	for (String key : HOST_NAME_KEYS) {
@@ -605,6 +616,7 @@ public  class ERXRequest extends WORequest {
 	public NSMutableDictionary<String, Object> mutableUserInfo() {
 		NSDictionary userInfo = userInfo();
 		NSMutableDictionary mutableUserInfo;
+
 		if (userInfo == null) {
 			mutableUserInfo = new NSMutableDictionary();
 			_userInfo = mutableUserInfo;
@@ -616,6 +628,7 @@ public  class ERXRequest extends WORequest {
 			mutableUserInfo = userInfo.mutableClone();
 			_userInfo = mutableUserInfo;
 		}
+
 		return mutableUserInfo;
 	}
 }
