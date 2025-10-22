@@ -36,8 +36,8 @@ public class ERXWOContext extends ERXAjaxContext {
 		});
 	}
 
-	public ERXWOContext(WORequest worequest) {
-		super(worequest);
+	public ERXWOContext(WORequest request) {
+		super(request);
 	}
 
 	/**
@@ -165,36 +165,12 @@ public class ERXWOContext extends ERXAjaxContext {
 		return (ERXWOContext) app.createContextForRequest(dummyRequest);
 	}
 	
-	/**
-	 * If er.extensions.ERXWOContext.forceRemoveApplicationNumber is true, then always remove the 
-	 * application number from the generated URLs.  You have to be aware of how your app is written
-	 * to know if this is something you can do without causing problems.  For instance, you MUST be
-	 * using cookies, and you must not use WOImages with data bindings -- anything that requires a 
-	 * per-instance cache has the potential to fail when this is enabled (if you have more than
-	 * one instance of your app deployed). 
-	 */
-	protected void _preprocessURL() {
-// 		FIXME: We've disabled forceRemoveApplicationNumber this as it isn't documented anywhere and functionality is unclear. But we might want to keep  it // Hugi 2025-10-18
-//		In any case, the number of invocations to this method are huge so not doing the property lookup is probably a performance gain (although not huge)
-//		
-//		if (ERXProperties.booleanForKey("er.extensions.ERXWOContext.forceRemoveApplicationNumber")) {
-//			_url().setApplicationNumber(null);
-//		}
-	}
-
 	protected String _postprocessURL(String url) {
 		return ERXApplication.erxApplication()._rewriteURL(url);
 	}
-	
-	@Override
-	public String _urlWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString, boolean secure) {
-		_preprocessURL();
-		return super._urlWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString, secure);
-	}
-	
+		
 	@Override
 	public String _urlWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString, boolean isSecure, int somePort) {
-		_preprocessURL();
 		String url = super._urlWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort);
 		url = _postprocessURL(url);
 		return url;
