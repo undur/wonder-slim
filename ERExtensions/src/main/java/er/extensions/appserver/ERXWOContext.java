@@ -320,28 +320,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		return result;
 	}
 
-	/**
-	 * Debugging help, returns the path to current component as WOComponent objects.
-	 * 
-	 * @param context the current context
-	 * @return an array of components
-	 */
-	public static NSArray<WOComponent> _componentPath(WOContext context) {
-		final NSMutableArray<WOComponent> result = new NSMutableArray<>();
-
-		if (context != null) {
-			WOComponent component = context.component();
-			while (component != null) {
-				if (component.name() != null) {
-					result.insertObjectAtIndex(component, 0);
-				}
-				component = component.parent();
-			}
-		}
-
-		return result;
-	}
-
 	private static final String SAFE_IDENTIFIER_NAME_KEY = "ERXWOContext.safeIdentifierName";
 
 	/**
