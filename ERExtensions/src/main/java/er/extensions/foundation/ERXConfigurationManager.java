@@ -6,7 +6,6 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.foundation;
 
-import java.util.Enumeration;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -85,7 +84,7 @@ public class ERXConfigurationManager {
 	private static ERXConfigurationManager defaultManager = null;
 
 	private String[] _commandLineArguments;
-	private NSArray _monitoredProperties;
+	private NSArray<String> _monitoredProperties;
 	private Properties _defaultProperties;
 	private Properties _commandLineArgumentProperties;
 	private boolean _isInitialized = false;
@@ -178,7 +177,7 @@ public class ERXConfigurationManager {
 		}
 	}
 
-	private NSArray monitoredProperties() {
+	private NSArray<String> monitoredProperties() {
 		if (_monitoredProperties == null) {
 			_monitoredProperties = ERXProperties.pathsForUserAndBundleProperties();
 		}
@@ -194,6 +193,7 @@ public class ERXConfigurationManager {
 	 * WOCaching disabled.
 	 */
 	public void configureRapidTurnAround() {
+
 		if (_isRapidTurnAroundInitialized) {
 			return;
 		}
@@ -207,8 +207,7 @@ public class ERXConfigurationManager {
 			return;
 		}
 
-		for (Enumeration e = monitoredProperties().objectEnumerator(); e.hasMoreElements();) {
-			String path = (String) e.nextElement();
+		for (String path : monitoredProperties()) {
 			registerForFileNotification(path, "updateSystemProperties");
 		}
 	}
