@@ -172,6 +172,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	public ERXApplication() {
+
 		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
 		ERXLoggingSupport.reInitConsoleAppenders();
 
@@ -183,7 +184,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		ERXStats.initStatisticsIfNecessary();
 		
 		fixBaseURLs();
-
 
 		checkEnvironment();
 
@@ -364,7 +364,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	protected void installPatches() {
 		ERXPatcher.installPatches();
 
-		if (contextClassName().equals("WOContext")) {
+		if (contextClassName().equals(WOContext.class.getSimpleName())) {
 			setContextClassName(ERXWOContext.class.getName());
 		}
 	}
