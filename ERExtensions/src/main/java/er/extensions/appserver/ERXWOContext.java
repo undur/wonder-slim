@@ -32,7 +32,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	static {
 		ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( notification -> {
 			ERXWOContext.setCurrentContext(null);
-			ERXThreadStorage.removeValueForKey(ERXWOContext.CONTEXT_DICTIONARY_KEY);			
+			ERXThreadStorage.removeValueForKey(CONTEXT_DICTIONARY_KEY);			
 		});
 	}
 
@@ -62,11 +62,11 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	public static NSMutableDictionary contextDictionary() {
-		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(ERXWOContext.CONTEXT_DICTIONARY_KEY);
+		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(CONTEXT_DICTIONARY_KEY);
 
 		if (contextDictionary == null) {
 			contextDictionary = new NSMutableDictionary();
-			ERXThreadStorage.takeValueForKey(contextDictionary, ERXWOContext.CONTEXT_DICTIONARY_KEY);
+			ERXThreadStorage.takeValueForKey(contextDictionary, CONTEXT_DICTIONARY_KEY);
 		}
 
 		return contextDictionary;
@@ -124,7 +124,9 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * @return A new WOContext created using a dummy WORequest.
 	 */
 	public static ERXWOContext newContext() {
-		ERXApplication app = ERXApplication.erxApplication();
+
+		final ERXApplication app = ERXApplication.erxApplication();
+
 		// Try to create a URL with a relative path into the application to mimic a real request.
 		// We must create a request with a relative URL, as using an absolute URL makes the new 
 		// WOContext's URL absolute, and it is then unable to render relative paths. (Long story short.)
@@ -133,18 +135,23 @@ public class ERXWOContext extends ERXAjaxContext {
 		// make sure to also set your WOAdaptorURL property to match.  Otherwise, asking the new context 
 		// the path to a direct action or component action URL will give an incorrect result.
 		String requestUrl = app.cgiAdaptorURL() + "/" + app.name() + app.applicationExtension();
+
 		try {
 			URL url = new URL(requestUrl);
 			requestUrl = url.getPath(); // Get just the part of the URL that is relative to the server root.
-		} catch (MalformedURLException mue) {
+		}
+		catch (MalformedURLException mue) {
 			// The above should never fail.  As a last resort, using the empty string will 
 			// look funny in the request, but still allow the context to use a relative url.
 			requestUrl = "";
 		}
-		WORequest dummyRequest = app.createRequest("GET", requestUrl, "HTTP/1.1", null, null, null);
+
+		final WORequest dummyRequest = app.createRequest("GET", requestUrl, "HTTP/1.1", null, null, null);
+
 		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.publicHostIsSecure", false)) {
 			dummyRequest.setHeader("on", "https");
 		}
+
 		return (ERXWOContext) app.createContextForRequest(dummyRequest);
 	}
 	
@@ -153,7 +160,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	public void setMutableUserInfo(NSMutableDictionary userInfo) {
-		ERXThreadStorage.takeValueForKey(userInfo, ERXWOContext.CONTEXT_DICTIONARY_KEY);
+		ERXThreadStorage.takeValueForKey(userInfo, CONTEXT_DICTIONARY_KEY);
 	}
 
 	@Override
@@ -170,7 +177,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * one instance of your app deployed). 
 	 */
 	protected void _preprocessURL() {
-// 		FIXME: We've disabled forceRemoveApplicationNumber this as it isn't documented anywhere and funcitonality is unclear. But we might want to keep  it // Hugi 2025-10-18
+// 		FIXME: We've disabled forceRemoveApplicationNumber this as it isn't documented anywhere and functionality is unclear. But we might want to keep  it // Hugi 2025-10-18
 //		In any case, the number of invocations to this method are huge so not doing the property lookup is probably a performance gain (although not huge)
 //		
 //		if (ERXProperties.booleanForKey("er.extensions.ERXWOContext.forceRemoveApplicationNumber")) {
@@ -179,9 +186,11 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	protected String _postprocessURL(String url) {
+
 		if (WOApplication.application() instanceof ERXApplication) {
 			return ERXApplication.erxApplication()._rewriteURL(url);
 		}
+
 		return url;
 	}
 	
@@ -221,9 +230,11 @@ public class ERXWOContext extends ERXAjaxContext {
 	 */
 	public String directActionURLForActionNamed(String actionName, NSDictionary queryDict, boolean includeSessionID) {
 		String url = super.directActionURLForActionNamed(actionName, queryDict);
+
 		if (!includeSessionID) {
 			url = stripSessionIDFromURL(url);
 		}
+
 		return url;
 	}
 
@@ -290,7 +301,8 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * @return an array of component names
 	 */
 	public static NSArray<String> componentPath(WOContext context) {
-		NSMutableArray<String> result = new NSMutableArray<>();
+		final NSMutableArray<String> result = new NSMutableArray<>();
+
 		if (context != null) {
 			WOComponent component = context.component();
 			while (component != null) {
@@ -300,6 +312,7 @@ public class ERXWOContext extends ERXAjaxContext {
 				component = component.parent();
 			}
 		}
+
 		return result;
 	}
 
@@ -310,7 +323,8 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * @return an array of components
 	 */
 	public static NSArray<WOComponent> _componentPath(WOContext context) {
-		NSMutableArray<WOComponent> result = new NSMutableArray<>();
+		final NSMutableArray<WOComponent> result = new NSMutableArray<>();
+
 		if (context != null) {
 			WOComponent component = context.component();
 			while (component != null) {
@@ -320,6 +334,7 @@ public class ERXWOContext extends ERXAjaxContext {
 				component = component.parent();
 			}
 		}
+
 		return result;
 	}
 
@@ -340,21 +355,25 @@ public class ERXWOContext extends ERXAjaxContext {
 	 */
 	public static String safeIdentifierName(WOContext context, boolean willCache) {
 		String safeIdentifierName;
+
 		if (willCache) {
-			NSMutableDictionary<String, Object> pageUserInfo = ERXResponseRewriter.pageUserInfo(context);
-			Integer counter = (Integer) pageUserInfo.objectForKey(ERXWOContext.SAFE_IDENTIFIER_NAME_KEY);
+			final NSMutableDictionary<String, Object> pageUserInfo = ERXResponseRewriter.pageUserInfo(context);
+			Integer counter = (Integer) pageUserInfo.objectForKey(SAFE_IDENTIFIER_NAME_KEY);
+
 			if (counter == null) {
 				counter = Integer.valueOf(0);
 			}
 			else {
 				counter = Integer.valueOf(counter.intValue() + 1);
 			}
-			pageUserInfo.setObjectForKey(counter, ERXWOContext.SAFE_IDENTIFIER_NAME_KEY);
+
+			pageUserInfo.setObjectForKey(counter, SAFE_IDENTIFIER_NAME_KEY);
 			safeIdentifierName = safeIdentifierName(counter.toString());
 		}
 		else {
 			safeIdentifierName = safeIdentifierName("e_" + context.elementID());	
 		}
+
 		return safeIdentifierName;
 	}
 	
@@ -373,15 +392,18 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * @return source converted to a name suitable for use as an identifier in JavaScript
 	 */
 	private static String safeIdentifierName(String source, String prefix, char replacement) {
-		StringBuilder b = new StringBuilder();
+		final StringBuilder b = new StringBuilder();
+
 		// Add prefix if source does not start with valid character
 		if (source == null || source.length() == 0 || !Character.isJavaIdentifierStart(source.charAt(0))) {
 			b.append(prefix);
 		}
+
 		b.append(source);
 
 		for (int i = 0; i < b.length(); i++) {
 			char c = b.charAt(i);
+
 			if (!Character.isJavaIdentifierPart(c)) {
 				b.setCharAt(i, replacement);
 			}
@@ -417,18 +439,14 @@ public class ERXWOContext extends ERXAjaxContext {
 	/**
 	 * Generates direct action URLs with support for various overrides.
 	 * 
-	 * @param context
-	 *            the context to generate the URL within
-	 * @param directActionName
-	 *            the direct action name
-	 * @param secure
-	 *            <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
-	 * @param includeSessionID
-	 *            if <code>false</code>, removes session ID from query parameters
+	 * @param context the context to generate the URL within
+	 * @param directActionName the direct action name
+	 * @param secure <code>true</code> = https, <code>false</code> = http, <code>null</code> = same as request
+	 * @param includeSessionID if <code>false</code>, removes session ID from query parameters
 	 * @return the constructed direct action URL
 	 */
 	public static String directActionUrl(WOContext context, String directActionName, Boolean secure, boolean includeSessionID) {
-		return ERXWOContext.directActionUrl(context, null, null, null, directActionName, null, secure, includeSessionID);
+		return directActionUrl(context, null, null, null, directActionName, null, secure, includeSessionID);
 	}
 
 	/**
@@ -444,7 +462,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * @return the constructed direct action URL
 	 */
 	public static String directActionUrl(WOContext context, String directActionName, String key, String value, Boolean secure, boolean includeSessionID) {
-		return ERXWOContext.directActionUrl(context, null, null, null, directActionName, key, value, secure, includeSessionID);
+		return directActionUrl(context, null, null, null, directActionName, key, value, secure, includeSessionID);
 	}
 
 	/**
@@ -459,7 +477,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * @return the constructed direct action URL
 	 */
 	public static String directActionUrl(WOContext context, String directActionName, NSDictionary<String, Object> queryParameters, Boolean secure, boolean includeSessionID) {
-		return ERXWOContext.directActionUrl(context, null, null, null, directActionName, queryParameters, secure, includeSessionID);
+		return directActionUrl(context, null, null, null, directActionName, queryParameters, secure, includeSessionID);
 	}
 
 	/**
@@ -479,10 +497,12 @@ public class ERXWOContext extends ERXAjaxContext {
 	 */
 	public static String directActionUrl(WOContext context, String host, Integer port, String path, String directActionName, String key, Object value, Boolean secure, boolean includeSessionID) {
 		NSDictionary<String, Object> queryParameters = null;
+
 		if (key != null && value != null) {
 			queryParameters = new NSDictionary<>(value, key);
 		}
-		return ERXWOContext.directActionUrl(context, host, port, path, directActionName, queryParameters, secure, includeSessionID);
+
+		return directActionUrl(context, host, port, path, directActionName, queryParameters, secure, includeSessionID);
 	}
 
 	/**
@@ -567,6 +587,7 @@ public class ERXWOContext extends ERXAjaxContext {
 				context.generateRelativeURLs();
 			}
 		}
+
 		return url;
 	}
 }
