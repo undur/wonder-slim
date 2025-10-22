@@ -62,7 +62,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	public static NSMutableDictionary contextDictionary() {
-		NSMutableDictionary contextDictionary = ERXWOContext._contextDictionary();
+		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(ERXWOContext.CONTEXT_DICTIONARY_KEY);
 
 		if (contextDictionary == null) {
 			contextDictionary = new NSMutableDictionary();
@@ -80,11 +80,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		ERXThreadStorage.takeValueForKey(object, CONTEXT_KEY);
 	}
 
-	protected static NSMutableDictionary _contextDictionary() {
-		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(ERXWOContext.CONTEXT_DICTIONARY_KEY);
-		return contextDictionary;
-	}
-	
 	@Override
 	public Object clone() {
 		ERXWOContext context = (ERXWOContext)super.clone();
