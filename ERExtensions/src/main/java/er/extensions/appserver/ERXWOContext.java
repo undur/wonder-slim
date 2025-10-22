@@ -42,6 +42,8 @@ public class ERXWOContext extends ERXAjaxContext {
 
 	/**
 	 * @return The existing session if any is given in the form values or URL, or else <code>null</code>
+	 * 
+	 * Overridden to include a check for the request's session ID
 	 */
 	public WOSession existingSession() {
 		final String requestSessionID = _requestSessionID();
@@ -55,6 +57,8 @@ public class ERXWOContext extends ERXAjaxContext {
 
 	/**
 	 * @return true if there is an existing session.
+	 * 
+	 * Overridden to check existingSession() (the request's session ID) as well as our stored session 
 	 */
 	@Override
 	public boolean hasSession() {
