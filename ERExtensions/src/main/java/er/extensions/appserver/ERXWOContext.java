@@ -183,12 +183,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	protected String _postprocessURL(String url) {
-
-		if (WOApplication.application() instanceof ERXApplication) {
-			return ERXApplication.erxApplication()._rewriteURL(url);
-		}
-
-		return url;
+		return ERXApplication.erxApplication()._rewriteURL(url);
 	}
 	
 	@Override
