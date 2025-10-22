@@ -40,27 +40,25 @@ public  class ERXRequest extends WORequest {
 
     private static final Logger log = LoggerFactory.getLogger(ERXRequest.class);
 
-    public static final String UNKNOWN_HOST = "UNKNOWN";
-
-    public static final String X_FORWARDED_PROTO_FOR_SSL = ERXProperties.stringForKeyWithDefault("er.extensions.appserver.ERXRequest.xForwardedProtoForSsl", "https");
-    public static final String X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL = ERXProperties.stringForKeyWithDefault("er.extensions.appserver.ERXRequest.xForwardedProtoHeaderKeyForSsl", "x-forwarded-proto");
-
-    protected static Boolean isBrowserFormValueEncodingOverrideEnabled;
-
-    protected static final NSArray<String> HOST_ADDRESS_KEYS = new NSArray<>(new String[]{"x-forwarded-for", "pc-remote-addr", "remote_host", "remote_addr", "remote_user", "x-webobjects-remote-addr"});
+    private static final String UNKNOWN_HOST = "UNKNOWN";
+    private static final String X_FORWARDED_PROTO_FOR_SSL = ERXProperties.stringForKeyWithDefault("er.extensions.appserver.ERXRequest.xForwardedProtoForSsl", "https");
+    private static final String X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL = ERXProperties.stringForKeyWithDefault("er.extensions.appserver.ERXRequest.xForwardedProtoHeaderKeyForSsl", "x-forwarded-proto");
+    private static final NSArray<String> HOST_ADDRESS_KEYS = new NSArray<>(new String[]{"x-forwarded-for", "pc-remote-addr", "remote_host", "remote_addr", "remote_user", "x-webobjects-remote-addr"});
 
     // 'Host' is the official HTTP 1.1 header for the host name in the request URL, so this should be checked first.
     // @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
     // when the app is behind a reverse proxy 'Host' will contain the proxy address instead of the requested one so check first for 'x-forwarded-host'
     // @see http://httpd.apache.org/docs/2.2/mod/mod_proxy.html#x-headers
     // Fallback headers such as server_name will screw up your complete URL generation for secure domains that have wildcard subdomains since it returns sth like *.domain.com for host name
-    protected static final NSArray<String> HOST_NAME_KEYS = new NSArray<>(new String[]{"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"});
+    private static final NSArray<String> HOST_NAME_KEYS = new NSArray<>(new String[]{"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"});
     
+    private static Boolean isBrowserFormValueEncodingOverrideEnabled;
+
     /** NSArray to keep browserLanguages in. */
-    protected NSArray<String> _browserLanguages;
+    private NSArray<String> _browserLanguages;
 
     /** holds a reference to the browser object */
-    protected ERXBrowser _browser;
+    private ERXBrowser _browser;
 
     /**
      * Specifies whether https should be overridden to be enabled or disabled app-wide. This is 
@@ -69,12 +67,12 @@ public  class ERXRequest extends WORequest {
      * 
      * Defaults to <code>false</code>, set er.extensions.ERXRequest.secureDisabled=true to turn it off.
      */
-    protected boolean _secureDisabled;
+    private boolean _secureDisabled;
     
     /**
      * Holds the cookies in a NSDictionary.
      */
-    protected NSDictionary<String, NSArray<String>> _cookieDictionary;
+    private NSDictionary<String, NSArray<String>> _cookieDictionary;
     
     /**
      * Returns a ERXRequest object initialized with the specified parameters.
