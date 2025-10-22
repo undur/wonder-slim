@@ -172,6 +172,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	public ERXApplication() {
+		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
+		ERXLoggingSupport.reInitConsoleAppenders();
 
 		// Register and initialize the parsley template parser
 		Parsley.register();
@@ -182,8 +184,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		
 		fixBaseURLs();
 
-		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
-		ERXLoggingSupport.reInitConsoleAppenders();
 
 		checkEnvironment();
 
