@@ -61,6 +61,23 @@ public class ERXWOContext extends ERXAjaxContext {
 		return super.hasSession() || existingSession() != null; 
 	}
 
+	public static WOContext currentContext() {
+		return (WOContext) ERXThreadStorage.valueForKey(CONTEXT_KEY);
+	}
+
+	public static void setCurrentContext(Object object) {
+		ERXThreadStorage.takeValueForKey(object, CONTEXT_KEY);
+	}
+
+	public NSMutableDictionary mutableUserInfo() {
+		return contextDictionary();
+	}
+
+	@Override
+	public NSDictionary userInfo() {
+		return mutableUserInfo();
+	}
+
 	public static NSMutableDictionary contextDictionary() {
 		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(CONTEXT_DICTIONARY_KEY);
 
@@ -72,19 +89,8 @@ public class ERXWOContext extends ERXAjaxContext {
 		return contextDictionary;
 	}
 
-	public static WOContext currentContext() {
-		return (WOContext) ERXThreadStorage.valueForKey(CONTEXT_KEY);
-	}
-
-	public static void setCurrentContext(Object object) {
-		ERXThreadStorage.takeValueForKey(object, CONTEXT_KEY);
-	}
-
-	@Override
-	public Object clone() {
-		ERXWOContext context = (ERXWOContext)super.clone();
-		context._setGenerateCompleteResourceURLs(_generateCompleteResourceURLs);
-		return context;
+	public void setMutableUserInfo(NSMutableDictionary userInfo) {
+		ERXThreadStorage.takeValueForKey(userInfo, CONTEXT_DICTIONARY_KEY);
 	}
 	
 	/**
@@ -155,19 +161,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		return (ERXWOContext) app.createContextForRequest(dummyRequest);
 	}
 	
-	public NSMutableDictionary mutableUserInfo() {
-		return contextDictionary();
-	}
-
-	public void setMutableUserInfo(NSMutableDictionary userInfo) {
-		ERXThreadStorage.takeValueForKey(userInfo, CONTEXT_DICTIONARY_KEY);
-	}
-
-	@Override
-	public NSDictionary userInfo() {
-		return mutableUserInfo();
-	}
-
 	/**
 	 * If er.extensions.ERXWOContext.forceRemoveApplicationNumber is true, then always remove the 
 	 * application number from the generated URLs.  You have to be aware of how your app is written
@@ -253,6 +246,13 @@ public class ERXWOContext extends ERXAjaxContext {
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public Object clone() {
+		ERXWOContext context = (ERXWOContext)super.clone();
+		context._setGenerateCompleteResourceURLs(_generateCompleteResourceURLs);
+		return context;
 	}
 
 	/**
