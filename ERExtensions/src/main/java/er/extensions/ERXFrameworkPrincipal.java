@@ -69,10 +69,8 @@ public abstract class ERXFrameworkPrincipal {
     	}
 
         /**
-         * Invoked when WOApplication posts 'ApplicationDidCreateNotification'.
+         * Invoked when WOApplication posts 'ApplicationDidCreateNotification' (after the WOApplication has been constructed, but before the application is ready for accepting requests).
          * Handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
-         * 
-         * @param n notification that is posted after the WOApplication has been constructed, but before the application is ready for accepting requests.
          */
         public final void finishInitialization(NSNotification n) {
             NSNotificationCenter.defaultCenter().removeObserver(this, ERXNotification.ApplicationDidCreateNotification.id(), null);
