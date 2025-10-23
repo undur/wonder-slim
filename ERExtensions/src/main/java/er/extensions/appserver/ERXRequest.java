@@ -427,7 +427,7 @@ public  class ERXRequest extends WORequest {
      * @param languages NSArray of Strings
      * @return sorted NSArray of normalized Strings
      */
-    protected NSArray<String> fixAbbreviationArray(NSArray<String> languages) {
+    private static NSArray<String> fixAbbreviationArray(NSArray<String> languages) {
         try {
             languages=languages.sortedArrayUsingComparator(COMPARE_Qs);
         } catch (NSComparator.ComparisonException e) {
