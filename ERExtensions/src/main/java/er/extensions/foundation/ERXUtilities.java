@@ -13,20 +13,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.util.Enumeration;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSBundle;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSKeyValueCoding;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
-
-import er.extensions.appserver.ERXWOContext;
 
 public class ERXUtilities {
 
@@ -81,108 +74,6 @@ public class ERXUtilities {
 	public static boolean stringIsNullOrEmpty( String string ) {
 		return string == null || string.isEmpty();
 	}
-
-	/**
-	 * Puts together a dictionary with a bunch of useful information relative to
-	 * the current state when the exception occurred. Potentially added information:
-	 * 
-	 * <ol>
-	 * <li>the current page name</li>
-	 * <li>the current component</li>
-	 * <li>the complete hierarchy of nested components</li>
-	 * <li>the requested uri</li>
-	 * <li>the D2W page configuration</li>
-	 * <li>the previous page list (from the WOStatisticsStore)</li>
-	 * </ol>
-	 * Also, in case the top-level exception was a EOGeneralAdaptorException,
-	 * then you also get the failed ops and the sql exception.
-	 * 
-	 * @param context the current context
-	 * @return dictionary containing extra information for the current context.
-	 */
-	public static NSMutableDictionary extraInformationForExceptionInContext(WOContext context) {
-		final NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
-		extraInfo.addEntriesFromDictionary(informationForContext(context));
-		extraInfo.addEntriesFromDictionary(informationForBundles());
-		return extraInfo;
-	}
-
-	private static NSMutableDictionary<String, Object> informationForBundles() {
-		final NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
-		final NSMutableDictionary<String, Object> bundleVersions = new NSMutableDictionary<String, Object>();
-
-		for (Enumeration bundles = NSBundle._allBundlesReally().objectEnumerator(); bundles.hasMoreElements();) {
-			NSBundle bundle = (NSBundle) bundles.nextElement();
-			String version = versionStringForFrameworkNamed(bundle.name());
-			if (version == null) {
-				version = "No version provided";
-			}
-			bundleVersions.setObjectForKey(version, bundle.name());
-		}
-		extraInfo.setObjectForKey(bundleVersions, "Bundles");
-
-		return extraInfo;
-	}
-
-	private static NSMutableDictionary<String, Object> informationForContext(WOContext context) {
-		final NSMutableDictionary<String, Object> extraInfo = new NSMutableDictionary<>();
-		
-		if (context != null) {
-			if (context.page() != null) {
-				extraInfo.setObjectForKey(context.page().name(), "CurrentPage");
-				if (context.component() != null) {
-					extraInfo.setObjectForKey(context.component().name(), "CurrentComponent");
-					if (context.component().parent() != null) {
-						extraInfo.setObjectForKey(ERXWOContext.componentPath(context), "CurrentComponentHierarchy");
-					}
-				}
-			}
-			if (context.request() != null) {
-				extraInfo.setObjectForKey(context.request().uri(), "URL");
-				if (context.request().headers() != null) {
-					NSMutableDictionary<String, Object> headers = new NSMutableDictionary<>();
-					for (Object key : context.request().headerKeys()) {
-						String value = context.request().headerForKey(key);
-						if (value != null) {
-							headers.setObjectForKey(value, key.toString());
-						}
-					}
-					extraInfo.setObjectForKey(headers, "Headers");
-				}
-			}
-			if (context.hasSession()) {
-				if (context.session().statistics() != null) {
-					extraInfo.setObjectForKey(context.session().statistics(), "PreviousPageList");
-				}
-				extraInfo.setObjectForKey(context.session(), "Session");
-			}
-		}
-
-		return extraInfo;
-	}
-	
-    /** 
-     * Returns the version string of the given framework.
-     * It checks <code>CFBundleShortVersionString</code> property 
-     * in the <code>info.plist</code> resource and returns 
-     * a trimmed version of the value.
-     * 
-     * @param frameworkName name
-     * @return version number as string; can be null-string when the framework is not found or the framework doesn't have the value of <code>CFBundleShortVersionString</code> in its <code>info.plist</code> resource.
-     * @see #webObjectsVersion()
-     */ 
-	private static String versionStringForFrameworkNamed(String frameworkName) {
-        NSBundle bundle = NSBundle.bundleForName(frameworkName);
-
-    	if (bundle == null) {
-    		return "";
-    	}
-
-    	final String dictString = new String(bundle.bytesForResourcePath("Info.plist"));
-    	final NSDictionary versionDictionary = NSPropertyListSerialization.dictionaryForString(dictString);
-    	final String versionString = (String) versionDictionary.objectForKey("CFBundleShortVersionString");
-    	return versionString == null  ?  ""  :  versionString.trim(); // trim() removes the line ending char
-    }
 
 	/**
 	 * Wrapper class for everything related to that single method for obtaining a private field/method value

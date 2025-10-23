@@ -61,7 +61,6 @@ import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
-import er.extensions.foundation.ERXUtilities;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
@@ -811,7 +810,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		WOExceptionPage.setExceptionID(exceptionID);
 
 		// Not a fatal exception, business as usual.
-		final NSDictionary extraInfo = ERXUtilities.extraInformationForExceptionInContext(context);
+		final NSDictionary extraInfo = ERXExceptionManager.Util.extraInformationForExceptionInContext(context);
 		final String extraInfoString = NSPropertyListSerialization.stringFromPropertyList(extraInfo);
 
 		log.error( "Exception caught: %s\nexceptionID: %s\nExtra info: %s\n".formatted( originalThrowable.getMessage(), exceptionID, extraInfoString ), exception );
@@ -1228,4 +1227,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				""");
 		}
 	}
+	
+    /**
+     * Log to System.out while we don't have the logging system set up.
+     */
+    private static final void log( Object s ) {
+    	String message = s == null ? "[null]" : s.toString();
+    	System.out.println( " == ERXFrameworkPrincipal.log == > " + message);
+    }
 }
