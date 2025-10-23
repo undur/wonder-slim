@@ -1227,12 +1227,4 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				""");
 		}
 	}
-	
-    /**
-     * Log to System.out while we don't have the logging system set up.
-     */
-    private static final void log( Object s ) {
-    	String message = s == null ? "[null]" : s.toString();
-    	System.out.println( " == ERXFrameworkPrincipal.log == > " + message);
-    }
 }
