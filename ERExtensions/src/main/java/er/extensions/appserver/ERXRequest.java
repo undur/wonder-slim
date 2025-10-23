@@ -58,7 +58,7 @@ public  class ERXRequest extends WORequest {
     /**
      * FIXME: Docs missing // Hugi 2025-10-22
      */
-    private static Boolean isBrowserFormValueEncodingOverrideEnabled;
+    private static Boolean _isBrowserFormValueEncodingOverrideEnabled;
 
     /**
      * NSArray to keep browserLanguages in
@@ -159,11 +159,11 @@ public  class ERXRequest extends WORequest {
      * FIXME: Docs missing // Hugi 2025-10-22 
      */
     public boolean isBrowserFormValueEncodingOverrideEnabled() {
-        if (isBrowserFormValueEncodingOverrideEnabled == null) {
-            isBrowserFormValueEncodingOverrideEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXRequest.BrowserFormValueEncodingOverrideEnabled", false) ? Boolean.TRUE : Boolean.FALSE;
+        if (_isBrowserFormValueEncodingOverrideEnabled == null) {
+            _isBrowserFormValueEncodingOverrideEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXRequest.BrowserFormValueEncodingOverrideEnabled", false) ? Boolean.TRUE : Boolean.FALSE;
         }
 
-        return isBrowserFormValueEncodingOverrideEnabled.booleanValue();
+        return _isBrowserFormValueEncodingOverrideEnabled.booleanValue();
     }
 
     /**
