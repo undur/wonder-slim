@@ -591,10 +591,10 @@ public  class ERXRequest extends WORequest {
         }
 
         for (final String headerName : HOST_ADDRESS_HEADERS) {
-        	final String remoteAddressHeaderValue = headerForKey(headerName);
+        	final String headerValue = headerForKey(headerName);
 
-			if (remoteAddressHeaderValue != null) {
-				return remoteAddressHeaderValue;
+			if (headerValue != null) {
+				return headerValue;
 			}
 		}
 
@@ -607,8 +607,10 @@ public  class ERXRequest extends WORequest {
     public String remoteHostName() {
 
     	for (final String headerName : HOST_NAME_HEADERS) {
-			if (headerForKey(headerName) != null) {
-				return headerForKey(headerName);
+			final String headerValue = headerForKey(headerName);
+
+			if (headerValue != null) {
+				return headerValue;
 			}
 		}
 
