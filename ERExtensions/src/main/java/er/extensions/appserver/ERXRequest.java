@@ -606,16 +606,22 @@ public  class ERXRequest extends WORequest {
     	return UNKNOWN_HOST;
     }
 
+    /**
+     * @return An ensured mutable version of the request's userInfo()
+     * 
+     * Replaces WORequest's internal dictionary in a somewhat unwholesome manner if it isn't already an NSMutableDictionary
+     */
 	public NSMutableDictionary<String, Object> mutableUserInfo() {
-		NSDictionary userInfo = userInfo();
+		final NSDictionary userInfo = userInfo();
+		
 		NSMutableDictionary mutableUserInfo;
 
 		if (userInfo == null) {
 			mutableUserInfo = new NSMutableDictionary();
 			_userInfo = mutableUserInfo;
 		}
-		else if (userInfo instanceof NSMutableDictionary) {
-			mutableUserInfo = (NSMutableDictionary) userInfo;
+		else if (userInfo instanceof NSMutableDictionary md) {
+			mutableUserInfo = md;
 		}
 		else {
 			mutableUserInfo = userInfo.mutableClone();
