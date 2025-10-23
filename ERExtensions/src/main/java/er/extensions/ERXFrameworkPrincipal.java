@@ -11,7 +11,6 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
 import er.extensions.appserver.ERXNotification;
-import er.extensions.foundation.ERXUtilities;
 
 /** 
  * Designated starter class for frameworks, adds support for dependency management.
@@ -76,15 +75,8 @@ public abstract class ERXFrameworkPrincipal {
     public static class Observer {
         
     	private Observer() {
-            NSNotificationCenter.defaultCenter().addObserver(this,
-                    ERXUtilities.notificationSelector("willFinishInitialization"),
-                    ERXNotification.ApplicationDidCreateNotification.id(),
-                    null);
-
-            NSNotificationCenter.defaultCenter().addObserver(this,
-            		ERXUtilities.notificationSelector("didFinishInitialization"),
-            		ERXNotification.ApplicationDidFinishInitializationNotification.id(),
-                    null);
+    		ERXNotification.ApplicationDidCreateNotification.addObserver(this, "finishInitialization");
+    		ERXNotification.ApplicationDidFinishInitializationNotification.addObserver(this, "didFinishInitialization");
     	}
 
         /**
@@ -93,7 +85,7 @@ public abstract class ERXFrameworkPrincipal {
          * 
          * @param n notification that is posted after the WOApplication has been constructed, but before the application is ready for accepting requests.
          */
-        public final void willFinishInitialization(NSNotification n) {
+        public final void finishInitialization(NSNotification n) {
             NSNotificationCenter.defaultCenter().removeObserver(this, ERXNotification.ApplicationDidCreateNotification.id(), null);
 
             for (ERXFrameworkPrincipal principal : launchingFrameworks) {
@@ -101,7 +93,7 @@ public abstract class ERXFrameworkPrincipal {
                 log("finishInitialization() on " + principal.getClass().getSimpleName());
             }
             
-            log("finishInitialization completed" );
+            log("finishInitialization() completed" );
         }
         
         /**
@@ -116,7 +108,7 @@ public abstract class ERXFrameworkPrincipal {
                 log("didFinishInitialization() on " + principal.getClass().getSimpleName());
             }
             
-            log("didFinishInitialization completed");
+            log("didFinishInitialization() completed");
         }
     }
     
