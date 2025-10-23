@@ -73,13 +73,17 @@ public class ERXWOContext extends ERXAjaxContext {
 		ERXThreadStorage.takeValueForKey(object, CONTEXT_KEY);
 	}
 
+	@Override
+	public NSDictionary userInfo() {
+		return mutableUserInfo();
+	}
+
 	public NSMutableDictionary mutableUserInfo() {
 		return contextDictionary();
 	}
 
-	@Override
-	public NSDictionary userInfo() {
-		return mutableUserInfo();
+	public void setMutableUserInfo(NSMutableDictionary userInfo) {
+		ERXThreadStorage.takeValueForKey(userInfo, CONTEXT_DICTIONARY_KEY);
 	}
 
 	public static NSMutableDictionary contextDictionary() {
@@ -91,10 +95,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		}
 
 		return contextDictionary;
-	}
-
-	public void setMutableUserInfo(NSMutableDictionary userInfo) {
-		ERXThreadStorage.takeValueForKey(userInfo, CONTEXT_DICTIONARY_KEY);
 	}
 	
 	/**
