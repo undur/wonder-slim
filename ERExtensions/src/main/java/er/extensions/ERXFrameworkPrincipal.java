@@ -29,22 +29,11 @@ import er.extensions.appserver.ERXNotification;
  * <pre><code>
  * public class ExampleFrameworkPrincipal extends ERXFrameworkPrincipal {
  * 
- *     public static final Logger log = Logger.getLogger(ExampleFrameworkPrincipal.class);
- * 
- *     protected static ExampleFrameworkPrincipal sharedInstance;
- *     
  *     public final static Class REQUIRES[] = new Class[] {ERXExtensions.class, ERDirectToWeb.class, ERJavaMail.class};
  * 
  *     // Registers the class as the framework principal
  *     static {
  *         setUpFrameworkPrincipalClass(ExampleFrameworkPrincipal.class);
- *     }
- * 
- *     public static ExampleFrameworkPrincipal sharedInstance() {
- *         if (sharedInstance == null) {
- *             sharedInstance = (ExampleFrameworkPrincipal)sharedInstance(ExampleFrameworkPrincipal.class);
- *         }
- *         return sharedInstance;
  *     }
  * 
  *     public void initialize() {
@@ -126,58 +115,57 @@ public abstract class ERXFrameworkPrincipal {
     	return initializedFrameworks.containsKey(principalClass.getName());
     }
 
-    /**
-     * Sets up the given framework principal class to receive notification when it is safe for the framework to be initialized.
-     */
-    public static void setUpFrameworkPrincipalClass(Class<? extends ERXFrameworkPrincipal> principalClass) {
+	/**
+	 * Sets up the given framework principal class to receive notification when it is safe for the framework to be initialized.
+	 */
+	public static void setUpFrameworkPrincipalClass(Class<? extends ERXFrameworkPrincipal> principalClass) {
 
-    	log("setUpFrameworkPrincipalClass for " + principalClass.getSimpleName());
+		log("setUpFrameworkPrincipalClass for " + principalClass.getSimpleName());
 
-        if (isInitialized(principalClass)) {
-        	return;
-        }
+		if (isInitialized(principalClass)) {
+			return;
+		}
 
-        try {
-            if(observer == null) {
-                observer = new Observer();
-            }
+		if (observer == null) {
+			observer = new Observer();
+		}
+
+		if (!isInitialized(principalClass)) {
+			try {
+				final Field requiresField = principalClass.getField("REQUIRES");
+				final Class requires[] = (Class[]) requiresField.get(principalClass);
+
+				for (final Class requiredPrincipalClass : requires) {
+					if (!isInitialized(requiredPrincipalClass)) {
+						setUpFrameworkPrincipalClass(requiredPrincipalClass);
+					}
+				}
+			}
+			catch (NoSuchFieldException e) {
+				// No REQUIRES field present
+			}
+			catch (IllegalAccessException e) {
+				throw new RuntimeException("Can't read REQUIRES field on framework principal" + principalClass.getName(), e);
+			}
 
 			if (!isInitialized(principalClass)) {
-                try {
-                    final Field requiresField = principalClass.getField("REQUIRES");
-                    final Class requires[] = (Class[]) requiresField.get(principalClass);
+				try {
+					final ERXFrameworkPrincipal principalInstance = principalClass.newInstance();
+					initializedFrameworks.put(principalClass.getName(), principalInstance);
+					principalInstance.initialize();
+					launchingFrameworks.add(principalInstance);
 
-                    for (final Class requiredPrincipalClass : requires) {
-                    	if(!isInitialized(requiredPrincipalClass)) {
-                    		setUpFrameworkPrincipalClass(requiredPrincipalClass);
-                    	}
-                    }
-                }
-                catch (NoSuchFieldException e) {
-                    // No REQUIRES field present
-                }
-                catch (IllegalAccessException e) {
-                	throw new RuntimeException( "Can't read REQUIRES field on framework principal" + principalClass.getName(), e );
-                }
-
-                if(!isInitialized(principalClass)) {
-                	final ERXFrameworkPrincipal principalInstance = principalClass.newInstance();
-                	initializedFrameworks.put(principalClass.getName(),principalInstance);
-                	principalInstance.initialize();
-                	launchingFrameworks.add(principalInstance);
-
-                	log("initialize() on " + principalClass.getName());
-                }
-
-            }
-            else {
-            	log("Already initialized: " + principalClass.getName());
-            }
-        }
-        catch (InstantiationException | IllegalAccessException e) {
-            throw NSForwardException._runtimeExceptionForThrowable(e);
-        }
-    }
+					log("initialize() on " + principalClass.getName());
+				}
+				catch (InstantiationException | IllegalAccessException e) {
+					throw NSForwardException._runtimeExceptionForThrowable(e);
+				}
+			}
+		}
+		else {
+			log("Already initialized: " + principalClass.getName());
+		}
+	}
 
     /**
      * Called directly after the constructor.
