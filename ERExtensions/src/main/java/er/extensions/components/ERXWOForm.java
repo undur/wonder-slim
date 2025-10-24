@@ -35,7 +35,7 @@ import er.extensions.foundation.ERXProperties;
  * use it, because it will get used instead of WOForm elements automagically. In
  * addition, it has a few new features:
  * <ul>
- * <li> it adds the FORM's name to the ERXWOContext's mutableUserInfo as as
+ * <li> it adds the FORM's name to ERXWOContext's contextDictionary() as as
  * "formName" key, which makes writing JavaScript elements a bit easier.
  * <li> it warns you when you have one FORM embedded inside another and omits
  * the tags for the nested FORM.
