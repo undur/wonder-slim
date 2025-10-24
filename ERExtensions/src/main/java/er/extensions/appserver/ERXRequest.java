@@ -618,27 +618,22 @@ public  class ERXRequest extends WORequest {
     }
 
     /**
-     * @return An ensured mutable version of the request's userInfo()
+     * @return Mutable version of the request's userInfo()
      * 
-     * Replaces WORequest's internal dictionary in a somewhat unwholesome manner if it isn't already an NSMutableDictionary
+     * If WORequest's internal _userInfo is null or not an NSMutableDictionary, replaces it with one
      */
 	public NSMutableDictionary<String, Object> mutableUserInfo() {
-		final NSDictionary userInfo = userInfo();
-		
-		NSMutableDictionary mutableUserInfo;
 
-		if (userInfo == null) {
-			mutableUserInfo = new NSMutableDictionary();
-			_userInfo = mutableUserInfo;
-		}
-		else if (userInfo instanceof NSMutableDictionary md) {
-			mutableUserInfo = md;
-		}
-		else {
-			mutableUserInfo = userInfo.mutableClone();
-			_userInfo = mutableUserInfo;
+		// If the parent's stored _userInfo is already a mutable dictionary, don't do anything and just return it
+		if( _userInfo instanceof NSMutableDictionary md ) {
+			return md;
 		}
 
-		return mutableUserInfo;
+		// If userInfo is null, set to new mutable dictionary.
+		// If it's some other map type, change that to a mutable dictionary.
+		_userInfo = (_userInfo == null) ? new NSMutableDictionary() : new NSMutableDictionary<>( _userInfo );
+
+		// Finally, return our mutated horror
+		return (NSMutableDictionary<String, Object>) _userInfo;
 	}
 }
