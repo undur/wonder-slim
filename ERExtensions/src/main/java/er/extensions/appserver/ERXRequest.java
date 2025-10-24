@@ -2,6 +2,7 @@ package er.extensions.appserver;
 
 import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -244,18 +245,21 @@ public  class ERXRequest extends WORequest {
 	}
 
     @Override
-    public NSTimestamp dateFormValueForKey(String aKey, SimpleDateFormat dateFormatter) {
+    public NSTimestamp dateFormValueForKey(String key, SimpleDateFormat dateFormatter) {
 
-        String aDateString = stringFormValueForKey(aKey);
-        java.util.Date aDate = null;
-        if (aDateString != null && dateFormatter != null) {
+        final String dateString = stringFormValueForKey(key);
+        Date date = null;
+
+        if (dateString != null && dateFormatter != null) {
             try {
-                aDate = dateFormatter.parse(aDateString);
-            } catch (java.text.ParseException e) {
-               log.error("Could not parse date '{}'.", aDateString, e);
+                date = dateFormatter.parse(dateString);
+            }
+            catch (java.text.ParseException e) {
+               log.error("Could not parse date '{}'.", dateString, e);
             }
         }
-        return aDate == null ? null : new NSTimestamp(aDate);
+
+        return date == null ? null : new NSTimestamp(date);
     }
 
 	/**
