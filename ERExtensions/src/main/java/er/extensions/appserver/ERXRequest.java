@@ -251,11 +251,10 @@ public  class ERXRequest extends WORequest {
     	String result = super.stringFormValueForKey(key);
 
     	if (result == null && "wodata".equals(key)) {
-    	    // AK: yet another crappy 5.4 fix, WODynamicURL changed packages
-    		final String requestHandlerKey = (String)valueForKeyPath("_uriDecomposed.requestHandlerKey");
+    		final String requestHandlerKey = _uriDecomposed().requestHandlerKey();
 
     		if (WOApplication.application().resourceRequestHandlerKey().equals(requestHandlerKey)) {
-    			String requestHandlerPath = (String)valueForKeyPath("_uriDecomposed.requestHandlerPath");
+    			String requestHandlerPath = _uriDecomposed().requestHandlerPath();
 
     			if(requestHandlerPath != null) {
     				requestHandlerPath = "file:/" +  requestHandlerPath.substring("wodata=/".length());
