@@ -325,13 +325,6 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
-     * Add the protocol, server and port parts of this request to a StringBuffer.
-     */
-	public void _completeURLPrefix(StringBuffer stringbuffer) {
-		_completeURLPrefix(stringbuffer, isSecure(), 0);
-	}
-	
-    /**
      * Add the protocol, server and port parts to a StringBuffer to build an URL to this app.
      * if port is set to 0, this request port will be used.
      * 
