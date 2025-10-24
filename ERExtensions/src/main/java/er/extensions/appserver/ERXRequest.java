@@ -78,7 +78,7 @@ public  class ERXRequest extends WORequest {
      * 
      * Defaults to <code>false</code>, set er.extensions.ERXRequest.secureDisabled=true to turn it off.
      */
-    private boolean _secureDisabled;
+    private final boolean _secureDisabled;
     
     /**
      * Holds the cookies in a NSDictionary.
