@@ -106,6 +106,16 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
+     * FIXME: No idea why is here, figure out and document. Essentially prevents the request from automatically constructing a context if none is present // Hugi 2025-10-22 
+     * 
+     * Added in this commit: https://github.com/wocommunity/wonder/commit/51106ce8b93372d88d0df2520003225b93f39f5a
+     */
+    @Override
+    public WOContext context() {
+    	return _context();
+    }
+
+    /**
      * This method is used by WOContext when generating full URLs for form actions in secure mode, etc.
      *
      * Overriding this because WORequest checks 'server_name' before 'Host' by default and it does not cut it for generating full secure
@@ -206,14 +216,6 @@ public  class ERXRequest extends WORequest {
         return _isBrowserFormValueEncodingOverrideEnabled.booleanValue();
     }
 
-    /**
-     * FIXME: I have no idea why is here. Figure out and document. Added in this commit: https://github.com/wocommunity/wonder/commit/51106ce8b93372d88d0df2520003225b93f39f5a // Hugi 2025-10-22
-     */
-    @Override
-    public WOContext context() {
-    	return _context();
-    }
-    
     /**
      * Returns a cooked version of the languages the user has set in his Browser.
      * Adds "Nonlocalized" and {@link er.extensions.localization.ERXLocalizer#defaultLanguage()} if not
