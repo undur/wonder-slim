@@ -65,25 +65,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		return super.hasSession() || existingSession() != null; 
 	}
 
-	public static WOContext currentContext() {
-		return (WOContext) ERXThreadStorage.valueForKey(CONTEXT_KEY);
-	}
-
-	public static void setCurrentContext(Object object) {
-		ERXThreadStorage.takeValueForKey(object, CONTEXT_KEY);
-	}
-
-	public static NSMutableDictionary contextDictionary() {
-		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(CONTEXT_DICTIONARY_KEY);
-
-		if (contextDictionary == null) {
-			contextDictionary = new NSMutableDictionary();
-			ERXThreadStorage.takeValueForKey(contextDictionary, CONTEXT_DICTIONARY_KEY);
-		}
-
-		return contextDictionary;
-	}
-	
 	/**
 	 * Turn on complete resource URL generation.
 	 * 
@@ -117,41 +98,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		return _generateCompleteURLs;
 	}
 
-	/**
-	 * @return A new WOContext created using a dummy WORequest.
-	 */
-	public static ERXWOContext newContext() {
-
-		final ERXApplication app = ERXApplication.erxApplication();
-
-		// Try to create a URL with a relative path into the application to mimic a real request.
-		// We must create a request with a relative URL, as using an absolute URL makes the new 
-		// WOContext's URL absolute, and it is then unable to render relative paths. (Long story short.)
-		//
-		// Note: If you configured the adaptor's WebObjectsAlias to something other than the default, 
-		// make sure to also set your WOAdaptorURL property to match.  Otherwise, asking the new context 
-		// the path to a direct action or component action URL will give an incorrect result.
-		String requestUrl = app.cgiAdaptorURL() + "/" + app.name() + app.applicationExtension();
-
-		try {
-			URL url = new URL(requestUrl);
-			requestUrl = url.getPath(); // Get just the part of the URL that is relative to the server root.
-		}
-		catch (MalformedURLException mue) {
-			// The above should never fail.  As a last resort, using the empty string will 
-			// look funny in the request, but still allow the context to use a relative url.
-			requestUrl = "";
-		}
-
-		final WORequest dummyRequest = app.createRequest("GET", requestUrl, "HTTP/1.1", null, null, null);
-
-		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.publicHostIsSecure", false)) {
-			dummyRequest.setHeader("on", "https");
-		}
-
-		return (ERXWOContext) app.createContextForRequest(dummyRequest);
-	}
-	
 	protected String _postprocessURL(String url) {
 		return ERXApplication.erxApplication()._rewriteURL(url);
 	}
@@ -215,6 +161,60 @@ public class ERXWOContext extends ERXAjaxContext {
 		ERXWOContext context = (ERXWOContext)super.clone();
 		context._setGenerateCompleteResourceURLs(_generateCompleteResourceURLs);
 		return context;
+	}
+
+	public static WOContext currentContext() {
+		return (WOContext) ERXThreadStorage.valueForKey(CONTEXT_KEY);
+	}
+
+	public static void setCurrentContext(Object object) {
+		ERXThreadStorage.takeValueForKey(object, CONTEXT_KEY);
+	}
+
+	public static NSMutableDictionary contextDictionary() {
+		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(CONTEXT_DICTIONARY_KEY);
+
+		if (contextDictionary == null) {
+			contextDictionary = new NSMutableDictionary();
+			ERXThreadStorage.takeValueForKey(contextDictionary, CONTEXT_DICTIONARY_KEY);
+		}
+
+		return contextDictionary;
+	}
+
+	/**
+	 * @return A new WOContext created using a dummy WORequest.
+	 */
+	public static ERXWOContext newContext() {
+
+		final ERXApplication app = ERXApplication.erxApplication();
+
+		// Try to create a URL with a relative path into the application to mimic a real request.
+		// We must create a request with a relative URL, as using an absolute URL makes the new 
+		// WOContext's URL absolute, and it is then unable to render relative paths. (Long story short.)
+		//
+		// Note: If you configured the adaptor's WebObjectsAlias to something other than the default, 
+		// make sure to also set your WOAdaptorURL property to match.  Otherwise, asking the new context 
+		// the path to a direct action or component action URL will give an incorrect result.
+		String requestUrl = app.cgiAdaptorURL() + "/" + app.name() + app.applicationExtension();
+
+		try {
+			URL url = new URL(requestUrl);
+			requestUrl = url.getPath(); // Get just the part of the URL that is relative to the server root.
+		}
+		catch (MalformedURLException mue) {
+			// The above should never fail.  As a last resort, using the empty string will 
+			// look funny in the request, but still allow the context to use a relative url.
+			requestUrl = "";
+		}
+
+		final WORequest dummyRequest = app.createRequest("GET", requestUrl, "HTTP/1.1", null, null, null);
+
+		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.publicHostIsSecure", false)) {
+			dummyRequest.setHeader("on", "https");
+		}
+
+		return (ERXWOContext) app.createContextForRequest(dummyRequest);
 	}
 
 	/**
