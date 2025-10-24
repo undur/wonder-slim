@@ -236,19 +236,6 @@ public abstract class ERXBrowser implements NSKeyValueCoding {
     public abstract boolean isIPhone();
     public abstract boolean isIPad();
 
-    /**
-     * If using ERXRequest objects allows one to override on a per browser basis
-     * what form value encoding to use. Default implementation defaults to null
-     * Note that you will need to enable the property:
-     * er.extensions.ERXRequest.BrowserFormValueEncodingOverrideEnabled=true
-     * in order for the actual over ride to happen.
-     * 
-     * @return form value encoding to use for this particular user-agent.
-     */
-    public String formValueEncoding() {
-        return null;
-    }
-    
     public Object valueForKey(String key) {
         return NSKeyValueCoding.DefaultImplementation.valueForKey(this, key);
     }
