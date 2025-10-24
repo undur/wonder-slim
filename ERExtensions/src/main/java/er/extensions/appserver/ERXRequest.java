@@ -142,6 +142,45 @@ public  class ERXRequest extends WORequest {
 		return serverName;
 	}
 
+
+    /**
+     * @return The remote client host address. Works in various setups, like direct connect, deployed etc. If no host address is found, returns "UNKNOWN".
+     */
+    public String remoteHostAddress() {
+        
+    	if (WOApplication.application().isDirectConnectEnabled()) {
+            if (_originatingAddress() != null) {
+                return _originatingAddress().getHostAddress();
+            }
+        }
+
+        for (final String headerName : HOST_ADDRESS_HEADERS) {
+        	final String headerValue = headerForKey(headerName);
+
+			if (headerValue != null) {
+				return headerValue;
+			}
+		}
+
+        return UNKNOWN_HOST;
+    }
+    
+    /**
+     * @return The remote client host name. If no host name is found, returns "UNKNOWN".
+     */
+    public String remoteHostName() {
+
+    	for (final String headerName : HOST_NAME_HEADERS) {
+			final String headerValue = headerForKey(headerName);
+
+			if (headerValue != null) {
+				return headerValue;
+			}
+		}
+
+    	return UNKNOWN_HOST;
+    }
+
     /**
      * @return true if er.extensions.ERXRequest.secureDisabled is true. Defaults to false.
      */
@@ -581,43 +620,5 @@ public  class ERXRequest extends WORequest {
             }
         }
         return sessionID;
-    }
-
-    /**
-     * @return The remote client host address. Works in various setups, like direct connect, deployed etc. If no host address is found, returns "UNKNOWN".
-     */
-    public String remoteHostAddress() {
-        
-    	if (WOApplication.application().isDirectConnectEnabled()) {
-            if (_originatingAddress() != null) {
-                return _originatingAddress().getHostAddress();
-            }
-        }
-
-        for (final String headerName : HOST_ADDRESS_HEADERS) {
-        	final String headerValue = headerForKey(headerName);
-
-			if (headerValue != null) {
-				return headerValue;
-			}
-		}
-
-        return UNKNOWN_HOST;
-    }
-    
-    /**
-     * @return The remote client host name. If no host name is found, returns "UNKNOWN".
-     */
-    public String remoteHostName() {
-
-    	for (final String headerName : HOST_NAME_HEADERS) {
-			final String headerValue = headerForKey(headerName);
-
-			if (headerValue != null) {
-				return headerValue;
-			}
-		}
-
-    	return UNKNOWN_HOST;
     }
 }
