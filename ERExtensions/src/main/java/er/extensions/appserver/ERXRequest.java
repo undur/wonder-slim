@@ -246,6 +246,9 @@ public  class ERXRequest extends WORequest {
         return _browserLanguages;
     }
     
+	/**
+	 * FIXME: Look into and document. WTF are we doing here // Hugi 2025-10-24
+	 */
     @Override
 	public String stringFormValueForKey(String key) {
     	String result = super.stringFormValueForKey(key);
@@ -266,6 +269,9 @@ public  class ERXRequest extends WORequest {
 		return result;
 	}
 
+    /**
+     * Overridden to properly parse into a java.util.Date and then convert to an NSTimestamp
+     */
     @Override
     public NSTimestamp dateFormValueForKey(String key, SimpleDateFormat dateFormatter) {
 
