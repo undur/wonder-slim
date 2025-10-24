@@ -78,7 +78,7 @@ public  class ERXRequest extends WORequest {
     /**
      * Holds the cookies in a NSDictionary.
      */
-    private NSDictionary<String, NSArray<String>> _cookieDictionary;
+    private NSDictionary<String, NSArray<String>> _cookieValues;
     
     /**
      * Initializes a ERXRequest object with the specified parameters
@@ -486,71 +486,69 @@ public  class ERXRequest extends WORequest {
     }
 
     /**
-     * Parses all cookies one at a time catch parse exception which just discards
-     * that cookie and not all cookies. It uses java.net.HttpCookie as a parser.
-     * 
-     * @return a dictionary of cookies, parsed one cookie at a time
-     */
-    private NSDictionary _cookieDictionary() {
-        if (_cookieDictionary == null) {
-        	final NSMutableDictionary<String, NSArray<String>> cookieDictionary = new NSMutableDictionary<String, NSArray<String>>();
-
-        	// from WORequest._cookieDescription()
-        	String cookieHeader = headerForKey("cookie");
-
-        	if (cookieHeader == null || cookieHeader.length() == 0) {
-        		// IIS cookies use a different header
-        		cookieHeader = headerForKey("http_cookie");
-        	}
-        	
-        	if (cookieHeader != null && cookieHeader.length() > 0) {
-        		final String[] cookies = cookieHeader.split(";");
-
-        		for (int i = 0; i < cookies.length; i++) {
-        			try {
-        				// only parse one cookie at a time => get(0)
-        				final HttpCookie httpCookie = HttpCookie.parse(cookies[i]).get(0);
-
-        				// Cookies with longer paths are listed before cookies with shorter paths:
-        				// see https://stackoverflow.com/a/24214538
-        				// Cookies with longer Patch are more specific than cookies with shorter path 
-        				// and should not be replaced by a less specific cookie 
-        				// If a cookie with Therfore we do not override cookies if there are already there!
-        				final String cookieName  = httpCookie.getName();
-        				final String cookieValue = httpCookie.getValue();
-
-        				log.debug("Cookie: '"+cookieName+"' = '"+cookieValue+"'");
-
-        				NSArray<String> cookieValueArray = cookieDictionary.get(cookieName);
-
-        				if ( cookieValueArray == null ){
-        					cookieValueArray = new NSArray<>();
-        				}
-
-        				cookieValueArray = cookieValueArray.arrayByAddingObject(cookieValue);
-        				cookieDictionary.put( cookieName, cookieValueArray );
-        			}
-        			catch (Throwable t) {
-        				log.warn("Unable to parse cookie '"+cookies[i]+"' : "+t.getMessage());
-        			}
-        		}
-        	}
-
-        	_cookieDictionary = cookieDictionary.immutableClone();
-        }
-
-        return _cookieDictionary;
-    }
-
-    /**
      * Overridden to call _cookieDictionary() where we parse the cookies one
      * at a time using java.net.HttpCookie so that we don't get an empty cookie
      * dictionary if one cookie is malformed.
      */
     @Override
 	public NSDictionary cookieValues() {
-    	return _cookieDictionary();
+        if (_cookieValues == null) {
+        	_cookieValues = parseCookieValues( this );
+        }
+
+        return _cookieValues;
     }    
+
+    /**
+     * Parses all cookies one at a time catch parse exception which just discards
+     * that cookie and not all cookies. It uses java.net.HttpCookie as a parser.
+     * 
+     * @return a dictionary of cookies, parsed one cookie at a time
+     */
+	private static NSDictionary<String, NSArray<String>> parseCookieValues( final WORequest request ) {
+		final NSMutableDictionary<String, NSArray<String>> cookieDictionary = new NSMutableDictionary<>();
+
+		// from WORequest._cookieDescription()
+		String cookieHeader = request.headerForKey("cookie");
+
+		if (cookieHeader == null || cookieHeader.length() == 0) {
+			// IIS cookies use a different header
+			cookieHeader = request.headerForKey("http_cookie");
+		}
+		
+		if (cookieHeader != null && cookieHeader.length() > 0) {
+			final String[] cookies = cookieHeader.split(";");
+
+			for (int i = 0; i < cookies.length; i++) {
+				try {
+					// only parse one cookie at a time => get(0)
+					final HttpCookie httpCookie = HttpCookie.parse(cookies[i]).get(0);
+
+					// Cookies with longer paths are listed before cookies with shorter paths:
+					// see https://stackoverflow.com/a/24214538
+					// Cookies with longer Patch are more specific than cookies with shorter path 
+					// and should not be replaced by a less specific cookie 
+					// If a cookie with Therfore we do not override cookies if there are already there!
+					final String cookieName  = httpCookie.getName();
+					final String cookieValue = httpCookie.getValue();
+
+					NSArray<String> cookieValueArray = cookieDictionary.get(cookieName);
+
+					if ( cookieValueArray == null ){
+						cookieValueArray = new NSArray<>();
+					}
+
+					cookieValueArray = cookieValueArray.arrayByAddingObject(cookieValue);
+					cookieDictionary.put( cookieName, cookieValueArray );
+				}
+				catch (Throwable t) {
+					log.warn("Unable to parse cookie '"+cookies[i]+"' : "+t.getMessage());
+				}
+			}
+		}
+
+		return cookieDictionary.immutableClone();
+	}
 
     /**
      * Overridden because the super implementation would pull in all 
