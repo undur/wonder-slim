@@ -57,11 +57,6 @@ public  class ERXRequest extends WORequest {
     private static final String[] HOST_NAME_HEADERS = {"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"};
     
     /**
-     * FIXME: Docs missing // Hugi 2025-10-22
-     */
-    private static Boolean _isBrowserFormValueEncodingOverrideEnabled;
-
-    /**
      * NSArray to keep browserLanguages in
      */
     private NSArray<String> _browserLanguages;
@@ -97,10 +92,6 @@ public  class ERXRequest extends WORequest {
      */
     public ERXRequest(String method, String url, String httpVersion, Map headers, NSData content, Map userInfo) {
         super(method, url, httpVersion, headers, content, userInfo);
-
-        if (isBrowserFormValueEncodingOverrideEnabled() && browser().formValueEncoding() != null) {
-            setDefaultFormValueEncoding(browser().formValueEncoding());
-        }
 
         _secureDisabled = ERXRequest._isSecureDisabled();
     }
@@ -205,17 +196,6 @@ public  class ERXRequest extends WORequest {
     	return _secureDisabled;
     }
     
-    /**
-     * FIXME: Docs missing // Hugi 2025-10-22 
-     */
-    public boolean isBrowserFormValueEncodingOverrideEnabled() {
-        if (_isBrowserFormValueEncodingOverrideEnabled == null) {
-            _isBrowserFormValueEncodingOverrideEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXRequest.BrowserFormValueEncodingOverrideEnabled", false) ? Boolean.TRUE : Boolean.FALSE;
-        }
-
-        return _isBrowserFormValueEncodingOverrideEnabled.booleanValue();
-    }
-
     /**
      * Returns a cooked version of the languages the user has set in his Browser.
      * Adds "Nonlocalized" and {@link er.extensions.localization.ERXLocalizer#defaultLanguage()} if not
