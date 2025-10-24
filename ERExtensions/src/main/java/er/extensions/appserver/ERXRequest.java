@@ -620,24 +620,4 @@ public  class ERXRequest extends WORequest {
 
     	return UNKNOWN_HOST;
     }
-
-    /**
-     * @return Mutable version of the request's userInfo()
-     * 
-     * If WORequest's internal _userInfo is null or not an NSMutableDictionary, replaces it with one
-     */
-	public NSMutableDictionary<String, Object> mutableUserInfo() {
-
-		// If the parent's stored _userInfo is already a mutable dictionary, don't do anything and just return it
-		if( _userInfo instanceof NSMutableDictionary md ) {
-			return md;
-		}
-
-		// If userInfo is null, set to new mutable dictionary.
-		// If it's some other map type, change that to a mutable dictionary.
-		_userInfo = (_userInfo == null) ? new NSMutableDictionary() : new NSMutableDictionary<>( _userInfo );
-
-		// Finally, return our mutated horror
-		return (NSMutableDictionary<String, Object>) _userInfo;
-	}
 }
