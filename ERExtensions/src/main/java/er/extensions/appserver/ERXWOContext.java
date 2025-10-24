@@ -82,10 +82,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		return contextDictionary();
 	}
 
-	public void setMutableUserInfo(NSMutableDictionary userInfo) {
-		ERXThreadStorage.takeValueForKey(userInfo, CONTEXT_DICTIONARY_KEY);
-	}
-
 	public static NSMutableDictionary contextDictionary() {
 		NSMutableDictionary contextDictionary = (NSMutableDictionary) ERXThreadStorage.valueForKey(CONTEXT_DICTIONARY_KEY);
 
