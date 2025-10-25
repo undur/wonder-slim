@@ -139,18 +139,11 @@ public class RouteTable {
 
 	/**
 	 * Maps a URL pattern to a given RouteHandler
+	 * 
+	 * @param pattern The pattern this route uses
+	 * @param routeHandler The routeHandler that will handle requests passed to this route
 	 */
-	public record Route(
-
-			/**
-			 * The pattern this route uses
-			 */
-			String pattern,
-
-			/**
-			 * The routeHandler that will handle requests passed to this route
-			 */
-			RouteHandler routeHandler ) {}
+	public record Route( String pattern, RouteHandler routeHandler ) {}
 
 	/**
 	 * For returning 404
