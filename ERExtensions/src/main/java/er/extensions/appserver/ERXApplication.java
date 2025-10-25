@@ -970,19 +970,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * @return A page constructed from the given component class
 	 */
-	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass, WOContext context) {
 		return (T) pageWithName(componentClass.getName(), context);
 	}
 
 	/**
-	 * @return A page constructed from the given component class
-	 * 
-	 * Renders in the context provided by ERXWOContext.currentContext()
+	 * @return A page constructed from the given component class in ERXWOContext.currentContext()
 	 */
-	@SuppressWarnings("unchecked")
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
-		return (T) pageWithName(componentClass.getName(), ERXWOContext.currentContext());
+		return pageWithName(componentClass, ERXWOContext.currentContext());
 	}
 
 	/**
