@@ -227,7 +227,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		// FIXME: Quick fix for our resource manager's initialization issue. Fix // Hugi 2025-10-06
 		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {
-			rmb._initContentTypes(); 
+			rmb.loadAdditionalContentTypes(); 
 		}
 		
 		final String fixCookiePathProperty = System.getProperty("FixCookiePath");

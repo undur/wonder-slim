@@ -17,10 +17,8 @@ import er.extensions.appserver.ERXWOContext;
  * 
  * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
  * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
- * TODO: Look into better ways to check if a resource is an actual WebServerResource (and not a private/internal/application resource) // Hugi 2025-10-04  
  * TODO: Handle localized resources // Hugi 2025-10-04
- * TODO: ERXResourceManager's "resource versioning" is nice, we need that // Hugi 2025-10-05
- * TODO: Go over the old ERXResourceManager thoroughly and see if we're missing any required features // Hugi 2025-10-04
+ * TODO: ERXResourceManager's "resource versioning" is a nice idea, we could do with something like that // Hugi 2025-10-05
  * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05   
  */
 

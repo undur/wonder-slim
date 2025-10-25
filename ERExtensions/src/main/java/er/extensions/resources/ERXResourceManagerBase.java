@@ -36,7 +36,7 @@ public class ERXResourceManagerBase extends WOResourceManager {
 	/**
 	 * FIXME A little hack to allow us to initialize the content types after the resource manager's creation. Should happen in constructor // Hugi 2025-10-06
 	 */
-	public void _initContentTypes() {
+	public void loadAdditionalContentTypes() {
 		final NSMutableDictionary d = new NSMutableDictionary<>();
 		d.putAll(super._contentTypesDictionary());
 		d.putAll(additionalContentTypesFromBunde("ERExtensions"));

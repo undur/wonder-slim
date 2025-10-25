@@ -39,10 +39,12 @@ public class ERXUtilities {
 	 * @param frameworkName name of framework containing resource, <code>null</code> or 'app' for the application bundle
 	 * @param languages language list search order
 	 * @param encoding string encoding of the resource
+	 * 
 	 * @return de-serialized plist from the resource
 	 */
 	public static Object readPListFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, Charset charset) {
-		return NSPropertyListSerialization.propertyListFromString(readStringFromBundleResource( filename, frameworkName, languages, charset));
+		final String plistString = readStringFromBundleResource( filename, frameworkName, languages, charset);
+		return NSPropertyListSerialization.propertyListFromString(plistString);
 	}
 
 	/**
@@ -52,6 +54,7 @@ public class ERXUtilities {
 	 * @param frameworkName name of framework containing resource, <code>null</code> or 'app' for the application bundle
 	 * @param languages language list search order
 	 * @param charset string Charset of the resource
+	 * 
 	 * @return string content of the resource
 	 */
 	public static String readStringFromBundleResource(final String filename, final String frameworkName, final NSArray<String> languages, Charset charset) {
