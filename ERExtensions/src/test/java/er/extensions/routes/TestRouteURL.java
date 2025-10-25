@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 public class TestRouteURL {
 
 	@Test
+	public void howTheHeckToHandleDoubleSlashes() {
+		// FIXME: Implement. Empty path component or eliminate path component? // Hugi 2025-10-11
+	}
+
+	@Test
 	public void removesSlashAtStartAndEnd() {
 		RouteURL url = RouteURL.create( "/url/" );
 		assertEquals( url.toString(), "url" );
@@ -15,8 +20,17 @@ public class TestRouteURL {
 
 	@Test
 	public void length() {
-		RouteURL url = RouteURL.create( "/url/hugi/" );
-		assertEquals( url.length(), 2 );
+		// 1 element length urls
+		assertEquals( 1, RouteURL.create( "/url/" ).length() );
+		assertEquals( 1, RouteURL.create( "/url" ).length() );
+		assertEquals( 1, RouteURL.create( "url/" ).length() );
+		assertEquals( 1, RouteURL.create( "url" ).length() );
+		
+		// 2 element length urls
+		assertEquals( 2, RouteURL.create( "/url/bork/" ).length() );
+		assertEquals( 2, RouteURL.create( "/url/bork" ).length() );
+		assertEquals( 2, RouteURL.create( "url/bork/" ).length() );
+		assertEquals( 2, RouteURL.create( "url/bork" ).length() );
 	}
 
 	@Test
@@ -43,10 +57,5 @@ public class TestRouteURL {
 	public void integerValueExceedingLengthIsNull() {
 		RouteURL url = RouteURL.create( "/url/2/haha" );
 		assertNull( url.getInteger( 4 ) );
-	}
-
-	@Test
-	public void howTheHeckToHandleDoubleSlashes() {
-		// FIXME: Implement. Empty path component or eliminate path component? // Hugi 2025-10-11
 	}
 }
