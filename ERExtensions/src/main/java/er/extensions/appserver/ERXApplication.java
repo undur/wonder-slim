@@ -64,8 +64,6 @@ import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
-import er.extensions.resources.old.ERXResourceManager;
-import er.extensions.resources.old.ERXStaticResourceRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 
@@ -201,14 +199,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
-
-		if( serveWebServerResourcesThroughApplication() ) {
-			registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );			
-		}
-		else if (_rapidTurnaroundActiveForAnyProject() && isDirectConnectEnabled()) {
-			// If WS-resources are being served through the app, all resources should work fine. If not, we have to enable this hack for loading jar-resources during development.
-			registerRequestHandler(new ERXStaticResourceRequestHandler(), "_wr_");
-		}
+		registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );			
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 
@@ -421,21 +412,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 	}
 
-	/**
-	 * Override to return true if you'd like to serve webserver resources through your application
-	 */
-	protected boolean serveWebServerResourcesThroughApplication() {
-		return true;
-	}
-
 	@Override
 	public WOResourceManager createResourceManager() {
-
-		if( serveWebServerResourcesThroughApplication() ) {
-			return new ERXAppBasedResourceManager();
-		}
-
-		return new ERXResourceManager();
+		return new ERXAppBasedResourceManager();
 	}
 
 	/**
