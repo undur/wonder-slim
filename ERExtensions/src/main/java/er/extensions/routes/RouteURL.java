@@ -28,7 +28,7 @@ public class RouteURL {
 	/**
 	 * Instances are constructed using the create() method.
 	 *
-	 * FIXME: We're currently stripping away starting and ending slashes. We'll want to look into if that's generally desired behaviour // Hugi 2021-12-28
+	 * FIXME: We're currently stripping away starting and ending slashes. Not desired behaviour // Hugi 2021-12-28
 	 */
 	private RouteURL( final String sourceURL ) {
 		Objects.requireNonNull( sourceURL );

@@ -6,10 +6,10 @@ import com.webobjects.appserver.WORequest;
 import er.extensions.appserver.ERXDirectAction;
 
 /**
- * A Direct Action class that takes care of passing requests on to a RouteHandler.
+ * A Direct Action that passes requests on to the default RouteTable for handling.
  *
- * URLs are be passed to the handler action either by query parameter ("url")
- * or are retrieved from the redirect_url header passed in by Apache's 404 handler.
+ * The "real" URL to handle is obtained from either the query parameter [url]
+ * or the [redirect_url] header passed in by Apache's 404 handler.
  */
 
 public class RouteAction extends ERXDirectAction {
