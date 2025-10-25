@@ -3,7 +3,6 @@ package er.extensions.routes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,6 +179,7 @@ public class RouteTable {
 //		}
 //	}
 
+	@Deprecated
 	public static class BiFunctionRouteHandler implements RouteHandler {
 		private BiFunction<RouteURL, WOContext, WOActionResults> _function;
 
