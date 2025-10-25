@@ -486,9 +486,7 @@ public  class ERXRequest extends WORequest {
     }
 
     /**
-     * Overridden to call _cookieDictionary() where we parse the cookies one
-     * at a time using java.net.HttpCookie so that we don't get an empty cookie
-     * dictionary if one cookie is malformed.
+     * Overridden to use our own method for cookie parsing
      */
     @Override
 	public NSDictionary cookieValues() {
@@ -500,10 +498,11 @@ public  class ERXRequest extends WORequest {
     }    
 
     /**
-     * Parses all cookies one at a time catch parse exception which just discards
-     * that cookie and not all cookies. It uses java.net.HttpCookie as a parser.
+     * More graceful handling of a malformed cookie header than WO's.
+     * Parses cookies one at a time. If a malformed cookie is present,
+     * discards only the malformed cookies rather than all of them.
      * 
-     * @return a dictionary of cookies, parsed one cookie at a time
+     * @return Parsed valid cookies from the given request 
      */
 	private static NSDictionary<String, NSArray<String>> parseCookieValues( final WORequest request ) {
 		final NSMutableDictionary<String, NSArray<String>> cookieDictionary = new NSMutableDictionary<>();
