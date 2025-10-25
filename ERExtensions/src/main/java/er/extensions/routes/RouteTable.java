@@ -134,7 +134,7 @@ public class RouteTable {
 //	}
 
 	public void map( final String pattern, final Class<? extends WOComponent> componentClass ) {
-		map( pattern, new ComponentRouteHandler( componentClass ) );
+		map( pattern, new ComponentClassRouteHandler( componentClass ) );
 	}
 
 	/**
@@ -193,10 +193,10 @@ public class RouteTable {
 		}
 	}
 
-	public static class ComponentRouteHandler implements RouteHandler {
+	public static class ComponentClassRouteHandler implements RouteHandler {
 		private Class<? extends WOComponent> _componentClass;
 
-		public ComponentRouteHandler( final Class<? extends WOComponent> componentClass ) {
+		public ComponentClassRouteHandler( final Class<? extends WOComponent> componentClass ) {
 			_componentClass = componentClass;
 		}
 
