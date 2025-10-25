@@ -127,12 +127,6 @@ public class RouteTable {
 		map( pattern, new BiFunctionRouteHandler( function ) );
 	}
 
-
-//	FIXME: Can probably be deleted. Replaced by RouteHandler as a functional interface // Hugi 2025-10-25
-//	public void map( final String pattern, final Function<RouteInvocation, WOActionResults> function ) {
-//		map( pattern, new FunctionRouteHandler( function ) );
-//	}
-
 	public void map( final String pattern, final Class<? extends WOComponent> componentClass ) {
 		map( pattern, new ComponentClassRouteHandler( componentClass ) );
 	}
@@ -157,20 +151,6 @@ public class RouteTable {
 			return response;
 		}
 	}
-
-//	FIXME: Can probably be deleted. Replaced by RouteHandler as a functional interface // Hugi 2025-10-25
-//	public static class FunctionRouteHandler implements RouteHandler {
-//		private Function<RouteInvocation, WOActionResults> _function;
-//		
-//		public FunctionRouteHandler( final Function<RouteInvocation, WOActionResults> function ) {
-//			_function = function;
-//		}
-//		
-//		@Override
-//		public WOActionResults handle( RouteInvocation routeRequest ) {
-//			return _function.apply(routeRequest);
-//		}
-//	}
 
 	@Deprecated
 	public static class BiFunctionRouteHandler implements RouteHandler {
