@@ -10,10 +10,10 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
 
 /**
@@ -101,7 +101,7 @@ public class ERXResourceManagerBase extends WOResourceManager {
 		final boolean resourceIsSecure = (secure == null) ? requestIsSecure : secure.booleanValue();
 	
 		// FIXME: Figure out the exact purpose of this longest written condition on Earth // Hugi 2025-10-05
-		if ((resourceIsSecure && ERXProperties.stringForKey("er.extensions.ERXResourceManager.secureResourceUrlPrefix") == null) || (!resourceIsSecure && ERXProperties.stringForKey("er.extensions.ERXResourceManager.resourceUrlPrefix") == null)) {
+		if ((resourceIsSecure && ERXP.SECURE_RESOURCE_URL_PREFIX.stringValue() == null) || (!resourceIsSecure && ERXP.RESOURCE_URL_PREFIX.stringValue() == null)) {
 			final StringBuffer sb = new StringBuffer();
 			final String serverPortStr = context.request()._serverPort();
 			final int serverPort = (serverPortStr == null) ? 0 : Integer.parseInt(serverPortStr);
