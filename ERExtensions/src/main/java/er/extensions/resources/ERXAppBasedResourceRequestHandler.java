@@ -93,7 +93,7 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	 * 
 	 * TODO: A little silly caching strategy (constructing the streaming response from a non-streaming one). Also; we're not streaming in dev mode // Hugi 2025-10-04 
 	 */
-	private class CachedResourceResponse {
+	private static class CachedResourceResponse {
 		
 		private final int _status;
 		private final NSDictionary _headers;
