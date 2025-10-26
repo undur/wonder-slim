@@ -98,14 +98,10 @@ public class ERXWOContext extends ERXAjaxContext {
 		return _generateCompleteURLs;
 	}
 
-	protected String _postprocessURL(String url) {
-		return ERXApplication.erxApplication()._rewriteURL(url);
-	}
-		
 	@Override
 	public String _urlWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString, boolean isSecure, int somePort) {
 		String url = super._urlWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort);
-		url = _postprocessURL(url);
+		url = ERXApplication.erxApplication()._rewriteURL(url);
 		return url;
 	}
 
