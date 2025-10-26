@@ -199,7 +199,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
-		registerRequestHandler(new ERXDirectActionRequestHandler(ERXDirectAction.class.getName(), "stats", false), "erxadm");
+//		registerRequestHandler(new ERXDirectActionRequestHandler(ERXAdminDirectAction.class.getName(), "stats", false), "erxadm"); // FIXME: Why is this getting installed specifically? Disabled for now // Hugi 2025-10-26
 		registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );			
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
