@@ -139,16 +139,22 @@ public class ERXWOContext extends ERXAjaxContext {
 		return safeIdentifierName(elementID());
 	}
 
+	/**
+	 * FIXME: Seems to be adding the "-" portnumber prefix when running under a local WS adaptor? Why? // Hugi 2025-10-26
+	 */
 	@Override
 	protected String relativeURLWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString) {
 		String result = super.relativeURLWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString);
+
 		if(ERXApplication.isDevelopmentModeSafe() && !WOApplication.application().isDirectConnectEnabled()) {
-			String extension = "." + WOApplication.application().applicationExtension();
-			String replace = extension + "/-" + WOApplication.application().port();
+			final String extension = "." + WOApplication.application().applicationExtension();
+			final String replace = extension + "/-" + WOApplication.application().port();
+
 			if(!result.contains(replace) && result.contains(extension)) {
 				result = result.replace(extension, replace);
 			}
 		}
+
 		return result;
 	}
 
