@@ -226,14 +226,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase().replace('.', '_');
 		_proxyBalancerCookieName = ("routeid_" + name()).toLowerCase().replace('.', '_');
 		_proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
+		ERXNotification.DidHandleRequestNotification.addObserver(this::addBalancerRouteCookieByNotification);
 
 		// FIXME: We might potentially have to initialize these later, since I'm not sure host() is ready — and apparently the SSL adaptor invokes setSSLPort after starting // Hugi 2025-10-18
 		_sslHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.ssl.host", host());
 		_sslPort = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.ssl.port", 443);
 
+		// Adding notification hooks for the application's launch lifecycle
 		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this::finishInitialization);
 		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this::didFinishLaunching);
-		ERXNotification.DidHandleRequestNotification.addObserver(this::addBalancerRouteCookieByNotification);
 		
 		ERXNotification.ApplicationDidCreateNotification.postNotification(this);
 	}
