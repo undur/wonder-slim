@@ -184,7 +184,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		checkEnvironment();
 
-		installPatches();
+		ERXPatcher.installPatches();
+		setContextClassName(ERXWOContext.class.getName());
 
 		_lowMemoryHandler = new ERXLowMemoryHandler();
 		_exceptionManager = new ERXExceptionManager();
@@ -346,17 +347,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				log.error( "Failed to start up the monitor service", e );
 			}
 		}		
-	}
-
-	/**
-	 * Installs several bugfixes and enhancements to WODynamicElements.
-	 */
-	protected void installPatches() {
-		ERXPatcher.installPatches();
-
-		if (contextClassName().equals(WOContext.class.getSimpleName())) {
-			setContextClassName(ERXWOContext.class.getName());
-		}
 	}
 
 	/**
