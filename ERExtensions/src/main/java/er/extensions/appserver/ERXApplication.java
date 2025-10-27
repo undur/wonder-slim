@@ -35,7 +35,6 @@ import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOComponentDefinition;
-import com.webobjects.appserver._private.WODeployedBundle;
 import com.webobjects.appserver._private.WOProperties;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
@@ -894,17 +893,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			return url.replaceFirst(_replaceApplicationPathPattern, _replaceApplicationPathReplace);
 		}
 
-		return url;
-	}
-
-	/**
-	 * Hook for rewriting generated resource URLs. Invoked by ERXResourceManager. 
-	 *
-	 * @param url the URL to rewrite
-	 * @param bundle the bundle the resource is located in
-	 * @return the rewritten URL
-	 */
-	public String _rewriteResourceURL(String url, WODeployedBundle bundle) {
 		return url;
 	}
 
