@@ -25,8 +25,8 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.foundation.ERXPrivateKVC;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXUtilities.ERXPrivateKVC;
 
 /**
  * ERXAjaxSession is the part of ERXSession that handles Ajax requests.

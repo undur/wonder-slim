@@ -18,7 +18,7 @@ import com.webobjects.foundation.NSValidation;
 
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
-import er.extensions.foundation.ERXUtilities.ERXPrivateKVC;
+import er.extensions.foundation.ERXPrivateKVC;
 
 /**
  * Replacement for WOTextField. Provides for localized formatters. 
