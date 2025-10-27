@@ -1055,71 +1055,77 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 	}
 
-	private static void _debugValueForDeclarationNamed(WOComponent component, String verb, String aDeclarationName, String aDeclarationType, String aBindingName, String anAssociationDescription, Object aValue) {
-		if (aValue instanceof String) {
-			StringBuilder stringbuffer = new StringBuilder(((String) aValue).length() + 2);
-			stringbuffer.append('"');
-			stringbuffer.append(aValue);
-			stringbuffer.append('"');
-			aValue = stringbuffer;
+	/**
+	 * Little bit better binding debug output than the original.
+	 */
+	@Override
+	public void logTakeValueForDeclarationNamed(String declarationName, String declarationType, String bindingName, String associationDescription, Object value) {
+		_debugValueForDeclarationNamed(" ==> ", declarationName, declarationType, bindingName, associationDescription, value);
+	}
+
+	/**
+	 * Little bit better binding debug output than the original.
+	 */
+	@Override
+	public void logSetValueForDeclarationNamed(String declarationName, String declarationType, String bindingName, String associationDescription, Object value) {
+		_debugValueForDeclarationNamed(" <== ", declarationName, declarationType, bindingName, associationDescription, value);
+	}
+
+	private static void _debugValueForDeclarationNamed(String verb, String declarationName, String declarationType, String bindingName, String associationDescription, Object value) {
+
+		WOComponent component = ERXWOContext.currentContext().component();
+
+		if (component.parent() != null) {
+			component = component.parent();
 		}
-		if (aDeclarationName.startsWith("_")) {
-			aDeclarationName = "[inline]";
+		
+		if (value instanceof String) {
+			StringBuilder stringbuffer = new StringBuilder(((String) value).length() + 2);
+			stringbuffer.append('"');
+			stringbuffer.append(value);
+			stringbuffer.append('"');
+			value = stringbuffer;
+		}
+		
+		if( declarationName == null ) {
+			declarationName = "[NULL_DECLARATION_NAME]";
 		}
 
-		StringBuilder sb = new StringBuilder();
+		if (declarationName.startsWith("_")) {
+			declarationName = "[inline]";
+		}
 
-		String lastComponentName = component.name().replaceFirst(".*\\.", "");
+		final StringBuilder sb = new StringBuilder();
+
+		final String lastComponentName = component.name().replaceFirst(".*\\.", "");
 		sb.append(lastComponentName);
 
 		sb.append(verb);
 
-		if (!aDeclarationName.startsWith("_")) {
-			sb.append(aDeclarationName);
+		if (!declarationName.startsWith("_")) {
+			sb.append(declarationName);
 			sb.append(':');
 		}
-		sb.append(aDeclarationType);
+
+		sb.append(declarationType);
 
 		sb.append(" { ");
-		sb.append(aBindingName);
+		sb.append(bindingName);
 		sb.append('=');
 
-		String valueStr = aValue != null ? aValue.toString() : "null";
-		if (anAssociationDescription.startsWith("class ")) {
+		final String valueStr = value != null ? value.toString() : "null";
+
+		if (associationDescription.startsWith("class ")) {
 			sb.append(valueStr);
 			sb.append("; }");
 		}
 		else {
-			sb.append(anAssociationDescription);
+			sb.append(associationDescription);
 			sb.append("; } value ");
 			sb.append(valueStr);
 		}
 
 		NSLog.debug.appendln(sb.toString());
-	}
-
-	/**
-	 * Little bit better binding debug output than the original.
-	 */
-	@Override
-	public void logTakeValueForDeclarationNamed(String aDeclarationName, String aDeclarationType, String aBindingName, String anAssociationDescription, Object aValue) {
-		WOComponent component = ERXWOContext.currentContext().component();
-		if (component.parent() != null) {
-			component = component.parent();
-		}
-		_debugValueForDeclarationNamed(component, " ==> ", aDeclarationName, aDeclarationType, aBindingName, anAssociationDescription, aValue);
-	}
-
-	/**
-	 * Little bit better binding debug output than the original.
-	 */
-	@Override
-	public void logSetValueForDeclarationNamed(String aDeclarationName, String aDeclarationType, String aBindingName, String anAssociationDescription, Object aValue) {
-		WOComponent component = ERXWOContext.currentContext().component();
-		if (component.parent() != null) {
-			component = component.parent();
-		}
-		_debugValueForDeclarationNamed(component, " <== ", aDeclarationName, aDeclarationType, aBindingName, anAssociationDescription, aValue);
 	}
 
 	/**
