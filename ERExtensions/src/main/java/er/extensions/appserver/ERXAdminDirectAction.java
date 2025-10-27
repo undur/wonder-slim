@@ -21,9 +21,9 @@ import com.webobjects.woextensions.stats.WOStatsPage;
 
 import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
-import er.extensions.foundation.ERXPrivateKVC;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
+import er.extensions.hacks.ERXPrivateKVC;
 import er.extensions.statistics.ERXStats;
 
 public class ERXAdminDirectAction extends WODirectAction {
