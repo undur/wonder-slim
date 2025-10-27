@@ -557,44 +557,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Bugfix for WO component loading. It fixes:
-	 * 
-	 * <ul>
-	 * <li>when isCachingEnabled is ON, and you have a new browser language that
-	 * hasn't been seen so far, the component gets re-read from the disk, which
-	 * can wreak havoc if you overwrite your html/wod with a new version.
-	 * <li>when caching enabled is OFF, and you make a change, you only see the
-	 * change in the first browser that touches the page. You need to re-save if
-	 * you want it seen in the second one.
-	 * </ul>
-	 * 
-	 * You need to set <code>er.extensions.ERXApplication.fixCachingEnabled=false</code> if you don't want it to load.
-	 * 
-	 * @author ak
-	 */
-	@Override
-	public WOComponentDefinition _componentDefinition(String s, NSArray nsarray) {
-
-		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.fixCachingEnabled", true)) {
-			// _expectedLanguages already contains all the languages in all projects,
-			// so there is no need to check for the ones that come in...
-			return super._componentDefinition(s, (nsarray != null ? nsarray.arrayByAddingObjectsFromArray(_expectedLanguages()) : _expectedLanguages()));
-		}
-
-		return super._componentDefinition(s, nsarray);
-	}
-
-	/**
-	 * Override and return false if you do not want sessions to be refused when memory is starved.
-	 * 
-	 * @return whether or not sessions should be refused on starved memory
+	 * Override to return false if you do not want sessions to be refused when memory is starved.
 	 */
 	protected boolean refuseSessionsOnStarvedMemory() {
 		return true;
 	}
 
 	/**
-	 * Overridden to return the super value OR true if the app is memory starved.
+	 * Overridden to add a check for memory starvation
 	 */
 	@Override
 	public boolean isRefusingNewSessions() {
@@ -708,6 +678,34 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public String nameSuffix() {
 		return ERXProperties.stringForKeyWithDefault("ERApplicationNameSuffix", "");
+	}
+
+	/**
+	 * Bugfix for WO component loading. It fixes:
+	 * 
+	 * <ul>
+	 * <li>when isCachingEnabled is ON, and you have a new browser language that
+	 * hasn't been seen so far, the component gets re-read from the disk, which
+	 * can wreak havoc if you overwrite your html/wod with a new version.
+	 * <li>when caching enabled is OFF, and you make a change, you only see the
+	 * change in the first browser that touches the page. You need to re-save if
+	 * you want it seen in the second one.
+	 * </ul>
+	 * 
+	 * You need to set <code>er.extensions.ERXApplication.fixCachingEnabled=false</code> if you don't want it to load.
+	 * 
+	 * @author ak
+	 */
+	@Override
+	public WOComponentDefinition _componentDefinition(String s, NSArray nsarray) {
+
+		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.fixCachingEnabled", true)) {
+			// _expectedLanguages already contains all the languages in all projects,
+			// so there is no need to check for the ones that come in...
+			return super._componentDefinition(s, (nsarray != null ? nsarray.arrayByAddingObjectsFromArray(_expectedLanguages()) : _expectedLanguages()));
+		}
+
+		return super._componentDefinition(s, nsarray);
 	}
 
 	/**
