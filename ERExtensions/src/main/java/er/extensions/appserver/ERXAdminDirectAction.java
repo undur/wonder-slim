@@ -23,7 +23,7 @@ import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.foundation.ERXUtilities.ERXPrivateer;
+import er.extensions.foundation.ERXUtilities.ERXPrivateKVC;
 import er.extensions.statistics.ERXStats;
 
 public class ERXAdminDirectAction extends WODirectAction {
@@ -171,7 +171,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 			return false;
 		}
 		
-		final Object uglyAssWayToGetThestatisticsStorePassword = ERXPrivateer.privateValueForKey(ERXApplication.erxApplication().statisticsStore(), "_password" );
+		final Object uglyAssWayToGetThestatisticsStorePassword = ERXPrivateKVC.privateValueForKey(ERXApplication.erxApplication().statisticsStore(), "_password" );
 
 		return password.equals( uglyAssWayToGetThestatisticsStorePassword );
 	}

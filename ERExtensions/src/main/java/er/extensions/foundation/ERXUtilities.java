@@ -83,7 +83,7 @@ public class ERXUtilities {
 	 * 
 	 * FIXME: Delete and replace with a couple of methods // Hugi 2025-10-16
 	 */
-	public static class ERXPrivateer {
+	public static class ERXPrivateKVC {
 
 		public static Object privateValueForKey(Object target, String key) {
 			final Field field = accessibleFieldForKey(target, key);

@@ -26,7 +26,7 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.foundation.ERXProperties;
-import er.extensions.foundation.ERXUtilities.ERXPrivateer;
+import er.extensions.foundation.ERXUtilities.ERXPrivateKVC;
 
 /**
  * ERXAjaxSession is the part of ERXSession that handles Ajax requests.
@@ -388,7 +388,7 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
 			flag = false;
 		}
 		else {
-			NSArray nsarray = (NSArray) ERXPrivateer.privateValueForKey(wocomponent, "_subcomponents");
+			NSArray nsarray = (NSArray) ERXPrivateKVC.privateValueForKey(wocomponent, "_subcomponents");
 			if (nsarray != null && nsarray != NSArray.EmptyArray) {
 				for(Enumeration enumeration = nsarray.objectEnumerator(); flag && enumeration.hasMoreElements(); ) {
 					if (!_shouldPutInPermanentCache((WOComponent) enumeration.nextElement()))
