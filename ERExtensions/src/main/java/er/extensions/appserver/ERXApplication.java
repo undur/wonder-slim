@@ -66,6 +66,20 @@ import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 
+/**
+ * FIXME: Application/plugin initialization phases // Hugi 2025-10-29
+ * 
+ * 1. main() :: Collect all ERXPlugin classes
+ * 2. main() :: Gather and read Properties from each (in .requires() order)
+ * 
+ * --- At this point all "raw" properties are loaded so the plugins are ready for real "initializaiton"
+ * 
+ * 3. main() / ERXPlugin.init() - Construct an instance of each ERXPlugin class and run initialization logic (in .requires() order)
+ * 
+ * 4. ERXApplication() / ERXPlugin.afterApplicationConstruction() 
+ * 5. ?? / ERXApplciation.afterApplicationLaunch()
+ */
+
 public abstract class ERXApplication extends ERXAjaxApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXApplication.class);
