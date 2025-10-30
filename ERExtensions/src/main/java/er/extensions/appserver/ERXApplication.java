@@ -109,17 +109,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * To support load balancing with mod_proxy
 	 */
-	private final String _proxyBalancerRoute;
-
-	/**
-	 * To support load balancing with mod_proxy
-	 */
-	private final String _proxyBalancerCookieName;
-
-	/**
-	 * To support load balancing with mod_proxy
-	 */
-	private final String _proxyBalancerCookiePath;
+	private final ProxyBalancerConfig _proxyBalancerConfig;
 
 	/**
 	 * Host name used for URL generation when no request is present (for example, in background tasks)
@@ -236,9 +226,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		
 		final String fixCookiePathProperty = System.getProperty("FixCookiePath");
-		_proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase().replace('.', '_');
-		_proxyBalancerCookieName = ("routeid_" + name()).toLowerCase().replace('.', '_');
-		_proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
+		final String proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase().replace('.', '_');
+		final String proxyBalancerCookieName = ("routeid_" + name()).toLowerCase().replace('.', '_');
+		final String proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
+		_proxyBalancerConfig = new ProxyBalancerConfig(proxyBalancerRoute, proxyBalancerCookieName, proxyBalancerCookiePath);
+
 		ERXNotification.DidHandleRequestNotification.addObserver(this::addBalancerRouteCookieByNotification);
 
 		// FIXME: We might potentially have to initialize these later, since I'm not sure host() is ready — and apparently the SSL adaptor invokes setSSLPort after starting // Hugi 2025-10-18
@@ -1078,15 +1070,25 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
+	 * Configuration for the generation of the proxy balancer cookie 
+	 */
+	public record ProxyBalancerConfig( String route, String cookieName, String cookiePath ) {
+
+		public WOCookie cookie( final WOContext context ) {
+			final WOCookie cookie = new WOCookie(cookieName, route, cookiePath, null, -1, context.request().isSecure(), true);
+			cookie.setExpires(null);
+			cookie.setSameSite(SameSite.LAX);
+			return cookie;
+		}
+	}
+
+	/**
 	 * Invoked on DidHandleRequestNotification to add the "balancer route cookie" to the current context's response 
 	 */
 	public void addBalancerRouteCookieByNotification(final NSNotification notification) {
 		if (notification.object() instanceof WOContext context) {
 			if (context.request() != null && context.response() != null) {
-				final WOCookie cookie = new WOCookie(_proxyBalancerCookieName, _proxyBalancerRoute, _proxyBalancerCookiePath, null, -1, context.request().isSecure(), true);
-				cookie.setExpires(null);
-				cookie.setSameSite(SameSite.LAX);
-				context.response().addCookie(cookie);
+				context.response().addCookie( _proxyBalancerConfig.cookie( context ) );
 			}
 		}
 	}
