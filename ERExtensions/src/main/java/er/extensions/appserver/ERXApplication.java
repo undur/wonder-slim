@@ -231,7 +231,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		final String proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
 		_proxyBalancerConfig = new ProxyBalancerConfig(proxyBalancerRoute, proxyBalancerCookieName, proxyBalancerCookiePath);
 
-		ERXNotification.DidHandleRequestNotification.addObserver(this::addBalancerRouteCookieByNotification);
+		ERXNotification.DidHandleRequestNotification.addObserver(_proxyBalancerConfig::addBalancerRouteCookieByNotification);
 
 		// FIXME: We might potentially have to initialize these later, since I'm not sure host() is ready — and apparently the SSL adaptor invokes setSSLPort after starting // Hugi 2025-10-18
 		_sslHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.ssl.host", host());
@@ -1073,23 +1073,26 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Configuration for the generation of the proxy balancer cookie 
 	 */
 	public record ProxyBalancerConfig( String route, String cookieName, String cookiePath ) {
-
-		public WOCookie cookie( final WOContext context ) {
-			final WOCookie cookie = new WOCookie(cookieName, route, cookiePath, null, -1, context.request().isSecure(), true);
+		
+		/**
+		 * Invoked on DidHandleRequestNotification to add the "balancer route cookie" to the current context's response 
+		 */
+		public void addBalancerRouteCookieByNotification(final NSNotification notification) {
+			if (notification.object() instanceof WOContext context) {
+				if (context.request() != null && context.response() != null) {
+					context.response().addCookie( createCookie( context.request().isSecure() ) );
+				}
+			}
+		}
+		
+		/**
+		 * @return A new balancer route cookie
+		 */
+		private WOCookie createCookie( final boolean secure ) {
+			final WOCookie cookie = new WOCookie(cookieName, route, cookiePath, null, -1, secure, true);
 			cookie.setExpires(null);
 			cookie.setSameSite(SameSite.LAX);
 			return cookie;
-		}
-	}
-
-	/**
-	 * Invoked on DidHandleRequestNotification to add the "balancer route cookie" to the current context's response 
-	 */
-	public void addBalancerRouteCookieByNotification(final NSNotification notification) {
-		if (notification.object() instanceof WOContext context) {
-			if (context.request() != null && context.response() != null) {
-				context.response().addCookie( _proxyBalancerConfig.cookie( context ) );
-			}
 		}
 	}
 
