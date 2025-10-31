@@ -81,39 +81,32 @@ public class ERXExceptionUtilities {
 	 * @return A string representation of the current stacktrace.
 	 */
 	public static String stackTrace() {
-		String result = null;
 
-		try {
-			throw new Throwable();
-		}
-		catch (Throwable t) {
-			result = stackTrace(t);
-		}
+		String result = stackTrace(new Throwable());
 	
-		String separator = System.getProperties().getProperty("line.separator");
+		final String separator = System.getProperties().getProperty("line.separator");
 	
 		// Chop off the 1st line, "java.lang.Throwable"
 		int offset = result.indexOf(separator);
 		result = result.substring(offset + 1);
 	
-		// Chop off the lines at the start that refer to ERXUtilities
+		// Chop off the lines at the start that refer to this class
 		offset = result.indexOf(separator);
-		while (result.substring(0, offset).indexOf("ERXUtilities.java") >= 0) {
+
+		while (result.substring(0, offset).indexOf("ERXExceptionUtilities.java") >= 0) {
 			result = result.substring(offset + 1);
 			offset = result.indexOf(separator);
 		}
+
 		return separator + result;
 	}
 	
 	/**
-	 * Converts a throwable's stacktrace into a string representation.
-	 * 
-	 * @param t throwable to print to a string
-	 * @return string representation of stacktrace
+	 * @return The throwable's stacktrace as a string
 	 */
 	private static String stackTrace(Throwable t) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-		PrintStream printStream = new PrintStream(baos);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
+		final PrintStream printStream = new PrintStream(baos);
 		t.printStackTrace(printStream);
 		return baos.toString();
 	}
