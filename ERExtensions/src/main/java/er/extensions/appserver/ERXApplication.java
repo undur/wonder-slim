@@ -85,14 +85,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static final Logger statsLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Statistics");
 
 	/**
-	 * The path rewriting pattern to match (@see _rewriteURL)
+	 * Host name used for URL generation when no request is present (for example, in background tasks)
 	 */
-	private String _replaceApplicationPathPattern;
-
-	/**
-	 * The path rewriting replacement to apply to the matched pattern (@see _rewriteURL)
-	 */
-	private String _replaceApplicationPathReplace;
+	private final String _publicHost;
 
 	/**
 	 * The SSL host used by this application.
@@ -105,14 +100,19 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private Integer _sslPort;
 
 	/**
+	 * The path rewriting pattern to match (@see _rewriteURL)
+	 */
+	private String _replaceApplicationPathPattern;
+	
+	/**
+	 * The path rewriting replacement to apply to the matched pattern (@see _rewriteURL)
+	 */
+	private String _replaceApplicationPathReplace;
+
+	/**
 	 * To support load balancing with mod_proxy
 	 */
 	private final ERXProxyBalancerConfig _proxyBalancerConfig;
-
-	/**
-	 * Host name used for URL generation when no request is present (for example, in background tasks)
-	 */
-	private final String _publicHost;
 
 	/**
 	 * Watches the state of the application's memory heap and handles low memory situations
