@@ -109,7 +109,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * To support load balancing with mod_proxy
 	 */
-	private final ProxyBalancerConfig _proxyBalancerConfig;
+	private final ERXProxyBalancerConfig _proxyBalancerConfig;
 
 	/**
 	 * Host name used for URL generation when no request is present (for example, in background tasks)
@@ -229,7 +229,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		final String proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase().replace('.', '_');
 		final String proxyBalancerCookieName = ("routeid_" + name()).toLowerCase().replace('.', '_');
 		final String proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
-		_proxyBalancerConfig = new ProxyBalancerConfig(proxyBalancerRoute, proxyBalancerCookieName, proxyBalancerCookiePath);
+		_proxyBalancerConfig = new ERXProxyBalancerConfig(proxyBalancerRoute, proxyBalancerCookieName, proxyBalancerCookiePath);
 
 		ERXNotification.DidHandleRequestNotification.addObserver(_proxyBalancerConfig::addBalancerRouteCookieByNotification);
 
@@ -1072,7 +1072,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Configuration for the generation of the proxy balancer cookie 
 	 */
-	public record ProxyBalancerConfig( String route, String cookieName, String cookiePath ) {
+	public record ERXProxyBalancerConfig( String route, String cookieName, String cookiePath ) {
 		
 		/**
 		 * Invoked on DidHandleRequestNotification to add the "balancer route cookie" to the current context's response 
