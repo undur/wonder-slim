@@ -223,11 +223,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			rmb.loadAdditionalContentTypes(); 
 		}
 		
-		final String fixCookiePathProperty = System.getProperty("FixCookiePath");
-		final String proxyBalancerRoute = (name() + "_" + port().toString()).toLowerCase().replace('.', '_');
-		final String proxyBalancerCookieName = ("routeid_" + name()).toLowerCase().replace('.', '_');
-		final String proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
-		_proxyBalancerConfig = new ERXProxyBalancerConfig(proxyBalancerRoute, proxyBalancerCookieName, proxyBalancerCookiePath);
+		_proxyBalancerConfig = new ERXProxyBalancerConfig(name(), port());
 
 		ERXNotification.DidHandleRequestNotification.addObserver(_proxyBalancerConfig::addBalancerRouteCookieByNotification);
 

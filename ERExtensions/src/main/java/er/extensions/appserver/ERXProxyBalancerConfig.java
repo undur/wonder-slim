@@ -11,6 +11,16 @@ import com.webobjects.foundation.NSNotification;
 public record ERXProxyBalancerConfig( String route, String cookieName, String cookiePath ) {
 	
 	/**
+	 * Construct a new route balance
+	 */
+	public ERXProxyBalancerConfig( String name, Number port ) {
+		final String fixCookiePathProperty = System.getProperty("FixCookiePath");
+		final String proxyBalancerRoute = (name + "_" + port.toString()).toLowerCase().replace('.', '_');
+		final String proxyBalancerCookieName = ("routeid_" + name).toLowerCase().replace('.', '_');
+		final String proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
+		this(proxyBalancerRoute, proxyBalancerCookieName, proxyBalancerCookiePath);
+	}
+	/**
 	 * Invoked on DidHandleRequestNotification to add the "balancer route cookie" to the current context's response 
 	 */
 	public void addBalancerRouteCookieByNotification(final NSNotification notification) {
