@@ -13,10 +13,10 @@ public record ERXProxyBalancerConfig( String route, String cookieName, String co
 	/**
 	 * Construct a new route balance
 	 */
-	public ERXProxyBalancerConfig( String name, Number port ) {
+	public ERXProxyBalancerConfig( String applicationName, Number instancePortNumber ) {
 		final String fixCookiePathProperty = System.getProperty("FixCookiePath");
-		final String proxyBalancerRoute = (name + "_" + port.toString()).toLowerCase().replace('.', '_');
-		final String proxyBalancerCookieName = ("routeid_" + name).toLowerCase().replace('.', '_');
+		final String proxyBalancerRoute = (applicationName + "_" + instancePortNumber.toString()).toLowerCase().replace('.', '_');
+		final String proxyBalancerCookieName = ("routeid_" + applicationName).toLowerCase().replace('.', '_');
 		final String proxyBalancerCookiePath = fixCookiePathProperty != null ? fixCookiePathProperty : "/";
 		this(proxyBalancerRoute, proxyBalancerCookieName, proxyBalancerCookiePath);
 	}
