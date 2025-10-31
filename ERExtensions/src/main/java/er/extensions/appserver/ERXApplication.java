@@ -671,15 +671,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @author ak
 	 */
 	@Override
-	public WOComponentDefinition _componentDefinition(String s, NSArray nsarray) {
+	public WOComponentDefinition _componentDefinition(final String componentName, NSArray languages) {
 
-		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.fixCachingEnabled", true)) {
-			// _expectedLanguages already contains all the languages in all projects,
-			// so there is no need to check for the ones that come in...
-			return super._componentDefinition(s, (nsarray != null ? nsarray.arrayByAddingObjectsFromArray(_expectedLanguages()) : _expectedLanguages()));
+		final boolean fixCachingEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.fixCachingEnabled", true);
+
+		if (fixCachingEnabled) {
+			// _expectedLanguages already contains all the languages in all projects, so there is no need to check for the ones that come in...
+			languages = languages != null ? languages.arrayByAddingObjectsFromArray(_expectedLanguages()) : _expectedLanguages();
 		}
 
-		return super._componentDefinition(s, nsarray);
+		return super._componentDefinition(componentName, languages);
 	}
 
 	/**
