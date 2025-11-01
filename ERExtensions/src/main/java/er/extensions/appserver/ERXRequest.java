@@ -128,18 +128,19 @@ public  class ERXRequest extends WORequest {
 	public String _serverName() {
 		String serverName = headerForKey("x-webobjects-servlet-server-name");
 
-		if ((serverName == null) || (serverName.length() == 0)) {
+		if(serverName == null || serverName.length() == 0) {
 			if (isUsingWebServer()) {
-				// Check our host name keys in our preferred order instead of Apple WO 5.4.3 default header check logic.
-				serverName = remoteHostName();
+				serverName = remoteHostName(); // Checks host name keys in our preferred order instead of Apple WO 5.4.3's default header check logic
 
-				if ((serverName == null) || (serverName.length() == 0) || serverName.equals(UNKNOWN_HOST))
+				if ((serverName == null) || (serverName.length() == 0) || serverName.equals(UNKNOWN_HOST)) {
 					throw new NSForwardException(new WOURLFormatException("<" + super.getClass().getName() + ">: Unable to build complete url as no server name was provided in the headers of the request."));
+				}
 			}
 			else {
 				serverName = ERXApplication.erxApplication().publicHost();
 			}
 		}
+
 		return serverName;
 	}
 
