@@ -5,6 +5,20 @@ import er.extensions.foundation.ERXProperties;
 /**
  * Holds configuration for an application's URL rewriting
  * 
+ * Hook to rewrite generated URLs. Invoked by ERXWOContext.
+ * 
+ * You can also set "er.extensions.replaceApplicationPath.pattern" to the pattern
+ * to match and "er.extensions.replaceApplicationPath.replace" to the value to replace it with.
+ * 
+ * For example, in Properties: <code>
+ * er.extensions.ERXApplication.replaceApplicationPath.pattern=/cgi-bin/WebObjects/YourApp.woa
+ * er.extensions.ERXApplication.replaceApplicationPath.replace=/yourapp
+ * </code>
+ * 
+ * and in Apache 2.2: <code>
+ * RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [PT,L]
+ * </code>
+ * 
  * @param replaceApplicationPathPattern The path rewriting pattern to match (@see _rewriteURL)
  * @param replaceApplicationPathReplace The path rewriting replacement to apply to the matched pattern (@see _rewriteURL)
  */
@@ -32,22 +46,7 @@ public record ERXURLRewriteConfig( String replaceApplicationPathPattern, String 
 	}
 	
 	/**
-	 * Hook to rewrite generated URLs. Invoked by ERXWOContext.
-	 * 
-	 * You can also set "er.extensions.replaceApplicationPath.pattern" to the pattern
-	 * to match and "er.extensions.replaceApplicationPath.replace" to the value to replace it with.
-	 * 
-	 * For example, in Properties: <code>
-	 * er.extensions.ERXApplication.replaceApplicationPath.pattern=/cgi-bin/WebObjects/YourApp.woa
-	 * er.extensions.ERXApplication.replaceApplicationPath.replace=/yourapp
-	 * </code>
-	 * 
-	 * and in Apache 2.2: <code>
-	 * RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [PT,L]
-	 * </code>
-	 * 
-	 * @param url the URL to rewrite
-	 * @return the rewritten URL
+	 * @return Rewritten URL
 	 */
 	public String rewriteURL(final String url) {
 
