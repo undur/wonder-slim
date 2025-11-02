@@ -85,6 +85,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static final Logger statsLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Statistics");
 
 	/**
+	 * Indicates whether the application is running in development mode
+	 */
+	private static final boolean _isDevelopmentMode = checkDevelopmentModeEnablingProjectBundle();
+
+	/**
 	 * Host name used for URL generation when no request is present (for example, in background tasks)
 	 */
 	private final String _publicHost;
@@ -130,26 +135,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private boolean _initializedAdaptors = false;
 
 	/**
-	 * Keeps track of whether didFinishLaunching has been invoked. We use this to keep track of whether we can declare variables that are dependent on configuration as constant (as this is written, only applies to isDevelopmentMode)
-	 */
-	private static boolean _didFinishLaunchingInvoked = false;
-
-	/**
 	 * Indicates if ERXApplication.main() has been invoked (so we can check that application actually did so)
 	 */
 	private static boolean _wasERXApplicationMainInvoked = false;
-
-	/**
-	 * Keeps track of whether the application is running in development mode. Set in didFinishLaunching and used after that, since we assume this value will never change after the application has been initialized
-	 */
-	private static boolean _isDevelopmentModeCached;
 
 	/**
 	 * Application entry point
 	 */
 	public static void main(String argv[], Class applicationClass) {
 		_wasERXApplicationMainInvoked = true;
-		useProjectBundleIfDeveloping();
 		ERXKVCReflectionHack.enable();
 		disablePBXProjectWatcher();
 
@@ -494,9 +488,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass().getName(), nsBundle.isJar() ) );
 		}
 		System.out.println( "============= LOADED BUNDLES END ===============" );
-		
-		_didFinishLaunchingInvoked = true;
-		_isDevelopmentModeCached = checkIsDevelopmentMode();
 	}
 
 	/**
@@ -809,35 +800,17 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * @return true if we're currently running in dev mode
-	 */
-	private static boolean checkIsDevelopmentMode() {
-
-		if (ERXProperties.stringForKey("er.extensions.ERXApplication.developmentMode") != null) {
-			return ERXProperties.booleanForKey("er.extensions.ERXApplication.developmentMode");
-		}
-
-		final String woide = ERXProperties.stringForKey("WOIDE");
-
-		if ("WOLips".equals(woide) || "Xcode".equals(woide)) {
-			return true;
-		}
-
-		return ERXProperties.booleanForKey("NSProjectBundleEnabled");
-	}
-
-	/**
 	 * @return whether or not the current application is in development mode
 	 */
 	public static boolean isDevelopmentModeSafe() {
-		return _didFinishLaunchingInvoked ? _isDevelopmentModeCached : checkIsDevelopmentMode();
+		return _isDevelopmentMode;
 	}
 
 	/**
 	 * @return whether or not the current application is in development mode
 	 */
 	public boolean isDevelopmentMode() {
-		return isDevelopmentModeSafe();
+		return _isDevelopmentMode;
 	}
 
 	/**
@@ -1041,7 +1014,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework by setting NSProjectBundleEnabled=true
 	 */
-	private static void useProjectBundleIfDeveloping() {
+	private static boolean checkDevelopmentModeEnablingProjectBundle() {
 		if( Files.exists(Paths.get("build.properties")) ) {
 			System.setProperty("NSProjectBundleEnabled", "true");
 			System.out.print( """
@@ -1049,6 +1022,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==
 				===================================================================================================
 				""");
+			
+			return true;
 		}
+		
+		return false;
 	}
 }
