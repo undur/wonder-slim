@@ -139,6 +139,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static boolean _wasERXApplicationMainInvoked = false;
 
 	/**
+	 * Registered streaming request handler keys
+	 */
+	private final NSMutableArray<String> _streamingRequestHandlerKeys = new NSMutableArray<>(streamActionRequestHandlerKey());
+
+	/**
 	 * Application entry point
 	 */
 	public static void main(String argv[], Class applicationClass) {
@@ -762,8 +767,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		return response;
 	}
-
-	protected NSMutableArray<String> _streamingRequestHandlerKeys = new NSMutableArray<>(streamActionRequestHandlerKey());
 
 	public void registerStreamingRequestHandlerKey(String s) {
 		if (!_streamingRequestHandlerKeys.containsObject(s)) {
