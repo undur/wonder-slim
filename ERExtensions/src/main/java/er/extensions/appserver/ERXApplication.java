@@ -8,7 +8,6 @@
 package er.extensions.appserver;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.BindException;
 import java.nio.file.Files;
@@ -204,7 +203,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 
-		startMonitorServer();
+		ERXMonitorServer.start();
 
 		// FIXME: Quick fix for our resource manager's initialization issue. Fix // Hugi 2025-10-06
 		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {
@@ -313,22 +312,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				}
 			}
 		}
-	}
-
-	private void startMonitorServer() {
-		// We'll only start up the monitor server if a password is set for it
-		final String monitorServerPassword = ERXProperties.stringForKey( "WOMonitorServicePassword" );
-
-		if( monitorServerPassword != null ) {
-			try {
-				// FIXME: This method of obtaining a port for the monitor service absolutely sucks
-				final int monitorServerPort = port().intValue() + 10000;
-				ERXMonitorServer.start( monitorServerPort );
-			}
-			catch( IOException e ) {
-				log.error( "Failed to start up the monitor service", e );
-			}
-		}		
 	}
 
 	/**

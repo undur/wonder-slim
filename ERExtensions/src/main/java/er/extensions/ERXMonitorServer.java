@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.webobjects.appserver.WOApplication;
 
 import er.extensions.foundation.ERXProperties;
 
@@ -26,6 +27,22 @@ import er.extensions.foundation.ERXProperties;
 public class ERXMonitorServer {
 
 	private static Logger logger = LoggerFactory.getLogger( ERXMonitorServer.class );
+
+	public static void start() {
+		// We'll only start up the monitor server if a password is set for it
+		final String monitorServerPassword = ERXProperties.stringForKey( "WOMonitorServicePassword" );
+
+		if( monitorServerPassword != null ) {
+			try {
+				// FIXME: This method of obtaining a port for the monitor service absolutely sucks
+				final int monitorServerPort = WOApplication.application().port().intValue() + 10000;
+				ERXMonitorServer.start( monitorServerPort );
+			}
+			catch( IOException e ) {
+				logger.error( "Failed to start up the monitor service", e );
+			}
+		}		
+	}
 
 	public static void start( int port ) throws IOException {
 		// Just for logging startup time / how expensive the monitoring service is
