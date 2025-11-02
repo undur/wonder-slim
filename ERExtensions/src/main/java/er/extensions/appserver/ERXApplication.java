@@ -440,7 +440,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	@Override
 	public String _newLocationForRequest(WORequest aRequest) {
-		return rewriteURL(super._newLocationForRequest(aRequest));
+		return urlRewriter().rewriteURL(super._newLocationForRequest(aRequest));
 	}
 
 	/**
@@ -843,13 +843,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * @return Rewritten URL
-	 */
-	public String rewriteURL(final String url) {
-		return urlRewriter().rewriteURL(url);
-	}
-
-	/**
 	 * @return The URL rewriter
 	 */
 	public ERXURLRewriter urlRewriter() {
@@ -871,7 +864,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		final String url = super.directConnectURL();
 
 		if (shouldRewriteDirectConnectURL()) {
-			return rewriteURL(url);
+			return urlRewriter().rewriteURL(url);
 		}
 
 		return url;

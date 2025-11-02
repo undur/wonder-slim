@@ -101,7 +101,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	@Override
 	public String _urlWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString, boolean isSecure, int somePort) {
 		String url = super._urlWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort);
-		url = ERXApplication.erxApplication().rewriteURL(url);
+		url = ERXApplication.erxApplication().urlRewriter().rewriteURL(url);
 		return url;
 	}
 
