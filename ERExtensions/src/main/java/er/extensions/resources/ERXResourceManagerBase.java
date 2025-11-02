@@ -86,7 +86,7 @@ public class ERXResourceManagerBase extends WOResourceManager {
 	 * @return true if complete resource URLs should be generated in the given context
 	 */
 	public static boolean _shouldGenerateCompleteResourceURL(WOContext context) {
-		return context instanceof ERXWOContext erxc && erxc._generatingCompleteResourceURLs() && !ERXApplication.erxApplication().rewriteDirectConnectURL();
+		return context instanceof ERXWOContext erxc && erxc._generatingCompleteResourceURLs() && !ERXApplication.erxApplication().shouldRewriteDirectConnectURL();
 	}
 
 	/**

@@ -33,7 +33,7 @@ public record ERXURLRewriteConfig( String pattern, String replacement ) {
 			propPattern = null;
 		}
 
-		if (propPattern == null && app.rewriteDirectConnectURL()) {
+		if (propPattern == null && app.shouldRewriteDirectConnectURL()) {
 			propPattern = "/cgi-bin/WebObjects/" + app.name() + app.applicationExtension();
 
 			if (propReplacement == null) {

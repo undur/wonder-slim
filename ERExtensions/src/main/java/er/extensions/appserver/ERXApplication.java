@@ -425,7 +425,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			httpVersion = "HTTP/1.0";
 		}
 
-		if (rewriteDirectConnectURL()) {
+		if (shouldRewriteDirectConnectURL()) {
 			url = adaptorPath() + name() + applicationExtension() + url;
 		}
 
@@ -852,7 +852,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * @return whether or not to rewrite direct connect URLs
 	 */
-	public boolean rewriteDirectConnectURL() {
+	public boolean shouldRewriteDirectConnectURL() {
 		return isDirectConnectEnabled() && !isCachingEnabled() && isDevelopmentMode() && ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.rewriteDirectConnect", false);
 	}
 
@@ -863,7 +863,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public String directConnectURL() {
 		final String directConnectURL = super.directConnectURL();
 
-		if (rewriteDirectConnectURL()) {
+		if (shouldRewriteDirectConnectURL()) {
 			return rewriteURL(directConnectURL);
 		}
 
