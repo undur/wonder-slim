@@ -13,8 +13,10 @@ import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -141,7 +143,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Registered streaming request handler keys
 	 */
-	private final NSMutableArray<String> _streamingRequestHandlerKeys = new NSMutableArray<>(streamActionRequestHandlerKey());
+	private final Set<String> _streamingRequestHandlerKeys = new HashSet<>(Set.of(streamActionRequestHandlerKey()));
 
 	/**
 	 * Application entry point
@@ -768,14 +770,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return response;
 	}
 
-	public void registerStreamingRequestHandlerKey(String s) {
-		if (!_streamingRequestHandlerKeys.containsObject(s)) {
-			_streamingRequestHandlerKeys.addObject(s);
-		}
+	public void registerStreamingRequestHandlerKey(String key) {
+		_streamingRequestHandlerKeys.add(key);
 	}
 
-	public boolean isStreamingRequestHandlerKey(String s) {
-		return _streamingRequestHandlerKeys.containsObject(s);
+	public boolean isStreamingRequestHandlerKey(String key) {
+		return _streamingRequestHandlerKeys.contains(key);
 	}
 
 	/**
