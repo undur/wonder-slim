@@ -593,6 +593,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Will also append the <code>nameSuffix</code> if one is set.
 	 * 
 	 * @return the computed name of the application.
+	 * 
+	 * FIXME: We can now actually initialize this during application construction, before running super's constructor // Hugi 2025-11-02
 	 */
 	@Override
 	public String name() {
@@ -627,7 +629,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * 
 	 * @return the System property <b>ERApplicationNameSuffix</b> or <code>""</code>
 	 */
-	public String nameSuffix() {
+	private String nameSuffix() {
 		return ERXProperties.stringForKeyWithDefault("ERApplicationNameSuffix", "");
 	}
 
