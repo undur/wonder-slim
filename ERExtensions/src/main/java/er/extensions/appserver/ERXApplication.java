@@ -435,8 +435,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Called, for example, when refuse new sessions is enabled and the request contains an expired session.
 	 * If mod_rewrite is being used we don't want the adaptor prefix being part of the redirect.
-	 * 
-	 * @see com.webobjects.appserver.WOApplication#_newLocationForRequest(com.webobjects.appserver.WORequest)
 	 */
 	@Override
 	public String _newLocationForRequest(WORequest aRequest) {
