@@ -258,13 +258,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			checkClasspathValidity();
 		}
 		catch (Exception e) {
-			System.out.println( """
-
-					==============================================================================================
-					== %s
-					==============================================================================================
-
-					""".formatted(e.getMessage()));
+			logImportantMessage(e.getMessage());
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -1015,22 +1009,26 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework by setting NSProjectBundleEnabled=true
 	 */
 	private static boolean checkDevelopmentModeEnablingProjectBundle() {
-		final String message;
 
-		final boolean devMode = Files.exists(Paths.get("build.properties"));
+		final boolean buildPropertiesExists = Files.exists(Paths.get("build.properties"));
 
-		if( devMode ) {
+		if( buildPropertiesExists ) {
 			System.setProperty("NSProjectBundleEnabled", "true");
-			message = "build.properties found. Setting development mode. Setting NSProjectBundleEnabled=true";
+			logImportantMessage( "build.properties found. Setting development mode. Setting NSProjectBundleEnabled=true" );
 		}
 		else {
-			message = "No build.properties found. Assuming we're in production";
+			logImportantMessage( "No build.properties found. Assuming we're in production" );
 		}
 
+		return buildPropertiesExists;
+	}
+	
+	/**
+	 * Log a message that becomes a little more important looking in our logs 
+	 */
+	private static void logImportantMessage( String message ) {
 		IO.println( "=".repeat(message.length() + 6));
 		IO.println( "== " + message + " ==" );
 		IO.println( "=".repeat(message.length() + 6));
-		
-		return devMode;
 	}
 }
