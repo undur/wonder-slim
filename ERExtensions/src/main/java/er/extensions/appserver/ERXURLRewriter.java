@@ -23,9 +23,9 @@ import er.extensions.foundation.ERXProperties;
  * @param replacement The string to replace the matched pattern with
  */
 
-public record ERXURLRewriteConfig( String pattern, String replacement ) {
+public record ERXURLRewriter( String pattern, String replacement ) {
 	
-	public ERXURLRewriteConfig( ERXApplication app ) {
+	public ERXURLRewriter( ERXApplication app ) {
 		String propPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
 		String propReplacement = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.replace");
 

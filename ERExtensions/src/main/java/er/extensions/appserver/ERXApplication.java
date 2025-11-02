@@ -102,7 +102,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Configuration for URL rewriting
 	 */
-	private final ERXURLRewriteConfig _urlRewriteConfig;
+	private final ERXURLRewriter _urlRewriter;
 
 	/**
 	 * To support load balancing with mod_proxy
@@ -207,7 +207,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		_urlRewriteConfig = new ERXURLRewriteConfig(this);
+		_urlRewriter = new ERXURLRewriter(this);
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 
@@ -846,7 +846,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @return Rewritten URL
 	 */
 	public String rewriteURL(final String url) {
-		return _urlRewriteConfig.rewriteURL(url);
+		return _urlRewriter.rewriteURL(url);
 	}
 
 	/**
