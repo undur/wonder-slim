@@ -120,7 +120,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final ERXExceptionManager _exceptionManager;
 
 	/**
-	 * The time taken from invoking main, until the end of the application constructor
+	 * Time from when this class is first touched until the app is ready to accept requests
 	 */
 	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
 
