@@ -146,6 +146,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final Set<String> _streamingRequestHandlerKeys = new HashSet<>(Set.of(streamActionRequestHandlerKey()));
 
 	/**
+	 * Cached computed application name
+	 */
+	private String _cachedApplicationName;
+
+	/**
 	 * Application entry point
 	 */
 	public static void main(String argv[], Class applicationClass) {
@@ -582,11 +587,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		NSLog.out.appendln("Forcing exit");
 		System.exit(1);
 	}
-
-	/**
-	 * Cached computed name
-	 */
-	private String _cachedApplicationName;
 
 	/**
 	 * Adds the ability to completely change the applications name by setting the System property <b>ERApplicationName</b>.
