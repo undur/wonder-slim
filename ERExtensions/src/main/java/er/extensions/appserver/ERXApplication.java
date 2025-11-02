@@ -846,7 +846,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * @return Rewritten URL
 	 */
 	public String rewriteURL(final String url) {
-		return _urlRewriter.rewriteURL(url);
+		return urlRewriter().rewriteURL(url);
+	}
+
+	/**
+	 * @return The URL rewriter
+	 */
+	public ERXURLRewriter urlRewriter() {
+		return _urlRewriter;
 	}
 
 	/**
