@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.BindException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -1010,7 +1010,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	private static boolean checkDevelopmentModeEnablingProjectBundle() {
 
-		final boolean buildPropertiesExists = Files.exists(Paths.get("build.properties"));
+		final boolean buildPropertiesExists = Files.exists(Path.of("build.properties"));
 
 		if( buildPropertiesExists ) {
 			System.setProperty("NSProjectBundleEnabled", "true");
