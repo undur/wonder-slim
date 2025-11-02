@@ -145,7 +145,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public static void main(String argv[], Class applicationClass) {
 		_wasERXApplicationMainInvoked = true;
 		ERXKVCReflectionHack.enable();
-//		disablePBXProjectWatcher(); // FIXME: Scheduled for deletion, see comment on method // Hugi 2025-11-02
 
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
@@ -989,25 +988,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public String publicHost() {
 		return _publicHost;
 	}
-	
-	/**
-	 * On every startup of a WOApplication _PBXProjectWatcher._sendXMLToPB() gets invoked, in an attempt to communicate with ProjectBuilder, an IDE which no longer exists.
-	 * Disabling this request shaves about a second of application startup time.
-	 * 
-	 * FIXME: No longer seems to be required, perhaps because we're setting NSProjectBundleEnabled=true early on? Needs a little investigation but can probably be deleted // Hugi 2025-11-02
-	 * 
-	private static void disablePBXProjectWatcher() {
-		try {
-			Field field = com.webobjects._ideservices._PBXProjectWatcher.class.getDeclaredField("_communicationDisabled");
-			field.setAccessible(true);
-			field.set(null, true);
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	*/
-	
+		
 	/**
 	 * If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework by setting NSProjectBundleEnabled=true
 	 */
