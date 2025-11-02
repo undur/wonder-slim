@@ -861,13 +861,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	@Override
 	public String directConnectURL() {
-		final String directConnectURL = super.directConnectURL();
+		final String url = super.directConnectURL();
 
 		if (shouldRewriteDirectConnectURL()) {
-			return rewriteURL(directConnectURL);
+			return rewriteURL(url);
 		}
 
-		return directConnectURL;
+		return url;
 	}
 
 	/**
