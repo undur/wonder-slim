@@ -470,7 +470,7 @@ public class ERXProperties {
      * @param projectsInfo Project Info {@link ERXProperties#pathsForUserAndBundleProperties}
      */
     private static void optionalPropertiesLoader(String userName, NSMutableArray<String> propertiesPaths, NSMutableArray<String> projectsInfo) {
-    	if(!ERXProperties.booleanForKeyWithDefault("er.extensions.ERXProperties.loadOptionalProperties", true)){
+    	if(!ERXProperties.booleanForKeyWithDefault("er.extensions.ERXProperties.loadOptionalProperties", false)){
     		return;
     	}
     	
