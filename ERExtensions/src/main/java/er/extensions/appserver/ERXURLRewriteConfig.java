@@ -19,30 +19,29 @@ import er.extensions.foundation.ERXProperties;
  * RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [PT,L]
  * </code>
  * 
- * @param replaceApplicationPathPattern The path rewriting pattern to match (@see _rewriteURL)
- * @param replaceApplicationPathReplace The path rewriting replacement to apply to the matched pattern (@see _rewriteURL)
+ * @param pattern The pattern to match from the URL
+ * @param replacement The string to replace the matched pattern with
  */
 
-public record ERXURLRewriteConfig( String replaceApplicationPathPattern, String replaceApplicationPathReplace ) {
+public record ERXURLRewriteConfig( String pattern, String replacement ) {
 	
 	public ERXURLRewriteConfig( ERXApplication app ) {
-		String _replaceApplicationPathPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
+		String propPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
+		String propReplacement = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.replace");
 
-		if (_replaceApplicationPathPattern != null && _replaceApplicationPathPattern.length() == 0) {
-			_replaceApplicationPathPattern = null;
+		if (propPattern != null && propPattern.length() == 0) {
+			propPattern = null;
 		}
 
-		String _replaceApplicationPathReplace = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.replace");
+		if (propPattern == null && app.rewriteDirectConnectURL()) {
+			propPattern = "/cgi-bin/WebObjects/" + app.name() + app.applicationExtension();
 
-		if (_replaceApplicationPathPattern == null && app.rewriteDirectConnectURL()) {
-			_replaceApplicationPathPattern = "/cgi-bin/WebObjects/" + app.name() + app.applicationExtension();
-
-			if (_replaceApplicationPathReplace == null) {
-				_replaceApplicationPathReplace = "";
+			if (propReplacement == null) {
+				propReplacement = "";
 			}
 		}
 		
-		this( _replaceApplicationPathPattern, _replaceApplicationPathReplace );
+		this( propPattern, propReplacement );
 	}
 	
 	/**
@@ -50,8 +49,8 @@ public record ERXURLRewriteConfig( String replaceApplicationPathPattern, String 
 	 */
 	public String rewriteURL(final String url) {
 
-		if (url != null && replaceApplicationPathPattern != null && replaceApplicationPathReplace != null) {
-			return url.replaceFirst(replaceApplicationPathPattern, replaceApplicationPathReplace);
+		if (url != null && pattern != null && replacement != null) {
+			return url.replaceFirst(pattern, replacement);
 		}
 
 		return url;
