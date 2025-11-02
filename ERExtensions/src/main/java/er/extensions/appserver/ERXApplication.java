@@ -461,9 +461,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		didFinishLaunching();
 		ERXStats.logStatisticsForOperation(statsLog, "sum");
 
-		// FIXME: Is this being handled by ERXStats? Check out. 
+		// ERXApplication's actual initialization time (not including static initialization of superclasses)
 		_startupTimeInMilliseconds = System.currentTimeMillis() - _startupTimeInMilliseconds;
-		log.info( String.format( "Startup time %s ms: ", _startupTimeInMilliseconds ) );
+		
+		// Time since the actual JVM process was started (when the process began, before any class initialization including main() or an app’s static initialization) 
+		final long jvmStartupTimeInMilliseconds = System.currentTimeMillis() - java.lang.management.ManagementFactory.getRuntimeMXBean().getStartTime();
+
+		log.info( String.format( "ERX Startup time: %s ms", _startupTimeInMilliseconds ) );
+		log.info( String.format( "JVM Startup time: %s ms", jvmStartupTimeInMilliseconds ) );
 
 		System.out.println( "============= LOADED BUNDLES START =============" );
 		System.out.println( String.format( "%-22s : %-65s : %s", "-- Name --", "-- Bundle class --", "-- isJar --" ) );
