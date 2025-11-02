@@ -1015,17 +1015,22 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * If a build.properties file exists in the current working directory, we're probably doing development. So let's tell the framework by setting NSProjectBundleEnabled=true
 	 */
 	private static boolean checkDevelopmentModeEnablingProjectBundle() {
-		if( Files.exists(Paths.get("build.properties")) ) {
+		final String message;
+
+		final boolean devMode = Files.exists(Paths.get("build.properties"));
+
+		if( devMode ) {
 			System.setProperty("NSProjectBundleEnabled", "true");
-			System.out.print( """
-				===================================================================================================
-				== build.properties found. Assuming we're doing development. Setting NSProjectBundleEnabled=true ==
-				===================================================================================================
-				""");
-			
-			return true;
+			message = "build.properties found. Setting development mode. Setting NSProjectBundleEnabled=true";
 		}
+		else {
+			message = "No build.properties found. Assuming we're in production";
+		}
+
+		IO.println( "=".repeat(message.length() + 6));
+		IO.println( "== " + message + " ==" );
+		IO.println( "=".repeat(message.length() + 6));
 		
-		return false;
+		return devMode;
 	}
 }
