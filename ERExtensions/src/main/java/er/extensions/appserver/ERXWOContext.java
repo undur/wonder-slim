@@ -30,7 +30,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	 * Register an observer for resetting currentContext() and contextDictionary() after request dispatch
 	 */
 	static {
-		ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( notification -> {
+		ERXNotification.ApplicationDidDispatchRequestNotification.addObserver( _ -> {
 			ERXWOContext.setCurrentContext(null);
 			ERXThreadStorage.removeValueForKey(CONTEXT_DICTIONARY_KEY);			
 		});
