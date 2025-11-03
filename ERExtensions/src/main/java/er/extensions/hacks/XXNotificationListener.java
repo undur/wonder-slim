@@ -12,13 +12,17 @@ import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXUtilities;
 
 /**
- * FIXME: Ugly hack for us to observe the application's initialization lifecycle // Hugi 2025-10-19 
+ * FIXME: Ugly hack for us to observe notifications // Hugi 2025-10-19 
  */
 
-public class XXLifecycleListenerHack {
+public class XXNotificationListener {
 
 
-	public static void activate() {
+	public static void activateOmniscient() {
+		NSNotificationCenter.defaultCenter().addOmniscientObserver( new LifeCycleObserver(), ERXUtilities.notificationSelector("logNotification") );
+	}
+
+	public static void activateAppEvents() {
 		System.out.println(" ==> Enabled initialization lifecycle event logging");
 
 		// Lifecycle events, ca. in the order they get posted
@@ -30,7 +34,7 @@ public class XXLifecycleListenerHack {
 				ERXNotification.ApplicationDidFinishLaunchingNotification.id()
 				)
 		.forEach( notificationName -> {
-			NSNotificationCenter.defaultCenter().addObserver(new LifeCycleObserver(), ERXUtilities.notificationSelector("logLifecycleEvent"), notificationName, null);
+			NSNotificationCenter.defaultCenter().addObserver(new LifeCycleObserver(), ERXUtilities.notificationSelector("logNotification"), notificationName, null);
 		});
 	}
 	
@@ -41,7 +45,7 @@ public class XXLifecycleListenerHack {
 			OBSERVERS.add( this );
 		}
 
-		public void logLifecycleEvent( NSNotification n ) {
+		public void logNotification( NSNotification n ) {
 			System.out.println();
 			System.out.println( "<<<< =========================================================================================================== >>>>" );
 			System.out.println( "<<<< == LIFECYCLE : " + n.name() );
