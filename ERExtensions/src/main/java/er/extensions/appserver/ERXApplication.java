@@ -155,15 +155,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public static void main(String argv[], Class applicationClass) {
 		_wasERXApplicationMainInvoked = true;
-		ERXKVCReflectionHack.enable();
 
+		ERXKVCReflectionHack.enable();
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
-
-		if( ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXApplication.enableERXShutdownHook", true ) ) {
-			ERXShutdownHook.useMe();
-			ERXShutdownHook.initERXShutdownHook();
-		}
+		ERXShutdownHook.initERXShutdownHookIfEnabled();
 
 		WOApplication.main(argv, applicationClass);
 	}

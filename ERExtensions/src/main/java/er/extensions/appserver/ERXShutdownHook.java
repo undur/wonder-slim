@@ -8,6 +8,8 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
+import er.extensions.foundation.ERXProperties;
+
 
 /**
  * Use this to register shutdown hooks instead of directly using Runtime.addShutdownHook().
@@ -47,7 +49,14 @@ import com.webobjects.foundation.NSNotificationCenter;
 public abstract class ERXShutdownHook extends Thread {
 
 	static final Set<ERXShutdownHook> ALL_HOOKS = new HashSet<>();
-	
+
+	public static void initERXShutdownHookIfEnabled() {
+		if( ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXApplication.enableERXShutdownHook", true ) ) {
+			ERXShutdownHook.useMe();
+			ERXShutdownHook.initERXShutdownHook();
+		}
+	}
+
 	public static void initERXShutdownHook() {
 		Runtime.getRuntime().addShutdownHook( new Thread( "shutdown_complete_message_writer" ) {
 			@Override
