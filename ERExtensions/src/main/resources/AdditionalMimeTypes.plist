@@ -6,4 +6,7 @@
 	"ttf" = "font/ttf";
 	"woff" = "font/woff";
 	"woff2" = "font/woff2";
+	"jpg" = "image/jpeg";
+	"bmp" = "image/bmp";
+	"gif" = "image/gif";
 }
