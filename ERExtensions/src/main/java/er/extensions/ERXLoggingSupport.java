@@ -23,11 +23,13 @@ public class ERXLoggingSupport {
 			final Class<?> bridge = Class.forName(LOGGING_BRIDGE_CLASS);
 			bridge.getMethod(methodName, null).invoke(null, null);
 		}
-		catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-			System.out.println("====== NO LOGGING! WARNING! SILENT RUNNING!");
+		catch (ClassNotFoundException e ) {
+			System.out.println("====== NO LOGGING BRIDGE FOUND! WARNING! SILENT RUNNING!");
 			System.out.println("====== Failed to locate class %s or run method %s on it".formatted(LOGGING_BRIDGE_CLASS, methodName));
-			System.out.println("====== NO LOGGING! WARNING! SILENT RUNNING!");
+			System.out.println("====== NO LOGGING BRIDGE FOUND! WARNING! SILENT RUNNING!");
+		}
+		catch( IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e ) {
+			throw new RuntimeException( "Failed to initialize logging bridge", e );
 		}
 	}
 }
