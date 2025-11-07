@@ -9,6 +9,7 @@ package er.extensions.appserver;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOAction;
+import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
@@ -36,6 +38,7 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSPropertyListSerialization;
@@ -761,6 +764,23 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
 		return pageWithName(componentClass, ERXWOContext.currentContext());
+	}
+
+	/**
+	 * Overridden to check for (and optionally kill) an existing running instance on the same port
+	 */
+	@Override
+	public WOAdaptor adaptorWithName(String aClassName, NSDictionary<String, Object> anArgsDictionary) {
+		try {
+			return super.adaptorWithName(aClassName, anArgsDictionary);
+		}
+		catch (NSForwardException e) {
+			Throwable rootCause = ERXExceptionUtilities.getMeaningfulThrowable(e);
+			if ((rootCause instanceof BindException) && ERXDevelopmentInstanceStopper.stopPreviousDevInstance()) {
+				return super.adaptorWithName(aClassName, anArgsDictionary);
+			}
+			throw e;
+		}
 	}
 
 	/**
