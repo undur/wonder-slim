@@ -343,8 +343,7 @@ public  class ERXRequest extends WORequest {
         String portStr;
 
         if (port == 0) {
-        	String sslPort = String.valueOf(ERXApplication.erxApplication().sslPort());
-        	portStr = secure ? sslPort : _serverPort();
+        	portStr = secure ? "443" : this._serverPort();
         }
         else {
         	portStr = WOShared.unsignedIntString(port);
@@ -392,21 +391,6 @@ public  class ERXRequest extends WORequest {
 	        // consider this to be an HTTP request.
 	        if (httpsMode != null && httpsMode.equalsIgnoreCase("on")) {
 	        	isRequestSecure = true;
-	        }
-	        else if (serverPort != null && WOApplication.application() instanceof ERXApplication && String.valueOf(ERXApplication.erxApplication().sslPort()).equals(serverPort)) {
-	        	isRequestSecure = true;
-	        }
-	        // MS: I have no idea how to do this properly ... There doesn't appear to be any way to
-	        // determine which adaptor is servicing this request right now, and WOHttpIO only tracks the
-	        // the originating port, not the original server port that serviced the request.  
-	        else if (!request.isUsingWebServer()) {
-	        	// It turns out there appears to always be a "host" header of the format "hostname:port" ... I
-	        	// don't believe this is actually secure at ALL, so I'm only enabling it when you're not using
-	        	// a webserver (i.e. probably testing).
-	        	String hostHeader = request.headerForKey("host");
-	        	if (hostHeader != null && WOApplication.application() instanceof ERXApplication && hostHeader.endsWith(":" + ERXApplication.erxApplication().sslPort())) {
-	        		isRequestSecure = true;
-	        	}
 	        }
 	        
 	        // Check if we've got an x-forwarded-proto header which is typically sent by a load balancer that is 

@@ -9,7 +9,6 @@ package er.extensions.appserver;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -23,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOAction;
-import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
@@ -34,15 +32,11 @@ import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOComponentDefinition;
-import com.webobjects.appserver._private.WOProperties;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSLog;
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
@@ -101,16 +95,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final String _publicHost;
 
 	/**
-	 * The SSL host used by this application.
-	 */
-	private String _sslHost;
-
-	/**
-	 * The SSL port used by this application.
-	 */
-	private Integer _sslPort;
-
-	/**
 	 * Configuration for URL rewriting
 	 */
 	private final ERXURLRewriter _urlRewriter;
@@ -129,11 +113,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Keeps track of exceptions logged by handleException()
 	 */
 	private final ERXExceptionManager _exceptionManager;
-
-	/**
-	 * Tracks whether or not _addAdditionalAdaptors has been called yet.
-	 */
-	private boolean _initializedAdaptors = false;
 
 	/**
 	 * Indicates if ERXApplication.main() has been invoked (so we can check that application actually did so)
@@ -221,10 +200,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_proxyBalancerConfig = new ERXProxyBalancerConfig(name(), port());
 
 		ERXNotification.DidHandleRequestNotification.addObserver(_proxyBalancerConfig::addBalancerRouteCookieByNotification);
-
-		// FIXME: We might potentially have to initialize these later, since I'm not sure host() is ready — and apparently the SSL adaptor invokes setSSLPort after starting // Hugi 2025-10-18
-		_sslHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.ssl.host", host());
-		_sslPort = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.ssl.port", 443);
 
 		// Adding notification hooks for the application's launch lifecycle
 		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this::finishInitialization);
@@ -843,110 +818,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public <T extends WOComponent> T pageWithName(Class<T> componentClass) {
 		return pageWithName(componentClass, ERXWOContext.currentContext());
-	}
-
-	/**
-	 * @return whether or not DirectConnect SSL should be enabled.
-	 * @property er.extensions.ERXApplication.ssl.enabled
-	 * 
-	 * If you set this, please review the DirectConnect SSL section of the ERExtensions
-	 * sample Properties file to learn more about how to properly configure it.
-	 */
-	public boolean sslEnabled() {
-		return ERXProperties.booleanForKey("er.extensions.ERXApplication.ssl.enabled");
-	}
-
-	/**
-	 * @return The host name that will be used to bind the SSL socket to (defaults to host()).
-	 * @property er.extensions.ERXApplication.ssl.host
-	 */
-	public String sslHost() {
-		return _sslHost;
-	}
-
-	/**
-	 * @param sslHost an SSL host override
-	 */
-	public void _setSslHost(String sslHost) {
-		_sslHost = sslHost;
-	}
-
-	/**
-	 * @return Returns the SSL port that will be used for DirectConnect SSL (defaults to 443). A value of 0 will cause WO to autogenerate an SSL port number.
-	 * @property er.extensions.ERXApplication.ssl.port
-	 */
-	public int sslPort() {
-		return _sslPort;
-	}
-
-	/**
-	 * @param sslPort an SSL port override (called back by the ERXSecureAdaptor)
-	 */
-	public void _setSslPort(int sslPort) {
-		_sslPort = sslPort;
-	}
-
-	/**
-	 * Injects additional adaptors into the WOAdditionalAdaptors setting.
-	 * Subclasses can extend this method, but should call super._addAdditionalAdaptors.
-	 * 
-	 * @param additionalAdaptors the mutable adaptors array
-	 */
-	protected void _addAdditionalAdaptors(NSMutableArray<NSDictionary<String, Object>> additionalAdaptors) {
-		if (sslEnabled()) {
-			boolean sslAdaptorConfigured = false;
-			for (NSDictionary<String, Object> adaptor : additionalAdaptors) {
-				if (ERXSecureDefaultAdaptor.class.getName().equals(adaptor.objectForKey(WOProperties._AdaptorKey))) {
-					sslAdaptorConfigured = true;
-				}
-			}
-			ERXSecureDefaultAdaptor.checkSSLConfig();
-			if (!sslAdaptorConfigured) {
-				NSMutableDictionary<String, Object> sslAdaptor = new NSMutableDictionary<>();
-				sslAdaptor.setObjectForKey(ERXSecureDefaultAdaptor.class.getName(), WOProperties._AdaptorKey);
-				String sslHost = sslHost();
-				if (sslHost != null) {
-					sslAdaptor.setObjectForKey(sslHost, WOProperties._HostKey);
-				}
-				sslAdaptor.setObjectForKey(Integer.valueOf(sslPort()), WOProperties._PortKey);
-				additionalAdaptors.addObject(sslAdaptor);
-			}
-		}
-	}
-
-	/**
-	 * Returns the additionalAdaptors, but calls _addAdditionalAdaptors to give
-	 * the runtime an opportunity to programmatically force adaptors into the list.
-	 */
-	@Override
-	@SuppressWarnings("deprecation")
-	public NSArray<NSDictionary<String, Object>> additionalAdaptors() {
-		NSArray<NSDictionary<String, Object>> additionalAdaptors = super.additionalAdaptors();
-		if (!_initializedAdaptors) {
-			NSMutableArray<NSDictionary<String, Object>> mutableAdditionalAdaptors = additionalAdaptors.mutableClone();
-			_addAdditionalAdaptors(mutableAdditionalAdaptors);
-			_initializedAdaptors = true;
-			additionalAdaptors = mutableAdditionalAdaptors;
-			setAdditionalAdaptors(mutableAdditionalAdaptors);
-		}
-		return additionalAdaptors;
-	}
-
-	/**
-	 * Overridden to check for (and optionally kill) an existing running instance on the same port
-	 */
-	@Override
-	public WOAdaptor adaptorWithName(String aClassName, NSDictionary<String, Object> anArgsDictionary) {
-		try {
-			return super.adaptorWithName(aClassName, anArgsDictionary);
-		}
-		catch (NSForwardException e) {
-			Throwable rootCause = ERXExceptionUtilities.getMeaningfulThrowable(e);
-			if ((rootCause instanceof BindException) && ERXDevelopmentInstanceStopper.stopPreviousDevInstance()) {
-				return super.adaptorWithName(aClassName, anArgsDictionary);
-			}
-			throw e;
-		}
 	}
 
 	/**
