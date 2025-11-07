@@ -125,11 +125,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final Set<String> _streamingRequestHandlerKeys = new HashSet<>(Set.of(streamActionRequestHandlerKey()));
 
 	/**
-	 * Cached computed application name
-	 */
-	private String _cachedApplicationName;
-
-	/**
 	 * Application entry point
 	 */
 	public static void main(String argv[], Class applicationClass) {
@@ -557,51 +552,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		log.info("Forcing exit");
 		NSLog.out.appendln("Forcing exit");
 		System.exit(1);
-	}
-
-	/**
-	 * Adds the ability to completely change the applications name by setting the System property <b>ERApplicationName</b>.
-	 * Will also append the <code>nameSuffix</code> if one is set.
-	 * 
-	 * @return the computed name of the application.
-	 * 
-	 * FIXME: We can now actually initialize this during application construction, before running super's constructor // Hugi 2025-11-02
-	 */
-	@Override
-	public String name() {
-		if (_cachedApplicationName == null) {
-			synchronized (this) {
-				_cachedApplicationName = System.getProperty("ERApplicationName");
-
-				if (_cachedApplicationName == null) {
-					_cachedApplicationName = super.name();
-				}
-
-				if (_cachedApplicationName != null) {
-					String suffix = nameSuffix();
-
-					if (suffix != null && suffix.length() > 0) {
-						_cachedApplicationName += suffix;
-					}
-				}
-			}
-		}
-
-		return _cachedApplicationName;
-	}
-
-	/**
-	 * The name suffix is appended to the current name of the application. This adds the ability to add
-	 * a useful suffix to differentiate between different sets of applications on the same machine.
-	 * 
-	 * The name suffix is set via the System property <b>ERApplicationNameSuffix</b>.
-	 * For example if the name of an application is Buyer and you want to have a training instance appear with the name
-	 * BuyerTraining then you would set the ERApplicationNameSuffix to Training.
-	 * 
-	 * @return the System property <b>ERApplicationNameSuffix</b> or <code>""</code>
-	 */
-	private String nameSuffix() {
-		return ERXProperties.stringForKeyWithDefault("ERApplicationNameSuffix", "");
 	}
 
 	/**
