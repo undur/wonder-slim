@@ -221,74 +221,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Run some environment validation. If any of those checks fail, we log the error and exit.
-	 */
-	private void checkEnvironment() {
-		try {
-			checkERXApplicationMainInvoked();
-			checkMainBundleIsNotJavaFoundation();
-			checkClasspathValidity();
-		}
-		catch (Exception e) {
-			logImportantMessage(e.getMessage());
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
-
-	/**
-	 * Ensure ERXApplication.main() was invoked when running the application (as opposed to WOApplication.main()) 
-	 */
-	private void checkERXApplicationMainInvoked() throws Exception {
-		if (!_wasERXApplicationMainInvoked ) {
-			throw new IllegalStateException( "Your application's main() did not invoke ERXApplication.main() as it should. Did you accidentally invoke WOApplication.main()?" );
-		}
-	}
-
-	/**
-	 * Ensure the main bundle's name isn't JavaFoundation, since if it is, something is seriously wrong
-	 */
-	private static void checkMainBundleIsNotJavaFoundation() throws Exception {
-		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
-			throw new IllegalStateException("Your main bundle is \"JavaFoundation\". Are you sure ERExtensions is the first <dependency> in your pom? And if you're developing; are you sure your working directory is your application's project?");
-		}
-	}
-
-	/**
-	 * Ensure ERFoundation, ERWebObjects and ERExtensions are earlier on the classpath than JavaFoundation and JavaWebObjects.
-	 * These libraries contain "patch classes" that override classes from the WO frameworks.
-	 */
-	private static void checkClasspathValidity() throws Exception {
-		final String[] classpathElements = System.getProperty("java.class.path").split(File.pathSeparator);
-		
-		boolean foundERFoundation = false;
-		boolean foundERWebObjects = false;
-		boolean foundERExtensions = false;
-		
-		for (String cpe : classpathElements) {
-			final String cpeLowercase = cpe.toLowerCase();
-
-			if( cpeLowercase.contains("erfoundation") ) {
-				foundERFoundation = true;
-			}
-
-			if( cpeLowercase.contains("erwebobjects") ) {
-				foundERWebObjects = true;
-			}
-
-			if( cpeLowercase.contains("erextensions") ) {
-				foundERExtensions = true;
-			}
-			
-			if( cpeLowercase.contains("javawebobjects") || cpeLowercase.contains("javafoundation") ) {
-				if( !foundERFoundation || !foundERWebObjects || !foundERExtensions ) {
-					throw new IllegalStateException("Whoops. ERFoundation, ERWebObjects and ERExtensions must appear earlier on the classpath than JavaFoundation and JavaWebObjects. The best way to ensure this is to make ERExtensions the first <dependency> in your pom file");
-				}
-			}
-		}
-	}
-
-	/**
 	 * Adds support for automatic application cycling. Applications can be configured to cycle in two ways:
 	 * 
 	 * The first way is by setting the System property <b>ERTimeToLive</b> to the number of seconds (+ a random interval of 10 minutes) that the
@@ -829,7 +761,76 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		return buildPropertiesExists;
 	}
-	
+
+
+	/**
+	 * Run some environment validation. If any of those checks fail, we log the error and exit.
+	 */
+	private void checkEnvironment() {
+		try {
+			checkERXApplicationMainInvoked();
+			checkMainBundleIsNotJavaFoundation();
+			checkClasspathValidity();
+		}
+		catch (Exception e) {
+			logImportantMessage(e.getMessage());
+			e.printStackTrace();
+			System.exit(1);
+		}
+	}
+
+	/**
+	 * Ensure ERXApplication.main() was invoked when running the application (as opposed to WOApplication.main()) 
+	 */
+	private void checkERXApplicationMainInvoked() throws Exception {
+		if (!_wasERXApplicationMainInvoked ) {
+			throw new IllegalStateException( "Your application's main() did not invoke ERXApplication.main() as it should. Did you accidentally invoke WOApplication.main()?" );
+		}
+	}
+
+	/**
+	 * Ensure the main bundle's name isn't JavaFoundation, since if it is, something is seriously wrong
+	 */
+	private static void checkMainBundleIsNotJavaFoundation() throws Exception {
+		if ("JavaFoundation".equals(NSBundle.mainBundle().name())) {
+			throw new IllegalStateException("Your main bundle is \"JavaFoundation\". Are you sure ERExtensions is the first <dependency> in your pom? And if you're developing; are you sure your working directory is your application's project?");
+		}
+	}
+
+	/**
+	 * Ensure ERFoundation, ERWebObjects and ERExtensions are earlier on the classpath than JavaFoundation and JavaWebObjects.
+	 * These libraries contain "patch classes" that override classes from the WO frameworks.
+	 */
+	private static void checkClasspathValidity() throws Exception {
+		final String[] classpathElements = System.getProperty("java.class.path").split(File.pathSeparator);
+		
+		boolean foundERFoundation = false;
+		boolean foundERWebObjects = false;
+		boolean foundERExtensions = false;
+		
+		for (String cpe : classpathElements) {
+			final String cpeLowercase = cpe.toLowerCase();
+
+			if( cpeLowercase.contains("erfoundation") ) {
+				foundERFoundation = true;
+			}
+
+			if( cpeLowercase.contains("erwebobjects") ) {
+				foundERWebObjects = true;
+			}
+
+			if( cpeLowercase.contains("erextensions") ) {
+				foundERExtensions = true;
+			}
+			
+			if( cpeLowercase.contains("javawebobjects") || cpeLowercase.contains("javafoundation") ) {
+				if( !foundERFoundation || !foundERWebObjects || !foundERExtensions ) {
+					throw new IllegalStateException("Whoops. ERFoundation, ERWebObjects and ERExtensions must appear earlier on the classpath than JavaFoundation and JavaWebObjects. The best way to ensure this is to make ERExtensions the first <dependency> in your pom file");
+				}
+			}
+		}
+	}
+
 	/**
 	 * Log a message that becomes a little more important looking in our logs 
 	 */
