@@ -235,21 +235,19 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		if (timeToLive > 0) {
 			log.info("Instance will live " + timeToLive + " seconds.");
-			NSLog.out.appendln("Instance will live " + timeToLive + " seconds.");
-			// add a fudge factor of around 10 minutes
+
+			// Adds a fudge factor of up to 10 minutes
 			timeToLive += Math.random() * 600;
-			NSTimestamp exitDate = (new NSTimestamp()).timestampByAddingGregorianUnits(0, 0, 0, 0, 0, timeToLive);
-			WOTimer t = new WOTimer(exitDate, 0, this, "killInstance", null, null, false);
-			t.schedule();
+
+			scheduleMethodInvocation(timeToLive, "killInstance");
 		}
 
 		int timeToDie = ERXProperties.intForKey("ERTimeToDie");
 
 		if (timeToDie > 0) {
 			log.info("Instance will not live past " + timeToDie + ":00.");
-			NSLog.out.appendln("Instance will not live past " + timeToDie + ":00.");
 
-			LocalDateTime now = LocalDateTime.now();
+			final LocalDateTime now = LocalDateTime.now();
 
 			int s = (timeToDie - now.getHour()) * 3600 - now.getMinute() * 60;
 
@@ -257,16 +255,24 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				s += 24 * 3600; // how many seconds to the deadline
 			}
 
-			// deliberately randomize this so that not all instances restart at the same time adding up to 1 hour
+			// Randomize so not all instances restart at the same time adding up to 1 hour
 			s += (Math.random() * 3600);
 
-			NSTimestamp stopDate = new NSTimestamp().timestampByAddingGregorianUnits(0, 0, 0, 0, 0, s);
-
-			WOTimer t = new WOTimer(stopDate, 0, this, "startRefusingSessions", null, null, false);
-			t.schedule();
+			scheduleMethodInvocation(s, "startRefusingSessions");
 		}
 
 		super.run();
+	}
+
+	/**
+	 * Schedules an invocation of a method on this app instance after the given number of seconds
+	 * 
+	 * @param secondsToWait Number of seconds to wait before invoking the method  
+	 * @param methodName Name of the method to invoke
+	 */
+	private void scheduleMethodInvocation( int secondsToWait, String methodName ) {
+		final NSTimestamp dateTime = new NSTimestamp().timestampByAddingGregorianUnits(0, 0, 0, 0, 0, secondsToWait);
+		new WOTimer(dateTime, 0, this, methodName, null, null, false).schedule();
 	}
 
 	@Override
