@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -240,7 +242,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			// Adds a fudge factor of up to 10 minutes
 			timeToLive += Math.random() * 600;
 
-			scheduleMethodInvocation(timeToLive, "killInstance");
+			CompletableFuture.delayedExecutor(timeToLive, TimeUnit.SECONDS ).execute(this::killInstance);
 		}
 
 		int timeToDie = ERXProperties.intForKey("ERTimeToDie");
@@ -259,19 +261,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			// Randomize so not all instances restart at the same time adding up to 1 hour
 			s += (Math.random() * 3600);
 
-			scheduleMethodInvocation(s, "startRefusingSessions");
+			CompletableFuture.delayedExecutor(s, TimeUnit.SECONDS ).execute(this::startRefusingSessions);
 		}
-	}
-
-	/**
-	 * Schedules an invocation of a method on this app instance after the given number of seconds
-	 * 
-	 * @param secondsToWait Number of seconds to wait before invoking the method  
-	 * @param methodName Name of the method to invoke
-	 */
-	private void scheduleMethodInvocation( int secondsToWait, String methodName ) {
-		final NSTimestamp dateTime = new NSTimestamp().timestampByAddingGregorianUnits(0, 0, 0, 0, 0, secondsToWait);
-		new WOTimer(dateTime, 0, this, methodName, null, null, false).schedule();
 	}
 
 	@Override
