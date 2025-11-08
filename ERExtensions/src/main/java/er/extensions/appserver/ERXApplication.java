@@ -183,6 +183,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		ERXMonitorServer.start();
 
+		activateScheduleOfLifeAndDeath();
+
 		// FIXME: Quick fix for our resource manager's initialization issue. Fix // Hugi 2025-10-06
 		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {
 			rmb.loadAdditionalContentTypes(); 
@@ -229,8 +231,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * The second way is by setting the System property <b>ERTimeToDie</b> to the time in seconds after midnight when the app should be starting to refuse new sessions.
 	 * In this case when the application starts to refuse new sessions it will also register a kill timer that will terminate the application between 0 minutes and 1:00 minutes.
 	 */
-	@Override
-	public void run() {
+	public void activateScheduleOfLifeAndDeath() {
 		int timeToLive = ERXProperties.intForKey("ERTimeToLive");
 
 		if (timeToLive > 0) {
@@ -260,8 +261,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 			scheduleMethodInvocation(s, "startRefusingSessions");
 		}
-
-		super.run();
 	}
 
 	/**
