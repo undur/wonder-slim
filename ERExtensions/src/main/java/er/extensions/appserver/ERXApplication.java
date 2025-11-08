@@ -475,6 +475,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
+	 * Sends out a ApplicationWillTerminateNotification before actually starting to terminate.
+	 */
+	@Override
+	public void terminate() {
+		ERXNotification.ApplicationWillTerminateNotification.postNotification(this);
+		super.terminate();
+	}
+
+	/**
 	 * Bugfix for WO component loading. It fixes:
 	 * 
 	 * <ul>
@@ -705,15 +714,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			}
 			throw e;
 		}
-	}
-
-	/**
-	 * Sends out a ApplicationWillTerminateNotification before actually starting to terminate.
-	 */
-	@Override
-	public void terminate() {
-		ERXNotification.ApplicationWillTerminateNotification.postNotification(this);
-		super.terminate();
 	}
 
 	/**
