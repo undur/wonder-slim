@@ -231,46 +231,42 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	@Override
 	public void run() {
-		try {
-			int timeToLive = ERXProperties.intForKey("ERTimeToLive");
-			if (timeToLive > 0) {
-				log.info("Instance will live " + timeToLive + " seconds.");
-				NSLog.out.appendln("Instance will live " + timeToLive + " seconds.");
-				// add a fudge factor of around 10 minutes
-				timeToLive += Math.random() * 600;
-				NSTimestamp exitDate = (new NSTimestamp()).timestampByAddingGregorianUnits(0, 0, 0, 0, 0, timeToLive);
-				WOTimer t = new WOTimer(exitDate, 0, this, "killInstance", null, null, false);
-				t.schedule();
-			}
-			int timeToDie = ERXProperties.intForKey("ERTimeToDie");
-			if (timeToDie > 0) {
-				log.info("Instance will not live past " + timeToDie + ":00.");
-				NSLog.out.appendln("Instance will not live past " + timeToDie + ":00.");
+		int timeToLive = ERXProperties.intForKey("ERTimeToLive");
 
-				LocalDateTime now = LocalDateTime.now();
-
-				int s = (timeToDie - now.getHour()) * 3600 - now.getMinute() * 60;
-
-				if (s < 0) {
-					s += 24 * 3600; // how many seconds to the deadline
-				}
-
-				// deliberately randomize this so that not all instances restart at the same time adding up to 1 hour
-				s += (Math.random() * 3600);
-
-				NSTimestamp stopDate = new NSTimestamp().timestampByAddingGregorianUnits(0, 0, 0, 0, 0, s);
-
-				WOTimer t = new WOTimer(stopDate, 0, this, "startRefusingSessions", null, null, false);
-				t.schedule();
-			}
-			super.run();
+		if (timeToLive > 0) {
+			log.info("Instance will live " + timeToLive + " seconds.");
+			NSLog.out.appendln("Instance will live " + timeToLive + " seconds.");
+			// add a fudge factor of around 10 minutes
+			timeToLive += Math.random() * 600;
+			NSTimestamp exitDate = (new NSTimestamp()).timestampByAddingGregorianUnits(0, 0, 0, 0, 0, timeToLive);
+			WOTimer t = new WOTimer(exitDate, 0, this, "killInstance", null, null, false);
+			t.schedule();
 		}
-		catch (RuntimeException t) {
-			if (ERXApplication._wasMainInvoked) {
-				ERXApplication.log.error(name() + " failed to start.", t);
+
+		int timeToDie = ERXProperties.intForKey("ERTimeToDie");
+
+		if (timeToDie > 0) {
+			log.info("Instance will not live past " + timeToDie + ":00.");
+			NSLog.out.appendln("Instance will not live past " + timeToDie + ":00.");
+
+			LocalDateTime now = LocalDateTime.now();
+
+			int s = (timeToDie - now.getHour()) * 3600 - now.getMinute() * 60;
+
+			if (s < 0) {
+				s += 24 * 3600; // how many seconds to the deadline
 			}
-			throw t;
+
+			// deliberately randomize this so that not all instances restart at the same time adding up to 1 hour
+			s += (Math.random() * 3600);
+
+			NSTimestamp stopDate = new NSTimestamp().timestampByAddingGregorianUnits(0, 0, 0, 0, 0, s);
+
+			WOTimer t = new WOTimer(stopDate, 0, this, "startRefusingSessions", null, null, false);
+			t.schedule();
 		}
+
+		super.run();
 	}
 
 	@Override
