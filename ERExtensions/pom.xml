@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>wonder.core</groupId>
 			<artifactId>ERFoundation</artifactId>
-			<version>1.0</version>
+			<version>1.1</version>
 		</dependency>
 		<!-- Closed source fixes and patches from Apple -->
 		<dependency>
