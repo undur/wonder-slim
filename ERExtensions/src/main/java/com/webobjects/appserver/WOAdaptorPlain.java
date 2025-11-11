@@ -9,11 +9,7 @@ import java.net.BindException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -134,10 +130,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 			// This is where the application logic will perform it's actual work
 			final WOResponse woResponse = WOApplication.application().dispatchRequest( woRequest );
 
-			for( final WOCookie c : woResponse.cookies() ) {
-				setCookie( exchange, c.name(), c.value(), c.timeOut(), c.isHttpOnly(), c.isSecure(), c.sameSite().toString() );
-			}
-			
 			exchange.getResponseHeaders().putAll( woResponse.headers() );
 
 			if( woResponse.contentInputStream() != null ) {
@@ -165,33 +157,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 			}
 		}
 
-		/** Sets a cookie header with optional attributes. */
-		public static void setCookie( HttpExchange exchange, String name, String value, int maxAgeSeconds, boolean httpOnly, boolean secure, String sameSite ) {
-
-			final StringBuilder sb = new StringBuilder();
-			sb.append( URLEncoder.encode( name, StandardCharsets.UTF_8 ) ).append( '=' ).append( URLEncoder.encode( value, StandardCharsets.UTF_8 ) );
-
-			if( maxAgeSeconds >= 0 ) {
-				sb.append( "; Max-Age=" ).append( maxAgeSeconds );
-			}
-
-			sb.append( "; Path=/" );
-
-			if( secure ) {
-				sb.append( "; Secure" );
-			}
-
-			if( httpOnly ) {
-				sb.append( "; HttpOnly" );
-			}
-
-			if( sameSite != null && !sameSite.isBlank() ) {
-				sb.append( "; SameSite=" ).append( sameSite );
-			}
-
-			exchange.getResponseHeaders().add( "Set-Cookie", sb.toString() );
-		}
-
 		/**
 		 * @return the given Request converted to a WORequest
 		 */
@@ -201,7 +166,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 			final String uri = exchange.getRequestURI().toString();
 			final String httpVersion = exchange.getProtocol();
 			final Map<String, List<String>> headers = exchange.getRequestHeaders();
-			final Map<String, List<String>> cookieValues = cookieValues( exchange );
 
 			final NSData contentData;
 
@@ -215,10 +179,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 			final WORequest worequest = WOApplication.application().createRequest( method, uri, httpVersion, headers, contentData, null );
 
-//			for( final HttpCookie cookie : Request.getCookies( exchange ) ) {
-//				worequest.addCookie( cookieToWOCookie( cookie ) );
-//			}
-
 			// FIXME: The Netty adaptor sets these. We might want to emulate that // Hugi 2025-11-11
 			// worequest._setOriginatingAddress( idr.getAddress() );
 			// worequest._setOriginatingPort( idr.getPort() );
@@ -227,32 +187,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 			// worequest._setAcceptingPort(connectionSocket.getLocalPort());
 
 			return worequest;
-		}
-
-		/**
-		 * @return The listed cookies as a map
-		 *
-		 * FIXME: We're not properly constructing the map; might fail for cookies with multiple values
-		 */
-		private static Map<String, List<String>> cookieValues( final HttpExchange exchange ) {
-			final Map<String, List<String>> cookies = new HashMap<String, List<String>>();
-
-			final String cookieHeader = exchange.getRequestHeaders().getFirst( "Cookie" );
-
-			if( cookieHeader != null ) {
-				final String[] pairs = cookieHeader.split( ";\\s*" );
-
-				for( String pair : pairs ) {
-					int eq = pair.indexOf( '=' );
-					if( eq > 0 ) {
-						final String name = URLDecoder.decode( pair.substring( 0, eq ), StandardCharsets.UTF_8 );
-						final String value = URLDecoder.decode( pair.substring( eq + 1 ), StandardCharsets.UTF_8 );
-						cookies.put( name, List.of( value ) );
-					}
-				}
-			}
-
-			return cookies;
 		}
 	}
 }
