@@ -37,11 +37,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 	private static final Logger logger = LoggerFactory.getLogger( WOAdaptorPlain.class );
 
 	/**
-	 * The port we're listening on
-	 */
-	private final int _port;
-
-	/**
 	 * Invoked by WO to construct an adaptor instance
 	 */
 	public WOAdaptorPlain( String name, NSDictionary<String, Object> config ) {
@@ -121,7 +116,7 @@ public class WOAdaptorPlain extends WOAdaptor {
 		}
 	}
 
-	public class WOHandler implements HttpHandler {
+	public static class WOHandler implements HttpHandler {
 
 		public void handle( HttpExchange exchange ) throws IOException {
 
@@ -179,14 +174,20 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 			final WORequest worequest = WOApplication.application().createRequest( method, uri, httpVersion, headers, contentData, null );
 
-			// FIXME: The Netty adaptor sets these. We might want to emulate that // Hugi 2025-11-11
-			// worequest._setOriginatingAddress( idr.getAddress() );
-			// worequest._setOriginatingPort( idr.getPort() );
-			// worequest._setAcceptingAddress(idr.getLocalAddress());
-			// worequest._setOriginatingAdaptor( null );
-			// worequest._setAcceptingPort(connectionSocket.getLocalPort());
+			populateAddresses(exchange, worequest);
 
 			return worequest;
+		}
+		
+		static void populateAddresses(final HttpExchange exchange, final WORequest aRequest) {
+		    InetSocketAddress remote = exchange.getRemoteAddress();
+		    InetSocketAddress local  = exchange.getLocalAddress();
+
+		    aRequest._setOriginatingAddress(remote.getAddress());
+		    aRequest._setOriginatingPort(remote.getPort());
+
+		    aRequest._setAcceptingAddress(local.getAddress());
+		    aRequest._setAcceptingPort(local.getPort());
 		}
 	}
 }
