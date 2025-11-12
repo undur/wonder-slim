@@ -165,18 +165,9 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 			final NSData contentData;
 
-			final int contentLength;
+			final int contentLength = contentLength( headers );
 
-			final List<String> contentLengthHeaders = headers.get("Content-Length");
-
-			if (contentLengthHeaders != null && !contentLengthHeaders.isEmpty()) {
-				contentLength = Integer.parseInt(contentLengthHeaders.getFirst());
-			}
-			else {
-				contentLength = 0;
-			}
-
-			if (contentLength > 0) {
+			if (contentLength  > 0) {
 				logger.info( "Constructing streaming request content with length: " + contentLength );
 				final InputStream requestStream = exchange.getRequestBody();
 				final InputStream bufferedStream = new BufferedInputStream(requestStream);
@@ -194,6 +185,20 @@ public class WOAdaptorPlain extends WOAdaptor {
 			return worequest;
 		}
 		
+		/**
+		 * @return The int value of the content-length header, 0 (zero) if not present 
+		 */
+		private static int contentLength( final Map<String, List<String>> headers ) {
+
+			final List<String> contentLengthHeaders = headers.get("Content-Length");
+
+			if (contentLengthHeaders != null && !contentLengthHeaders.isEmpty()) {
+				return Integer.parseInt( contentLengthHeaders.getFirst() );
+			}
+			
+			return 0;
+		}
+
 		static void populateAddresses(final HttpExchange exchange, final WORequest aRequest) {
 		    InetSocketAddress remote = exchange.getRemoteAddress();
 		    InetSocketAddress local  = exchange.getLocalAddress();
