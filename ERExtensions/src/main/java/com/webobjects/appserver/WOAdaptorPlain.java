@@ -1,10 +1,10 @@
 package com.webobjects.appserver;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -21,6 +21,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.webobjects.appserver._private.WOInputStreamData;
+import com.webobjects.appserver._private.WONoCopyPushbackInputStream;
 import com.webobjects.appserver._private.WOProperties;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
@@ -164,12 +165,26 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 			final NSData contentData;
 
-			try {
-				// FIXME: We're reading the entire NSData here, that shouldn't be required // Hugi 2025-11-11
-				contentData = new WOInputStreamData( new NSData( exchange.getRequestBody(), 4096 ) );
+			final int contentLength;
+
+			final List<String> contentLengthHeaders = headers.get("Content-Length");
+
+			if (contentLengthHeaders != null && !contentLengthHeaders.isEmpty()) {
+				contentLength = Integer.parseInt(contentLengthHeaders.getFirst());
 			}
-			catch( IOException e ) {
-				throw new UncheckedIOException( e );
+			else {
+				contentLength = 0;
+			}
+
+			if (contentLength > 0) {
+				logger.info( "Constructing streaming request content with length: " + contentLength );
+				final InputStream requestStream = exchange.getRequestBody();
+				final InputStream bufferedStream = new BufferedInputStream(requestStream);
+				final WONoCopyPushbackInputStream wrappedStream = new WONoCopyPushbackInputStream(bufferedStream, contentLength);
+				contentData = new WOInputStreamData(wrappedStream, contentLength);
+			}
+			else {
+				contentData = NSData.EmptyData;
 			}
 
 			final WORequest worequest = WOApplication.application().createRequest( method, uri, httpVersion, headers, contentData, null );
