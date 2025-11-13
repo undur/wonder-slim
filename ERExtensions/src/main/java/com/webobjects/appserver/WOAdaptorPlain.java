@@ -119,41 +119,41 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 	public static class WOHandler implements HttpHandler {
 
-		public void handle( HttpExchange exchange ) throws IOException {
+		public void handle( final HttpExchange exchange ) throws IOException {
 
 			// If the request has Transfer-Encoding: chunked we currently just reject it
 			if( rejectChunkedTransferEncoding( exchange ) ) {
 				return;
 			}
 
-			final WORequest woRequest = requestToWORequest( exchange );
+			final WORequest request = requestFromExchange( exchange );
 
 			// This is where the application logic will perform it's actual work
-			final WOResponse woResponse = WOApplication.application().dispatchRequest( woRequest );
+			final WOResponse response = WOApplication.application().dispatchRequest( request );
 
-			exchange.getResponseHeaders().putAll( woResponse.headers() );
+			exchange.getResponseHeaders().putAll( response.headers() );
 
-			if( woResponse.contentInputStream() != null ) {
-				final long contentLength = woResponse.contentInputStreamLength(); // If an InputStream is present, the stream's length must be present as well
+			if( response.contentInputStream() != null ) {
+				final long contentLength = response.contentInputStreamLength(); // If an InputStream is present, the stream's length must be present as well
 
 				if( contentLength == -1 ) {
 					throw new IllegalArgumentException( "WOResponse.contentInputStream() is set but contentInputLength has not been set. You must provide the content length when serving an InputStream" );
 				}
 
-				exchange.sendResponseHeaders( woResponse.status(), contentLength );
+				exchange.sendResponseHeaders( response.status(), contentLength );
 
-				try( final InputStream inputStream = woResponse.contentInputStream()) {
+				try( final InputStream inputStream = response.contentInputStream()) {
 					try( final OutputStream out = exchange.getResponseBody()) {
 						inputStream.transferTo( out );
 					}
 				}
 			}
 			else {
-				final long contentLength = woResponse.content()._bytesNoCopy().length;
-				exchange.sendResponseHeaders( woResponse.status(), contentLength );
+				final long contentLength = response.content()._bytesNoCopy().length;
+				exchange.sendResponseHeaders( response.status(), contentLength );
 
 				try( final OutputStream out = exchange.getResponseBody()) {
-					new ByteArrayInputStream( woResponse.content()._bytesNoCopy() ).transferTo( out );
+					new ByteArrayInputStream( response.content()._bytesNoCopy() ).transferTo( out );
 				}
 			}
 		}
@@ -161,7 +161,7 @@ public class WOAdaptorPlain extends WOAdaptor {
 		/**
 		 * @return the given Request converted to a WORequest
 		 */
-		private static WORequest requestToWORequest( final HttpExchange exchange ) {
+		private static WORequest requestFromExchange( final HttpExchange exchange ) {
 
 			final String method = exchange.getRequestMethod();
 			final String uri = exchange.getRequestURI().toString();
@@ -205,7 +205,7 @@ public class WOAdaptorPlain extends WOAdaptor {
 		}
 
 		/**
-		 * Obtain information about originating address/target address at set on the given request 
+		 * Get originating/target addresses from the HttpExchange and set them on the given request 
 		 */
 		private static void populateAddresses(final HttpExchange exchange, final WORequest request) {
 		    final InetSocketAddress remote = exchange.getRemoteAddress();
