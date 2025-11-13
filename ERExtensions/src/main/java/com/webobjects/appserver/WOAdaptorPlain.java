@@ -121,6 +121,17 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 		public void handle( HttpExchange exchange ) throws IOException {
 
+			// Check for chunked transfer encoding - we don't support it (our current handling of the request's content requires known content-length)
+			// If this is actually required we could add support  for it
+			final List<String> transferEncoding = exchange.getRequestHeaders().get( "Transfer-Encoding" );
+
+			if( transferEncoding != null && transferEncoding.stream().anyMatch( s -> s.toLowerCase().contains( "chunked" ) ) ) {
+				logger.warn( "Received chunked transfer-encoded request to {} - not supported. Returning 411 Length Required", exchange.getRequestURI() );
+				exchange.sendResponseHeaders( 411, -1 ); // 411 Length Required
+				exchange.close();
+				return;
+			}
+
 			final WORequest woRequest = requestToWORequest( exchange );
 
 			// This is where the application logic will perform it's actual work
@@ -186,7 +197,7 @@ public class WOAdaptorPlain extends WOAdaptor {
 		}
 		
 		/**
-		 * @return The int value of the content-length header, 0 (zero) if not present 
+		 * @return The value of the content-length header or 0 (zero) if not present 
 		 */
 		private static int contentLength( final Map<String, List<String>> headers ) {
 
@@ -199,15 +210,18 @@ public class WOAdaptorPlain extends WOAdaptor {
 			return 0;
 		}
 
-		static void populateAddresses(final HttpExchange exchange, final WORequest aRequest) {
-		    InetSocketAddress remote = exchange.getRemoteAddress();
-		    InetSocketAddress local  = exchange.getLocalAddress();
+		/**
+		 * Obtain information about originating address/target address at set on the given request 
+		 */
+		private static void populateAddresses(final HttpExchange exchange, final WORequest request) {
+		    final InetSocketAddress remote = exchange.getRemoteAddress();
+		    final InetSocketAddress local  = exchange.getLocalAddress();
 
-		    aRequest._setOriginatingAddress(remote.getAddress());
-		    aRequest._setOriginatingPort(remote.getPort());
+		    request._setOriginatingAddress(remote.getAddress());
+		    request._setOriginatingPort(remote.getPort());
 
-		    aRequest._setAcceptingAddress(local.getAddress());
-		    aRequest._setAcceptingPort(local.getPort());
+		    request._setAcceptingAddress(local.getAddress());
+		    request._setAcceptingPort(local.getPort());
 		}
 	}
 }
