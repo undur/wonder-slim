@@ -707,11 +707,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		try {
 			return super.adaptorWithName(aClassName, anArgsDictionary);
 		}
-		catch (NSForwardException e) {
-			Throwable rootCause = ERXExceptionUtilities.getMeaningfulThrowable(e);
-			if ((rootCause instanceof BindException) && ERXDevelopmentInstanceStopper.stopPreviousDevInstance()) {
+		catch (Exception e) {
+			final Throwable rootCause = ERXExceptionUtilities.getMeaningfulThrowable(e);
+
+			if (rootCause instanceof BindException && ERXDevelopmentInstanceStopper.stopPreviousDevInstance()) {
 				return super.adaptorWithName(aClassName, anArgsDictionary);
 			}
+
 			throw e;
 		}
 	}
