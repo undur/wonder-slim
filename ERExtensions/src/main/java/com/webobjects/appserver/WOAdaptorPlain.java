@@ -121,14 +121,8 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 		public void handle( HttpExchange exchange ) throws IOException {
 
-			// Check for chunked transfer encoding - we don't support it (our current handling of the request's content requires known content-length)
-			// If this is actually required we could add support  for it
-			final List<String> transferEncoding = exchange.getRequestHeaders().get( "Transfer-Encoding" );
-
-			if( transferEncoding != null && transferEncoding.stream().anyMatch( s -> s.toLowerCase().contains( "chunked" ) ) ) {
-				logger.warn( "Received chunked transfer-encoded request to {} - not supported. Returning 411 Length Required", exchange.getRequestURI() );
-				exchange.sendResponseHeaders( 411, -1 ); // 411 Length Required
-				exchange.close();
+			// If the request has Transfer-Encoding: chunked we currently just reject it
+			if( rejectChunkedTransferEncoding( exchange ) ) {
 				return;
 			}
 
@@ -222,6 +216,23 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 		    request._setAcceptingAddress(local.getAddress());
 		    request._setAcceptingPort(local.getPort());
+		}
+		
+		/**
+		 * Check for chunked transfer encoding - we don't support it (our current handling of the request's content requires known content-length)
+		 */
+		private boolean rejectChunkedTransferEncoding( final HttpExchange exchange ) throws IOException {
+			final List<String> transferEncoding = exchange.getRequestHeaders().get( "Transfer-Encoding" );
+
+			if( transferEncoding != null && transferEncoding.stream().anyMatch( s -> s.toLowerCase().contains( "chunked" ) ) ) {
+				logger.warn( "Received chunked transfer-encoded request to {} - not supported. Returning 411 Length Required", exchange.getRequestURI() );
+				exchange.sendResponseHeaders( 411, -1 ); // 411 Length Required
+				exchange.close();
+				return true;
+			}
+			
+			return false;
+
 		}
 	}
 }
