@@ -36,7 +36,7 @@ public class ERXWOHyperlink extends WOHyperlink {
 	/**
      * Defines if the hyperlink adds a default <code>rel="nofollow"</code> if an action is bound.
      */
-    private static boolean defaultNoFollow = ERXProperties.booleanForKey("er.extensions.ERXHyperlink.defaultNoFollow");
+    private static final boolean defaultNoFollow = ERXProperties.booleanForKey("er.extensions.ERXHyperlink.defaultNoFollow");
 
     public ERXWOHyperlink(String name, NSDictionary associations, WOElement template) {
         super(name, associations, template);
