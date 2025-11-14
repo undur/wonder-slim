@@ -4,7 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.BindException;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -27,9 +27,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 
 /**
- * A WOAdaptor based on Java's built in HTTP server
- *
- * To use, set the property -WOAdaptor WOAdaptorPlain
+ * A WOAdaptor based on Java's built in HTTP server. To use, set the property -WOAdaptor WOAdaptorPlain
  */
 
 public class WOAdaptorPlain extends WOAdaptor {
@@ -43,18 +41,25 @@ public class WOAdaptorPlain extends WOAdaptor {
 		super( name, config );
 		_port = port( config );
 
-		// If the port is occupied, we emulate WO's behaviour. Helps ERXApplication handle the exception, restarting any app occupying the port
-		if( !isPortAvailable( _port ) ) {
-			throw new NSForwardException( new BindException( "Port %s is occupied".formatted( _port ) ) );
-		}
+		checkPortAvailable(_port);
 
 		try {
-			// Copied from the Netty adaptor
+			// Set-The-Port-Stuff copied from the WONettyAdaptor, feels a little dirty
 			WOApplication.application()._setHost( InetAddress.getLocalHost().getHostName() );
 			System.setProperty( WOProperties._PortKey, Integer.toString( _port ) );
 		}
 		catch( UnknownHostException e ) {
-			throw new RuntimeException( e );
+			throw new UncheckedIOException( e );
+		}
+	}
+
+	/**
+	 * Briefly try binding to the requested port. If unsuccessful, emulate WO's behaviour (wrap the BindException in NSForwardException) to help ERXApplication catch it and stop any apps occupying the port 
+	 */
+	private static void checkPortAvailable( final int port ) {
+		try( ServerSocket socket = new ServerSocket( port )) {}
+		catch( IOException e ) {
+			throw new NSForwardException( e );
 		}
 	}
 
@@ -77,18 +82,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 		return port;
 	}
 
-	/**
-	 * @return true if the given port is available for us to use
-	 */
-	private static boolean isPortAvailable( int port ) {
-		try( ServerSocket socket = new ServerSocket( port )) {
-			return true;
-		}
-		catch( IOException e ) {
-			return false;
-		}
-	}
-
 	@Override
 	public boolean dispatchesRequestsConcurrently() {
 		return true;
@@ -102,7 +95,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 	@Override
 	public void registerForEvents() {
-
 		try {
 			logger.info( "Starting %s on port %s".formatted( getClass().getSimpleName(), _port ) );
 			var server = HttpServer.create( new InetSocketAddress( _port ), 0 );
@@ -174,7 +166,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 			final int contentLength = contentLength( headers );
 
 			if (contentLength  > 0) {
-				logger.info( "Constructing streaming request content with length: " + contentLength );
 				final InputStream requestStream = exchange.getRequestBody();
 				final InputStream bufferedStream = new BufferedInputStream(requestStream);
 				final WONoCopyPushbackInputStream wrappedStream = new WONoCopyPushbackInputStream(bufferedStream, contentLength);
@@ -233,7 +224,6 @@ public class WOAdaptorPlain extends WOAdaptor {
 			}
 			
 			return false;
-
 		}
 	}
 }
