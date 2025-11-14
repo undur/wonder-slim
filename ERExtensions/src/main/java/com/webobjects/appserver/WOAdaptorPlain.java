@@ -1,7 +1,6 @@
 package com.webobjects.appserver;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -149,11 +148,13 @@ public class WOAdaptorPlain extends WOAdaptor {
 				}
 			}
 			else {
-				final long contentLength = response.content()._bytesNoCopy().length;
+				final NSData responseContent = response.content();
+				final long contentLength = responseContent.length();
+
 				exchange.sendResponseHeaders( response.status(), contentLength );
 
 				try( final OutputStream out = exchange.getResponseBody()) {
-					new ByteArrayInputStream( response.content()._bytesNoCopy() ).transferTo( out );
+					responseContent.writeToStream( out );
 				}
 			}
 		}
