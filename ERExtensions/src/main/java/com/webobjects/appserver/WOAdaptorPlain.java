@@ -78,7 +78,7 @@ public class WOAdaptorPlain extends WOAdaptor {
 	 */
 	private static void checkPortAvailable( final int port ) {
 
-		// Port 0 just means "WOPort not set", so we don't need to perform a check (Jetty will pick a random free port)
+		// Port 0 just means "WOPort not set", so we don't need to perform a check (the server will pick a random free port)
 		if( port != 0 ) {
 			try( ServerSocket socket = new ServerSocket( port )) {}
 			catch( IOException e ) {
@@ -105,6 +105,7 @@ public class WOAdaptorPlain extends WOAdaptor {
 		try {
 			logger.info( "%s starting %s".formatted( getClass().getSimpleName(), _port == 0 ? "on a random port" : "on port " + _port ) );
 
+			// FIXME: Use WOHost when constructing? // Hugi 2025-11-15
 			_server = HttpServer.create( new InetSocketAddress( _port ), 0 );
 			_server.setExecutor( Executors.newVirtualThreadPerTaskExecutor() );
 			_server.createContext( "/" ).setHandler( new WOHandler() );
