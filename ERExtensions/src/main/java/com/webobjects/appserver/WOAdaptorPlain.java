@@ -35,6 +35,11 @@ public class WOAdaptorPlain extends WOAdaptor {
 	private static final Logger logger = LoggerFactory.getLogger( WOAdaptorPlain.class );
 
 	/**
+	 * The HttpServer instance
+	 */
+	private HttpServer _server;
+
+	/**
 	 * Invoked by WO to construct an adaptor instance
 	 */
 	public WOAdaptorPlain( String name, NSDictionary<String, Object> config ) {
@@ -89,18 +94,20 @@ public class WOAdaptorPlain extends WOAdaptor {
 
 	@Override
 	public void unregisterForEvents() {
-		// FIXME: Missing implementation // Hugi 2025-11-11
-		logger.error( "We haven't implemented WOAdaptor.unregisterForEvents()" );
+		if( _server != null ) {
+			logger.info( "Stopping %s".formatted( getClass().getSimpleName() ) );
+			_server.stop( 0 );
+		}
 	}
 
 	@Override
 	public void registerForEvents() {
 		try {
 			logger.info( "Starting %s on port %s".formatted( getClass().getSimpleName(), _port ) );
-			var server = HttpServer.create( new InetSocketAddress( _port ), 0 );
-			server.setExecutor( Executors.newVirtualThreadPerTaskExecutor() );
-			server.createContext( "/" ).setHandler( new WOHandler() );
-			server.start();
+			_server = HttpServer.create( new InetSocketAddress( _port ), 0 );
+			_server.setExecutor( Executors.newVirtualThreadPerTaskExecutor() );
+			_server.createContext( "/" ).setHandler( new WOHandler() );
+			_server.start();
 		}
 		catch( final Exception e ) {
 			e.printStackTrace();
