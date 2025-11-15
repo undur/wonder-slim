@@ -313,7 +313,7 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 		 * @return The properly capitalized value for the SameSite cookie value 
 		 */
 		public String valueForCookie() {
-			return name().substring(0, 1).toUpperCase() + name().substring(1);
+			return name().substring(0, 1).toUpperCase() + name().substring(1).toLowerCase();
 		}
 	}
 }
