@@ -165,7 +165,7 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 			}
 			if (_sameSite != SameSite.NORMAL) {
 				header.append("; SameSite=");
-				header.append(_sameSite.toString().toLowerCase());
+				header.append(_sameSite.valueForCookie());
 			}
 		}
 		return header.toString();
@@ -307,6 +307,13 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 	public static enum SameSite {
 		NORMAL,
 		LAX,
-		STRICT
+		STRICT;
+		
+		/**
+		 * @return The properly capitalized value for the SameSite cookie value 
+		 */
+		public String valueForCookie() {
+			return name().substring(0, 1).toUpperCase() + name().substring(1);
+		}
 	}
 }
