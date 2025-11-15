@@ -702,15 +702,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Overridden to check for (and optionally kill) an existing running instance on the same port
 	 */
 	@Override
-	public WOAdaptor adaptorWithName(String aClassName, NSDictionary<String, Object> anArgsDictionary) {
+	public WOAdaptor adaptorWithName(String adaptorClassName, NSDictionary<String, Object> args) {
 		try {
-			return super.adaptorWithName(aClassName, anArgsDictionary);
+			return super.adaptorWithName(adaptorClassName, args);
 		}
 		catch (Exception e) {
 			final Throwable rootCause = ERXExceptionUtilities.getMeaningfulThrowable(e);
 
 			if (rootCause instanceof BindException && ERXDevelopmentInstanceStopper.stopPreviousDevInstance()) {
-				return super.adaptorWithName(aClassName, anArgsDictionary);
+				return super.adaptorWithName(adaptorClassName, args);
 			}
 
 			throw e;
