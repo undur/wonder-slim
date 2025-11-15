@@ -4,11 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -46,26 +43,15 @@ public class WOAdaptorPlain extends WOAdaptor {
 		super( name, config );
 		_port = port( config );
 
-		checkPortAvailable(_port);
-
-		try {
-			// Set-The-Port-Stuff copied from the WONettyAdaptor, feels a little dirty
-			WOApplication.application()._setHost( InetAddress.getLocalHost().getHostName() );
-			System.setProperty( WOProperties._PortKey, Integer.toString( _port ) );
-		}
-		catch( UnknownHostException e ) {
-			throw new UncheckedIOException( e );
-		}
+		checkPortAvailable( _port );
 	}
 
 	/**
-	 * Briefly try binding to the requested port. If unsuccessful, emulate WO's behaviour (wrap the BindException in NSForwardException) to help ERXApplication catch it and stop any apps occupying the port 
+	 * Overridden, since WO will invoke this method when constructing a direct connect URL
 	 */
-	private static void checkPortAvailable( final int port ) {
-		try( ServerSocket socket = new ServerSocket( port )) {}
-		catch( IOException e ) {
-			throw new NSForwardException( e );
-		}
+	@Override
+	public int port() {
+		return _port;
 	}
 
 	/**
@@ -87,6 +73,20 @@ public class WOAdaptorPlain extends WOAdaptor {
 		return port;
 	}
 
+	/**
+	 * Briefly try binding to the requested port. If unsuccessful, emulate WO's behaviour (wrap the BindException in NSForwardException) to help ERXApplication catch it and stop any apps occupying the port
+	 */
+	private static void checkPortAvailable( final int port ) {
+
+		// Port 0 just means "WOPort not set", so we don't need to perform a check (Jetty will pick a random free port)
+		if( port != 0 ) {
+			try( ServerSocket socket = new ServerSocket( port )) {}
+			catch( IOException e ) {
+				throw new NSForwardException( e );
+			}
+		}
+	}
+
 	@Override
 	public boolean dispatchesRequestsConcurrently() {
 		return true;
@@ -103,11 +103,22 @@ public class WOAdaptorPlain extends WOAdaptor {
 	@Override
 	public void registerForEvents() {
 		try {
-			logger.info( "Starting %s on port %s".formatted( getClass().getSimpleName(), _port ) );
+			logger.info( "%s starting %s".formatted( getClass().getSimpleName(), _port == 0 ? "on a random port" : "on port " + _port ) );
+
 			_server = HttpServer.create( new InetSocketAddress( _port ), 0 );
 			_server.setExecutor( Executors.newVirtualThreadPerTaskExecutor() );
 			_server.createContext( "/" ).setHandler( new WOHandler() );
 			_server.start();
+
+			// If port was 0, get the actual assigned port and update WO properties
+			if( _port == 0 ) {
+				_port = _server.getAddress().getPort();
+				System.setProperty( WOProperties._PortKey, Integer.toString( _port ) );
+				logger.info( "Running on port %s".formatted( _port ) );
+			}
+			
+			// FIXME: WOHost? // Hugi 2025-11-15
+			// WOApplication.application()._setHost( InetAddress.getLocalHost().getHostName() );
 		}
 		catch( final Exception e ) {
 			e.printStackTrace();
