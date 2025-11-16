@@ -25,6 +25,7 @@ import er.extensions.appserver.ERXApplication;
  * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
  * TODO: Handle localized resources // Hugi 2025-10-04
  * TODO: ERXResourceManager's "resource versioning" is a nice idea, we could do with something like that // Hugi 2025-10-05
+ * TODO: Along the lines of versioning, we should see if serving ETag headers is worth the effort // Hugi 2025-11-16
  * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05   
  */
 
