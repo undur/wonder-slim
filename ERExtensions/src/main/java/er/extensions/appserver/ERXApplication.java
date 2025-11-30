@@ -79,11 +79,6 @@ import parsley.Parsley;
 
 public abstract class ERXApplication extends ERXAjaxApplication {
 
-	/**
-	 * Time from when this class is first touched until the app is ready to accept requests
-	 */
-	private static long _startupTimeInMilliseconds = System.currentTimeMillis();
-
 	private static final Logger log = LoggerFactory.getLogger(ERXApplication.class);
 	private static final Logger requestHandlingLog = LoggerFactory.getLogger("er.extensions.ERXApplication.RequestHandling");
 	private static final Logger statsLog = LoggerFactory.getLogger("er.extensions.ERXApplication.Statistics");
@@ -351,14 +346,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		didFinishLaunching();
 		ERXStats.logStatisticsForOperation(statsLog, "sum");
 
-		// ERXApplication's actual initialization time (not including static initialization of superclasses)
-		_startupTimeInMilliseconds = System.currentTimeMillis() - _startupTimeInMilliseconds;
-		
 		// Time since the actual JVM process was started (when the process began, before any class initialization including main() or an app’s static initialization) 
-		final long jvmStartupTimeInMilliseconds = System.currentTimeMillis() - java.lang.management.ManagementFactory.getRuntimeMXBean().getStartTime();
+		final long elapsedMSSinceJVMStartup = System.currentTimeMillis() - java.lang.management.ManagementFactory.getRuntimeMXBean().getStartTime();
 
-		log.info( String.format( "ERX Startup time: %s ms", _startupTimeInMilliseconds ) );
-		log.info( String.format( "JVM Startup time: %s ms", jvmStartupTimeInMilliseconds ) );
+		log.info( String.format( "Startup time: %s ms", elapsedMSSinceJVMStartup ) );
 
 		System.out.println( "============= LOADED BUNDLES START =============" );
 		System.out.println( String.format( "%-22s : %-65s : %s", "-- Name --", "-- Bundle class --", "-- isJar --" ) );
