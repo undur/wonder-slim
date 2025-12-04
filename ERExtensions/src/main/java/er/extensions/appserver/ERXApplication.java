@@ -433,7 +433,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		resetKillTimer(isRefusingNewSessions());
 	}
 
-	protected WOTimer _killTimer;
+	private WOTimer _killTimer;
 
 	/**
 	 * Sets the kill timer.
@@ -444,6 +444,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			_killTimer.invalidate();
 			_killTimer = null;
 		}
+
 		if (install) {
 			int timeToKill = ERXProperties.intForKey("ERTimeToKill");
 			if (timeToKill > 0) {
