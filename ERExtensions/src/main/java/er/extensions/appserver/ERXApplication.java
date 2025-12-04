@@ -407,13 +407,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Overridden to fix that direct connect apps can't refuse new sessions.
 	 */
 	@Override
-	public synchronized void refuseNewSessions(boolean value) {
+	public synchronized void refuseNewSessions(boolean shouldRefuseNewSessions) {
 		boolean success = false;
 
 		try {
 			Field f = WOApplication.class.getDeclaredField("_refusingNewClients");
 			f.setAccessible(true);
-			f.set(this, value);
+			f.set(this, shouldRefuseNewSessions);
 			success = true;
 		}
 		catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
@@ -421,11 +421,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		if (!success) {
-			super.refuseNewSessions(value);
+			super.refuseNewSessions(shouldRefuseNewSessions);
 		}
 
 		// #81712. App will terminate immediately if the right conditions are met.
-		if (value && (activeSessionsCount() <= minimumActiveSessionsCount())) {
+		if (shouldRefuseNewSessions && (activeSessionsCount() <= minimumActiveSessionsCount())) {
 			log.info("Refusing new clients and below min active session threshold, about to terminate...");
 			terminate();
 		}
@@ -438,14 +438,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Sets the kill timer.
 	 */
-	private void resetKillTimer(boolean install) {
+	private void resetKillTimer(boolean isRefusingNewSessions) {
 		// we assume that we changed our mind about killing the instance.
 		if (_killTimer != null) {
 			_killTimer.invalidate();
 			_killTimer = null;
 		}
 
-		if (install) {
+		if (isRefusingNewSessions) {
 			int timeToKill = ERXProperties.intForKey("ERTimeToKill");
 			if (timeToKill > 0) {
 				log.warn("Registering kill timer in " + timeToKill + "seconds");
