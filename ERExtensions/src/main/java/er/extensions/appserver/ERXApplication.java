@@ -126,7 +126,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Application entry point
 	 */
-	public static void main(String argv[], Class applicationClass) {
+	public static void main(String[] argv, Class applicationClass) {
 		_wasERXApplicationMainInvoked = true;
 
 		ERXKVCReflectionHack.enable();
@@ -161,7 +161,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
-//		registerRequestHandler(new ERXDirectActionRequestHandler(ERXAdminDirectAction.class.getName(), "stats", false), "erxadm"); // FIXME: Why is this getting installed specifically? Disabled for now // Hugi 2025-10-26
 		registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );			
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
