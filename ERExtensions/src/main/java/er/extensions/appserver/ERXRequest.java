@@ -207,16 +207,14 @@ public  class ERXRequest extends WORequest {
 	@Override
 	public NSArray<String> browserLanguages() {
         if (_browserLanguages == null) {
-        	NSMutableArray<String> languageKeys = new NSMutableArray<>();
-            NSArray<String> fixedLanguages = null;
-            String string = headerForKey("accept-language");
+        	final NSMutableArray<String> languageKeys = new NSMutableArray<>();
+            final String acceptLanguageHeader = headerForKey("accept-language");
 
-            if (string != null) {
-                NSArray<String> rawLanguages = NSArray.componentsSeparatedByString(string, ",");
-                fixedLanguages = fixAbbreviationArray(rawLanguages);
+            if (acceptLanguageHeader != null) {
+                final NSArray<String> rawLanguages = NSArray.componentsSeparatedByString(acceptLanguageHeader, ",");
+                final NSArray<String> fixedLanguages = fixAbbreviationArray(rawLanguages);
 
-                for (Enumeration<String> e = fixedLanguages.objectEnumerator(); e.hasMoreElements();) {
-					String languageKey = e.nextElement();
+                for (String languageKey : fixedLanguages) {
 					String language = WOProperties.TheLanguageDictionary.objectForKey(languageKey);
 
 					if(language == null) {
@@ -226,11 +224,13 @@ public  class ERXRequest extends WORequest {
 							String mainLanguageKey = languageKey.substring(0, index);
 							String region = languageKey.substring(index);
 							language = WOProperties.TheLanguageDictionary.objectForKey(mainLanguageKey);
+
 							if(language != null) {
 								language = language + region.toUpperCase();
 							}
 						}
 					}
+
 					if(language != null) {
 						languageKeys.addObject(language);
 					}
@@ -242,8 +242,10 @@ public  class ERXRequest extends WORequest {
             if(!languageKeys.containsObject(ERXLocalizer.defaultLanguage())) {
                 languageKeys.addObject(ERXLocalizer.defaultLanguage());
             }
+
             _browserLanguages = languageKeys.immutableClone();
         }
+
         return _browserLanguages;
     }
     
