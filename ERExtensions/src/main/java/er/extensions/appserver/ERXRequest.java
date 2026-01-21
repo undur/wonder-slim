@@ -438,23 +438,31 @@ public  class ERXRequest extends WORequest {
      * @return sorted NSArray of normalized Strings
      */
     private static NSArray<String> fixAbbreviationArray(NSArray<String> languages) {
+
         try {
             languages=languages.sortedArrayUsingComparator(COMPARE_Qs);
         } catch (NSComparator.ComparisonException | NumberFormatException e) {
             log.warn("Couldn't sort language array {}.", languages, e);
         }
-        NSMutableArray<String> languagePrefix = new NSMutableArray<>(languages.count());
+
+        final NSMutableArray<String> languagePrefix = new NSMutableArray<>(languages.count());
+
         for (int languageNum = languages.count() - 1; languageNum >= 0; languageNum--) {
             String language = languages.objectAtIndex(languageNum);
             int offset;
+
             language = language.trim();
             offset = language.indexOf(';');
+
             if (offset > 0) {
                 language = language.substring(0, offset);
             }
+
             offset = language.indexOf('-');
+
             if (offset > 0) {
-                String langPrefix = language.substring(0, offset);  //  "en" part of "en-us"
+                final String langPrefix = language.substring(0, offset);  //  "en" part of "en-us"
+
                 if (!languagePrefix.containsObject(langPrefix)) { 
                     languagePrefix.insertObjectAtIndex(langPrefix, 0);
                 }
@@ -463,8 +471,10 @@ public  class ERXRequest extends WORequest {
                 String cooked = language.replace('-', '_');
                 language = cooked;
             }
+
             languagePrefix.insertObjectAtIndex(language, 0);
         }
+
         return languagePrefix;
     }
 
