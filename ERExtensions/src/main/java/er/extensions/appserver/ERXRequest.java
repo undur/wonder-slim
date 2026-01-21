@@ -440,10 +440,8 @@ public  class ERXRequest extends WORequest {
     private static NSArray<String> fixAbbreviationArray(NSArray<String> languages) {
         try {
             languages=languages.sortedArrayUsingComparator(COMPARE_Qs);
-        } catch (NSComparator.ComparisonException e) {
+        } catch (NSComparator.ComparisonException | NumberFormatException e) {
             log.warn("Couldn't sort language array {}.", languages, e);
-        } catch (NumberFormatException e2) {
-            log.warn("Couldn't sort language array {}.", languages, e2);
         }
         NSMutableArray<String> languagePrefix = new NSMutableArray<>(languages.count());
         for (int languageNum = languages.count() - 1; languageNum >= 0; languageNum--) {
