@@ -48,7 +48,7 @@ Most modern WO apps that use inline bindings probably use `WOOgnl`'s syntax. As 
 
 ### Run on modern java
 
-Slim's sources target JDK 21 and it runs fine up to and including JDK 24. We do not support older JDKs.
+Slim's sources target JDK 25 and it runs fine up to and including JDK 26. We do not support older JDKs.
 
 ### Reduce the number of external dependencies
 
