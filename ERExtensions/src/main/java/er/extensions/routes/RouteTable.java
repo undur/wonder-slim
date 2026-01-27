@@ -155,6 +155,7 @@ public class RouteTable {
 			final WOResponse response = new WOResponse();
 			response.setStatus( 404 );
 			response.setContent( "No route found for URL: " + invocation.url() );
+			response.setUserInfoForKey("true", "wo-unhandled-response"); // FIXME: Experimental, used in conjuction with wo-adaptor-jetty // Hugi 2026-01-27
 			return response;
 		}
 	}
