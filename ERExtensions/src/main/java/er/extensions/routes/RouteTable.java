@@ -82,7 +82,16 @@ public class RouteTable {
 			routeURL = routeURLFromRequestParameters( request );
 		}
 		else {
-			routeURL = request.uri();
+			String uri = request.uri();
+			
+			// WO returns the URI including the query string, so we have to manually remove it ourselves
+			int questionMarkIndex = uri.indexOf('?');
+			
+			if( questionMarkIndex > 0 ) {
+				uri = uri.substring(0, questionMarkIndex);
+			}
+
+			routeURL = uri;
 		}
 
 		final String ipAddress = ((ERXRequest)request).remoteHostAddress();
