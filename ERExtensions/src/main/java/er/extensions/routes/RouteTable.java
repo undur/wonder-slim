@@ -75,8 +75,15 @@ public class RouteTable {
 		return pattern.equals( url );
 	}
 
-	public WOActionResults handle( final WORequest request ) {
-		final String routeURL = routeURLFromRequestParameters( request );
+	public WOActionResults handle( final WORequest request, boolean urlInParams ) {
+		final String routeURL;
+		
+		if( urlInParams ) {
+			routeURL = routeURLFromRequestParameters( request );
+		}
+		else {
+			routeURL = request.uri();
+		}
 
 		final String ipAddress = ((ERXRequest)request).remoteHostAddress();
 		final String userAgent = request.headerForKey( "user-agent" );

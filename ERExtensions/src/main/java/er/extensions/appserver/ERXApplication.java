@@ -60,6 +60,7 @@ import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
+import er.extensions.routes.RouteRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 
@@ -162,6 +163,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
 		registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );			
+
+		setDefaultRequestHandler(new RouteRequestHandler());
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 

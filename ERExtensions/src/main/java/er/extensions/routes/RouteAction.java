@@ -22,6 +22,6 @@ public class RouteAction extends ERXDirectAction {
 	 * @return The result of invoking the route mathing the provided URL.
 	 */
 	public WOActionResults handlerAction() {
-		return RouteTable.defaultRouteTable().handle( request() );
+		return RouteTable.defaultRouteTable().handle( request(), true );
 	}
 }
