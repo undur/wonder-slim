@@ -1,6 +1,7 @@
 package er.extensions.routes;
 
 import com.webobjects.appserver.WOActionResults;
+import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequest;
 
 import er.extensions.appserver.ERXDirectAction;
@@ -23,5 +24,14 @@ public class RouteAction extends ERXDirectAction {
 	 */
 	public WOActionResults handlerAction() {
 		return RouteTable.defaultRouteTable().handle( request(), true );
+	}
+	
+	@Override
+	public WOActionResults defaultAction() {
+
+		// The request's URL  doesn't have an adaptor prefix, so we set it on our context to ensure proper dynamic URL generation
+		context()._url().setPrefix(WOApplication.application().adaptorPath());
+
+		return RouteTable.defaultRouteTable().handle( request(), false );
 	}
 }
