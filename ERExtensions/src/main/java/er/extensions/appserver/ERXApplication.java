@@ -296,6 +296,19 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return new ERXRequest(method, url, httpVersion, headers, content, info);
 	}
 
+    /**
+     * @returns Request handler used to handle the given request.
+     * 
+     * Overridden to disable WOStaticResourceRequestHandler being returned for URLs ending with resource-suffixes.
+     * 
+     * FIXME: I'm 99,99% sure this is fine for everyone. Labeling it for a while though // Hugi 2026-01-28
+     */
+	@Override
+    public WORequestHandler handlerForRequest(WORequest request) {
+        WORequestHandler requestHandler = requestHandlerForKey(request.requestHandlerKey());
+        return requestHandler != null ? requestHandler : defaultRequestHandler();
+    }
+
 	/**
 	 * Called, for example, when refuse new sessions is enabled and the request contains an expired session.
 	 * If mod_rewrite is being used we don't want the adaptor prefix being part of the redirect.
