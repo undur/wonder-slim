@@ -3,6 +3,7 @@ package er.extensions.routes;
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WODirectAction;
+import com.webobjects.appserver.WODynamicURL;
 import com.webobjects.appserver.WORequest;
 
 /**
@@ -28,8 +29,13 @@ public class RouteAction extends WODirectAction {
 	@Override
 	public WOActionResults defaultAction() {
 
-		// The request's URL  doesn't have an adaptor prefix, so we set it on our context to ensure proper dynamic URL generation
-		context()._url().setPrefix(WOApplication.application().adaptorPath());
+		// A freestyle request URL won't have an adaptor prefix or an application name, so we have to set it explicitly ourselves to ensure proper dynamic URL generation
+		final WODynamicURL url = context()._url();
+		url.setPrefix(WOApplication.application().adaptorPath());
+		
+		if( url.applicationName() == null || url.applicationName().isEmpty() ) {
+			url.setApplicationName(WOApplication.application().name());
+		}
 
 		return RouteTable.defaultRouteTable().handle( request(), false );
 	}
