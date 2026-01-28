@@ -29,6 +29,7 @@ import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
+import com.webobjects.appserver.WODynamicURL;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
@@ -36,6 +37,7 @@ import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOComponentDefinition;
+import com.webobjects.appserver._private.WOURLFormatException;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
@@ -308,6 +310,31 @@ public abstract class ERXApplication extends ERXAjaxApplication {
         WORequestHandler requestHandler = requestHandlerForKey(request.requestHandlerKey());
         return requestHandler != null ? requestHandler : defaultRequestHandler();
     }
+
+	/**
+	 * @return An unchecked dynamic URL initialized with the given string.
+	 */
+	@Override
+	public UncheckedDynamicURL newDynamicURL( String url ) {
+		return new UncheckedDynamicURL( url );
+	}
+
+	/**
+	 * WODynamicURL implementation created to override and disable the check() method, allowing us to handle freestyle URLs/routing.
+	 * 
+	 * FIXME: For use while we're experimenting with generic URL-handling. Needs work // Hugi 2026-01-28
+	 */
+	public static class UncheckedDynamicURL extends WODynamicURL {
+
+		public UncheckedDynamicURL() {}
+
+		public UncheckedDynamicURL( String url ) {
+			super( url );
+		}
+
+		@Override
+		public void check() {}
+	}
 
 	/**
 	 * Called, for example, when refuse new sessions is enabled and the request contains an expired session.
