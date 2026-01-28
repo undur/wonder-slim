@@ -2,9 +2,8 @@ package er.extensions.routes;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
+import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WORequest;
-
-import er.extensions.appserver.ERXDirectAction;
 
 /**
  * A Direct Action that passes requests on to the default RouteTable for handling.
@@ -13,7 +12,7 @@ import er.extensions.appserver.ERXDirectAction;
  * or the [redirect_url] header passed in by Apache's 404 handler.
  */
 
-public class RouteAction extends ERXDirectAction {
+public class RouteAction extends WODirectAction {
 
 	public RouteAction( WORequest r ) {
 		super( r );
