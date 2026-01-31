@@ -3,7 +3,6 @@ package er.extensions.appserver;
 import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Map;
 
 import org.slf4j.Logger;
