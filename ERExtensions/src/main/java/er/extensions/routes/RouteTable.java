@@ -126,14 +126,10 @@ public class RouteTable {
 	/**
 	 * @return Route URL usable for development (i.e. invoking the direct action directly)
 	 * 
-	 * FIXME: Probably shouldn't exist or do anything at all // Hugi 2026-01-28
+	 * FIXME: Scheduled for deletion // Hugi 2026-01-28
 	 */
+	@Deprecated
 	public static String urlForDevelopment( String url, final WOContext context ) {
-		/*
-		final NSMutableDictionary<String, Object> params = new NSMutableDictionary<>( url, "url" );
-		url = context.directActionURLForActionNamed( RouteAction.class.getSimpleName() + "/handler", params );
-		url = url.replace( "&", "&amp;" );
-		*/
 		return url;
 	}
 
