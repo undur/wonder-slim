@@ -46,7 +46,7 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 		}
 		
 		if( context == null ) {
-			throw new NullPointerException( "Couldn't find a WOContext to use" );
+			throw new IllegalStateException( "Attempted to generate a resource URL outside of a WOContext" );
 		}
 		
 		return context;
