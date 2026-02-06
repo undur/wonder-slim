@@ -169,7 +169,7 @@ public class RouteTable {
 	}
 
 	@Deprecated
-	public static class BiFunctionRouteHandler implements RouteHandler {
+	private static class BiFunctionRouteHandler implements RouteHandler {
 		private BiFunction<RouteURL, WOContext, WOActionResults> _function;
 
 		public BiFunctionRouteHandler( final BiFunction<RouteURL, WOContext, WOActionResults> function ) {
