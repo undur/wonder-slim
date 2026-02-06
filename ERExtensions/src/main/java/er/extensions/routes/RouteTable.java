@@ -162,16 +162,11 @@ public class RouteTable {
 		}
 	}
 
-	public static class ComponentClassRouteHandler implements RouteHandler {
-		private Class<? extends WOComponent> _componentClass;
-
-		public ComponentClassRouteHandler( final Class<? extends WOComponent> componentClass ) {
-			_componentClass = componentClass;
-		}
+	public record ComponentClassRouteHandler( Class<? extends WOComponent> componentClass )  implements RouteHandler {
 
 		@Override
 		public WOActionResults handle( RouteInvocation invocation ) {
-			return WOApplication.application().pageWithName( _componentClass.getName(), invocation.request().context() );
+			return WOApplication.application().pageWithName( componentClass().getName(), invocation.request().context() );
 		}
 	}
 }
