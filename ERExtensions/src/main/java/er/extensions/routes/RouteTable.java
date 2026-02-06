@@ -2,7 +2,6 @@ package er.extensions.routes;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,11 +136,6 @@ public class RouteTable {
 		_routes.add( new Route( pattern, routeHandler ) );
 	}
 
-	@Deprecated
-	public void map( final String pattern, final BiFunction<RouteURL, WOContext, WOActionResults> function ) {
-		map( pattern, new BiFunctionRouteHandler( function ) );
-	}
-
 	public void map( final String pattern, final Class<? extends WOComponent> componentClass ) {
 		map( pattern, new ComponentClassRouteHandler( componentClass ) );
 	}
@@ -165,20 +159,6 @@ public class RouteTable {
 			response.setContent( "No route found for URL: " + invocation.url() );
 			response.setUserInfoForKey("true", "wo-unhandled-response"); // FIXME: Experimental, used in conjuction with wo-adaptor-jetty // Hugi 2026-01-27
 			return response;
-		}
-	}
-
-	@Deprecated
-	private static class BiFunctionRouteHandler implements RouteHandler {
-		private BiFunction<RouteURL, WOContext, WOActionResults> _function;
-
-		public BiFunctionRouteHandler( final BiFunction<RouteURL, WOContext, WOActionResults> function ) {
-			_function = function;
-		}
-
-		@Override
-		public WOActionResults handle( RouteInvocation invocation ) {
-			return _function.apply( invocation.routeURL(), invocation.request().context() );
 		}
 	}
 
