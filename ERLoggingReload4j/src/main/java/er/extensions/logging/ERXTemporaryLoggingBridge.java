@@ -7,7 +7,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 
 /**
- * This class exists only as a temporary bridge while we work out receiving instructions from ERExtensions in a nicer manner
+ * FIXME: Temporary bridge until we work out a nicer method of initializing logging
  */
 
 public class ERXTemporaryLoggingBridge {

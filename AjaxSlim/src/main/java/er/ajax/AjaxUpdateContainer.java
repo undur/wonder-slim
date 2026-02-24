@@ -16,7 +16,7 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXValueUtilities;
 
 /**
- * observeFieldID requires ERExtensions, specifically ERXWOForm
+ * observeFieldID requires ERXWOForm
  * 
  * @binding onRefreshComplete the script to execute at the end of refreshing the container
  * @binding action the action to call when this updateContainer refreshes
