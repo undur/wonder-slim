@@ -20,8 +20,7 @@ import com.webobjects.foundation.NSKeyValueCoding;
  * is also responsible to parse "user-agent" header in a WORequest 
  * object and to get an appropriate browser object.
  * <p>
- * One concrete browser, ERXBasicBrowser, is defined in the 
- * ERExtensions framework. It not only implements the basic 
+ * ERXBasicBrowser not only implements the basic 
  * questions defined by ERXBrowser, but also more specific 
  * questions like <code>isIFrameSupported</code> and 
  * <code>willRenderNestedTablesFast</code>.

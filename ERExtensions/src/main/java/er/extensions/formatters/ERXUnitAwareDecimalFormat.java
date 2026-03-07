@@ -1,6 +1,5 @@
 //
 // ERXUnitAwareDecimalFormat.java
-// Project ERExtensions
 //
 // Created by tatsuya on Sun Oct 19 2002
 //

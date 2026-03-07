@@ -168,7 +168,7 @@ public class ERXConfigurationManager {
 
 	/**
 	 * Initializes the configuration manager. The framework principal
-	 * {@link ERXExtensions} calls this method when the ERExtensions framework is loaded.
+	 * Invoked when the ER Extensions framework is loaded.
 	 */
 	public void initialize() {
 		if (!_isInitialized) {
