@@ -36,6 +36,7 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 	protected WOAssociation _useDecimalNumber;
 	protected WOAssociation _blankIsNull;
 	protected WOAssociation _readonly;
+	protected WOAssociation _typeAss;
 
 	public ERXWOTextField(String tagname, NSDictionary nsdictionary, WOElement woelement) {
 		super("input", nsdictionary, woelement);
@@ -48,6 +49,7 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 		_useDecimalNumber = _associations.removeObjectForKey("useDecimalNumber");
 		_blankIsNull = _associations.removeObjectForKey("blankIsNull");
 		_readonly = _associations.removeObjectForKey("readonly");
+		_typeAss = _associations.removeObjectForKey("type");
 		
 		if(_dateFormat != null && _numberFormat != null) {
 			throw new WODynamicElementCreationException("<" + getClass().getName() + "> Cannot have 'dateFormat' and 'numberFormat' attributes at the same time.");
@@ -58,7 +60,25 @@ public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.
 	public String type() {
 		return "text";
 	}
-	   
+
+	/**
+	 * Overridden to support supplying an overridden "type" attribute for the field
+	 */
+	protected void _appendTypeAttributeToResponse(WOResponse response, WOContext context) {
+		final String type;
+
+		if( _typeAss != null ) {
+			type = (String) _typeAss.valueInComponent(context.component());
+		}
+		else {
+			type = this.hiddenInContext(context) ? "hidden" : type();
+		}
+
+		if (type != null && type.length() > 0) {
+			_appendTagAttributeAndValueToResponse(response, "type", type, false);
+		}
+	}
+
     @Override
     protected boolean isDisabledInContext(WOContext context) {
     	WOAssociation disabled = (WOAssociation) ERXPrivateKVC.privateValueForKey(this, "_disabled");
