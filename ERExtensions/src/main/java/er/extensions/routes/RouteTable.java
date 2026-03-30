@@ -14,6 +14,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXRequest;
+import er.extensions.foundation.ERXHTTPUtilities;
 
 /**
  * Route handling.
@@ -92,7 +93,7 @@ public class RouteTable {
 			routeURL = uri;
 		}
 
-		final String ipAddress = ((ERXRequest)request).remoteHostAddress();
+		final String ipAddress = ERXHTTPUtilities.ipAddressFromRequest(request);
 		final String userAgent = request.headerForKey( "user-agent" );
 
 		logger.info( "Handling URL: {};{};{}", routeURL, ipAddress, userAgent );
