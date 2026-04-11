@@ -45,6 +45,7 @@ import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
+import com.webobjects.foundation._NSUtilities;
 import com.webobjects.woextensions.error.WOExceptionPage;
 
 import er.extensions.ERXExtensions;
@@ -61,6 +62,7 @@ import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
+import er.extensions.routes.RouteAction;
 import er.extensions.routes.RouteRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
@@ -150,7 +152,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		// FIXME: Figure out why this is getting initialized here and document it // Hugi 2025-06-07
 		ERXStats.initStatisticsIfNecessary();
-		
+
+		// RouteAction is a very generic name for a direct action class, so we register it explicitly to prevent problems
+		_NSUtilities.setClassForName( RouteAction.class, "RouteAction" );
+
 		fixBaseURLs();
 
 		checkEnvironment();
