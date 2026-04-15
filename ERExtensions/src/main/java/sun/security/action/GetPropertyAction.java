@@ -3,7 +3,8 @@ package sun.security.action;
 import java.security.PrivilegedAction;
 
 /**
- * Replaces an old class from the Security Manager (and thus removed from modern JDKs). Used by NSTimeZone.
+ * Replaces a Security Manager JDK class removed in JDK 24.
+ * The class is used by at least NSTimeZone, which causes a WO app to fail on startup if this class is not present.
  */
 
 public class GetPropertyAction implements PrivilegedAction<String> {
@@ -12,7 +13,6 @@ public class GetPropertyAction implements PrivilegedAction<String> {
 
 	/**
 	 * Constructor taking the name of a system property to get the value of
-	 *
 	 */
 	public GetPropertyAction( String propertyName ) {
 		this._propertyName = propertyName;
