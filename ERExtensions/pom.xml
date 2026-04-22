@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>is.rebbi.parsley</groupId>
 			<artifactId>parsley</artifactId>
-			<version>1.4.0</version>
+			<version>1.4.1</version>
 		</dependency>
 		<!--
 			Dependency declared since JavaWebObjects needs it but fails to declare it as a
