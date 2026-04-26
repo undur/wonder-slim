@@ -9,11 +9,9 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
-import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
-import er.extensions.appserver.ERXRequest;
 import er.extensions.foundation.ERXHTTPUtilities;
 
 /**
@@ -120,16 +118,6 @@ public class RouteTable {
 			url = request.headerForKey( "redirect_url" );
 		}
 
-		return url;
-	}
-
-	/**
-	 * @return Route URL usable for development (i.e. invoking the direct action directly)
-	 * 
-	 * FIXME: Scheduled for deletion // Hugi 2026-01-28
-	 */
-	@Deprecated
-	public static String urlForDevelopment( String url, final WOContext context ) {
 		return url;
 	}
 
