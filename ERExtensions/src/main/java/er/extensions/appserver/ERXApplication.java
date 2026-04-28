@@ -403,6 +403,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass().getName(), nsBundle.isJar() ) );
 		}
 		System.out.println( "============= LOADED BUNDLES END ===============" );
+		
+		// FIXME: Hmm... Wasn't this logged before? Check. Temporary logging meanwhile // Hugi 2026-04-28
+		if( isDevelopmentMode() ) {
+			log.info("Direct connect URL: " + directConnectURL() );
+		}
 	}
 
 	/**
