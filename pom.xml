@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>undur</groupId>
-	<artifactId>undur-reactor</artifactId>
-	<version>8.0.0.slim-SNAPSHOT</version>
+	<groupId>is.rebbi.slim</groupId>
+	<artifactId>wonder-slim-reactor</artifactId>
+	<version>8.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>wonder-slim reactor</name>
 
@@ -20,9 +20,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<wonder.core.group>wonder.core</wonder.core.group>
-		<wonder.ajax.group>wonder.ajax</wonder.ajax.group>
-		<wonder.version>8.0.0.slim-SNAPSHOT</wonder.version>
+		<wonder.core.group>is.rebbi.slim</wonder.core.group>
+		<wonder.ajax.group>is.rebbi.slim</wonder.ajax.group>
+		<wonder.version>8.0.0-SNAPSHOT</wonder.version>
 
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
@@ -110,4 +110,18 @@
 			</snapshots>
 		</repository>
 	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>wocommunity.deployment</id>
+			<name>WOCommunity Maven2 Releases Repository</name>
+			<url>https://maven.wocommunity.org/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>wocommunity.deployment</id>
+			<uniqueVersion>false</uniqueVersion>
+			<name>WOCommunity Maven2 Snapshots Repository</name>
+			<url>https://maven.wocommunity.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>

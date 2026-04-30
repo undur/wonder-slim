@@ -4,12 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>undur</groupId>
-		<artifactId>undur-reactor</artifactId>
-		<version>8.0.0.slim-SNAPSHOT</version>
+		<groupId>is.rebbi.slim</groupId>
+		<artifactId>wonder-slim-reactor</artifactId>
+		<version>8.0.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>wonder.core</groupId>
 	<artifactId>ERExtensions</artifactId>
 	<name>ERExtensions Framework</name>
 	<packaging>woframework</packaging>

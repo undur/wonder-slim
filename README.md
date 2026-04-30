@@ -17,7 +17,7 @@ First, [here's a sample project](https://github.com/undur/wonder-slim-sample) th
  
 To use in an existing project:
 
- * Change the version for `ERExtensions` (and `Ajax`, if present) to `8.0.0.slim-SNAPSHOT` in your `pom.xml`.
+ * Change the version for `ERExtensions` (and `Ajax`, if present) to `8.0.0-SNAPSHOT` in your `pom.xml`.
  * You'll probably want `ERLoggingReload4j` framework as a dependency as well if you want logging. It's currently the only implementation of our "logging bridge".
  * Remove `JavaWOExtensions` and `WOOgnl` if present (`JavaWOExtensions` is now a part of `ERExtensions` and `WOOgnl` has been replaced by Parsley)
 
