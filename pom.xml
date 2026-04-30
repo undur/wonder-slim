@@ -4,7 +4,7 @@
 
 	<groupId>is.rebbi.slim</groupId>
 	<artifactId>wonder-slim-reactor</artifactId>
-	<version>8.0.0</version>
+	<version>8.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>wonder-slim reactor</name>
 
@@ -22,7 +22,7 @@
 
 		<wonder.core.group>is.rebbi.slim</wonder.core.group>
 		<wonder.ajax.group>is.rebbi.slim</wonder.ajax.group>
-		<wonder.version>8.0.0</wonder.version>
+		<wonder.version>8.0.1-SNAPSHOT</wonder.version>
 
 		<webobjects.group>com.webobjects</webobjects.group>
 		<webobjects.version>5.4.3</webobjects.version>
