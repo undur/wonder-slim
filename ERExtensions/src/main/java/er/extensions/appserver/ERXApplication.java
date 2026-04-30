@@ -404,9 +404,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 		System.out.println( "============= LOADED BUNDLES END ===============" );
 		
-		// FIXME: Hmm... Wasn't this logged before? Check. Temporary logging meanwhile // Hugi 2026-04-28
 		if( isDevelopmentMode() ) {
-			log.info("Direct connect URL: " + directConnectURL() );
+			// To make the URL conveniently double clickable, we put it on it's own line
+			System.out.println();
+			System.out.println( "============= DIRECT CONNECT URL ===============" );
+			System.out.println( directConnectURL() );
+			System.out.println( "================================================" );
 		}
 	}
 
