@@ -37,6 +37,7 @@ import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOComponentDefinition;
+import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
@@ -63,7 +64,6 @@ import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.routes.RouteAction;
-import er.extensions.routes.RouteRequestHandler;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 
@@ -170,7 +170,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
 		registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );			
 
-		setDefaultRequestHandler(new RouteRequestHandler());
+		// Set the routing request handler as the default request handler
+		setDefaultRequestHandler( new WODirectActionRequestHandler(RouteAction.class.getName(), "default", true) );
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 
