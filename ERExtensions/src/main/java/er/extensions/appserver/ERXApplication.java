@@ -398,20 +398,26 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		log.info( String.format( "Startup time: %s ms", elapsedMSSinceJVMStartup ) );
 
-		System.out.println( "============= LOADED BUNDLES START =============" );
+		System.out.println( "================ LOADED BUNDLES ================" );
 		System.out.println( String.format( "%-22s : %-65s : %s", "-- Name --", "-- Bundle class --", "-- isJar --" ) );
+
 		for( NSBundle nsBundle : NSBundle._allBundlesReally() ) {
 			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass().getName(), nsBundle.isJar() ) );
 		}
-		System.out.println( "============= LOADED BUNDLES END ===============" );
-		
-		if( isDevelopmentMode() ) {
+
+		if( isDevelopmentMode() && isDirectConnectEnabled()) {
 			// To make the URL conveniently double clickable, we put it on it's own line
+			// We're also shortening the direct connect URL to the hostname and the port. Because we can.
+			// CHECKME: We might also want to just make this the default directConnectURL? // Hugi 2026-05-02
+			final int firstSlashIndex = directConnectURL().substring(7).indexOf('/');
+			final String url = directConnectURL().substring(0,firstSlashIndex+8);
+
 			System.out.println();
 			System.out.println( "============= DIRECT CONNECT URL ===============" );
-			System.out.println( directConnectURL() );
-			System.out.println( "================================================" );
+			System.out.println( url );
 		}
+
+		System.out.println( "================================================" );
 	}
 
 	/**
