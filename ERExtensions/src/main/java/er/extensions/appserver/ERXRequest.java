@@ -407,18 +407,46 @@ public  class ERXRequest extends WORequest {
     private static class _LanguageComparator extends NSComparator {
         public _LanguageComparator() {}
 
+        /**
+         * Extract the quality factor from a single Accept-Language entry like {@code "en;q=0.9"}.
+         *
+         * Returns {@code 1.0} when no {@code ;q=} segment is present (per RFC default), or when parsing fails for any
+         * reason. Malformed real-world headers do show up in the wild (duplicated {@code ;q=...;q=...} segments, stray
+         * whitespace, etc.) and shouldn't crash the sort.
+         */
         private static float quality(String languageString) {
-            float result=0f;
-            if (languageString!=null) {
-                languageString = languageString.trim();
-                int semicolon=languageString.indexOf(';');
-                if (semicolon!=-1 &&
-                    languageString.length()>semicolon+2) {
-                    result=Float.parseFloat(languageString.substring(semicolon+1).trim().substring(2));
-                } else
-                    result=1.0f;
+            if (languageString == null) {
+                return 0f;
             }
-            return result;
+
+            languageString = languageString.trim();
+            final int semicolon = languageString.indexOf(';');
+
+            if (semicolon == -1) {
+                return 1.0f;
+            }
+
+            // Scan parameters after the first ';' looking for q=. Stop at the next ';' so a duplicate or trailing
+            // parameter can't poison the float parse.
+            final int qIndex = languageString.indexOf("q=", semicolon);
+
+            if (qIndex == -1) {
+                return 1.0f;
+            }
+
+            final int start = qIndex + 2;
+            int end = languageString.indexOf(';', start);
+
+            if (end == -1) {
+                end = languageString.length();
+            }
+
+            try {
+                return Float.parseFloat(languageString.substring(start, end).trim());
+            }
+            catch (NumberFormatException e) {
+                return 1.0f;
+            }
         }
         
         @Override
@@ -434,11 +462,12 @@ public  class ERXRequest extends WORequest {
 
     /**
      * Translates ("de", "en-us;q=0.33", "en", "en-gb;q=0.66") to ("de", "en_gb", "en-us", "en").
-     * 
+     *
      * @param languages NSArray of Strings
      * @return sorted NSArray of normalized Strings
      */
-    private static NSArray<String> fixAbbreviationArray(NSArray<String> languages) {
+    // Package-private for tests
+    static NSArray<String> fixAbbreviationArray(NSArray<String> languages) {
 
         try {
             languages=languages.sortedArrayUsingComparator(COMPARE_Qs);
