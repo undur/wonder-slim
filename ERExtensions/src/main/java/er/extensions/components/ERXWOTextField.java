@@ -29,7 +29,7 @@ import er.extensions.hacks.ERXPrivateKVC;
  * 
  * @author ak
  */
-public class ERXWOTextField extends WOInput /*ERXPatcher.DynamicElementsPatches.TextField*/ {
+public class ERXWOTextField extends WOInput {
 	protected WOAssociation _formatter;
 	protected WOAssociation _dateFormat;
 	protected WOAssociation _numberFormat;
