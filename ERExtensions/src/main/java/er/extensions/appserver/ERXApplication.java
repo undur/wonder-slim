@@ -42,7 +42,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
@@ -445,7 +444,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public void startRefusingSessions() {
 		log.info("Refusing new sessions");
-		NSLog.out.appendln("Refusing new sessions");
 		refuseNewSessions(true);
 	}
 
@@ -522,7 +520,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public void killInstance() {
 		log.info("Forcing exit");
-		NSLog.out.appendln("Forcing exit");
 		System.exit(1);
 	}
 
