@@ -72,7 +72,6 @@ public class WXOutlineEntry extends WOComponent {
 
 		if (!isExpanded()) {
 			Object currentItem = valueForBinding("item");
-			// NSLog(@"*** currentItem=%@", currentItem);
 			selectionPath = selectionPath.arrayByAddingObject(currentItem);
 		}
 
