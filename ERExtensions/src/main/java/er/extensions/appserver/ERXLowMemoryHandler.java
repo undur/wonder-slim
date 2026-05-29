@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
@@ -121,14 +120,12 @@ public class ERXLowMemoryHandler {
 				}
 				// We first log just in case the log4j call puts us in a bad state.
 				if (shouldQuit) {
-					NSLog.err.appendln("Ran out of memory, killing this instance");
 					log.error("Ran out of memory, killing this instance");
 					log.error("Ran out of memory, killing this instance", throwable);
 				}
 			}
 			else {
 				// We log just in case the log4j call puts us in a bad state.
-				NSLog.err.appendln("java.lang.Error \"" + throwable.getClass().getName() + "\" occured.");
 				log.error("java.lang.Error \"" + throwable.getClass().getName() + "\" occured.", throwable);
 			}
 			
