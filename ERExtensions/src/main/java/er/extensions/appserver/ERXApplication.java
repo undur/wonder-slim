@@ -629,6 +629,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Store the exception ID with the current thread for display in the exception page
 		WOExceptionPage.setExceptionID(exceptionID);
 
+		// Capture the component hierarchy that was rendering when the exception
+		// was thrown, while the originating context is still live. The exception
+		// page renders in a fresh request cycle where this context is gone, so
+		// we snapshot it here and carry it across via thread storage. The
+		// exception is passed too: if it carries a Parsley source location, the
+		// failing frame is resolved to a template file + line.
+		WOExceptionPage.setContextSnapshot(originalThrowable, context);
+
 		// Not a fatal exception, business as usual.
 		final NSDictionary extraInfo = ERXExceptionManager.Util.extraInformationForExceptionInContext(context);
 		final String extraInfoString = NSPropertyListSerialization.stringFromPropertyList(extraInfo);

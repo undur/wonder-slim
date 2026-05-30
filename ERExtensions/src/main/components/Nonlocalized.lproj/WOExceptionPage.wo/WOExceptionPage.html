@@ -4,109 +4,425 @@
 		<meta charset="utf-8">
 		<title>An exception occurred</title>
 		<style type="text/css">
-		
-			body, table, td, th {
-				font-family: sans-serif;
-				font-size: 12px;
+
+			:root {
+				--bg: #fbfbfc;
+				--panel: #ffffff;
+				--border: #e3e3e8;
+				--text: #2b2b30;
+				--muted: #9a9aa3;
+				--accent: #c0392b;
+				--main-tint: rgba(80, 200, 120, 0.14);
+				--main-edge: #38a169;
+				--workspace-tint: rgba(90, 140, 230, 0.10);
+				--workspace-edge: #5a7fd6;
+				--code-bg: #f5f5f7;
+				--error-line: #ffd5d9;
 			}
 
-			h3 {
-				display: inline-block;
+			* {
+				box-sizing: border-box;
 			}
 
-			table {
-				width: 100%;
-				border: 1px solid rgb(230,230,230);
-				border-collapse: collapse;
-			}
-
-			td,th {
-				margin: 0px;
-				padding: 5px 10px;
-				text-align: left;
-				white-space: nowrap;
-			}
-
-			th {
-				background-color: rgb(240,240,240);
-			}
-
-			
-			table tr:nth-child(odd) {
-				background-color: rgb(253,253,253);
-			}
-			
-			table tr:nth-child(even) {
-				background-color: rgb(248,248,248);
-			}
-
-			.filename-container {
-				font-family: monospace;
-				color: gray;
-			}
-
-			tr.success {
-				background-color: rgba(200,240,200,0.6) !important;
-			}
-
-			tr.info {
-				background-color: rgba(180,180,240,0.2) !important;
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+				font-size: 13px;
+				line-height: 1.45;
+				color: var(--text);
+				background: var(--bg);
+				margin: 0;
+				padding: 0;
 			}
 
 			.container {
-				width: 90%;
-				margin: auto;
+				/* Use the full viewport width up to a sane cap, so the
+				   side-by-side layout has room to breathe on wide screens
+				   without the lines getting uncomfortably long on very wide
+				   ones. Centered once it hits the cap. */
+				max-width: 1800px;
+				margin: 0 auto;
+				padding: 28px 32px 48px;
+			}
+
+			/* ---- Diagnosis layout ----
+
+			   Two columns:
+			     LEFT  (main column): hierarchy → HTML source → Java source →
+			                          Java stack, top to bottom.
+			     RIGHT (context rail): phase, failing binding, and room for more
+			                          context — spans the full height beside the
+			                          main column. */
+			.diagnosis-layout {
+				display: grid;
+				grid-template-columns: 7fr 3fr;
+				gap: 28px;
+				align-items: start;
+			}
+
+			.main-column {
+				min-width: 0; /* let the wide Java table scroll inside this column instead of blowing out the grid */
+			}
+
+			/* Space the main column's stacked sections apart. */
+			.main-column .src-container {
+				margin-bottom: 28px;
+			}
+
+			.context-rail {
+				min-width: 0;
+			}
+
+			/* Component containment hierarchy. The page sits at the top with the
+			   most indentation; each nested level steps back toward the left,
+			   and the failing component sits flush at the bottom. */
+			.component-hierarchy {
+				font-size: 13px;
+				/* The focal (failing) component is the last row and acts as the
+				   header for the HTML source below it, so this gap should match
+				   the Java filename header's gap to its source (.source-filename
+				   margin-bottom). */
+				margin-bottom: 6px;
+			}
+
+			.component-hierarchy > div {
+				padding: 2px 6px;
+			}
+
+			.hier-bracket {
+				color: var(--muted);
+			}
+
+			.hier-name {
+				font-size: 12.5px;
+			}
+
+			/* The component whose source we're showing (the failing one) is the
+			   header for the HTML source below it — style it to match the Java
+			   source's filename header (.source-filename + its bold name), so the
+			   two source blocks read identically. Wrapping components stay
+			   regular. */
+			.component-hierarchy > div.ctx-failing .hier-name {
+				font-size: 13px;
+				color: var(--text);
+				font-weight: 700;
+			}
+
+			/* No tree bracket on the focal component — like a filename header,
+			   it stands on its own rather than being another tree node. */
+			.component-hierarchy > div.ctx-failing .hier-bracket {
+				display: none;
+			}
+
+			/* Clickable hierarchy rows (open the component in the IDE). */
+			.component-hierarchy > div.clickable {
+				cursor: pointer;
+			}
+
+			.component-hierarchy > div.clickable:hover .hier-name {
+				text-decoration: underline;
+			}
+
+			.sidebar-block {
+				margin-bottom: 16px;
+			}
+
+			.sidebar-label {
+				font-size: 11px;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				color: var(--muted);
+				margin-bottom: 3px;
+			}
+
+			.sidebar-value {
+				font-size: 14px;
+				font-family: ui-monospace, "SF Mono", Menlo, monospace;
+				color: var(--text);
+				word-break: break-word;
+			}
+
+			/* Contain a too-wide table rather than letting it stretch the page. */
+			.table-scroll {
+				overflow-x: auto;
+			}
+
+			@media (max-width: 1180px) {
+				.diagnosis-layout {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			/* ---- Header: exception type + message ---- */
+
+			.exception-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				gap: 24px;
+				border-left: 4px solid var(--accent);
+				background: var(--panel);
+				border: 1px solid var(--border);
+				border-left: 4px solid var(--accent);
+				border-radius: 6px;
+				padding: 18px 22px;
+				margin-bottom: 22px;
+			}
+
+			.exception-type {
+				font-size: 20px;
+				font-weight: 600;
+				color: var(--accent);
+				margin: 0 0 6px;
+				word-break: break-word;
+			}
+
+			.exception-cause {
+				font-size: 14px;
+				font-weight: 400;
+				color: var(--muted);
+			}
+
+			.exception-message {
+				font-size: 15px;
+				margin: 0;
+				color: var(--text);
+				word-break: break-word;
+			}
+
+			.meta {
+				flex-shrink: 0;
+				text-align: right;
+				color: var(--muted);
+				font-size: 12px;
+				line-height: 1.5;
+				white-space: nowrap;
+			}
+
+			/* ---- Source preview ---- */
+
+			.source-filename {
+				font-family: ui-monospace, "SF Mono", Menlo, monospace;
+				font-size: 13px;
+				color: var(--text);
+				margin-bottom: 6px;
+			}
+
+			/* The filename header is a click target (opens the file at the error
+			   line), so it gets the same affordance as the clickable component
+			   names: pointer cursor, underline on hover. */
+			.clickable-filename {
+				cursor: pointer;
+				display: inline-block;
+			}
+
+			.clickable-filename:hover strong {
+				text-decoration: underline;
+			}
+
+			.source-filename .emoji {
+				margin-right: 6px;
+			}
+
+			/* The failing binding (e.g. value="$propValue") in the rail — which
+			   binding was being pulled when the render threw. The clearest thing
+			   in the rail: accent-coloured, heavier, and a touch larger (we have
+			   the room). Inherits .sidebar-value's mono font. */
+			.failing-binding {
+				color: var(--accent);
+				font-weight: 600;
+				font-size: 16px;
 			}
 
 			.src-container {
-				font-family: monospace;
-				font-size: small;
-				border: 1px solid rgb(230,230,230);
-				color: rgb(50,50,50);
-				padding: 0px;
-				margin: 10px 0px;
-				overflow: hidden;
+				font-family: ui-monospace, "SF Mono", Menlo, monospace;
+				font-size: 12.5px;
+				background: var(--code-bg);
+				border: 1px solid var(--border);
+				border-radius: 6px;
+				/* Dark, dark gray — reads as black until you look twice. Softens
+				   the code just slightly without losing contrast. */
+				color: #3a3a42;
+				padding: 8px 0;
+				margin: 0 0 24px;
+				overflow-x: auto;
 			}
 
 			.src-line {
 				white-space: pre;
 				display: block;
+				padding: 0 14px;
 			}
-			
-			.src-line>span {
+
+			.src-line>.lineno {
 				display: inline-block;
-				background-color: rgba(0,0,0,0.1);
-				padding: 0px 2px;					
-			}
-			
-			.odd-line {
-				background-color: rgb( 252,252,252);
-			}
-			
-			.even-line {
-				background-color: rgb( 245,245,245);
+				width: 3em;
+				margin-right: 12px;
+				text-align: right;
+				color: var(--muted);
+				user-select: none;
 			}
 
 			.error-line {
-				background-color: rgb(255,150,160);
+				background: var(--error-line);
 			}
-			
-			.time-and-id {
-				margin: 10px 0px 10px 10px;
-				padding: 10px;
-				float: right;
-				border: 1px solid rgb(180,180,180);
-				color: rgb(180,180,180);
+
+			.error-line>.lineno {
+				color: var(--accent);
+				font-weight: 600;
+			}
+
+			/* Source lines that can be opened in the IDE (dev mode). */
+			.src-line.clickable {
+				cursor: pointer;
+			}
+
+			.src-line.clickable:hover {
+				background: rgba(90, 140, 230, 0.16);
+			}
+
+			/* Keep the error line's red tint distinct even on hover. */
+			.src-line.error-line.clickable:hover {
+				background: #ffc2c8;
+			}
+
+			/* ---- Stack trace table ---- */
+
+			.section-label {
+				font-size: 12px;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				color: var(--muted);
+				margin: 0 0 8px;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				background: var(--panel);
+				border: 1px solid var(--border);
+				border-radius: 6px;
+				overflow: hidden;
+			}
+
+			th, td {
+				padding: 7px 12px;
+				text-align: left;
+				white-space: nowrap;
+			}
+
+			th {
+				background: #f2f2f4;
+				color: var(--muted);
+				font-weight: 600;
+				font-size: 11px;
+				text-transform: uppercase;
+				letter-spacing: 0.04em;
+				border-bottom: 1px solid var(--border);
+			}
+
+			td {
+				border-bottom: 1px solid #efeff2;
+			}
+
+			td.cue {
+				width: 1.6em;
+				text-align: center;
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+
+			td.mono, .mono {
+				font-family: ui-monospace, "SF Mono", Menlo, monospace;
+				font-size: 12px;
+			}
+
+			td.class-name {
+				color: var(--muted);
+			}
+
+			/* Frame categories — the whole point: make actionable frames pop. */
+
+			tr.frame-main {
+				background: var(--main-tint);
+				box-shadow: inset 3px 0 0 var(--main-edge);
+			}
+
+			tr.frame-main td {
+				font-weight: 500;
+			}
+
+			tr.frame-workspace {
+				background: var(--workspace-tint);
+				box-shadow: inset 3px 0 0 var(--workspace-edge);
+			}
+
+			/* Framework / library frames: dimmed so they recede into context. */
+			tr.frame-external {
+				color: var(--muted);
+			}
+
+			tr.frame-external td.class-name {
+				color: #c2c2c9;
+			}
+
+			/* Actionable rows: the whole row is a click target (opens the
+			   source in the IDE), so show it's clickable and highlight on hover. */
+			tr.clickable {
+				cursor: pointer;
+			}
+
+			tr.clickable:hover {
+				filter: brightness(0.96);
+			}
+
+			tr.frame-external.clickable:hover {
+				background: #f0f0f3;
+			}
+
+			td.lineno-cell {
+				font-family: ui-monospace, "SF Mono", Menlo, monospace;
+				font-size: 12px;
+				color: var(--muted);
+			}
+
+			/* On actionable rows the line number takes the category accent,
+			   reinforcing that the row leads somewhere. */
+			tr.frame-main.clickable td.lineno-cell {
+				color: var(--main-edge);
+				font-weight: 600;
+			}
+
+			tr.frame-workspace.clickable td.lineno-cell {
+				color: var(--workspace-edge);
+			}
+
+			.bundle-jar {
+				color: var(--muted);
+				font-size: 11.5px;
+			}
+
+			.footer {
 				text-align: right;
-				line-height: 1.1rem;
+				color: var(--muted);
+				font-size: 12px;
+				margin-top: 18px;
 			}
-			
-			.class-name {
-				color: gray;
+
+			.footer strong {
+				color: var(--text);
 			}
+
+			.legend {
+				display: flex;
+				gap: 18px;
+				font-size: 11.5px;
+				color: var(--muted);
+				margin: 0 0 10px;
+			}
+
 		</style>
 		<script>
-			// For communicating with the WOLips server
+			// For communicating with the dev server (Parsley or classic WOLips)
 			function invokeURL( url ) {
 				const Http = new XMLHttpRequest();
 				Http.open("GET", url);
@@ -116,42 +432,124 @@
 	</head>
 	<body>
 		<div class="container">
-			<h3><wo:str value="$exceptionParser.typeException" /><wo:if condition="$exception.cause"> <span style="font-size: smaller; color: gray">(<wo:str value="$exception.cause" />)</span></wo:if></h3> <div class="time-and-id"><wo:str value="$now" /><br /><wo:str value="$exceptionID" /></div>
-			<p><wo:str value="$exceptionParser.message" /></p>
-			<wo:if condition="$showSource">
-	<div class="filename-container"><strong><wo:str value="$firstLineOfTrace.fileName" /></strong></div>
-	<div class="src-container">
-	<wo:repetition list="$lines" item="$currentSourceLine" index="$currentSourceLineIndex"><wo:container elementName="span" class="$sourceLineClass"><span><wo:str value="$currentActualLineNumber" /></span> <wo:str value="$currentSourceLine" /></wo:container></wo:repetition>
-	</div>
+
+			<div class="exception-header">
+				<div>
+					<div class="exception-type">
+						<wo:str value="$exceptionParser.typeException" /><wo:if condition="$exception.cause"> <span class="exception-cause">(<wo:str value="$exception.cause" />)</span></wo:if>
+					</div>
+					<p class="exception-message"><wo:str value="$exceptionParser.message" /></p>
+				</div>
+				<div class="meta">
+					<wo:str value="$now" /><br />
+					<wo:str value="$exceptionID" />
+				</div>
+			</div>
+
+			<!--
+				The page is a two-column layout:
+
+				  LEFT (main column), top to bottom:
+				    1. Component hierarchy — the containment chain as an indented
+				       tree (page at top, failing component at bottom), each row
+				       clickable to open that component in the IDE.
+				    2. HTML (template) source — the component name doubles as its
+				       header.
+				    3. Java source.
+				    4. Java stack trace.
+
+				  RIGHT (context rail) — spans the full height beside the main
+				    column: request phase, failing binding, and room for more
+				    context we add later.
+			-->
+
+			<!-- Component context: hierarchy + HTML source on the left, the
+			     context rail on the right. Only this part is two-column; the
+			     Java source and stack below run full width. Dev-mode only, so the
+			     whole block is omitted in production rather than left empty. -->
+			<wo:if condition="$showDiagnosis">
+			<div class="diagnosis-layout">
+
+				<div class="main-column">
+
+					<wo:if condition="$showContextStack">
+						<div class="component-hierarchy">
+							<wo:repetition list="$contextFramesTopDown" item="$currentContextFrame" index="$currentContextFrameIndex">
+								<wo:container elementName="div" class="$currentContextFrameClass" style="$currentContextFrameIndentStyle" onclick="$currentContextFrameOnClick"><span class="hier-bracket">⌜ </span><span class="mono hier-name"><wo:str value="$currentContextFrame.componentName" /></span></wo:container>
+							</wo:repetition>
+						</div>
+					</wo:if>
+
+					<!-- HTML (template) source — the component name is its header. -->
+					<wo:if condition="$showTemplateSource">
+						<div class="src-container"><wo:repetition list="$templateLines" item="$currentTemplateLine" index="$currentTemplateLineIndex"><wo:container elementName="span" class="$templateLineClass" onclick="$currentTemplateLineOnClick"><span class="lineno"><wo:str value="$currentTemplateActualLineNumber" /></span><wo:str value="$currentTemplateLine" /></wo:container></wo:repetition></div>
+					</wo:if>
+
+				</div>
+
+				<!-- Context rail — beside the hierarchy + HTML source. -->
+				<div class="context-rail">
+					<wo:if condition="$showFailingBinding">
+						<div class="sidebar-block">
+							<div class="sidebar-label">Resolving binding</div>
+							<div class="sidebar-value failing-binding"><wo:str value="$failingBindingDescription" /></div>
+						</div>
+					</wo:if>
+					<wo:if condition="$showRequestPhase">
+						<div class="sidebar-block">
+							<div class="sidebar-label">Phase</div>
+							<div class="sidebar-value"><wo:str value="$requestPhase" /></div>
+						</div>
+					</wo:if>
+				</div>
+
+			</div>
 			</wo:if>
-			<table>
-				<tr>
-					<th>Package</th>
-					<th>File</th>
-					<th>Line #</th>
-					<th>Class</th>
-					<th>Method</th>
-					<th>Bundle / jar</th>
-				</tr>
-				<wo:repetition list="$exceptionParser.stackTrace" item="$currentErrorLine">
-					<wo:container elementName="tr" class="$currentRowClass">
-						<td><wo:str value="$currentErrorLine.packageName" /></td>
-						<td><wo:str value="$currentErrorLine.fileName" /></td>
-						<td><wo:link href="$currentLineURL" disabled="$currentLineDisabled"><wo:str value="$currentErrorLine.lineNumber" /></wo:link></td>
-						<td class="class-name"><wo:str value="$currentErrorLine.className" /></td>
-						<td><wo:str value="$currentErrorLine.methodName" /></td>
-						<td>
-							<wo:if condition="$currentBundle">
-								<wo:str value="$currentBundle.name" />
-							</wo:if>
-							<wo:if condition="$currentBundle" negate="$true">
-								<span style="color:rgb(150,150,150)"><wo:str value="$currentJarName" /></span>
-							</wo:if>
-						</td>
-					</wo:container>
-				</wo:repetition>
-			</table>
-			<div align="right"><h4 style="font-weight: normal; color: gray">The exception occurred in the application <strong><wo:str value="$application.name" /></strong></h4></div>
+
+			<!-- Java source — full width. -->
+			<wo:if condition="$showSource">
+				<wo:container elementName="div" class="source-filename clickable-filename" onclick="$javaFilenameOnClick"><strong><wo:str value="$firstWorkspaceLineOfTrace.fileName" /></strong></wo:container>
+				<div class="src-container"><wo:repetition list="$lines" item="$currentSourceLine" index="$currentSourceLineIndex"><wo:container elementName="span" class="$sourceLineClass" onclick="$currentSourceLineOnClick"><span class="lineno"><wo:str value="$currentActualLineNumber" /></span><wo:str value="$currentSourceLine" /></wo:container></wo:repetition></div>
+			</wo:if>
+
+			<!-- Java stack trace — full width. -->
+			<div class="legend">
+				<span>🟢 app</span>
+				<span>📄 workspace project</span>
+			</div>
+			<div class="table-scroll">
+				<table>
+					<tr>
+						<th class="cue"></th>
+						<th>Class</th>
+						<th>Method</th>
+						<th>Package</th>
+						<th>File</th>
+						<th>Line</th>
+						<th>Bundle</th>
+					</tr>
+					<wo:repetition list="$exceptionParser.stackTrace" item="$currentErrorLine">
+						<wo:container elementName="tr" class="$currentRowClass" onclick="$currentRowOnClick">
+							<td class="cue"><wo:str value="$currentFrameEmoji" /></td>
+							<td class="class-name mono"><wo:str value="$currentErrorLine.className" /></td>
+							<td class="mono"><wo:str value="$currentErrorLine.methodName" /></td>
+							<td class="mono"><wo:str value="$currentErrorLine.packageName" /></td>
+							<td class="mono"><wo:str value="$currentErrorLine.fileName" /></td>
+							<td class="lineno-cell"><wo:str value="$currentErrorLine.lineNumber" /></td>
+							<td>
+								<wo:if condition="$currentBundle">
+									<span class="bundle-jar"><wo:str value="$currentBundle.name" /></span>
+								</wo:if>
+								<wo:if condition="$currentBundle" negate="$true">
+									<span class="bundle-jar"><wo:str value="$currentJarName" /></span>
+								</wo:if>
+							</td>
+						</wo:container>
+					</wo:repetition>
+				</table>
+			</div>
+
+			<div class="footer">The exception occurred in the application <strong><wo:str value="$application.name" /></strong></div>
 		</div>
 	</body>
 </html>
