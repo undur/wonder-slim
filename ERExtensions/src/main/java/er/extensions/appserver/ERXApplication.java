@@ -405,11 +405,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		if( isDevelopmentMode() && isDirectConnectEnabled()) {
-			// To make the URL conveniently double clickable, we put it on it's own line
-			// We're also shortening the direct connect URL to the hostname and the port. Because we can.
-			// CHECKME: We might also want to just make this the default directConnectURL? // Hugi 2026-05-02
-			final int firstSlashIndex = directConnectURL().substring(7).indexOf('/');
-			final String url = directConnectURL().substring(0,firstSlashIndex+8);
+			// To make the URL conveniently double clickable, we put it on it's own line.
+			// We force the host to "localhost" because directConnectURL() typically resolves to
+			// the machine's mDNS name (e.g. my-macbook.local) which is awkward to connect to
+			// from the same box (firewall prompts, mDNS round-trips). localhost always works.
+			// WOApplication.port() can be -1 here (it's only set when -WOPort was passed); the
+			// bound port lives on the adaptor itself. This is how WO's own directConnectURL()
+			// sources the port (see WOApplication.directConnectURLForAdaptor).
+			final String url = "http://localhost:" + defaultAdaptor().port();
 
 			System.out.println();
 			System.out.println( "============= DIRECT CONNECT URL ===============" );
