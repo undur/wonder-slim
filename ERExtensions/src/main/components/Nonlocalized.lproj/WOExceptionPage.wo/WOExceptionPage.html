@@ -198,6 +198,32 @@
 				white-space: nowrap;
 			}
 
+			/* ---- WO context → Java context divider ----
+
+			   Only shown when the component hierarchy is followed directly by
+			   the Java source with no HTML template between them (e.g. an
+			   exception thrown in a constructor). Without it, the Java filename
+			   header reads like the next node in the component tree. A hairline
+			   rule plus a small label make the Java block read as its own
+			   section, on a different axis from the WO containment chain. */
+			.java-context-divider {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin: 24px 0 16px;
+				color: var(--muted);
+				font-size: 11px;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+			}
+
+			.java-context-divider::after {
+				content: "";
+				flex: 1;
+				height: 1px;
+				background: var(--border);
+			}
+
 			/* ---- Source preview ---- */
 
 			.source-filename {
@@ -504,6 +530,14 @@
 				</div>
 
 			</div>
+			</wo:if>
+
+			<!-- Divider: the component hierarchy above describes the WO render
+			     context; everything below is the Java location. Shown only when
+			     there's no HTML template source between them (e.g. a constructor
+			     exception), so the Java block doesn't read as the next tree node. -->
+			<wo:if condition="$showJavaContextDivider">
+				<div class="java-context-divider">Java</div>
 			</wo:if>
 
 			<!-- Java source — full width. -->

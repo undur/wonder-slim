@@ -614,6 +614,26 @@ public class WOExceptionPage extends ERXComponent {
 	}
 
 	/**
+	 * @return true if a labeled divider should separate the component-context
+	 *         block from the full-width Java source/stack below it.
+	 *         <p>
+	 *         When a template was rendering, the HTML source block sits between
+	 *         the component hierarchy and the Java source, so the two axes
+	 *         (WO render context vs. Java location) are already visually
+	 *         distinct. But when the failure happened in Java <em>before</em>
+	 *         any template rendered — most notably an exception thrown in a
+	 *         component's constructor — there is no HTML source, so the Java
+	 *         filename header butts directly against the hierarchy and reads
+	 *         like the next node in the component tree. In that case we draw an
+	 *         explicit divider (with a "Java location" label) so the Java block
+	 *         is unmistakably a separate section, not a continuation of the
+	 *         containment chain.
+	 */
+	public boolean showJavaContextDivider() {
+		return showContextStack() && !showTemplateSource() && showSource();
+	}
+
+	/**
 	 * @return The request-handling phase the exception occurred in ("append to
 	 *         response", "take values from request", "invoke action"), or null
 	 *         if it couldn't be determined.
