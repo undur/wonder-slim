@@ -638,7 +638,19 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// we snapshot it here and carry it across via thread storage. The
 		// exception is passed too: if it carries a Parsley source location, the
 		// failing frame is resolved to a template file + line.
-		WOExceptionPage.setContextSnapshot(originalThrowable, context);
+		//
+		// We pass the ORIGINAL exception here, not originalThrowable. Parsley
+		// attaches its source/binding markers (ParsleySourceLocation /
+		// ParsleyBindingLocation) as *suppressed* throwables on the outer wrapper
+		// frames (e.g. the NSForwardException produced when a component constructor
+		// throws). originalThrowable has been unwrapped to the root cause via
+		// getCause(), which discards those outer frames and their suppressed
+		// markers — so handing it the root would lose the location. setContextSnapshot
+		// walks the cause chain itself (and only reads the throwable for location/
+		// binding/phase detection, never for the displayed message or type), so giving
+		// it the un-unwrapped exception strictly widens what it can find without
+		// affecting anything shown on the page.
+		WOExceptionPage.setContextSnapshot(exception, context);
 
 		// Not a fatal exception, business as usual.
 		final NSDictionary extraInfo = ERXExceptionManager.Util.extraInformationForExceptionInContext(context);
