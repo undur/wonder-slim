@@ -1,6 +1,7 @@
 package er.extensions.logging;
 
 import java.util.Enumeration;
+import java.util.List;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
@@ -27,5 +28,33 @@ public class ERXTemporaryLoggingBridge {
 				app.activateOptions();
 			}
 		}
+	}
+
+	/**
+	 * Attaches the in-memory ring-buffer appender so recent log output can be read
+	 * back (development convenience). Idempotent. Delegated here so callers in
+	 * ERExtensions can reach it through the same reflective bridge they already use,
+	 * without a compile dependency on this logging backend.
+	 *
+	 * @return true if log capture is active after this call
+	 */
+	public static boolean installLogCapture() {
+		return ERXRingBufferAppender.install();
+	}
+
+	/**
+	 * @return true if the ring-buffer log capture appender is attached.
+	 */
+	public static boolean isLogCaptureInstalled() {
+		return ERXRingBufferAppender.isInstalled();
+	}
+
+	/**
+	 * @return a snapshot of recently captured log lines (oldest first), filtered by
+	 *         {@code contains} and limited to the last {@code tail} lines. See
+	 *         {@link ERXRingBufferAppender#snapshot(String, int)}.
+	 */
+	public static List<String> logSnapshot( final String contains, final int tail ) {
+		return ERXRingBufferAppender.snapshot( contains, tail );
 	}
 }

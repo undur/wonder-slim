@@ -167,7 +167,22 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
-		registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );			
+		registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );
+
+		// Development only: capture recent log output and expose it for reading over HTTP
+		// (.../App.woa/log), so external tooling can read the app's logs instead of a
+		// human copying the IDE console.
+		//
+		// Capture attaches a bounded in-memory appender to the logging backend's root
+		// logger; it does NOT touch System.out/System.err, deliberately — in this stack
+		// NSLog bridges the streams INTO log4j and log4j's ConsoleAppender writes back OUT
+		// to System.out, so teeing the streams would sit inside a feedback loop. Capturing
+		// at the appender — the single point where all logging converges — sidesteps that.
+		// It runs after reInitConsoleAppenders() (above) so the root logger is configured.
+		if( isDevelopmentModeSafe() ) {
+			ERXConsoleCapture.install();
+			registerRequestHandler( new ERXConsoleLogRequestHandler(), ERXConsoleLogRequestHandler.KEY );
+		}
 
 		// Set the routing request handler as the default request handler
 		setDefaultRequestHandler( new WODirectActionRequestHandler(RouteAction.class.getName(), "default", true) );
