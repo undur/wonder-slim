@@ -20,7 +20,7 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 	 * FIXME: Temporarily inserted while we test // Hugi 2026-06-03
 	 */
 	@Deprecated
-	public static final boolean USE_NEW_URLS = true;
+	public static final boolean USE_NEW_URLS = false;
 
 	/**
 	 * The route used for serving resources
