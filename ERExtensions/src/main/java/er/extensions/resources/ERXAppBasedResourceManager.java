@@ -17,6 +17,17 @@ import er.extensions.appserver.ERXWOContext;
 public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 
 	/**
+	 * FIXME: Temporarily inserted while we test // Hugi 2026-06-03
+	 */
+	@Deprecated
+	public static final boolean USE_NEW_URLS = true;
+
+	/**
+	 * The route used for serving resources
+	 */
+	public static final String URL_ROUTE_PREFIX = "/wres/";
+
+	/**
 	 * Generates a URL for the given resource. Format: .../App.woa/res/[framework]/[resourceName]?languages=[lang1,lang2,lang3]
 	 * 
 	 * FIXME: Handle localized resources // Hugi 2025-10-04
@@ -27,7 +38,11 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 		if( frameworkName == null ) {
 			frameworkName = "app";
 		}
-		
+
+		if( USE_NEW_URLS ) {
+			return URL_ROUTE_PREFIX + frameworkName + "/" + resourceName;
+		}
+
 		return context( request ).urlWithRequestHandlerKey(ERXAppBasedResourceRequestHandler.KEY, frameworkName + "/" + resourceName, null);
 	}
 

@@ -63,6 +63,7 @@ import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.routes.RouteAction;
+import er.extensions.routes.RouteTable;
 import er.extensions.statistics.ERXStats;
 import parsley.Parsley;
 
@@ -165,9 +166,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		_lowMemoryHandler = new ERXLowMemoryHandler();
 		_exceptionManager = new ERXExceptionManager();
 
+		final ERXAppBasedResourceRequestHandler resourceRequestHandler = new ERXAppBasedResourceRequestHandler();
+
+		if( ERXAppBasedResourceManager.USE_NEW_URLS ) {
+			RouteTable.defaultRouteTable().map(ERXAppBasedResourceManager.URL_ROUTE_PREFIX + "*", ri -> resourceRequestHandler.handleRequest( ri.request() ) );
+		}
+
 		registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
-		registerRequestHandler( new ERXAppBasedResourceRequestHandler(), ERXAppBasedResourceRequestHandler.KEY );
+		registerRequestHandler( resourceRequestHandler, ERXAppBasedResourceRequestHandler.KEY );
 
 		// Development only: capture recent log output and expose it for reading over HTTP
 		// (.../App.woa/log), so external tooling can read the app's logs instead of a

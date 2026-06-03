@@ -53,7 +53,24 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	@Override
 	public WOResponse handleRequest(WORequest request) {
 		
-		final String path = request.requestHandlerPath();
+		final String path;
+
+		if( ERXAppBasedResourceManager.USE_NEW_URLS ) {
+			// WO returns the URI including the query string, so we strip it ourselves
+			// (e.g. cache-busters like /wres/app/app.css?v=3 must still resolve the file)
+			String uri = request.uri();
+
+			final int questionMarkIndex = uri.indexOf('?');
+
+			if( questionMarkIndex >= 0 ) {
+				uri = uri.substring(0, questionMarkIndex);
+			}
+
+			path = uri.substring(ERXAppBasedResourceManager.URL_ROUTE_PREFIX.length());
+		}
+		else {
+			path = request.requestHandlerPath();
+		}
 
 		if( _useCache ) {
 			return _cache.computeIfAbsent(path, _ -> new CachedResourceResponse( responseForPath(path) )).streamingResponse();
