@@ -412,6 +412,16 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public final void didFinishLaunching(NSNotification n) {
 		didFinishLaunching();
+
+		// Development only: announce our port to the Eclipse dev server so external
+		// tooling/agents can discover where this app runs by name (…/apps) rather than
+		// guessing. Best-effort and on a background thread — a missing dev server never
+		// affects startup. Done here, not in the constructor, because the listening port
+		// isn't reliably bound until launch has finished.
+		if( isDevelopmentModeSafe() ) {
+			ERXDevServerRegistration.registerAtStartup();
+		}
+
 		ERXStats.logStatisticsForOperation(statsLog, "sum");
 
 		// Time since the actual JVM process was started (when the process began, before any class initialization including main() or an app’s static initialization) 
