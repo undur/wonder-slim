@@ -53,25 +53,98 @@ public class ERXRingBufferAppender extends AppenderSkeleton {
 	/** The ring buffer of recent lines. Guarded by itself. */
 	private final Deque<String> _lines = new ArrayDeque<>(MAX_LINES);
 
+	/** The appender's name on the root logger; also used to detect detachment. */
+	private static final String APPENDER_NAME = "ERXRingBuffer";
+
+	/** Set once we've subscribed to re-attach on logging reconfiguration. */
+	private static boolean _reattachObserverRegistered;
+
 	public ERXRingBufferAppender() {
 		setLayout(new PatternLayout(CAPTURE_PATTERN));
-		setName("ERXRingBuffer");
+		setName(APPENDER_NAME);
 	}
 
 	/**
-	 * Attaches a shared ring-buffer appender to the root logger, if not already
-	 * attached. Idempotent.
+	 * Attaches the shared ring-buffer appender to the root logger and keeps it
+	 * attached across logging reconfigurations.
+	 *
+	 * <p>Idempotent, and deliberately robust against detachment: logging gets
+	 * reconfigured several times during startup (ERXExtensions / ERXConfigurationManager
+	 * each call {@code configureLogging}, which begins with
+	 * {@code LogManager.resetConfiguration()} — that strips <em>all</em> appenders from
+	 * <em>all</em> loggers, including this one). A single attach in the app constructor
+	 * therefore survives only until the next reset, which is why capture used to go
+	 * silent after startup. To stay attached, we (a) re-add ourselves here if we've been
+	 * detached, and (b) subscribe once to {@code ConfigurationDidChangeNotification},
+	 * which {@code configureLogging} posts at the very end (after the reset and after it
+	 * re-adds its own console appenders) — so every future reconfiguration re-attaches us.
 	 *
 	 * @return true if capture is active after this call
 	 */
 	public static synchronized boolean install() {
-		if (_installed != null) {
-			return true;
+		if (_installed == null) {
+			_installed = new ERXRingBufferAppender();
 		}
-		final ERXRingBufferAppender appender = new ERXRingBufferAppender();
-		Logger.getRootLogger().addAppender(appender);
-		_installed = appender;
+		reattachIfNeeded();
+		registerReattachObserver();
 		return true;
+	}
+
+	/** Re-adds the appender to the root logger if a reset removed it. */
+	private static synchronized void reattachIfNeeded() {
+		if (_installed == null) {
+			return;
+		}
+		final Logger root = Logger.getRootLogger();
+		if (root.getAppender(APPENDER_NAME) == null) {
+			root.addAppender(_installed);
+		}
+	}
+
+	/**
+	 * Subscribes (once) to the configuration-changed notification so we re-attach after
+	 * any logging reconfiguration. The notification name matches the one
+	 * {@code configureLogging} posts at the end of every reconfiguration.
+	 */
+	private static synchronized void registerReattachObserver() {
+		if (_reattachObserverRegistered) {
+			return;
+		}
+		// Mark registered up front and guard the call: console capture is a dev
+		// convenience and must never be able to abort app startup. If wiring the
+		// re-attach observer fails for any reason, we degrade to "captures until the
+		// next logging reset" rather than taking the app down.
+		_reattachObserverRegistered = true;
+		try {
+			com.webobjects.foundation.NSNotificationCenter.defaultCenter().addObserver(
+					new ReattachObserver(),
+					new com.webobjects.foundation.NSSelector("configurationDidChange", new Class[] { com.webobjects.foundation.NSNotification.class }),
+					er.extensions.foundation.ERXConfigurationManager.ConfigurationDidChangeNotification,
+					null);
+		}
+		catch (Throwable t) {
+			System.err.println("ERXRingBufferAppender: could not register re-attach observer (console capture may stop after a logging reconfiguration): " + t);
+		}
+	}
+
+	/**
+	 * Notification target for re-attaching after logging reconfiguration. Must be a
+	 * named, accessible class with a public method — NSSelector reflection cannot invoke
+	 * a method on an anonymous inner class (the enclosing class member isn't accessible),
+	 * which throws at notification time and aborts startup.
+	 */
+	public static final class ReattachObserver {
+		public void configurationDidChange(com.webobjects.foundation.NSNotification n) {
+			// Never let a re-attach problem propagate: this runs inside the logging
+			// reconfiguration's notification dispatch, and an exception here would abort
+			// that (and startup, as it once did).
+			try {
+				reattachIfNeeded();
+			}
+			catch (Throwable t) {
+				System.err.println("ERXRingBufferAppender: re-attach after logging reconfiguration failed: " + t);
+			}
+		}
 	}
 
 	public static boolean isInstalled() {
