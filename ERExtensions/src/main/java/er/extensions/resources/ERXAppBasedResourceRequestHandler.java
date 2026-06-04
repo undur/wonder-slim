@@ -22,11 +22,12 @@ import er.extensions.appserver.ERXApplication;
  * Work to do before labeling this "totally ready":
  * 
  * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
+ * FIXME: Support range requests (Range / 206 Partial Content / Accept-Ranges). We currently always serve a full 200 with the whole resource, ignoring Range headers. This breaks media: a <video> element streams via range requests, and browsers tend not to cache range-incapable media — so e.g. an autoplay marketing video re-downloads in full on every refresh, and seeking is degraded. // Hugi 2026-06-04
  * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
  * TODO: Handle localized resources // Hugi 2025-10-04
  * TODO: ERXResourceManager's "resource versioning" is a nice idea, we could do with something like that // Hugi 2025-10-05
  * TODO: Along the lines of versioning, we should see if serving ETag headers is worth the effort // Hugi 2025-11-16
- * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05   
+ * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05
  */
 
 public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
