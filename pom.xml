@@ -12,6 +12,7 @@
 		<module>ERExtensions</module>
 		<module>ERLoggingReload4j</module>
 		<module>Ajax</module>
+		<module>AjaxPlayground</module>
 	</modules>
 
 	<properties>

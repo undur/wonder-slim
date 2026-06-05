@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: Focus preservation</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		label { display: block; margin: .8rem 0 .2rem; font-weight: 600; }
+		input[type=text] { font-size: 1rem; padding: .4rem; width: 20rem; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.greeting { font-size: 1.1rem; color: #2b6cb0; margin-top: 1rem; }
+		.toggle { margin: 1rem 0; padding: .6rem; background: #fff7e6; border: 1px solid #f0c36d; border-radius: 6px; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<body>
+	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<h1>Focus &amp; input-state preservation</h1>
+	<p class="lead">Type in a field. On each change the container below refreshes and the greeting is recomputed server-side. With <strong>morph on</strong>, your cursor stays put; with <strong>morph off</strong>, focus is lost on every keystroke.</p>
+
+	<div class="toggle">
+		<wo:form>
+			<label><wo:checkbox checked="$morph" id="morphToggle" /> morph this container (uncheck to compare classic innerHTML replacement)</label>
+			<wo:AjaxObserveField observeFieldID="morphToggle" updateContainerID="focusContainer" />
+		</wo:form>
+	</div>
+
+	<wo:AjaxUpdateContainer id="focusContainer" morph="$morph">
+		<wo:form>
+			<wo:AjaxObserveField updateContainerID="focusContainer" observeDelay="0.3">
+				<label>First name</label>
+				<wo:textfield value="$firstName" id="firstNameField" />
+				<label>Last name</label>
+				<wo:textfield value="$lastName" id="lastNameField" />
+			</wo:AjaxObserveField>
+			<div class="box">
+				<div class="greeting"><wo:str value="$computedGreeting" /></div>
+				<p class="lead">Current morph mode: <strong><wo:str value="$morph" /></strong></p>
+			</div>
+		</wo:form>
+	</wo:AjaxUpdateContainer>
+</body>
+</html>

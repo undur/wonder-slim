@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Ajax Playground</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 60rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		h2 { margin-top: 2rem; color: #444; }
+		.lead { color: #666; }
+		ul { line-height: 1.9; }
+		a { color: #2b6cb0; text-decoration: none; }
+		a:hover { text-decoration: underline; }
+		code { background: #f2f2f2; padding: 1px 4px; border-radius: 3px; }
+	</style>
+</head>
+<body>
+	<h1>Ajax Playground</h1>
+	<p class="lead">A login-free, database-free harness for exercising the Ajax framework - the test surface for DOM morphing becoming the default update mechanism, and for the wider Ajax cleanup.</p>
+
+	<h2>Scenario pages (danger matrix)</h2>
+	<p class="lead">Each targets a specific risk identified when making morph the default. Compare <code>morph="$true"</code> vs classic replacement, and watch focus / observer / request behaviour.</p>
+	<ul>
+		<li><wo:link action="$scenarioFocus">Focus &amp; input state preservation</wo:link> - does typing survive an update?</li>
+		<li><wo:link action="$scenarioAccumulation">Observer / request accumulation</wo:link> - do repeated updates stack observers?</li>
+		<li><wo:link action="$scenarioNested">Nested update containers</wo:link> - inner containers refreshed by an outer morph.</li>
+		<li><wo:link action="$scenarioUuidIds">UUID / dashed element ids</wo:link> - the eval-global throw class.</li>
+		<li><wo:link action="$scenarioScripts">Inline script execution</wo:link> - do per-update scripts still run under morph?</li>
+	</ul>
+
+	<h2>Component gallery</h2>
+	<p class="lead">One page per component, each inside an update container with a morph toggle, for behavioural and regression testing.</p>
+	<ul>
+		<li><wo:link action="$galleryUpdateContainer">AjaxUpdateContainer</wo:link></li>
+	</ul>
+</body>
+</html>
