@@ -72,8 +72,13 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 				String nextUpdateContainerID = updateContainerIDEnum.next();
 				// PROTOTYPE FUNCTIONS
 				Object evalScripts = ERXComponentUtilities.valueForBinding("evalScripts", "true", _associations, component);
+				// No explicit insertion: let the Ajax.Updater reach the (overridden) updateContent so a
+				// target with data-morph="true" is morphed, and others fall to receiver.update() - which
+				// is byte-identical to the Element.update that used to be hard-coded here. Hard-coding
+				// insertion previously forced innerHTML replacement and silently bypassed morphing (and
+				// also ignored the target container's own effect/insertion bindings).
 				response.appendContentString("if ($wi('" + nextUpdateContainerID + "')) { ");
-				response.appendContentString("new Ajax.Updater('" + nextUpdateContainerID + "', $wi('" + nextUpdateContainerID + "').getAttribute('data-updateUrl'), {" + " evalScripts: " + evalScripts + ", insertion: Element.update, method: 'get' });\n");
+				response.appendContentString("new Ajax.Updater('" + nextUpdateContainerID + "', $wi('" + nextUpdateContainerID + "').getAttribute('data-updateUrl'), {" + " evalScripts: " + evalScripts + ", method: 'get' });\n");
 				response.appendContentString(" }");
 			}
 			AjaxUtils.appendScriptFooter(response);
