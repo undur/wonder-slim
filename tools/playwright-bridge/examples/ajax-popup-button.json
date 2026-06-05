@@ -1,0 +1,107 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryAjaxPopUpButton",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "read",
+      "name": "markerClass",
+      "selector": "select#fruitSelect",
+      "what": "attribute",
+      "attr": "class"
+    },
+    {
+      "do": "read",
+      "name": "enhanced",
+      "selector": "wonder-select .ws-trigger",
+      "what": "exists"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-search"
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Stra",
+      "delay": 30
+    },
+    {
+      "do": "wait",
+      "ms": 300
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 900
+    },
+    {
+      "do": "read",
+      "name": "echo",
+      "selector": "#echo",
+      "what": "text"
+    },
+    {
+      "do": "click",
+      "selector": "#refreshLink"
+    },
+    {
+      "do": "wait",
+      "ms": 1000
+    },
+    {
+      "do": "read",
+      "name": "survivedMorph",
+      "selector": "wonder-select .ws-trigger",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "valueAfterMorph",
+      "selector": "wonder-select .ws-trigger",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "element added ajax-popup-button class",
+      "that": "markerClass",
+      "contains": "ajax-popup-button"
+    },
+    {
+      "do": "assert",
+      "name": "widget auto-enhanced (no manual include)",
+      "that": "enhanced",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "native change reached server",
+      "that": "echo",
+      "contains": "Strawberry"
+    },
+    {
+      "do": "assert",
+      "name": "widget survived container morph",
+      "that": "survivedMorph",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "value intact after morph",
+      "that": "valueAfterMorph",
+      "contains": "Strawberry"
+    }
+  ]
+}
