@@ -1,0 +1,138 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryWonderSelect",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "read",
+      "name": "enhanced",
+      "selector": "wonder-select .ws-trigger",
+      "what": "exists"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-search"
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Man",
+      "delay": 30
+    },
+    {
+      "do": "wait",
+      "ms": 300
+    },
+    {
+      "do": "read",
+      "name": "filteredCount",
+      "selector": "wonder-select .ws-option",
+      "what": "count"
+    },
+    {
+      "do": "marker",
+      "label": "pick"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 900
+    },
+    {
+      "do": "read",
+      "name": "triggerText",
+      "selector": "wonder-select .ws-trigger",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "echoText",
+      "selector": "#echo",
+      "what": "text"
+    },
+    {
+      "do": "marker",
+      "label": "morph"
+    },
+    {
+      "do": "click",
+      "selector": "#refreshLink"
+    },
+    {
+      "do": "wait",
+      "ms": 1000
+    },
+    {
+      "do": "read",
+      "name": "triggerAfterMorph",
+      "selector": "wonder-select .ws-trigger",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "triggerTextAfterMorph",
+      "selector": "wonder-select .ws-trigger",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "refreshCount",
+      "selector": "#refreshCount",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "select was enhanced into wonder-select",
+      "that": "enhanced",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "search filtered to Mango",
+      "that": "filteredCount",
+      "atMost": 1
+    },
+    {
+      "do": "assert",
+      "name": "pick set trigger label",
+      "that": "triggerText",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "native change reached server (echo)",
+      "that": "echoText",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "widget SURVIVED the morph",
+      "that": "triggerAfterMorph",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "value intact after morph",
+      "that": "triggerTextAfterMorph",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "container actually morphed",
+      "that": "refreshCount",
+      "equals": "1"
+    }
+  ]
+}

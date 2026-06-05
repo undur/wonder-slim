@@ -6,6 +6,7 @@ import com.webobjects.appserver.WOContext;
 import er.extensions.components.ERXComponent;
 
 import ajaxplayground.components.gallery.GalleryUpdateContainer;
+import ajaxplayground.components.gallery.GalleryWonderSelect;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioNested;
@@ -49,5 +50,9 @@ public class Main extends ERXComponent {
 
 	public WOActionResults galleryUpdateContainer() {
 		return pageWithName( GalleryUpdateContainer.class );
+	}
+
+	public WOActionResults galleryWonderSelect() {
+		return pageWithName( GalleryWonderSelect.class );
 	}
 }
