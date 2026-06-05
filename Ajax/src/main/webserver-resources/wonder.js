@@ -545,6 +545,34 @@ var AjaxSubmitButton = {
 	},
 	
 	observeField: function(updateContainerID, formFieldID, observeFieldFrequency, partial, observeDelay, options) {
+		// Idempotency guard for morphing.
+		//
+		// When an AjaxObserveField (especially the descendant-observing form, which has no
+		// observeFieldID) lives inside a morph="true" container, its registration script
+		// re-runs on every refresh. Under the old innerHTML replacement the observed input
+		// nodes were destroyed and recreated each time, so their observers died with them
+		// and exactly one fresh observer was attached. Morphing preserves the input nodes,
+		// so without this guard each refresh would attach ANOTHER observer to the same
+		// element - they accumulate, and the Nth edit fires N duplicate requests (worse the
+		// more fields/rows there are). Prototype's Form.Element.EventObserver has no stop()
+		// and binds an anonymous handler it never stores, so the attach cannot be cleanly
+		// undone; the robust fix is to not attach twice in the first place.
+		//
+		// We mark the element with the set of observation signatures already applied. The
+		// mark is a plain JS property, so Idiomorph preserves it on a kept node but a
+		// genuinely-new node (e.g. a row added to the list) starts fresh and gets observed.
+		var __field = $(formFieldID);
+		if (__field) {
+			var __signature = (partial ? 'p' : (updateContainerID != null ? 'u:' + updateContainerID : 'r'))
+				+ '|f:' + observeFieldFrequency + '|d:' + observeDelay;
+			var __observed = __field._ajaxObservedSignatures || (__field._ajaxObservedSignatures = {});
+			if (__observed[__signature]) {
+				// This exact observer is already attached to this preserved element - skip.
+				return;
+			}
+			__observed[__signature] = true;
+		}
+
 		var submitFunction;
 		if (partial) {
 			// We need to cheat and make the WOForm that contains the form action appear to have been
