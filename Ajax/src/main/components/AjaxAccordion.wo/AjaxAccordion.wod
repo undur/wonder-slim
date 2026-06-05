@@ -5,6 +5,7 @@ AccordionDiv : WOGenericContainer {
 	elementName = "div";
 	id = accordionID;
 	class = "accordion";
+	otherTagString = "data-morph-ignore=\"true\"";
 }
 
 AccordionContainerID : WOString {

@@ -103,7 +103,10 @@ public class AjaxSlider extends AjaxComponent {
         	options.setObjectForKey(valuesBuffer.toString(), "values");
         }
 
-        res.appendContentString("<div class=\"tracker\" id=\""+
+        // data-morph-ignore: Control.Slider positions the handle via client-mutated inline style
+        // that isn't in the server HTML; without this a morph of an enclosing container would
+        // reconcile the handle back to its initial position. See AjaxMorph.callbacks in wonder.js.
+        res.appendContentString("<div class=\"tracker\" data-morph-ignore=\"true\" id=\""+
                 _trackerId+"\"><div class=\"handle\" id=\""+
                 _handleId+"\"></div></div>");
         AjaxUtils.appendScriptHeader(res);

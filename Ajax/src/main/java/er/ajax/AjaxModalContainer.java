@@ -181,6 +181,10 @@ public class AjaxModalContainer extends AjaxDynamicElement {
 
         	appendTagAttributeToResponse(response, "id", containerID);
         	appendTagAttributeToResponse(response, "style", "display:none;");
+        	// data-morph-ignore: in inline (href="#id") mode iBox relocates this node to <body>;
+        	// once moved it is absent from the server HTML, so a morph would otherwise remove it
+        	// (or collide on the duplicated id). See AjaxMorph.callbacks in wonder.js.
+        	appendTagAttributeToResponse(response, "data-morph-ignore", "true");
         	response.appendContentString(">");
         	appendChildrenToResponse(response, context);
         	response.appendContentString("</div>");

@@ -27,6 +27,9 @@ UpdateContainer : AjaxUpdateContainer {
 	evalScripts = true;
 	onLoading = ^onLoading;
 	onRefreshComplete = ^onRefreshComplete;
+	// Never morph the in-place editor's own container: morphing the in-edit form mid-edit would
+	// reconcile away the user's unsaved input. Use the generic per-container opt-out.
+	morph = false;
 }
 
 ManualViewControlConditional : WOConditional {

@@ -4,6 +4,7 @@ DraggableContainer : WOGenericContainer {
 	class = ^class;
 	style = ^style;
 	draggableID = draggableID;
+	otherTagString = "data-morph-ignore=\"true\"";
 }
 
 Content : WOComponentContent {

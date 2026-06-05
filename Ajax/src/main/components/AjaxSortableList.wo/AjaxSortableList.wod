@@ -6,6 +6,7 @@ ListContainer : WOGenericContainer {
 	id = id;
 	class = ^listClass;
 	style = ^listStyle;
+	otherTagString = "data-morph-ignore=\"true\"";
 }
 
 ListItemContainer : WOGenericContainer {
