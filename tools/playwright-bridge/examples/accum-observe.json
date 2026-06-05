@@ -1,0 +1,126 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioAccumulation",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#observedField"
+    },
+    {
+      "do": "marker",
+      "label": "chg1"
+    },
+    {
+      "do": "focus",
+      "selector": "#observedField"
+    },
+    {
+      "do": "fill",
+      "selector": "#observedField",
+      "text": "a"
+    },
+    {
+      "do": "press",
+      "selector": "#observedField",
+      "key": "Tab"
+    },
+    {
+      "do": "wait",
+      "ms": 800
+    },
+    {
+      "do": "read",
+      "name": "ajax1",
+      "what": "requestCount",
+      "marker": "chg1"
+    },
+    {
+      "do": "marker",
+      "label": "chg2"
+    },
+    {
+      "do": "focus",
+      "selector": "#observedField"
+    },
+    {
+      "do": "fill",
+      "selector": "#observedField",
+      "text": "ab"
+    },
+    {
+      "do": "press",
+      "selector": "#observedField",
+      "key": "Tab"
+    },
+    {
+      "do": "wait",
+      "ms": 800
+    },
+    {
+      "do": "read",
+      "name": "ajax2",
+      "what": "requestCount",
+      "marker": "chg2"
+    },
+    {
+      "do": "marker",
+      "label": "chg3"
+    },
+    {
+      "do": "focus",
+      "selector": "#observedField"
+    },
+    {
+      "do": "fill",
+      "selector": "#observedField",
+      "text": "abc"
+    },
+    {
+      "do": "press",
+      "selector": "#observedField",
+      "key": "Tab"
+    },
+    {
+      "do": "wait",
+      "ms": 800
+    },
+    {
+      "do": "read",
+      "name": "ajax3",
+      "what": "requestCount",
+      "marker": "chg3"
+    },
+    {
+      "do": "read",
+      "name": "obsCount",
+      "selector": "#observeCount",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "change 1 -> 1 ajax request",
+      "that": "ajax1",
+      "atMost": 1
+    },
+    {
+      "do": "assert",
+      "name": "change 2 -> still <=1 (no stacking)",
+      "that": "ajax2",
+      "atMost": 1
+    },
+    {
+      "do": "assert",
+      "name": "change 3 -> still <=1 (no stacking)",
+      "that": "ajax3",
+      "atMost": 1
+    },
+    {
+      "do": "assert",
+      "name": "each change registered at least 1",
+      "that": "ajax3",
+      "atLeast": 1
+    }
+  ]
+}

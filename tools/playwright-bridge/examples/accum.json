@@ -1,0 +1,126 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioAccumulation",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#bumpLink"
+    },
+    {
+      "do": "marker",
+      "label": "click1"
+    },
+    {
+      "do": "click",
+      "selector": "#bumpLink"
+    },
+    {
+      "do": "wait",
+      "ms": 700
+    },
+    {
+      "do": "read",
+      "name": "reqs1",
+      "what": "requestCount",
+      "marker": "click1"
+    },
+    {
+      "do": "read",
+      "name": "count1",
+      "selector": "#bumpCount",
+      "what": "text"
+    },
+    {
+      "do": "marker",
+      "label": "click2"
+    },
+    {
+      "do": "click",
+      "selector": "#bumpLink"
+    },
+    {
+      "do": "wait",
+      "ms": 700
+    },
+    {
+      "do": "read",
+      "name": "reqs2",
+      "what": "requestCount",
+      "marker": "click2"
+    },
+    {
+      "do": "marker",
+      "label": "click3"
+    },
+    {
+      "do": "click",
+      "selector": "#bumpLink"
+    },
+    {
+      "do": "wait",
+      "ms": 700
+    },
+    {
+      "do": "read",
+      "name": "reqs3",
+      "what": "requestCount",
+      "marker": "click3"
+    },
+    {
+      "do": "marker",
+      "label": "click4"
+    },
+    {
+      "do": "click",
+      "selector": "#bumpLink"
+    },
+    {
+      "do": "wait",
+      "ms": 700
+    },
+    {
+      "do": "read",
+      "name": "reqs4",
+      "what": "requestCount",
+      "marker": "click4"
+    },
+    {
+      "do": "read",
+      "name": "count4",
+      "selector": "#bumpCount",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "click 1 -> exactly 1 request",
+      "that": "reqs1",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "click 2 -> still 1 (no accumulation)",
+      "that": "reqs2",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "click 3 -> still 1 (no accumulation)",
+      "that": "reqs3",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "click 4 -> still 1 (no accumulation)",
+      "that": "reqs4",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "counter advanced to 4",
+      "that": "count4",
+      "equals": "4"
+    }
+  ]
+}

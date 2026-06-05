@@ -2,12 +2,44 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>ScenarioAccumulation</title>
-	<style>body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; } a { color: #2b6cb0; }</style>
+	<title>Scenario: Observer / request accumulation</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		h2 { margin-top: 2rem; color: #444; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.count { font-size: 1.4rem; color: #2b6cb0; font-weight: 700; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; }
+		input[type=text] { font-size: 1rem; padding: .4rem; width: 16rem; }
+		a { color: #2b6cb0; }
+	</style>
 </head>
 <body>
 	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
-	<h1>ScenarioAccumulation</h1>
-	<p style="color:#888">Placeholder - this scenario page is not built out yet.</p>
+	<h1>Observer / request accumulation</h1>
+	<p class="lead">The danger: a registration script inside a morphed container re-runs on every update against preserved DOM, stacking observers so the Nth interaction fires N requests. Test: drive an update repeatedly and count the requests ONE interaction fires - it must stay flat.</p>
+
+	<h2>Variant A - explicit trigger (deterministic)</h2>
+	<p class="lead">Each "bump" click should fire exactly one request, no matter how many times you have already bumped.</p>
+	<wo:AjaxUpdateContainer id="bumpContainer" morph="$true">
+		<div class="box">
+			<p>Update count: <span class="count" id="bumpCount"><wo:str value="$updateCount" /></span></p>
+			<wo:AjaxUpdateLink updateContainerID="bumpContainer" action="$bumpCounter" id="bumpLink" class="btn">Bump (morph this container)</wo:AjaxUpdateLink>
+		</div>
+	</wo:AjaxUpdateContainer>
+
+	<h2>Variant B - observe field (real-world case)</h2>
+	<p class="lead">Changing the field (blur/Tab) morphs the container below. Repeated changes must not stack observers - each change should fire one request.</p>
+	<wo:AjaxUpdateContainer id="observeContainer" morph="$true">
+		<wo:form>
+			<wo:AjaxObserveField updateContainerID="observeContainer" action="$observedChanged">
+				<input type="text" id="observedField" value="" />
+			</wo:AjaxObserveField>
+			<div class="box">
+				<p>Observed-change count: <span class="count" id="observeCount"><wo:str value="$updateCount" /></span></p>
+			</div>
+		</wo:form>
+	</wo:AjaxUpdateContainer>
 </body>
 </html>
