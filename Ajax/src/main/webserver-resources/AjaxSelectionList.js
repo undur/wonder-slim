@@ -17,6 +17,16 @@ AjaxSelectionList.prototype = {
 
 	initialize: function(id) {
 		this.container = $(id);
+		// Idempotency guard for morphing: initialize() attaches container + per-item event
+		// observers. When the component lives in a morphed update container, its inline
+		// instantiation <script> re-runs on every update against the PRESERVED container, which
+		// would stack another full set of observers each time. Mark the container (a plain JS
+		// property Idiomorph keeps on a kept node) and bail on re-init; a genuinely-new container
+		// has no mark and initializes once.
+		if (this.container._ajaxSelectionListInit) {
+			return;
+		}
+		this.container._ajaxSelectionListInit = true;
 		this.list = this.container.down();
 		if (this.list.nodeName == 'UL' || this.list.nodeName == 'OL') {
 			this.itemType = 'LI';

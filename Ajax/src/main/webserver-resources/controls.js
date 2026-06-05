@@ -43,6 +43,15 @@ var Autocompleter = { };
 Autocompleter.Base = Class.create({
   baseInitialize: function(element, update, options) {
     element          = $(element);
+    // Idempotency guard for morphing: baseInitialize attaches blur/keydown/focus observers to
+    // the field. When an AjaxAutoComplete lives in a morphed update container, the inline
+    // "new Ajax.Autocompleter(...)" script re-runs on every update against the PRESERVED field,
+    // stacking another autocompleter (and its observers + duplicate Ajax requests per keystroke)
+    // each time. Mark the field and bail on re-init; a genuinely-new field initializes once.
+    if (element._ajaxAutocompleterInit) {
+      return;
+    }
+    element._ajaxAutocompleterInit = true;
     this.element     = element;
     this.update      = $(update);
     this.hasFocus    = false;
@@ -491,6 +500,16 @@ Ajax.InPlaceEditor = Class.create({
   initialize: function(element, url, options) {
     this.url = url;
     this.element = element = $(element);
+    // Idempotency guard for morphing: the editor registers click/observer handlers on the
+    // element. If it lives in a morphed container, the inline construction script re-runs on
+    // every update against the PRESERVED element and stacks another editor each time. Mark the
+    // element and bail on re-init; a genuinely-new element initializes once. (Note: an editor
+    // that is actively IN-EDIT when its container morphs is a separate concern handled by the
+    // morph-hostile auto-disable in Stage 4 - this guard only prevents accumulation.)
+    if (element._ajaxInPlaceEditorInit) {
+      return;
+    }
+    element._ajaxInPlaceEditorInit = true;
     this.prepareOptions();
     this._controls = { };
     arguments.callee.dealWithDeprecatedOptions(options); // DEPRECATION LAYER!!!

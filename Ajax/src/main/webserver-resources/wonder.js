@@ -29,9 +29,46 @@ AjaxMorph = {
 		}
 		var doEval = evalScripts !== false;
 		var html = doEval ? responseText.stripScripts() : responseText;
-		Idiomorph.morph(receiver, html, { morphStyle: 'innerHTML' });
+		Idiomorph.morph(receiver, html, {
+			morphStyle: 'innerHTML',
+			callbacks: AjaxMorph.callbacks
+		});
 		if (doEval) {
 			AjaxMorph.evalScriptsIsolated(responseText);
+		}
+	},
+
+	// Escape hatches for self-managing widgets (scriptaculous/Rico/iBox sliders, draggables,
+	// accordions, in-place editors, relocated modal content). These widgets mutate inline
+	// style/class on the client or relocate/inject DOM that is NOT present in the server-rendered
+	// fragment; left alone, Idiomorph would reconcile that client-only state away. Widgets opt out
+	// by marking their managed DOM:
+	//   data-morph-ignore          - do not morph this element or its subtree at all (widget owns it)
+	//   data-morph-preserve        - do not remove this node even if absent from the new HTML
+	//                                (e.g. a node the widget relocated elsewhere in the document)
+	//   data-morph-preserve-style  - do not overwrite this node's style/class attributes
+	// im-preserve="true" (Idiomorph's built-in) is also honored automatically by Idiomorph.
+	callbacks: {
+		beforeNodeMorphed: function(oldNode, newNode) {
+			// Returning false tells Idiomorph to skip this node (and its children).
+			if (oldNode.nodeType === 1 && oldNode.getAttribute && oldNode.getAttribute('data-morph-ignore') != null) {
+				return false;
+			}
+			return true;
+		},
+		beforeNodeRemoved: function(node) {
+			if (node.nodeType === 1 && node.getAttribute &&
+					(node.getAttribute('data-morph-preserve') != null || node.getAttribute('data-morph-ignore') != null)) {
+				return false;
+			}
+			return true;
+		},
+		beforeAttributeUpdated: function(attributeName, node, mutationType) {
+			if ((attributeName === 'style' || attributeName === 'class') &&
+					node.getAttribute && node.getAttribute('data-morph-preserve-style') != null) {
+				return false;
+			}
+			return true;
 		}
 	},
 
@@ -338,6 +375,14 @@ var AjaxOptions = {
 var AjaxUpdateContainer = {
 	registerPeriodic: function(id, canStop, stopped, options) {
 		var url = $(id).getAttribute('data-updateUrl');
+		// Idempotency guard for morphing: a PeriodicalUpdater is a self-scheduling timer. If a
+		// periodic container is nested in another morphed container, re-running this would start a
+		// SECOND timer while the first keeps ticking. Stop any prior updater for this id first.
+		var safeId = ajaxSafeName(id);
+		var previous = window[safeId + "PeriodicalUpdater"];
+		if (previous && typeof previous.stop === 'function') {
+			previous.stop();
+		}
 		var updater;
 		if (!canStop) {
 			updater = new Ajax.PeriodicalUpdater(id, url, options);
@@ -353,9 +398,8 @@ var AjaxUpdateContainer = {
 		
 		// Create the <id>PeriodicalUpdater / <id>Stop globals via bracket access rather than
 		// eval(id + "..."), so ids that aren't valid JS identifiers (e.g. UUIDs with '-') don't
-		// throw. ajaxSafeName must match AjaxUtils.jsSafeIdentifier on the server so any emitted
-		// call site (e.g. <id>Stop()) resolves to the same name.
-		var safeId = ajaxSafeName(id);
+		// throw. ajaxSafeName (computed above) must match AjaxUtils.jsSafeIdentifier on the server
+		// so any emitted call site (e.g. <id>Stop()) resolves to the same name.
 		window[safeId + "PeriodicalUpdater"] = updater;
 		window[safeId + "Stop"] = function() { updater.stop(); };
 	},
@@ -986,6 +1030,14 @@ var AjaxHintedText = {
         if(!e.getAttribute('default')) {
             return;
         }
+        // Idempotency guard for morphing: this wraps e.onfocus/onblur by capturing the existing
+        // handler and chaining, and unescapes the 'default' attribute in place. Re-running on a
+        // morphed (preserved) element would wrap its own wrapper (unbounded nesting) and
+        // double-unescape. Mark the element and bail on re-run; a new element is hinted once.
+        if(e._ajaxHintedTextInit) {
+            return;
+        }
+        e._ajaxHintedTextInit = true;
         e.setAttribute('default', unescape(e.getAttribute('default')));
         e.showDefaultValue = function() {
             if(e.value == "" ||
@@ -1131,7 +1183,19 @@ var AjaxBusy = {
 		return updateContainer;
 	},
 	
+	// Module-level dedup registry. AjaxBusy.register adds a GLOBAL Ajax.Responder that is not
+	// anchored to a DOM node, so a per-element guard can't help: if the registration script
+	// renders inside a morphed container it re-runs every update and would stack another global
+	// responder each time (firing on every page request thereafter). We key on the registration
+	// signature and register the responder at most once per distinct signature.
+	_registered: {},
+
 	register: function(busyClass, busyAnimationElement, watchContainerID, onCreateCallback, onCompleteCallback, useSpinJS, spinOpts) {
+		var signature = [busyClass, busyAnimationElement, watchContainerID, useSpinJS].join('|');
+		if (AjaxBusy._registered[signature]) {
+			return;
+		}
+		AjaxBusy._registered[signature] = true;
 		Ajax.Responders.register({
 			onCreate: function(request, transport) {
 	     	var updateContainer = AjaxBusy.requestContainer(request);
@@ -1392,6 +1456,13 @@ AUP.uploader = function(id) {
 	return uploaders[id];
 };
 AUP.add = function(id, jsonrpc, labels, options, uploaderOptions) {
+	// Idempotency guard for morphing: AjaxUploadClient/AjaxUpload attach a change listener to the
+	// PRESERVED select-file button. If this runs again on a morph (the construction script lives
+	// in the container), the existing uploader's button listener is still live, so re-adding would
+	// stack another. Keep the first uploader for a given id; a new id gets a new uploader.
+	if (this.uploaders[id]) {
+		return;
+	}
 	var uploadButtonId = 'AFUSelectFileButton' + id;
 	this.uploaders[id] = new AjaxUploadClient(id, uploadButtonId, jsonrpc, labels, options, uploaderOptions);
 };
