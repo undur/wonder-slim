@@ -640,7 +640,16 @@ var AjaxSubmitButton = {
 		// genuinely-new node (e.g. a row added to the list) starts fresh and gets observed.
 		var __field = $(formFieldID);
 		if (__field) {
-			var __signature = (partial ? 'p' : (updateContainerID != null ? 'u:' + updateContainerID : 'r'))
+			// The signature must distinguish every DISTINCT observer that can legitimately be
+			// attached to the same field, so it includes the target container AND the partial flag
+			// AND frequency/delay. A single field commonly carries several AjaxObserveFields, each
+			// targeting a different updateContainerID (e.g. a key field that refreshes customer,
+			// text, amount, vat, validation and the next row); they must all register. (An earlier
+			// version folded updateContainerID out of the signature whenever partial was true, so
+			// all of those collapsed to one signature and only the first observer survived - which
+			// silently dropped, among others, the "refresh the next row" observer.)
+			var __signature = 'p:' + (partial ? 1 : 0)
+				+ '|u:' + (updateContainerID != null ? updateContainerID : '')
 				+ '|f:' + observeFieldFrequency + '|d:' + observeDelay;
 			var __observed = __field._ajaxObservedSignatures || (__field._ajaxObservedSignatures = {});
 			if (__observed[__signature]) {
