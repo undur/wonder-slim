@@ -32,9 +32,30 @@ import er.extensions.foundation.ERXValueUtilities;
  * @binding frequency the frequency (in seconds) of a periodic update
  * @binding decay a multiplier (default is one) applied to the frequency if the response of the update is unchanged
  * @binding stopped determines whether a periodic update container loads as stopped.
+ * @binding morph if true (use morph="$true"), content updates reconcile the existing DOM via
+ *                Idiomorph instead of replacing innerHTML, preserving focus/scroll/selection and
+ *                unchanged subtrees. Bind morph="$false" to force classic innerHTML replacement.
+ *                When unbound, the framework default ({@link #MORPH_BY_DEFAULT}) applies.
  */
 public class AjaxUpdateContainer extends AjaxDynamicElement {
 	private static final String CURRENT_UPDATE_CONTAINER_ID_KEY = "er.ajax.AjaxUpdateContainer.currentID";
+
+	/**
+	 * The framework-wide default for whether AjaxUpdateContainers morph their content on update
+	 * (as opposed to replacing innerHTML). This is the SINGLE SOURCE OF TRUTH for the default -
+	 * flipping morphing on globally is a one-line change here. A per-container "morph" binding
+	 * always overrides this default in either direction, so morph="$false" remains a permanent,
+	 * reliable opt-out even after the default flips to true.
+	 */
+	public static final boolean MORPH_BY_DEFAULT = false;
+
+	/**
+	 * Resolves whether the given container should morph: the per-container "morph" binding if
+	 * present, otherwise {@link #MORPH_BY_DEFAULT}.
+	 */
+	public boolean shouldMorph(WOComponent component) {
+		return booleanValueForBinding("morph", MORPH_BY_DEFAULT, component);
+	}
 
 	public AjaxUpdateContainer(String name, NSDictionary<String, WOAssociation> associations, WOElement children) {
 		super(name, associations, children);
@@ -184,9 +205,10 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				appendTagAttributeToResponse(response, "class", valueForBinding("class", component));
 				appendTagAttributeToResponse(response, "style", valueForBinding("style", component));
 				appendTagAttributeToResponse(response, "data-updateUrl", AjaxUtils.ajaxComponentActionUrl(context));
-				if (booleanValueForBinding("morph", false, component)) {
-					appendTagAttributeToResponse(response, "data-morph", "true");
-				}
+				// Emit the resolved morph decision explicitly in both states so the JS side has a
+				// single, unambiguous source of truth. An explicit data-morph="false" forces classic
+				// innerHTML replacement and keeps doing so even after MORPH_BY_DEFAULT flips to true.
+				appendTagAttributeToResponse(response, "data-morph", shouldMorph(component) ? "true" : "false");
 				// appendTagAttributeToResponse(response, "woElementID", context.elementID());
 				response.appendContentString(">");
 				if (hasChildrenElements()) {

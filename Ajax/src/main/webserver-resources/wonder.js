@@ -31,12 +31,27 @@ AjaxMorph = {
 		var html = doEval ? responseText.stripScripts() : responseText;
 		Idiomorph.morph(receiver, html, { morphStyle: 'innerHTML' });
 		if (doEval) {
+			AjaxMorph.evalScriptsIsolated(responseText);
+		}
+	},
+
+	// Evaluate each <script> in the morphed fragment in ITS OWN try/catch, instead of
+	// Prototype's responseText.evalScripts() (which is extractScripts().map(eval) - a single
+	// throw there aborts every later script in the batch). The legacy innerHTML-replacement
+	// path emits id-derived JS globals via eval(id + "..."), which throw on ids that aren't
+	// valid JS identifiers (e.g. UUIDs with '-'); isolating each script means one bad fragment
+	// degrades to a logged error rather than silently killing sibling scripts (e.g. an
+	// AjaxUpdateTrigger later in the same response).
+	evalScriptsIsolated: function(responseText) {
+		var scripts = responseText.extractScripts();
+		for (var i = 0; i < scripts.length; i++) {
 			try {
-				responseText.evalScripts();
+				// Indirect eval keeps each script in global scope, matching evalScripts().
+				(0, eval)(scripts[i]);
 			}
 			catch (e) {
 				if (window.console) {
-					console.error('AjaxMorph: error evaluating scripts in morphed content', e);
+					console.error('AjaxMorph: error evaluating a script in morphed content (continuing with the rest)', e, scripts[i]);
 				}
 			}
 		}
