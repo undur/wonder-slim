@@ -9,6 +9,7 @@ import ajaxplayground.components.gallery.GalleryUpdateContainer;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioNested;
+import ajaxplayground.components.scenario.ScenarioMultiObserve;
 import ajaxplayground.components.scenario.ScenarioScripts;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
 
@@ -40,6 +41,10 @@ public class Main extends ERXComponent {
 
 	public WOActionResults scenarioScripts() {
 		return pageWithName( ScenarioScripts.class );
+	}
+
+	public WOActionResults scenarioMultiObserve() {
+		return pageWithName( ScenarioMultiObserve.class );
 	}
 
 	public WOActionResults galleryUpdateContainer() {
