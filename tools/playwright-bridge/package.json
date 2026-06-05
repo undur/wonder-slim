@@ -1,0 +1,14 @@
+{
+  "name": "playwright-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless-browser bridge for testing client-side behaviour of WebObjects/Ajax apps (DOM morphing).",
+  "scripts": {
+    "postinstall": "playwright install chromium",
+    "run-script": "node run.js"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

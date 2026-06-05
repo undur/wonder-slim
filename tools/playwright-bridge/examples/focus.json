@@ -1,0 +1,25 @@
+{
+  "_comment": "Focus-survival test against AjaxPlayground ScenarioFocus. Replace <PORT> with the app's port from http://localhost:9485/apps. With morph on, focus must remain on lastNameField after the observe-field-triggered container refresh.",
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wo/ScenarioFocus",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#focusContainer" },
+
+    { "do": "marker", "label": "type-firstname" },
+    { "do": "focus", "selector": "#firstNameField" },
+    { "do": "type", "selector": "#firstNameField", "text": "Ada" },
+    { "do": "wait", "ms": 800 },
+
+    { "do": "marker", "label": "type-lastname" },
+    { "do": "focus", "selector": "#lastNameField" },
+    { "do": "type", "selector": "#lastNameField", "text": "Lovelace" },
+    { "do": "wait", "ms": 800 },
+
+    { "do": "read", "name": "activeId", "what": "activeElementId" },
+    { "do": "read", "name": "greeting", "selector": ".greeting", "what": "text" },
+    { "do": "read", "name": "lastNameReqs", "what": "requestCount", "marker": "type-lastname" },
+
+    { "do": "assert", "name": "focus stayed on last name", "that": "activeId", "equals": "lastNameField" },
+    { "do": "assert", "name": "greeting recomputed", "that": "greeting", "contains": "Ada Lovelace" }
+  ]
+}
