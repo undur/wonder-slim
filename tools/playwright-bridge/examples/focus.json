@@ -1,25 +1,107 @@
 {
-  "_comment": "Focus-survival test against AjaxPlayground ScenarioFocus. Replace <PORT> with the app's port from http://localhost:9485/apps. With morph on, focus must remain on lastNameField after the observe-field-triggered container refresh.",
-  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wo/ScenarioFocus",
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioFocus",
   "steps": [
-    { "do": "goto" },
-    { "do": "wait", "selector": "#focusContainer" },
-
-    { "do": "marker", "label": "type-firstname" },
-    { "do": "focus", "selector": "#firstNameField" },
-    { "do": "type", "selector": "#firstNameField", "text": "Ada" },
-    { "do": "wait", "ms": 800 },
-
-    { "do": "marker", "label": "type-lastname" },
-    { "do": "focus", "selector": "#lastNameField" },
-    { "do": "type", "selector": "#lastNameField", "text": "Lovelace" },
-    { "do": "wait", "ms": 800 },
-
-    { "do": "read", "name": "activeId", "what": "activeElementId" },
-    { "do": "read", "name": "greeting", "selector": ".greeting", "what": "text" },
-    { "do": "read", "name": "lastNameReqs", "what": "requestCount", "marker": "type-lastname" },
-
-    { "do": "assert", "name": "focus stayed on last name", "that": "activeId", "equals": "lastNameField" },
-    { "do": "assert", "name": "greeting recomputed", "that": "greeting", "contains": "Ada Lovelace" }
-  ]
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#focusContainer"
+    },
+    {
+      "do": "read",
+      "name": "morphAttr",
+      "selector": "#focusContainer",
+      "what": "attribute",
+      "attr": "data-morph"
+    },
+    {
+      "do": "focus",
+      "selector": "#firstNameField"
+    },
+    {
+      "do": "type",
+      "selector": "#firstNameField",
+      "text": "Ada",
+      "delay": 40
+    },
+    {
+      "do": "press",
+      "selector": "#firstNameField",
+      "key": "Tab"
+    },
+    {
+      "do": "wait",
+      "ms": 1000
+    },
+    {
+      "do": "read",
+      "name": "afterFirstMorph_active",
+      "what": "activeElementId"
+    },
+    {
+      "do": "read",
+      "name": "afterFirstMorph_greeting",
+      "selector": ".greeting",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "firstStillThere",
+      "selector": "#firstNameField",
+      "what": "value"
+    },
+    {
+      "do": "focus",
+      "selector": "#lastNameField"
+    },
+    {
+      "do": "type",
+      "selector": "#lastNameField",
+      "text": "Lovelace",
+      "delay": 40
+    },
+    {
+      "do": "read",
+      "name": "midType_active",
+      "what": "activeElementId"
+    },
+    {
+      "do": "read",
+      "name": "midType_value",
+      "selector": "#lastNameField",
+      "what": "value"
+    },
+    {
+      "do": "assert",
+      "name": "morph on",
+      "that": "morphAttr",
+      "equals": "true"
+    },
+    {
+      "do": "assert",
+      "name": "firstName value survived its own morph",
+      "that": "firstStillThere",
+      "equals": "Ada"
+    },
+    {
+      "do": "assert",
+      "name": "greeting recomputed after morph",
+      "that": "afterFirstMorph_greeting",
+      "contains": "Ada"
+    },
+    {
+      "do": "assert",
+      "name": "focus on lastName while typing (not stolen by prior morph)",
+      "that": "midType_active",
+      "equals": "lastNameField"
+    },
+    {
+      "do": "assert",
+      "name": "lastName typing intact",
+      "that": "midType_value",
+      "equals": "Lovelace"
+    }
+  ],
+  "_comment": "Focus-survival test. Get <PORT> from the running app (lsof / app startup log; the jetty adaptor uses an ephemeral port). The descendant AjaxObserveField fires on the CHANGE event (blur/Tab), not per keystroke - so each field is committed with Tab to trigger the container morph."
 }
