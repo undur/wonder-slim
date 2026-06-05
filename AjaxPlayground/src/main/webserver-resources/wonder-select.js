@@ -206,30 +206,86 @@
 			}
 		}
 
-		// Auto-enhance any <select class="chosen-select"> by wrapping it in a <wonder-select> host.
-		// Idempotent and morph-safe: a select already inside a wonder-select is skipped, and a
-		// host that survives a morph is just re-synced.
+		// Enhance one select: wrap it in a <wonder-select> host and build the widget.
+		function enhance(select) {
+			if (select.closest('wonder-select')) return;
+			var host = document.createElement('wonder-select');
+			select.parentNode.insertBefore(host, select);
+			host.appendChild(select);
+			mount(host);
+		}
+
+		// Enhance every chosen-select under root, and re-sync any already-mounted hosts.
 		function enhanceAll(root) {
-			(root || document).querySelectorAll('select.chosen-select').forEach(function (select) {
-				if (select.closest('wonder-select')) return;
-				var host = document.createElement('wonder-select');
-				select.parentNode.insertBefore(host, select);
-				host.appendChild(select);
-				mount(host);
-			});
-			// Re-sync any already-mounted hosts (e.g. after a morph changed a selection server-side).
+			(root || document).querySelectorAll('select.chosen-select').forEach(enhance);
 			(root || document).querySelectorAll('wonder-select.ws-host').forEach(syncDisplay);
 		}
 
-		return { define: define, mount: mount, enhanceAll: enhanceAll, syncDisplay: syncDisplay };
+		// Fully automatic upkeep - NO app involvement (no onRefreshComplete hook). A single
+		// document-level observer reacts to whatever the DOM does, including Ajax morphs:
+		//   - a newly added <select class="chosen-select"> (e.g. a row a morph revealed) is enhanced
+		//   - when a morph reconciles an already-enhanced <select> (its selected option / options
+		//     change server-side, set programmatically so no 'change' fires), its host is re-synced
+		// This is what makes wonder-select morph-native: the widget keeps itself correct on its own.
+		function startAutoObserver() {
+			if (WonderSelect._observing || !window.MutationObserver) return;
+			WonderSelect._observing = true;
+
+			var resync = (function () {
+				// Coalesce bursts of mutations from a single morph into one pass.
+				var queued = false;
+				return function () {
+					if (queued) return;
+					queued = true;
+					(window.requestAnimationFrame || window.setTimeout)(function () {
+						queued = false;
+						document.querySelectorAll('select.chosen-select').forEach(enhance);
+						document.querySelectorAll('wonder-select.ws-host').forEach(syncDisplay);
+					}, 0);
+				};
+			})();
+
+			// Ignore mutations that wonder-select itself causes (building the trigger/dropdown,
+			// re-rendering the label), otherwise reacting to our own DOM writes would loop.
+			function isOurOwnDom(node) {
+				var el = node && (node.nodeType === 1 ? node : node.parentElement);
+				return !!(el && el.closest && el.closest('.ws-trigger, .ws-dropdown'));
+			}
+
+			new MutationObserver(function (mutations) {
+				for (var i = 0; i < mutations.length; i++) {
+					var m = mutations[i];
+					if (isOurOwnDom(m.target)) continue;
+					// A select being added (e.g. a row a morph revealed) needs enhancing; an option's
+					// selected/value/text changing (morph reconciling a select) needs a re-sync.
+					if (m.type === 'childList' && m.addedNodes.length) {
+						for (var j = 0; j < m.addedNodes.length; j++) {
+							var n = m.addedNodes[j];
+							if (n.nodeType === 1 && (n.matches && n.matches('select.chosen-select') || n.querySelector && n.querySelector('select.chosen-select'))) { resync(); return; }
+						}
+						continue;
+					}
+					if ((m.type === 'attributes' || m.type === 'characterData') && m.target) {
+						var nn = m.target.nodeName;
+						if (nn === 'OPTION' || nn === 'SELECT') { resync(); return; }
+					}
+				}
+			}).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['selected', 'value'], characterData: true });
+		}
+
+		return { define: define, mount: mount, enhance: enhance, enhanceAll: enhanceAll, syncDisplay: syncDisplay, startAutoObserver: startAutoObserver };
 	})();
 
 	window.WonderSelect = WonderSelect;
 	WonderSelect.define();
 
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', function () { WonderSelect.enhanceAll(document); });
-	} else {
+	function boot() {
 		WonderSelect.enhanceAll(document);
+		WonderSelect.startAutoObserver();
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', boot);
+	} else {
+		boot();
 	}
 })();
