@@ -1,0 +1,84 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioScripts",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#scriptBump"
+    },
+    {
+      "do": "read",
+      "name": "markerA_load",
+      "selector": "#markerAOut",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "markerB_load",
+      "selector": "#markerBOut",
+      "what": "text"
+    },
+    {
+      "do": "marker",
+      "label": "morph"
+    },
+    {
+      "do": "click",
+      "selector": "#scriptBump"
+    },
+    {
+      "do": "wait",
+      "ms": 900
+    },
+    {
+      "do": "read",
+      "name": "count_after",
+      "selector": "#scriptCount",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "markerA_after",
+      "selector": "#markerAOut",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "markerB_after",
+      "selector": "#markerBOut",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "load: marker A set",
+      "that": "markerA_load",
+      "contains": "A-set"
+    },
+    {
+      "do": "assert",
+      "name": "load: marker B set (after thrower)",
+      "that": "markerB_load",
+      "equals": "B-set"
+    },
+    {
+      "do": "assert",
+      "name": "morph happened (count=1)",
+      "that": "count_after",
+      "equals": "1"
+    },
+    {
+      "do": "assert",
+      "name": "AFTER MORPH: marker A re-ran",
+      "that": "markerA_after",
+      "contains": "again"
+    },
+    {
+      "do": "assert",
+      "name": "AFTER MORPH: marker B set despite thrower (isolation works)",
+      "that": "markerB_after",
+      "equals": "B-set"
+    }
+  ]
+}

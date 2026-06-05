@@ -2,12 +2,44 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>ScenarioScripts</title>
-	<style>body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; } a { color: #2b6cb0; }</style>
+	<title>Scenario: Inline script execution &amp; batch isolation</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; }
+		.marker { font-family: ui-monospace, monospace; }
+		a { color: #2b6cb0; }
+	</style>
 </head>
 <body>
 	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
-	<h1>ScenarioScripts</h1>
-	<p style="color:#888">Placeholder - this scenario page is not built out yet.</p>
+	<h1>Inline script execution &amp; batch isolation</h1>
+	<p class="lead">Inside the morphed container are three inline scripts: set marker A, then a script that deliberately throws, then set marker B (after the thrower). If scripts run after a morph AND one bad script does not abort the batch, both markers end up set.</p>
+
+	<wo:AjaxUpdateContainer id="scriptContainer" morph="$true">
+		<div class="box">
+			<p>Update count: <span id="scriptCount"><wo:str value="$updateCount" /></span></p>
+			<p>Marker A: <span class="marker" id="markerAOut">unset</span></p>
+			<p>Marker B (set by a script AFTER the throwing one): <span class="marker" id="markerBOut">unset</span></p>
+			<wo:AjaxUpdateLink updateContainerID="scriptContainer" action="$bumpCounter" id="scriptBump" class="btn">Bump (morph &amp; re-run scripts)</wo:AjaxUpdateLink>
+
+			<script>
+				// 1) sets marker A
+				window.__scenarioMarkerA = 'A-set@' + (window.__scenarioMarkerA ? 'again' : 'first');
+				document.getElementById('markerAOut').textContent = window.__scenarioMarkerA;
+			</script>
+			<script>
+				// 2) deliberately throws - must NOT prevent script 3 from running
+				throw new Error('deliberate failure in the middle of the script batch');
+			</script>
+			<script>
+				// 3) sets marker B - only runs if the thrower above did not abort the batch
+				window.__scenarioMarkerB = 'B-set';
+				document.getElementById('markerBOut').textContent = window.__scenarioMarkerB;
+			</script>
+		</div>
+	</wo:AjaxUpdateContainer>
 </body>
 </html>
