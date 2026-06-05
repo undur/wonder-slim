@@ -47,7 +47,7 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	 * always overrides this default in either direction, so morph="$false" remains a permanent,
 	 * reliable opt-out even after the default flips to true.
 	 */
-	public static final boolean MORPH_BY_DEFAULT = false;
+	public static final boolean MORPH_BY_DEFAULT = true;
 
 	/**
 	 * Resolves whether the given container should morph: the per-container "morph" binding if

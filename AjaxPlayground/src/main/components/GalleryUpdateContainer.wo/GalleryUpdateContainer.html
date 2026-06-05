@@ -36,5 +36,15 @@
 			<wo:AjaxUpdateLink updateContainerID="classicContainer" action="$increment" id="classicIncrement" class="btn">Increment (classic)</wo:AjaxUpdateLink>
 		</div>
 	</wo:AjaxUpdateContainer>
+
+	<h2>Default container (no morph binding)</h2>
+	<p class="lead">No <code>morph</code> binding at all - this reflects the framework default (MORPH_BY_DEFAULT).</p>
+	<wo:AjaxUpdateContainer id="defaultContainer">
+		<div class="box">
+			<p>Count: <span class="count" id="defaultValue"><wo:str value="$count" /></span></p>
+			<p class="lead">data-morph reflects the global default.</p>
+			<wo:AjaxUpdateLink updateContainerID="defaultContainer" action="$increment" id="defaultIncrement" class="btn">Increment (default)</wo:AjaxUpdateLink>
+		</div>
+	</wo:AjaxUpdateContainer>
 </body>
 </html>
