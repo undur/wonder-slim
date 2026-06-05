@@ -28,7 +28,7 @@
 				<div class="inner">
 					<wo:form>
 						<wo:AjaxObserveField updateContainerID="innerContainer" action="$innerChanged">
-							<input type="text" id="innerField" value="" />
+							<wo:textfield value="$innerValue" id="innerField" />
 						</wo:AjaxObserveField>
 						<p>Inner change count: <span id="innerCount"><wo:str value="$innerCount" /></span></p>
 					</wo:form>

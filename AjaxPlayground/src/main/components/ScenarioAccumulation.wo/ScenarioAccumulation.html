@@ -34,7 +34,7 @@
 	<wo:AjaxUpdateContainer id="observeContainer" morph="$true">
 		<wo:form>
 			<wo:AjaxObserveField updateContainerID="observeContainer" action="$observedChanged">
-				<input type="text" id="observedField" value="" />
+				<wo:textfield value="$observedValue" id="observedField" />
 			</wo:AjaxObserveField>
 			<div class="box">
 				<p>Observed-change count: <span class="count" id="observeCount"><wo:str value="$updateCount" /></span></p>
