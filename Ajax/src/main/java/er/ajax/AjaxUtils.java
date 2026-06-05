@@ -40,6 +40,22 @@ public class AjaxUtils {
 	}
 
 	/**
+	 * Converts a value (typically a DOM id) into a token safe to use as part of a JavaScript
+	 * global/function name. DOM ids may legally contain '-' and start with a digit (e.g. UUIDs),
+	 * which are illegal in a JS identifier. Several Ajax elements build globals like
+	 * <code>&lt;id&gt;Edit</code> / <code>&lt;id&gt;Save</code> from an id; without sanitizing,
+	 * such ids produce a SyntaxError when the global is defined or called. This MUST match the
+	 * client-side <code>ajaxSafeName()</code> in wonder.js so the server-emitted name and the
+	 * name the browser creates/reads are identical.
+	 *
+	 * @param value the value to make identifier-safe
+	 * @return the value with every character outside [A-Za-z0-9_$] replaced by '_'
+	 */
+	public static String jsSafeIdentifier(String value) {
+		return value == null ? null : value.replaceAll("[^a-zA-Z0-9_$]", "_");
+	}
+
+	/**
 	 * Return whether or not the given request is an Ajax request.
 	 * 
 	 * @param request the request the check

@@ -283,29 +283,39 @@ var AjaxUtils = {
 	}
 };
 
+// Converts a DOM id into a token safe to use as part of a JavaScript global name.
+// DOM ids may legally contain '-' and start with a digit (e.g. UUIDs); a JS identifier
+// may not. The framework historically built globals like <id>Update via eval(id + "..."),
+// which throws on such ids - and because a morph re-evals the whole script batch, one throw
+// silently aborts every later script in the response. We instead create/read these globals
+// with bracket access (window[name]) so the name never has to be a valid identifier, and we
+// sanitize the id so the SAME safe name is produced wherever it's referenced. Both sides
+// (the JS that creates the global and any Java that emits a call site) must sanitize
+// identically - see AjaxUtils.jsSafeIdentifier on the server.
+function ajaxSafeName(id) {
+	return String(id).replace(/[^a-zA-Z0-9_$]/g, '_');
+}
+
 var AjaxInPlace = {
 	saveFunctionName: function(id) {
-		return "window." + id + "Save";
+		return ajaxSafeName(id) + "Save";
 	},
-	
+
 	cancelFunctionName: function(id) {
-		return "window." + id + "Cancel";
+		return ajaxSafeName(id) + "Cancel";
 	},
-	
+
 	editFunctionName: function(id) {
-		return "window." + id + "Edit";
+		return ajaxSafeName(id) + "Edit";
 	},
-	
+
 	cleanupEdit: function(id) {
-		var saveFunctionName = this.saveFunctionName(id);
-		var cancelFunctionName = this.cancelFunctionName(id);
-		if (typeof eval(saveFunctionName) != 'undefined') { eval(saveFunctionName + " = null"); }
-		if (typeof eval(cancelFunctionName) != 'undefined') { eval(cancelFunctionName + " = null"); }
+		window[this.saveFunctionName(id)] = null;
+		window[this.cancelFunctionName(id)] = null;
 	},
-	
+
 	cleanupView: function(id) {
-		var editFunctionName = this.editFunctionName(id);
-		if (typeof eval(editFunctionName) != 'undefined') { eval(editFunctionName + " = null"); }
+		window[this.editFunctionName(id)] = null;
 	}
 };
 var AIP = AjaxInPlace;
@@ -341,8 +351,13 @@ var AjaxUpdateContainer = {
 			updater = new Ajax.ActivePeriodicalUpdater(id, url, options);
 		}
 		
-		eval(id + "PeriodicalUpdater = updater;");
-		eval(id + "Stop = function() { " + id + "PeriodicalUpdater.stop() };");
+		// Create the <id>PeriodicalUpdater / <id>Stop globals via bracket access rather than
+		// eval(id + "..."), so ids that aren't valid JS identifiers (e.g. UUIDs with '-') don't
+		// throw. ajaxSafeName must match AjaxUtils.jsSafeIdentifier on the server so any emitted
+		// call site (e.g. <id>Stop()) resolves to the same name.
+		var safeId = ajaxSafeName(id);
+		window[safeId + "PeriodicalUpdater"] = updater;
+		window[safeId + "Stop"] = function() { updater.stop(); };
 	},
 	
 	insertionFunc: function(effectPairName, beforeDuration, afterDuration) {
@@ -396,7 +411,10 @@ var AjaxUpdateContainer = {
 		if (!options) {
 			options = {};
 		}
-		eval(id + "Update = function() {AjaxUpdateContainer.update(id, options) }");
+		// Create the <id>Update global via bracket access rather than eval(id + "..."), so ids
+		// that aren't valid JS identifiers (e.g. UUIDs with '-') don't throw. ajaxSafeName must
+		// match AjaxUtils.jsSafeIdentifier on the server so an emitted <id>Update() call resolves.
+		window[ajaxSafeName(id) + "Update"] = function() { AjaxUpdateContainer.update(id, options); };
 	},
 	
 	update: function(id, options) {
@@ -677,14 +695,19 @@ var AjaxObserveDelayer = Class.create({
 });
 
 var AjaxDraggable = {
+	// Keyed registry of live Draggable instances, replacing the former draggable_<id> globals
+	// built via eval. Keying on the id directly (object property, not a JS identifier) means
+	// ids with '-' or a leading digit work, and re-registering a preserved element destroys the
+	// prior instance first instead of leaking it (relevant once a draggable lives in a morphed
+	// container - the old eval("typeof draggable_a-b") even mis-parsed and skipped this guard).
+	_draggables: {},
+
 	register: function(draggableContainerID, options) {
-		var draggableContainerName = 'draggable_' + draggableContainerID;
-		var draggableContainerType = eval("typeof " + draggableContainerName);
-		if (draggableContainerType != 'undefined') {
-			eval(draggableContainerName).destroy();
+		var existing = this._draggables[draggableContainerID];
+		if (existing) {
+			existing.destroy();
 		}
-		var draggableContainer = new Draggable(draggableContainerID, options);
-		eval(draggableContainerName + "=draggableContainer");
+		this._draggables[draggableContainerID] = new Draggable(draggableContainerID, options);
 	}
 };
 var ADG = AjaxDraggable;
@@ -754,14 +777,17 @@ var AjaxDroppable = Class.create({
 	}
 });
 Object.extend(AjaxDroppable, {
+	// Keyed registry of registered droppable elements, replacing the former droppable_<id>
+	// globals built via eval (which threw / mis-parsed on ids with '-' or a leading digit).
+	_droppables: {},
+
 	register: function(droppableContainerID, options) {
-		var droppableContainerName = 'droppable_' + droppableContainerID;
-		var droppableContainerType = eval("typeof " + droppableContainerName);
-		if (droppableContainerType != 'undefined') {
-			Droppables.remove(eval(droppableContainerName));
+		var existing = this._droppables[droppableContainerID];
+		if (existing) {
+			Droppables.remove(existing);
 		}
 		var droppableContainer = $(droppableContainerID);
-		eval(droppableContainerName + '=droppableContainer');
+		this._droppables[droppableContainerID] = droppableContainer;
 		Droppables.add(droppableContainer, options);
 	},
 	
@@ -1173,7 +1199,13 @@ var AjaxModalDialog = {
 	},
 	
 	open: function(id) {
-		eval("openAMD_" + id + "()");
+		// Invoke the public openAMD_<id>() global via bracket access rather than eval, so ids
+		// that aren't valid JS identifiers don't throw. ajaxSafeName must match the server-side
+		// AjaxModalDialog.openDialogFunctionName sanitizing so the name resolves to the same fn.
+		var fn = window["openAMD_" + ajaxSafeName(id)];
+		if (typeof fn === 'function') {
+			fn();
+		}
 	},
 	
 	contentUpdated: function() {

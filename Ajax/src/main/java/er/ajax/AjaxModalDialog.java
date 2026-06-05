@@ -215,7 +215,10 @@ public class AjaxModalDialog extends AjaxComponent {
 	 * @return JavaScript function name for the function to open the AjaxModalDialog
 	 */
 	public static String openDialogFunctionName(String id) {
-		return "openAMD_" + id;
+		// The id is sanitized so this public openAMD_<id> global is a valid JS identifier even
+		// when the dialog's DOM id contains '-' or a leading digit (e.g. a UUID); the matching
+		// client-side AjaxModalDialog.open() applies the same sanitizing (wonder.js ajaxSafeName).
+		return "openAMD_" + AjaxUtils.jsSafeIdentifier(id);
 	}
 	
 	/**

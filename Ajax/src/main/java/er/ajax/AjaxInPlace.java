@@ -250,11 +250,11 @@ public class AjaxInPlace extends WOComponent {
 	}
 
 	public String updateFunctionName() {
-		return id() + "Update();";
+		return AjaxUtils.jsSafeIdentifier(id()) + "Update();";
 	}
 
 	public String editFunctionName() {
-		return id() + "Edit";
+		return AjaxUtils.jsSafeIdentifier(id()) + "Edit";
 	}
 
 	public String editFunctionCall() {
@@ -266,7 +266,7 @@ public class AjaxInPlace extends WOComponent {
 	}
 
 	public String saveFunctionName() {
-		return id() + "Save";
+		return AjaxUtils.jsSafeIdentifier(id()) + "Save";
 	}
 
 	public String saveFunctionCall() {
@@ -274,7 +274,7 @@ public class AjaxInPlace extends WOComponent {
 	}
 
 	public String cancelFunctionName() {
-		return id() + "Cancel";
+		return AjaxUtils.jsSafeIdentifier(id()) + "Cancel";
 	}
 
 	public String cancelFunctionCall() {
