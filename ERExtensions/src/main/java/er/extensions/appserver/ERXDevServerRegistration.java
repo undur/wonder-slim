@@ -7,6 +7,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
+import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 
 import er.extensions.foundation.ERXProperties;
@@ -48,8 +49,7 @@ public final class ERXDevServerRegistration {
 			return;
 		}
 
-		final Number portNumber = app.port();
-		final int port = portNumber == null ? -1 : portNumber.intValue();
+		final int port = boundPort(app);
 		if (port <= 0) {
 			// No bound port to announce (e.g. an unusual launch); nothing useful to register.
 			return;
@@ -69,6 +69,25 @@ public final class ERXDevServerRegistration {
 		final Thread t = new Thread(() -> ping(url, appName, port), "ERXDevServerRegistration");
 		t.setDaemon(true);
 		t.start();
+	}
+
+	/**
+	 * The port the app is actually listening on.
+	 *
+	 * <p>{@link WOApplication#port()} only reflects an explicitly passed {@code -WOPort}
+	 * and is {@code -1} when the port was auto-assigned (no {@code -WOPort}, or
+	 * {@code -WOPort 0} → the OS picks a free port). The real bound port lives on the
+	 * adaptor — which is how WO's own direct-connect URL sources it. We read the adaptor
+	 * first so auto-port apps register correctly, falling back to {@code port()} only if
+	 * there's no adaptor yet.
+	 */
+	private static int boundPort(WOApplication app) {
+		final WOAdaptor adaptor = app.defaultAdaptor();
+		if (adaptor != null && adaptor.port() > 0) {
+			return adaptor.port();
+		}
+		final Number configured = app.port();
+		return configured == null ? -1 : configured.intValue();
 	}
 
 	private static void ping(String url, String appName, int port) {
