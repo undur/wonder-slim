@@ -2,12 +2,35 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>ScenarioUuidIds</title>
-	<style>body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; } a { color: #2b6cb0; }</style>
+	<title>Scenario: UUID / dashed element ids</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; }
+		code { background: #f2f2f2; padding: 1px 4px; border-radius: 3px; font-size: .85em; }
+		a { color: #2b6cb0; }
+	</style>
 </head>
 <body>
 	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
-	<h1>ScenarioUuidIds</h1>
-	<p style="color:#888">Placeholder - this scenario page is not built out yet.</p>
+	<h1>UUID / dashed element ids</h1>
+	<p class="lead">The main container's id is a UUID with dashes (<code><wo:str value="$uuidContainerID" /></code>). Updating it used to throw in <code>AUC.register</code>'s eval and abort later scripts in the same response - silently killing the <code>AjaxUpdateTrigger</code> inside it. Now: bumping the main container should update its count AND fire the trigger that refreshes the second container.</p>
+
+	<wo:AjaxUpdateContainer id="$uuidContainerID" morph="$true">
+		<div class="box">
+			<p>Main count (UUID-id container): <span id="mainCount"><wo:str value="$mainCount" /></span></p>
+			<wo:AjaxUpdateLink updateContainerID="$uuidContainerID" action="$bumpMain" id="mainBump" class="btn">Bump main (morph the UUID-id container)</wo:AjaxUpdateLink>
+			<wo:AjaxUpdateTrigger updateContainerIDs="$triggeredContainersInArray" />
+		</div>
+	</wo:AjaxUpdateContainer>
+
+	<wo:AjaxUpdateContainer id="triggeredContainer" morph="$true">
+		<wo:str value="$triggeredRenderTick" />
+		<div class="box">
+			<p>Triggered container render count (bumped each time the trigger refreshes it): <span id="triggeredCount"><wo:str value="$triggeredCount" /></span></p>
+		</div>
+	</wo:AjaxUpdateContainer>
 </body>
 </html>

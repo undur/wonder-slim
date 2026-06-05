@@ -1,0 +1,54 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioUuidIds",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#mainBump"
+    },
+    {
+      "do": "read",
+      "name": "mainBefore",
+      "selector": "#mainCount",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "trigBefore",
+      "selector": "#triggeredCount",
+      "what": "text"
+    },
+    {
+      "do": "marker",
+      "label": "bump"
+    },
+    {
+      "do": "click",
+      "selector": "#mainBump"
+    },
+    {
+      "do": "wait",
+      "ms": 1000
+    },
+    {
+      "do": "read",
+      "name": "mainAfter",
+      "selector": "#mainCount",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "trigAfter",
+      "selector": "#triggeredCount",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "containerStillThere",
+      "selector": "#mainBump",
+      "what": "exists"
+    }
+  ]
+}
