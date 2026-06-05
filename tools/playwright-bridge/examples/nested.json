@@ -1,0 +1,94 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioNested",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#outerBump"
+    },
+    {
+      "do": "click",
+      "selector": "#outerBump"
+    },
+    {
+      "do": "wait",
+      "ms": 600
+    },
+    {
+      "do": "click",
+      "selector": "#outerBump"
+    },
+    {
+      "do": "wait",
+      "ms": 600
+    },
+    {
+      "do": "click",
+      "selector": "#outerBump"
+    },
+    {
+      "do": "wait",
+      "ms": 600
+    },
+    {
+      "do": "read",
+      "name": "outerCount",
+      "selector": "#outerCount",
+      "what": "text"
+    },
+    {
+      "do": "marker",
+      "label": "inner-change"
+    },
+    {
+      "do": "focus",
+      "selector": "#innerField"
+    },
+    {
+      "do": "fill",
+      "selector": "#innerField",
+      "text": "x"
+    },
+    {
+      "do": "press",
+      "selector": "#innerField",
+      "key": "Tab"
+    },
+    {
+      "do": "wait",
+      "ms": 900
+    },
+    {
+      "do": "read",
+      "name": "innerReqs",
+      "what": "requestCount",
+      "marker": "inner-change"
+    },
+    {
+      "do": "read",
+      "name": "innerCount",
+      "selector": "#innerCount",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "outer morphed 3 times",
+      "that": "outerCount",
+      "equals": "3"
+    },
+    {
+      "do": "assert",
+      "name": "inner change fires exactly 1 request despite 3 outer morphs",
+      "that": "innerReqs",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "inner change registered once",
+      "that": "innerCount",
+      "equals": "1"
+    }
+  ]
+}

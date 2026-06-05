@@ -2,12 +2,39 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>ScenarioNested</title>
-	<style>body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; } a { color: #2b6cb0; }</style>
+	<title>Scenario: Nested update containers</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.outer { border: 2px solid #2b6cb0; border-radius: 8px; padding: 1rem 1.2rem; margin-top: 1rem; }
+		.inner { border: 1px dashed #888; border-radius: 6px; padding: .8rem 1rem; margin-top: 1rem; background: #fafafa; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; }
+		input[type=text] { font-size: 1rem; padding: .4rem; width: 14rem; }
+		a { color: #2b6cb0; }
+	</style>
 </head>
 <body>
 	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
-	<h1>ScenarioNested</h1>
-	<p style="color:#888">Placeholder - this scenario page is not built out yet.</p>
+	<h1>Nested update containers</h1>
+	<p class="lead">An inner container's registration (an observe field) re-runs every time the outer container morphs. The danger is the inner observer stacking. Test: morph the outer container several times, then change the inner field once - it must fire a single request, not one-per-outer-morph.</p>
+
+	<wo:AjaxUpdateContainer id="outerContainer" morph="$true">
+		<div class="outer">
+			<p>Outer morph count: <span id="outerCount"><wo:str value="$outerCount" /></span></p>
+			<wo:AjaxUpdateLink updateContainerID="outerContainer" action="$bumpOuter" id="outerBump" class="btn">Morph outer container</wo:AjaxUpdateLink>
+
+			<wo:AjaxUpdateContainer id="innerContainer" morph="$true">
+				<div class="inner">
+					<wo:form>
+						<wo:AjaxObserveField updateContainerID="innerContainer" action="$innerChanged">
+							<input type="text" id="innerField" value="" />
+						</wo:AjaxObserveField>
+						<p>Inner change count: <span id="innerCount"><wo:str value="$innerCount" /></span></p>
+					</wo:form>
+				</div>
+			</wo:AjaxUpdateContainer>
+		</div>
+	</wo:AjaxUpdateContainer>
 </body>
 </html>
