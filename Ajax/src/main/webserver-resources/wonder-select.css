@@ -11,7 +11,7 @@ wonder-select.ws-host {
 wonder-select .ws-trigger {
 	border: 1px solid #bbb;
 	border-radius: 5px;
-	padding: .4rem .6rem;
+	padding: .4rem 1.8rem .4rem .6rem; /* extra right padding leaves room for the caret */
 	min-height: 1.4rem;
 	background: #fff;
 	cursor: pointer;
@@ -19,8 +19,25 @@ wonder-select .ws-trigger {
 	flex-wrap: wrap;
 	gap: .3rem;
 	align-items: center;
+	position: relative;
+}
+/* The traditional down caret that marks this as a select. */
+wonder-select .ws-trigger::after {
+	content: "";
+	position: absolute;
+	right: .7rem;
+	top: 50%;
+	width: 0;
+	height: 0;
+	border-left: .3rem solid transparent;
+	border-right: .3rem solid transparent;
+	border-top: .35rem solid #888;
+	transform: translateY(-25%);
+	pointer-events: none;
 }
 wonder-select.ws-open .ws-trigger { border-color: #2b6cb0; box-shadow: 0 0 0 2px rgba(43,108,176,.2); }
+/* Flip the caret while open. */
+wonder-select.ws-open .ws-trigger::after { border-top-color: #2b6cb0; transform: translateY(-75%) rotate(180deg); }
 wonder-select .ws-placeholder { color: #999; }
 wonder-select .ws-value { color: #222; }
 

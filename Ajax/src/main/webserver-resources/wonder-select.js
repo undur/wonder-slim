@@ -121,7 +121,7 @@
 				if (host.classList.contains('ws-open')) close(host); else open(host);
 			});
 			ws.trigger.addEventListener('keydown', function (e) {
-				if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); open(host); }
+				if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(host); }
 			});
 			ws.search.addEventListener('input', function () { renderOptions(host, ws.search.value); });
 			ws.search.addEventListener('keydown', function (e) {
