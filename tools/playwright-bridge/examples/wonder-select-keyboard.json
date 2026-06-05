@@ -1,0 +1,116 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryWonderSelect",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "read",
+      "name": "optCount",
+      "selector": "wonder-select .ws-option",
+      "what": "count"
+    },
+    {
+      "do": "read",
+      "name": "firstOpt",
+      "selector": "wonder-select .ws-option",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "activeOnOpen",
+      "selector": "wonder-select .ws-option.ws-active",
+      "what": "text"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-search",
+      "key": "ArrowDown"
+    },
+    {
+      "do": "read",
+      "name": "after1Down",
+      "selector": "wonder-select .ws-option.ws-active",
+      "what": "text"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-search",
+      "key": "ArrowUp"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-search",
+      "key": "ArrowUp"
+    },
+    {
+      "do": "read",
+      "name": "wrappedToLast",
+      "selector": "wonder-select .ws-option.ws-active",
+      "what": "text"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-search",
+      "key": "Enter"
+    },
+    {
+      "do": "wait",
+      "ms": 700
+    },
+    {
+      "do": "read",
+      "name": "picked",
+      "selector": "wonder-select .ws-trigger",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "placeholder NOT a pickable option (17 fruits)",
+      "that": "optCount",
+      "equals": 17
+    },
+    {
+      "do": "assert",
+      "name": "first option is Apple not placeholder",
+      "that": "firstOpt",
+      "contains": "Apple"
+    },
+    {
+      "do": "assert",
+      "name": "Apple highlighted on open",
+      "that": "activeOnOpen",
+      "contains": "Apple"
+    },
+    {
+      "do": "assert",
+      "name": "ArrowDown -> Apricot",
+      "that": "after1Down",
+      "contains": "Apricot"
+    },
+    {
+      "do": "assert",
+      "name": "ArrowUp past top wraps to last (Strawberry)",
+      "that": "wrappedToLast",
+      "contains": "Strawberry"
+    },
+    {
+      "do": "assert",
+      "name": "Enter selects highlighted (Strawberry)",
+      "that": "picked",
+      "contains": "Strawberry"
+    }
+  ]
+}

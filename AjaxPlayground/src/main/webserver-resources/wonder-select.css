@@ -63,7 +63,9 @@ wonder-select .ws-search {
 }
 wonder-select .ws-options { list-style: none; margin: 0; padding: .25rem 0; }
 wonder-select .ws-option { padding: .35rem .7rem; cursor: pointer; }
-wonder-select .ws-option:hover { background: #eef4fb; }
+/* Keyboard highlight (arrow keys / hover). Distinct from the actually-selected option. */
+wonder-select .ws-option.ws-active { background: #2b6cb0; color: #fff; }
 wonder-select .ws-option.ws-selected { background: #d8e8f8; font-weight: 600; }
+wonder-select .ws-option.ws-selected.ws-active { background: #2b6cb0; color: #fff; }
 wonder-select .ws-option.ws-disabled { color: #999; cursor: default; }
 wonder-select .ws-option.ws-disabled:hover { background: none; }

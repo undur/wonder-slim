@@ -38,11 +38,16 @@
 		return el;
 	}
 
+	// True for the "no selection" placeholder option. Covers a plain empty value and WebObjects'
+	// noSelectionString sentinel ("WONoSelectionString"), which is what every nb chosen-select uses.
+	function isPlaceholderOption(opt) {
+		return opt.value === '' || opt.value === 'WONoSelectionString';
+	}
+
 	function placeholderFor(select) {
 		if (select.getAttribute('data-placeholder')) return select.getAttribute('data-placeholder');
-		// A leading empty-value option is the common "noSelectionString" pattern.
 		var first = select.options[0];
-		if (first && first.value === '' ) return first.textContent.trim();
+		if (first && isPlaceholderOption(first)) return first.textContent.trim();
 		return '';
 	}
 
@@ -120,11 +125,14 @@
 			});
 			ws.search.addEventListener('input', function () { renderOptions(host, ws.search.value); });
 			ws.search.addEventListener('keydown', function (e) {
-				if (e.key === 'Escape') { close(host); ws.trigger.focus(); }
+				if (e.key === 'Escape') { close(host); ws.trigger.focus(); return; }
+				if (e.key === 'ArrowDown') { e.preventDefault(); moveActive(host, 1); return; }
+				if (e.key === 'ArrowUp') { e.preventDefault(); moveActive(host, -1); return; }
 				if (e.key === 'Enter') {
 					e.preventDefault();
-					var firstOpt = ws.list.querySelector('.ws-option:not(.ws-disabled)');
-					if (firstOpt) choose(host, firstOpt.getAttribute('data-value'));
+					var active = activeOption(host);
+					if (active) choose(host, active.getAttribute('data-value'));
+					return;
 				}
 			});
 			// Close on outside click.
@@ -139,18 +147,54 @@
 			ws.list.textContent = '';
 			var anyShown = false;
 			Array.prototype.forEach.call(ws.select.options, function (opt) {
-				if (opt.value === '' && !host._wsMultiple) return; // the placeholder option isn't pickable
+				if (isPlaceholderOption(opt) && !host._wsMultiple) return; // the placeholder isn't pickable
 				var label = opt.textContent;
 				if (f && label.toLowerCase().indexOf(f) === -1) return;
 				anyShown = true;
 				var li = h('li', { class: 'ws-option', 'data-value': opt.value, text: label });
 				if (isSelected(ws.select, opt.value)) li.classList.add('ws-selected');
 				li.addEventListener('click', function () { choose(host, opt.value); });
+				// Hovering moves the keyboard highlight, so mouse and keyboard agree.
+				li.addEventListener('mousemove', function () { setActive(host, li); });
 				ws.list.appendChild(li);
 			});
 			if (!anyShown) {
 				ws.list.appendChild(h('li', { class: 'ws-option ws-disabled', text: host._wsNoResults }));
 			}
+			// Highlight a sensible starting option: the selected one if visible, else the first.
+			var opts = selectableOptions(host);
+			var preferred = opts.filter(function (li) { return li.classList.contains('ws-selected'); })[0] || opts[0];
+			setActive(host, preferred || null);
+		}
+
+		// All highlightable (non-disabled) option <li>s currently rendered.
+		function selectableOptions(host) {
+			return Array.prototype.slice.call(host._ws.list.querySelectorAll('.ws-option:not(.ws-disabled)'));
+		}
+
+		// The currently keyboard-highlighted option, if any.
+		function activeOption(host) {
+			return host._ws.list.querySelector('.ws-option.ws-active');
+		}
+
+		function setActive(host, li) {
+			var prev = activeOption(host);
+			if (prev) prev.classList.remove('ws-active');
+			if (li) {
+				li.classList.add('ws-active');
+				// Keep the highlighted item in view as you arrow past the visible edges.
+				if (li.scrollIntoView) li.scrollIntoView({ block: 'nearest' });
+			}
+		}
+
+		// Move the highlight by dir (+1 down / -1 up), wrapping at the ends.
+		function moveActive(host, dir) {
+			var opts = selectableOptions(host);
+			if (!opts.length) return;
+			var current = activeOption(host);
+			var idx = current ? opts.indexOf(current) : -1;
+			idx = (idx + dir + opts.length) % opts.length;
+			setActive(host, opts[idx]);
 		}
 
 		function isSelected(select, value) {
@@ -182,7 +226,7 @@
 			var select = ws.select;
 			ws.trigger.textContent = '';
 			if (host._wsMultiple) {
-				var chosen = Array.prototype.filter.call(select.options, function (o) { return o.selected && o.value !== ''; });
+				var chosen = Array.prototype.filter.call(select.options, function (o) { return o.selected && !isPlaceholderOption(o); });
 				if (!chosen.length) {
 					ws.trigger.appendChild(h('span', { class: 'ws-placeholder', text: placeholderFor(select) }));
 				} else {
@@ -198,7 +242,7 @@
 				}
 			} else {
 				var sel = select.options[select.selectedIndex];
-				if (sel && sel.value !== '') {
+				if (sel && !isPlaceholderOption(sel)) {
 					ws.trigger.appendChild(h('span', { class: 'ws-value', text: sel.textContent }));
 				} else {
 					ws.trigger.appendChild(h('span', { class: 'ws-placeholder', text: placeholderFor(select) }));
