@@ -13,7 +13,7 @@
  *
  * INTEGRATION: it dispatches a native 'change' event on the underlying <select> when the selection
  * changes, so existing AjaxObserveField wiring keeps working unchanged. An auto-enhancer adopts any
- * <select class="chosen-select"> (drop-in for Chosen), and you can also author <wonder-select>
+ * <select class="ajax-popup-button"> (drop-in for Chosen), and you can also author <wonder-select>
  * explicitly around a <select>.
  *
  * SUPPORTED (matches actual nb usage): single + multiple select, type-to-filter, placeholder text
@@ -39,7 +39,7 @@
 	}
 
 	// True for the "no selection" placeholder option. Covers a plain empty value and WebObjects'
-	// noSelectionString sentinel ("WONoSelectionString"), which is what every nb chosen-select uses.
+	// noSelectionString sentinel ("WONoSelectionString"), which is what every nb ajax-popup-button uses.
 	function isPlaceholderOption(opt) {
 		return opt.value === '' || opt.value === 'WONoSelectionString';
 	}
@@ -259,15 +259,15 @@
 			mount(host);
 		}
 
-		// Enhance every chosen-select under root, and re-sync any already-mounted hosts.
+		// Enhance every ajax-popup-button under root, and re-sync any already-mounted hosts.
 		function enhanceAll(root) {
-			(root || document).querySelectorAll('select.chosen-select').forEach(enhance);
+			(root || document).querySelectorAll('select.ajax-popup-button').forEach(enhance);
 			(root || document).querySelectorAll('wonder-select.ws-host').forEach(syncDisplay);
 		}
 
 		// Fully automatic upkeep - NO app involvement (no onRefreshComplete hook). A single
 		// document-level observer reacts to whatever the DOM does, including Ajax morphs:
-		//   - a newly added <select class="chosen-select"> (e.g. a row a morph revealed) is enhanced
+		//   - a newly added <select class="ajax-popup-button"> (e.g. a row a morph revealed) is enhanced
 		//   - when a morph reconciles an already-enhanced <select> (its selected option / options
 		//     change server-side, set programmatically so no 'change' fires), its host is re-synced
 		// This is what makes wonder-select morph-native: the widget keeps itself correct on its own.
@@ -283,7 +283,7 @@
 					queued = true;
 					(window.requestAnimationFrame || window.setTimeout)(function () {
 						queued = false;
-						document.querySelectorAll('select.chosen-select').forEach(enhance);
+						document.querySelectorAll('select.ajax-popup-button').forEach(enhance);
 						document.querySelectorAll('wonder-select.ws-host').forEach(syncDisplay);
 					}, 0);
 				};
@@ -305,7 +305,7 @@
 					if (m.type === 'childList' && m.addedNodes.length) {
 						for (var j = 0; j < m.addedNodes.length; j++) {
 							var n = m.addedNodes[j];
-							if (n.nodeType === 1 && (n.matches && n.matches('select.chosen-select') || n.querySelector && n.querySelector('select.chosen-select'))) { resync(); return; }
+							if (n.nodeType === 1 && (n.matches && n.matches('select.ajax-popup-button') || n.querySelector && n.querySelector('select.ajax-popup-button'))) { resync(); return; }
 						}
 						continue;
 					}

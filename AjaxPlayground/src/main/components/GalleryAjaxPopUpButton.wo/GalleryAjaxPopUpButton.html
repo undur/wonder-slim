@@ -2,8 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>Gallery: wonder-select (morph-native Chosen replacement)</title>
-	<wo:ERXStyleSheet filename="wonder-select.css" framework="Ajax" />
+	<title>Gallery: AjaxPopUpButton</title>
 	<style>
 		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
 		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
@@ -17,14 +16,14 @@
 </head>
 <body>
 	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
-	<h1>wonder-select (morph-native Chosen replacement)</h1>
-	<p class="lead">A searchable select that enhances a native <code>&lt;select class="ajax-popup-button"&gt;</code> in place via a custom element - no foreign sibling DOM, so it survives a morph. The select sits inside the morphing container below. Pick a fruit; the server echo updates via an observe field. Then "refresh container" to morph the container around the live widget - it must stay usable with its value intact.</p>
+	<h1>AjaxPopUpButton</h1>
+	<p class="lead">Authored as <code>&lt;wo:AjaxPopUpButton&gt;</code> - no class, no resource include. The element adds the <code>ajax-popup-button</code> marker class and pulls in wonder-select.js/.css itself. Same morph-survival as wonder-select, but zero per-page wiring.</p>
 
 	<wo:form>
 		<wo:AjaxUpdateContainer id="selectContainer">
 			<div class="box">
 				<label>Single-select fruit</label>
-				<wo:popUpButton list="$fruits" item="$currentFruit" selection="$selectedFruit" noSelectionString="Pick a fruit..." id="fruitSelect" class="ajax-popup-button" />
+				<wo:AjaxPopUpButton list="$fruits" item="$currentFruit" selection="$selectedFruit" noSelectionString="Pick a fruit..." id="fruitSelect" />
 				<wo:AjaxObserveField observeFieldID="fruitSelect" updateContainerID="echoContainer" action="$fruitChanged" />
 				<p class="lead">Container refresh count: <span id="refreshCount"><wo:str value="$refreshCount" /></span></p>
 				<wo:AjaxUpdateLink updateContainerID="selectContainer" action="$refreshContainer" id="refreshLink" class="btn">Refresh (morph) this container</wo:AjaxUpdateLink>
@@ -37,7 +36,5 @@
 			Server sees selected: <span class="echo" id="echo"><wo:str value="$selectedFruit" /></span>
 		</div>
 	</wo:AjaxUpdateContainer>
-
-	<wo:ERXJavaScript filename="wonder-select.js" framework="Ajax" />
 </body>
 </html>
