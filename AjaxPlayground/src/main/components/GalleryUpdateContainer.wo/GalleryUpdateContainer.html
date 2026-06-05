@@ -2,12 +2,39 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>GalleryUpdateContainer</title>
-	<style>body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; } a { color: #2b6cb0; }</style>
+	<title>Gallery: AjaxUpdateContainer</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		h2 { margin-top: 1.5rem; color: #444; font-size: 1.1rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: .6rem; background: #fafafa; }
+		.count { font-size: 1.6rem; color: #2b6cb0; font-weight: 700; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; }
+		a { color: #2b6cb0; }
+	</style>
 </head>
 <body>
 	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
-	<h1>GalleryUpdateContainer</h1>
-	<p style="color:#888">Placeholder - this scenario page is not built out yet.</p>
+	<h1>AjaxUpdateContainer (baseline)</h1>
+	<p class="lead">The simplest morph test: a counter you bump via an update link. Two side-by-side containers - one morphing, one classic - share the same counter, so you can compare the two update mechanisms directly. (Note: morph mode is fixed per container at render; a runtime toggle is intentionally avoided - see the testing notes.)</p>
+
+	<h2>Morphing container (morph="$true")</h2>
+	<wo:AjaxUpdateContainer id="morphContainer" morph="$true">
+		<div class="box">
+			<p>Count: <span class="count" id="morphValue"><wo:str value="$count" /></span></p>
+			<p class="lead">data-morph reflects the binding (see DOM).</p>
+			<wo:AjaxUpdateLink updateContainerID="morphContainer" action="$increment" id="morphIncrement" class="btn">Increment (morph)</wo:AjaxUpdateLink>
+		</div>
+	</wo:AjaxUpdateContainer>
+
+	<h2>Classic container (morph="$false")</h2>
+	<wo:AjaxUpdateContainer id="classicContainer" morph="$false">
+		<div class="box">
+			<p>Count: <span class="count" id="classicValue"><wo:str value="$count" /></span></p>
+			<p class="lead">Same counter, classic innerHTML replacement.</p>
+			<wo:AjaxUpdateLink updateContainerID="classicContainer" action="$increment" id="classicIncrement" class="btn">Increment (classic)</wo:AjaxUpdateLink>
+		</div>
+	</wo:AjaxUpdateContainer>
 </body>
 </html>

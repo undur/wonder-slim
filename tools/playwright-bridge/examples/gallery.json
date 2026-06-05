@@ -1,0 +1,110 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryUpdateContainer",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#morphIncrement"
+    },
+    {
+      "do": "read",
+      "name": "morphAttr",
+      "selector": "#morphContainer",
+      "what": "attribute",
+      "attr": "data-morph"
+    },
+    {
+      "do": "read",
+      "name": "classicAttr",
+      "selector": "#classicContainer",
+      "what": "attribute",
+      "attr": "data-morph"
+    },
+    {
+      "do": "marker",
+      "label": "morphInc"
+    },
+    {
+      "do": "click",
+      "selector": "#morphIncrement"
+    },
+    {
+      "do": "wait",
+      "ms": 600
+    },
+    {
+      "do": "read",
+      "name": "morphVal",
+      "selector": "#morphValue",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "morphReqs",
+      "what": "requestCount",
+      "marker": "morphInc"
+    },
+    {
+      "do": "marker",
+      "label": "classicInc"
+    },
+    {
+      "do": "click",
+      "selector": "#classicIncrement"
+    },
+    {
+      "do": "wait",
+      "ms": 600
+    },
+    {
+      "do": "read",
+      "name": "classicVal",
+      "selector": "#classicValue",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "classicReqs",
+      "what": "requestCount",
+      "marker": "classicInc"
+    },
+    {
+      "do": "assert",
+      "name": "morph container data-morph=true",
+      "that": "morphAttr",
+      "equals": "true"
+    },
+    {
+      "do": "assert",
+      "name": "classic container data-morph=false",
+      "that": "classicAttr",
+      "equals": "false"
+    },
+    {
+      "do": "assert",
+      "name": "morph increment works",
+      "that": "morphVal",
+      "equals": "1"
+    },
+    {
+      "do": "assert",
+      "name": "morph: 1 request",
+      "that": "morphReqs",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "classic increment works",
+      "that": "classicVal",
+      "equals": "2"
+    },
+    {
+      "do": "assert",
+      "name": "classic: 1 request",
+      "that": "classicReqs",
+      "equals": 1
+    }
+  ]
+}
