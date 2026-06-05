@@ -23,6 +23,7 @@
 		<binding name="insertionDuration"/>
 		<binding name="beforeInsertionDuration"/>
 		<binding name="afterInsertionDuration"/>
+        <binding name="morph" defaults="Boolean"/>
 
     
 	<binding name="id"/>

@@ -1,6 +1,79 @@
 // $wi = the Wonder "lookup by ID" function
 var $wi = $;
- 
+
+// ---------------------------------------------------------------------------
+// DOM morphing for AjaxUpdateContainer (morph="true")
+//
+// By default an Ajax update replaces the receiver's innerHTML wholesale, which
+// destroys all DOM state inside it (focus, selection, scroll position, input
+// values, CSS transitions, etc.). When a container is rendered with
+// morph="true" it carries a data-morph attribute; for those we reconcile the
+// existing DOM against the freshly-rendered HTML using Idiomorph instead, so
+// the identity of unchanged nodes - and therefore their state - survives.
+//
+// This is installed as an override of Ajax.Updater#updateContent rather than
+// in any single trigger function, so it applies uniformly no matter what kicks
+// off the update: the container itself, AjaxUpdateLink, AjaxSubmitButton,
+// AjaxObserveField (with or without action) or AjaxUpdateTrigger.
+// ---------------------------------------------------------------------------
+AjaxMorph = {
+	// Reconcile receiver's children with responseText. Idiomorph leaves <script>
+	// nodes inert, so we mirror Prototype's Element#update: strip scripts before
+	// morphing, then eval them afterwards (unless evalScripts is explicitly off).
+	morph: function(receiver, responseText, evalScripts) {
+		if (typeof Idiomorph === 'undefined') {
+			// Idiomorph didn't load - fall back to the classic replacement so the
+			// update still happens rather than silently doing nothing.
+			receiver.update(responseText);
+			return;
+		}
+		var doEval = evalScripts !== false;
+		var html = doEval ? responseText.stripScripts() : responseText;
+		Idiomorph.morph(receiver, html, { morphStyle: 'innerHTML' });
+		if (doEval) {
+			try {
+				responseText.evalScripts();
+			}
+			catch (e) {
+				if (window.console) {
+					console.error('AjaxMorph: error evaluating scripts in morphed content', e);
+				}
+			}
+		}
+	},
+
+	// True when this receiver should be morphed rather than replaced.
+	shouldMorph: function(receiver) {
+		return receiver && receiver.getAttribute && receiver.getAttribute('data-morph') == 'true';
+	}
+};
+
+// Override Ajax.Updater#updateContent to add the morph path. This preserves the
+// original semantics exactly (success/failure receiver selection, explicit
+// options.insertion / effect handling, evalScripts stripping) and only diverges
+// when the resolved receiver opts into morphing.
+Ajax.Updater.prototype.updateContent = function(responseText) {
+	var receiver = this.container[this.success() ? 'success' : 'failure'],
+	    options = this.options;
+
+	if (!options.evalScripts) responseText = responseText.stripScripts();
+
+	if (receiver = $(receiver)) {
+		if (options.insertion) {
+			// An explicit insertion / effect was requested - it owns the swap.
+			if (Object.isString(options.insertion)) {
+				var insertion = { }; insertion[options.insertion] = responseText;
+				receiver.insert(insertion);
+			}
+			else options.insertion(receiver, responseText);
+		}
+		else if (AjaxMorph.shouldMorph(receiver)) {
+			AjaxMorph.morph(receiver, responseText, options.evalScripts);
+		}
+		else receiver.update(responseText);
+	}
+};
+
 Object.extend(Prototype, {
   exec: (function(){
     var script, scriptId = '__prototype_exec_script',

@@ -47,6 +47,7 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	protected void addRequiredWebResources(WOResponse response, WOContext context) {
 		addScriptResourceInHead(context, response, "prototype.js");
 		addScriptResourceInHead(context, response, "effects.js");
+		addScriptResourceInHead(context, response, "idiomorph.js");
 		addScriptResourceInHead(context, response, "wonder.js");
 	}
 
@@ -183,6 +184,9 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				appendTagAttributeToResponse(response, "class", valueForBinding("class", component));
 				appendTagAttributeToResponse(response, "style", valueForBinding("style", component));
 				appendTagAttributeToResponse(response, "data-updateUrl", AjaxUtils.ajaxComponentActionUrl(context));
+				if (booleanValueForBinding("morph", false, component)) {
+					appendTagAttributeToResponse(response, "data-morph", "true");
+				}
 				// appendTagAttributeToResponse(response, "woElementID", context.elementID());
 				response.appendContentString(">");
 				if (hasChildrenElements()) {
