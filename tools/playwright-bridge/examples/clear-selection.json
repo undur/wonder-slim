@@ -1,0 +1,144 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryWonderSelect",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#selectContainer wonder-select .ws-trigger"
+    },
+    {
+      "do": "comment",
+      "text": "initially nothing selected -> open -> there should be NO clear option"
+    },
+    {
+      "do": "click",
+      "selector": "#selectContainer wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "read",
+      "name": "clearBeforeSelect",
+      "selector": "#selectContainer wonder-select .ws-clear",
+      "what": "exists"
+    },
+    {
+      "do": "comment",
+      "text": "pick Mango"
+    },
+    {
+      "do": "type",
+      "selector": "#selectContainer wonder-select .ws-search",
+      "text": "Man",
+      "delay": 25
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "click",
+      "selector": "#selectContainer wonder-select .ws-option:not(.ws-disabled):not(.ws-clear)"
+    },
+    {
+      "do": "wait",
+      "ms": 800
+    },
+    {
+      "do": "read",
+      "name": "afterPick_trigger",
+      "selector": "#selectContainer wonder-select .ws-trigger",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "afterPick_echo",
+      "selector": "#echo",
+      "what": "text"
+    },
+    {
+      "do": "comment",
+      "text": "reopen -> now a clear option should exist; pick it"
+    },
+    {
+      "do": "click",
+      "selector": "#selectContainer wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "read",
+      "name": "clearAfterSelect",
+      "selector": "#selectContainer wonder-select .ws-clear",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "clearLabel",
+      "selector": "#selectContainer wonder-select .ws-clear",
+      "what": "text"
+    },
+    {
+      "do": "click",
+      "selector": "#selectContainer wonder-select .ws-clear"
+    },
+    {
+      "do": "wait",
+      "ms": 800
+    },
+    {
+      "do": "read",
+      "name": "afterClear_trigger",
+      "selector": "#selectContainer wonder-select .ws-trigger",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "afterClear_echo",
+      "selector": "#echo",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "no clear option when nothing selected",
+      "that": "clearBeforeSelect",
+      "equals": false
+    },
+    {
+      "do": "assert",
+      "name": "pick set Mango",
+      "that": "afterPick_trigger",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "server got Mango",
+      "that": "afterPick_echo",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "clear option appears once selected",
+      "that": "clearAfterSelect",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "trigger back to placeholder after clear",
+      "that": "afterClear_trigger",
+      "contains": "Pick a fruit"
+    },
+    {
+      "do": "assert",
+      "name": "server selection cleared (not Mango)",
+      "that": "afterClear_echo",
+      "equals": "(none)"
+    }
+  ]
+}

@@ -24,7 +24,14 @@ async function main() {
 	const script = await readInput();
 	const browser = await chromium.launch({ headless: true });
 	try {
-		const context = await browser.newContext();
+		// Optional viewport (e.g. { "viewport": { "width": 900, "height": 500 } }) - lets a run
+		// pin the window size, which is needed to test viewport-relative behaviour like a dropdown
+		// that must size/flip to stay within the viewport.
+		const contextOpts = {};
+		if (script.viewport && script.viewport.width && script.viewport.height) {
+			contextOpts.viewport = { width: script.viewport.width, height: script.viewport.height };
+		}
+		const context = await browser.newContext(contextOpts);
 		const page = await context.newPage();
 		const result = await runScript(page, script);
 		process.stdout.write(JSON.stringify(result, null, 2) + '\n');

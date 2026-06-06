@@ -9,6 +9,7 @@ import ajaxplayground.components.gallery.GalleryAjaxPopUpButton;
 import ajaxplayground.components.gallery.GalleryUpdateContainer;
 import ajaxplayground.components.gallery.GalleryWonderSelect;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
+import ajaxplayground.components.scenario.ScenarioDropdownViewport;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioNested;
 import ajaxplayground.components.scenario.ScenarioMultiObserve;
@@ -44,6 +45,10 @@ public class Main extends ERXComponent {
 
 	public WOActionResults scenarioScripts() {
 		return pageWithName( ScenarioScripts.class );
+	}
+
+	public WOActionResults scenarioDropdownViewport() {
+		return pageWithName( ScenarioDropdownViewport.class );
 	}
 
 	public WOActionResults scenarioRowIdentity() {

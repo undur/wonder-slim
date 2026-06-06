@@ -71,6 +71,9 @@ export async function runScript(page, script) {
 					if (step.selector) await page.press(step.selector, step.key);
 					else await page.keyboard.press(step.key);
 					break;
+				case 'comment':
+					// No-op; lets run scripts document themselves ({ "do": "comment", "text": "..." }).
+					break;
 				case 'wait':
 					if (step.selector) await page.waitForSelector(step.selector, { timeout: step.ms ?? 5000 });
 					if (step.ms && !step.selector) await page.waitForTimeout(step.ms);
@@ -124,6 +127,27 @@ async function readValue(page, step, reads, requestsSince) {
 			return (await page.locator(step.selector).count()) > 0;
 		case 'requestCount':
 			return requestsSince(step.marker).length;
+		case 'withinViewport':
+			// True if the element's bounding rect fits entirely within the viewport (small tolerance
+			// for sub-pixel rounding). Used to assert a dropdown never extends beyond the viewport.
+			return await page.evaluate((sel) => {
+				var el = document.querySelector(sel);
+				if (!el) return null;
+				var r = el.getBoundingClientRect();
+				var tol = 1;
+				return r.top >= -tol && r.left >= -tol
+					&& r.right <= (window.innerWidth || document.documentElement.clientWidth) + tol
+					&& r.bottom <= (window.innerHeight || document.documentElement.clientHeight) + tol;
+			}, step.selector);
+		case 'boundingEdge':
+			// A single edge of the element's rect (step.edge: top|left|right|bottom|width|height), so
+			// overflow can be asserted numerically (e.g. right atMost viewport width).
+			return await page.evaluate((arg) => {
+				var el = document.querySelector(arg.sel);
+				if (!el) return null;
+				var r = el.getBoundingClientRect();
+				return Math.round(r[arg.edge]);
+			}, { sel: step.selector, edge: step.edge });
 		default:
 			throw new Error(`unknown read 'what': ${step.what}`);
 	}

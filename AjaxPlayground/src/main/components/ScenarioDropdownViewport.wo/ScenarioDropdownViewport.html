@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: Dropdown stays within viewport</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 0; color: #222; min-height: 100vh; position: relative; }
+		.note { padding: 1rem; color: #666; }
+		/* Place a select near the TOP-LEFT and one near the BOTTOM-RIGHT of the viewport, so a small
+		   viewport forces flip-up + right-align. Absolute to the page corners. */
+		.topleft { position: absolute; top: .5rem; left: .5rem; }
+		.bottomright { position: absolute; bottom: .5rem; right: .5rem; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<body>
+	<div class="note">
+		<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+		Dropdowns with long labels at the viewport corners - the open list must stay within the viewport (flip up / right-align as needed).
+	</div>
+
+	<div class="topleft">
+		<wo:popUpButton list="$items" item="$currentItem" selection="$topLeftSel" noSelectionString="Top-left..." id="topLeftSelect" class="ajax-popup-button" />
+	</div>
+
+	<div class="bottomright">
+		<wo:popUpButton list="$items" item="$currentItem" selection="$bottomRightSel" noSelectionString="Bottom-right..." id="bottomRightSelect" class="ajax-popup-button" />
+	</div>
+
+	<wo:ERXJavaScript filename="wonder-select.js" framework="Ajax" />
+	<wo:ERXStyleSheet filename="wonder-select.css" framework="Ajax" />
+</body>
+</html>

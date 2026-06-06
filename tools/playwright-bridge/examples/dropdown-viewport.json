@@ -1,0 +1,92 @@
+{
+  "_comment": "Regression guard: dropdown must stay within the viewport. Small viewport; the bottom-right select must flip up + right-align, the top-left opens down/left. Both must fit entirely.",
+  "viewport": {
+    "width": 800,
+    "height": 420
+  },
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioDropdownViewport",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": ".bottomright wonder-select .ws-trigger"
+    },
+    {
+      "do": "click",
+      "selector": ".bottomright wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 250
+    },
+    {
+      "do": "read",
+      "name": "brWithin",
+      "selector": ".bottomright wonder-select .ws-dropdown",
+      "what": "withinViewport"
+    },
+    {
+      "do": "read",
+      "name": "brRight",
+      "selector": ".bottomright wonder-select .ws-dropdown",
+      "what": "boundingEdge",
+      "edge": "right"
+    },
+    {
+      "do": "read",
+      "name": "brBottom",
+      "selector": ".bottomright wonder-select .ws-dropdown",
+      "what": "boundingEdge",
+      "edge": "bottom"
+    },
+    {
+      "do": "press",
+      "selector": ".bottomright wonder-select .ws-search",
+      "key": "Escape"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "click",
+      "selector": ".topleft wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 250
+    },
+    {
+      "do": "read",
+      "name": "tlWithin",
+      "selector": ".topleft wonder-select .ws-dropdown",
+      "what": "withinViewport"
+    },
+    {
+      "do": "assert",
+      "name": "bottom-right dropdown stays within viewport",
+      "that": "brWithin",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "bottom-right right edge within 800w",
+      "that": "brRight",
+      "atMost": 800
+    },
+    {
+      "do": "assert",
+      "name": "bottom-right bottom edge within 420h",
+      "that": "brBottom",
+      "atMost": 420
+    },
+    {
+      "do": "assert",
+      "name": "top-left dropdown stays within viewport",
+      "that": "tlWithin",
+      "equals": true
+    }
+  ]
+}
