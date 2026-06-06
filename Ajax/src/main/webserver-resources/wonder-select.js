@@ -183,7 +183,15 @@
 				if (host.classList.contains('ws-open')) close(host); else open(host);
 			});
 			ws.trigger.addEventListener('keydown', function (e) {
-				if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+				// Enter on the (closed) trigger is deliberately NOT an opener: the trigger is a div
+				// inside a form, and Enter there would otherwise trigger the form's implicit submit.
+				// We swallow it (preventDefault) so it neither submits nor does anything surprising;
+				// Space / ArrowDown / ArrowUp / typing open the dropdown instead (none submit a form).
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					return;
+				}
+				if (e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
 					e.preventDefault();
 					open(host);
 					return;
