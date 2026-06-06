@@ -1,13 +1,47 @@
 /* wonder-select - minimal styling for the morph-native select replacement. */
 
 /*
- * Prevent the FOUC blink of the native <select> before wonder-select enhances it. The CSS loads
- * (in <head>) before wonder-select.js runs and hides the select itself, so without this the raw
- * select paints for a frame or two and then vanishes. Hiding it up front means it is never painted;
- * wonder-select shows its own trigger instead. (This makes the field JS-required, which is fine -
- * the surrounding app is entirely Ajax/JS-driven.)
+ * Avoid both flashes during enhancement:
+ *   1. the native-select FOUC (the raw <select> painting then vanishing), and
+ *   2. the empty-gap / pop-in (nothing, then the widget appears).
+ *
+ * Instead of hiding the unenhanced select, we style it to LOOK like the eventual trigger - same
+ * border, padding, caret - so from the very first paint there's a select-shaped control in place
+ * (already showing the current value, natively). When wonder-select enhances it, the select moves
+ * inside a .ws-host and we hide it there, swapping in the real trigger seamlessly. No blink, no gap,
+ * no layout shift. (appearance:none lets us draw our own caret to match the trigger.)
  */
-select.ajax-popup-button { display: none; }
+select.ajax-popup-button {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 24rem;
+	border: 1px solid #bbb;
+	border-radius: 5px;
+	padding: .4rem 1.8rem .4rem .6rem;
+	min-height: 1.4rem;
+	background-color: #fff;
+	/* a down-caret matching .ws-trigger::after, drawn as an inline SVG background */
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right .65rem center;
+	font: inherit;
+	cursor: pointer;
+	/* Muted while unenhanced: it is effectively a disabled select until JS upgrades it, and the
+	   text it shows is usually the no-selection placeholder - which the real trigger renders gray
+	   (.ws-placeholder, #999). Matching that avoids a black->gray text pop at the swap. */
+	color: #999;
+}
+/* When a real value IS selected (the no-selection option isn't the chosen one), use normal dark
+   text to match the trigger's .ws-value (#222). :has() is supported in all current browsers;
+   where it isn't, the muted color above is a harmless fallback for the brief pre-enhance frame. */
+select.ajax-popup-button:has(option:checked:not([value="WONoSelectionString"]):not([value=""])) {
+	color: #222;
+}
+/* Once enhanced, the real trigger takes over - hide the now-wrapped native select. */
+wonder-select.ws-host select.ajax-popup-button { display: none; }
 
 wonder-select.ws-host {
 	display: inline-block;
