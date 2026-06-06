@@ -1,0 +1,195 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryAjaxBrowser",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "read",
+      "name": "isMulti",
+      "selector": "wonder-select.ws-multiple",
+      "what": "exists"
+    },
+    {
+      "do": "comment",
+      "text": "open and pick Mango"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Man",
+      "delay": 25
+    },
+    {
+      "do": "wait",
+      "ms": 120
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "read",
+      "name": "dropdownStaysOpen",
+      "selector": "wonder-select.ws-open",
+      "what": "exists"
+    },
+    {
+      "do": "comment",
+      "text": "pick a second one - Grape"
+    },
+    {
+      "do": "fill",
+      "selector": "wonder-select .ws-search",
+      "text": "Grape"
+    },
+    {
+      "do": "wait",
+      "ms": 120
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "read",
+      "name": "tagCount",
+      "selector": "wonder-select .ws-tag",
+      "what": "count"
+    },
+    {
+      "do": "comment",
+      "text": "close, commit selection to server (Tab fires change/blur)"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-search",
+      "key": "Escape"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-trigger",
+      "key": "Tab"
+    },
+    {
+      "do": "wait",
+      "ms": 800
+    },
+    {
+      "do": "read",
+      "name": "echoAfterPick",
+      "selector": "#echo",
+      "what": "text"
+    },
+    {
+      "do": "comment",
+      "text": "remove the first tag via its x button"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-tag .ws-tag-remove"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "read",
+      "name": "tagCountAfterRemove",
+      "selector": "wonder-select .ws-tag",
+      "what": "count"
+    },
+    {
+      "do": "comment",
+      "text": "morph the container, confirm tags survive"
+    },
+    {
+      "do": "click",
+      "selector": "#refreshLink"
+    },
+    {
+      "do": "wait",
+      "ms": 900
+    },
+    {
+      "do": "read",
+      "name": "tagCountAfterMorph",
+      "selector": "wonder-select .ws-tag",
+      "what": "count"
+    },
+    {
+      "do": "read",
+      "name": "widgetAfterMorph",
+      "selector": "wonder-select .ws-trigger",
+      "what": "exists"
+    },
+    {
+      "do": "assert",
+      "name": "rendered as multi-select",
+      "that": "isMulti",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "dropdown stays open after a pick",
+      "that": "dropdownStaysOpen",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "two tags after two picks",
+      "that": "tagCount",
+      "equals": 2
+    },
+    {
+      "do": "assert",
+      "name": "server got both (Mango + Grape)",
+      "that": "echoAfterPick",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "server got Grape too",
+      "that": "echoAfterPick",
+      "contains": "Grape"
+    },
+    {
+      "do": "assert",
+      "name": "removing a tag drops to one",
+      "that": "tagCountAfterRemove",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "tags survive container morph",
+      "that": "tagCountAfterMorph",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "widget survives morph",
+      "that": "widgetAfterMorph",
+      "equals": true
+    }
+  ]
+}

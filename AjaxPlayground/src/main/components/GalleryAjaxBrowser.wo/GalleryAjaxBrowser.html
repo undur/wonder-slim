@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Gallery: AjaxBrowser (multi-select)</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; }
+		.echo { font-size: 1.1rem; color: #2b6cb0; }
+		a { color: #2b6cb0; }
+		label { font-weight: 600; display:block; margin-bottom: .3rem; }
+	</style>
+</head>
+<body>
+	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<h1>AjaxBrowser (multi-select)</h1>
+	<p class="lead">A <code>&lt;wo:AjaxBrowser multiple="$true"&gt;</code> - the multi-select form of wonder-select. Pick several fruits (the dropdown stays open, selections show as removable tags). The same widget as AjaxPopUpButton, driven by the select's multiple attribute. Inside a morphing container to confirm multi survives a morph.</p>
+
+	<wo:form>
+		<wo:AjaxUpdateContainer id="selectContainer">
+			<div class="box">
+				<label>Fruits (multi-select)</label>
+				<wo:AjaxBrowser list="$fruits" item="$currentFruit" displayString="$currentFruit.name" selections="$selectedFruits" multiple="$true" id="fruitBrowser" />
+				<wo:AjaxObserveField observeFieldID="fruitBrowser" updateContainerID="echoContainer" action="$selectionChanged" />
+				<p class="lead">Change count: <span id="changeCount"><wo:str value="$changeCount" /></span></p>
+				<wo:AjaxUpdateLink updateContainerID="selectContainer" action="$refreshContainer" id="refreshLink" class="btn">Refresh (morph) this container</wo:AjaxUpdateLink>
+			</div>
+		</wo:AjaxUpdateContainer>
+	</wo:form>
+
+	<wo:AjaxUpdateContainer id="echoContainer">
+		<div class="box">
+			Server sees selected: <span class="echo" id="echo"><wo:str value="$selectedEcho" /></span>
+		</div>
+	</wo:AjaxUpdateContainer>
+
+	<wo:ERXJavaScript filename="wonder-select.js" framework="Ajax" />
+	<wo:ERXStyleSheet filename="wonder-select.css" framework="Ajax" />
+</body>
+</html>

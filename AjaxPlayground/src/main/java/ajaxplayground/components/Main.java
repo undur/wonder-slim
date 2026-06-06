@@ -5,6 +5,7 @@ import com.webobjects.appserver.WOContext;
 
 import er.extensions.components.ERXComponent;
 
+import ajaxplayground.components.gallery.GalleryAjaxBrowser;
 import ajaxplayground.components.gallery.GalleryAjaxPopUpButton;
 import ajaxplayground.components.gallery.GalleryUpdateContainer;
 import ajaxplayground.components.gallery.GalleryWonderSelect;
@@ -65,6 +66,10 @@ public class Main extends ERXComponent {
 
 	public WOActionResults galleryWonderSelect() {
 		return pageWithName( GalleryWonderSelect.class );
+	}
+
+	public WOActionResults galleryAjaxBrowser() {
+		return pageWithName( GalleryAjaxBrowser.class );
 	}
 
 	public WOActionResults galleryAjaxPopUpButton() {
