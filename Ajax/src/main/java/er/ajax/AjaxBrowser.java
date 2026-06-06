@@ -11,27 +11,29 @@ import com.webobjects.foundation.NSMutableDictionary;
 import er.extensions.foundation.ERXPatcher;
 
 /**
- * A plain WOPopUpButton that renders a searchable, morph-native dropdown (wonder-select) instead of
- * a bare select. It is deliberately thin: it changes nothing about how WOPopUpButton works except
+ * The MULTI-SELECT companion to {@link AjaxPopUpButton}: a plain WOBrowser that renders the
+ * searchable, morph-native wonder-select widget instead of a bare multi-select. It is deliberately
+ * thin - it changes nothing about how WOBrowser works except
  *
- *   1. it adds the CSS marker class "ajax-popup-button" to the rendered &lt;select&gt;, and
+ *   1. it adds the CSS marker class "ajax-popup-button" to the rendered &lt;select multiple&gt;, and
  *   2. it ensures wonder-select.js / wonder-select.css are on the page.
  *
- * Everything else - list, item, selection, displayString, noSelectionString, etc. - is exactly
- * WOPopUpButton. The widget itself is driven entirely client-side by wonder-select.js, which
- * auto-enhances any &lt;select class="ajax-popup-button"&gt; and keeps it correct across Ajax morphs
- * via a MutationObserver (no per-page init or onRefreshComplete hook needed). So you can equally
- * just put class="ajax-popup-button" on a plain popUpButton; this element is sugar that also
- * guarantees the resources are loaded.
+ * Everything else - list, item, selections, displayString, multiple, etc. - is exactly WOBrowser.
+ * The SAME wonder-select.js drives both this and AjaxPopUpButton: it reads the &lt;select&gt;'s
+ * multiple attribute and renders removable tags for multi-select, a single value for single-select.
+ * So WO's own single (WOPopUpButton) vs multi (WOBrowser) split is mirrored by AjaxPopUpButton vs
+ * AjaxBrowser, over one shared widget.
  *
- * A distinct class (not Chosen's "chosen-select") is used on purpose, so wonder-select and any
- * remaining legacy Chosen popups don't both try to enhance the same select during migration.
+ * As with AjaxPopUpButton, you can equally just put class="ajax-popup-button" on a plain browser;
+ * this element is sugar that also guarantees the resources are loaded. The distinct marker class
+ * (not Chosen's "chosen-select") lets wonder-select and legacy Chosen/TomSelect coexist during
+ * migration without both enhancing the same select.
  */
-public class AjaxPopUpButton extends ERXPatcher.DynamicElementsPatches.PopUpButton {
+public class AjaxBrowser extends ERXPatcher.DynamicElementsPatches.Browser {
 
 	public static final String MARKER_CLASS = "ajax-popup-button";
 
-	public AjaxPopUpButton(String name, NSDictionary associations, WOElement element) {
+	public AjaxBrowser(String name, NSDictionary associations, WOElement element) {
 		super(name, withMarkerClass(associations), element);
 	}
 

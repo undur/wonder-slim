@@ -208,8 +208,12 @@
 					return;
 				}
 			});
-			// Close on outside click.
+			// Close on outside click. Guard against our OWN re-render: picking an option in
+			// multi-select mode rebuilds the option <li>s, so by the time this bubbled click fires the
+			// clicked <li> is detached from the document. A detached target means the click came from
+			// inside our (re-rendered) list - not an outside click - so don't close on it.
 			document.addEventListener('click', function (e) {
+				if (e.target && !document.contains(e.target)) return;
 				if (!host.contains(e.target)) close(host);
 			});
 		}
