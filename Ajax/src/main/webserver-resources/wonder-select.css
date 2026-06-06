@@ -1,5 +1,14 @@
 /* wonder-select - minimal styling for the morph-native select replacement. */
 
+/*
+ * Prevent the FOUC blink of the native <select> before wonder-select enhances it. The CSS loads
+ * (in <head>) before wonder-select.js runs and hides the select itself, so without this the raw
+ * select paints for a frame or two and then vanishes. Hiding it up front means it is never painted;
+ * wonder-select shows its own trigger instead. (This makes the field JS-required, which is fine -
+ * the surrounding app is entirely Ajax/JS-driven.)
+ */
+select.ajax-popup-button { display: none; }
+
 wonder-select.ws-host {
 	display: inline-block;
 	position: relative;
