@@ -78,7 +78,12 @@ wonder-select .ws-trigger::after {
 	transform: translateY(-25%);
 	pointer-events: none;
 }
-wonder-select.ws-open .ws-trigger { border-color: #2b6cb0; box-shadow: 0 0 0 2px rgba(43,108,176,.2); }
+/* Focus ring: show the same blue border whenever the trigger has focus (e.g. after a pick, by
+   keyboard, or click) - not only while the dropdown is open - so it reads as focused like a native
+   select. outline:none because we draw our own ring via border + box-shadow. */
+wonder-select .ws-trigger:focus { outline: none; }
+wonder-select.ws-open .ws-trigger,
+wonder-select .ws-trigger:focus { border-color: #2b6cb0; box-shadow: 0 0 0 2px rgba(43,108,176,.2); }
 /* Flip the caret while open. */
 wonder-select.ws-open .ws-trigger::after { border-top-color: #2b6cb0; transform: translateY(-75%) rotate(180deg); }
 wonder-select .ws-placeholder { color: #999; }
