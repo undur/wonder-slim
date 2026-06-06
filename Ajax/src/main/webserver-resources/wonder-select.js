@@ -326,7 +326,11 @@
 				Array.prototype.forEach.call(select.options, function (o) {
 					if (o.value === value) o.selected = !o.selected;
 				});
-				renderOptions(host, host._ws.search.value);
+				// After a pick, clear the search and close the list (then focus the trigger), so each
+				// selection is a discrete pick rather than leaving a stale filter in an open dropdown.
+				host._ws.search.value = '';
+				close(host);
+				host._ws.trigger.focus();
 			} else {
 				select.value = value;
 				close(host);

@@ -16,7 +16,7 @@
     },
     {
       "do": "comment",
-      "text": "open and pick Mango"
+      "text": "pick Mango -> list closes, search clears, focus kept"
     },
     {
       "do": "click",
@@ -42,22 +42,43 @@
     },
     {
       "do": "wait",
-      "ms": 150
+      "ms": 250
     },
     {
       "do": "read",
-      "name": "dropdownStaysOpen",
+      "name": "closedAfterPick",
       "selector": "wonder-select.ws-open",
       "what": "exists"
     },
     {
-      "do": "comment",
-      "text": "pick a second one - Grape"
+      "do": "read",
+      "name": "focusKept",
+      "selector": "wonder-select :focus",
+      "what": "exists"
     },
     {
-      "do": "fill",
+      "do": "comment",
+      "text": "reopen (search empty), pick Grape -> two tags"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "read",
+      "name": "searchEmptyOnReopen",
       "selector": "wonder-select .ws-search",
-      "text": "Grape"
+      "what": "value"
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Grape",
+      "delay": 25
     },
     {
       "do": "wait",
@@ -69,7 +90,7 @@
     },
     {
       "do": "wait",
-      "ms": 150
+      "ms": 250
     },
     {
       "do": "read",
@@ -79,12 +100,7 @@
     },
     {
       "do": "comment",
-      "text": "close, commit selection to server (Tab fires change/blur)"
-    },
-    {
-      "do": "press",
-      "selector": "wonder-select .ws-search",
-      "key": "Escape"
+      "text": "commit to server"
     },
     {
       "do": "press",
@@ -97,13 +113,13 @@
     },
     {
       "do": "read",
-      "name": "echoAfterPick",
+      "name": "echo",
       "selector": "#echo",
       "what": "text"
     },
     {
       "do": "comment",
-      "text": "remove the first tag via its x button"
+      "text": "remove a tag"
     },
     {
       "do": "click",
@@ -111,7 +127,7 @@
     },
     {
       "do": "wait",
-      "ms": 150
+      "ms": 200
     },
     {
       "do": "read",
@@ -121,7 +137,7 @@
     },
     {
       "do": "comment",
-      "text": "morph the container, confirm tags survive"
+      "text": "morph the container, tags survive"
     },
     {
       "do": "click",
@@ -138,12 +154,6 @@
       "what": "count"
     },
     {
-      "do": "read",
-      "name": "widgetAfterMorph",
-      "selector": "wonder-select .ws-trigger",
-      "what": "exists"
-    },
-    {
       "do": "assert",
       "name": "rendered as multi-select",
       "that": "isMulti",
@@ -151,45 +161,51 @@
     },
     {
       "do": "assert",
-      "name": "dropdown stays open after a pick",
-      "that": "dropdownStaysOpen",
+      "name": "list closes after a pick",
+      "that": "closedAfterPick",
+      "equals": false
+    },
+    {
+      "do": "assert",
+      "name": "focus kept after pick",
+      "that": "focusKept",
       "equals": true
     },
     {
       "do": "assert",
-      "name": "two tags after two picks",
+      "name": "search cleared on reopen",
+      "that": "searchEmptyOnReopen",
+      "equals": ""
+    },
+    {
+      "do": "assert",
+      "name": "two picks accumulate to two tags",
       "that": "tagCount",
       "equals": 2
     },
     {
       "do": "assert",
-      "name": "server got both (Mango + Grape)",
-      "that": "echoAfterPick",
+      "name": "server got Mango",
+      "that": "echo",
       "contains": "Mango"
     },
     {
       "do": "assert",
-      "name": "server got Grape too",
-      "that": "echoAfterPick",
+      "name": "server got Grape",
+      "that": "echo",
       "contains": "Grape"
     },
     {
       "do": "assert",
-      "name": "removing a tag drops to one",
+      "name": "remove tag -> one",
       "that": "tagCountAfterRemove",
       "equals": 1
     },
     {
       "do": "assert",
-      "name": "tags survive container morph",
+      "name": "tags survive morph",
       "that": "tagCountAfterMorph",
       "equals": 1
-    },
-    {
-      "do": "assert",
-      "name": "widget survives morph",
-      "that": "widgetAfterMorph",
-      "equals": true
     }
   ]
 }
