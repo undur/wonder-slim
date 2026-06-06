@@ -101,13 +101,18 @@
 			syncDisplay(host);
 		}
 
-		function open(host) {
+		function open(host, initialSearch) {
 			var ws = host._ws;
 			ws.dropdown.hidden = false;
 			host.classList.add('ws-open');
-			ws.search.value = '';
-			renderOptions(host, '');
+			ws.search.value = initialSearch || '';
+			renderOptions(host, ws.search.value);
 			ws.search.focus();
+			// Put the caret after the seeded character.
+			if (initialSearch) {
+				var len = ws.search.value.length;
+				if (ws.search.setSelectionRange) ws.search.setSelectionRange(len, len);
+			}
 		}
 
 		function close(host) {
@@ -121,7 +126,18 @@
 				if (host.classList.contains('ws-open')) close(host); else open(host);
 			});
 			ws.trigger.addEventListener('keydown', function (e) {
-				if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(host); }
+				if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+					e.preventDefault();
+					open(host);
+					return;
+				}
+				// Type-to-search: any printable character (not a modifier combo) opens the dropdown
+				// and seeds the search with that character, so you can just focus the field and start
+				// typing - the way Chosen behaved. e.key is a single char for printable keys.
+				if (e.key && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+					e.preventDefault();
+					open(host, e.key);
+				}
 			});
 			ws.search.addEventListener('input', function () { renderOptions(host, ws.search.value); });
 			ws.search.addEventListener('keydown', function (e) {
