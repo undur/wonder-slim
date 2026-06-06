@@ -139,6 +139,23 @@ async function readValue(page, step, reads, requestsSince) {
 					&& r.right <= (window.innerWidth || document.documentElement.clientWidth) + tol
 					&& r.bottom <= (window.innerHeight || document.documentElement.clientHeight) + tol;
 			}, step.selector);
+		case 'timeClickToRender':
+			// Wall-clock ms from clicking step.clickSelector until step.selector reaches at least
+			// step.atLeastCount matches (i.e. the list finished rendering). Measured in-page with
+			// performance.now() around a synchronous click + a rAF/poll wait, so it captures the real
+			// open cost (build + layout) the user feels - used to guard large-list render performance.
+			return await page.evaluate(async (arg) => {
+				var trigger = document.querySelector(arg.clickSelector);
+				if (!trigger) return null;
+				var t0 = performance.now();
+				trigger.click();
+				var deadline = t0 + (arg.timeoutMs || 8000);
+				while (performance.now() < deadline) {
+					if (document.querySelectorAll(arg.selector).length >= arg.atLeastCount) break;
+					await new Promise(function (r) { (window.requestAnimationFrame || setTimeout)(r); });
+				}
+				return Math.round(performance.now() - t0);
+			}, { clickSelector: step.clickSelector, selector: step.selector, atLeastCount: step.atLeastCount, timeoutMs: step.timeoutMs });
 		case 'boundingEdge':
 			// A single edge of the element's rect (step.edge: top|left|right|bottom|width|height), so
 			// overflow can be asserted numerically (e.g. right atMost viewport width).

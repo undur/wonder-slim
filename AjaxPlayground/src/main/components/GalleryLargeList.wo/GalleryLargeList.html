@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Gallery: Large list (render performance)</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.echo { font-size: 1.1rem; color: #2b6cb0; }
+		a { color: #2b6cb0; }
+		label { font-weight: 600; display:block; margin-bottom: .3rem; }
+	</style>
+</head>
+<body>
+	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<h1>Large list (render performance)</h1>
+	<p class="lead">An <code>AjaxPopUpButton</code> backed by <span id="count"><wo:str value="$itemCount" /></span> options - the render-performance stress case (long accounting-key-style labels). Opening the list builds one row per option; this page exists to keep that fast.</p>
+
+	<wo:form>
+		<div class="box">
+			<label>Pick an entry</label>
+			<wo:AjaxPopUpButton list="$items" item="$currentItem" selection="$selectedItem" noSelectionString="Pick an entry..." id="bigSelect" />
+			<wo:AjaxObserveField observeFieldID="bigSelect" updateContainerID="echoContainer" action="$selectionChanged" />
+		</div>
+	</wo:form>
+
+	<wo:AjaxUpdateContainer id="echoContainer">
+		<div class="box">
+			Server sees selected: <span class="echo" id="echo"><wo:str value="$selectedItem" /></span>
+		</div>
+	</wo:AjaxUpdateContainer>
+</body>
+</html>

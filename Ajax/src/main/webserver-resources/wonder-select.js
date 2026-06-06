@@ -266,8 +266,21 @@
 		function renderOptions(host, filter) {
 			var ws = host._ws;
 			var f = (filter || '').toLowerCase();
-			ws.list.textContent = '';
 			var anyShown = false;
+
+			// Build the whole list off-document in a fragment, then insert it in ONE DOM write. Appending
+			// each <li> straight into the live (visible, auto-sizing) dropdown forces the browser to
+			// re-layout per option - O(n) reflows - which is what made opening a few-hundred-option list
+			// take a second. A fragment defers all layout to the single append at the end.
+			var frag = document.createDocumentFragment();
+
+			// Precompute the set of selected values ONCE. The old per-option isSelected() rescanned every
+			// option (O(n) each), making the render O(n^2) - the dominant cost on large lists, and it ran
+			// on every keystroke too. A lookup set makes the per-option check O(1).
+			var selectedValues = {};
+			Array.prototype.forEach.call(ws.select.options, function (o) {
+				if (o.selected) selectedValues[o.value] = true;
+			});
 
 			// If a real value is selected and there's a placeholder option, offer it as a "clear"
 			// choice so the user can deselect back to nothing (Chosen/native behaviour). Single-select
@@ -282,7 +295,7 @@
 						var clearLi = h('li', { class: 'ws-option ws-clear', 'data-value': placeholder.value, text: label0 });
 						clearLi.addEventListener('click', function () { choose(host, placeholder.value); });
 						clearLi.addEventListener('mousemove', function () { setActive(host, clearLi); });
-						ws.list.appendChild(clearLi);
+						frag.appendChild(clearLi);
 					}
 				}
 			}
@@ -293,19 +306,24 @@
 				if (f && label.toLowerCase().indexOf(f) === -1) return;
 				anyShown = true;
 				var li = h('li', { class: 'ws-option', 'data-value': opt.value, text: label });
-				if (isSelected(ws.select, opt.value)) li.classList.add('ws-selected');
+				if (selectedValues[opt.value]) li.classList.add('ws-selected');
 				li.addEventListener('click', function () { choose(host, opt.value); });
 				// Hovering moves the keyboard highlight, so mouse and keyboard agree.
 				li.addEventListener('mousemove', function () { setActive(host, li); });
-				ws.list.appendChild(li);
+				frag.appendChild(li);
 			});
 			if (!anyShown) {
-				ws.list.appendChild(h('li', { class: 'ws-option ws-disabled', text: host._wsNoResults }));
+				frag.appendChild(h('li', { class: 'ws-option ws-disabled', text: host._wsNoResults }));
 			}
+			ws.list.textContent = '';
+			ws.list.appendChild(frag);   // single layout pass for the whole list
+
 			// Highlight a sensible starting option: the selected one if visible, else the first.
 			var opts = selectableOptions(host);
 			var preferred = opts.filter(function (li) { return li.classList.contains('ws-selected'); })[0] || opts[0];
-			setActive(host, preferred || null);
+			// Don't scroll the freshly-built list into view synchronously during render (a forced layout
+			// on top of the insert) - defer it so the initial paint isn't blocked.
+			setActive(host, preferred || null, true);
 		}
 
 		// All highlightable (non-disabled) option <li>s currently rendered.
@@ -318,13 +336,23 @@
 			return host._ws.list.querySelector('.ws-option.ws-active');
 		}
 
-		function setActive(host, li) {
+		function setActive(host, li, deferScroll) {
 			var prev = activeOption(host);
 			if (prev) prev.classList.remove('ws-active');
 			if (li) {
 				li.classList.add('ws-active');
-				// Keep the highlighted item in view as you arrow past the visible edges.
-				if (li.scrollIntoView) li.scrollIntoView({ block: 'nearest' });
+				// Keep the highlighted item in view as you arrow past the visible edges. During an
+				// initial render (deferScroll) we let the browser paint first, then scroll on the next
+				// frame, so a big list's first paint isn't blocked by a synchronous scroll+layout.
+				if (li.scrollIntoView) {
+					if (deferScroll && window.requestAnimationFrame) {
+						window.requestAnimationFrame(function () {
+							if (li.classList.contains('ws-active')) li.scrollIntoView({ block: 'nearest' });
+						});
+					} else {
+						li.scrollIntoView({ block: 'nearest' });
+					}
+				}
 			}
 		}
 
@@ -336,10 +364,6 @@
 			var idx = current ? opts.indexOf(current) : -1;
 			idx = (idx + dir + opts.length) % opts.length;
 			setActive(host, opts[idx]);
-		}
-
-		function isSelected(select, value) {
-			return Array.prototype.some.call(select.options, function (o) { return o.value === value && o.selected; });
 		}
 
 		function choose(host, value) {

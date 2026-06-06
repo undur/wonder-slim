@@ -7,6 +7,7 @@ import er.extensions.components.ERXComponent;
 
 import ajaxplayground.components.gallery.GalleryAjaxBrowser;
 import ajaxplayground.components.gallery.GalleryAjaxPopUpButton;
+import ajaxplayground.components.gallery.GalleryLargeList;
 import ajaxplayground.components.gallery.GalleryUpdateContainer;
 import ajaxplayground.components.gallery.GalleryWonderSelect;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
@@ -74,5 +75,9 @@ public class Main extends ERXComponent {
 
 	public WOActionResults galleryAjaxPopUpButton() {
 		return pageWithName( GalleryAjaxPopUpButton.class );
+	}
+
+	public WOActionResults galleryLargeList() {
+		return pageWithName( GalleryLargeList.class );
 	}
 }

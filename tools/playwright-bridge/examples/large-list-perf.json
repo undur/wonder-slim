@@ -1,0 +1,19 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryLargeList",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "wonder-select .ws-trigger" },
+    { "do": "read", "name": "optionCount", "selector": "wonder-select select option", "what": "count" },
+    { "do": "comment", "text": "measure cold open: click trigger -> all 2000 options rendered as <li>" },
+    { "do": "read", "name": "openMs", "selector": "wonder-select .ws-option", "what": "timeClickToRender", "clickSelector": "wonder-select .ws-trigger", "atLeastCount": 2000, "timeoutMs": 8000 },
+    { "do": "read", "name": "renderedCount", "selector": "wonder-select .ws-option", "what": "count" },
+    { "do": "comment", "text": "filtering re-renders quickly too (per-keystroke cost)" },
+    { "do": "type", "selector": "wonder-select .ws-search", "text": "0123", "delay": 40 },
+    { "do": "wait", "ms": 150 },
+    { "do": "read", "name": "filteredCount", "selector": "wonder-select .ws-option", "what": "count" },
+    { "do": "assert", "name": "select has >= 2000 options", "that": "optionCount", "atLeast": 2000 },
+    { "do": "assert", "name": "all 2000 rendered as li", "that": "renderedCount", "atLeast": 2000 },
+    { "do": "assert", "name": "cold open under 300ms (old path was ~327ms)", "that": "openMs", "atMost": 300 },
+    { "do": "assert", "name": "filter narrows to one match", "that": "filteredCount", "equals": 1 }
+  ]
+}
