@@ -1,0 +1,176 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryAjaxPopUpButton",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "comment",
+      "text": "pick a fruit"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 120
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Mango",
+      "delay": 20
+    },
+    {
+      "do": "wait",
+      "ms": 100
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 700
+    },
+    {
+      "do": "read",
+      "name": "valueBefore",
+      "selector": "wonder-select .ws-value",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "echoBefore",
+      "selector": "#echo",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "focusedBefore",
+      "selector": "wonder-select :focus",
+      "what": "exists"
+    },
+    {
+      "do": "comment",
+      "text": "Backspace on the focused trigger clears back to placeholder"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-trigger",
+      "key": "Backspace"
+    },
+    {
+      "do": "wait",
+      "ms": 700
+    },
+    {
+      "do": "read",
+      "name": "placeholderAfter",
+      "selector": "wonder-select .ws-placeholder",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "valueGone",
+      "selector": "wonder-select .ws-value",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "echoAfter",
+      "selector": "#echo",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "focusedAfter",
+      "selector": "wonder-select :focus",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "openAfter",
+      "selector": "wonder-select.ws-open",
+      "what": "exists"
+    },
+    {
+      "do": "comment",
+      "text": "Delete on an already-empty single select is a no-op (placeholder stays)"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-trigger",
+      "key": "Delete"
+    },
+    {
+      "do": "wait",
+      "ms": 250
+    },
+    {
+      "do": "read",
+      "name": "placeholderStill",
+      "selector": "wonder-select .ws-placeholder",
+      "what": "exists"
+    },
+    {
+      "do": "assert",
+      "name": "value selected before",
+      "that": "valueBefore",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "server saw Mango before",
+      "that": "echoBefore",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "trigger focused before",
+      "that": "focusedBefore",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "placeholder shown after clear",
+      "that": "placeholderAfter",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "value gone after clear",
+      "that": "valueGone",
+      "equals": false
+    },
+    {
+      "do": "assert",
+      "name": "server cleared (echo empty)",
+      "that": "echoAfter",
+      "equals": ""
+    },
+    {
+      "do": "assert",
+      "name": "focus kept after clear",
+      "that": "focusedAfter",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "dropdown stays closed",
+      "that": "openAfter",
+      "equals": false
+    },
+    {
+      "do": "assert",
+      "name": "delete on empty is no-op",
+      "that": "placeholderStill",
+      "equals": true
+    }
+  ]
+}

@@ -206,6 +206,28 @@
 					}
 					return;
 				}
+				// Backspace / Delete on the focused (closed) trigger clears a selection - the keyboard
+				// complement of the mouse gestures (the per-tag × button / the "clear" option). In
+				// multi-select it peels off the LAST tag, one per press (the conventional tag-input
+				// gesture); in single-select it clears back to the placeholder. No-op when nothing is
+				// selected, and we don't hijack these keys while the dropdown is open (the search box
+				// owns them there).
+				if ((e.key === 'Backspace' || e.key === 'Delete') && !host.classList.contains('ws-open')) {
+					if (host._wsMultiple) {
+						var selected = Array.prototype.filter.call(ws.select.options, function (o) { return o.selected && !isPlaceholderOption(o); });
+						if (selected.length) {
+							e.preventDefault();
+							deselect(host, selected[selected.length - 1].value);
+						}
+					} else {
+						var cur = ws.select.options[ws.select.selectedIndex];
+						if (cur && !isPlaceholderOption(cur)) {
+							e.preventDefault();
+							clearSingle(host);
+						}
+					}
+					return;
+				}
 				if (e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
 					e.preventDefault();
 					open(host);
@@ -336,13 +358,44 @@
 				close(host);
 				host._ws.trigger.focus();
 			}
+			commit(host);
+		}
+
+		// Turn a single option OFF (multi-select) and commit, keeping the trigger focused. Used by the
+		// per-tag × button and by Backspace-removes-last-tag - neither needs the open/close dance, since
+		// the dropdown is already closed (or the click came from a tag in the closed trigger).
+		function deselect(host, value) {
+			var select = host._ws.select;
+			Array.prototype.forEach.call(select.options, function (o) {
+				if (o.value === value) o.selected = false;
+			});
+			host._ws.trigger.focus();
+			commit(host);
+		}
+
+		// Clear a single-select back to its placeholder (no-selection) value and commit, keeping the
+		// trigger focused. The keyboard equivalent of clicking the "clear" option in the dropdown.
+		function clearSingle(host) {
+			var select = host._ws.select;
+			var placeholder = Array.prototype.filter.call(select.options, isPlaceholderOption)[0];
+			// Prefer the explicit placeholder option's value (e.g. WONoSelectionString) so it round-trips
+			// to the server exactly as the click-to-clear path does; fall back to clearing selectedIndex.
+			if (placeholder) select.value = placeholder.value;
+			else select.selectedIndex = -1;
+			host._ws.trigger.focus();
+			commit(host);
+		}
+
+		// Shared tail for any selection change: refresh the trigger label, arm post-morph focus
+		// restoration, and fire the native 'change' so AjaxObserveField (and any other listener) reacts.
+		function commit(host) {
+			var select = host._ws.select;
 			syncDisplay(host);
 			// The change below may trigger an Ajax morph of the container this widget lives in. That
 			// morph can re-create our (client-injected) wrapper, dropping focus to <body>. Arm the
 			// post-morph resync to restore focus - keyed on the SELECT'S ID (stable, server-rendered)
 			// rather than the host object, since the host instance may be replaced by the morph.
 			WonderSelect._refocus = { selectId: select.id, at: Date.now() };
-			// Native change so AjaxObserveField (and any other listener) reacts exactly as before.
 			select.dispatchEvent(new Event('change', { bubbles: true }));
 		}
 
@@ -363,7 +416,7 @@
 						tag.appendChild(document.createTextNode(o.textContent));
 						var x = h('button', { class: 'ws-tag-remove', type: 'button', 'aria-label': 'Remove' });
 						x.textContent = '×';
-						x.addEventListener('click', function (e) { e.stopPropagation(); choose(host, o.value); });
+						x.addEventListener('click', function (e) { e.stopPropagation(); deselect(host, o.value); });
 						tag.appendChild(x);
 						ws.trigger.appendChild(tag);
 					});

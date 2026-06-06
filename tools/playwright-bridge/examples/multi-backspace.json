@@ -1,0 +1,203 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryAjaxBrowser",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "comment",
+      "text": "pick Mango then Grape -> two tags, trigger focused"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 120
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Man",
+      "delay": 20
+    },
+    {
+      "do": "wait",
+      "ms": 100
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 120
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Grape",
+      "delay": 20
+    },
+    {
+      "do": "wait",
+      "ms": 100
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 250
+    },
+    {
+      "do": "read",
+      "name": "tagsBefore",
+      "selector": "wonder-select .ws-tag",
+      "what": "count"
+    },
+    {
+      "do": "read",
+      "name": "focusedBefore",
+      "selector": "wonder-select :focus",
+      "what": "exists"
+    },
+    {
+      "do": "comment",
+      "text": "Backspace on focused (closed) trigger removes LAST tag"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-trigger",
+      "key": "Backspace"
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "read",
+      "name": "tagsAfter1",
+      "selector": "wonder-select .ws-tag",
+      "what": "count"
+    },
+    {
+      "do": "read",
+      "name": "remainingTagText",
+      "selector": "wonder-select .ws-tag",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "openAfter",
+      "selector": "wonder-select.ws-open",
+      "what": "exists"
+    },
+    {
+      "do": "comment",
+      "text": "second Backspace removes the other tag -> placeholder"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-trigger",
+      "key": "Backspace"
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "read",
+      "name": "tagsAfter2",
+      "selector": "wonder-select .ws-tag",
+      "what": "count"
+    },
+    {
+      "do": "read",
+      "name": "placeholderShown",
+      "selector": "wonder-select .ws-placeholder",
+      "what": "exists"
+    },
+    {
+      "do": "comment",
+      "text": "third Backspace on empty selection is a no-op"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-trigger",
+      "key": "Backspace"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "read",
+      "name": "tagsAfter3",
+      "selector": "wonder-select .ws-tag",
+      "what": "count"
+    },
+    {
+      "do": "assert",
+      "name": "two tags before",
+      "that": "tagsBefore",
+      "equals": 2
+    },
+    {
+      "do": "assert",
+      "name": "trigger focused before",
+      "that": "focusedBefore",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "one tag after first backspace",
+      "that": "tagsAfter1",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "rightmost tag (Mango) peeled, Grape remains",
+      "that": "remainingTagText",
+      "contains": "Grape"
+    },
+    {
+      "do": "assert",
+      "name": "dropdown stays closed",
+      "that": "openAfter",
+      "equals": false
+    },
+    {
+      "do": "assert",
+      "name": "no tags after second backspace",
+      "that": "tagsAfter2",
+      "equals": 0
+    },
+    {
+      "do": "assert",
+      "name": "placeholder shown when empty",
+      "that": "placeholderShown",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "backspace on empty is no-op",
+      "that": "tagsAfter3",
+      "equals": 0
+    }
+  ]
+}
