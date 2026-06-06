@@ -27,6 +27,8 @@
 				<wo:AjaxObserveField observeFieldID="fruitSelect" updateContainerID="echoContainer" action="$fruitChanged" />
 				<p class="lead">Container refresh count: <span id="refreshCount"><wo:str value="$refreshCount" /></span></p>
 				<wo:AjaxUpdateLink updateContainerID="selectContainer" action="$refreshContainer" id="refreshLink" class="btn">Refresh (morph) this container</wo:AjaxUpdateLink>
+				<wo:submit action="$doSubmit" value="Submit" id="submitBtn" class="btn" />
+				<p class="lead">Submitted: <strong id="submitFlag"><wo:str value="$submittedFlag" /></strong></p>
 			</div>
 		</wo:AjaxUpdateContainer>
 	</wo:form>

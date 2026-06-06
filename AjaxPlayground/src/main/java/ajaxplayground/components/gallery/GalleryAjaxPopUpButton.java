@@ -21,6 +21,7 @@ public class GalleryAjaxPopUpButton extends PlaygroundPage {
 	public String currentFruit;
 	public String selectedFruit;
 	private int _refreshCount;
+	private boolean _submitted;
 
 	public GalleryAjaxPopUpButton( WOContext context ) {
 		super( context );
@@ -42,4 +43,15 @@ public class GalleryAjaxPopUpButton extends PlaygroundPage {
 		_refreshCount++;
 		return null;
 	}
+
+	/** Submit button action - lets the bridge confirm Enter-on-trigger really submits the form. */
+	public WOActionResults doSubmit() {
+		_submitted = true;
+		return null;
+	}
+
+	public String submittedFlag() {
+		return _submitted ? "YES" : "no";
+	}
 }
+

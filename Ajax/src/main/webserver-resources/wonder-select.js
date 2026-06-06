@@ -183,12 +183,27 @@
 				if (host.classList.contains('ws-open')) close(host); else open(host);
 			});
 			ws.trigger.addEventListener('keydown', function (e) {
-				// Enter on the (closed) trigger is deliberately NOT an opener: the trigger is a div
-				// inside a form, and Enter there would otherwise trigger the form's implicit submit.
-				// We swallow it (preventDefault) so it neither submits nor does anything surprising;
-				// Space / ArrowDown / ArrowUp / typing open the dropdown instead (none submit a form).
+				// Enter on the (closed) trigger submits the enclosing form, like Enter in a normal
+				// field would. The trigger is a div (not a form control), so it won't submit on its
+				// own - we trigger the form's submit explicitly. Enter is NOT an opener (open via
+				// Space / ArrowDown / ArrowUp / typing instead).
 				if (e.key === 'Enter') {
 					e.preventDefault();
+					var form = ws.select && ws.select.form;
+					if (form) {
+						// Submit the enclosing form the way Enter in a normal text field does: through
+						// the form's default (first) submit button, so the right WO action fires (WO
+						// needs the submit button as the "sender"). Fall back to a plain submit if the
+						// form has no button.
+						var submitBtn = form.querySelector('input[type=submit], button[type=submit], button:not([type])');
+						if (submitBtn) {
+							submitBtn.click();
+						} else if (form.requestSubmit) {
+							form.requestSubmit();
+						} else {
+							form.submit();
+						}
+					}
 					return;
 				}
 				if (e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {

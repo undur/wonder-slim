@@ -1,0 +1,95 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryAjaxPopUpButton",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "comment",
+      "text": "TEST 1: mouse-pick keeps focus on the widget"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Man",
+      "delay": 25
+    },
+    {
+      "do": "wait",
+      "ms": 120
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 900
+    },
+    {
+      "do": "read",
+      "name": "focusInWidgetAfterMousePick",
+      "selector": "wonder-select :focus",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "picked",
+      "selector": "wonder-select .ws-trigger",
+      "what": "text"
+    },
+    {
+      "do": "comment",
+      "text": "TEST 2: Enter on the focused trigger submits the form"
+    },
+    {
+      "do": "focus",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "press",
+      "selector": "wonder-select .ws-trigger",
+      "key": "Enter"
+    },
+    {
+      "do": "wait",
+      "ms": 1000
+    },
+    {
+      "do": "read",
+      "name": "submitFlag",
+      "selector": "#submitFlag",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "mouse-pick keeps focus in widget",
+      "that": "focusInWidgetAfterMousePick",
+      "equals": true
+    },
+    {
+      "do": "assert",
+      "name": "mouse-pick selected Mango",
+      "that": "picked",
+      "contains": "Mango"
+    },
+    {
+      "do": "assert",
+      "name": "Enter on trigger SUBMITS the form",
+      "that": "submitFlag",
+      "equals": "YES"
+    }
+  ]
+}
