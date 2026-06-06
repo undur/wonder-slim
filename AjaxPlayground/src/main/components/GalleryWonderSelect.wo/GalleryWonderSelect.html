@@ -38,6 +38,19 @@
 		</div>
 	</wo:AjaxUpdateContainer>
 
+	<h2 style="margin-top:2rem">Self-refreshing container (the Strimillinn case)</h2>
+	<p class="lead">Here the select's OWN container is what its change refreshes - the select sits inside <code>selfContainer</code> and its observe field updates <code>selfContainer</code>. Picking an option morphs the container the widget lives in. Focus must survive.</p>
+	<wo:form>
+		<wo:AjaxUpdateContainer id="selfContainer">
+			<div class="box">
+				<label>Fruit (refreshes its own container)</label>
+				<wo:popUpButton list="$fruits" item="$currentFruit" selection="$selfFruit" noSelectionString="Pick a fruit..." id="selfSelect" class="ajax-popup-button" />
+				<wo:AjaxObserveField observeFieldID="selfSelect" updateContainerID="selfContainer" action="$selfChanged" />
+				<p class="lead">Self-change count: <span id="selfCount"><wo:str value="$selfCount" /></span> &middot; server sees: <strong id="selfEcho"><wo:str value="$selfFruit" /></strong></p>
+			</div>
+		</wo:AjaxUpdateContainer>
+	</wo:form>
+
 	<wo:ERXJavaScript filename="wonder-select.js" framework="Ajax" />
 </body>
 </html>

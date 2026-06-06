@@ -230,6 +230,11 @@
 				host._ws.trigger.focus();
 			}
 			syncDisplay(host);
+			// The change below may trigger an Ajax morph of the container this widget lives in. That
+			// morph can re-create our (client-injected) wrapper, dropping focus to <body>. Arm the
+			// post-morph resync to restore focus - keyed on the SELECT'S ID (stable, server-rendered)
+			// rather than the host object, since the host instance may be replaced by the morph.
+			WonderSelect._refocus = { selectId: select.id, at: Date.now() };
 			// Native change so AjaxObserveField (and any other listener) reacts exactly as before.
 			select.dispatchEvent(new Event('change', { bubbles: true }));
 		}
@@ -301,6 +306,28 @@
 						queued = false;
 						document.querySelectorAll('select.ajax-popup-button').forEach(enhance);
 						document.querySelectorAll('wonder-select.ws-host').forEach(syncDisplay);
+						// Restore focus dropped by a morph that reconciled around our wrapper. The morph
+						// that drops focus arrives a network round-trip AFTER the pick, so earlier
+						// (pre-morph) resyncs run while focus is still fine - we must NOT clear the arm
+						// then. We only act when focus has actually fallen to <body>, and only restore
+						// to the host the user just picked from (set by choose, with a short deadline so
+						// a stale arm can't later steal focus the user moved elsewhere).
+						var arm = WonderSelect._refocus;
+						if (arm && Date.now() - arm.at < 4000) {
+							var active = document.activeElement;
+							if (arm.selectId && (!active || active === document.body)) {
+								// Re-find the (possibly re-created) host by the select's stable id.
+								var sel = document.getElementById(arm.selectId);
+								var host2 = sel && sel.closest && sel.closest('wonder-select');
+								if (host2 && host2._ws) {
+									host2._ws.trigger.focus();
+									WonderSelect._refocus = null;
+								}
+							}
+						}
+						else {
+							WonderSelect._refocus = null;
+						}
 					}, 0);
 				};
 			})();

@@ -23,6 +23,10 @@ public class GalleryWonderSelect extends PlaygroundPage {
 	public String selectedFruit;
 	private int _refreshCount;
 
+	/** Second case: a select whose OWN container is refreshed by its change (the Strimillinn case). */
+	public String selfFruit;
+	private int _selfCount;
+
 	public GalleryWonderSelect( WOContext context ) {
 		super( context );
 	}
@@ -47,6 +51,16 @@ public class GalleryWonderSelect extends PlaygroundPage {
 	/** Explicitly morph the container holding the select, to prove the widget survives. */
 	public WOActionResults refreshContainer() {
 		_refreshCount++;
+		return null;
+	}
+
+	public int selfCount() {
+		return _selfCount;
+	}
+
+	/** The self-refreshing select's change: bumps a counter and morphs its OWN container. */
+	public WOActionResults selfChanged() {
+		_selfCount++;
 		return null;
 	}
 }

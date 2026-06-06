@@ -6,11 +6,11 @@
     },
     {
       "do": "wait",
-      "selector": "wonder-select .ws-trigger"
+      "selector": "#selectContainer wonder-select .ws-trigger"
     },
     {
       "do": "click",
-      "selector": "wonder-select .ws-trigger"
+      "selector": "#selectContainer wonder-select .ws-trigger"
     },
     {
       "do": "wait",
@@ -19,51 +19,51 @@
     {
       "do": "read",
       "name": "optCount",
-      "selector": "wonder-select .ws-option",
+      "selector": "#selectContainer wonder-select .ws-option",
       "what": "count"
     },
     {
       "do": "read",
       "name": "firstOpt",
-      "selector": "wonder-select .ws-option",
+      "selector": "#selectContainer wonder-select .ws-option",
       "what": "text"
     },
     {
       "do": "read",
       "name": "activeOnOpen",
-      "selector": "wonder-select .ws-option.ws-active",
+      "selector": "#selectContainer wonder-select .ws-option.ws-active",
       "what": "text"
     },
     {
       "do": "press",
-      "selector": "wonder-select .ws-search",
+      "selector": "#selectContainer wonder-select .ws-search",
       "key": "ArrowDown"
     },
     {
       "do": "read",
       "name": "after1Down",
-      "selector": "wonder-select .ws-option.ws-active",
+      "selector": "#selectContainer wonder-select .ws-option.ws-active",
       "what": "text"
     },
     {
       "do": "press",
-      "selector": "wonder-select .ws-search",
+      "selector": "#selectContainer wonder-select .ws-search",
       "key": "ArrowUp"
     },
     {
       "do": "press",
-      "selector": "wonder-select .ws-search",
+      "selector": "#selectContainer wonder-select .ws-search",
       "key": "ArrowUp"
     },
     {
       "do": "read",
       "name": "wrappedToLast",
-      "selector": "wonder-select .ws-option.ws-active",
+      "selector": "#selectContainer wonder-select .ws-option.ws-active",
       "what": "text"
     },
     {
       "do": "press",
-      "selector": "wonder-select .ws-search",
+      "selector": "#selectContainer wonder-select .ws-search",
       "key": "Enter"
     },
     {
@@ -73,7 +73,7 @@
     {
       "do": "read",
       "name": "picked",
-      "selector": "wonder-select .ws-trigger",
+      "selector": "#selectContainer wonder-select .ws-trigger",
       "what": "text"
     },
     {

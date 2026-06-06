@@ -1,0 +1,85 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryWonderSelect",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#selfContainer wonder-select .ws-trigger"
+    },
+    {
+      "do": "click",
+      "selector": "#selfContainer wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "type",
+      "selector": "#selfContainer wonder-select .ws-search",
+      "text": "Man",
+      "delay": 30
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "click",
+      "selector": "#selfContainer wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 1200
+    },
+    {
+      "do": "read",
+      "name": "widgetStillThere",
+      "selector": "#selfContainer wonder-select .ws-trigger",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "widgetCount",
+      "selector": "#selfContainer wonder-select",
+      "what": "count"
+    },
+    {
+      "do": "read",
+      "name": "selectCount",
+      "selector": "#selfContainer select#selfSelect",
+      "what": "count"
+    },
+    {
+      "do": "read",
+      "name": "triggerText",
+      "selector": "#selfContainer wonder-select .ws-trigger",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "selfEcho",
+      "selector": "#selfEcho",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "activeId",
+      "what": "activeElementId"
+    },
+    {
+      "do": "read",
+      "name": "activeIsInWidget",
+      "selector": "#selfContainer wonder-select :focus",
+      "what": "exists"
+    },
+    {
+      "do": "assert",
+      "name": "focus restored to widget after self-container morph",
+      "that": "activeIsInWidget",
+      "equals": true
+    }
+  ]
+}
