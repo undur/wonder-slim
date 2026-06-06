@@ -107,6 +107,7 @@
 			host.classList.add('ws-open');
 			ws.search.value = initialSearch || '';
 			renderOptions(host, ws.search.value);
+			positionDropdown(host);
 			ws.search.focus();
 			// Put the caret after the seeded character.
 			if (initialSearch) {
@@ -115,9 +116,65 @@
 			}
 		}
 
+		// Size and orient the dropdown relative to the VIEWPORT so it never extends beyond it
+		// (Chosen's annoyance) and uses available space well: open downward by default, but flip up
+		// when there's more room above; cap the height to whichever gap we open into (minus a small
+		// margin) and to a sensible fraction of the viewport. Measured each open (handles the
+		// trigger being inside a scrolling table, different screen sizes, etc.).
+		function positionDropdown(host) {
+			var ws = host._ws;
+			var rect = ws.trigger.getBoundingClientRect();
+			var viewportH = window.innerHeight || document.documentElement.clientHeight;
+			var margin = 8;                       // breathing room from the viewport edge
+			var spaceBelow = viewportH - rect.bottom - margin;
+			var spaceAbove = rect.top - margin;
+			// Users often BROWSE the list to decide (e.g. accounting keys), so maximise visible
+			// height: open into whichever side has more room. A small bias keeps it opening downward
+			// when down is already comfortable, to avoid a jarring flip for no real gain.
+			var DOWN_BIAS = 40;
+			var openUp = spaceAbove > spaceBelow + DOWN_BIAS;
+			var avail = openUp ? spaceAbove : spaceBelow;
+			// Never exceed the available gap (so it stays within the viewport); also cap at a
+			// comfortable fraction of the viewport so a huge screen doesn't make an unwieldy list.
+			// Floor so it's always at least usable even in a tight spot.
+			var maxH = Math.max(120, Math.min(avail, viewportH * 0.7));
+			host.classList.toggle('ws-up', openUp);
+			ws.dropdown.style.maxHeight = maxH + 'px';
+
+			// Width: the list grows to its widest label (min = trigger width). Cap it to the viewport
+			// so a ~100-char label can't run off-screen. Prefer left-aligned to the trigger; if the
+			// content would overflow the right edge, right-align instead. Only if it still doesn't
+			// fit even right-aligned do we cap the width (then long lines scroll horizontally).
+			var viewportW = window.innerWidth || document.documentElement.clientWidth;
+			// Clear any prior caps/alignment so we measure the natural width fresh.
+			host.classList.remove('ws-right');
+			ws.dropdown.style.maxWidth = '';
+			var natural = Math.max(ws.dropdown.scrollWidth, rect.width);
+			var spaceRightOfLeftEdge = viewportW - rect.left - margin;   // room if left-aligned to trigger
+			var spaceLeftOfRightEdge = rect.right - margin;              // room if right-aligned to trigger
+			if (natural <= spaceRightOfLeftEdge) {
+				// Fits opening left-aligned - nothing to do.
+			} else if (natural <= spaceLeftOfRightEdge) {
+				host.classList.add('ws-right');                          // flip to right-align, it fits
+			} else {
+				// Too wide for either side: take the roomier side and cap (horizontal scroll for the rest).
+				if (spaceLeftOfRightEdge > spaceRightOfLeftEdge) {
+					host.classList.add('ws-right');
+					ws.dropdown.style.maxWidth = Math.max(rect.width, spaceLeftOfRightEdge) + 'px';
+				} else {
+					ws.dropdown.style.maxWidth = Math.max(rect.width, spaceRightOfLeftEdge) + 'px';
+				}
+			}
+		}
+
 		function close(host) {
 			host._ws.dropdown.hidden = true;
 			host.classList.remove('ws-open');
+			host.classList.remove('ws-up');
+			host.classList.remove('ws-right');
+			// Clear measured sizing so the next open re-measures from scratch (e.g. after a resize).
+			host._ws.dropdown.style.maxHeight = '';
+			host._ws.dropdown.style.maxWidth = '';
 		}
 
 		function wireEvents(host) {
@@ -162,8 +219,27 @@
 			var f = (filter || '').toLowerCase();
 			ws.list.textContent = '';
 			var anyShown = false;
+
+			// If a real value is selected and there's a placeholder option, offer it as a "clear"
+			// choice so the user can deselect back to nothing (Chosen/native behaviour). Single-select
+			// only; multi-select clears by toggling its tags off.
+			if (!host._wsMultiple) {
+				var placeholder = Array.prototype.filter.call(ws.select.options, isPlaceholderOption)[0];
+				var hasRealSelection = ws.select.selectedIndex >= 0 && !isPlaceholderOption(ws.select.options[ws.select.selectedIndex]);
+				if (placeholder && hasRealSelection) {
+					var label0 = placeholder.textContent;
+					if (!f || label0.toLowerCase().indexOf(f) !== -1) {
+						anyShown = true;
+						var clearLi = h('li', { class: 'ws-option ws-clear', 'data-value': placeholder.value, text: label0 });
+						clearLi.addEventListener('click', function () { choose(host, placeholder.value); });
+						clearLi.addEventListener('mousemove', function () { setActive(host, clearLi); });
+						ws.list.appendChild(clearLi);
+					}
+				}
+			}
+
 			Array.prototype.forEach.call(ws.select.options, function (opt) {
-				if (isPlaceholderOption(opt) && !host._wsMultiple) return; // the placeholder isn't pickable
+				if (isPlaceholderOption(opt) && !host._wsMultiple) return; // placeholder handled above as the clear option
 				var label = opt.textContent;
 				if (f && label.toLowerCase().indexOf(f) === -1) return;
 				anyShown = true;

@@ -102,15 +102,31 @@ wonder-select .ws-dropdown {
 	position: absolute;
 	top: 100%;
 	left: 0;
-	right: 0;
 	z-index: 1000;
 	margin-top: 2px;
 	border: 1px solid #bbb;
 	border-radius: 5px;
 	background: #fff;
 	box-shadow: 0 4px 16px rgba(0,0,0,.12);
-	max-height: 16rem;
+	/* Grow to the widest option (at least as wide as the trigger) so long labels are readable on
+	   one line; positionDropdown() sets an inline, viewport-aware max-height AND max-width. */
+	min-width: 100%;
+	width: max-content;
+	max-height: 16rem; /* fallback; overridden inline */
 	overflow: auto;
+}
+/* When opened upward (more room above than below), anchor the dropdown to the top of the trigger. */
+wonder-select.ws-up .ws-dropdown {
+	top: auto;
+	bottom: 100%;
+	margin-top: 0;
+	margin-bottom: 2px;
+	box-shadow: 0 -4px 16px rgba(0,0,0,.12);
+}
+/* When the list would overflow the right edge, positionDropdown() right-aligns it to the trigger. */
+wonder-select.ws-right .ws-dropdown {
+	left: auto;
+	right: 0;
 }
 wonder-select .ws-search {
 	width: 100%;
@@ -122,10 +138,14 @@ wonder-select .ws-search {
 	outline: none;
 }
 wonder-select .ws-options { list-style: none; margin: 0; padding: .25rem 0; }
-wonder-select .ws-option { padding: .35rem .7rem; cursor: pointer; }
+wonder-select .ws-option { padding: .35rem .7rem; cursor: pointer; white-space: nowrap; }
 /* Keyboard highlight (arrow keys / hover). Distinct from the actually-selected option. */
 wonder-select .ws-option.ws-active { background: #2b6cb0; color: #fff; }
 wonder-select .ws-option.ws-selected { background: #d8e8f8; font-weight: 600; }
 wonder-select .ws-option.ws-selected.ws-active { background: #2b6cb0; color: #fff; }
 wonder-select .ws-option.ws-disabled { color: #999; cursor: default; }
 wonder-select .ws-option.ws-disabled:hover { background: none; }
+/* The "clear selection" option (the placeholder, shown only when something is selected). Muted +
+   italic so it reads as deselect rather than a real choice; separated from the real options. */
+wonder-select .ws-option.ws-clear { color: #999; font-style: italic; border-bottom: 1px solid #eee; }
+wonder-select .ws-option.ws-clear.ws-active { color: #fff; }
