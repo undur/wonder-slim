@@ -1,0 +1,102 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryAjaxBrowser",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "read",
+      "name": "emptyPlaceholder",
+      "selector": "wonder-select .ws-placeholder",
+      "what": "text"
+    },
+    {
+      "do": "comment",
+      "text": "pick one -> placeholder gone, tag shown"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-trigger"
+    },
+    {
+      "do": "wait",
+      "ms": 150
+    },
+    {
+      "do": "type",
+      "selector": "wonder-select .ws-search",
+      "text": "Man",
+      "delay": 25
+    },
+    {
+      "do": "wait",
+      "ms": 120
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-option:not(.ws-disabled)"
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "read",
+      "name": "placeholderAfterPick",
+      "selector": "wonder-select .ws-placeholder",
+      "what": "exists"
+    },
+    {
+      "do": "read",
+      "name": "tagCount",
+      "selector": "wonder-select .ws-tag",
+      "what": "count"
+    },
+    {
+      "do": "comment",
+      "text": "remove the tag -> placeholder returns"
+    },
+    {
+      "do": "click",
+      "selector": "wonder-select .ws-tag .ws-tag-remove"
+    },
+    {
+      "do": "wait",
+      "ms": 200
+    },
+    {
+      "do": "read",
+      "name": "placeholderAfterRemove",
+      "selector": "wonder-select .ws-placeholder",
+      "what": "text"
+    },
+    {
+      "do": "assert",
+      "name": "empty multi shows placeholder",
+      "that": "emptyPlaceholder",
+      "contains": "Pick fruits"
+    },
+    {
+      "do": "assert",
+      "name": "placeholder gone after a pick",
+      "that": "placeholderAfterPick",
+      "equals": false
+    },
+    {
+      "do": "assert",
+      "name": "one tag after pick",
+      "that": "tagCount",
+      "equals": 1
+    },
+    {
+      "do": "assert",
+      "name": "placeholder returns after removing all",
+      "that": "placeholderAfterRemove",
+      "contains": "Pick fruits"
+    }
+  ]
+}

@@ -23,7 +23,7 @@
 		<wo:AjaxUpdateContainer id="selectContainer">
 			<div class="box">
 				<label>Fruits (multi-select)</label>
-				<wo:AjaxBrowser list="$fruits" item="$currentFruit" displayString="$currentFruit.name" selections="$selectedFruits" multiple="$true" id="fruitBrowser" />
+				<wo:AjaxBrowser list="$fruits" item="$currentFruit" displayString="$currentFruit.name" selections="$selectedFruits" multiple="$true" noSelectionString="Pick fruits..." id="fruitBrowser" />
 				<wo:AjaxObserveField observeFieldID="fruitBrowser" updateContainerID="echoContainer" action="$selectionChanged" />
 				<p class="lead">Change count: <span id="changeCount"><wo:str value="$changeCount" /></span></p>
 				<wo:AjaxUpdateLink updateContainerID="selectContainer" action="$refreshContainer" id="refreshLink" class="btn">Refresh (morph) this container</wo:AjaxUpdateLink>

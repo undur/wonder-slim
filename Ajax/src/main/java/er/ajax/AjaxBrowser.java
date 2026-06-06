@@ -38,9 +38,11 @@ public class AjaxBrowser extends ERXPatcher.DynamicElementsPatches.Browser {
 	}
 
 	/**
-	 * Returns a copy of the associations with the marker class merged into the "class" binding,
-	 * preserving any class the developer set (which may be dynamic) and appending the marker at
-	 * render time.
+	 * Returns a copy of the associations with (1) the marker class merged into the "class" binding,
+	 * preserving any class the developer set (which may be dynamic), and (2) the noSelectionString
+	 * surfaced as a "data-placeholder" attribute. Unlike WOPopUpButton, WOBrowser renders no
+	 * "no selection" option for a multi-select, so the widget can't read the placeholder text from
+	 * an option - data-placeholder is how wonder-select's placeholderFor() picks it up.
 	 */
 	@SuppressWarnings("unchecked")
 	private static NSDictionary withMarkerClass(NSDictionary associations) {
@@ -53,6 +55,13 @@ public class AjaxBrowser extends ERXPatcher.DynamicElementsPatches.Browser {
 		}
 		else {
 			merged.setObjectForKey(new MarkerClassAssociation(existing), "class");
+		}
+		// Surface noSelectionString as data-placeholder so the multi-select widget can show it when
+		// nothing is selected. (noSelectionString is not a real WOBrowser binding, so we don't pass
+		// it through as-is - we map it to a plain HTML attribute the widget reads.)
+		WOAssociation noSelection = (WOAssociation) merged.removeObjectForKey("noSelectionString");
+		if (noSelection != null && merged.objectForKey("data-placeholder") == null) {
+			merged.setObjectForKey(noSelection, "data-placeholder");
 		}
 		return merged;
 	}
