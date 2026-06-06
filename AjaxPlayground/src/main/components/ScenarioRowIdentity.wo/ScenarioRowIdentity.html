@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: Row identity under morph</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 60rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.cols { display: flex; gap: 2rem; }
+		.col { flex: 1; }
+		.col h2 { font-size: 1rem; }
+		table { border-collapse: collapse; width: 100%; }
+		td { padding: .3rem .4rem; border-bottom: 1px solid #eee; }
+		input[type=text] { padding: .3rem; width: 8rem; }
+		.del { color: #c00; cursor: pointer; text-decoration: none; }
+		.lbl { color: #888; font-size: .85em; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<body>
+	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<h1>Row identity under morph ("data jumps lines")</h1>
+	<p class="lead">Two columns, same rows. Left uses INDEX-based container ids; right uses IDENTITY-based. Type a note into a row, then delete a row ABOVE it (which shifts everything up) and watch whether your note follows the right row. With index ids, morph matches the wrong node; with identity ids it follows the row.</p>
+
+	<div class="cols">
+		<div class="col">
+			<h2>Index-based ids (the bug pattern)</h2>
+			<wo:AjaxUpdateContainer id="indexContainer">
+				<wo:form>
+					<table>
+						<wo:repetition list="$rows" item="$currentRow" index="$currentIndex">
+							<wo:AjaxUpdateContainer elementName="tr" id="$indexRowID">
+								<td class="lbl"><wo:str value="$currentRow.label" /></td>
+								<td>
+									<wo:textfield value="$currentNote" id="$indexNoteFieldID" />
+									<wo:AjaxObserveField observeFieldID="$indexNoteFieldID" updateContainerID="indexEcho" action="$noteChanged" />
+								</td>
+								<td><wo:AjaxUpdateLink action="$deleteRow" updateContainerID="indexContainer" class="del">delete</wo:AjaxUpdateLink></td>
+							</wo:AjaxUpdateContainer>
+						</wo:repetition>
+					</table>
+				</wo:form>
+			</wo:AjaxUpdateContainer>
+			<wo:AjaxUpdateContainer id="indexEcho"><span style="display:none"><wo:str value="$noteEcho" /></span></wo:AjaxUpdateContainer>
+		</div>
+
+		<div class="col">
+			<h2>Identity-based ids (the fix)</h2>
+			<wo:AjaxUpdateContainer id="idContainer">
+				<wo:form>
+					<table>
+						<wo:repetition list="$rows" item="$currentRow" index="$currentIndex">
+							<wo:AjaxUpdateContainer elementName="tr" id="$idRowID">
+								<td class="lbl"><wo:str value="$currentRow.label" /></td>
+								<td>
+									<wo:textfield value="$currentNote" id="$idNoteFieldID" />
+									<wo:AjaxObserveField observeFieldID="$idNoteFieldID" updateContainerID="idEcho" action="$noteChanged" />
+								</td>
+								<td><wo:AjaxUpdateLink action="$deleteRow" updateContainerID="idContainer" class="del">delete</wo:AjaxUpdateLink></td>
+							</wo:AjaxUpdateContainer>
+						</wo:repetition>
+					</table>
+				</wo:form>
+			</wo:AjaxUpdateContainer>
+			<wo:AjaxUpdateContainer id="idEcho"><span style="display:none"><wo:str value="$noteEcho" /></span></wo:AjaxUpdateContainer>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioRowIdentity",
+  "steps": [
+    {
+      "do": "goto"
+    },
+    {
+      "do": "wait",
+      "selector": "#indexContainer #inote3"
+    },
+    {
+      "do": "focus",
+      "selector": "#indexContainer #inote3"
+    },
+    {
+      "do": "type",
+      "selector": "#indexContainer #inote3",
+      "text": "DRAFT4",
+      "delay": 20
+    },
+    {
+      "do": "wait",
+      "ms": 100
+    },
+    {
+      "do": "press",
+      "selector": "#indexContainer #inote3",
+      "key": "Tab"
+    },
+    {
+      "do": "wait",
+      "ms": 600
+    },
+    {
+      "do": "click",
+      "selector": "#indexContainer tr#irow0 .del"
+    },
+    {
+      "do": "wait",
+      "ms": 1000
+    },
+    {
+      "do": "read",
+      "name": "r0_label",
+      "selector": "#indexContainer #irow0 .lbl",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "r0_note",
+      "selector": "#indexContainer #irow0 input",
+      "what": "value"
+    },
+    {
+      "do": "read",
+      "name": "r1_label",
+      "selector": "#indexContainer #irow1 .lbl",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "r1_note",
+      "selector": "#indexContainer #irow1 input",
+      "what": "value"
+    },
+    {
+      "do": "read",
+      "name": "r2_label",
+      "selector": "#indexContainer #irow2 .lbl",
+      "what": "text"
+    },
+    {
+      "do": "read",
+      "name": "r2_note",
+      "selector": "#indexContainer #irow2 input",
+      "what": "value"
+    }
+  ],
+  "_comment": "Reproduction: index-based row ids + delete-shifts-rows. Demonstrates committed values FOLLOW their row correctly under morph (no data-jumps-lines) because the server re-renders value bindings. DRAFT4 (committed to id=4) ends on the row labeled id=4 after deleting a row above."
+}

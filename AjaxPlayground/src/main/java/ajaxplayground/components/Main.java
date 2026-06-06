@@ -12,6 +12,7 @@ import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioNested;
 import ajaxplayground.components.scenario.ScenarioMultiObserve;
+import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioScripts;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
 
@@ -43,6 +44,10 @@ public class Main extends ERXComponent {
 
 	public WOActionResults scenarioScripts() {
 		return pageWithName( ScenarioScripts.class );
+	}
+
+	public WOActionResults scenarioRowIdentity() {
+		return pageWithName( ScenarioRowIdentity.class );
 	}
 
 	public WOActionResults scenarioMultiObserve() {
