@@ -102,7 +102,7 @@ public class ERXDevelopmentInstanceStopper {
 	 * @return true if the application running on the given port number is an ng-objects application
 	 */
 	private static boolean isNGApplicationRunningOnPort( int portNumber ) {
-		final String urlString = String.format( "http://localhost:%s/ng/dev/type", 1200 );
+		final String urlString = String.format( "http://localhost:%s/ng/dev/type", portNumber );
 
 		try( InputStream is = new URI( urlString ).toURL().openStream()) {
 			final String type = new String( is.readAllBytes() );
