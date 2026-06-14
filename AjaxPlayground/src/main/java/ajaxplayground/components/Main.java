@@ -61,6 +61,10 @@ public class Main extends ERXComponent {
 		return pageWithName( ScenarioMultiObserve.class );
 	}
 
+	public WOActionResults ajaxOverview() {
+		return pageWithName( AjaxOverview.class );
+	}
+
 	public WOActionResults galleryUpdateContainer() {
 		return pageWithName( GalleryUpdateContainer.class );
 	}

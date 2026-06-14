@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Ajax framework — overview</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 0; color: #1a1a1a; line-height: 1.5; }
+		.wrap { max-width: 62rem; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		h2 { margin-top: 2.5rem; border-bottom: 1px solid #ddd; padding-bottom: .2rem; }
+		h3 { margin: 1.2rem 0 .3rem; font-size: 1.05rem; display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+		.lead { color: #666; margin-top: .2rem; } .muted { color: #999; }
+		.el { padding: .2rem 0 .8rem; border-bottom: 1px solid #f0f0f0; }
+		.role { margin: .2rem 0; } .usage, .deps { margin: .25rem 0; font-size: .92rem; color: #444; } .deps { color: #777; }
+		code { background: #f4f4f4; padding: .05rem .25rem; border-radius: 3px; font-size: .9em; }
+		a { color: #2b6cb0; }
+		.toc { background: #fafafa; border: 1px solid #e2e2e2; border-radius: 8px; padding: 1rem 1.4rem; columns: 2; }
+		.toc ul { margin: 0; padding-left: 1.1rem; } .toc li { margin: .15rem 0; }
+		.badge { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .02em; padding: .1rem .4rem; border-radius: 4px; white-space: nowrap; }
+		.s-core { background: #d8f5dd; color: #1a7431; } .s-useful { background: #e3f0ff; color: #1c4f8a; }
+		.s-niche { background: #eee; color: #555; } .s-dead { background: #ffe0e0; color: #a12626; }
+		.m-modern { background: #e6fbe6; color: #167a16; border: 1px solid #b5e6b5; }
+		.m-rewrite { background: #fff; color: #3730a3; border: 1px solid #c3c8f5; }
+		.m-platform { background: #fff; color: #9a4a17; border: 1px solid #f0cba8; }
+		.m-delete { background: #fff; color: #a12626; border: 1px solid #f0b0b0; }
+		.legend { margin: 1rem 0; font-size: .85rem; } .legend div { margin: .3rem 0; }
+		.legend .badge { margin-right: .3rem; }
+		.note { background: #fffbea; border-left: 3px solid #f0c000; padding: .8rem 1rem; border-radius: 4px; margin: 1.5rem 0; font-size: .92rem; }
+	</style>
+</head>
+<body>
+<div class="wrap">
+	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<h1>Ajax framework — overview</h1>
+	<p class="lead">A reference catalogue of every element in the wonder-slim <code>Ajax</code> framework, grouped by role. Each entry carries <strong>two independent badges</strong>.</p>
+
+	<div class="legend">
+		<div><strong>Status</strong> &mdash; what to reach for, using the framework as it is today (capability only):
+			<span class="badge s-core">Core</span><span class="badge s-useful">Useful</span><span class="badge s-niche">Niche</span><span class="badge s-dead">Dead</span></div>
+		<div><strong>Modernization</strong> &mdash; the cleanup direction (implementation only):
+			<span class="badge m-modern">Modern</span><span class="badge m-rewrite">Needs rewrite</span><span class="badge m-platform">Replace w/ platform</span><span class="badge m-delete">Delete</span></div>
+	</div>
+
+	<div class="note"><strong>Reading the badges.</strong> The two axes are deliberately separate. A <span class="badge s-core">Core</span> element can be <span class="badge m-rewrite">Needs rewrite</span> &mdash; that means &ldquo;use it, it&rsquo;s fundamental; and separately, its client is slated to move off Prototype onto fetch()+morph.&rdquo; <em>Status is never lowered for being built on old JS.</em> The full reasoning per element is in <code>Ajax/docs/ASSESSMENT.md</code>.</div>
+
+	<div class="toc"><strong>Sections</strong><ul>
+<li><a href="#sec0">Recommended — morph-native widgets</a> <span class="muted">(2)</span></li>
+<li><a href="#sec1">Core update mechanism</a> <span class="muted">(8)</span></li>
+<li><a href="#sec2">Links &amp; buttons</a> <span class="muted">(4)</span></li>
+<li><a href="#sec3">Form-input widgets</a> <span class="muted">(6)</span></li>
+<li><a href="#sec4">Containers &amp; panels</a> <span class="muted">(12)</span></li>
+<li><a href="#sec5">Trees &amp; lists</a> <span class="muted">(3)</span></li>
+<li><a href="#sec6">Drag &amp; drop</a> <span class="muted">(2)</span></li>
+<li><a href="#sec7">Progress, busy &amp; polling</a> <span class="muted">(9)</span></li>
+<li><a href="#sec8">File upload</a> <span class="muted">(3)</span></li>
+<li><a href="#sec9">Visual effects</a> <span class="muted">(4)</span></li>
+<li><a href="#sec10">Option support &amp; focus helpers</a> <span class="muted">(5)</span></li>
+<li><a href="#sec11">Server-side plumbing &amp; base classes</a> <span class="muted">(8)</span></li>
+<li><a href="#sec12">JSON-RPC bridge (legacy / quarantined)</a> <span class="muted">(1)</span></li>
+<li><a href="#sec13">Social</a> <span class="muted">(2)</span></li>
+	</ul></div>
+
+<section id="sec0"><h2>Recommended — morph-native widgets</h2><p class="lead">The canonical pattern for new work: dependency-free custom elements that survive DOM morphing with zero re-init.</p>
+<div class="el">
+<h3>AjaxPopUpButton <span class="badge s-useful">Useful</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A drop-in WOPopUpButton subclass that renders a searchable, morph-native single-select (the wonder-select custom element) instead of a bare &lt;select&gt;; reach for it when a long option list needs type-to-filter.</p>
+<p class="usage"><strong>Usage.</strong> Same bindings as WOPopUpButton (list/item/selection/displayString/noSelectionString). It merges marker class &quot;ajax-popup-button&quot; onto the rendered &lt;select&gt; and injects wonder-select.js/.css. Sketch: &lt;wo:AjaxPopUpButton list=&quot;$items&quot; item=&quot;$item&quot; selection=&quot;$sel&quot; displayString=&quot;$item.name&quot;/&gt; — or equivalently a plain WOPopUpButton with class=&quot;ajax-popup-button&quot;.</p>
+<p class="deps"><strong>Client deps.</strong> Vanilla/custom element only — ships wonder-select.js + wonder-select.css. NO Prototype, NO Scriptaculous. Auto-enhances via MutationObserver and is morph-safe by design.</p>
+</div>
+<div class="el">
+<h3>AjaxBrowser <span class="badge s-useful">Useful</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">The multi-select companion to AjaxPopUpButton: a WOBrowser subclass that renders the same searchable wonder-select widget with removable tags instead of a bare multi-select.</p>
+<p class="usage"><strong>Usage.</strong> Same bindings as WOBrowser (list/item/selections/multiple). It merges marker class &quot;ajax-popup-button&quot; and maps noSelectionString to a data-placeholder attribute (since a multi-select has no no-selection option) for the widget&#x27;s placeholder. Sketch: &lt;wo:AjaxBrowser list=&quot;$items&quot; item=&quot;$item&quot; selections=&quot;$selected&quot; displayString=&quot;$item.name&quot; noSelectionString=&quot;Pick some&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Vanilla/custom element only — shares wonder-select.js + wonder-select.css with AjaxPopUpButton. NO Prototype, NO Scriptaculous. Morph-safe.</p>
+</div>
+</section>
+<section id="sec1"><h2>Core update mechanism</h2><p class="lead">The load-bearing spine — partial page updates and Ajax form submission. The capabilities here are fundamental; most are slated for a fetch()+morph client rewrite (morph is already the default).</p>
+<div class="el">
+<h3>AjaxUpdateContainer <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Renders a named DOM region (a div by default) that can be re-rendered in place via an Ajax round-trip, optionally on a timer or driven by an observed field; the foundational element every other Ajax partial-update component targets.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: id, action, elementName, frequency/decay/stopped (periodic), observeFieldID/fullSubmit, insertion + *Duration (Scriptaculous effects), onRefreshComplete, optional, and morph ($true/$false). Sketch: &lt;wo:AjaxUpdateContainer id=&quot;detail&quot; action=&quot;$refresh&quot;&gt; ...content... &lt;/wo:AjaxUpdateContainer&gt;, then refresh from elsewhere with updateContainerID=&quot;detail&quot; or server-side AjaxUpdateContainer.updateContainerWithID(&quot;detail&quot;, context).</p>
+<p class="deps"><strong>Client deps.</strong> Ships/requires prototype.js, effects.js (Scriptaculous), idiomorph.js, wonder.js. Client side is Prototype&#x27;s Ajax.Updater plus the AUC.* helpers in wonder.js; periodic mode uses Prototype&#x27;s PeriodicalExecuter; insertion shortcuts map to Scriptaculous Effect.PAIRS.</p>
+</div>
+<div class="el">
+<h3>AjaxUpdateLink <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Renders an anchor (or button/JS function) whose click fires an Ajax action and refreshes a target AjaxUpdateContainer (or replaceID region), i.e. the standard &#x27;click to update part of the page&#x27; link.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: action/directActionName, updateContainerID, replaceID, onClick/onClickBefore/onClickServer, function/functionName, button, elementName, asynchronous, accesskey, plus effect/beforeEffect/afterEffect (+IDs/durations) and insertion (all Scriptaculous). Sketch: &lt;wo:AjaxUpdateLink action=&quot;$edit&quot; updateContainerID=&quot;detail&quot; string=&quot;Edit&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Requires prototype.js, effects.js (Scriptaculous), wonder.js. Emits inline onclick of either AUL.update(...) (fast path) or raw new Ajax.Updater/new Ajax.Request; effects emit new Effect.Xxx(...) Scriptaculous calls.</p>
+</div>
+<div class="el">
+<h3>AjaxUpdateTrigger <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Server-side element with no UI of its own that, when rendered into an Ajax response, forces one or more named update containers elsewhere on the page to refresh themselves — used to update sibling regions from a central controller (e.g. exit edit mode in all rows but one).</p>
+<p class="usage"><strong>Usage.</strong> Bindings: updateContainerID (single), updateContainerIDs (array), resetAfterUpdate, evalScripts. Sketch: place &lt;wo:AjaxUpdateTrigger updateContainerIDs=&quot;$idsToRefresh&quot;/&gt; inside a container that is itself being Ajax-updated; on render it emits script to refresh each listed container.</p>
+<p class="deps"><strong>Client deps.</strong> No addRequiredWebResources of its own, but the script it emits calls new Ajax.Updater(...) and the $wi() helper from wonder.js, so it transitively depends on prototype.js + wonder.js (and whatever the target containers loaded). Reads each target&#x27;s data-updateUrl attribute and lets the (morph-aware) Ajax.Updater override drive morphing.</p>
+</div>
+<div class="el">
+<h3>AjaxObserveField <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Watches a form field (or all descendant fields) for value changes and fires an Ajax partial submit + optional container update, i.e. live/auto-submit-on-change without a visible button.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: observeFieldID (or omit to observe all descendants and render a wrapper div), updateContainerID, action, fullSubmit, observeFieldFrequency, observeDelay, onBeforeSubmit, onCreate. Sketch: &lt;wo:WOTextField id=&quot;q&quot;/&gt; &lt;wo:AjaxObserveField observeFieldID=&quot;q&quot; updateContainerID=&quot;results&quot; action=&quot;$search&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Requires prototype.js + wonder.js. Emits ASB.observeField / ASB.observeDescendentFields (wonder.js), which wrap Prototype&#x27;s Form.Element.Observer / event observation and reuse the AjaxSubmitButton (ASB) submit machinery and Form.serialize.</p>
+</div>
+<div class="el">
+<h3>AjaxSubmitButton <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A WOSubmitButton replacement that submits its form in the background via Ajax (serializing the form, optionally partial-submit) and updates a container/replace region with the result; the workhorse for Ajax form submission.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: action, name/value, updateContainerID, replaceID, button (link vs button), useButtonTag, functionName, formName, formSerializer, onClick/onClickBefore/onClickServer/onComplete/onSuccess/onFailure, disabled, plus the full effect/insertion Scriptaculous set. Sketch: &lt;wo:AjaxSubmitButton action=&quot;$save&quot; updateContainerID=&quot;detail&quot; value=&quot;Save&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Requires prototype.js, effects.js (Scriptaculous), wonder.js. Emits ASB.update(...) / ASB.request(...) (wonder.js) which build on Prototype Ajax.Request and Form.serializeWithoutSubmits; effects emit Scriptaculous Effect.* calls. Coordinates with ERXAjaxApplication via the AJAX_SUBMIT_BUTTON_NAME form key.</p>
+</div>
+<div class="el">
+<h3>AjaxDefaultSubmitButton <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">An invisible (off-screen) Ajax submit button placed first in a form so that pressing Enter triggers a specific Ajax action — the &#x27;default button&#x27; for Ajax forms.</p>
+<p class="usage"><strong>Usage.</strong> Subclass of AjaxSubmitButton; same submit bindings (action, updateContainerID, formName, on*, effects). Sketch: put &lt;wo:AjaxDefaultSubmitButton action=&quot;$search&quot; updateContainerID=&quot;results&quot;/&gt; as the first element inside the form; it renders a hidden input positioned at left:-10000px and submits on Enter.</p>
+<p class="deps"><strong>Client deps.</strong> Inherits prototype.js + effects.js + wonder.js from AjaxSubmitButton; emits ASB.update/ASB.request (Prototype). Additionally emits a legacy IE&lt;9 keypress workaround using Prototype&#x27;s Event.observe, $$(), and the non-standard fireEvent().</p>
+</div>
+<div class="el">
+<h3>AjaxHyperlink <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">An anchor (or arbitrary element) that fires a background Ajax.Request to a server action on click and runs JS callbacks (onSuccess/onFailure/onComplete) with the response, optionally rendering itself as a named JS function instead of a link.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: action, onSuccess/onFailure/onComplete/onLoading (JS), onClickBefore (for confirm() gating), onClick, onClickServer (script returned from server), evalScripts, functionName, plus title/string/id/class/style/disabled/elementName. Minimal: &lt;wo:AjaxHyperlink action=&quot;$doThing&quot; string=&quot;Do it&quot; onSuccess=&quot;alert(&#x27;ok&#x27;)&quot;/&gt;. With functionName set it emits a global JS function instead of an &lt;a&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js (emits `new Ajax.Request(...)`) plus Scriptaculous effects.js — both force-added in addRequiredWebResources(). No own .js/.css shipped.</p>
+</div>
+<div class="el">
+<h3>AjaxResetButton <span class="badge s-niche">Niche</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A button that does a pure client-side reset of a form&#x27;s fields — either back to original values or cleared to blank — without a server round-trip.</p>
+<p class="usage"><strong>Usage.</strong> Stateless WOComponent (not a dynamic element). Bindings: formId (required), clear (true = blank, false = reset to original), value (label), id/class/style. Sketch: &lt;wo:AjaxResetButton formId=&quot;editForm&quot; clear=&quot;$true&quot; value=&quot;Clear&quot;/&gt;. Renders a WOInput whose onClick is Form.reset(...)/Form.clear(...).</p>
+<p class="deps"><strong>Client deps.</strong> Loads prototype.js, effects.js, wonder.js, but the only real dependency is Prototype&#x27;s Form.reset / Form.clear. effects.js is loaded but unused — pure dead weight.</p>
+</div>
+</section>
+<section id="sec2"><h2>Links &amp; buttons</h2><p class="lead">Server-action links and function-call buttons.</p>
+<div class="el">
+<h3>AjaxFunctionLink <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A thin &lt;a&gt; wrapper that wires an onclick to call the JS function an enclosing AjaxUpdateContainer/AjaxInPlace publishes (Edit/Cancel/Save/Update), so links inside an in-place-edit block can switch modes without naming the container.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: action (&quot;edit&quot;/&quot;cancel&quot;/&quot;save&quot;/&quot;update&quot;), updateContainerID (optional inside a container), onclick/onClick (mutually exclusive with action), disabled. Minimal: &lt;wo:AjaxFunctionLink action=&quot;edit&quot;&gt;Edit&lt;/wo:AjaxFunctionLink&gt; inside an AjaxInPlace. Emits &lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;&lt;containerID&gt;Edit()&quot;&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> No direct Prototype/Scriptaculous of its own — it just emits an onclick string. But the functions it calls (&lt;id&gt;Edit/Save/etc.) are generated by AjaxUpdateContainer/AjaxInPlace, which are Prototype-based. No own .js/.css.</p>
+</div>
+<div class="el">
+<h3>AjaxFunctionButton <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Identical convenience to AjaxFunctionLink but renders an &lt;input type=&quot;button&quot;&gt; instead of an anchor, for triggering an enclosing container&#x27;s Edit/Cancel/Save/Update action.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: action, updateContainerID, onclick, disabled, value (button text). Minimal: &lt;wo:AjaxFunctionButton action=&quot;save&quot; value=&quot;Save&quot;/&gt; inside an AjaxUpdateContainer. Reuses AjaxFunctionLink._appendAttributesToResponse to emit the onclick; renders `disabled` attribute when disabled.</p>
+<p class="deps"><strong>Client deps.</strong> Same as AjaxFunctionLink — no Prototype/Scriptaculous of its own, but the onclick targets globals generated by the Prototype-based AjaxUpdateContainer/AjaxInPlace. No own .js/.css.</p>
+</div>
+<div class="el">
+<h3>AjaxToggleLink <span class="badge s-niche">Niche</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">An &lt;a&gt; whose onclick calls Scriptaculous Effect.toggle to show/hide a target element with a visual effect (default &quot;blind&quot;), i.e. a one-line expand/collapse trigger.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: toggleID (required, element to toggle), effect (default &quot;blind&quot;), duration, disabled; binding onclick is rejected. Minimal: &lt;wo:AjaxToggleLink toggleID=&quot;details&quot;&gt;More&lt;/wo:AjaxToggleLink&gt;. Emits onclick=&quot;Effect.toggle($wi(&#x27;details&#x27;), &#x27;blind&#x27;, {duration:...})&quot;.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js ($wi element lookup) AND Scriptaculous effects.js (Effect.toggle / Effect.Blind) — both confirmed shipped in webserver-resources. Hard dependency on the 2007-era script.aculo.us effects library.</p>
+</div>
+<div class="el">
+<h3>AjaxIncludeScript <span class="badge s-dead">Dead</span> <span class="badge m-delete">Delete</span></h3>
+<p class="role">A no-render helper element that just declares a script dependency (e.g. prototype.js, effects.js) into the page head, so custom hand-written Ajax JS can reuse the exact library versions shipped in Ajax.framework.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: name (required JS file name), framework (defaults to &quot;Ajax&quot;). Minimal: &lt;wo:AjaxIncludeScript name=&quot;prototype.js&quot;/&gt;. handleRequest returns null; addRequiredWebResources adds the script to &lt;head&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> No library of its own; it is a generic script-injector. In practice its reason to exist is to pull in Ajax.framework&#x27;s Prototype/Scriptaculous bundle for custom code.</p>
+</div>
+</section>
+<section id="sec3"><h2>Form-input widgets</h2><p class="lead">Enhanced inputs. The wonder-select pair is the modern path; the rest are legacy reimplementations of native inputs.</p>
+<div class="el">
+<h3>AjaxAutoComplete <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A Google-suggest-style autocompleting combo box: a text field that fetches (or filters locally) a list of suggestions as the user types and offers a dropdown of matches.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: list/value/item/displayString plus a large pass-through set (frequency, minChars, tokens, fullSearch, isLocal, afterUpdateElement, etc.). Generates new Ajax.Autocompleter or Autocompleter.Local. Sketch: &lt;wo:AjaxAutoComplete value=&quot;$q&quot; list=&quot;$matches&quot; item=&quot;$item&quot; displayString=&quot;$item.name&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Scriptaculous controls.js (Ajax.Autocompleter / Autocompleter.Local) on top of Prototype.js + effects.js + wonder.js — the ~2008 Prototype/Scriptaculous stack. Server-roundtrip variant emits raw new Ajax.Request strings.</p>
+</div>
+<div class="el">
+<h3>AjaxSelectionList <span class="badge s-niche">Niche</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A form-field-like single-select list (ul/ol/table) that uses component content as the per-row renderer and adds keyboard navigation plus change/select(enter,dblclick)/delete events; reach for it when WOPopUpButton&#x27;s plain displayString isn&#x27;t rich enough.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: list/item/selection, mandatory, onchange/onselect/ondelete, focus, elementName. Renders a hidden field holding the selected index and a JS new AjaxSelectionList(containerId) wiring the callbacks. Sketch: &lt;wo:AjaxSelectionList list=&quot;$rows&quot; item=&quot;$row&quot; selection=&quot;$sel&quot; onselect=&quot;doEdit()&quot;&gt;...row template...&lt;/wo:AjaxSelectionList&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + its own AjaxSelectionList.js + AjaxSelectionList.css. Uses Prototype&#x27;s $wi/$ helpers in the template script. NO Scriptaculous, but a hard Prototype dependency.</p>
+</div>
+<div class="el">
+<h3>AjaxTextHinter <span class="badge s-dead">Dead</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A wrapper element that turns an input&#x27;s `default` binding into ghosted placeholder text, and re-registers forms/inputs after an Ajax refresh so the hints persist inside AjaxUpdateContainers.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: form (id of the form to hint). Emits AjaxHintedText.register/registerForm calls, guarded by Event.observe(window,&#x27;load&#x27;,...) on full loads. Sketch: wrap a form/input and add &lt;wo:AjaxTextHinter form=&quot;myform&quot;/&gt;, with default=&quot;Login name&quot; on the fields.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + wonder.js (uses Prototype&#x27;s Event.observe and the AjaxHintedText helper in wonder.js). Hard Prototype dependency.</p>
+</div>
+<div class="el">
+<h3>AjaxSlider <span class="badge s-useful">Useful</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A draggable horizontal/vertical slider control that binds a numeric value, with optional snap-to-integer values and server-side onChange/onSlide callbacks.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: minimum/maximum, value, orientation, snap, increment/step, onChange/onSlide (+ ...Server variants for Ajax callbacks). Renders a tracker/handle div (marked data-morph-ignore) and a new Control.Slider(...) init. Sketch: &lt;wo:AjaxSlider minimum=&quot;0&quot; maximum=&quot;100&quot; value=&quot;$pct&quot; snap=&quot;true&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Scriptaculous Control.Slider from slider.js, on top of Prototype.js + effects.js + controls.js — full Prototype/Scriptaculous stack. Uses Prototype&#x27;s $R() range. Handle position is client-mutated inline style, requiring a data-morph-ignore guard.</p>
+</div>
+<div class="el">
+<h3>AjaxDatePicker <span class="badge s-useful">Useful</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A text input with a pop-up calendar (ported from Rails Date Kit) for choosing a date, with localized day/month names, configurable format/formatter, and server-side validation of the typed value.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: value (required), format/formatter, startDay, dayNames/monthNames, locale, onDateSelect, manualInput, showYearControls, calendarCSS. Input wires onFocus/onClick to calendar_open(...). Sketch: &lt;wo:AjaxDatePicker value=&quot;$date&quot; format=&quot;%m %d %Y&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + wonder.js + calendar.js + date.js + calendar.css. The calendar (calendar.js/date.js) is Prototype-based; doc explicitly warns of a Prototype init conflict with AjaxModalDialogOpener. Hard Prototype dependency.</p>
+</div>
+<div class="el">
+<h3>AjaxValue <span class="badge s-niche">Niche</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A server-side helper (plain Java class, not a UI element) that serializes Java/Foundation objects into JavaScript-literal strings with type hinting via AjaxOption.Type, including JS string escaping.</p>
+<p class="usage"><strong>Usage.</strong> No bindings — used in code by the other Ajax components when building option dictionaries. Sketch: new AjaxValue(AjaxOption.ARRAY, anNSArray).javascriptValue(); or AjaxValue.javaScriptEscaped(obj) for a quoted, escaped JS string.</p>
+<p class="deps"><strong>Client deps.</strong> None — pure server-side Java, emits no client resources and depends on no client library.</p>
+</div>
+</section>
+<section id="sec4"><h2>Containers &amp; panels</h2><p class="lead">Modals, tabs, accordions, expansion, in-place editing.</p>
+<div class="el">
+<h3>AjaxModalDialog <span class="badge s-useful">Useful</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A heavier modal dialog (based on the ModalBox library) that, unlike AjaxModalContainer, can host forms, submit via Ajax, refresh its own contents, and fetch content from an action/pageName/inline template.</p>
+<p class="usage"><strong>Usage.</strong> Place outside any form; open via the generated openAMD_&lt;id&gt;() JS, an onclick, or AjaxModalDialogOpener. Server helpers: AjaxModalDialog.close(context), AjaxModalDialog.update(context, title). Key bindings: action/pageName/inline content, title, width/height, locked, overlayClose, onOpen/onClose (server), beforeLoad/afterLoad/afterHide (client), closeUpdateContainerID. Minimal: &lt;wo:AjaxModalDialog id=&quot;edit&quot; title=&quot;Edit&quot; action=&quot;$editForm&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + Scriptaculous (effects.js for transitions, dragdrop.js for movable) + the third-party ModalBox library (modalbox.js, ~2007 wildbit.com) + wonder.js. Uses Ajax.Request, AUL, Modalbox.show throughout.</p>
+</div>
+<div class="el">
+<h3>AjaxModalDialogOpener <span class="badge s-niche">Niche</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">Renders a standalone clickable element (link/button) that opens a separately-declared AjaxModalDialog, used to decouple the trigger from the dialog (e.g. opener inside a repetition or inside another form).</p>
+<p class="usage"><strong>Usage.</strong> &lt;wo:AjaxModalDialogOpener dialogId=&quot;edit&quot; label=&quot;Edit&quot; action=&quot;$prepare&quot;/&gt; paired with a &lt;wo:AjaxModalDialog id=&quot;edit&quot; showOpener=&quot;false&quot;/&gt;. Key bindings: dialogId (required), elementName, label/linkTitle, action (synchronous prep), enabled, onFailure. Click fires a synchronous Ajax.Request, then onSuccess calls openAMD_&lt;dialogId&gt;().</p>
+<p class="deps"><strong>Client deps.</strong> No resources of its own (addRequiredWebResources is empty) but emits Prototype Ajax.Request inline and depends on AjaxModalDialog&#x27;s openAMD_&lt;id&gt;() global, so it is transitively bound to the same Prototype/ModalBox stack.</p>
+</div>
+<div class="el">
+<h3>AjaxModalContainer <span class="badge s-useful">Useful</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">Renders a link that opens wrapped inline content (or a fetched URL/direct-action/iframe) in a lightbox-style modal overlay via the bundled iBox library.</p>
+<p class="usage"><strong>Usage.</strong> Inline content mode: &lt;wo:AjaxModalContainer label=&quot;Details&quot; ajax=&quot;true&quot; id=&quot;detailsBox&quot;&gt;...content...&lt;/wo:AjaxModalContainer&gt;. Key bindings: label, id (required when ajax=true), href/directActionName (iframe fetch), action (div fetch), open, locked, skin (lightbox|darkbox), height/width/closeLabel. Emits an &lt;a rel=&quot;ibox&amp;...&quot;&gt; and calls iBox.init(); inline content is moved to &lt;body&gt; by iBox at open time.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js (hard dependency: $wi, Event.observe, .bind, iBox.handleTag) plus the ~2008 iBox 2.2 library (ibox/ibox.js) and ibox.css/skins. No jQuery despite the stale link comment pointing at jQuery ThickBox.</p>
+</div>
+<div class="el">
+<h3>AjaxTabbedPanel <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Renders a UL of tabs whose panes load on demand via Ajax, so only the selected tab&#x27;s content is rendered initially; the dev reaches for it for lazy-loaded tabbed sections.</p>
+<p class="usage"><strong>Usage.</strong> Wrap AjaxTabbedPanelTab children. Key bindings: id (required), busyDiv, onLoad, onSelect. Minimal: &lt;wo:AjaxTabbedPanel id=&quot;tabs&quot;&gt;&lt;wo:AjaxTabbedPanelTab name=&quot;One&quot; isSelected=&quot;$first&quot;&gt;...&lt;/wo:AjaxTabbedPanelTab&gt;...&lt;/wo:AjaxTabbedPanel&gt;. Tabs emit onclick handlers calling AjaxTabbedPanel.loadPanel/selectPanel/selectTab from switchtabs.js.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js (hard: $, $A, .each, removeClassName/addClassName, .down throughout switchtabs.js) plus wonder.js and the custom switchtabs.js. No Scriptaculous. switchtabs.js is custom-but-Prototype-bound.</p>
+</div>
+<div class="el">
+<h3>AjaxTabbedPanelTab <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Declares a single tab/pane within an AjaxTabbedPanel — its title, selected state, visibility, and the (lazily server-rendered) pane content.</p>
+<p class="usage"><strong>Usage.</strong> Child of AjaxTabbedPanel only. Key bindings: name (required, tab label), isSelected (settable), refreshOnSelect, isVisible, onLoad, accesskey, id. Renders an &lt;li data-updateUrl=...&gt; pane; content is appended only when selected, and re-fetched on click via the parent&#x27;s switchtabs.js.</p>
+<p class="deps"><strong>Client deps.</strong> Ships no resources itself (empty addRequiredWebResources); its rendered onclick wiring and pane-swap behavior depend entirely on the parent&#x27;s Prototype + switchtabs.js.</p>
+</div>
+<div class="el">
+<h3>AjaxAccordion <span class="badge s-useful">Useful</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">Renders an accordion container (a stack of collapsible AjaxAccordionTab sections where opening one collapses the others), driven by the Rico library&#x27;s Rico.Accordion.</p>
+<p class="usage"><strong>Usage.</strong> Wrap AjaxAccordionTab children. Key bindings are pure styling/animation options: expandedBg, hoverBg, collapsedBg, expandedTextColor, panelHeight, onShowTab/onHideTab/onLoadShowTab. Minimal: &lt;wo:AjaxAccordion id=&quot;acc&quot;&gt;&lt;wo:AjaxAccordionTab title=&quot;A&quot;&gt;...&lt;/wo:AjaxAccordionTab&gt;...&lt;/wo:AjaxAccordion&gt;. The template emits new Rico.Accordion($wi(id), options).</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + Rico (rico.js, ~90KB, itself a Prototype-based 2005-era effects/widget library with 167 prototype/Effect references). The whole behavior is Rico.Accordion. Also needs data-morph-ignore because Rico rewrites the DOM.</p>
+</div>
+<div class="el">
+<h3>AjaxAccordionTab <span class="badge s-useful">Useful</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">Declares one collapsible section (title bar + content box) inside an AjaxAccordion; a plain WOComponent that just supplies stable header/content/tab DOM ids for Rico to wire up.</p>
+<p class="usage"><strong>Usage.</strong> Child of AjaxAccordion only. Key bindings: title (the header text), id (optional). Renders nested divs (accordionTab &gt; accordionTabTitleBar + accordionTabContentBox) that Rico.Accordion attaches collapse behavior to.</p>
+<p class="deps"><strong>Client deps.</strong> No client resources of its own; it is inert markup whose behavior comes entirely from the parent AjaxAccordion&#x27;s Prototype + Rico. (Note: it is the one element here not extending an Ajax base class — plain WOComponent.)</p>
+</div>
+<div class="el">
+<h3>AjaxExpansion <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A single disclosure/expander: a toggle link that Ajax-updates an inline content area open/closed and adds an &#x27;expanded&#x27; CSS class to the link, with optional animation that affects only the contents (not the link).</p>
+<p class="usage"><strong>Usage.</strong> Key bindings: id, string (or openedLabel/closedLabel), action (fires on toggle), expanded/initiallyExpanded, insertion/insertionDuration (effect), linkClass, accesskey, onExpansionComplete. Minimal: &lt;wo:AjaxExpansion id=&quot;contact&quot; string=&quot;Contact&quot;&gt;...content...&lt;/wo:AjaxExpansion&gt;. Built from an AjaxUpdateLink toggling an AjaxUpdateContainer.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + Scriptaculous (effects.js, for the Effect.blind-style insertion animation) + wonder.js. Composed of AjaxUpdateLink/AjaxUpdateContainer, so it transitively carries the whole Ajax/Prototype update stack.</p>
+</div>
+<div class="el">
+<h3>AjaxInPlace <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A server-side component that renders a region twice — a &quot;view&quot; template and an &quot;edit&quot; template — and swaps between them in an AjaxUpdateContainer, giving click-to-edit / save / cancel behavior driven entirely by WO Ajax round-trips rather than client widgets.</p>
+<p class="usage"><strong>Usage.</strong> Wrap an AjaxInPlaceViewTemplate (named &quot;view&quot;) and AjaxInPlaceEditTemplate (named &quot;edit&quot;) inside it; bindings: id, class, saveAction, cancelAction, editAction, canEdit, canSave, editOnly, button, submitOnSave, plus per-mode JS hooks (onSaveSuccess, onEditClick, etc.). Sketch (wod): `IP : AjaxInPlace { id=&quot;x&quot;; saveAction=save; }` with `View : AjaxInPlaceViewTemplate {}` and `Edit : AjaxInPlaceEditTemplate {}` in the html, each containing the read-only WOString and the WOTextField respectively.</p>
+<p class="deps"><strong>Client deps.</strong> No direct Prototype/Scriptaculous load in this class; it composes AjaxUpdateContainer + AjaxUpdateLink + AjaxSubmitButton (which transitively pull in prototype.js + wonder.js). However it exposes a large family of *Insertion / *InsertionDuration bindings explicitly documented as &quot;PROTOTYPE FUNCTIONS&quot; — i.e. Scriptaculous Effect insertion animations. Already morph-aware: its .wod hardcodes morph=false on its own container with a comment that morphing would reconcile away unsaved edit input.</p>
+</div>
+<div class="el">
+<h3>AjaxInPlaceEditor <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A dynamic element that renders a value inside a div/span and attaches script.aculo.us&#x27;s `Ajax.InPlaceEditor` so the user can click the text, edit it inline in a generated form field, and POST the new value back via an Ajax component action with server-side formatter/parse support.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: value (required, the keypath edited), id, elementName, class, formatter/dateformat/numberformat, useDecimalNumber, escapeHTML, action, plus Scriptaculous passthrough options (okButton, okText, cancelLink, savingText, clickToEditText, highlightcolor, submitOnBlur, rows/cols, valueWhenEmpty, onComplete, onFailure). Sketch (wod): `Name : AjaxInPlaceEditor { value = person.name; clickToEditText = &quot;click to edit&quot;; }`.</p>
+<p class="deps"><strong>Client deps.</strong> Hard Prototype + Scriptaculous dependency. addRequiredWebResources explicitly loads prototype.js, builder.js, effects.js, controls.js, wonder.js, wonder_inplace.js. It instantiates `new Ajax.InPlaceEditorWithEmptyText`, a wonder_inplace.js subclass of script.aculo.us controls.js `Ajax.InPlaceEditor` (controls.js v1.9.0, 2010).</p>
+</div>
+<div class="el">
+<h3>AjaxInPlaceEditTemplate <span class="badge s-useful">Useful</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A one-line convenience subclass of ERXWOTemplate that hardcodes templateName=&quot;edit&quot;, used to mark the edit-mode content inside an AjaxInPlace.</p>
+<p class="usage"><strong>Usage.</strong> No bindings of its own; just wrap the edit-mode markup. Sketch (html): `&lt;wo:AjaxInPlaceEditTemplate&gt; &lt;wo:WOTextField value=&quot;$value&quot;/&gt; &lt;/wo:AjaxInPlaceEditTemplate&gt;`. Equivalent to `ERXWOTemplate { templateName = &quot;edit&quot;; }`.</p>
+<p class="deps"><strong>Client deps.</strong> None — pure server-side; subclasses ERXWOTemplate and ships no client JS/CSS.</p>
+</div>
+<div class="el">
+<h3>AjaxInPlaceViewTemplate <span class="badge s-useful">Useful</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A one-line convenience subclass of ERXWOTemplate that hardcodes templateName=&quot;view&quot;, used to mark the read-only view-mode content inside an AjaxInPlace.</p>
+<p class="usage"><strong>Usage.</strong> No bindings of its own; wrap the view-mode markup. Sketch (html): `&lt;wo:AjaxInPlaceViewTemplate&gt; &lt;wo:WOString value=&quot;$value&quot;/&gt; &lt;/wo:AjaxInPlaceViewTemplate&gt;`. Equivalent to `ERXWOTemplate { templateName = &quot;view&quot;; }`.</p>
+<p class="deps"><strong>Client deps.</strong> None — pure server-side; subclasses ERXWOTemplate and ships no client JS/CSS.</p>
+</div>
+</section>
+<section id="sec5"><h2>Trees &amp; lists</h2><p class="lead">Hierarchical and reorderable/selectable lists.</p>
+<div class="el">
+<h3>AjaxTree <span class="badge s-niche">Niche</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Renders a server-driven, Ajax-refreshing tree as nested &lt;ul&gt;/&lt;li&gt; using your component content as the per-node renderer, expanding/collapsing nodes via partial updates without a full page reload.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: root, item, parentKeyPath/childrenKeyPath (or delegate), isLeafKeyPath, showRoot, allExpanded/rootExpanded, collapsed/expanded/leafImage(+Framework), treeModel, cache, id/class. Sketch: &lt;wo:AjaxTree root=&quot;$rootNode&quot; item=&quot;$node&quot; childrenKeyPath=&quot;children&quot; parentKeyPath=&quot;parent&quot;&gt;$node.name&lt;/wo:AjaxTree&gt;. Expand/collapse links are AjaxUpdateLinks that re-render the AjaxUpdateContainer wrapping the tree.</p>
+<p class="deps"><strong>Client deps.</strong> Server: AjaxTreeModel, AjaxUpdateContainer, AjaxUpdateLink, WOComponentContent. Client: Prototype.js (inline toggle uses new Ajax.Updater). No Scriptaculous. Ships expand/collapse/leaf GIF icons; no own .js/.css. Relies on the morph-aware AjaxUpdateContainer machinery.</p>
+</div>
+<div class="el">
+<h3>AjaxTreeModel <span class="badge s-niche">Niche</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">Pure server-side Java model behind AjaxTree that tracks expanded/collapsed state and walks the node graph via key paths or a delegate, with helpers for leaf detection, level, depth-first enumeration and a WrapperNode for graph-shaped data.</p>
+<p class="usage"><strong>Usage.</strong> No bindings/template of its own. Configure via setRootTreeNode, setParentTreeNodeKeyPath/setChildrenTreeNodesKeyPath (or setDelegate implementing AjaxTreeModel.Delegate), setAllExpanded/setRootExpanded; query isExpanded/setExpanded, isLeaf, level, childrenTreeNodes, rootDepthFirstEnumeration. Normally instantiated automatically by AjaxTree; pass your own via the treeModel binding to share state.</p>
+<p class="deps"><strong>Client deps.</strong> None on the client — plain Java over com.webobjects.foundation (NSArray/NSMutableSet/NSKeyValueCodingAdditions/_NSDelegate). No Prototype, Scriptaculous, jQuery, JS or CSS shipped.</p>
+</div>
+<div class="el">
+<h3>AjaxSortableList <span class="badge s-dead">Dead</span> <span class="badge m-delete">Delete</span></h3>
+<p class="role">Wraps a WORepetition in a Scriptaculous drag-and-drop Sortable so users can reorder a list, posting the new order back to the server to re-sort the bound array.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: list, item, listItemIDKeyPath, id (all required), plus drag tuning (handle, ghosting, constraint, hoverclass, movingClass, starteffect/reverteffect/endeffect, scroll), onChange/onUpdate, action. Sketch: &lt;wo:AjaxSortableList list=&quot;$items&quot; item=&quot;$item&quot; listItemIDKeyPath=&quot;id&quot; id=&quot;sortable&quot;&gt;$item.name&lt;/wo:AjaxSortableList&gt;. Emits Sortable.create(...) and on drop posts Sortable.serialize back to the component action.</p>
+<p class="deps"><strong>Client deps.</strong> Hard dependency on Prototype.js AND Scriptaculous — addRequiredWebResources injects prototype.js, effects.js and dragdrop.js, and the template calls Sortable.create / Sortable.serialize / Ajax.Request. effect bindings map directly to Scriptaculous Effect.* functions.</p>
+</div>
+</section>
+<section id="sec6"><h2>Drag &amp; drop</h2><p class="lead">Scriptaculous-based dragging and drop targets.</p>
+<div class="el">
+<h3>AjaxDraggable <span class="badge s-niche">Niche</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Wraps its component content (or an existing DOM element by id) in a Scriptaculous Draggable so the user can drag it around, optionally carrying a server-side Java object to a matching AjaxDroppable.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: id, omitContainer, elementName, class/style, draggableObject (server object handed to the droppable), draggableID, plus Scriptaculous pass-through options (starteffect/reverteffect/endeffect, zindex, revert, snap, ghosting, handle, change, keyPress, scroll). Minimal sketch: wrap content in `&lt;wo:AjaxDraggable draggableObject=&quot;$item&quot;&gt;...&lt;/wo:AjaxDraggable&gt;`; template renders a WOGenericContainer (default div) and emits `ADG.register(id, options)`. The draggableObject is stashed in a per-page WeakHashMap on the session for retrieval by the drop target.</p>
+<p class="deps"><strong>Client deps.</strong> Hard dependency on Prototype.js + Scriptaculous: addRequiredWebResources injects prototype.js, effects.js, dragdrop.js (script.aculo.us v1.9.0) and wonder.js. Client behavior is Scriptaculous&#x27;s Draggable; ADG is a Wonder helper in wonder.js.</p>
+</div>
+<div class="el">
+<h3>AjaxDroppable <span class="badge s-niche">Niche</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Wraps content in a Scriptaculous Droppables zone that accepts AjaxDraggables, then on drop notifies the server (Ajax action or form submit) and resolves the dropped item back to its server-side Java object.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: id, elementName, accept/containment/hoverclass/overlap/greedy/onHover (Scriptaculous pass-through), onBeforeDrop/onDrop/onComplete JS hooks, submit + formName for form submission, confirmMessage for a confirm() guard, updateContainerID to refresh an AUC, action, droppedDraggableID, droppedObject, disabled, evalScripts. Minimal sketch: `&lt;wo:AjaxDroppable droppedObject=&quot;$target&quot; action=&quot;$handleDrop&quot; updateContainerID=&quot;list&quot;&gt;...&lt;/wo:AjaxDroppable&gt;`; emits `ADP.register(id, options)` and an onDrop that calls `ADP.droppedFunc(...)` to round-trip to handleRequest, where droppedObject is looked up via AjaxDraggable.draggableObjectForPage.</p>
+<p class="deps"><strong>Client deps.</strong> Hard dependency on Prototype.js + Scriptaculous: addRequiredWebResources injects prototype.js, effects.js, dragdrop.js (script.aculo.us Droppables) and wonder.js. Drop dispatch uses ADP helpers in wonder.js plus AjaxSubmitButton/AjaxOptions plumbing.</p>
+</div>
+</section>
+<section id="sec7"><h2>Progress, busy &amp; polling</h2><p class="lead">Long-running-task feedback and periodic server polling.</p>
+<div class="el">
+<h3>AjaxProgress <span class="badge s-niche">Niche</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">Server-side Java model object (no template) that holds the state of a long-running operation (value, maximum, done/canceled/failed/status) and is driven by an AjaxProgressBar; a dev reaches for it to track an upload or batch job&#x27;s progress in the session.</p>
+<p class="usage"><strong>Usage.</strong> Pure POJO, no bindings. Instantiate `new AjaxProgress(id, maximum)`, register with `AjaxProgress.registerProgress(session, p)`, then `p.incrementValue(n)` / `p.setDone(true)` from the worker (or use `copyAndTrack(in,out,maxSize)` for streams). An AjaxProgressBar bound to the same id/registry polls and renders it.</p>
+<p class="deps"><strong>Client deps.</strong> None — server-side only, ships no client JS/CSS. Depends only on er.extensions (ERXUnitAwareDecimalFormat).</p>
+</div>
+<div class="el">
+<h3>AjaxProgressBar <span class="badge s-niche">Niche</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A polling progress-bar component that renders an AjaxProgress model as an HTML table that refreshes itself on a timer via an update container, firing JS/action callbacks on start/cancel/success/failure; a dev reaches for it to show upload or batch-job progress.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: progress/progressID, started, refreshTime, allowCancel, visibleBeforeStart/AfterDone, cancelText, startedFunction/succeededFunction/failedFunction/finishedFunction, finishedAction/succeededAction/canceledAction/failedAction. Sketch: `&lt;wo:AjaxProgressBar progress=&quot;$uploadProgress&quot; succeededAction=&quot;$done&quot; allowCancel=&quot;true&quot;/&gt;`. Self-polls via `setTimeout(&quot;&lt;id&gt;Update()&quot;, refreshTime)`.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + Scriptaculous effects.js + wonder.js (explicitly added in appendToResponse). Renders via an AjaxUpdateContainer and table-based markup. Heavy legacy 2008-era stack.</p>
+</div>
+<div class="el">
+<h3>AjaxBusyIndicator <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Shows/hides a &#x27;busy&#x27; div (or applies a CSS class) globally or per-update-container while any Ajax request is in flight, optionally auto-generating a div wrapping a spinner GIF; a dev reaches for it to give visual feedback during AjaxUpdateContainer requests.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: busyClass, divID, busyImage/busyImageFramework, watchContainerID, onCreate/onComplete, id/class/style. Sketch: `&lt;wo:AjaxBusyIndicator busyImage=&quot;spinner.gif&quot; watchContainerID=&quot;myAUC&quot;/&gt;`. Emits `&lt;script&gt;AjaxBusy.register(busyClass, divID, watchContainerID, onCreate, onComplete)&lt;/script&gt;` which hooks a global Ajax.Responder.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + Scriptaculous effects.js + wonder.js. The AjaxBusy.register helper in wonder.js installs a global Ajax.Responder (Prototype) keyed to request start/end — wholly Prototype-dependent. Ships a busyBigSpinner.gif.</p>
+</div>
+<div class="el">
+<h3>AjaxBusySpinner <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Same role as AjaxBusyIndicator but renders the busy animation with the JS spin.js library instead of a GIF, exposing spinner styling bindings; a dev reaches for it for a configurable vector spinner during Ajax requests.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: busyClass, divID, watchContainerID, onCreate/onComplete, plus spin.js options lines/length/width/radius/color/speed/trail/shadow/spinOpts. Sketch: `&lt;wo:AjaxBusySpinner watchContainerID=&quot;myAUC&quot; color=&quot;#39f&quot; lines=&quot;12&quot;/&gt;`. Emits `AjaxBusy.register(..., true, spinOpts)`.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + Scriptaculous effects.js + wonder.js + spin.js (fgnass spin.js v1.2.6, ~2011). Same Prototype Ajax.Responder mechanism as AjaxBusyIndicator, just with a spin.js renderer.</p>
+</div>
+<div class="el">
+<h3>AjaxPing <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Cheaply polls the server on a timer with a small cache-key payload and, when the key changes, triggers a full refresh of a separate (larger) AjaxUpdateContainer; a dev reaches for it to keep a heavy content area live without re-fetching it every cycle.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: frequency (ms, default 3000), targetContainerID, cacheKey, onBeforeUpdate, id, stop. Sketch: `&lt;wo:AjaxPing targetContainerID=&quot;entriesAUC&quot; cacheKey=&quot;$entries.count&quot; frequency=&quot;5000&quot;/&gt;`. Wraps its body in its own update container that re-arms via `setTimeout(&quot;&lt;id&gt;Update()&quot;, frequency)`; on cacheKey change calls `AUC.update(targetContainerID)`.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + wonder.js (via the AjaxUpdateContainer it renders into and the AUC.update/&lt;id&gt;Update() JS). No Scriptaculous of its own, but transitively rides the Prototype Ajax stack.</p>
+</div>
+<div class="el">
+<h3>AjaxPingUpdate <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A child of AjaxPing that lets one ping request conditionally refresh additional update containers, each with its own cacheKey; a dev reaches for it to fan a single ping out to several target containers.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: targetContainerID, cacheKey, onBeforeUpdate. Sketch: nest inside AjaxPing — `&lt;wo:AjaxPing ...&gt;&lt;wo:AjaxPingUpdate targetContainerID=&quot;sidebarAUC&quot; cacheKey=&quot;$sidebar.hash&quot;/&gt;&lt;/wo:AjaxPing&gt;`. Emits `if(onBeforeUpdate()){ AUC.update(&#x27;targetContainerID&#x27;); }` only when its cacheKey changed.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + wonder.js transitively (AUC.update is the Prototype/wonder update-container call). No client resources of its own; emits inline script only.</p>
+</div>
+<div class="el">
+<h3>AjaxSessionPing <span class="badge s-niche">Niche</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A dynamic element that periodically pings a direct action in the background to detect session expiry (running onFailure, default window.close()) and optionally to keep the session alive; a dev reaches for it to react to / prevent session timeout on a page.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: frequency (default 60s), keepSessionAlive, parameters, onFailure, asynchronous, evalScripts, method. Sketch: `&lt;wo:AjaxSessionPing keepSessionAlive=&quot;true&quot; frequency=&quot;30&quot;/&gt;`. Emits `new Ajax.ActivePeriodicalUpdater(&#x27;AjaxSessionPinger&#x27;, url, options)` pointing at its inner WODirectAction (returns 200 if session exists, 300 if not).</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + wonder.js. Directly instantiates Ajax.ActivePeriodicalUpdater (a Prototype/wonder class defined in wonder.js) in inline script — core mechanism is wholly Prototype-dependent.</p>
+</div>
+<div class="el">
+<h3>AjaxLongResponse <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A stateless component that keeps the user on the current page while a long-running server task executes, polling an embedded AjaxUpdateContainer on a timer until the task signals it is done.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: id (required), isRunning (required, drives start/stop), elementName (default div), frequency (poll seconds, default 1), stopped (start in stopped mode). Sketch: wrap progress markup in &lt;wo:AjaxLongResponse id=&quot;lr&quot; isRunning=&quot;$taskRunning&quot; frequency=&quot;2&quot;&gt;...progress...&lt;/wo:AjaxLongResponse&gt;; the parent kicks off the task and toggles isRunning to stop the polling.</p>
+<p class="deps"><strong>Client deps.</strong> Depends on Prototype.js: the .html emits inline JS referencing a `&lt;id&gt;PeriodicalUpdater` global created by wonder.js, which is built on Ajax.PeriodicalUpdater / Ajax.Request from Prototype. No jQuery, no vanilla path.</p>
+</div>
+<div class="el">
+<h3>AjaxUploadProgress <span class="badge s-niche">Niche</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">Server-side subclass of AjaxProgress that adds file-upload metadata (temp file, file name, content type) and a Delegate.uploadFinished callback, deleting the temp file on dispose; a dev reaches for it when tracking an Ajax file upload&#x27;s byte progress.</p>
+<p class="usage"><strong>Usage.</strong> Pure POJO, no template/bindings. `new AjaxUploadProgress(id, tempFile, fileName, streamLength)`, register like an AjaxProgress, feed bytes via copyAndTrack/incrementValue, render with an AjaxProgressBar; dispose() deletes the temp file. Used by the file-upload machinery (e.g. AjaxFileUpload).</p>
+<p class="deps"><strong>Client deps.</strong> None — server-side only, ships no client JS/CSS. Extends AjaxProgress; only java.io.File and the parent model.</p>
+</div>
+</section>
+<section id="sec8"><h2>File upload</h2><p class="lead">Background uploads with progress + the server-side streaming core.</p>
+<div class="el">
+<h3>AjaxFileUpload <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A self-contained file-upload component that renders its own form and a hidden iframe, autosubmits when a file is picked, runs the upload in the background, and fires action/JS hooks (succeeded/failed/canceled/finished) plus a progress bar without blocking the page.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: data/inputStream/outputStream/streamToFilePath/finalFilePath/filePath for capturing the upload; succeededAction/failedAction/canceledAction/finishedAction and *Function JS hooks; uploadLabel, allowCancel, refreshTime, keepTempFile, mimeType, uploadFunctionName, onFileSelected. Minimal sketch: &lt;wo:AjaxFileUpload data=&quot;$uploadedData&quot; filePath=&quot;$fileName&quot; succeededAction=&quot;done&quot;/&gt;. It self-registers the &#x27;upload&#x27; request handler in its constructor and writes the temp file there.</p>
+<p class="deps"><strong>Client deps.</strong> Loads prototype.js (Prototype, ~2008), effects.js (Scriptaculous Effects), and wonder.js in appendToResponse. Upload transport is a hidden iframe + the self-registered AjaxFileUploadRequestHandler. No jQuery. Hard Prototype/Scriptaculous dependency.</p>
+</div>
+<div class="el">
+<h3>AjaxFlexibleFileUpload <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A more heavily styled, form-independent variant of AjaxFileUpload that dynamically creates its upload iframe (via Andrew Valums&#x27; ajaxupload.js) so it can live inside or outside a form, with styleable select/upload/cancel/clear buttons, a polled progress bar, and JSON-RPC state queries.</p>
+<p class="usage"><strong>Usage.</strong> Extends AjaxFileUpload, adds bindings: selectFileLabel/uploadLabel/cancelLabel/clearLabel, *ButtonClass overrides, accept, autoSubmit, allowCancel, injectDefaultCSS, clearUploadProgressOnSuccess, onClickBefore, clearedAction/clearedFunction. Drives a client-side &#x27;AUP&#x27; object (AUP.add/prepare/start/cancel/clear) and an AjaxProxy (&#x27;jsonrpc&#x27;+id) that polls uploadState() every refreshTime ms. Minimal sketch: &lt;wo:AjaxFlexibleFileUpload data=&quot;$data&quot; filePath=&quot;$name&quot; succeededAction=&quot;done&quot; allowCancel=&quot;true&quot;/&gt;.</p>
+<p class="deps"><strong>Client deps.</strong> Loads prototype.js, effects.js (Scriptaculous), wonder.js, ajaxupload.js (Valums AJAX Upload, MIT, ~2009) and injects default_ajaxupload.css. Relies on AjaxProxy/JSON-RPC polling and the same iframe transport. Hard Prototype/Scriptaculous + third-party ajaxupload.js dependency. The .html already carries data-morph-ignore=&quot;true&quot;, confirming it is not morph-compatible.</p>
+</div>
+<div class="el">
+<h3>AjaxFileUploadRequestHandler <span class="badge s-core">Core</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A WORequestHandler registered under the &#x27;upload&#x27; key that consumes the multipart upload request out-of-band, streams the body to a temp file while tracking progress (AjaxUploadProgress), enforces a max-upload-size, and restores the session by id so the upload can run without blocking the session lock.</p>
+<p class="usage"><strong>Usage.</strong> Not a component; auto-registered by AjaxFileUpload&#x27;s constructor. Configured via properties er.ajax.AjaxFileRequestHandler.tempFileFolder and .maxUploadSize. Reads the multipart iterator, pulls sessionId/id/file form-data, registers an AjaxUploadProgress, and copyAndTrack()s the stream to a temp file; subclasses can override downloadFinished(progress).</p>
+<p class="deps"><strong>Client deps.</strong> Pure server-side Java (WOMultipartIterator, ERXUnitAwareDecimalFormat, ERXProperties, AjaxUploadProgress). No client JS, no Prototype/Scriptaculous. The only coupling is that it is driven by the iframe upload from the two components above.</p>
+</div>
+</section>
+<section id="sec9"><h2>Visual effects</h2><p class="lead">Highlight, hover, rounded corners, behaviour binding.</p>
+<div class="el">
+<h3>AjaxHighlight <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A WODynamicGroup that flashes a Scriptaculous &#x27;Highlight&#x27; (yellow-fade) effect on a wrapped container when its bound value matches an object a prior action queued via the static AjaxHighlight.highlight(obj); devs reach for it to draw the eye to a row/record that was just created or updated after a page reload.</p>
+<p class="usage"><strong>Usage.</strong> Server side: call AjaxHighlight.highlight(eo) (or highlightNew/highlightUpdate) in the action before returning the page. Template: wrap the markup in AjaxHighlight bound to value=eo. Key bindings: value (required), id, elementName (default div), effect/newEffect/updateEffect (default &#x27;Highlight&#x27;, &#x27;none&#x27; to suppress), duration, hidden, delay, showEffect/hideEffect with durations. Minimal: &lt;wo:AjaxHighlight value=&quot;$item&quot; class=&quot;row&quot;&gt;...row markup...&lt;/wo:AjaxHighlight&gt; emits a div plus an inline AH.highlight(...) script when the item was flagged.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + Scriptaculous effects.js (script.aculo.us) + wonder.js. Hard-codes addScriptResourceInHead for prototype.js and effects.js; the runtime call is AH.highlight() which chains scriptaculous Effect.Highlight / Effect.Appear / Effect.Fade. Squarely a 2008-era Prototype/Scriptaculous stack.</p>
+</div>
+<div class="el">
+<h3>AjaxHoverable <span class="badge s-useful">Useful</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A WOComponent that wraps content in a hover area and shows a styled tooltip/popover (image or text) on mouseover, with extensive positioning bindings (drop above/below/corners or advanced top/left/right/bottom); devs reach for it to attach a rich hover tooltip to arbitrary content.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: hoverableWidth, showHoverable, toolTipWidth/Height, toolTipAutoScroll, toolTipDrop{Above,Below,TopRight,...}, advancedToolTip{Left,Right,Top,Bottom}, useJavascriptForHoverEffect (default true), useJavascriptOffsetX/Y, additionalClass/Style for hover area and tooltip. Minimal: &lt;wo:AjaxHoverable toolTipWidth=&quot;200px&quot;&gt;visible content&lt;wo:ToolTip&gt;...hover content...&lt;/wo:ToolTip&gt;&lt;/wo:AjaxHoverable&gt; (tooltip content supplied via the component&#x27;s content sections). With useJavascriptForHoverEffect it wires erxToolTip.show/hide on mouseover/mouseout; otherwise it is pure CSS :hover.</p>
+<p class="deps"><strong>Client deps.</strong> Ships ajaxHoverable.css + ajaxHoverable.js (custom erxToolTip object, Michael-Leigeber-derived). The JS path depends on Prototype.js: Element.observe, $(), .up(&#x27;.erxHoverArea&#x27;), new Element(), clonePosition, addClassName, Event.observe(window,&#x27;dom:loaded&#x27;,...) are all Prototype API used in the .html. So: custom tooltip code on a Prototype.js substrate.</p>
+</div>
+<div class="el">
+<h3>AjaxRoundEffect <span class="badge s-dead">Dead</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">An AjaxDynamicElement that applies the Rico library&#x27;s Rico.Effect.Round to give an element CSS-less rounded corners by drawing them in JavaScript; devs reached for it in the pre-border-radius era to round box corners.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: class (required), elementName (default div), generateTags (default false), id, plus corner-styling options corners/color/bgColor/blend/border/compact. Minimal: &lt;wo:AjaxRoundEffect class=&quot;myBox&quot; generateTags=&quot;true&quot;&gt;...&lt;/wo:AjaxRoundEffect&gt; emits the wrapper and an inline new Rico.Effect.Round(&#x27;div&#x27;,&#x27;myBox&#x27;, {...}) script. Already marked @Deprecated in source.</p>
+<p class="deps"><strong>Client deps.</strong> Prototype.js + rico.js (Rico, an early Prototype-based UI library; grep shows ~55 prototype/Effect references in rico.js). Pure 2006-2008 Prototype/Rico stack.</p>
+</div>
+<div class="el">
+<h3>AjaxBehaviour <span class="badge s-niche">Niche</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">An AjaxDynamicElement that writes out a Behaviour.register(...) call wrapping its template content, letting you attach JS event handlers to elements by CSS selector (unobtrusive JS) without manually emitting the script tag; devs reached for it to bind behaviors to server-rendered markup by selector.</p>
+<p class="usage"><strong>Usage.</strong> Binding: includeScriptTag (default true). Minimal: &lt;wo:AjaxBehaviour&gt;{ &#x27;#save&#x27; : function(e){ e.onclick = ... } }&lt;/wo:AjaxBehaviour&gt; emits &lt;script&gt;Behaviour.register({...});&lt;/script&gt;. The content between the tags is the literal JS rules object passed to Behaviour.register.</p>
+<p class="deps"><strong>Client deps.</strong> behaviour.js (Behaviour v1.1, Ben Nolan, June 2005), which is built on top of Prototype&#x27;s $$/CSS-selector engine. So: Prototype-era unobtrusive-JS micro-library.</p>
+</div>
+</section>
+<section id="sec10"><h2>Option support &amp; focus helpers</h2><p class="lead">Select-option models and field-focus helpers.</p>
+<div class="el">
+<h3>AjaxOption <span class="badge s-useful">Useful</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A pure server-side Java helper that maps a single WO binding (by name, with optional default and a type tag) to one JavaScript/JSON key-value pair, used by Ajax dynamic elements to assemble the options object passed to a client-side JS widget.</p>
+<p class="usage"><strong>Usage.</strong> Not a WOD element; instantiated in Java. Minimal sketch: new AjaxOption(&quot;frequency&quot;, AjaxOption.NUMBER); then AjaxOption.createAjaxOptionsDictionary(arrayOfOptions, component, associations()) yields an NSMutableDictionary of JS-formatted strings. Type constants: DEFAULT/STRING/SCRIPT/NUMBER/ARRAY/STRING_ARRAY/BOOLEAN/STRING_OR_ARRAY/DICTIONARY/FUNCTION.</p>
+<p class="deps"><strong>Client deps.</strong> None on the client. Pure Java; delegates JS value formatting to AjaxValue. No Prototype/Scriptaculous/jQuery. (It exists to feed Prototype-era widgets, but carries no client code itself.)</p>
+</div>
+<div class="el">
+<h3>AjaxOptions <span class="badge s-useful">Useful</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A WODynamicElement (and set of static helpers) that emits a JSON/JS object literal from a dictionary of bindings, wrapping the output in { } for inclusion in a generated client-side call.</p>
+<p class="usage"><strong>Usage.</strong> Inline WOD: AjaxOptions { method = &quot;get&quot;; options = createAjaxOptions; } emits {method:&#x27;get&#x27;, ...}. More commonly used statically from Java: AjaxOptions.appendToResponse(optionsDict, response, context). The element renders its children between the braces, so it can wrap literal JS too.</p>
+<p class="deps"><strong>Client deps.</strong> None on the client. Pure server-side response generation. Javadoc explicitly targets Prototype&#x27;s Ajax.Request options argument, but the class emits generic JSON and ships no JS. No jQuery.</p>
+</div>
+<div class="el">
+<h3>AjaxConstantOption <span class="badge s-niche">Niche</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A trivial AjaxOption subclass that ignores the bound value and always emits a fixed constant, used when an options key must be hard-coded rather than read from a component binding.</p>
+<p class="usage"><strong>Usage.</strong> Java only: new AjaxConstantOption(&quot;evalScripts&quot;, Boolean.TRUE, AjaxOption.BOOLEAN); then include it in the array passed to AjaxOption.createAjaxOptionsDictionary(...). Overrides both valueInComponent(...) variants to return the constant.</p>
+<p class="deps"><strong>Client deps.</strong> None on the client. Pure Java, 34 lines. No Prototype/Scriptaculous/jQuery.</p>
+</div>
+<div class="el">
+<h3>FocusText <span class="badge s-niche">Niche</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A convenience subclass of ERXWOText (a textarea) that auto-grabs keyboard focus, optionally selects all text, and optionally runs JS on the Enter key, via injected client script.</p>
+<p class="usage"><strong>Usage.</strong> WOD: FocusText { value = someText; focus = true; selectAll = true; onEnter = &quot;doSubmit()&quot;; }. Bindings: id, selectAll, focus (default true), onEnter, plus passed-through onkeypress. Emits an inline &lt;script&gt; calling Field.focus/Field.select inside a setTimeout, and an idSubmitOnEnter handler wired to onkeypress.</p>
+<p class="deps"><strong>Client deps.</strong> Hard dependency on Prototype.js — it calls AjaxUtils.addScriptResourceInHead(context, response, &quot;prototype.js&quot;) and the generated JS uses Prototype&#x27;s Field.focus, Field.select, Event.keyValue, and Event.stop. No Scriptaculous, no jQuery.</p>
+</div>
+<div class="el">
+<h3>FocusTextField <span class="badge s-niche">Niche</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A convenience subclass of ERXWOTextField (an &lt;input type=text&gt;) that auto-grabs focus, optionally selects all text, and optionally runs JS on Enter via injected client script; also the shared static helper that FocusText delegates its script emission to.</p>
+<p class="usage"><strong>Usage.</strong> WOD: FocusTextField { value = name; focus = true; selectAll = true; onEnter = &quot;login()&quot;; }. Same bindings as FocusText (id, selectAll, focus, onEnter, onkeypress). Static appendJavascriptToResponse(...) emits the Field.focus/Field.select/setTimeout block and the Prototype-based idSubmitOnEnter(event) handler reused by FocusText.</p>
+<p class="deps"><strong>Client deps.</strong> Hard dependency on Prototype.js — injects prototype.js into &lt;head&gt; and the emitted JS uses Prototype&#x27;s Field.focus, Field.select, Event.keyValue, Event.stop (comment in source literally says &#x27;PROTOTYPE FUNCTIONS&#x27;). No Scriptaculous, no jQuery.</p>
+</div>
+</section>
+<section id="sec11"><h2>Server-side plumbing &amp; base classes</h2><p class="lead">The framework&#x27;s internals — base classes, response/request handling, utilities. Architecturally sound and morph-neutral.</p>
+<div class="el">
+<h3>Ajax <span class="badge s-core">Core</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">Framework principal that boots the Ajax framework at app launch, registering the AjaxRequestHandler, the comet/push handler, and the AjaxResponse delegate.</p>
+<p class="usage"><strong>Usage.</strong> No bindings; it is an ERXFrameworkPrincipal subclass loaded automatically. finishInitialization() registers request handlers and, for ERXAjaxApplication apps, installs AjaxResponse.AjaxResponseDelegate. Developers never instantiate it directly.</p>
+<p class="deps"><strong>Client deps.</strong> Server-side only; no client JS. Indirectly governs the whole Ajax JS stack (Prototype/Scriptaculous bundled in the framework).</p>
+</div>
+<div class="el">
+<h3>AjaxComponent <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Abstract WOComponent base for stateful (.wo) Ajax components, wiring up request handling, binding helpers, and resource-injection convenience methods.</p>
+<p class="usage"><strong>Usage.</strong> Subclass it; implement addRequiredWebResources(WOResponse) and handleRequest(request, context). Provides valueForBinding-with-default, booleanValueForBinding, safeElementID(), and invokeAction() that routes Ajax requests to handleRequest via AjaxUtils.shouldHandleRequest.</p>
+<p class="deps"><strong>Client deps.</strong> Server-side base class; ships no client JS directly. Resource helpers delegate to AjaxUtils/ERXResponseRewriter.</p>
+</div>
+<div class="el">
+<h3>AjaxDynamicElement <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Abstract WODynamicElement base for stateless Ajax elements (most er.ajax elements extend this), providing the same request-dispatch and resource-injection contract as AjaxComponent.</p>
+<p class="usage"><strong>Usage.</strong> Subclass it; implement addRequiredWebResources(response, context) and handleRequest(request, context). invokeAction() checks shouldHandleRequest(), calls handleRequest, guards against accidentally returning the full page, and falls back to AjaxUtils.createResponse. Extends ERXDynamicElement.</p>
+<p class="deps"><strong>Client deps.</strong> Server-side base class; no client JS of its own. Subclasses pull in their own JS via addRequiredWebResources.</p>
+</div>
+<div class="el">
+<h3>IAjaxElement <span class="badge s-useful">Useful</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">Tiny interface unifying AjaxComponent and AjaxDynamicElement so callers can treat stateful and stateless Ajax elements uniformly for binding access and request handling.</p>
+<p class="usage"><strong>Usage.</strong> Implemented by AjaxComponent and AjaxDynamicElement. Declares valueForBinding(name, component), valueForBinding(name, default, component), and handleRequest(request, context). Rarely referenced by application code directly.</p>
+<p class="deps"><strong>Client deps.</strong> None; pure server-side interface.</p>
+</div>
+<div class="el">
+<h3>AjaxUtils <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">Central static utility grab-bag for the Ajax framework: building AjaxResponses, injecting script/CSS resources, JS-string quoting/escaping, request-routing decisions, array/JSON coercion, and DOM-update JS emission.</p>
+<p class="usage"><strong>Usage.</strong> All-static. Common calls: AjaxUtils.createResponse(request, context), addScriptResourceInHead/addStylesheetResourceInHead, appendScript/appendScriptHeaderIfNecessary, shouldHandleRequest, ajaxComponentActionUrl, jsSafeIdentifier, and updateDomElement (emits Prototype&#x27;s Element.update(...)).</p>
+<p class="deps"><strong>Client deps.</strong> Mixed. Most methods are server-side plumbing. updateDomElement emits Prototype&#x27;s Element.update() JS, and jsSafeIdentifier is documented to mirror ajaxSafeName() in wonder.js. Depends on jabsorb JSONSerializer for array coercion.</p>
+</div>
+<div class="el">
+<h3>AjaxResponse <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">WOResponse subclass that runs a second &#x27;update pass&#x27; so an Ajax action can render one or more AjaxUpdateContainers in the same response, plus a delegate that recovers from double-click/null-result race conditions.</p>
+<p class="usage"><strong>Usage.</strong> Usually obtained via AjaxUtils.createResponse rather than constructed directly. Offers updateDomElement(id, value[, formats]) and appendScriptHeader/FooterIfNecessary convenience methods. addAjaxResponseAppender registers global appenders (e.g. a notifications-area updater) onto every Ajax response.</p>
+<p class="deps"><strong>Client deps.</strong> Server-side; emits JS that relies on the client Ajax stack. updateDomElement convenience method emits Prototype&#x27;s Element.update().</p>
+</div>
+<div class="el">
+<h3>AjaxRequestHandler <span class="badge s-core">Core</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">WOComponentRequestHandler subclass registered under the &#x27;ajax&#x27; key so Ajax component actions get a dedicated URL namespace and page-storage is suppressed for them.</p>
+<p class="usage"><strong>Usage.</strong> Registered automatically by the Ajax principal under key &#x27;ajax&#x27;. AjaxUtils.ajaxComponentActionUrl rewrites normal component-action URLs to this handler when useAjaxRequestHandler() is true. handleRequest() calls enableShouldNotStorePage() then defers to the standard component handler.</p>
+<p class="deps"><strong>Client deps.</strong> None; pure server-side request handler.</p>
+</div>
+<div class="el">
+<h3>AjaxResponseAppender <span class="badge s-niche">Niche</span> <span class="badge m-modern">Modern</span></h3>
+<p class="role">A tiny abstract server-side hook (single appendToResponse method) whose subclasses get a chance to append extra markup/JS to the tail of every AjaxResponse, registered globally via AjaxResponse.addAjaxResponseAppender.</p>
+<p class="usage"><strong>Usage.</strong> No bindings, no template — pure Java SPI. Subclass it, implement appendToResponse(WOResponse, WOContext), and register once at startup: AjaxResponse.addAjaxResponseAppender(new MyAppender()). Each registered appender runs at the end of every AjaxResponse, typically to inject a shared JS block so callers need not repeat it.</p>
+<p class="deps"><strong>Client deps.</strong> None — pure server-side Java abstraction; ships no client JS or resources.</p>
+</div>
+</section>
+<section id="sec12"><h2>JSON-RPC bridge (legacy / quarantined)</h2><p class="lead">The jabsorb-based bridge exposing server objects to JS. Unmaintained and a security liability.</p>
+<div class="el">
+<h3>AjaxProxy <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
+<p class="role">A stateless JSON-RPC bridge component that exposes a server-side Java object&#x27;s public methods to client JavaScript, letting the browser call Java methods by name over JSON (via the jabsorb library) without a full page action.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: name (client-side bridge var name), proxyName (client name for the proxy object), proxy (the Java object to expose — you should ALWAYS supply this; defaults to parent(), which is dangerous), AjaxBridge/JSONRPCBridge (optional shared JSONRPCBridge), lazy (init on demand). Sketch: &lt;wo:AjaxProxy name=&quot;jsonrpc&quot; proxyName=&quot;wopage&quot; proxy=&quot;$myService&quot;/&gt; then in JS call jsonrpc.wopage.someMethod(arg).</p>
+<p class="deps"><strong>Client deps.</strong> Ships jsonrpc.js (jabsorb client, Apache-licensed) which is a self-contained XMLHttpRequest-based RPC client — its `.prototype` references are native JS, NOT Prototype.js. Server side depends on org.jabsorb (JSONRPCBridge) and org.json. No Scriptaculous. Effectively framework-independent on the client.</p>
+</div>
+</section>
+<section id="sec13"><h2>Social</h2><p class="lead">Hardcoded bookmarking-service links; data is mostly defunct.</p>
+<div class="el">
+<h3>AjaxSocialNetwork <span class="badge s-dead">Dead</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">An abstract server-side registry/factory of ~19 hardcoded social-bookmarking sites (del.icio.us, Digg, Furl, StumbleUpon, etc.) that each build a &#x27;submit this URL+title&#x27; share link for the given page.</p>
+<p class="usage"><strong>Usage.</strong> No template — pure Java. AjaxSocialNetwork.socialNetworkNamed(&quot;digg&quot;).submissionUrl(url, title) returns the share URL; registerSocialNetworkNamed(net, name) adds custom ones; iconName()/iconFramework() locate the bundled PNG/GIF icon. Backing data for AjaxSocialNetworkLink.</p>
+<p class="deps"><strong>Client deps.</strong> None on the client (no JS); ships icon images under SocialNetwork/ in the Ajax framework. Pure server-side Java.</p>
+</div>
+<div class="el">
+<h3>AjaxSocialNetworkLink <span class="badge s-dead">Dead</span> <span class="badge m-platform">Replace w/ platform</span></h3>
+<p class="role">A component that renders a hyperlink (wrapping the network&#x27;s bundled icon image) to a social network&#x27;s share/submit URL for a given page URL and title.</p>
+<p class="usage"><strong>Usage.</strong> Bindings: name (social network key, e.g. &quot;facebook&quot;), url (page to submit), title, alt (defaults to network name), target. Sketch: &lt;wo:AjaxSocialNetworkLink name=&quot;reddit&quot; url=&quot;$pageUrl&quot; title=&quot;$pageTitle&quot; target=&quot;_blank&quot;/&gt;. Resolves AjaxSocialNetwork.socialNetworkNamed(name) and renders a WOHyperlink+WOImage.</p>
+<p class="deps"><strong>Client deps.</strong> None on the client — plain server-rendered &lt;a&gt;&lt;img&gt;&lt;/a&gt;, no JS, no Prototype/Scriptaculous. Depends entirely on AjaxSocialNetwork (and its bundled icons) for data.</p>
+</div>
+</section>
+</div>
+</body>
+</html>
