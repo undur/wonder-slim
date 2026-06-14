@@ -25,9 +25,9 @@ import er.extensions.foundation.ERXPatcher;
  * AjaxBrowser, over one shared widget.
  *
  * As with AjaxPopUpButton, you can equally just put class="ajax-popup-button" on a plain browser;
- * this element is sugar that also guarantees the resources are loaded. The distinct marker class
- * (not Chosen's "chosen-select") lets wonder-select and legacy Chosen/TomSelect coexist during
- * migration without both enhancing the same select.
+ * this element is sugar that also guarantees the resources are loaded. The marker class is specific
+ * to wonder-select on purpose, so it can coexist with another select-enhancing library on the same
+ * page without both enhancing the same select.
  */
 public class AjaxBrowser extends ERXPatcher.DynamicElementsPatches.Browser {
 

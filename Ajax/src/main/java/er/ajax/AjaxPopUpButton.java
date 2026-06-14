@@ -24,8 +24,8 @@ import er.extensions.foundation.ERXPatcher;
  * just put class="ajax-popup-button" on a plain popUpButton; this element is sugar that also
  * guarantees the resources are loaded.
  *
- * A distinct class (not Chosen's "chosen-select") is used on purpose, so wonder-select and any
- * remaining legacy Chosen popups don't both try to enhance the same select during migration.
+ * The marker class is specific to wonder-select on purpose, so that if another select-enhancing
+ * library is present on the page, the two don't both try to enhance the same select.
  */
 public class AjaxPopUpButton extends ERXPatcher.DynamicElementsPatches.PopUpButton {
 

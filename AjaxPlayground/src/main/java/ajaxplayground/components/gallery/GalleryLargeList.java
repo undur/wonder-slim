@@ -12,9 +12,9 @@ import ajaxplayground.components.PlaygroundPage;
  * Gallery: AjaxPopUpButton with a LARGE option list - the render-performance stress case.
  *
  * Opening the dropdown builds one &lt;li&gt; per option. With a few hundred options the naive
- * append-per-option / O(n^2) selected-check path took ~1-2s to open (much worse than Chosen). This
- * page exists to measure and guard that: the bridge opens the list and asserts both that all options
- * rendered and that the open completed quickly.
+ * append-per-option / O(n^2) selected-check path took ~1-2s to open. This page exists to measure and
+ * guard that: the bridge opens the list and asserts both that all options rendered and that the open
+ * completed quickly.
  */
 public class GalleryLargeList extends PlaygroundPage {
 

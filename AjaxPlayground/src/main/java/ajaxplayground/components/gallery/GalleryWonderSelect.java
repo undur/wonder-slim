@@ -9,10 +9,11 @@ import com.webobjects.appserver.WOContext;
 import ajaxplayground.components.PlaygroundPage;
 
 /**
- * Gallery: wonder-select, the morph-native Chosen replacement.
+ * Gallery: wonder-select, the morph-native searchable select.
  *
  * The select lives INSIDE a morphing AjaxUpdateContainer that can be refreshed on demand - the
- * exact situation that breaks Chosen (preserved select, stripped .chosen-container, re-init no-op).
+ * exact situation that breaks a sibling-generating enhancer (preserved select, stripped generated
+ * container, re-init no-op).
  * wonder-select must survive the morph: the widget stays usable, the selected value is preserved,
  * and picking an option still fires a native change (shown here by a server-side echo of the
  * current selection that updates via an observe field).
@@ -23,7 +24,7 @@ public class GalleryWonderSelect extends PlaygroundPage {
 	public String selectedFruit;
 	private int _refreshCount;
 
-	/** Second case: a select whose OWN container is refreshed by its change (the Strimillinn case). */
+	/** Second case: a select whose OWN container is refreshed by its change. */
 	public String selfFruit;
 	private int _selfCount;
 

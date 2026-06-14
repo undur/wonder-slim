@@ -1,9 +1,10 @@
 /*
- * wonder-select - a morph-native, dependency-free replacement for the Chosen jQuery widget.
+ * wonder-select - a morph-native, dependency-free searchable select widget.
  *
- * WHY: Chosen turns a <select> into a hidden select plus a GENERATED sibling .chosen-container.
- * Under DOM morphing that sibling is foreign DOM the server never rendered, so morph strips it and
- * Chosen's re-init no-ops on the preserved (already-initialized) select - the widget breaks.
+ * WHY: the typical jQuery-style select enhancer turns a <select> into a hidden select plus a
+ * GENERATED sibling container. Under DOM morphing that sibling is foreign DOM the server never
+ * rendered, so morph strips it and the enhancer's re-init no-ops on the preserved (already-
+ * initialized) select - the widget breaks.
  *
  * wonder-select avoids that by being a CUSTOM ELEMENT: <wonder-select> owns the native <select>
  * (its source of truth) and renders its trigger / search box / options list as its OWN children.
@@ -13,12 +14,12 @@
  *
  * INTEGRATION: it dispatches a native 'change' event on the underlying <select> when the selection
  * changes, so existing AjaxObserveField wiring keeps working unchanged. An auto-enhancer adopts any
- * <select class="ajax-popup-button"> (drop-in for Chosen), and you can also author <wonder-select>
- * explicitly around a <select>.
+ * <select class="ajax-popup-button">, and you can also author <wonder-select> explicitly around a
+ * <select>.
  *
- * SUPPORTED (matches actual nb usage): single + multiple select, type-to-filter, placeholder text
- * (from the select's data-placeholder or a leading empty/disabled option), no-results text,
- * width:100%. Deliberately small - not a full Chosen clone.
+ * SUPPORTED: single + multiple select, type-to-filter, placeholder text (from the select's
+ * data-placeholder or a leading empty/disabled option), no-results text, width:100%. Deliberately
+ * small - not a full-featured select library.
  */
 (function () {
 	'use strict';
@@ -39,7 +40,7 @@
 	}
 
 	// True for the "no selection" placeholder option. Covers a plain empty value and WebObjects'
-	// noSelectionString sentinel ("WONoSelectionString"), which is what every nb ajax-popup-button uses.
+	// noSelectionString sentinel ("WONoSelectionString"), which is what AjaxPopUpButton emits.
 	function isPlaceholderOption(opt) {
 		return opt.value === '' || opt.value === 'WONoSelectionString';
 	}
@@ -80,8 +81,8 @@
 			// The trigger + dropdown are generated client-side, so they are NOT in the server HTML.
 			// Mark them data-morph-ignore so a morph of an enclosing container leaves them in place
 			// (otherwise Idiomorph would strip them as "absent from the new HTML" - the exact bug
-			// that broke Chosen). The underlying <select> still morphs normally (its value/options
-			// come from the server); we re-sync the trigger label from it after the morph.
+			// that breaks sibling-generating enhancers). The underlying <select> still morphs normally
+			// (its value/options come from the server); we re-sync the trigger label from it after the morph.
 			var trigger = h('div', { class: 'ws-trigger', tabindex: '0', 'data-morph-ignore': 'true' });
 			var dropdown = h('div', { class: 'ws-dropdown', hidden: '', 'data-morph-ignore': 'true' });
 			var search = h('input', { class: 'ws-search', type: 'text', autocomplete: 'off' });
@@ -117,7 +118,7 @@
 		}
 
 		// Size and orient the dropdown relative to the VIEWPORT so it never extends beyond it
-		// (Chosen's annoyance) and uses available space well: open downward by default, but flip up
+		// and uses available space well: open downward by default, but flip up
 		// when there's more room above; cap the height to whichever gap we open into (minus a small
 		// margin) and to a sensible fraction of the viewport. Measured each open (handles the
 		// trigger being inside a scrolling table, different screen sizes, etc.).
@@ -235,7 +236,7 @@
 				}
 				// Type-to-search: any printable character (not a modifier combo) opens the dropdown
 				// and seeds the search with that character, so you can just focus the field and start
-				// typing - the way Chosen behaved. e.key is a single char for printable keys.
+				// typing. e.key is a single char for printable keys.
 				if (e.key && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
 					e.preventDefault();
 					open(host, e.key);
@@ -283,8 +284,8 @@
 			});
 
 			// If a real value is selected and there's a placeholder option, offer it as a "clear"
-			// choice so the user can deselect back to nothing (Chosen/native behaviour). Single-select
-			// only; multi-select clears by toggling its tags off.
+			// choice so the user can deselect back to nothing (matching native select behaviour).
+			// Single-select only; multi-select clears by toggling its tags off.
 			if (!host._wsMultiple) {
 				var placeholder = Array.prototype.filter.call(ws.select.options, isPlaceholderOption)[0];
 				var hasRealSelection = ws.select.selectedIndex >= 0 && !isPlaceholderOption(ws.select.options[ws.select.selectedIndex]);
