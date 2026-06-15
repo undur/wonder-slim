@@ -160,6 +160,38 @@
 	// targetId may be null - that's a "fire and forget" request (AUL.request / ASB.request) whose
 	// response is JUST scripts to run (e.g. an onClickServer that itself calls AUC.update). In that
 	// case we run the response's <script>s in global scope rather than morphing into a container.
+	// --- ajax-activity broker --------------------------------------------------
+	// fetchAndMorph is the single choke point for ALL ajax activity, so we track in-flight requests
+	// here and dispatch document-level events on the 0<->1 transitions. This is the modern replacement
+	// for Prototype's global Ajax.Responders: anything that wants to react to "ajax busy / idle"
+	// (e.g. AjaxBusySpinner) listens for 'ajaxslim:busy' / 'ajaxslim:idle' instead of registering a
+	// responder. document.documentElement carries a 'data-ajaxslim-busy' attribute while >0 requests
+	// are in flight, so a pure-CSS spinner can show/hide with no JS of its own.
+	var inFlight = 0;
+
+	function activityStart() {
+		inFlight++;
+		if (inFlight === 1) {
+			document.documentElement.setAttribute('data-ajaxslim-busy', 'true');
+			dispatchActivity('ajaxslim:busy');
+		}
+	}
+
+	function activityEnd() {
+		inFlight = Math.max(0, inFlight - 1);
+		if (inFlight === 0) {
+			document.documentElement.removeAttribute('data-ajaxslim-busy');
+			dispatchActivity('ajaxslim:idle');
+		}
+	}
+
+	function dispatchActivity(name) {
+		try {
+			document.dispatchEvent(new CustomEvent(name, { detail: { inFlight: inFlight } }));
+		}
+		catch (e) { /* CustomEvent unsupported in ancient browsers - the data-attribute still works */ }
+	}
+
 	function fetchAndMorph(targetId, url, body, onDone) {
 		var init = {
 			credentials: 'same-origin',
@@ -174,6 +206,7 @@
 				init.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 			}
 		}
+		activityStart();
 		return fetch(url, init).then(function (response) {
 			return response.text();
 		}).then(function (text) {
@@ -204,7 +237,7 @@
 			if (window.console) {
 				console.error('AjaxSlim: ajax update failed for "' + targetId + '"', e);
 			}
-		});
+		}).then(activityEnd, activityEnd); // finally: always settle the activity counter
 	}
 
 	var AUC = {

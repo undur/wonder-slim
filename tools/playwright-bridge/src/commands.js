@@ -125,6 +125,11 @@ async function readValue(page, step, reads, requestsSince) {
 			return await page.locator(step.selector).count();
 		case 'exists':
 			return (await page.locator(step.selector).count()) > 0;
+		case 'visible':
+			// True if the element is rendered AND visible (Playwright treats display:none / zero-box /
+			// visibility:hidden as not-visible). Distinct from 'exists' (in the DOM) and 'withinViewport'
+			// (geometry only) - this is the right probe for CSS show/hide via a class or attribute.
+			return await page.locator(step.selector).first().isVisible();
 		case 'requestCount':
 			return requestsSince(step.marker).length;
 		case 'withinViewport':

@@ -219,6 +219,24 @@ it survives morphing (no foreign sibling for morph to strip) and re-applies stat
 attribute (a multi-select renders no "no selection" option to read it from). No code changes were
 needed beyond moving the files into AjaxSlim.
 
+### `AjaxBusySpinner`
+
+Shows a busy indicator while any ajax request is in flight. The runtime carries an **ajax-activity
+broker**: `fetchAndMorph` (the single choke point for all ajax activity) keeps an in-flight counter
+and, on the 0↔1 transitions, sets/clears `data-ajaxslim-busy="true"` on `<html>` and dispatches
+`ajaxslim:busy` / `ajaxslim:idle` events on `document`. The spinner is then **pure CSS** — hidden by
+default, revealed by `html[data-ajaxslim-busy] .ajaxslim-busy-spinner` — so a bare
+`<wo:AjaxBusySpinner/>` needs no JavaScript of its own. Three pulsing dots, no images.
+
+Divergence from legacy: the legacy spinner was an `AjaxComponent` carrying ~17 bindings (busyClass,
+divID, watchContainerID, onCreate/onComplete, and the spin.js option set — lines/length/width/radius/
+color/speed/trail/shadow + a `spinOpts` JSON built via `org.json`), driven by a global Prototype
+`Ajax.Responders.register`, and it shipped `spin.js` + `prototype.js` + `effects.js`. In practice every
+real use was a bare `<wo:AjaxBusySpinner/>` with no bindings, so AjaxSlim drops the entire config
+surface, spin.js, the Prototype responder, and the org.json dependency: id/class/style only, CSS-driven
+off the activity broker. Apps wanting a bespoke indicator can style `.ajaxslim-busy-spinner` or listen
+for the `ajaxslim:busy`/`ajaxslim:idle` events.
+
 ## Divergence from the legacy Ajax framework
 
 | Concern | Legacy Ajax | AjaxSlim |
@@ -289,13 +307,18 @@ standalone `Morph` object inside `ajaxslim.js`:
 - `AjaxSubmitButton` / `AjaxDefaultSubmitButton`
 - `AjaxUpdateTrigger`
 - `AjaxPopUpButton` / `AjaxBrowser` + `wonder-select.js` / `wonder-select.css`
+- `AjaxBusySpinner` (+ the runtime's ajax-activity broker + `ajaxslim-busy.css`)
+
+**Proven in production:** Strimillinn runs on AjaxSlim end-to-end. (A focus-on-Tab regression in the
+descendant-observe path was found and fixed — see the `observeField` notes — by binding observers to
+field nodes rather than churning synthetic positional ids that drift under morphs.)
 
 Still to build / do for a full framework:
 
-- **The Strimillinn stragglers** — the remaining legacy Ajax elements the real-app audit still needs
-  a slim equivalent for: **`AjaxModalDialog` / ModalContainer**, **`AjaxBusyIndicator` / BusySpinner**,
-  and **AutoComplete**. (Two ripples are already pinned to that work: `AjaxDefaultSubmitButton`
-  dropped its `AjaxModalDialog.isInDialog` focus-ring tweak, to be restored when the modal lands.)
+- **The remaining Strimillinn stragglers** — **AutoComplete** and the modal (**`AjaxModalContainer` /
+  `AjaxModalDialog`** → native `<dialog>`). (`AjaxBusySpinner` is now done. One ripple stays pinned to
+  the modal: `AjaxDefaultSubmitButton` dropped its `AjaxModalDialog.isInDialog` focus-ring tweak, to be
+  restored when the modal lands.)
 - **Dependency migration + playground verification** — AjaxPlayground (and downstream apps) currently
   depend on the legacy `Ajax` framework. Because both ship `er.ajax.*`, exercising AjaxSlim requires
   swapping that dependency to `AjaxSlim` (a separate, later step — not done here). The
