@@ -237,6 +237,24 @@ surface, spin.js, the Prototype responder, and the org.json dependency: id/class
 off the activity broker. Apps wanting a bespoke indicator can style `.ajaxslim-busy-spinner` or listen
 for the `ajaxslim:busy`/`ajaxslim:idle` events.
 
+### `AjaxModalContainer`
+
+Renders a trigger button that opens its inline children in a modal, built on the native
+`<dialog>` element. The trigger carries `data-ajaxslim-modal-open="<dialogId>"`; `ajaxslim-modal.js`
+(one delegated click listener on `document`, so it survives morphs with no re-init) opens that dialog
+with `showModal()`. The close button is a `<form method="dialog">` submit, which the platform closes
+natively. `<dialog>` provides the backdrop (`::backdrop`), focus trapping and Esc-to-close for free.
+
+Divergence from legacy: the legacy element wrapped the **iBox** lightbox (Prototype) — it **relocated**
+the content node to `<body>` (hence its `data-morph-ignore` relocation hack), drew its own overlay, and
+supported iframe (`href`), `directActionName`, and ajax-fetched (`ajax`/`action`) content modes plus
+`skin`/`locked`/`secure`. Every real use across the apps is the **inline-content** pattern (a labelled
+button popping its children in a confirm dialog with a close button), so AjaxSlim implements only that:
+`label`/`closeLabel`/`title`/`class`/`style`/`id`/`open`. The content stays **in place** in the DOM
+(native `<dialog>` doesn't relocate it), so forms/links inside submit and navigate normally and there is
+no morph collision — the relocation hack is gone. No iBox, no Prototype, no iframe/direct-action/skin
+machinery.
+
 ## Divergence from the legacy Ajax framework
 
 | Concern | Legacy Ajax | AjaxSlim |
@@ -308,17 +326,28 @@ standalone `Morph` object inside `ajaxslim.js`:
 - `AjaxUpdateTrigger`
 - `AjaxPopUpButton` / `AjaxBrowser` + `wonder-select.js` / `wonder-select.css`
 - `AjaxBusySpinner` (+ the runtime's ajax-activity broker + `ajaxslim-busy.css`)
+- `AjaxModalContainer` (native `<dialog>`, + `ajaxslim-modal.js` / `ajaxslim-modal.css`)
 
 **Proven in production:** Strimillinn runs on AjaxSlim end-to-end. (A focus-on-Tab regression in the
 descendant-observe path was found and fixed — see the `observeField` notes — by binding observers to
 field nodes rather than churning synthetic positional ids that drift under morphs.)
 
+This now covers everything Strimillinn (and the shared `helium5` library all the apps depend on) use:
+UpdateContainer, UpdateLink, ObserveField, SubmitButton, UpdateTrigger, PopUpButton, Browser,
+BusySpinner, ModalContainer.
+
 Still to build / do for a full framework:
 
-- **The remaining Strimillinn stragglers** — **AutoComplete** and the modal (**`AjaxModalContainer` /
-  `AjaxModalDialog`** → native `<dialog>`). (`AjaxBusySpinner` is now done. One ripple stays pinned to
-  the modal: `AjaxDefaultSubmitButton` dropped its `AjaxModalDialog.isInDialog` focus-ring tweak, to be
-  restored when the modal lands.)
+- **`AjaxAutoComplete`** — deliberately deferred. It is very rarely used (only an experimental
+  Strimillinn feature) and its legacy form is a 397-line, ~40-binding Scriptaculous `Ajax.Autocompleter`
+  wrapper. When wanted, it should be a small fresh build on native `<datalist>` (or a tiny custom
+  element), not a port.
+- **`AjaxModalDialog`** — 4 uses total, none in Strimillinn; not built. (`AjaxDefaultSubmitButton`
+  dropped its `AjaxModalDialog.isInDialog` focus-ring tweak; only relevant if/when this lands.)
+- **Dependency migration + playground verification** — apps still depend on the legacy `Ajax`
+  framework. Because both ship `er.ajax.*`, swapping an app to AjaxSlim is a one-line pom change
+  (Strimillinn has done this in production). Verified no app/helium5 JS depends on the legacy
+  `AUC`/`ASB`/`AUL`/`iBox` globals (AjaxSlim namespaces under `AjaxSlim.*`), so the swap is clean.
 - **Dependency migration + playground verification** — AjaxPlayground (and downstream apps) currently
   depend on the legacy `Ajax` framework. Because both ship `er.ajax.*`, exercising AjaxSlim requires
   swapping that dependency to `AjaxSlim` (a separate, later step — not done here). The
