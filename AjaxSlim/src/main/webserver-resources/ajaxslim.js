@@ -392,8 +392,8 @@
 
 		// Partial submit: send ONLY the changed field plus the partial-sender marker (so ERXWOForm
 		// treats the field's form as submitted), then morph targetId. Mirrors the legacy ASB.partial.
-		partial: function (targetId, fieldId, options) {
-			var field = elementFor(fieldId);
+		partial: function (targetId, fieldOrId, options) {
+			var field = (fieldOrId && fieldOrId.nodeType === 1) ? fieldOrId : elementFor(fieldOrId);
 			if (field == null) {
 				return;
 			}
@@ -421,8 +421,15 @@
 		// partial=false + targetId => full form submit; partial=false + no targetId => fire+forget.
 		// frequencySeconds (legacy poll) is treated as a debounce; observeDelaySeconds also debounces.
 		// Idempotent across morphs via a per-signature flag on the (preserved) field node.
-		observeField: function (targetId, fieldId, frequencySeconds, partial, observeDelaySeconds, options) {
-			var field = elementFor(fieldId);
+		observeField: function (targetId, fieldOrId, frequencySeconds, partial, observeDelaySeconds, options) {
+			// Accept either a DOM node or an id. We bind to and key off the NODE directly - never
+			// assigning a synthetic id - so anonymous fields (e.g. repetition rows with no id) keep
+			// working. Assigning positional ids was the cause of a focus regression: it mutated the DOM
+			// on every re-registration, and when a morph changed the field count/order the index-based
+			// ids drifted, so Idiomorph's id-keyed focus restoration landed on the wrong node. Idiomorph
+			// matches unchanged nodes positionally and preserves their focus on its own; we just must not
+			// fight it by churning ids.
+			var field = (fieldOrId && fieldOrId.nodeType === 1) ? fieldOrId : elementFor(fieldOrId);
 			if (field == null) {
 				return;
 			}
@@ -436,11 +443,11 @@
 			options = options || {};
 
 			var fire = function () {
-				if (options.onBeforeSubmit && options.onBeforeSubmit(fieldId) === false) {
+				if (options.onBeforeSubmit && options.onBeforeSubmit(field) === false) {
 					return;
 				}
 				if (partial) {
-					ASB.partial(targetId, fieldId, options);
+					ASB.partial(targetId, field, options);
 				}
 				else if (targetId != null) {
 					ASB.update(targetId, field.form, options);
@@ -475,12 +482,11 @@
 				if ((f.type || '').toLowerCase() === 'hidden') {
 					continue;
 				}
-				if (!f.id) {
-					// observeField keys on an id; give anonymous fields a stable one so the
-					// per-field idempotency flag and lookups work.
-					f.id = containerId + '__f' + i;
-				}
-				ASB.observeField(targetId, f.id, frequencySeconds, partial, observeDelaySeconds, options);
+				// Pass the NODE, not an id. observeField keys its idempotency flag off the node and
+				// ASB.partial sends the field's form-value NAME (not its DOM id) as the partial sender,
+				// so no DOM id is needed. Crucially we do NOT assign synthetic positional ids here:
+				// that mutated the DOM and drifted under morphs, breaking focus restoration.
+				ASB.observeField(targetId, f, frequencySeconds, partial, observeDelaySeconds, options);
 			}
 		}
 	};
