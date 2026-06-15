@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>is.rebbi.slim</groupId>
+		<artifactId>wonder-slim-reactor</artifactId>
+		<version>8.0.2-SNAPSHOT</version>
+	</parent>
+	<artifactId>AjaxSlim</artifactId>
+	<name>AjaxSlim Framework</name>
+	<packaging>woframework</packaging>
+
+	<!--
+		AjaxSlim - the modern, slim Ajax framework. A morph-native, fetch-based, dependency-free
+		rebuild of the parts of the legacy Ajax framework that are actually used: the core update
+		spine (AjaxUpdateContainer/Link/ObserveField/SubmitButton/UpdateTrigger) and the wonder-select
+		widgets. No Prototype, no Scriptaculous. Elements live in package er.ajax so it is a drop-in
+		replacement for the legacy Ajax framework (the two cannot share a classpath - AjaxSlim replaces
+		Ajax). Depends only on ERExtensions, which carries the WO-Ajax substrate
+		(ERXAjaxApplication/Session/Context) the elements stand on.
+	-->
+	<dependencies>
+		<dependency>
+			<groupId>${wonder.core.group}</groupId>
+			<artifactId>ERExtensions</artifactId>
+			<version>${wonder.version}</version>
+		</dependency>
+	</dependencies>
+</project>

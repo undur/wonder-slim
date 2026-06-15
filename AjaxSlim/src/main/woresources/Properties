@@ -1,0 +1,4 @@
+## AjaxSlim framework properties
+
+er.extensions.load.Properties.framework.AjaxSlim=load
+er.extensions.AjaxSlim.hasLocalization=false
