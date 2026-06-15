@@ -432,7 +432,7 @@
 			}
 			var body = new URLSearchParams();
 			if (field.name) {
-				body.append(field.name, fieldValue(field));
+				appendFieldValues(body, field);
 				body.append(PartialFormSenderIDKey, field.name);
 			}
 			ASB._submitBody(targetId, field.form, options, body);
@@ -541,17 +541,21 @@
 
 	// Current value of a form field for a partial submit (multi-selects join with the field name
 	// repeated by the caller; here we return the single current value).
-	function fieldValue(field) {
+	// Append a field's value(s) to a URLSearchParams body, the way a real form submit would. A
+	// multiple <select> contributes ONE entry per selected option under the same name (NOT a single
+	// comma-joined value) - WOBrowser reconstitutes its selections by matching repeated form values
+	// to its option list, so a joined string would round-trip as no selection. Everything else is a
+	// single value.
+	function appendFieldValues(body, field) {
 		if (field.tagName && field.tagName.toLowerCase() === 'select' && field.multiple) {
-			var values = [];
 			for (var i = 0; i < field.options.length; i++) {
 				if (field.options[i].selected) {
-					values.push(field.options[i].value);
+					body.append(field.name, field.options[i].value);
 				}
 			}
-			return values.join(',');
+			return;
 		}
-		return field.value;
+		body.append(field.name, field.value);
 	}
 
 	// Legacy observeFieldFrequency was a poll interval in SECONDS; observeDelay was a min gap in
