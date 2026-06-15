@@ -23,6 +23,8 @@
 		.m-rewrite { background: #fff; color: #3730a3; border: 1px solid #c3c8f5; }
 		.m-platform { background: #fff; color: #9a4a17; border: 1px solid #f0cba8; }
 		.m-delete { background: #fff; color: #a12626; border: 1px solid #f0b0b0; }
+		.removed { background: #444; color: #fff; }
+		#secRemoved .el { opacity: .75; }
 		.legend { margin: 1rem 0; font-size: .85rem; } .legend div { margin: .3rem 0; }
 		.legend .badge { margin-right: .3rem; }
 		.note { background: #fffbea; border-left: 3px solid #f0c000; padding: .8rem 1rem; border-radius: 4px; margin: 1.5rem 0; font-size: .92rem; }
@@ -39,6 +41,8 @@
 			<span class="badge s-core">Core</span><span class="badge s-useful">Useful</span><span class="badge s-niche">Niche</span><span class="badge s-dead">Dead</span></div>
 		<div><strong>Modernization</strong> &mdash; the cleanup direction (implementation only):
 			<span class="badge m-modern">Modern</span><span class="badge m-rewrite">Needs rewrite</span><span class="badge m-platform">Replace w/ platform</span><span class="badge m-delete">Delete</span></div>
+		<div><strong>Removed</strong> &mdash; deleted from the framework; see the <a href="#secRemoved">Removed</a> section:
+			<span class="badge removed">Removed</span></div>
 	</div>
 
 	<div class="note"><strong>Reading the badges.</strong> The two axes are deliberately separate. A <span class="badge s-core">Core</span> element can be <span class="badge m-rewrite">Needs rewrite</span> &mdash; that means &ldquo;use it, it&rsquo;s fundamental; and separately, its client is slated to move off Prototype onto fetch()+morph.&rdquo; <em>Status is never lowered for being built on old JS.</em> The full reasoning per element is in <code>Ajax/docs/ASSESSMENT.md</code>.</div>
@@ -52,12 +56,11 @@
 <li><a href="#sec5">Trees &amp; lists</a> <span class="muted">(3)</span></li>
 <li><a href="#sec6">Drag &amp; drop</a> <span class="muted">(2)</span></li>
 <li><a href="#sec7">Progress, busy &amp; polling</a> <span class="muted">(9)</span></li>
-<li><a href="#sec8">File upload</a> <span class="muted">(3)</span></li>
+<li><a href="#sec8">File upload</a> <span class="muted">(2)</span></li>
 <li><a href="#sec9">Visual effects</a> <span class="muted">(4)</span></li>
 <li><a href="#sec10">Option support &amp; focus helpers</a> <span class="muted">(5)</span></li>
 <li><a href="#sec11">Server-side plumbing &amp; base classes</a> <span class="muted">(8)</span></li>
-<li><a href="#sec12">JSON-RPC bridge (legacy / quarantined)</a> <span class="muted">(1)</span></li>
-<li><a href="#sec13">Social</a> <span class="muted">(2)</span></li>
+<li><a href="#secRemoved">Removed</a> <span class="muted">(3)</span></li>
 	</ul></div>
 
 <section id="sec0"><h2>Recommended — morph-native widgets</h2><p class="lead">The canonical pattern for new work: dependency-free custom elements that survive DOM morphing with zero re-init.</p>
@@ -360,12 +363,6 @@
 <p class="deps"><strong>Client deps.</strong> Loads prototype.js (Prototype, ~2008), effects.js (Scriptaculous Effects), and wonder.js in appendToResponse. Upload transport is a hidden iframe + the self-registered AjaxFileUploadRequestHandler. No jQuery. Hard Prototype/Scriptaculous dependency.</p>
 </div>
 <div class="el">
-<h3>AjaxFlexibleFileUpload <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
-<p class="role">A more heavily styled, form-independent variant of AjaxFileUpload that dynamically creates its upload iframe (via Andrew Valums&#x27; ajaxupload.js) so it can live inside or outside a form, with styleable select/upload/cancel/clear buttons, a polled progress bar, and JSON-RPC state queries.</p>
-<p class="usage"><strong>Usage.</strong> Extends AjaxFileUpload, adds bindings: selectFileLabel/uploadLabel/cancelLabel/clearLabel, *ButtonClass overrides, accept, autoSubmit, allowCancel, injectDefaultCSS, clearUploadProgressOnSuccess, onClickBefore, clearedAction/clearedFunction. Drives a client-side &#x27;AUP&#x27; object (AUP.add/prepare/start/cancel/clear) and an AjaxProxy (&#x27;jsonrpc&#x27;+id) that polls uploadState() every refreshTime ms. Minimal sketch: &lt;wo:AjaxFlexibleFileUpload data=&quot;$data&quot; filePath=&quot;$name&quot; succeededAction=&quot;done&quot; allowCancel=&quot;true&quot;/&gt;.</p>
-<p class="deps"><strong>Client deps.</strong> Loads prototype.js, effects.js (Scriptaculous), wonder.js, ajaxupload.js (Valums AJAX Upload, MIT, ~2009) and injects default_ajaxupload.css. Relies on AjaxProxy/JSON-RPC polling and the same iframe transport. Hard Prototype/Scriptaculous + third-party ajaxupload.js dependency. The .html already carries data-morph-ignore=&quot;true&quot;, confirming it is not morph-compatible.</p>
-</div>
-<div class="el">
 <h3>AjaxFileUploadRequestHandler <span class="badge s-core">Core</span> <span class="badge m-modern">Modern</span></h3>
 <p class="role">A WORequestHandler registered under the &#x27;upload&#x27; key that consumes the multipart upload request out-of-band, streams the body to a temp file while tracking progress (AjaxUploadProgress), enforces a max-upload-size, and restores the session by id so the upload can run without blocking the session lock.</p>
 <p class="usage"><strong>Usage.</strong> Not a component; auto-registered by AjaxFileUpload&#x27;s constructor. Configured via properties er.ajax.AjaxFileRequestHandler.tempFileFolder and .maxUploadSize. Reads the multipart iterator, pulls sessionId/id/file form-data, registers an AjaxUploadProgress, and copyAndTrack()s the stream to a temp file; subclasses can override downloadFinished(progress).</p>
@@ -459,7 +456,7 @@
 <h3>AjaxUtils <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
 <p class="role">Central static utility grab-bag for the Ajax framework: building AjaxResponses, injecting script/CSS resources, JS-string quoting/escaping, request-routing decisions, array/JSON coercion, and DOM-update JS emission.</p>
 <p class="usage"><strong>Usage.</strong> All-static. Common calls: AjaxUtils.createResponse(request, context), addScriptResourceInHead/addStylesheetResourceInHead, appendScript/appendScriptHeaderIfNecessary, shouldHandleRequest, ajaxComponentActionUrl, jsSafeIdentifier, and updateDomElement (emits Prototype&#x27;s Element.update(...)).</p>
-<p class="deps"><strong>Client deps.</strong> Mixed. Most methods are server-side plumbing. updateDomElement emits Prototype&#x27;s Element.update() JS, and jsSafeIdentifier is documented to mirror ajaxSafeName() in wonder.js. Depends on jabsorb JSONSerializer for array coercion.</p>
+<p class="deps"><strong>Client deps.</strong> Mixed. Most methods are server-side plumbing. updateDomElement emits Prototype&#x27;s Element.update() JS, and jsSafeIdentifier is documented to mirror ajaxSafeName() in wonder.js. Uses org.json (JSONArray) for array coercion.</p>
 </div>
 <div class="el">
 <h3>AjaxResponse <span class="badge s-core">Core</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
@@ -480,26 +477,24 @@
 <p class="deps"><strong>Client deps.</strong> None — pure server-side Java abstraction; ships no client JS or resources.</p>
 </div>
 </section>
-<section id="sec12"><h2>JSON-RPC bridge (legacy / quarantined)</h2><p class="lead">The jabsorb-based bridge exposing server objects to JS. Unmaintained and a security liability.</p>
+<section id="secRemoved"><h2>Removed</h2><p class="lead">Elements that existed in the original framework and have since been deleted, kept here as a record of what went and why. Their code lives on in git history.</p>
 <div class="el">
-<h3>AjaxProxy <span class="badge s-useful">Useful</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
-<p class="role">A stateless JSON-RPC bridge component that exposes a server-side Java object&#x27;s public methods to client JavaScript, letting the browser call Java methods by name over JSON (via the jabsorb library) without a full page action.</p>
-<p class="usage"><strong>Usage.</strong> Bindings: name (client-side bridge var name), proxyName (client name for the proxy object), proxy (the Java object to expose — you should ALWAYS supply this; defaults to parent(), which is dangerous), AjaxBridge/JSONRPCBridge (optional shared JSONRPCBridge), lazy (init on demand). Sketch: &lt;wo:AjaxProxy name=&quot;jsonrpc&quot; proxyName=&quot;wopage&quot; proxy=&quot;$myService&quot;/&gt; then in JS call jsonrpc.wopage.someMethod(arg).</p>
-<p class="deps"><strong>Client deps.</strong> Ships jsonrpc.js (jabsorb client, Apache-licensed) which is a self-contained XMLHttpRequest-based RPC client — its `.prototype` references are native JS, NOT Prototype.js. Server side depends on org.jabsorb (JSONRPCBridge) and org.json. No Scriptaculous. Effectively framework-independent on the client.</p>
-</div>
-</section>
-<section id="sec13"><h2>Social</h2><p class="lead">Hardcoded bookmarking-service links; data is mostly defunct.</p>
-<div class="el">
-<h3>AjaxSocialNetwork <span class="badge s-dead">Dead</span> <span class="badge m-platform">Replace w/ platform</span></h3>
-<p class="role">An abstract server-side registry/factory of ~19 hardcoded social-bookmarking sites (del.icio.us, Digg, Furl, StumbleUpon, etc.) that each build a &#x27;submit this URL+title&#x27; share link for the given page.</p>
-<p class="usage"><strong>Usage.</strong> No template — pure Java. AjaxSocialNetwork.socialNetworkNamed(&quot;digg&quot;).submissionUrl(url, title) returns the share URL; registerSocialNetworkNamed(net, name) adds custom ones; iconName()/iconFramework() locate the bundled PNG/GIF icon. Backing data for AjaxSocialNetworkLink.</p>
-<p class="deps"><strong>Client deps.</strong> None on the client (no JS); ships icon images under SocialNetwork/ in the Ajax framework. Pure server-side Java.</p>
+<h3>AjaxProxy <span class="badge removed">Removed</span></h3>
+<p class="role">A JSON-RPC bridge that exposed a server-side Java object&#x27;s public methods to client JavaScript (call Java by name over JSON, via the jabsorb library).</p>
+<p class="usage"><strong>Why removed.</strong> A security liability: by default it published <em>every</em> public method of the proxied object to the browser (the parent component if no proxy was bound), making things like <code>application.terminate()</code> reachable from client JS. Built on jabsorb 1.2.2 — unmaintained since ~2008 and not in Maven Central. Its entire in-framework use was the (also-removed) AjaxFlexibleFileUpload&#x27;s progress polling. The whole jabsorb / <code>er.ajax.json</code> stack went with it.</p>
+<p class="deps"><strong>Replacement.</strong> For browser→server calls, use a normal direct action (or component action) returning JSON and call it with <code>fetch()</code>. No standing RPC bridge, no reflective method exposure.</p>
 </div>
 <div class="el">
-<h3>AjaxSocialNetworkLink <span class="badge s-dead">Dead</span> <span class="badge m-platform">Replace w/ platform</span></h3>
-<p class="role">A component that renders a hyperlink (wrapping the network&#x27;s bundled icon image) to a social network&#x27;s share/submit URL for a given page URL and title.</p>
-<p class="usage"><strong>Usage.</strong> Bindings: name (social network key, e.g. &quot;facebook&quot;), url (page to submit), title, alt (defaults to network name), target. Sketch: &lt;wo:AjaxSocialNetworkLink name=&quot;reddit&quot; url=&quot;$pageUrl&quot; title=&quot;$pageTitle&quot; target=&quot;_blank&quot;/&gt;. Resolves AjaxSocialNetwork.socialNetworkNamed(name) and renders a WOHyperlink+WOImage.</p>
-<p class="deps"><strong>Client deps.</strong> None on the client — plain server-rendered &lt;a&gt;&lt;img&gt;&lt;/a&gt;, no JS, no Prototype/Scriptaculous. Depends entirely on AjaxSocialNetwork (and its bundled icons) for data.</p>
+<h3>AjaxFlexibleFileUpload <span class="badge removed">Removed</span></h3>
+<p class="role">A styled, form-independent file-upload variant of AjaxFileUpload, driven by a hidden iframe (Valums&#x27; ajaxupload.js) plus AjaxProxy/JSON-RPC progress polling on a refreshTime interval.</p>
+<p class="usage"><strong>Why removed.</strong> Its rich client UX was the only consumer of the AjaxProxy/jabsorb stack, and that whole transport is obsolete: native <code>XMLHttpRequest</code> gives continuous upload progress (<code>xhr.upload.onprogress</code>) and cancel (<code>xhr.abort()</code>) with no server polling, no iframe, and no Prototype/Scriptaculous. Single-file, click-to-select only (it never supported multi-file or drag-and-drop — the &quot;flexible&quot; referred to its flexible server-side data sink).</p>
+<p class="deps"><strong>Replacement.</strong> A native-XHR reimplementation (same binding signature, inherits AjaxFileUpload&#x27;s data sink) exists on the <code>flexible-file-upload-experiment</code> branch, validated end-to-end. The plain <code>AjaxFileUpload</code> remains for no-frills uploads.</p>
+</div>
+<div class="el">
+<h3>AjaxSocialNetwork <span class="badge removed">Removed</span></h3>
+<p class="role">A server-side registry of ~19 hardcoded social-bookmarking sites, each building a &quot;submit this URL+title&quot; share link, plus AjaxSocialNetworkLink which rendered an icon-link to one.</p>
+<p class="usage"><strong>Why removed.</strong> The data was a fossil: del.icio.us, Furl, StumbleUpon, Newsvine, Netscape, Ma.gnolia, Rawsugar, Spurl, Squidoo, Tagtooga — nearly all of these are <em>dead websites</em>, not just dead APIs. All links were plain <code>http://</code>, and one (<code>ttp://technorati.com</code>, missing the &quot;h&quot;) was a never-corrected typo — proof it had never been exercised. Nothing in the framework referenced it. Shipped 19 icon images of defunct services.</p>
+<p class="deps"><strong>Replacement.</strong> None needed. Modern sharing is <code>navigator.share()</code> (the Web Share API) or a couple of per-platform intent URLs — not a curated registry of 2007 bookmarking sites.</p>
 </div>
 </section>
 </div>
