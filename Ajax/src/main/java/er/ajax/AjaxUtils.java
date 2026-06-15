@@ -1,8 +1,6 @@
 package er.ajax;
 
-import java.util.Collection;
-
-import org.jabsorb.JSONSerializer;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +11,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
+import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXRedirect;
@@ -289,8 +288,8 @@ public class AjaxUtils {
 
 	/**
 	 * Returns the array for the given object.  If the object is a string, it will be parsed as a
-	 * JSON value.
-	 * 
+	 * JSON array.
+	 *
 	 * @param <T> the array type
 	 * @param value the object value
 	 * @return an array (or null)
@@ -310,18 +309,12 @@ public class AjaxUtils {
 				if (!strValue.startsWith("[")) {
 					strValue = "[" + strValue + "]";
 				}
-				JSONSerializer serializer = new JSONSerializer();
-				serializer.registerDefaultSerializers();
-				Object objValue = serializer.fromJSON(strValue);
-				if (objValue.getClass().isArray()) {
-					arrayValue = new NSArray((Object[]) objValue);
+				JSONArray jsonArray = new JSONArray(strValue);
+				NSMutableArray<Object> values = new NSMutableArray<>(jsonArray.length());
+				for (int i = 0; i < jsonArray.length(); i++) {
+					values.add(jsonArray.get(i));
 				}
-				else if (objValue instanceof Collection) {
-					arrayValue = new NSArray((Collection) objValue);
-				}
-				else {
-					arrayValue = new NSArray(objValue);
-				}
+				arrayValue = values;
 			}
 			catch (Throwable e) {
 				throw new IllegalArgumentException("Failed to convert String to array.", e);
