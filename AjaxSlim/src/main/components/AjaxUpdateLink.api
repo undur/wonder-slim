@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxUpdateLink" wocomponentcontent="true">
+		<binding name="action"/>
+		<binding name="directActionName"/>
+		<binding name="updateContainerID"/>
+		<binding name="replaceID"/>
+
+		<binding name="onComplete"/>
+		<binding name="onSuccess"/>
+		<binding name="onClick"/>
+		<binding name="onClickBefore"/>
+		<binding name="onClickServer"/>
+		<binding defaults="Boolean" name="ignoreActionResponse"/>
+
+		<binding name="function"/>
+		<binding name="functionName"/>
+		<binding name="elementName"/>
+		<binding name="button"/>
+		<binding name="string"/>
+
+		<binding name="title"/>
+		<binding name="style"/>
+		<binding name="class"/>
+		<binding name="id"/>
+		<binding name="accesskey"/>
+		<binding defaults="Boolean" name="disabled"/>
+
+		<validation message="'action' and 'directActionName' cannot both be bound.">
+			<bound name="action"/>
+			<bound name="directActionName"/>
+		</validation>
+
+		<validation message="If 'directActionName' is bound, then 'replaceID' must also be bound.">
+			<bound name="directActionName"/>
+			<unbound name="replaceID"/>
+		</validation>
+
+		<validation message="'updateContainerID', 'action', 'directActionName' must be bound.">
+			<unbound name="action"/>
+			<unbound name="directActionName"/>
+			<unbound name="updateContainerID"/>
+		</validation>
+
+		<validation message="Only one of 'replaceID' or 'ignoreActionResponse' can be bound.">
+			<bound name="replaceID"/>
+			<bound name="ignoreActionResponse"/>
+		</validation>
+
+		<validation message="Only one of 'directActionName' or 'ignoreActionResponse' can be bound.">
+			<bound name="directActionName"/>
+			<bound name="ignoreActionResponse"/>
+		</validation>
+
+		<validation message="Only one of 'replaceID' or 'updateContainerID' can be bound.">
+			<bound name="replaceID"/>
+			<bound name="updateContainerID"/>
+		</validation>
+
+		<validation message="Only one of 'updateContainerID' or 'ignoreActionResponse' can be bound.">
+			<bound name="updateContainerID"/>
+			<bound name="ignoreActionResponse"/>
+		</validation>
+	</wo>
+</wodefinitions>

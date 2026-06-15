@@ -1,0 +1,42 @@
+/*
+ * AjaxModalContainer - styling for the native <dialog>-based modal. Deliberately minimal: the platform
+ * provides the backdrop, centering, focus trap and Esc-to-close; this just gives a reasonable default
+ * look that apps can override (every selector is a plain class).
+ */
+dialog.ajaxslim-modal {
+	border: none;
+	border-radius: 8px;
+	padding: 0;
+	max-width: 32rem;
+	width: calc(100% - 2rem);
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+dialog.ajaxslim-modal::backdrop {
+	background: rgba(0, 0, 0, 0.45);
+}
+
+dialog.ajaxslim-modal .ajaxslim-modal-body {
+	padding: 1.25rem 1.5rem;
+}
+
+dialog.ajaxslim-modal .ajaxslim-modal-title {
+	margin: 0 0 0.75rem;
+	font-size: 1.15rem;
+}
+
+dialog.ajaxslim-modal .ajaxslim-modal-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	padding: 0.75rem 1.5rem;
+	margin: 0;
+	border-top: 1px solid #eee;
+}
+
+/* The close button is unstyled by default beyond a sensible baseline, so app button classes (e.g.
+   Bootstrap's) can be applied via the closeLabel content or overridden here. */
+dialog.ajaxslim-modal .ajaxslim-modal-close {
+	font: inherit;
+	cursor: pointer;
+}

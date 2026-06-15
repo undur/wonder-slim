@@ -39,7 +39,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${wonder.ajax.group}</groupId>
-			<artifactId>Ajax</artifactId>
+			<artifactId>AjaxSlim</artifactId>
 			<version>${wonder.version}</version>
 		</dependency>
 	</dependencies>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<!--
+		AjaxBrowser is the multi-select companion to AjaxPopUpButton: a WOBrowser that renders the
+		wonder-select widget. It adds no bindings of its own - it just adds the "ajax-popup-button"
+		CSS class and injects wonder-select.js/.css - so this mirrors WOBrowser's bindings exactly
+		(from WOLips' WebObjectDefinitions.xml).
+	-->
+	<wo class="AjaxBrowser" wocomponentcontent="false">
+		<binding name="list" passthrough="NO" required="YES"/>
+		<binding name="displayString" passthrough="NO"/>
+		<binding name="disabled" passthrough="NO" defaults="YES/NO"/>
+		<binding name="otherTagString" passthrough="NO"/>
+		<binding name="selectedValues" passthrough="NO"/>
+		<binding name="item" passthrough="NO"/>
+		<binding name="name"/>
+		<binding name="multiple"/>
+		<binding name="selections" passthrough="NO" settable="YES"/>
+		<binding name="value" passthrough="NO"/>
+		<binding name="escapeHTML" passthrough="NO" defaults="YES/NO"/>
+
+		<binding name="id"/>
+		<binding name="class"/>
+		<binding name="style"/>
+
+		<validation message="'list' must not be a constant">
+			<and>
+				<bound name="list"/>
+				<ungettable name="list"/>
+			</and>
+		</validation>
+
+		<validation message="'item' may not be a constant when 'displayString' or 'value' is bound">
+			<and>
+				<or>
+					<bound name="displayString"/>
+					<bound name="value"/>
+				</or>
+				<unsettable name="item"/>
+			</and>
+		</validation>
+
+		<validation message="'item' must be bound when 'displayString' or 'value' is bound">
+			<and>
+				<unbound name="item"/>
+				<or>
+					<bound name="value"/>
+					<bound name="displayString"/>
+				</or>
+			</and>
+		</validation>
+
+		<validation message="'selectedValues' and 'selections' cannot both be bound">
+			<and>
+				<bound name="selections"/>
+				<bound name="selectedValues"/>
+			</and>
+		</validation>
+	</wo>
+</wodefinitions>

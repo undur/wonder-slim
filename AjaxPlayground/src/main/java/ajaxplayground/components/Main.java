@@ -7,6 +7,7 @@ import er.extensions.components.ERXComponent;
 
 import ajaxplayground.components.gallery.GalleryAjaxBrowser;
 import ajaxplayground.components.gallery.GalleryAjaxPopUpButton;
+import ajaxplayground.components.gallery.GalleryAjaxSlimUpdateContainer;
 import ajaxplayground.components.gallery.GalleryLargeList;
 import ajaxplayground.components.gallery.GalleryUpdateContainer;
 import ajaxplayground.components.gallery.GalleryWonderSelect;
@@ -67,6 +68,10 @@ public class Main extends ERXComponent {
 
 	public WOActionResults galleryUpdateContainer() {
 		return pageWithName( GalleryUpdateContainer.class );
+	}
+
+	public WOActionResults galleryAjaxSlimUpdateContainer() {
+		return pageWithName( GalleryAjaxSlimUpdateContainer.class );
 	}
 
 	public WOActionResults galleryWonderSelect() {

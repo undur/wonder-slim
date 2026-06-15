@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxSubmitButton" wocomponentcontent="true">
+		<binding name="name"/>
+		<binding name="value"/>
+		<binding name="action"/>
+		<binding name="id"/>
+		<binding name="class"/>
+		<binding name="style"/>
+		<binding name="title"/>
+		<binding name="tabindex"/>
+		<binding name="accesskey"/>
+
+		<binding name="onClick"/>
+		<binding name="onClickBefore"/>
+		<binding name="onClickServer"/>
+		<binding name="onComplete"/>
+		<binding name="onSuccess"/>
+
+		<binding name="button"/>
+		<binding defaults="Boolean" name="useButtonTag"/>
+		<binding name="formName"/>
+		<binding name="formSerializer"/>
+		<binding name="functionName"/>
+		<binding name="showUI"/>
+		<binding name="updateContainerID"/>
+		<binding name="replaceID"/>
+		<binding name="elementName"/>
+		<binding defaults="Boolean" name="disabled"/>
+
+		<validation message="Only one of 'replaceID' or 'updateContainerID' can be bound.">
+			<bound name="replaceID"/>
+			<bound name="updateContainerID"/>
+		</validation>
+	</wo>
+</wodefinitions>

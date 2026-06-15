@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxObserveField" wocomponentcontent="true">
+		<binding name="observeFieldID"/>
+		<binding name="updateContainerID"/>
+		<binding name="action"/>
+		<binding defaults="Boolean" name="fullSubmit"/>
+		<binding name="observeDelay"/>
+		<binding name="observeFieldFrequency"/>
+		<binding name="onBeforeSubmit"/>
+		<binding name="onComplete"/>
+		<binding name="onSuccess"/>
+		<binding name="name"/>
+		<binding name="id"/>
+		<binding name="elementName"/>
+		<binding name="class"/>
+		<binding name="style"/>
+	</wo>
+</wodefinitions>

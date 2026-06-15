@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Gallery: AjaxSlim AjaxUpdateContainer</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		h2 { margin-top: 1.5rem; color: #444; font-size: 1.1rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: .6rem; background: #fafafa; }
+		.count { font-size: 1.6rem; color: #2b6cb0; font-weight: 700; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; }
+		a { color: #2b6cb0; }
+		code { background: #eee; padding: 0 .25rem; border-radius: 3px; }
+	</style>
+</head>
+<body>
+	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<h1>AjaxSlim AjaxUpdateContainer</h1>
+	<p class="lead">The AjaxSlim rewrite of <code>&lt;wo:AjaxUpdateContainer&gt;</code>: a dependency-free, fetch + Idiomorph runtime (<code>ajaxslim.js</code>) with zero Prototype/Scriptaculous. This page exercises morph vs. classic replacement, periodic refresh, and the onRefreshComplete hook.</p>
+
+	<h2>Morphing container (morph="$true")</h2>
+	<wo:AjaxUpdateContainer id="morphContainer" morph="$true">
+		<div class="box">
+			<p>Count: <span class="count" id="morphValue"><wo:str value="$count" /></span></p>
+			<p class="lead"><code>data-morph="true"</code> - Idiomorph reconciles the DOM (focus/scroll preserved).</p>
+			<wo:AjaxUpdateLink updateContainerID="morphContainer" action="$increment" id="morphIncrement" class="btn">Increment (morph)</wo:AjaxUpdateLink>
+		</div>
+	</wo:AjaxUpdateContainer>
+
+	<h2>Classic container (morph="$false")</h2>
+	<wo:AjaxUpdateContainer id="classicContainer" morph="$false">
+		<div class="box">
+			<p>Count: <span class="count" id="classicValue"><wo:str value="$count" /></span></p>
+			<p class="lead"><code>data-morph="false"</code> - classic innerHTML replacement.</p>
+			<wo:AjaxUpdateLink updateContainerID="classicContainer" action="$increment" id="classicIncrement" class="btn">Increment (classic)</wo:AjaxUpdateLink>
+		</div>
+	</wo:AjaxUpdateContainer>
+
+	<h2>Periodic refresh (frequency="3") with onRefreshComplete</h2>
+	<p class="lead">Refreshes itself every 3 seconds via the runtime's <code>registerPeriodic</code> (setInterval), and pulses the border each time via <code>onRefreshComplete</code>.</p>
+	<wo:AjaxUpdateContainer id="periodicContainer" frequency="3" action="$increment" onRefreshComplete="document.getElementById('periodicContainer').style.borderColor='#2b6cb0'; setTimeout(function(){var e=document.getElementById('periodicContainer'); if(e) e.style.borderColor='#ccc';}, 400);">
+		<div class="box">
+			<p>Server count: <span class="count"><wo:str value="$count" /></span></p>
+			<p class="lead">The container's own <code>action</code> binding fires on each periodic refresh, bumping the count.</p>
+		</div>
+	</wo:AjaxUpdateContainer>
+</body>
+</html>

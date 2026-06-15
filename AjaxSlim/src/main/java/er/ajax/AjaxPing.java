@@ -1,0 +1,114 @@
+package er.ajax;
+
+import com.webobjects.appserver.WOComponent;
+import com.webobjects.appserver.WOContext;
+
+import er.extensions.appserver.ERXWOContext;
+import er.extensions.foundation.ERXValueUtilities;
+
+/**
+ * Refreshes a large content area based on periodic refreshes of a very small one. You provide a cache
+ * key that, on changing, triggers an update of a target AjaxUpdateContainer.
+ *
+ * <p>
+ * AjaxPing is itself a tiny AjaxUpdateContainer that re-fetches every <code>frequency</code>
+ * milliseconds. Its server-side content depends only on the <code>cacheKey</code>, so while the key is
+ * unchanged the periodic refresh returns the same trivial content cheaply; when the key changes, the
+ * embedded {@link AjaxPingUpdate} emits a script that refreshes the (potentially large) target
+ * container. So the expensive container is rebuilt only when something actually changed.
+ * </p>
+ *
+ * <p>
+ * Unchanged from the legacy element except that the periodic self-refresh and the target refresh go
+ * through the AjaxSlim runtime ({@code AjaxSlim.AUC.update(id)} / {@code registerPeriodic}) instead of
+ * Prototype - there is no Prototype, no eval'd <code>&lt;id&gt;Update()</code> global.
+ * </p>
+ *
+ * @binding frequency the frequency of refresh (in millis), defaults to 3000
+ * @binding targetContainerID the ID of the update container to refresh when a change is detected
+ * @binding cacheKey some value that represents the state of the target container
+ * @binding onBeforeUpdate (optional) a javascript function to call before updating (returns true to allow the update)
+ * @binding id (optional) the id of the ping container
+ * @binding stop (optional) if true, the ping stops; if false it runs (refresh the ping's container to restart it)
+ *
+ * @author mschrag
+ */
+public class AjaxPing extends WOComponent {
+
+	private static final long serialVersionUID = 1L;
+
+	private String _id;
+
+	public AjaxPing(WOContext context) {
+		super(context);
+	}
+
+	@Override
+	public boolean synchronizesVariablesWithBindings() {
+		return false;
+	}
+
+	/**
+	 * @return the refresh frequency in millis (default 3000); kept for the binding contract
+	 */
+	public Object frequency() {
+		Object frequency = valueForBinding("frequency");
+		if (frequency == null) {
+			frequency = "3000";
+		}
+		return frequency;
+	}
+
+	/**
+	 * The ping container is an AjaxUpdateContainer whose <code>frequency</code> binding is in SECONDS,
+	 * but AjaxPing's <code>frequency</code> binding is in MILLISECONDS (legacy contract). Convert.
+	 *
+	 * @return the refresh frequency in seconds
+	 */
+	public double frequencyInSeconds() {
+		double millis;
+		try {
+			millis = Double.parseDouble(String.valueOf(frequency()).trim());
+		}
+		catch (NumberFormatException e) {
+			millis = 3000;
+		}
+		return millis / 1000.0;
+	}
+
+	/**
+	 * @return true if the ping is stopped (the "stop" binding, default false)
+	 */
+	public boolean stopped() {
+		return ERXValueUtilities.booleanValueWithDefault(valueForBinding("stop"), false);
+	}
+
+	public Object cacheKey() {
+		return valueForBinding("cacheKey");
+	}
+
+	public String targetContainerID() {
+		return (String) valueForBinding("targetContainerID");
+	}
+
+	public Object onBeforeUpdate() {
+		return valueForBinding("onBeforeUpdate");
+	}
+
+	public boolean hasTargetContainerID() {
+		return valueForBinding("targetContainerID") != null;
+	}
+
+	/**
+	 * @return the id of the ping container
+	 */
+	public String id() {
+		if (_id == null) {
+			_id = (String) valueForBinding("id");
+			if (_id == null) {
+				_id = ERXWOContext.safeIdentifierName(context(), true);
+			}
+		}
+		return _id;
+	}
+}
