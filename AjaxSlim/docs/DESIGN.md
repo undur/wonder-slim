@@ -255,6 +255,21 @@ button popping its children in a confirm dialog with a close button), so AjaxSli
 no morph collision — the relocation hack is gone. No iBox, no Prototype, no iframe/direct-action/skin
 machinery.
 
+### `AjaxPing` / `AjaxPingUpdate`
+
+Refreshes a large container only when something actually changed, by polling a tiny one. `AjaxPing` is
+itself a small `AjaxUpdateContainer` that re-fetches every `frequency`; its content depends only on a
+`cacheKey`, so while the key is unchanged each poll returns the same trivial content cheaply. When the
+key changes, the embedded `AjaxPingUpdate` emits a script that refreshes the target container.
+
+Built entirely on AjaxSlim primitives: the periodic self-refresh uses `AjaxUpdateContainer`'s native
+`frequency`/`stopped` bindings (→ the runtime's `registerPeriodic`/`setInterval`), not a hand-emitted
+`setTimeout("<id>Update()")` global; the target refresh is `AjaxSlim.AUC.update(id)`, not Prototype's
+`AUC.update`. The Java is otherwise unchanged from legacy (the cache-key comparison in `AjaxPingUpdate`).
+**Unit note:** AjaxPing's `frequency` binding is in **milliseconds** (legacy contract, NBServer passes
+`frequency="1000"`), but `AjaxUpdateContainer`'s `frequency` is in **seconds**, so `AjaxPing` converts
+ms→s before feeding it through.
+
 ## Divergence from the legacy Ajax framework
 
 | Concern | Legacy Ajax | AjaxSlim |
@@ -327,14 +342,22 @@ standalone `Morph` object inside `ajaxslim.js`:
 - `AjaxPopUpButton` / `AjaxBrowser` + `wonder-select.js` / `wonder-select.css`
 - `AjaxBusySpinner` (+ the runtime's ajax-activity broker + `ajaxslim-busy.css`)
 - `AjaxModalContainer` (native `<dialog>`, + `ajaxslim-modal.js` / `ajaxslim-modal.css`)
+- `AjaxPing` / `AjaxPingUpdate` (cache-key-gated periodic refresh, built on `AjaxUpdateContainer`)
 
 **Proven in production:** Strimillinn runs on AjaxSlim end-to-end. (A focus-on-Tab regression in the
 descendant-observe path was found and fixed — see the `observeField` notes — by binding observers to
 field nodes rather than churning synthetic positional ids that drift under morphs.)
 
-This now covers everything Strimillinn (and the shared `helium5` library all the apps depend on) use:
-UpdateContainer, UpdateLink, ObserveField, SubmitButton, UpdateTrigger, PopUpButton, Browser,
-BusySpinner, ModalContainer.
+This covers everything **Strimillinn**, the shared **helium5** library, and **NBServer** use (NBServer
+adds AjaxPing; its single AjaxInPlaceEditor site is being replaced rather than ported): UpdateContainer,
+UpdateLink, ObserveField, SubmitButton, DefaultSubmitButton, UpdateTrigger, PopUpButton, Browser,
+BusySpinner, ModalContainer, Ping/PingUpdate.
+
+**AjaxPlayground now depends on AjaxSlim** (not the legacy Ajax framework) — its real test pages use only
+elements AjaxSlim has, and the full reactor builds green. It is the showcase/harness for the new
+framework. (The `AjaxOverview` page still documents the *legacy* framework's full element catalogue in
+its prose — it is now describing a framework the playground no longer ships; cleaning/repurposing it is
+a loose end, not a build issue.)
 
 Still to build / do for a full framework:
 
