@@ -12,6 +12,8 @@
 		code { background: #eee; padding: 0 .25rem; border-radius: 3px; }
 		.bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: .8rem 1rem; }
 		.bar .grow { flex: 1; }
+		/* the descendant-observe wrapper holds customer + tags side by side, like the rest of the bar */
+		.observed-fields { display: flex; align-items: center; gap: 1rem; }
 		/* fixed table layout + explicit column widths so a line update doesn't reflow columns.
 		   NOTE: no overflow:hidden on the cells - it would clip the wonder-select's absolutely
 		   positioned dropdown to the row. table-layout:fixed + the colgroup already pin the columns. */
@@ -58,10 +60,20 @@
 	     busy spinner. These all sit ABOVE the line editor and must not disturb it. -->
 	<wo:form id="headerForm">
 		<div class="bar">
-			<div>
-				<label class="muted">Customer</label><br />
-				<wo:AjaxPopUpButton list="$customers" item="$currentProduct" selection="$customer" id="customerPick" />
-			</div>
+			<!-- DESCENDANT-OBSERVE: one AjaxObserveField (no observeFieldID) watches EVERY field inside its
+			     wrapper - here the customer picker AND the tags multi-select - and refreshes the rendered
+			     invoice + summary when either changes. This is the descendant form of the element (distinct
+			     from the per-field observeFieldID form used on the line rows), so the page exercises both. -->
+			<wo:AjaxObserveField updateContainerID="renderedInvoice;summaryPanel" elementName="div" class="observed-fields">
+				<div>
+					<label class="muted">Customer</label><br />
+					<wo:AjaxPopUpButton list="$customers" item="$currentProduct" selection="$customer" id="customerPick" />
+				</div>
+				<div>
+					<label class="muted">Tags</label><br />
+					<wo:AjaxBrowser list="$allTags" item="$currentTag" selections="$tags" multiple="$true" noSelectionString="Add tags..." id="tagPick" />
+				</div>
+			</wo:AjaxObserveField>
 			<div>
 				<wo:AjaxModalContainer label="Edit customer..." title="Customer details" id="customerModal" class="btn ghost small">
 					<wo:AjaxUpdateContainer id="customerModalBox" elementName="div">
@@ -71,10 +83,6 @@
 						<p class="muted">Saves so far: <wo:str value="$saveCount" /></p>
 					</wo:AjaxUpdateContainer>
 				</wo:AjaxModalContainer>
-			</div>
-			<div>
-				<label class="muted">Tags</label><br />
-				<wo:AjaxBrowser list="$allTags" item="$currentTag" selections="$tags" multiple="$true" noSelectionString="Add tags..." id="tagPick" />
 			</div>
 			<div class="grow"></div>
 			<div class="busywrap">
@@ -101,6 +109,8 @@
 						<wo:AjaxUpdateContainer elementName="tr" id="$lineContainerID" class="$lineRowClass">
 							<td>
 								<wo:AjaxPopUpButton list="$products" item="$currentProduct" selection="$currentLine.product" id="$productFieldID" />
+								<!-- picking a product fires the same line refresh so the rendered invoice below updates too -->
+								<wo:AjaxObserveField observeFieldID="$productFieldID" updateContainerID="$lineAndTotalsIDs" action="$lineEdited" />
 							</td>
 							<td class="num">
 								<wo:textfield value="$currentLine.quantityField" id="$qtyFieldID" />
