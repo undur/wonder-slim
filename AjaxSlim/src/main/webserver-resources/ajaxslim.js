@@ -290,16 +290,27 @@
 	// whose id is no longer on the page is skipped, the rest still update; each honours its own
 	// data-morph and fires its onRefreshComplete. Scripts inside a fragment run via Morph (same as a
 	// single update). Robust to fragments arriving in any order.
+	// Pull each <ajaxslim-fragment data-id="...">...</ajaxslim-fragment> out of the response as a RAW
+	// HTML string (id + inner html), via regex - NOT by DOM-parsing the whole response. This matters for
+	// table-context content: a fragment's inner html may be bare <td>/<tr>/<tbody> (when the container is
+	// a <tr>/<table>), and parsing those through an out-of-context <template>/<div> makes the HTML parser
+	// silently DROP the table tags. Keeping the inner html as a string lets Morph.morph hand it to
+	// Idiomorph, which parses it in the RECEIVER's context (e.g. inside a <tr>), so the cells survive.
+	function parseFragments(text) {
+		var out = [];
+		var re = /<ajaxslim-fragment\b[^>]*\bdata-id\s*=\s*"([^"]*)"[^>]*>([\s\S]*?)<\/ajaxslim-fragment\s*>/gi;
+		var m;
+		while ((m = re.exec(text)) !== null) {
+			out.push({ id: m[1], html: m[2] });
+		}
+		return out;
+	}
+
 	function applyFragments(text) {
-		// Parse with the HTML parser (template content so nothing executes on parse). <ajaxslim-fragment>
-		// is an unknown element, preserved verbatim by the parser.
-		var holder = document.createElement('template');
-		holder.innerHTML = text;
-		var fragments = holder.content.querySelectorAll('ajaxslim-fragment');
+		var fragments = parseFragments(text);
 		if (!fragments.length) {
-			// No frames found - treat the whole body as a single container? No: a multi response always
-			// frames. If we get here the response was unexpected; run any scripts it carried so a
-			// script-only push still works, and warn.
+			// No frames found - a multi response always frames, so this is unexpected. Run any scripts the
+			// body carried (a script-only push still works) and warn.
 			Morph.runResponseScripts(text, 'text/html');
 			if (window.console) {
 				console.warn('AjaxSlim: multi-update response carried no <ajaxslim-fragment>s');
@@ -307,8 +318,7 @@
 			return;
 		}
 		for (var i = 0; i < fragments.length; i++) {
-			var frag = fragments[i];
-			var id = frag.getAttribute('data-id');
+			var id = fragments[i].id;
 			if (!id) {
 				continue;
 			}
@@ -317,7 +327,7 @@
 				// container gone from the page - skip it, keep going with the others
 				continue;
 			}
-			var html = frag.innerHTML;
+			var html = fragments[i].html;
 			var doMorph = receiver.getAttribute('data-morph') !== 'false';
 			if (doMorph) {
 				Morph.morph(receiver, html);
