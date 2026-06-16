@@ -101,11 +101,16 @@ public class ScenarioInvoice extends PlaygroundPage {
 		return "product-" + currentLine.id();
 	}
 
-	/** This line's own box, the totals panel, and the rendered invoice below - what a single qty/price
-	 *  edit refreshes (the line's total changes, the grand total changes, and the rendered copy must
-	 *  stay in lockstep). A multi-target update string. */
+	/** What a single qty/price/product edit refreshes: the whole lines container (NOT just the edited
+	 *  row), the totals panel, and the rendered invoice. Refreshing the whole container - rather than
+	 *  only "linebox-<thisRow>" - is deliberate: a row's own action links (move up/down, remove) carry
+	 *  a WO context id baked in at render time, and a link is only refreshed when ITS row re-renders.
+	 *  If an edit re-rendered only the edited row, every OTHER row's links would keep pointing at an
+	 *  ever-older context; after enough edits that context is evicted from the page-replacement cache
+	 *  and the stale link 500s ("backtracked too far"). Re-rendering the whole container on each edit
+	 *  keeps every row's links current. Morph makes the wider refresh cheap. */
 	public String lineAndTotalsIDs() {
-		return "linebox-" + currentLine.id() + ";totalsPanel;renderedInvoice";
+		return "linesContainer;totalsPanel;renderedInvoice";
 	}
 
 	public boolean currentLineInvalid() {
