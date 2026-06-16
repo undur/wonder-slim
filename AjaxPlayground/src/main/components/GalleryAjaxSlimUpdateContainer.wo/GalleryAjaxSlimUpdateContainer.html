@@ -39,12 +39,12 @@
 	</wo:AjaxUpdateContainer>
 
 	<h2>Periodic refresh (frequency="3") with onRefreshComplete</h2>
-	<p class="lead">Refreshes itself every 3 seconds via the runtime's <code>registerPeriodic</code> (setInterval), and pulses the border each time via <code>onRefreshComplete</code>.</p>
-	<wo:AjaxUpdateContainer id="periodicContainer" frequency="3" action="$increment" onRefreshComplete="document.getElementById('periodicContainer').style.borderColor='#2b6cb0'; setTimeout(function(){var e=document.getElementById('periodicContainer'); if(e) e.style.borderColor='#ccc';}, 400);">
+	<p class="lead">A self-updating container is a SEPARATE element - <code>&lt;wo:AjaxSelfUpdatingContainer&gt;</code> - because self-refresh is a distinct behaviour from the passive <code>AjaxUpdateContainer</code> (which only renders when something else targets it). It refreshes itself every 3 seconds via the runtime's <code>registerPeriodic</code> (setInterval), and pulses the border each time via <code>onRefreshComplete</code>.</p>
+	<wo:AjaxSelfUpdatingContainer id="periodicContainer" frequency="3" action="$increment" onRefreshComplete="document.getElementById('periodicContainer').style.borderColor='#2b6cb0'; setTimeout(function(){var e=document.getElementById('periodicContainer'); if(e) e.style.borderColor='#ccc';}, 400);">
 		<div class="box">
 			<p>Server count: <span class="count"><wo:str value="$count" /></span></p>
 			<p class="lead">The container's own <code>action</code> binding fires on each periodic refresh, bumping the count.</p>
 		</div>
-	</wo:AjaxUpdateContainer>
+	</wo:AjaxSelfUpdatingContainer>
 </body>
 </html>
