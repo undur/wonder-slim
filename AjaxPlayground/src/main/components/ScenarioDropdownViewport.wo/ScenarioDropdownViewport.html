@@ -5,11 +5,13 @@
 	<title>Scenario: Dropdown stays within viewport</title>
 	<style>
 		body { font-family: -apple-system, system-ui, sans-serif; margin: 0; color: #222; min-height: 100vh; position: relative; }
-		.note { padding: 1rem; color: #666; }
+		/* The note sits centred so it never collides with the corner selects. */
+		.note { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 28rem; text-align: center; color: #666; }
 		/* Place a select near the TOP-LEFT and one near the BOTTOM-RIGHT of the viewport, so a small
-		   viewport forces flip-up + right-align. Absolute to the page corners. */
-		.topleft { position: absolute; top: .5rem; left: .5rem; }
-		.bottomright { position: absolute; bottom: .5rem; right: .5rem; }
+		   viewport forces flip-up / right-align. Absolute to the page corners, each given a fixed width
+		   so the widget (width:100%) has a definite box to fill instead of a shrink-wrapped one. */
+		.topleft { position: absolute; top: .5rem; left: .5rem; width: 12rem; }
+		.bottomright { position: absolute; bottom: .5rem; right: .5rem; width: 12rem; }
 		a { color: #2b6cb0; }
 	</style>
 </head>
