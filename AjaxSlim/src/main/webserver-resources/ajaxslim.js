@@ -325,7 +325,11 @@
 			else {
 				Morph.replace(receiver, html);
 			}
-			AUC.fireRefreshComplete(id);
+			// NOTE: do NOT also call AUC.fireRefreshComplete(id) here. The server frames each container's
+			// onRefreshComplete script INSIDE its fragment (AjaxUpdateContainer.handleRequest), and
+			// Morph.morph/replace runs embedded <script>s - so the hook already fires exactly once,
+			// matching the single-update path (fetchAndMorph also relies on the morphed-in script, not
+			// the registry). Calling fireRefreshComplete here too would run it a SECOND time.
 		}
 	}
 
