@@ -388,11 +388,17 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
   }
 
   /**
-   * Resolves a cached page record by the request's TARGET CONTAINER ({@code _u}) rather than its
+   * Resolves a cached page record by the request's TARGET CONTAINER(S) ({@code _u}) rather than its
    * context id, for the case where a still-rendered action link carries a context that has aged out of
-   * the cache. The link's {@code _u} names the container(s) it targets; we match the first one against
-   * the cached fragment whose key ends in {@code _<container>}. Because every fragment of a page shares
-   * one page instance, any surviving fragment for that container resolves the live page.
+   * the cache. The link's {@code _u} names the container(s) it targets; we match ANY of them against a
+   * cached fragment whose key ends in {@code _<container>}. Because every fragment of a page shares one
+   * page instance, any surviving fragment for any of the targeted containers resolves the live page.
+   * <p>
+   * Trying ALL of {@code _u}'s containers matters for multi-target updates: such a request renders
+   * several containers but only stores ONE fragment, keyed by whichever container the update pass
+   * rendered LAST (each container's render overwrites the page-replacement-cache-key request header).
+   * So for {@code _u=a;b;c} the stored fragment may be under {@code c}, not {@code a} - we must check
+   * all three, not just the first.
    *
    * @param pageReplacementCache the fragment cache
    * @return a matching record, or null if the request has no {@code _u} or no fragment matches
@@ -407,21 +413,27 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
     if (updateContainerIDs == null || updateContainerIDs.length() == 0) {
       return null;
     }
-    // _u may name several containers ("a;b;c"); the first is enough to identify the page.
-    int sep = updateContainerIDs.indexOf(';');
-    String container = sep >= 0 ? updateContainerIDs.substring(0, sep) : updateContainerIDs;
-    String suffix = "_" + container;
-    // Prefer the current (not old-page) record for that container; fall back to any match.
+    // _u may name several containers ("a;b;c"); the stored fragment is keyed by one of them (the last
+    // rendered), so check them all. Prefer a current (not old-page) record over an old-page one.
+    String[] containers = updateContainerIDs.split(";");
     TransactionRecord fallback = null;
-    Iterator recordsEnum = pageReplacementCache.values().iterator();
-    while (recordsEnum.hasNext()) {
-      TransactionRecord record = (TransactionRecord) recordsEnum.next();
-      String key = record.key();
-      if (key != null && key.endsWith(suffix)) {
-        if (!record.isOldPage()) {
-          return record;
+    for (String container : containers) {
+      if (container.length() == 0) {
+        continue;
+      }
+      String suffix = "_" + container;
+      Iterator recordsEnum = pageReplacementCache.values().iterator();
+      while (recordsEnum.hasNext()) {
+        TransactionRecord record = (TransactionRecord) recordsEnum.next();
+        String key = record.key();
+        if (key != null && key.endsWith(suffix)) {
+          if (!record.isOldPage()) {
+            return record;
+          }
+          if (fallback == null) {
+            fallback = record;
+          }
         }
-        fallback = record;
       }
     }
     return fallback;
