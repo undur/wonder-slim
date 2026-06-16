@@ -4,7 +4,7 @@
 	<meta charset="utf-8" />
 	<title>Invoice editor (integration scenario)</title>
 	<style>
-		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 60rem; color: #222; }
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 72rem; color: #222; }
 		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
 		h2 { color: #444; font-size: 1.05rem; margin-top: 1.6rem; }
 		.lead { color: #666; }
@@ -12,11 +12,17 @@
 		code { background: #eee; padding: 0 .25rem; border-radius: 3px; }
 		.bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: .8rem 1rem; }
 		.bar .grow { flex: 1; }
-		table.lines { width: 100%; border-collapse: collapse; margin-top: .6rem; }
-		table.lines th, table.lines td { padding: .45rem .5rem; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
+		/* fixed table layout + explicit column widths so a line update doesn't reflow columns */
+		table.lines { width: 100%; border-collapse: collapse; margin-top: .6rem; table-layout: fixed; }
+		table.lines th, table.lines td { padding: .45rem .5rem; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; overflow: hidden; }
 		table.lines th { color: #777; font-weight: 600; font-size: .85rem; }
+		table.lines col.c-product { width: 40%; }
+		table.lines col.c-qty, table.lines col.c-unit, table.lines col.c-total { width: 14%; }
+		table.lines col.c-actions { width: 18%; }
+		/* the product wonder-select fills its (fixed-width) column instead of sizing to content */
+		table.lines td .ajax-popup-button, table.lines td wonder-select { width: 100%; box-sizing: border-box; }
 		.num { text-align: right; }
-		input[type=text] { width: 5rem; padding: .35rem; font: inherit; text-align: right; }
+		input[type=text] { width: 100%; max-width: 6rem; padding: .35rem; font: inherit; text-align: right; box-sizing: border-box; }
 		.invalid input { border-color: #e53e3e; background: #fff5f5; }
 		.err { color: #e53e3e; font-size: .8rem; }
 		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border: none; border-radius: 5px; cursor: pointer; font: inherit; }
@@ -29,6 +35,15 @@
 		.muted { color: #999; font-size: .85rem; }
 		/* the busy spinner shows whenever any ajax request is in flight */
 		[data-ajaxslim-busy] .busywrap::after { content: "saving..."; color: #2b6cb0; font-size: .8rem; }
+		/* rendered invoice (read-only document view that updates in lockstep with the editor) */
+		.doc { border: 1px solid #e1e4e8; border-radius: 8px; padding: 1.4rem 1.6rem; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+		.doc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+		.doc-title { font-size: 1.4rem; font-weight: 700; letter-spacing: .08em; color: #2b6cb0; }
+		.doc-lines { width: 100%; border-collapse: collapse; }
+		.doc-lines th { text-align: left; color: #777; font-size: .8rem; border-bottom: 2px solid #eee; padding: .4rem .5rem; }
+		.doc-lines td { padding: .4rem .5rem; border-bottom: 1px solid #f0f0f0; }
+		.doc-lines tfoot td { border-top: 2px solid #ddd; border-bottom: none; font-size: 1.05rem; padding-top: .6rem; }
+		.doc-lines tr.invalid td { color: #e53e3e; }
 	</style>
 </head>
 <body>
@@ -50,7 +65,7 @@
 					<wo:AjaxUpdateContainer id="customerModalBox" elementName="div">
 						<p>Editing <strong><wo:str value="$customer" /></strong>.</p>
 						<p class="muted">A dialog with its own update container - proves ajax works inside a native &lt;dialog&gt;.</p>
-						<wo:AjaxUpdateLink action="$save" updateContainerID="customerModalBox;totalsPanel" class="btn small">Touch (save + refresh)</wo:AjaxUpdateLink>
+						<wo:AjaxUpdateLink action="$save" updateContainerID="customerModalBox;totalsPanel;renderedInvoice" class="btn small">Touch (save + refresh)</wo:AjaxUpdateLink>
 						<p class="muted">Saves so far: <wo:str value="$saveCount" /></p>
 					</wo:AjaxUpdateContainer>
 				</wo:AjaxModalContainer>
@@ -73,6 +88,9 @@
 		<h2>Lines</h2>
 		<wo:AjaxUpdateContainer id="linesContainer" elementName="div">
 			<table class="lines">
+				<colgroup>
+					<col class="c-product" /><col class="c-qty" /><col class="c-unit" /><col class="c-total" /><col class="c-actions" />
+				</colgroup>
 				<thead>
 					<tr><th>Product</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Line total</th><th></th></tr>
 				</thead>
@@ -92,7 +110,7 @@
 							</td>
 							<td class="num"><strong class="lineTotal"><wo:str value="$currentLine.lineTotal" /></strong></td>
 							<td>
-								<wo:AjaxUpdateLink action="$removeCurrentLine" updateContainerID="linesContainer;totalsPanel" class="btn ghost small">remove</wo:AjaxUpdateLink>
+								<wo:AjaxUpdateLink action="$removeCurrentLine" updateContainerID="linesContainer;totalsPanel;renderedInvoice" class="btn ghost small">remove</wo:AjaxUpdateLink>
 								<wo:if condition="$currentLineInvalid"><span class="err">qty &gt; 0</span></wo:if>
 							</td>
 						</wo:AjaxUpdateContainer>
@@ -102,7 +120,7 @@
 		</wo:AjaxUpdateContainer>
 
 		<p>
-			<wo:AjaxUpdateLink action="$addLine" updateContainerID="linesContainer;totalsPanel" id="addLine" class="btn">+ Add line</wo:AjaxUpdateLink>
+			<wo:AjaxUpdateLink action="$addLine" updateContainerID="linesContainer;totalsPanel;renderedInvoice" id="addLine" class="btn">+ Add line</wo:AjaxUpdateLink>
 		</p>
 
 		<!-- TOTALS PANEL: the canary. Refreshed by every line edit / add / remove. Shows the live sum,
@@ -115,13 +133,13 @@
 			</div>
 			<p style="margin-top:.6rem">
 				Status: <span class="$statusPillClass" id="statusPill"><wo:str value="$finalisedLabel" /></span>
-				<wo:AjaxUpdateLink action="$toggleFinalised" updateContainerID="totalsPanel" class="btn ghost small" id="toggleFinal">toggle</wo:AjaxUpdateLink>
+				<wo:AjaxUpdateLink action="$toggleFinalised" updateContainerID="totalsPanel;renderedInvoice" class="btn ghost small" id="toggleFinal">toggle</wo:AjaxUpdateLink>
 				<!-- toggling status cascades a refresh to the summary panel via a trigger -->
 				<wo:AjaxUpdateTrigger updateContainerID="summaryPanel" />
 			</p>
 			<p>
-				<wo:AjaxSubmitButton action="$save" updateContainerID="totalsPanel" value="Save invoice" id="saveBtn" class="btn" />
-				<wo:AjaxDefaultSubmitButton action="$save" updateContainerID="totalsPanel" id="saveDefault" />
+				<wo:AjaxSubmitButton action="$save" updateContainerID="totalsPanel;renderedInvoice" value="Save invoice" id="saveBtn" class="btn" />
+				<wo:AjaxDefaultSubmitButton action="$save" updateContainerID="totalsPanel;renderedInvoice" id="saveDefault" />
 				<span class="muted">Saved <wo:str value="$saveCount" /> time(s) - press Enter to save too</span>
 			</p>
 		</wo:AjaxUpdateContainer>
@@ -146,5 +164,41 @@
 
 	<wo:AjaxPing frequency="5000" targetContainerID="summaryPanel" cacheKey="$invoiceCacheKey" id="concurrentWatch" />
 	<p class="muted">A ping watches the invoice cache key and refreshes the summary only when it changes.</p>
+
+	<!-- RENDERED INVOICE: a read-only render of the whole invoice (customer, tags, every line, grand
+	     total) below the editor. Every line edit / add / remove / save also targets this container, so
+	     it updates in lockstep with the editor above - you watch the finished document rebuild live as
+	     you type. If any edit fails to propagate, the rendered copy visibly disagrees with the editor. -->
+	<h2>Rendered invoice</h2>
+	<wo:AjaxUpdateContainer id="renderedInvoice" elementName="div" class="rendered">
+		<div class="doc">
+			<div class="doc-head">
+				<div>
+					<div class="doc-title">INVOICE</div>
+					<div class="muted">Bill to: <strong><wo:str value="$customer" /></strong></div>
+					<wo:if condition="$hasTags"><div class="muted">Tags: <wo:str value="$tagsDisplay" /></div></wo:if>
+				</div>
+				<div class="doc-status"><span class="$statusPillClass"><wo:str value="$finalisedLabel" /></span></div>
+			</div>
+			<table class="doc-lines">
+				<thead>
+					<tr><th>Product</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Amount</th></tr>
+				</thead>
+				<tbody>
+					<wo:repetition list="$lines" item="$currentLine">
+						<tr class="$lineRowClass">
+							<td><wo:str value="$currentLine.product" /></td>
+							<td class="num"><wo:str value="$currentLine.quantity" /></td>
+							<td class="num"><wo:str value="$currentLine.unitPrice" /></td>
+							<td class="num"><wo:str value="$currentLine.lineTotal" /></td>
+						</tr>
+					</wo:repetition>
+				</tbody>
+				<tfoot>
+					<tr><td colspan="3" class="num"><strong>Total</strong></td><td class="num"><strong><wo:str value="$grandTotal" /></strong></td></tr>
+				</tfoot>
+			</table>
+		</div>
+	</wo:AjaxUpdateContainer>
 </body>
 </html>

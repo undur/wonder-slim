@@ -99,10 +99,11 @@ public class ScenarioInvoice extends PlaygroundPage {
 		return "product-" + currentLine.id();
 	}
 
-	/** This line's own box plus the totals panel - what a single qty/price edit refreshes (the line's
-	 *  total changes AND the grand total). A multi-target update string. */
+	/** This line's own box, the totals panel, and the rendered invoice below - what a single qty/price
+	 *  edit refreshes (the line's total changes, the grand total changes, and the rendered copy must
+	 *  stay in lockstep). A multi-target update string. */
 	public String lineAndTotalsIDs() {
-		return "linebox-" + currentLine.id() + ";totalsPanel";
+		return "linebox-" + currentLine.id() + ";totalsPanel;renderedInvoice";
 	}
 
 	public boolean currentLineInvalid() {
@@ -199,5 +200,14 @@ public class ScenarioInvoice extends PlaygroundPage {
 
 	public String finalisedLabel() {
 		return finalised ? "Finalised" : "Draft";
+	}
+
+	public boolean hasTags() {
+		return tags != null && tags.count() > 0;
+	}
+
+	/** The selected tags as a comma-separated string for the rendered invoice header. */
+	public String tagsDisplay() {
+		return tags == null ? "" : tags.componentsJoinedByString(", ");
 	}
 }

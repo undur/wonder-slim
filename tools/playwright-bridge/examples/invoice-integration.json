@@ -16,9 +16,12 @@
     { "do": "wait", "ms": 700 },
     { "do": "read", "name": "line1_1", "selector": "#linebox-1 .lineTotal", "what": "text" },
     { "do": "read", "name": "total1", "selector": "#grandTotal", "what": "text" },
+    { "do": "read", "name": "line1_cells", "what": "count", "selector": "#linebox-1 > td" },
     { "do": "assert", "name": "line 1 total recomputed to 2500", "that": "line1_1", "equals": "2500" },
     { "do": "assert", "name": "grand total recomputed to 4000", "that": "total1", "equals": "4000" },
     { "do": "assert", "name": "line 2 was NOT disturbed by editing line 1", "that": "total1", "notEquals": "2500" },
+    { "do": "comment", "text": "Regression guard for the table-context morph bug: the edited <tr> must keep its 5 <td> cells. Multi-update of a <tr> container used to DOM-parse the fragment out of table context and drop the <td>s, collapsing the row's columns. Now the fragment html is kept as a string and morphed in the receiver's context." },
+    { "do": "assert", "name": "edited row kept its 5 cells (table-context morph not mangled)", "that": "line1_cells", "equals": 5 },
 
     { "do": "comment", "text": "Edit line 3 unit price 75 -> 100 (4x100=400). Grand total 4000-300+400 = 4100. Proves a SECOND independent observe field works alongside the first, no cross-talk." },
     { "do": "fill", "selector": "#price-3", "text": "100" },
@@ -62,6 +65,21 @@
     { "do": "click", "selector": "#saveBtn" },
     { "do": "wait", "ms": 800 },
     { "do": "read", "name": "total5", "selector": "#grandTotal", "what": "text" },
-    { "do": "assert", "name": "grand total unchanged by save", "that": "total5", "equals": "3000" }
+    { "do": "assert", "name": "grand total unchanged by save", "that": "total5", "equals": "3000" },
+
+    { "do": "comment", "text": "The RENDERED invoice below must be in lockstep with the editor after all those edits: same total, and the same number of line rows (started 3, +1 add, -1 remove = 3). If a refresh missed it, the rendered copy visibly disagrees with the editor - which is the whole point of having it. The tfoot has two .num strong cells ('Total' label + amount); take the LAST." },
+    { "do": "read", "name": "renderedTotal", "what": "jsExpression", "expression": "(function(){var c=document.querySelectorAll('#renderedInvoice tfoot td.num strong');return (c[c.length-1]||{}).textContent;})()" },
+    { "do": "read", "name": "renderedRows", "what": "count", "selector": "#renderedInvoice tbody tr" },
+    { "do": "assert", "name": "rendered invoice total matches the editor (3000)", "that": "renderedTotal", "equals": "3000" },
+    { "do": "assert", "name": "rendered invoice line count matches the editor (3)", "that": "renderedRows", "equals": 3 },
+
+    { "do": "comment", "text": "And one more live edit propagates to BOTH the editor total and the rendered copy at once: line 1 qty 5 -> 1 (1x500=500), grand total 3000-2500+500 = 1000." },
+    { "do": "fill", "selector": "#qty-1", "text": "1" },
+    { "do": "press", "selector": "#qty-1", "key": "Tab" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "editorTotalFinal", "selector": "#grandTotal", "what": "text" },
+    { "do": "read", "name": "renderedTotalFinal", "what": "jsExpression", "expression": "(function(){var c=document.querySelectorAll('#renderedInvoice tfoot td.num strong');return (c[c.length-1]||{}).textContent;})()" },
+    { "do": "assert", "name": "editor total updated to 1000", "that": "editorTotalFinal", "equals": "1000" },
+    { "do": "assert", "name": "rendered invoice updated in lockstep to 1000", "that": "renderedTotalFinal", "equals": "1000" }
   ]
 }
