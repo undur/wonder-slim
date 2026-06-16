@@ -11,7 +11,6 @@ import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.foundation.ERXValueUtilities;
 
 /**
  * AjaxUpdateContainer - a region of a page that can be refreshed independently via an ajax request,
@@ -28,17 +27,18 @@ import er.extensions.foundation.ERXValueUtilities;
  *     to do a classic innerHTML replacement. Always emitted explicitly so the JS side has a single,
  *     unambiguous source of truth.</li>
  * </ul>
- * plus a single <code>AjaxSlim.AUC.register(id, options)</code> call (and, optionally, a
- * <code>registerPeriodic</code> / <code>observeField</code> call).
+ * plus a single <code>AjaxSlim.AUC.register(id, options)</code> call.
+ *
+ * <p>
+ * This is a <b>passive</b> update container: a named region that <i>other</i> elements
+ * (AjaxUpdateLink / AjaxObserveField / AjaxSubmitButton with <code>updateContainerID</code>) refresh.
+ * It does not refresh itself and has no action of its own. For a region that refreshes itself - on a
+ * timer or when a field changes - use {@link AjaxSelfUpdatingContainer}.
+ * </p>
  *
  * @binding id the DOM id of the container (defaults to a safe element id)
  * @binding elementName the HTML tag to render (defaults to "div")
- * @binding action the action to call when this updateContainer refreshes
  * @binding onRefreshComplete javascript to run after the container has been refreshed/morphed
- * @binding frequency the frequency (in seconds) of a periodic refresh
- * @binding stopped determines whether a periodic update container loads as stopped
- * @binding observeFieldID the DOM id of a field whose changes trigger a refresh of this container
- * @binding fullSubmit when observing a field, whether to submit the whole form (true) or just the field (false)
  * @binding optional set to true to skip rendering the container tags when already inside an update container
  * @binding morph if true, content updates reconcile the existing DOM via Idiomorph instead of replacing
  *                innerHTML, preserving focus/scroll/selection and unchanged subtrees. Bind morph="$false"
@@ -152,49 +152,24 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 
 				super.appendToResponse(response, context);
 
-				Object frequency = valueForBinding("frequency", component);
-				String observeFieldID = (String) valueForBinding("observeFieldID", component);
 				String onRefreshComplete = (String) valueForBinding("onRefreshComplete", component);
 
 				AjaxUtils.appendScriptHeader(response);
 
 				// register(id, options) - store this container's options (currently just the
 				// onRefreshComplete hook) keyed by id so a later update(id) can find them. The
-				// options object is a plain JS object literal; we keep it tiny.
+				// options object is a plain JS object literal; we keep it tiny. This is a passive-target
+				// concern (the hook to run after THIS container is morphed), so it stays on the base.
 				response.appendContentString("AjaxSlim.AUC.register('" + id + "', {");
 				if (onRefreshComplete != null) {
 					response.appendContentString("onRefreshComplete: function() { " + onRefreshComplete + " }");
 				}
 				response.appendContentString("});");
 
-				if (frequency != null) {
-					// try to convert to a number to check whether it is 0
-					boolean isNotZero = true;
-					try {
-						float numberFrequency = ERXValueUtilities.floatValue(frequency);
-						if (numberFrequency == 0.0) {
-							isNotZero = false;
-						}
-					}
-					catch (RuntimeException e) {
-						throw new IllegalStateException("Error parsing float from value : <" + frequency + ">");
-					}
-
-					if (isNotZero) {
-						boolean canStop = false;
-						boolean stopped = false;
-						if (associations().objectForKey("stopped") != null) {
-							canStop = true;
-							stopped = booleanValueForBinding("stopped", false, component);
-						}
-						response.appendContentString("AjaxSlim.AUC.registerPeriodic('" + id + "'," + canStop + "," + stopped + "," + ERXValueUtilities.floatValue(frequency) + ");");
-					}
-				}
-
-				if (observeFieldID != null) {
-					boolean fullSubmit = booleanValueForBinding("fullSubmit", false, component);
-					response.appendContentString("AjaxSlim.AUC.observeField('" + id + "','" + observeFieldID + "'," + fullSubmit + ");");
-				}
+				// Self-updating behaviour (periodic refresh / observe-a-field) is NOT part of a passive
+				// update container - it lives in AjaxSelfUpdatingContainer, which overrides this hook.
+				// The base emits nothing here.
+				appendSelfUpdateScript(response, context, id);
 
 				AjaxUtils.appendScriptFooter(response);
 			}
@@ -204,16 +179,31 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 		}
 	}
 
+	/**
+	 * Hook for emitting the client registration of self-updating behaviour (periodic refresh,
+	 * observe-a-field). A passive {@link AjaxUpdateContainer} has none, so this is empty;
+	 * {@link AjaxSelfUpdatingContainer} overrides it. Called inside the container's script block during
+	 * {@link #appendToResponse}, after the base {@code AUC.register(...)} call.
+	 */
+	protected void appendSelfUpdateScript(WOResponse response, WOContext context, String id) {
+		// no-op for a passive update container
+	}
+
+	/**
+	 * Hook for invoking a self-update container's own refresh action when the container is the request
+	 * sender (i.e. it refreshed itself). A passive {@link AjaxUpdateContainer} has no action, so this is
+	 * a no-op; {@link AjaxSelfUpdatingContainer} overrides it to invoke its {@code action} binding.
+	 */
+	protected void performSelfUpdateAction(WORequest request, WOContext context) {
+		// no-op for a passive update container
+	}
+
 	@Override
 	public WOActionResults handleRequest(WORequest request, WOContext context) {
 		WOComponent component = context.component();
 		String id = _containerID(context);
 
-		if (associations().objectForKey("action") != null) {
-			@SuppressWarnings("unused")
-			WOActionResults results = (WOActionResults) valueForBinding("action", component);
-			// ignore results
-		}
+		performSelfUpdateAction(request, context);
 
 		WOResponse response = AjaxUtils.createResponse(request, context);
 		AjaxUtils.setPageReplacementCacheKey(context, id);

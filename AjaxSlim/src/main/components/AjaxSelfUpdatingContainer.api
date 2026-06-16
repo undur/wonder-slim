@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wodefinitions>
-	<wo class="AjaxUpdateContainer" wocomponentcontent="true">
+	<wo class="AjaxSelfUpdatingContainer" wocomponentcontent="true">
 		<binding name="id"/>
 		<binding name="elementName"/>
 		<binding name="onRefreshComplete"/>
+
+		<binding name="action"/>
+
+		<binding name="frequency"/>
+		<binding defaults="Boolean" name="stopped"/>
+
+		<binding name="observeFieldID"/>
+		<binding defaults="Boolean" name="fullSubmit"/>
 
 		<binding defaults="Boolean" name="optional"/>
 		<binding name="morph" defaults="Boolean"/>
