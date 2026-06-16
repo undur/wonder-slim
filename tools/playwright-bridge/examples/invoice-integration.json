@@ -29,6 +29,9 @@
     { "do": "wait", "ms": 800 },
     { "do": "read", "name": "billTo1", "what": "jsExpression", "expression": "(document.querySelector('#renderedInvoice .doc-head strong')||{}).textContent" },
     { "do": "assert", "name": "descendant-observe: changing customer refreshed rendered Bill-to", "that": "billTo1", "notEquals": "Acme Corp" },
+    { "do": "comment", "text": "The Edit-customer modal opens purely client-side (native <dialog>, no round-trip), so its content must be kept fresh by the same customer-change update - otherwise it shows a stale customer until you open it twice. Assert the modal box (inside the still-closed dialog) already reflects the new customer." },
+    { "do": "read", "name": "modalCustomer", "what": "jsExpression", "expression": "(document.querySelector('#customerModalBox strong')||{}).textContent" },
+    { "do": "assert", "name": "modal content tracks the customer change (no stale-until-reopened)", "that": "modalCustomer", "notEquals": "Acme Corp" },
 
     { "do": "comment", "text": "Edit line 1 quantity 2 -> 5 (5x500=2500). Grand total should become 2500-1000+2500 = 4000. One field edit refreshes its line box AND the totals (multi-update _u=linebox-1;totalsPanel)." },
     { "do": "fill", "selector": "#qty-1", "text": "5" },

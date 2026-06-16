@@ -64,7 +64,7 @@
 			     wrapper - here the customer picker AND the tags multi-select - and refreshes the rendered
 			     invoice + summary when either changes. This is the descendant form of the element (distinct
 			     from the per-field observeFieldID form used on the line rows), so the page exercises both. -->
-			<wo:AjaxObserveField updateContainerID="renderedInvoice;summaryPanel" elementName="div" class="observed-fields">
+			<wo:AjaxObserveField updateContainerID="renderedInvoice;summaryPanel;customerModalBox" elementName="div" class="observed-fields">
 				<div>
 					<label class="muted">Customer</label><br />
 					<wo:AjaxPopUpButton list="$customers" item="$currentProduct" selection="$customer" id="customerPick" />
