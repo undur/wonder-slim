@@ -99,6 +99,9 @@
 	     refresh every line box AND the totals together in ONE multi-update request. -->
 	<wo:form id="invoiceForm">
 		<h2>Lines</h2>
+		<p>
+			<wo:AjaxUpdateLink action="$addLine" updateContainerID="linesContainer;totalsPanel;renderedInvoice" id="addLine" class="btn">+ Add line</wo:AjaxUpdateLink>
+		</p>
 		<wo:AjaxUpdateContainer id="linesContainer" elementName="div">
 			<table class="lines">
 				<colgroup>
@@ -145,10 +148,6 @@
 				</tbody>
 			</table>
 		</wo:AjaxUpdateContainer>
-
-		<p>
-			<wo:AjaxUpdateLink action="$addLine" updateContainerID="linesContainer;totalsPanel;renderedInvoice" id="addLine" class="btn">+ Add line</wo:AjaxUpdateLink>
-		</p>
 
 		<!-- TOTALS PANEL: the canary. Refreshed by every line edit / add / remove. Shows the live sum,
 		     line count, validity, finalised flag, and the save controls. -->
