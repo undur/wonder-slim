@@ -33,6 +33,9 @@
 		.note { background: #fffbea; border-left: 3px solid #f0c000; padding: .8rem 1rem; border-radius: 4px; margin: 1.4rem 0; font-size: .92rem; }
 		.legend { font-size: .82rem; color: #666; margin: .8rem 0 0; }
 		.legend .tag { margin: 0 .25rem; }
+		table.migrate td { padding: .35rem .5rem; border-bottom: 1px solid #f2f2f2; vertical-align: top; font-size: .92rem; }
+		table.migrate td.old { white-space: nowrap; color: #a12626; font-family: ui-monospace, Menlo, monospace; font-size: .85rem; }
+		table.migrate td.new { white-space: nowrap; color: #1a7431; font-family: ui-monospace, Menlo, monospace; font-size: .85rem; }
 	</style>
 </head>
 <body>
@@ -75,6 +78,40 @@
 	</div>
 
 	<div class="note"><strong>Two update-container elements, on purpose.</strong> <code>AjaxUpdateContainer</code> is <em>passive</em> — a named region that <em>other</em> elements refresh. <code>AjaxSelfUpdatingContainer</code> refreshes <em>itself</em> (on a timer or when a field changes) and may run its own <code>action</code>. The old single element conflated the two: an <code>action</code> on a plain container only fired on self-refresh, which read backwards. Splitting them makes the intent explicit.</div>
+
+	<!-- ============================ MIGRATING FROM Ajax ============================ -->
+	<h2>Migrating from the Ajax framework</h2>
+	<p class="lead">AjaxSlim is a drop-in replacement (same <code>er.ajax</code> package), so most templates need no change. The things that actually break a port — almost all client-side, because the Prototype/Scriptaculous runtime is gone:</p>
+	<table class="migrate">
+		<tbody>
+			<tr>
+				<td class="old">&lt;id&gt;Update()</td>
+				<td class="new">AjaxSlim.AUC.update('&lt;id&gt;')</td>
+				<td>The per-container global function the old framework generated (via <code>eval</code>) no longer exists. Call the public API to refresh a container from your own JS.</td>
+			</tr>
+			<tr>
+				<td class="old">AjaxUpdateContainer<br/>frequency / action / observeFieldID</td>
+				<td class="new">AjaxSelfUpdatingContainer</td>
+				<td>The container element was split. A container that refreshes <em>itself</em> (on a timer, on a field change, or running its own <code>action</code>) is now <code>AjaxSelfUpdatingContainer</code>; plain <code>AjaxUpdateContainer</code> is passive and only refreshes when something else targets it. An old self-updating container ported as-is will stop refreshing.</td>
+			</tr>
+			<tr>
+				<td class="old">AUC. / AUL. / ASB.</td>
+				<td class="new">AjaxSlim.AUC. / AUL. / ASB.</td>
+				<td>The client globals are namespaced now. Any custom JS calling the bare globals needs the <code>AjaxSlim.</code> prefix.</td>
+			</tr>
+			<tr>
+				<td class="old">effect / insertion<br/>*Duration / *EffectID</td>
+				<td class="new">— (dropped)</td>
+				<td>All Scriptaculous effect &amp; insertion bindings are gone (no <code>effects.js</code>). Use CSS transitions instead. <code>onComplete</code>/<code>onSuccess</code> are kept, repurposed as post-morph JS hooks.</td>
+			</tr>
+			<tr>
+				<td class="old">onLoading / onFailure<br/>asynchronous / evalScripts</td>
+				<td class="new">— (dropped)</td>
+				<td>The Prototype <code>Ajax.Request</code> transport options are gone — the transport that consumed them (Prototype) was replaced by <code>fetch</code>.</td>
+			</tr>
+		</tbody>
+	</table>
+	<p class="lead" style="margin-top:.8rem"><strong>Also worth knowing:</strong> updates now <strong>morph</strong> the DOM (Idiomorph) by default instead of replacing innerHTML — focus, scroll and selection survive a refresh; bind <code>morph="$false"</code> for the old replace-everything behaviour. And ~40 rarely-used legacy elements (Accordion, Tree, Slider, DatePicker, drag/drop, in-place editors, the Scriptaculous effects, …) were <strong>not</strong> ported — AjaxSlim is the actually-used core; reach for a platform/native equivalent for those.</p>
 
 	<!-- ============================ CORE UPDATE MECHANISM ============================ -->
 	<h2>Core update mechanism</h2>
