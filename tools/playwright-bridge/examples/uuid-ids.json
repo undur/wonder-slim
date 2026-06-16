@@ -49,6 +49,10 @@
       "name": "containerStillThere",
       "selector": "#mainBump",
       "what": "exists"
-    }
+    },
+    { "do": "comment", "text": "Containers with dashed/UUID ids must update via the Map-keyed registry without the legacy eval-global throw. The main container updates, its triggered cascade fires, and the container survives the morph." },
+    { "do": "assert", "name": "dashed/UUID-id container updated (0 -> 1)", "that": "mainAfter", "equals": "1" },
+    { "do": "assert", "name": "triggered cascade also updated (1 -> 2)", "that": "trigAfter", "equals": "2" },
+    { "do": "assert", "name": "container survived the update (no eval-global throw)", "that": "containerStillThere", "equals": true }
   ]
 }

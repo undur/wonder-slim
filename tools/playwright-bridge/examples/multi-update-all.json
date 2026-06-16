@@ -1,0 +1,46 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioMultiUpdate",
+  "comment": "Core claim: ONE link click refreshes all three containers from ONE request, each box getting its own distinct value, with mixed morph modes (boxB is morph=false) and each onRefreshComplete firing exactly once.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#bumpAll" },
+
+    { "do": "read", "name": "a0", "selector": "#valA", "what": "text" },
+    { "do": "read", "name": "b0", "selector": "#valB", "what": "text" },
+    { "do": "read", "name": "c0", "selector": "#valC", "what": "text" },
+    { "do": "assert", "name": "all boxes start at 0", "that": "a0", "equals": "0" },
+
+    { "do": "marker", "label": "click1" },
+    { "do": "click", "selector": "#bumpAll" },
+    { "do": "wait", "ms": 700 },
+
+    { "do": "read", "name": "reqs1", "what": "requestCount", "marker": "click1" },
+    { "do": "read", "name": "a1", "selector": "#valA", "what": "text" },
+    { "do": "read", "name": "b1", "selector": "#valB", "what": "text" },
+    { "do": "read", "name": "c1", "selector": "#valC", "what": "text" },
+
+    { "do": "assert", "name": "ONE request updated all three containers", "that": "reqs1", "equals": 1 },
+    { "do": "assert", "name": "box A (morph) updated to 1", "that": "a1", "equals": "1" },
+    { "do": "assert", "name": "box B (classic morph=false) updated to 1", "that": "b1", "equals": "1" },
+    { "do": "assert", "name": "box C (morph) updated to 1", "that": "c1", "equals": "1" },
+
+    { "do": "comment", "text": "onRefreshComplete fired once per container (set window.__refreshed.{boxA,boxB,boxC})" },
+    { "do": "read", "name": "hookA", "selector": "#boxA", "what": "attribute", "attr": "class" },
+    { "do": "assert", "name": "box A onRefreshComplete added .refreshed", "that": "hookA", "contains": "refreshed" },
+    { "do": "read", "name": "hookB", "what": "jsExpression", "expression": "window.__refreshed && window.__refreshed.boxB" },
+    { "do": "read", "name": "hookC", "what": "jsExpression", "expression": "window.__refreshed && window.__refreshed.boxC" },
+    { "do": "assert", "name": "box B onRefreshComplete fired once", "that": "hookB", "equals": 1 },
+    { "do": "assert", "name": "box C onRefreshComplete fired once", "that": "hookC", "equals": 1 },
+
+    { "do": "comment", "text": "second click: confirm it keeps working and still one request" },
+    { "do": "marker", "label": "click2" },
+    { "do": "click", "selector": "#bumpAll" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "reqs2", "what": "requestCount", "marker": "click2" },
+    { "do": "read", "name": "a2", "selector": "#valA", "what": "text" },
+    { "do": "read", "name": "hookB2", "what": "jsExpression", "expression": "window.__refreshed && window.__refreshed.boxB" },
+    { "do": "assert", "name": "second click also one request", "that": "reqs2", "equals": 1 },
+    { "do": "assert", "name": "box A advanced to 2", "that": "a2", "equals": "2" },
+    { "do": "assert", "name": "box B onRefreshComplete fired EXACTLY once per update (2 after 2 clicks)", "that": "hookB2", "equals": 2 }
+  ]
+}

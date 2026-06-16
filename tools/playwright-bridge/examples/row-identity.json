@@ -74,7 +74,12 @@
       "name": "r2_note",
       "selector": "#indexContainer #irow2 input",
       "what": "value"
-    }
+    },
+    { "do": "comment", "text": "After deleting the first row, rows shift to id=2,3,4. DRAFT4 was committed to id=4, so it MUST end on the row now labelled id=4 (position 3 / irow2) - the data follows its identity, it does not jump lines." },
+    { "do": "assert", "name": "row 0 is now id=2 (top row deleted)", "that": "r0_label", "contains": "id=2" },
+    { "do": "assert", "name": "row 2 is the id=4 row", "that": "r2_label", "contains": "id=4" },
+    { "do": "assert", "name": "DRAFT4 followed its row (id=4), did NOT jump lines", "that": "r2_note", "equals": "DRAFT4" },
+    { "do": "assert", "name": "the id=2 row did NOT inherit DRAFT4", "that": "r0_note", "notEquals": "DRAFT4" }
   ],
   "_comment": "Reproduction: index-based row ids + delete-shifts-rows. Demonstrates committed values FOLLOW their row correctly under morph (no data-jumps-lines) because the server re-renders value bindings. DRAFT4 (committed to id=4) ends on the row labeled id=4 after deleting a row above."
 }

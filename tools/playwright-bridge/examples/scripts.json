@@ -1,5 +1,7 @@
 {
   "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioScripts",
+  "comment": "Inline-script execution under morph. One script deliberately throws to prove that a single bad inline script does NOT abort the others (isolation) - so that page error is EXPECTED and whitelisted via allowPageErrors.",
+  "allowPageErrors": ["deliberate failure in the middle of the script batch"],
   "steps": [
     {
       "do": "goto"

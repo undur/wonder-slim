@@ -1,0 +1,26 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioMultiUpdate",
+  "comment": "Robustness: a trigger targeting boxA;ghost;boxC must update A and C, silently skip the non-existent 'ghost', and leave boxB (not targeted) untouched. Still exactly one request, no page error.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#bumpAC" },
+
+    { "do": "read", "name": "a0", "selector": "#valA", "what": "text" },
+    { "do": "read", "name": "b0", "selector": "#valB", "what": "text" },
+    { "do": "read", "name": "c0", "selector": "#valC", "what": "text" },
+
+    { "do": "marker", "label": "click" },
+    { "do": "click", "selector": "#bumpAC" },
+    { "do": "wait", "ms": 700 },
+
+    { "do": "read", "name": "reqs", "what": "requestCount", "marker": "click" },
+    { "do": "read", "name": "a1", "selector": "#valA", "what": "text" },
+    { "do": "read", "name": "b1", "selector": "#valB", "what": "text" },
+    { "do": "read", "name": "c1", "selector": "#valC", "what": "text" },
+
+    { "do": "assert", "name": "one request despite a missing target", "that": "reqs", "equals": 1 },
+    { "do": "assert", "name": "box A updated to 1", "that": "a1", "equals": "1" },
+    { "do": "assert", "name": "box C updated to 1", "that": "c1", "equals": "1" },
+    { "do": "assert", "name": "box B (NOT targeted) stayed at 0", "that": "b1", "equals": "0" }
+  ]
+}

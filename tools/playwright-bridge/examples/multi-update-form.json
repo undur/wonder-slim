@@ -1,0 +1,29 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioMultiUpdate",
+  "comment": "The AjaxSubmitButton multi-target path (POST branch of ASB._submitBody): a form submit refreshes all three containers in one POST, and the typed note round-trips through the server (proving the form body was actually submitted, not just the containers re-rendered).",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#submitBump" },
+
+    { "do": "read", "name": "a0", "selector": "#valA", "what": "text" },
+    { "do": "read", "name": "echo0", "selector": "#noteEcho", "what": "text" },
+
+    { "do": "fill", "selector": "#noteField", "text": "hello-multi" },
+
+    { "do": "marker", "label": "submit" },
+    { "do": "click", "selector": "#submitBump" },
+    { "do": "wait", "ms": 800 },
+
+    { "do": "read", "name": "reqs", "what": "requestCount", "marker": "submit" },
+    { "do": "read", "name": "a1", "selector": "#valA", "what": "text" },
+    { "do": "read", "name": "b1", "selector": "#valB", "what": "text" },
+    { "do": "read", "name": "c1", "selector": "#valC", "what": "text" },
+    { "do": "read", "name": "echo1", "selector": "#noteEcho", "what": "text" },
+
+    { "do": "assert", "name": "one POST refreshed all three", "that": "reqs", "equals": 1 },
+    { "do": "assert", "name": "box A updated", "that": "a1", "equals": "1" },
+    { "do": "assert", "name": "box B updated", "that": "b1", "equals": "1" },
+    { "do": "assert", "name": "box C updated", "that": "c1", "equals": "1" },
+    { "do": "assert", "name": "note round-tripped through the form submit", "that": "echo1", "equals": "hello-multi" }
+  ]
+}

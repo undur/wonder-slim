@@ -16,8 +16,11 @@
  *   wait    { ms? , selector? }            - wait for a timeout and/or a selector to appear
  *   read    { name, selector?, what }      - capture state; `what` in:
  *                                              value | text | attribute(:attr) | activeElementId |
- *                                              count | exists | requestCount
- *   assert  { name, that, equals|contains|atMost|atLeast } - check a prior read or a live value
+ *                                              count | exists | visible | requestCount |
+ *                                              jsExpression(:expression)
+ *   assert  { name, that, equals|notEquals|contains|notContains|changedFrom|atMost|atLeast }
+ *                                          - check a prior read (`that` names it); changedFrom names
+ *                                            another read it must differ from
  *   marker  { label }                      - tag subsequent requests with a label (for counting)
  */
 
@@ -53,7 +56,12 @@ export async function runScript(page, script) {
 		try {
 			switch (step.do) {
 				case 'goto':
-					await page.goto(step.url || script.url, { waitUntil: 'networkidle' });
+					// 'domcontentloaded' + a bounded timeout, NOT 'networkidle'. networkidle hangs
+					// indefinitely when a page keeps the network busy (a long-poll, a websocket, an
+					// in-flight prefetch) - which stalled the whole serial suite on the wonder-select
+					// pages. Every scenario already has explicit `wait` steps for the elements it needs,
+					// so waiting for full network quiescence here is both redundant and fragile.
+					await page.goto(step.url || script.url, { waitUntil: 'domcontentloaded', timeout: step.timeout ?? 15000 });
 					break;
 				case 'click':
 					await page.click(step.selector);
@@ -132,6 +140,20 @@ async function readValue(page, step, reads, requestsSince) {
 			return await page.locator(step.selector).first().isVisible();
 		case 'requestCount':
 			return requestsSince(step.marker).length;
+		case 'jsExpression':
+			// Evaluate an arbitrary JS expression in the page and return its value (stringified if not a
+			// primitive, so it composes with the string/number asserts). For probing state a selector
+			// can't reach - e.g. a window.* marker set by an onRefreshComplete hook. step.expression is a
+			// JS expression string, e.g. "window.__refreshed && window.__refreshed.boxB".
+			return await page.evaluate((expr) => {
+				try {
+					// eslint-disable-next-line no-eval
+					var v = eval(expr);
+					return (v === null || v === undefined || typeof v === 'object') ? JSON.stringify(v) ?? null : v;
+				} catch (e) {
+					return 'EVAL_ERROR: ' + (e && e.message || e);
+				}
+			}, step.expression);
 		case 'withinViewport':
 			// True if the element's bounding rect fits entirely within the viewport (small tolerance
 			// for sub-pixel rounding). Used to assert a dropdown never extends beyond the viewport.
@@ -180,8 +202,20 @@ function evaluateAssert(step, reads) {
 	if ('equals' in step) {
 		return { pass: actual === step.equals, detail: `expected ${JSON.stringify(step.equals)}, got ${JSON.stringify(actual)}` };
 	}
+	if ('notEquals' in step) {
+		return { pass: actual !== step.notEquals, detail: `expected not ${JSON.stringify(step.notEquals)}, got ${JSON.stringify(actual)}` };
+	}
 	if ('contains' in step) {
 		return { pass: String(actual ?? '').includes(step.contains), detail: `expected to contain ${JSON.stringify(step.contains)}, got ${JSON.stringify(actual)}` };
+	}
+	if ('notContains' in step) {
+		return { pass: !String(actual ?? '').includes(step.notContains), detail: `expected NOT to contain ${JSON.stringify(step.notContains)}, got ${JSON.stringify(actual)}` };
+	}
+	if ('changedFrom' in step) {
+		// Asserts the value differs from an earlier read named by step.changedFrom - for "it updated,
+		// I don't care to what" (e.g. a periodic refresh bumped a counter from some unknown start).
+		const before = step.changedFrom in reads ? reads[step.changedFrom] : undefined;
+		return { pass: actual !== before, detail: `expected to differ from ${JSON.stringify(before)} (read "${step.changedFrom}"), got ${JSON.stringify(actual)}` };
 	}
 	if ('atMost' in step) {
 		return { pass: Number(actual) <= step.atMost, detail: `expected <= ${step.atMost}, got ${actual}` };
@@ -189,5 +223,5 @@ function evaluateAssert(step, reads) {
 	if ('atLeast' in step) {
 		return { pass: Number(actual) >= step.atLeast, detail: `expected >= ${step.atLeast}, got ${actual}` };
 	}
-	return { pass: false, detail: 'assert had no comparison (equals/contains/atMost/atLeast)' };
+	return { pass: false, detail: 'assert had no comparison (equals/notEquals/contains/notContains/changedFrom/atMost/atLeast)' };
 }

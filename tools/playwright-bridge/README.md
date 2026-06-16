@@ -44,3 +44,34 @@ node run.js examples/focus.json
 ```
 
 A run script is a JSON object: `{ "url": "...", "steps": [ ... ] }`. See `examples/`.
+
+Optional top-level keys:
+
+- `viewport` — `{ "width": N, "height": N }` to pin the window (for viewport-relative behaviour).
+- `allowPageErrors` — `true`, or an array of substrings, to whitelist EXPECTED page errors. Use when a
+  scenario deliberately throws (e.g. `scripts` throws mid-batch to prove inline-script isolation); without
+  this, the runner treats any uncaught page error as a failure.
+
+## Running the whole suite
+
+ALWAYS run the full suite with the serial runner, never a shell `for` loop:
+
+```bash
+node run-all.js            # every examples/*.json, one at a time, against the auto-discovered port
+node run-all.js multi      # only scenarios whose filename contains "multi"
+PORT=1200 node run-all.js  # pin the port instead of auto-discovering
+```
+
+The AjaxPlayground is a single WebObjects instance and serialises requests; driving it from two browsers
+at once (a backgrounded `for` loop) makes scenarios intermittently time out or read stale state — flaky
+"errors" that are really contention. `run-all.js` launches ONE browser, runs each scenario in its own fresh
+context (no session/counter bleed), prints a per-scenario pass/fail summary, and exits non-zero if anything
+failed (so CI / an agent can branch on it). The port is discovered by probing for a live AjaxPlayground.
+
+### Assertion + read vocabulary
+
+`assert` comparisons: `equals`, `notEquals`, `contains`, `notContains`, `changedFrom` (differs from another
+named read), `atMost`, `atLeast`. `read` `what`: `value`, `text`, `attribute`, `activeElementId`, `count`,
+`exists`, `visible`, `requestCount`, `withinViewport`, `boundingEdge`, and `jsExpression` (evaluate an
+arbitrary JS expression in the page — for probing state a selector can't reach, e.g. a `window.*` marker set
+by an `onRefreshComplete` hook).
