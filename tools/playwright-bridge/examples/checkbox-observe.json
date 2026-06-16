@@ -1,0 +1,24 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioCheckbox",
+  "comment": "Regression guard for the partial-submit checkbox bug. A checkbox watched by an AjaxObserveField (partial submit) must round-trip BOTH ways: unchecking it submits nothing so the server reads OFF; re-checking submits its value so the server reads ON. The serializer used to send the checkbox value regardless of checked state, so toggling OFF never registered server-side. The container echoes the server's view of the boolean.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#flagBox" },
+    { "do": "read", "name": "state0", "selector": "#serverState", "what": "text" },
+    { "do": "assert", "name": "starts ON (box checked)", "that": "state0", "equals": "ON" },
+
+    { "do": "comment", "text": "Uncheck it - the partial submit must send NOTHING for the box, so the server reads OFF." },
+    { "do": "click", "selector": "#flagBox" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "state1", "selector": "#serverState", "what": "text" },
+    { "do": "assert", "name": "unchecking round-trips: server now sees OFF", "that": "state1", "equals": "OFF" },
+
+    { "do": "comment", "text": "Re-check it - now the box submits its value, server reads ON again." },
+    { "do": "click", "selector": "#flagBox" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "state2", "selector": "#serverState", "what": "text" },
+    { "do": "read", "name": "changes", "selector": "#changeCount", "what": "text" },
+    { "do": "assert", "name": "re-checking round-trips: server sees ON again", "that": "state2", "equals": "ON" },
+    { "do": "assert", "name": "the observe field fired on each toggle (>=2 changes)", "that": "changes", "atLeast": 2 }
+  ]
+}

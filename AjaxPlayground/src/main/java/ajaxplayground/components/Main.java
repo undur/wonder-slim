@@ -12,6 +12,7 @@ import ajaxplayground.components.gallery.GalleryLargeList;
 import ajaxplayground.components.gallery.GalleryUpdateContainer;
 import ajaxplayground.components.gallery.GalleryWonderSelect;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
+import ajaxplayground.components.scenario.ScenarioCheckbox;
 import ajaxplayground.components.scenario.ScenarioDropdownViewport;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioInvoice;
@@ -66,6 +67,10 @@ public class Main extends ERXComponent {
 
 	public WOActionResults scenarioMultiUpdate() {
 		return pageWithName( ScenarioMultiUpdate.class );
+	}
+
+	public WOActionResults scenarioCheckbox() {
+		return pageWithName( ScenarioCheckbox.class );
 	}
 
 	public WOActionResults scenarioInvoice() {

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: checkbox observe (partial submit)</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 44rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.state { font-size: 1.3rem; font-weight: 700; color: #2b6cb0; }
+		.muted { color: #999; font-size: .9rem; }
+		a { color: #2b6cb0; }
+		code { background: #f2f2f2; padding: 0 .25rem; border-radius: 3px; }
+	</style>
+</head>
+<body>
+	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<h1>Checkbox observe (partial submit)</h1>
+	<p class="lead">A checkbox watched by an <code>AjaxObserveField</code> doing a <strong>partial</strong> submit. Toggling it must round-trip BOTH ways: an unchecked box submits nothing (so the server reads it as off), a checked box submits its value. The server-side state echoes into the container below.</p>
+
+	<wo:form>
+		<label>
+			<wo:checkbox checked="$flag" id="flagBox" />
+			Toggle me
+		</label>
+		<wo:AjaxObserveField observeFieldID="flagBox" updateContainerID="stateBox" action="$flagChanged" />
+	</wo:form>
+
+	<wo:AjaxUpdateContainer id="stateBox" elementName="div">
+		<p>Server sees the checkbox as: <span class="state" id="serverState"><wo:str value="$flagState" /></span></p>
+		<p class="muted">Observed changes server-side: <span id="changeCount"><wo:str value="$changeCount" /></span></p>
+	</wo:AjaxUpdateContainer>
+</body>
+</html>
