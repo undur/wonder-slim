@@ -62,6 +62,18 @@
 						node.getAttribute && node.getAttribute('data-morph-preserve-style') != null) {
 					return false;
 				}
+				// Don't let a morph overwrite the live state of the form control the user is currently
+				// interacting with. When two debounced observers overlap (e.g. typing in a search field
+				// AND toggling a checkbox), the search field's morph response can land just after the
+				// checkbox click and reset the box's checked state back to the server's rendered value -
+				// undoing the click before its own request round-trips, so the toggle silently reverts.
+				// Protect value/checked/selected on the active element; its own update will carry the
+				// real value to the server. (value is also covered by Idiomorph's ignoreActiveValue, but
+				// checked/selected are not, so we guard all three here.)
+				if ((attributeName === 'value' || attributeName === 'checked' || attributeName === 'selected') &&
+						node === document.activeElement) {
+					return false;
+				}
 				return true;
 			}
 		},
