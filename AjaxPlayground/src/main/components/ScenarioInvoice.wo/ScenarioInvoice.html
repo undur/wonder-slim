@@ -170,12 +170,12 @@
 	     gated on the invoice cache key. Both run on timers while you edit and must NOT steal focus or
 	     disturb the editor above. -->
 	<h2>Background</h2>
-	<wo:AjaxSelfUpdatingContainer id="activityTicker" elementName="div" frequency="4" action="$activityPoll" class="muted">
-		Activity poll #<wo:str value="$activityTick" /> (a background self-update; should never disturb your editing)
+	<wo:AjaxSelfUpdatingContainer id="activityTicker" elementName="div" frequency="10" action="$activityPoll" class="muted">
+		Server time <strong id="serverTime"><wo:str value="$serverTime" /></strong> &middot; refresh #<wo:str value="$activityTick" /> (a background self-update every 10s; the clock proves a real round-trip, and it should never disturb your editing)
 	</wo:AjaxSelfUpdatingContainer>
 
-	<wo:AjaxPing frequency="5000" targetContainerID="summaryPanel" cacheKey="$invoiceCacheKey" id="concurrentWatch" />
-	<p class="muted">A ping watches the invoice cache key and refreshes the summary only when it changes.</p>
+	<wo:AjaxPing frequency="15000" targetContainerID="summaryPanel" cacheKey="$invoiceCacheKey" id="concurrentWatch" />
+	<p class="muted">A ping checks the invoice cache key every 15s and refreshes the summary only when it actually changed.</p>
 
 	<!-- RENDERED INVOICE: a read-only render of the whole invoice (customer, tags, every line, grand
 	     total) below the editor. Every line edit / add / remove / save also targets this container, so

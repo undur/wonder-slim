@@ -1,5 +1,7 @@
 package ajaxplayground.components.scenario;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -190,6 +192,12 @@ public class ScenarioInvoice extends PlaygroundPage {
 
 	public int activityTick() {
 		return _activityTick;
+	}
+
+	/** The server's current time, re-read on every render - so each periodic refresh of the ticker
+	 *  visibly shows a NEW value (proving a real round-trip happened, not just a busy flash). */
+	public String serverTime() {
+		return LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 	}
 
 	/** The cache key for the concurrent-edit AjaxPing: derived from the invoice state, so the heavy
