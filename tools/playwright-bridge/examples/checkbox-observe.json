@@ -19,6 +19,13 @@
     { "do": "read", "name": "state2", "selector": "#serverState", "what": "text" },
     { "do": "read", "name": "changes", "selector": "#changeCount", "what": "text" },
     { "do": "assert", "name": "re-checking round-trips: server sees ON again", "that": "state2", "equals": "ON" },
-    { "do": "assert", "name": "the observe field fired on each toggle (>=2 changes)", "that": "changes", "atLeast": 2 }
+    { "do": "assert", "name": "the observe field fired on each toggle (>=2 changes)", "that": "changes", "atLeast": 2 },
+
+    { "do": "comment", "text": "Race guard: when the box is the focused/active control, a COMPETING morph of its container (e.g. from an overlapping observer on another field) must NOT overwrite its live checked state - that stomp was the intermittent 'click doesn't work until I click again' glitch. Uncheck the box (it stays focused), then morph its container with HTML that still says checked='checked' and assert the box stays UNCHECKED." },
+    { "do": "click", "selector": "#flagBox" },
+    { "do": "read", "name": "raceClicked", "what": "jsExpression", "expression": "document.getElementById('flagBox').checked" },
+    { "do": "read", "name": "raceAfterMorph", "what": "jsExpression", "expression": "(function(){var cb=document.getElementById('flagBox');var p=cb.closest('form');var html=p.innerHTML.replace(/(<input[^>]*id=\"flagBox\"[^>]*?)\\s*>/, function(m,p1){return (p1.indexOf('checked')>=0?p1:p1+' checked=\"checked\"')+'>';});AjaxSlim.Morph.morph(p, html);return document.getElementById('flagBox').checked;})()" },
+    { "do": "assert", "name": "box was unchecked by the click", "that": "raceClicked", "equals": false },
+    { "do": "assert", "name": "competing morph did NOT re-check the focused box (no stomp)", "that": "raceAfterMorph", "equals": false }
   ]
 }
