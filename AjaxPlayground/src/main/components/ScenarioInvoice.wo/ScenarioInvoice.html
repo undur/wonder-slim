@@ -12,9 +12,11 @@
 		code { background: #eee; padding: 0 .25rem; border-radius: 3px; }
 		.bar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: .8rem 1rem; }
 		.bar .grow { flex: 1; }
-		/* fixed table layout + explicit column widths so a line update doesn't reflow columns */
+		/* fixed table layout + explicit column widths so a line update doesn't reflow columns.
+		   NOTE: no overflow:hidden on the cells - it would clip the wonder-select's absolutely
+		   positioned dropdown to the row. table-layout:fixed + the colgroup already pin the columns. */
 		table.lines { width: 100%; border-collapse: collapse; margin-top: .6rem; table-layout: fixed; }
-		table.lines th, table.lines td { padding: .45rem .5rem; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; overflow: hidden; }
+		table.lines th, table.lines td { padding: .45rem .5rem; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
 		table.lines th { color: #777; font-weight: 600; font-size: .85rem; }
 		table.lines col.c-product { width: 40%; }
 		table.lines col.c-qty, table.lines col.c-unit, table.lines col.c-total { width: 14%; }
