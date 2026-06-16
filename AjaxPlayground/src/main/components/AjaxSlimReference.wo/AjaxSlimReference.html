@@ -60,7 +60,7 @@
 			<li><a href="#AjaxObserveField">AjaxObserveField</a></li>
 			<li><a href="#AjaxUpdateTrigger">AjaxUpdateTrigger</a></li>
 		</ul>
-		<h4>Morph-native widgets</h4>
+		<h4>Input widgets</h4>
 		<ul>
 			<li><a href="#AjaxPopUpButton">AjaxPopUpButton</a></li>
 			<li><a href="#AjaxBrowser">AjaxBrowser</a></li>
@@ -237,13 +237,13 @@
 &lt;wo:AjaxUpdateTrigger updateContainerID="summaryPanel"/&gt;</pre>
 	</div>
 
-	<!-- ============================ MORPH-NATIVE WIDGETS ============================ -->
-	<h2>Morph-native widgets</h2>
-	<p class="lead">Dependency-free custom-element widgets (the <code>wonder-select</code> custom element) that survive DOM morphing with zero re-init. Both are thin WO subclasses: they add the marker class <code>ajax-popup-button</code> and ensure <code>wonder-select.js</code>/<code>.css</code> are loaded — so a plain <code>WOPopUpButton</code>/<code>WOBrowser</code> with <code>class="ajax-popup-button"</code> is equivalent.</p>
+	<!-- ============================ INPUT WIDGETS ============================ -->
+	<h2>Input widgets</h2>
+	<p class="lead">Searchable, type-to-filter replacements for the standard <code>&lt;select&gt;</code> elements (the dependency-free <code>wonder-select</code> custom element). Both are thin WO subclasses: they add the marker class <code>ajax-popup-button</code> and ensure <code>wonder-select.js</code>/<code>.css</code> are loaded — so a plain <code>WOPopUpButton</code>/<code>WOBrowser</code> with <code>class="ajax-popup-button"</code> is equivalent.</p>
 
 	<div class="el">
 		<h3 id="AjaxPopUpButton"><code>AjaxPopUpButton</code> <span class="tag t-widget">Widget</span></h3>
-		<p class="role">A drop-in <code>WOPopUpButton</code> that renders a searchable, morph-native single-select instead of a bare <code>&lt;select&gt;</code>. Reach for it when a long option list needs type-to-filter. The widget auto-enhances via a MutationObserver and stays correct across Ajax morphs with no per-page init.</p>
+		<p class="role">A drop-in <code>WOPopUpButton</code> that renders a searchable single-select instead of a bare <code>&lt;select&gt;</code>. Reach for it when a long option list needs type-to-filter. The widget auto-enhances any matching <code>&lt;select&gt;</code> on the page, so it needs no per-page init.</p>
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
