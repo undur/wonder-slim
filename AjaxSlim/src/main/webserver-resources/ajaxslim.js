@@ -710,6 +710,17 @@
 	// to its option list, so a joined string would round-trip as no selection. Everything else is a
 	// single value.
 	function appendFieldValues(body, field) {
+		var type = (field.type || '').toLowerCase();
+		// A checkbox/radio contributes its value ONLY when checked - an unchecked one submits nothing,
+		// exactly as a real form does (and as serializeForm() does). Appending field.value regardless
+		// (a checkbox's value is its value attribute, not its checked state) made a partial-submit
+		// observer on a checkbox always look "on", so toggling it off never registered server-side.
+		if (type === 'checkbox' || type === 'radio') {
+			if (field.checked) {
+				body.append(field.name, field.value);
+			}
+			return;
+		}
 		if (field.tagName && field.tagName.toLowerCase() === 'select' && field.multiple) {
 			for (var i = 0; i < field.options.length; i++) {
 				if (field.options[i].selected) {
