@@ -42,12 +42,16 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 
 	/**
 	 * The framework-wide default for whether AjaxUpdateContainers morph their content on update
-	 * (as opposed to replacing innerHTML). This is the SINGLE SOURCE OF TRUTH for the default -
-	 * flipping morphing on globally is a one-line change here. A per-container "morph" binding
-	 * always overrides this default in either direction, so morph="$false" remains a permanent,
-	 * reliable opt-out even after the default flips to true.
+	 * (as opposed to replacing innerHTML). This is the SINGLE SOURCE OF TRUTH for the default.
+	 * <p>
+	 * It is <b>false</b>: the legacy Ajax framework defaults to classic innerHTML replacement, exactly
+	 * as it always has, so upgrading causes no behavioural change. Morphing is opt-in - turn it on for
+	 * a single container with morph="$true", or flip this constant to true to enable it framework-wide.
+	 * A per-container "morph" binding always overrides this default in either direction, so both
+	 * morph="$true" and morph="$false" remain reliable regardless of the default. (For new work that
+	 * wants morphing as the baseline, use the AjaxSlim framework instead, which is morph-native.)
 	 */
-	public static final boolean MORPH_BY_DEFAULT = true;
+	public static final boolean MORPH_BY_DEFAULT = false;
 
 	/**
 	 * Resolves whether the given container should morph: the per-container "morph" binding if
@@ -206,8 +210,8 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				appendTagAttributeToResponse(response, "style", valueForBinding("style", component));
 				appendTagAttributeToResponse(response, "data-updateUrl", AjaxUtils.ajaxComponentActionUrl(context));
 				// Emit the resolved morph decision explicitly in both states so the JS side has a
-				// single, unambiguous source of truth. An explicit data-morph="false" forces classic
-				// innerHTML replacement and keeps doing so even after MORPH_BY_DEFAULT flips to true.
+				// single, unambiguous source of truth, independent of whatever MORPH_BY_DEFAULT is set
+				// to. data-morph="false" forces classic innerHTML replacement; data-morph="true" morphs.
 				appendTagAttributeToResponse(response, "data-morph", shouldMorph(component) ? "true" : "false");
 				// appendTagAttributeToResponse(response, "woElementID", context.elementID());
 				response.appendContentString(">");
