@@ -171,6 +171,40 @@ public class ScenarioInvoice extends PlaygroundPage {
 		return null;
 	}
 
+	public boolean isFirstLine() {
+		return _lines.indexOf(currentLine) == 0;
+	}
+
+	public boolean isLastLine() {
+		return _lines.indexOf(currentLine) == _lines.size() - 1;
+	}
+
+	public boolean canMoveUp() {
+		return !isFirstLine();
+	}
+
+	public boolean canMoveDown() {
+		return !isLastLine();
+	}
+
+	/** Swap the current line with the one above it. */
+	public WOActionResults moveCurrentLineUp() {
+		int i = _lines.indexOf(currentLine);
+		if (i > 0) {
+			_lines.set(i, _lines.set(i - 1, currentLine));
+		}
+		return null;
+	}
+
+	/** Swap the current line with the one below it. */
+	public WOActionResults moveCurrentLineDown() {
+		int i = _lines.indexOf(currentLine);
+		if (i >= 0 && i < _lines.size() - 1) {
+			_lines.set(i, _lines.set(i + 1, currentLine));
+		}
+		return null;
+	}
+
 	public WOActionResults save() {
 		_saveCount++;
 		return null;

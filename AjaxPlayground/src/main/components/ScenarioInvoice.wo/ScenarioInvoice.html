@@ -22,7 +22,10 @@
 		table.lines th { color: #777; font-weight: 600; font-size: .85rem; }
 		table.lines col.c-product { width: 40%; }
 		table.lines col.c-qty, table.lines col.c-unit, table.lines col.c-total { width: 14%; }
-		table.lines col.c-actions { width: 18%; }
+		table.lines col.c-actions { width: 24%; }
+		/* the move/remove buttons share a row; keep them snug */
+		table.lines td .btn.small { margin-right: .15rem; }
+		.btn.small.disabled { opacity: .35; pointer-events: none; }
 		/* the product wonder-select fills its (fixed-width) column instead of sizing to content */
 		table.lines td .ajax-popup-button, table.lines td wonder-select { width: 100%; box-sizing: border-box; }
 		.num { text-align: right; }
@@ -122,7 +125,19 @@
 							</td>
 							<td class="num"><strong class="lineTotal"><wo:str value="$currentLine.lineTotal" /></strong></td>
 							<td>
-								<wo:AjaxUpdateLink action="$removeCurrentLine" updateContainerID="linesContainer;totalsPanel;renderedInvoice" class="btn ghost small">remove</wo:AjaxUpdateLink>
+								<wo:if condition="$canMoveUp">
+									<wo:AjaxUpdateLink action="$moveCurrentLineUp" updateContainerID="linesContainer;totalsPanel;renderedInvoice" class="btn ghost small" title="Move up">&uarr;</wo:AjaxUpdateLink>
+								</wo:if>
+								<wo:if condition="$isFirstLine">
+									<span class="btn ghost small disabled" title="Already first" aria-hidden="true">&uarr;</span>
+								</wo:if>
+								<wo:if condition="$canMoveDown">
+									<wo:AjaxUpdateLink action="$moveCurrentLineDown" updateContainerID="linesContainer;totalsPanel;renderedInvoice" class="btn ghost small" title="Move down">&darr;</wo:AjaxUpdateLink>
+								</wo:if>
+								<wo:if condition="$isLastLine">
+									<span class="btn ghost small disabled" title="Already last" aria-hidden="true">&darr;</span>
+								</wo:if>
+								<wo:AjaxUpdateLink action="$removeCurrentLine" updateContainerID="linesContainer;totalsPanel;renderedInvoice" class="btn ghost small remove-line" title="Remove line">remove</wo:AjaxUpdateLink>
 								<wo:if condition="$currentLineInvalid"><span class="err">qty &gt; 0</span></wo:if>
 							</td>
 						</wo:AjaxUpdateContainer>
