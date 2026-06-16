@@ -76,6 +76,10 @@ public class Main extends ERXComponent {
 		return pageWithName( AjaxOverview.class );
 	}
 
+	public WOActionResults ajaxSlimReference() {
+		return pageWithName( AjaxSlimReference.class );
+	}
+
 	public WOActionResults galleryUpdateContainer() {
 		return pageWithName( GalleryUpdateContainer.class );
 	}
