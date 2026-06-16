@@ -105,13 +105,32 @@
 				if (!code || !code.trim()) {
 					continue;
 				}
-				try {
-					(0, eval)(code);
+				Morph.evalIsolated(code);
+			}
+		},
+
+		// Run the scripts from a script-only ajax response. The server returns such a response either as
+		// a raw text/javascript body (no <script> wrapper - the case with no _u update marker) or with
+		// the JS wrapped in <script> tags. Eval a raw body directly; otherwise extract and run the tags.
+		runResponseScripts: function (text, contentType) {
+			var isRawJs = /(?:application|text)\/(?:x-)?(?:java|ecma)script/i.test(contentType || '');
+			if (isRawJs || text.indexOf('<script') === -1) {
+				if (text && text.trim()) {
+					Morph.evalIsolated(text);
 				}
-				catch (e) {
-					if (window.console) {
-						console.error('AjaxSlim: error evaluating a script in updated content (continuing with the rest)', e, code);
-					}
+				return;
+			}
+			Morph.runScripts(text);
+		},
+
+		// Indirect eval keeps each script in global scope; isolate so one failure doesn't kill the rest.
+		evalIsolated: function (code) {
+			try {
+				(0, eval)(code);
+			}
+			catch (e) {
+				if (window.console) {
+					console.error('AjaxSlim: error evaluating a script in an ajax response (continuing)', e, code);
 				}
 			}
 		}
@@ -207,12 +226,19 @@
 			}
 		}
 		activityStart();
+		var responseContentType = '';
 		return fetch(url, init).then(function (response) {
+			responseContentType = response.headers.get('Content-Type') || '';
 			return response.text();
 		}).then(function (text) {
 			if (targetId == null) {
-				// No container to update - the response is just scripts to run globally.
-				Morph.runScripts(text);
+				// No container to update - the response is JS to run globally (e.g. an action that
+				// pushed AjaxSlim.AUC.update('someOtherContainer') server-side via
+				// AjaxUpdateContainer.updateContainerWithID). When there is no _u marker on the request,
+				// the server returns the script as a RAW text/javascript body (no <script> wrapper); when
+				// there is, it wraps it in <script> tags. Handle both: eval a raw-JS body directly, and
+				// also run any <script> tags the body carries.
+				Morph.runResponseScripts(text, responseContentType);
 			}
 			else {
 				var receiver = elementFor(targetId);
