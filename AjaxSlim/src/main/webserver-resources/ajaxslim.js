@@ -211,19 +211,25 @@
 		catch (e) { /* CustomEvent unsupported in ancient browsers - the data-attribute still works */ }
 	}
 
+	// Headers for an ajax request. Always sends x-requested-with (ERXAjaxApplication.isAjaxRequest keys
+	// on it). For a URLSearchParams POST body we set form-urlencoded; FormData sets its own multipart
+	// content-type, so we leave it.
+	function postHeaders(body) {
+		var headers = { 'x-requested-with': 'XMLHttpRequest' };
+		if (body != null && typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) {
+			headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+		}
+		return headers;
+	}
+
 	function fetchAndMorph(targetId, url, body, onDone) {
 		var init = {
 			credentials: 'same-origin',
-			headers: { 'x-requested-with': 'XMLHttpRequest' }
+			headers: postHeaders(body)
 		};
 		if (body != null) {
 			init.method = 'POST';
 			init.body = body;
-			// URLSearchParams/FormData set their own content-type; we only need the header below for
-			// URLSearchParams (form-urlencoded). FormData sets multipart automatically, so leave it.
-			if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) {
-				init.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
-			}
 		}
 		activityStart();
 		var responseContentType = '';
@@ -266,6 +272,63 @@
 		}).then(activityEnd, activityEnd); // finally: always settle the activity counter
 	}
 
+	// Split a ";"-joined update target ("a;b;c") into trimmed, non-empty ids.
+	function splitIds(value) {
+		var out = [];
+		var parts = String(value).split(';');
+		for (var i = 0; i < parts.length; i++) {
+			var t = parts[i].trim();
+			if (t) {
+				out.push(t);
+			}
+		}
+		return out;
+	}
+
+	// Demux a multi-update response: parse out each <ajaxslim-fragment data-id="…"> and morph its inner
+	// content into the live container of that id. Each fragment is applied independently - a container
+	// whose id is no longer on the page is skipped, the rest still update; each honours its own
+	// data-morph and fires its onRefreshComplete. Scripts inside a fragment run via Morph (same as a
+	// single update). Robust to fragments arriving in any order.
+	function applyFragments(text) {
+		// Parse with the HTML parser (template content so nothing executes on parse). <ajaxslim-fragment>
+		// is an unknown element, preserved verbatim by the parser.
+		var holder = document.createElement('template');
+		holder.innerHTML = text;
+		var fragments = holder.content.querySelectorAll('ajaxslim-fragment');
+		if (!fragments.length) {
+			// No frames found - treat the whole body as a single container? No: a multi response always
+			// frames. If we get here the response was unexpected; run any scripts it carried so a
+			// script-only push still works, and warn.
+			Morph.runResponseScripts(text, 'text/html');
+			if (window.console) {
+				console.warn('AjaxSlim: multi-update response carried no <ajaxslim-fragment>s');
+			}
+			return;
+		}
+		for (var i = 0; i < fragments.length; i++) {
+			var frag = fragments[i];
+			var id = frag.getAttribute('data-id');
+			if (!id) {
+				continue;
+			}
+			var receiver = elementFor(id);
+			if (receiver == null) {
+				// container gone from the page - skip it, keep going with the others
+				continue;
+			}
+			var html = frag.innerHTML;
+			var doMorph = receiver.getAttribute('data-morph') !== 'false';
+			if (doMorph) {
+				Morph.morph(receiver, html);
+			}
+			else {
+				Morph.replace(receiver, html);
+			}
+			AUC.fireRefreshComplete(id);
+		}
+	}
+
 	var AUC = {
 		// Remember a container's options (currently the onRefreshComplete hook) keyed by id. Safe to
 		// call repeatedly - later calls overwrite, which is exactly what we want after a morph
@@ -293,6 +356,39 @@
 			fetchAndMorph(id, url, null, function () {
 				AUC.fireRefreshComplete(id);
 			});
+		},
+
+		// Update SEVERAL containers from ONE request. actionUrl is the trigger's action URL (e.g. an
+		// AjaxUpdateLink's); we fetch it once with _u=a;b;c, and the server returns each container's
+		// content framed in <ajaxslim-fragment data-id="…">. We demux those and morph each into its live
+		// container, honouring each one's data-morph, then fire its onRefreshComplete. One round-trip.
+		updateMany: function (ids, actionUrl, options) {
+			options = options || {};
+			if (!ids || !ids.length) {
+				return;
+			}
+			if (ids.length === 1) {
+				// Degenerate case: not actually multi - the server would return a bare (unframed)
+				// response, so route through the normal single path.
+				return AUC.update(ids[0], options);
+			}
+			var joined = ids.join(';');
+			var url = addUpdateParams(actionUrl, joined, !!options.replace);
+			activityStart();
+			return fetch(url, {
+				credentials: 'same-origin',
+				headers: { 'x-requested-with': 'XMLHttpRequest' }
+			}).then(function (response) {
+				return response.text();
+			}).then(function (text) {
+				applyFragments(text);
+				runHook(options.onSuccess);
+				runHook(options.onComplete);
+			}).catch(function (e) {
+				if (window.console) {
+					console.error('AjaxSlim: multi-update failed for [' + ids.join(', ') + ']', e);
+				}
+			}).then(activityEnd, activityEnd);
 		},
 
 		// Run the registered onRefreshComplete hook, if any, after an update/morph completes.
@@ -365,8 +461,14 @@
 	// -----------------------------------------------------------------------
 	var AUL = {
 		// Update targetId by fetching actionUrl (already an absolute ajax action URL) and morphing.
+		// A targetId of "a;b;c" is a multi-container update - a single container id never contains ';' -
+		// so route those to updateMany (one request, framed fragments, morph each). Single ids are
+		// unaffected.
 		update: function (targetId, actionUrl, options) {
 			options = options || {};
+			if (targetId != null && targetId.indexOf(';') !== -1) {
+				return AUC.updateMany(splitIds(targetId), actionUrl, options);
+			}
 			var url = addUpdateParams(actionUrl, targetId, !!options.replace);
 			fetchAndMorph(targetId, url, null, function () {
 				runHook(options.onSuccess);
@@ -470,6 +572,27 @@
 				body.append(AjaxSubmitButtonNameKey, options.submitButtonName);
 			}
 			var url = submitUrl(form, targetId, !!options.replace);
+			// A ";"-joined targetId ("a;b;c") is a multi-container update: one POST, framed fragments,
+			// morph each. A single container id never contains ';', so single submits are unaffected.
+			if (targetId != null && targetId.indexOf(';') !== -1) {
+				activityStart();
+				return fetch(url, {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: postHeaders(body),
+					body: body
+				}).then(function (response) {
+					return response.text();
+				}).then(function (text) {
+					applyFragments(text);
+					runHook(options.onSuccess);
+					runHook(options.onComplete);
+				}).catch(function (e) {
+					if (window.console) {
+						console.error('AjaxSlim: multi submit failed for "' + targetId + '"', e);
+					}
+				}).then(activityEnd, activityEnd);
+			}
 			fetchAndMorph(targetId, url, body, function () {
 				runHook(options.onSuccess);
 				runHook(options.onComplete);

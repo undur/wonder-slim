@@ -161,13 +161,15 @@ public class AjaxUtils {
 	public static boolean shouldHandleRequest(WORequest request, WOContext context, String containerID) {
 		String elementID = context.elementID();
 		String senderID = context.senderID();
-		String updateContainerID = null;
-		if (containerID != null) {
-			if (AjaxResponse.isAjaxUpdatePass(request)) {
-				updateContainerID = AjaxUpdateContainer.updateContainerID(request);
-			}
+		// The requested update target. With a single target this is one id (unchanged); with the
+		// multi-target feature (updateContainerID="a;b;c") it is a ";"-separated set, and this AUC
+		// renders its content if its id is a MEMBER of that set. isRequestedUpdateContainer() handles
+		// both - for the single case it is exactly the old `containerID.equals(updateContainerID)`.
+		boolean targetedContainer = false;
+		if (containerID != null && AjaxResponse.isAjaxUpdatePass(request)) {
+			targetedContainer = AjaxUpdateContainer.isRequestedUpdateContainer(request, containerID);
 		}
-		boolean shouldHandleRequest = elementID != null && (elementID.equals(senderID) || (containerID != null && containerID.equals(updateContainerID)) || elementID.equals(ERXAjaxApplication.ajaxSubmitButtonName(request)));
+		boolean shouldHandleRequest = elementID != null && (elementID.equals(senderID) || targetedContainer || elementID.equals(ERXAjaxApplication.ajaxSubmitButtonName(request)));
 		return shouldHandleRequest;
 	}
 

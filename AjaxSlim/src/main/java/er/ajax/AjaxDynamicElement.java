@@ -43,8 +43,19 @@ public abstract class AjaxDynamicElement extends ERXDynamicElement implements IA
 				log.warn("An Ajax request attempted to return the page, which is almost certainly an error.");
 				result = null;
 			}
-			if (result == null && !ERXAjaxApplication.isAjaxReplacement(request)) {
+			// Multi-target update (_u="a;b;c"): SEVERAL containers must render into the one response, so
+			// this element appended its fragment but must NOT halt the traversal by returning a non-null
+			// result - otherwise WO stops at the first matched container. Returning null lets the page
+			// walk reach the sibling targets too (each appends to the same shared response). The single
+			// case is unchanged: it returns the response and stops, exactly as before.
+			boolean multi = AjaxUpdateContainer.isMultiUpdate(request);
+			if (result == null && !ERXAjaxApplication.isAjaxReplacement(request) && !multi) {
 				result = AjaxUtils.createResponse(request, context);
+			}
+			else if (multi && hasChildrenElements()) {
+				// keep walking into this container's children (nested targets, and to reach siblings the
+				// parent group continues because we return null)
+				super.invokeAction(request, context);
 			}
 		} else if (hasChildrenElements()) {
 			result = super.invokeAction(request, context);

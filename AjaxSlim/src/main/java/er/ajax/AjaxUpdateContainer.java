@@ -7,7 +7,9 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSMutableArray;
 
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
@@ -207,6 +209,17 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 
 		WOResponse response = AjaxUtils.createResponse(request, context);
 		AjaxUtils.setPageReplacementCacheKey(context, id);
+
+		// Multi-target update (updateContainerID="a;b;c"): several containers render their content into
+		// ONE response in this same update pass, so each frames its content in an inert
+		// <ajaxslim-fragment data-id> wrapper the client demuxes. For a single-target update this is
+		// skipped, so the response body is byte-for-byte identical to before (just the children, plus
+		// any onRefreshComplete script).
+		boolean multi = AjaxUpdateContainer.isMultiUpdate(request);
+		if (multi) {
+			response.appendContentString("<ajaxslim-fragment data-id=\"" + id + "\">");
+		}
+
 		if (hasChildrenElements()) {
 			appendChildrenToResponse(response, context);
 		}
@@ -215,6 +228,10 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 			AjaxUtils.appendScriptHeader(response);
 			response.appendContentString(onRefreshComplete);
 			AjaxUtils.appendScriptFooter(response);
+		}
+
+		if (multi) {
+			response.appendContentString("</ajaxslim-fragment>");
 		}
 		return null;
 	}
@@ -240,6 +257,58 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 
 	public static boolean hasUpdateContainerID(WORequest request) {
 		return AjaxUpdateContainer.updateContainerID(request) != null;
+	}
+
+	/** The character separating ids in a multi-target update request ({@code _u=a;b;c}). */
+	public static final String MULTI_UPDATE_SEPARATOR = ";";
+
+	/**
+	 * True when the current update pass targets MORE THAN ONE container (the {@code _u} value is a
+	 * separated set). Drives the framed-fragment response format; a single-target update is unaffected.
+	 */
+	public static boolean isMultiUpdate(WORequest request) {
+		String id = AjaxUpdateContainer.updateContainerID(request);
+		return id != null && id.indexOf(MULTI_UPDATE_SEPARATOR) != -1;
+	}
+
+	/**
+	 * The set of requested update container ids for this pass. One id for a normal update; several for
+	 * a multi-target update ({@code updateContainerID="a;b;c"}). Empty/blank ids are dropped.
+	 */
+	public static NSArray<String> requestedUpdateContainerIDs(WORequest request) {
+		String id = AjaxUpdateContainer.updateContainerID(request);
+		if (id == null) {
+			return NSArray.emptyArray();
+		}
+		if (id.indexOf(MULTI_UPDATE_SEPARATOR) == -1) {
+			return new NSArray<>(id);
+		}
+		NSMutableArray<String> ids = new NSMutableArray<>();
+		for (String part : id.split(MULTI_UPDATE_SEPARATOR)) {
+			String trimmed = part.trim();
+			if (trimmed.length() > 0) {
+				ids.addObject(trimmed);
+			}
+		}
+		return ids;
+	}
+
+	/**
+	 * True if {@code containerID} is (one of) the requested update target(s). For a single-target
+	 * request this is exactly an id equality check; for multi-target it is set membership.
+	 */
+	public static boolean isRequestedUpdateContainer(WORequest request, String containerID) {
+		if (containerID == null) {
+			return false;
+		}
+		String id = AjaxUpdateContainer.updateContainerID(request);
+		if (id == null) {
+			return false;
+		}
+		if (id.indexOf(MULTI_UPDATE_SEPARATOR) == -1) {
+			return containerID.equals(id);
+		}
+		return AjaxUpdateContainer.requestedUpdateContainerIDs(request).containsObject(containerID);
 	}
 
 	public static String currentUpdateContainerID() {

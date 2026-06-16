@@ -16,6 +16,7 @@ import ajaxplayground.components.scenario.ScenarioDropdownViewport;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioNested;
 import ajaxplayground.components.scenario.ScenarioMultiObserve;
+import ajaxplayground.components.scenario.ScenarioMultiUpdate;
 import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioScripts;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
@@ -60,6 +61,10 @@ public class Main extends ERXComponent {
 
 	public WOActionResults scenarioMultiObserve() {
 		return pageWithName( ScenarioMultiObserve.class );
+	}
+
+	public WOActionResults scenarioMultiUpdate() {
+		return pageWithName( ScenarioMultiUpdate.class );
 	}
 
 	public WOActionResults ajaxOverview() {

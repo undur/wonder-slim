@@ -128,6 +128,8 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 				buffer.append("AjaxSlim.AUL.request(" + actionUrlExpression + ", " + options + ")");
 			}
 			else {
+				// A "a;b;c" target is a multi-container update (a single id never contains ';'); AUL.update
+				// detects this on the client and routes to updateMany. So no special-casing here.
 				buffer.append("AjaxSlim.AUL.update('" + target + "', " + actionUrlExpression + ", " + options + ")");
 			}
 		}
@@ -253,6 +255,8 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 	public WOActionResults handleRequest(WORequest request, WOContext context) {
 		WOComponent component = context.component();
 		boolean disabled = booleanValueForBinding("disabled", false, component);
+		// updateContainerID may be a single id or a ";"-joined multi-target set ("a;b;c") - either way it
+		// is set as the _u value, and the update pass renders every container it names.
 		String updateContainerID = AjaxUpdateContainer.updateContainerID(this, component);
 		AjaxUpdateContainer.setUpdateContainerID(request, updateContainerID);
 		WOActionResults results = null;
