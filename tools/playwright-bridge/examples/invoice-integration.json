@@ -1,0 +1,67 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioInvoice",
+  "comment": "Integration test: drive a realistic invoice-editing session and assert the grand total (the canary) stays exactly equal to the recomputed sum at every step. A wrong total means some element interfered with another - an observer double-fired, a morph dropped a row, a binding didn't round-trip. Starts: line1 2x500=1000, line2 1x1200=1200, line3 4x75=300 => 2500. Observe fields fire on change (blur/Tab), so edits are committed with Tab.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#grandTotal" },
+
+    { "do": "read", "name": "total0", "selector": "#grandTotal", "what": "text" },
+    { "do": "read", "name": "line1_0", "selector": "#linebox-1 .lineTotal", "what": "text" },
+    { "do": "assert", "name": "initial grand total is 2500", "that": "total0", "equals": "2500" },
+    { "do": "assert", "name": "line 1 total is 1000", "that": "line1_0", "equals": "1000" },
+
+    { "do": "comment", "text": "Edit line 1 quantity 2 -> 5 (5x500=2500). Grand total should become 2500-1000+2500 = 4000. One field edit refreshes its line box AND the totals (multi-update _u=linebox-1;totalsPanel)." },
+    { "do": "fill", "selector": "#qty-1", "text": "5" },
+    { "do": "press", "selector": "#qty-1", "key": "Tab" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "line1_1", "selector": "#linebox-1 .lineTotal", "what": "text" },
+    { "do": "read", "name": "total1", "selector": "#grandTotal", "what": "text" },
+    { "do": "assert", "name": "line 1 total recomputed to 2500", "that": "line1_1", "equals": "2500" },
+    { "do": "assert", "name": "grand total recomputed to 4000", "that": "total1", "equals": "4000" },
+    { "do": "assert", "name": "line 2 was NOT disturbed by editing line 1", "that": "total1", "notEquals": "2500" },
+
+    { "do": "comment", "text": "Edit line 3 unit price 75 -> 100 (4x100=400). Grand total 4000-300+400 = 4100. Proves a SECOND independent observe field works alongside the first, no cross-talk." },
+    { "do": "fill", "selector": "#price-3", "text": "100" },
+    { "do": "press", "selector": "#price-3", "key": "Tab" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "line3_2", "selector": "#linebox-3 .lineTotal", "what": "text" },
+    { "do": "read", "name": "total2", "selector": "#grandTotal", "what": "text" },
+    { "do": "assert", "name": "line 3 total recomputed to 400", "that": "line3_2", "equals": "400" },
+    { "do": "assert", "name": "grand total now 4100", "that": "total2", "equals": "4100" },
+
+    { "do": "comment", "text": "Add a line (default 1x100=100): grand total 4100+100 = 4200. Add-line is a multi-update refreshing the whole lines container + totals in ONE request; refreshing totalsPanel then fires its AjaxUpdateTrigger, which cascades ONE more request to summaryPanel. So 2 requests total - the update plus the intended dependency cascade - NOT N-per-row. This proves the trigger cascade and multi-update coexist correctly." },
+    { "do": "marker", "label": "addline" },
+    { "do": "click", "selector": "#addLine" },
+    { "do": "wait", "ms": 900 },
+    { "do": "read", "name": "addReqs", "what": "requestCount", "marker": "addline" },
+    { "do": "read", "name": "total3", "selector": "#grandTotal", "what": "text" },
+    { "do": "read", "name": "lineCount3", "selector": "#linebox-4", "what": "exists" },
+    { "do": "assert", "name": "add line = 1 update + 1 intended trigger cascade (not N-per-row)", "that": "addReqs", "equals": 2 },
+    { "do": "assert", "name": "new line box 4 exists", "that": "lineCount3", "equals": true },
+    { "do": "assert", "name": "grand total now 4200", "that": "total3", "equals": "4200" },
+
+    { "do": "comment", "text": "The earlier edits must SURVIVE the add-line morph: line 1 still 2500, line 3 still 400. If a morph dropped/relabelled a row, these would be wrong." },
+    { "do": "read", "name": "line1_after_add", "selector": "#linebox-1 .lineTotal", "what": "text" },
+    { "do": "read", "name": "line3_after_add", "selector": "#linebox-3 .lineTotal", "what": "text" },
+    { "do": "assert", "name": "line 1 edit survived the add-line morph", "that": "line1_after_add", "equals": "2500" },
+    { "do": "assert", "name": "line 3 edit survived the add-line morph (no data jump)", "that": "line3_after_add", "equals": "400" },
+
+    { "do": "comment", "text": "Remove line 2 (1200): grand total 4200-1200 = 3000. Removing a row in the MIDDLE is the classic data-jumps-lines hazard; the remaining lines must keep their own totals." },
+    { "do": "click", "selector": "#linebox-2 a.btn" },
+    { "do": "wait", "ms": 800 },
+    { "do": "read", "name": "total4", "selector": "#grandTotal", "what": "text" },
+    { "do": "read", "name": "line2_gone", "selector": "#linebox-2", "what": "exists" },
+    { "do": "read", "name": "line1_after_remove", "selector": "#linebox-1 .lineTotal", "what": "text" },
+    { "do": "read", "name": "line3_after_remove", "selector": "#linebox-3 .lineTotal", "what": "text" },
+    { "do": "assert", "name": "line 2 removed", "that": "line2_gone", "equals": false },
+    { "do": "assert", "name": "grand total now 3000", "that": "total4", "equals": "3000" },
+    { "do": "assert", "name": "line 1 kept its value after a middle row was removed", "that": "line1_after_remove", "equals": "2500" },
+    { "do": "assert", "name": "line 3 kept its value after a middle row was removed", "that": "line3_after_remove", "equals": "400" },
+
+    { "do": "comment", "text": "Save (AjaxSubmitButton) and confirm the form round-trips without disturbing the total." },
+    { "do": "click", "selector": "#saveBtn" },
+    { "do": "wait", "ms": 800 },
+    { "do": "read", "name": "total5", "selector": "#grandTotal", "what": "text" },
+    { "do": "assert", "name": "grand total unchanged by save", "that": "total5", "equals": "3000" }
+  ]
+}

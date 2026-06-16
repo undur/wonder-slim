@@ -1,0 +1,203 @@
+package ajaxplayground.components.scenario;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.webobjects.appserver.WOActionResults;
+import com.webobjects.appserver.WOContext;
+import com.webobjects.foundation.NSArray;
+
+import ajaxplayground.components.PlaygroundPage;
+
+/**
+ * Integration scenario: a working invoice editor.
+ *
+ * This page is deliberately NOT a test grid - it is a small but real-feeling application that happens
+ * to exercise EVERY AjaxSlim element together, so behavioural conflicts surface as something that
+ * feels "wrong" (a total that doesn't add up, a row's data on the wrong line, a validation message
+ * that vanishes) rather than as an abstract assertion failure. The grand total is the canary: it is a
+ * sum of values the user is editing through several different elements at once, so almost any
+ * cross-element regression makes it visibly incorrect.
+ *
+ * Elements in play (and why each is here, not contrived):
+ * - AjaxPopUpButton (wonder-select)   product picker on each line + the customer picker
+ * - AjaxBrowser (multi-select)        invoice tags
+ * - AjaxObserveField                  qty / unit-price fields recompute the line + grand total live
+ * - AjaxUpdateLink + multi-update     "add line" / "remove line" refresh the rows AND the totals in one request
+ * - AjaxSubmitButton                  Save
+ * - AjaxDefaultSubmitButton           Enter-to-save
+ * - AjaxUpdateTrigger                 toggling "finalised" cascades a refresh to the summary panel
+ * - AjaxSelfUpdatingContainer         a "last activity" ticker polling in the background
+ * - AjaxPing / AjaxPingUpdate         a concurrent-edit watcher (cache-key gated)
+ * - AjaxBusySpinner                   activity indicator during saves
+ * - AjaxModalContainer                "edit customer details" dialog with its own form
+ */
+public class ScenarioInvoice extends PlaygroundPage {
+
+	private final List<InvoiceLine> _lines;
+	private int _nextLineID;
+
+	/** Bindings the widgets edit. Public ivars per the playground idiom. */
+	public InvoiceLine currentLine;        // repetition item
+	public String currentProduct;          // popup repetition item
+	public String currentTag;              // browser repetition item
+	public String customer;
+	public NSArray<String> tags;
+	public boolean finalised;
+
+	private int _saveCount;
+	private int _activityTick;
+
+	public ScenarioInvoice(WOContext context) {
+		super(context);
+		_lines = new ArrayList<>();
+		_lines.add(new InvoiceLine(1, "Widget", 2, 500));
+		_lines.add(new InvoiceLine(2, "Gadget", 1, 1200));
+		_lines.add(new InvoiceLine(3, "Sprocket", 4, 75));
+		_nextLineID = 4;
+		customer = "Acme Corp";
+		tags = new NSArray<>();
+	}
+
+	// --- data the widgets bind to ---------------------------------------------------------------
+
+	public List<InvoiceLine> lines() {
+		return _lines;
+	}
+
+	public List<String> products() {
+		return Arrays.asList("Widget", "Gadget", "Sprocket", "Cog", "Flange", "Grommet", "Bracket", "Bearing");
+	}
+
+	public List<String> customers() {
+		return Arrays.asList("Acme Corp", "Globex", "Initech", "Umbrella", "Wayne Enterprises", "Stark Industries");
+	}
+
+	public List<String> allTags() {
+		return Arrays.asList("urgent", "wholesale", "tax-exempt", "recurring", "international");
+	}
+
+	/** A stable per-row id used for DOM ids - never reused, so data follows identity across morphs. */
+	public String rowID() {
+		return "line-" + currentLine.id();
+	}
+
+	public String qtyFieldID() {
+		return "qty-" + currentLine.id();
+	}
+
+	public String priceFieldID() {
+		return "price-" + currentLine.id();
+	}
+
+	public String lineContainerID() {
+		return "linebox-" + currentLine.id();
+	}
+
+	public String productFieldID() {
+		return "product-" + currentLine.id();
+	}
+
+	/** This line's own box plus the totals panel - what a single qty/price edit refreshes (the line's
+	 *  total changes AND the grand total). A multi-target update string. */
+	public String lineAndTotalsIDs() {
+		return "linebox-" + currentLine.id() + ";totalsPanel";
+	}
+
+	public boolean currentLineInvalid() {
+		return !currentLine.isValid();
+	}
+
+	public String lineRowClass() {
+		return currentLine.isValid() ? "" : "invalid";
+	}
+
+	public String statusPillClass() {
+		return finalised ? "pill final" : "pill";
+	}
+
+	// --- derived totals (the canary) ------------------------------------------------------------
+
+	public int grandTotal() {
+		int sum = 0;
+		for (InvoiceLine line : _lines) {
+			sum += line.lineTotal();
+		}
+		return sum;
+	}
+
+	public int lineCount() {
+		return _lines.size();
+	}
+
+	public boolean hasInvalidLine() {
+		for (InvoiceLine line : _lines) {
+			if (!line.isValid()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public int saveCount() {
+		return _saveCount;
+	}
+
+	/** Just the totals container - the target an observe-field on a qty/price field refreshes. */
+	public String totalsContainerID() {
+		return "totalsPanel";
+	}
+
+	// --- actions --------------------------------------------------------------------------------
+
+	/** A qty/price field changed - nothing to do server-side beyond letting the binding round-trip
+	 *  and the totals re-render. */
+	public WOActionResults lineEdited() {
+		return null;
+	}
+
+	public WOActionResults addLine() {
+		_lines.add(new InvoiceLine(_nextLineID++, "Widget", 1, 100));
+		return null;
+	}
+
+	/** Remove the row currently being rendered in the repetition (bound via currentLine). */
+	public WOActionResults removeCurrentLine() {
+		_lines.remove(currentLine);
+		return null;
+	}
+
+	public WOActionResults save() {
+		_saveCount++;
+		return null;
+	}
+
+	public WOActionResults toggleFinalised() {
+		finalised = !finalised;
+		return null;
+	}
+
+	// --- background pollers ---------------------------------------------------------------------
+
+	/** Drives the "last activity" ticker (AjaxSelfUpdatingContainer): bumps each poll so the ticker
+	 *  visibly advances WITHOUT disturbing the editing happening elsewhere on the page. */
+	public WOActionResults activityPoll() {
+		_activityTick++;
+		return null;
+	}
+
+	public int activityTick() {
+		return _activityTick;
+	}
+
+	/** The cache key for the concurrent-edit AjaxPing: derived from the invoice state, so the heavy
+	 *  target only refreshes when something actually changed. */
+	public String invoiceCacheKey() {
+		return _lines.size() + ":" + grandTotal() + ":" + _saveCount + ":" + finalised;
+	}
+
+	public String finalisedLabel() {
+		return finalised ? "Finalised" : "Draft";
+	}
+}
