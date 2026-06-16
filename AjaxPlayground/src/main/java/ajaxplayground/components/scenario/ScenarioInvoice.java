@@ -101,16 +101,15 @@ public class ScenarioInvoice extends PlaygroundPage {
 		return "product-" + currentLine.id();
 	}
 
-	/** What a single qty/price/product edit refreshes: the whole lines container (NOT just the edited
-	 *  row), the totals panel, and the rendered invoice. Refreshing the whole container - rather than
-	 *  only "linebox-<thisRow>" - is deliberate: a row's own action links (move up/down, remove) carry
-	 *  a WO context id baked in at render time, and a link is only refreshed when ITS row re-renders.
-	 *  If an edit re-rendered only the edited row, every OTHER row's links would keep pointing at an
-	 *  ever-older context; after enough edits that context is evicted from the page-replacement cache
-	 *  and the stale link 500s ("backtracked too far"). Re-rendering the whole container on each edit
-	 *  keeps every row's links current. Morph makes the wider refresh cheap. */
+	/** This line's own box, the totals panel, and the rendered invoice - a PER-ROW targeted update.
+	 *  This is deliberately the cache-hungry pattern: editing one row re-renders only that row, so the
+	 *  OTHER rows' action links (move/remove) keep an ever-older WO context id. Under the legacy flat,
+	 *  context-id-keyed page-replacement cache that eventually evicts a still-valid container's page and
+	 *  the stale link 500s. This page is the stress test for the container-identity-keyed cache on this
+	 *  branch: if the cache is correct, per-row updates work indefinitely. (master uses a whole-container
+	 *  refresh as the pragmatic workaround for the old cache.) */
 	public String lineAndTotalsIDs() {
-		return "linesContainer;totalsPanel;renderedInvoice";
+		return "linebox-" + currentLine.id() + ";totalsPanel;renderedInvoice";
 	}
 
 	public boolean currentLineInvalid() {

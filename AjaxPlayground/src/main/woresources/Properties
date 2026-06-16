@@ -4,3 +4,8 @@
 # shows up in http://localhost:9485/apps - that's how the dev loop discovers where it is running.
 wolips.host=localhost
 wolips.port=9485
+
+# Log the ajax fragment (page-replacement) cache size + page->container structure on every fragment
+# store - so you can watch the cache stay sized by (pages x containers) instead of growing per
+# interaction. Dev/showcase only; off by default in the framework.
+er.extensions.appserver.ajax.ERXAjaxSession.logPageReplacementCache=true
