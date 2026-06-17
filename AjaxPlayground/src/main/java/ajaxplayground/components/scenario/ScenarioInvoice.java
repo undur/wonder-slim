@@ -11,6 +11,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
 
 import ajaxplayground.components.PlaygroundPage;
+import er.ajax.AjaxSortable;
 
 /**
  * Integration scenario: a working invoice editor.
@@ -205,6 +206,20 @@ public class ScenarioInvoice extends PlaygroundPage {
 		int i = _lines.indexOf(currentLine);
 		if (i >= 0 && i < _lines.size() - 1) {
 			_lines.set(i, _lines.set(i + 1, currentLine));
+		}
+		return null;
+	}
+
+	/**
+	 * Drag-to-reorder target for AjaxSortable. The element reports the move purely positionally; we read
+	 * it with AjaxSortable.dragResult and apply it the same way the move-up/down actions do, just
+	 * generalized to an arbitrary distance: remove from fromIndex, insert at toIndex. Both indices refer
+	 * to the same (pre-move) list snapshot the user was looking at.
+	 */
+	public WOActionResults reorderLines() {
+		AjaxSortable.DragResult move = AjaxSortable.dragResult(context().request());
+		if (move != null && move.isValidFor(_lines.size())) {
+			_lines.add(move.toIndex(), _lines.remove(move.fromIndex()));
 		}
 		return null;
 	}

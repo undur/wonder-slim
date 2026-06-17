@@ -20,9 +20,10 @@
 		table.lines { width: 100%; border-collapse: collapse; margin-top: .6rem; table-layout: fixed; }
 		table.lines th, table.lines td { padding: .45rem .5rem; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
 		table.lines th { color: #777; font-weight: 600; font-size: .85rem; }
-		table.lines col.c-product { width: 40%; }
-		table.lines col.c-qty, table.lines col.c-unit, table.lines col.c-total { width: 14%; }
-		table.lines col.c-actions { width: 24%; }
+		table.lines col.c-grip { width: 2.2rem; }
+		table.lines col.c-product { width: 38%; }
+		table.lines col.c-qty, table.lines col.c-unit, table.lines col.c-total { width: 13%; }
+		table.lines col.c-actions { width: 23%; }
 		/* the move/remove buttons share a row; keep them snug */
 		table.lines td .btn.small { margin-right: .15rem; }
 		.btn.small.disabled { opacity: .35; pointer-events: none; }
@@ -51,6 +52,11 @@
 		.doc-lines td { padding: .4rem .5rem; border-bottom: 1px solid #f0f0f0; }
 		.doc-lines tfoot td { border-top: 2px solid #ddd; border-bottom: none; font-size: 1.05rem; padding-top: .6rem; }
 		.doc-lines tr.invalid td { color: #e53e3e; }
+		/* drag-to-reorder: a grip handle per row + dragging affordances */
+		.drag-handle { cursor: grab; color: #bbb; user-select: none; padding: 0 .3rem; font-size: 1.1rem; line-height: 1; }
+		.drag-handle:active { cursor: grabbing; }
+		tr.ajaxslim-dragging { opacity: .6; background: #eef5ff; }
+		html.ajaxslim-sorting, html.ajaxslim-sorting * { user-select: none; }
 	</style>
 </head>
 <body>
@@ -103,16 +109,23 @@
 			<wo:AjaxUpdateLink action="$addLine" updateContainerID="linesContainer;totalsPanel;renderedInvoice" id="addLine" class="btn">+ Add line</wo:AjaxUpdateLink>
 		</p>
 		<wo:AjaxUpdateContainer id="linesContainer" elementName="div">
+			<!-- Drag-to-reorder. AjaxSortable renders the client registration and, on drop, fires
+			     $reorderLines (which reads the move via AjaxSortable.dragResult) and morphs the lines +
+			     totals. The reorderable rows are marked data-sortable-item and their grips
+			     data-sortable-grip in the row markup below; everything else is this element. -->
+			<wo:AjaxSortable listID="linesContainer"
+				action="$reorderLines" updateContainerID="linesContainer;totalsPanel;renderedInvoice" />
 			<table class="lines">
 				<colgroup>
-					<col class="c-product" /><col class="c-qty" /><col class="c-unit" /><col class="c-total" /><col class="c-actions" />
+					<col class="c-grip" /><col class="c-product" /><col class="c-qty" /><col class="c-unit" /><col class="c-total" /><col class="c-actions" />
 				</colgroup>
 				<thead>
-					<tr><th>Product</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Line total</th><th></th></tr>
+					<tr><th></th><th>Product</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Line total</th><th></th></tr>
 				</thead>
 				<tbody>
 					<wo:repetition list="$lines" item="$currentLine">
-						<wo:AjaxUpdateContainer elementName="tr" id="$lineContainerID" class="$lineRowClass">
+						<wo:AjaxUpdateContainer elementName="tr" id="$lineContainerID" class="$lineRowClass" data-sortable-item="true">
+							<td class="c-grip"><span class="drag-handle" data-sortable-grip="true" title="Drag to reorder" aria-label="Drag to reorder">⠿</span></td>
 							<td>
 								<wo:AjaxPopUpButton list="$products" item="$currentProduct" selection="$currentLine.product" id="$productFieldID" />
 								<!-- picking a product fires the same line refresh so the rendered invoice below updates too -->

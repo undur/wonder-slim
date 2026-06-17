@@ -171,9 +171,14 @@
 	// When replace is true the '_r' (ajax-replacement) marker is used instead of '_u' (ajax-update
 	// pass) - this mirrors ERXAjaxApplication's two ways of targeting a region.
 	function addUpdateParams(raw, id, replace) {
-		var qIndex = raw.indexOf('?');
-		var base = qIndex === -1 ? raw : raw.substring(0, qIndex);
-		var params = new URLSearchParams(qIndex === -1 ? '' : raw.substring(qIndex + 1));
+		// Params may be joined with '?' OR, if a caller appended additional params to a URL that had no
+		// query yet (AjaxUpdateLink functionName + AjaxSlim.queryString returns '&key=val'), with a
+		// leading '&' before any '?'. Treat the FIRST '?' or '&' as the start of the query so those
+		// params aren't trapped in the path. Without this, ".../ajax/0.5&_oldIndex=0" + "?_u=.." would
+		// put _oldIndex in the path and the server would never see it.
+		var sepIndex = raw.search(/[?&]/);
+		var base = sepIndex === -1 ? raw : raw.substring(0, sepIndex);
+		var params = new URLSearchParams(sepIndex === -1 ? '' : raw.substring(sepIndex + 1));
 		if (id != null) {
 			params.set(replace ? '_r' : '_u', id);
 		}
