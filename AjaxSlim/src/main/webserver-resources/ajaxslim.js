@@ -223,6 +223,70 @@
 		catch (e) { /* CustomEvent unsupported in ancient browsers - the data-attribute still works */ }
 	}
 
+	// --- error reporting -------------------------------------------------------
+	// When an ajax request FAILS (a network error, or an HTTP error status from the server such as a
+	// 500 "backtracked too far" when a page has aged out of the cache), we must NOT silently swallow it
+	// and we must NOT morph the server's error page into the target container. Instead we surface it to
+	// the user. The contract mirrors the busy/idle broker: a cancelable document-level CustomEvent
+	// 'ajaxslim:error' carries the failure detail, so an app can render its own UX (and call
+	// preventDefault() to suppress the built-in presenter). If nobody cancels it, a minimal built-in
+	// banner shows - so a failure is NEVER invisible, even in an app that wires up nothing.
+	//
+	// detail = { targetId, url, status (HTTP status or 0 for a network error), statusText, body, error }
+	function reportError(detail) {
+		if (window.console) {
+			console.error('AjaxSlim: ajax request failed', detail);
+		}
+		var cancelled = false;
+		try {
+			var evt = new CustomEvent('ajaxslim:error', { detail: detail, cancelable: true });
+			cancelled = !document.dispatchEvent(evt); // dispatchEvent returns false if preventDefault was called
+		}
+		catch (e) { /* CustomEvent unsupported - fall through to the default presenter */ }
+		if (!cancelled) {
+			AjaxSlim.Notify.error(detail);
+		}
+	}
+
+	// The built-in error presenter: a single dismissible banner pinned to the top of the viewport. It is
+	// intentionally tiny and dependency-free. Apps that want their own look replace AjaxSlim.Notify.error
+	// wholesale, or listen for 'ajaxslim:error' and preventDefault(). Re-uses one banner element so a
+	// burst of failures doesn't stack.
+	AjaxSlim.Notify = AjaxSlim.Notify || {
+		error: function (detail) {
+			try {
+				var id = 'ajaxslim-error-banner';
+				var bar = document.getElementById(id);
+				if (!bar) {
+					bar = document.createElement('div');
+					bar.id = id;
+					bar.setAttribute('role', 'alert');
+					bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;'
+						+ 'background:#b00020;color:#fff;font:14px/1.4 system-ui,sans-serif;'
+						+ 'padding:10px 40px 10px 14px;box-shadow:0 1px 4px rgba(0,0,0,.3);';
+					var close = document.createElement('button');
+					close.type = 'button';
+					close.setAttribute('aria-label', 'Dismiss');
+					close.textContent = '×';
+					close.style.cssText = 'position:absolute;top:6px;right:10px;background:none;border:0;'
+						+ 'color:#fff;font-size:20px;line-height:1;cursor:pointer;';
+					close.onclick = function () { if (bar.parentNode) { bar.parentNode.removeChild(bar); } };
+					bar.appendChild(close);
+					bar._msg = document.createElement('span');
+					bar.appendChild(bar._msg);
+					document.body.appendChild(bar);
+				}
+				var msg = (detail && detail.status)
+					? ('A server error occurred (' + detail.status + ') and the page could not be updated. '
+						+ 'Please reload the page and try again.')
+					: 'The server could not be reached and the page could not be updated. '
+						+ 'Please check your connection and try again.';
+				bar._msg.textContent = msg;
+			}
+			catch (e) { /* last-resort: never let the error presenter itself throw */ }
+		}
+	};
+
 	// Headers for an ajax request. Always sends x-requested-with (ERXAjaxApplication.isAjaxRequest keys
 	// on it). For a URLSearchParams POST body we set form-urlencoded; FormData sets its own multipart
 	// content-type, so we leave it.
@@ -247,6 +311,17 @@
 		var responseContentType = '';
 		return fetch(url, init).then(function (response) {
 			responseContentType = response.headers.get('Content-Type') || '';
+			// fetch() only rejects on a NETWORK error - an HTTP 500/404/etc. resolves normally. So we
+			// must check response.ok ourselves: otherwise we would morph the server's error page (e.g.
+			// "backtracked too far") straight into the target container. Read the body for diagnostics,
+			// then throw a typed error to divert to the .catch (which reports rather than morphs).
+			if (!response.ok) {
+				return response.text().catch(function () { return ''; }).then(function (body) {
+					var err = new Error('AjaxSlim HTTP ' + response.status);
+					err.ajaxslim = { status: response.status, statusText: response.statusText, body: body };
+					throw err;
+				});
+			}
 			return response.text();
 		}).then(function (text) {
 			if (targetId == null) {
@@ -278,9 +353,11 @@
 				onDone();
 			}
 		}).catch(function (e) {
-			if (window.console) {
-				console.error('AjaxSlim: ajax update failed for "' + targetId + '"', e);
-			}
+			// Either a network failure (no e.ajaxslim) or an HTTP error we threw above (e.ajaxslim set).
+			// Surface it to the user; never morph an error response into the container.
+			var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
+			reportError({ targetId: targetId, url: url, status: info.status, statusText: info.statusText,
+				body: info.body, error: e });
 		}).then(activityEnd, activityEnd); // finally: always settle the activity counter
 	}
 
@@ -405,15 +482,24 @@
 				credentials: 'same-origin',
 				headers: { 'x-requested-with': 'XMLHttpRequest' }
 			}).then(function (response) {
+				// Same as the single path: don't apply an HTTP error response as fragments - check
+				// response.ok and divert failures to reportError instead of morphing the error page.
+				if (!response.ok) {
+					return response.text().catch(function () { return ''; }).then(function (body) {
+						var err = new Error('AjaxSlim HTTP ' + response.status);
+						err.ajaxslim = { status: response.status, statusText: response.statusText, body: body };
+						throw err;
+					});
+				}
 				return response.text();
 			}).then(function (text) {
 				applyFragments(text);
 				runHook(options.onSuccess);
 				runHook(options.onComplete);
 			}).catch(function (e) {
-				if (window.console) {
-					console.error('AjaxSlim: multi-update failed for [' + ids.join(', ') + ']', e);
-				}
+				var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
+				reportError({ targetId: ids.join(';'), url: url, status: info.status,
+					statusText: info.statusText, body: info.body, error: e });
 			}).then(activityEnd, activityEnd);
 		},
 
