@@ -1,0 +1,41 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioInvoice",
+  "comment": "Stress test for the (page,container)-keyed page-replacement cache. The invoice page on this branch uses PER-ROW targeted updates (cache-hungry on purpose): editing one row leaves the OTHER rows' action links pointing at an ever-older context. Under the legacy flat, context-id-keyed LRU cache, ~30-60 such interactions evict a still-valid row's page and its move/remove link 500s ('backtracked too far'). With the new cache (fragments keyed by page+container, evicted by page not by insertion order), the links stay valid indefinitely. Do many edits on row 2/3, then assert move-down on row 1 still works.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#qty-2" },
+
+    { "do": "comment", "text": "Hammer edits on rows 2 and 3 (NOT row 1), so row 1's links go stale under the old cache. ~30 interactions - past the legacy MAX*2 LRU threshold." },
+    { "do": "fill", "selector": "#qty-2", "text": "11" }, { "do": "press", "selector": "#qty-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-2", "text": "21" }, { "do": "press", "selector": "#price-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-3", "text": "12" }, { "do": "press", "selector": "#qty-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-3", "text": "22" }, { "do": "press", "selector": "#price-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-2", "text": "13" }, { "do": "press", "selector": "#qty-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-2", "text": "23" }, { "do": "press", "selector": "#price-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-3", "text": "14" }, { "do": "press", "selector": "#qty-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-3", "text": "24" }, { "do": "press", "selector": "#price-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-2", "text": "15" }, { "do": "press", "selector": "#qty-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-2", "text": "25" }, { "do": "press", "selector": "#price-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-3", "text": "16" }, { "do": "press", "selector": "#qty-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-3", "text": "26" }, { "do": "press", "selector": "#price-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-2", "text": "17" }, { "do": "press", "selector": "#qty-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-2", "text": "27" }, { "do": "press", "selector": "#price-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-3", "text": "18" }, { "do": "press", "selector": "#qty-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-3", "text": "28" }, { "do": "press", "selector": "#price-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-2", "text": "19" }, { "do": "press", "selector": "#qty-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-2", "text": "29" }, { "do": "press", "selector": "#price-2", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#qty-3", "text": "20" }, { "do": "press", "selector": "#qty-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+    { "do": "fill", "selector": "#price-3", "text": "30" }, { "do": "press", "selector": "#price-3", "key": "Tab" }, { "do": "wait", "ms": 350 },
+
+    { "do": "comment", "text": "Now exercise the once-stale links: move row 1 DOWN. Rows identified by lineTotal. Row 1 (Widget) started 1000; after no edits to it, still 1000. Move it down -> it should swap with row 2." },
+    { "do": "read", "name": "row0Before", "what": "jsExpression", "expression": "document.querySelectorAll('#linesContainer tbody tr')[0].querySelector('.lineTotal').textContent" },
+    { "do": "click", "selector": "#linebox-1 a[title='Move down']" },
+    { "do": "wait", "ms": 900 },
+    { "do": "read", "name": "row0After", "what": "jsExpression", "expression": "document.querySelectorAll('#linesContainer tbody tr')[0].querySelector('.lineTotal').textContent" },
+    { "do": "read", "name": "row1After", "what": "jsExpression", "expression": "document.querySelectorAll('#linesContainer tbody tr')[1].querySelector('.lineTotal').textContent" },
+
+    { "do": "assert", "name": "row 0 was Widget (1000) before the move", "that": "row0Before", "equals": "1000" },
+    { "do": "assert", "name": "after move-down: row 0 is NO LONGER Widget (the move worked - link survived ~40 interactions)", "that": "row0After", "notEquals": "1000" },
+    { "do": "assert", "name": "after move-down: Widget(1000) is now in row 1", "that": "row1After", "equals": "1000" }
+  ]
+}
