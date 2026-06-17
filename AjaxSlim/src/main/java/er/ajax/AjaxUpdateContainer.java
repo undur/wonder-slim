@@ -146,6 +146,11 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				// single, unambiguous source of truth. An explicit data-morph="false" forces classic
 				// innerHTML replacement and keeps doing so even after MORPH_BY_DEFAULT flips to true.
 				appendTagAttributeToResponse(response, "data-morph", shouldMorph(component) ? "true" : "false");
+				// Pass through any author-supplied attribute this element does not handle itself
+				// (data-*, role, aria-*, title, ...). An AjaxUpdateContainer is a <wo:container> with
+				// ajax behavior; attributes it has no special meaning for belong on the rendered tag,
+				// not silently dropped.
+				appendPassthroughAttributes(response, component);
 				response.appendContentString(">");
 				if (hasChildrenElements()) {
 					appendChildrenToResponse(response, context);
@@ -178,6 +183,51 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 			finally {
 				AjaxUpdateContainer.setCurrentUpdateContainerID(previousUpdateContainerID);
 			}
+		}
+	}
+
+	/**
+	 * The binding names this element interprets itself - either as behaviour (morph, action handling,
+	 * self-update) or as an attribute it emits explicitly (id, class, style, data-updateUrl, data-morph).
+	 * Every OTHER author-supplied binding is passed through to the rendered tag by
+	 * {@link #appendPassthroughAttributes}. Subclasses that add their own bindings extend this via
+	 * {@link #handledBindingNames()}.
+	 */
+	private static final NSArray<String> HANDLED_BINDINGS = new NSArray<>(new String[] {
+		"id", "elementName", "class", "style", "morph", "onRefreshComplete", "optional",
+		// AjaxSelfUpdatingContainer's bindings, listed here so they don't leak onto the tag for that
+		// subclass (cheap to include unconditionally - a passive container never sets them anyway).
+		"action", "updateContainerID", "frequency", "stopped", "canStop", "observeFieldID",
+		"observeFieldFrequency", "observeDelay", "onBeforeSubmit", "onComplete", "onSuccess", "fullSubmit"
+	});
+
+	/**
+	 * The set of binding names this element handles itself and must NOT pass through onto the rendered
+	 * tag. Subclasses override to add their own.
+	 *
+	 * @return the handled binding names
+	 */
+	protected NSArray<String> handledBindingNames() {
+		return HANDLED_BINDINGS;
+	}
+
+	/**
+	 * Emit every author-supplied binding that this element does not handle itself as a tag attribute -
+	 * so arbitrary HTML attributes (data-*, role, aria-*, title, ...) placed on an
+	 * {@code &lt;wo:AjaxUpdateContainer&gt;} land on the rendered element instead of being dropped.
+	 *
+	 * @param response the response being built
+	 * @param component the current component (for evaluating each association)
+	 */
+	protected void appendPassthroughAttributes(WOResponse response, WOComponent component) {
+		NSArray<String> handled = handledBindingNames();
+		for (String name : associations().allKeys()) {
+			if (handled.containsObject(name)) {
+				continue;
+			}
+			WOAssociation association = associations().objectForKey(name);
+			Object value = association.valueInComponent(component);
+			appendTagAttributeToResponse(response, name, value);
 		}
 	}
 
