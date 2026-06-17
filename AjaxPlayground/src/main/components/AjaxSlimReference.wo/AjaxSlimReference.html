@@ -128,10 +128,9 @@
 				<tr><td class="b-name">morph</td><td class="b-type">Boolean</td><td>When true (the default), content updates reconcile the existing DOM via Idiomorph — preserving focus/scroll/selection and unchanged subtrees. Bind <code>morph="$false"</code> to force classic <code>innerHTML</code> replacement.</td></tr>
 				<tr><td class="b-name">onRefreshComplete</td><td class="b-type">String (JS)</td><td>JavaScript to run after the container has been refreshed/morphed.</td></tr>
 				<tr><td class="b-name">optional</td><td class="b-type">Boolean</td><td>Set true to skip rendering the container tags when this element is already inside another update container (renders only its children).</td></tr>
-				<tr><td class="b-name">class</td><td class="b-type">String</td><td>CSS class of the container element.</td></tr>
-				<tr><td class="b-name">style</td><td class="b-type">String</td><td>Inline style of the container element.</td></tr>
 			</tbody>
 		</table>
+		<p class="role">Any other attribute you set — <code>class</code>, <code>style</code>, <code>data-*</code>, <code>role</code>, <code>aria-*</code>, <code>title</code>, … — is passed through verbatim onto the rendered tag.</p>
 <pre class="sketch">&lt;wo:AjaxUpdateContainer id="detail"&gt; ...content... &lt;/wo:AjaxUpdateContainer&gt;
 &lt;!-- refresh it from elsewhere: --&gt;
 &lt;wo:AjaxUpdateLink action="$reload" updateContainerID="detail"&gt;Reload&lt;/wo:AjaxUpdateLink&gt;</pre>
@@ -139,7 +138,7 @@
 
 	<div class="el">
 		<h3 id="AjaxSelfUpdatingContainer"><code>AjaxSelfUpdatingContainer</code> <span class="tag t-update">Update</span></h3>
-		<p class="role">An update container that refreshes <strong>itself</strong> — on a timer (<code>frequency</code>) and/or when a field changes (<code>observeFieldID</code>) — and may invoke its own <code>action</code> when it does. The counterpart to the passive <code>AjaxUpdateContainer</code>; it also inherits all of that element's bindings (<code>id</code>, <code>elementName</code>, <code>morph</code>, <code>onRefreshComplete</code>, <code>class</code>, <code>style</code>).</p>
+		<p class="role">An update container that refreshes <strong>itself</strong> — on a timer (<code>frequency</code>) and/or when a field changes (<code>observeFieldID</code>) — and may invoke its own <code>action</code> when it does. The counterpart to the passive <code>AjaxUpdateContainer</code>; it also inherits all of that element's bindings (<code>id</code>, <code>elementName</code>, <code>morph</code>, <code>onRefreshComplete</code>, <code>optional</code>) and the same attribute passthrough (<code>class</code>, <code>style</code>, <code>data-*</code>, …).</p>
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>

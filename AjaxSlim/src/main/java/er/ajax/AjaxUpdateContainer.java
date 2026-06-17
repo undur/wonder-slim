@@ -139,17 +139,16 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				AjaxUpdateContainer.setCurrentUpdateContainerID(id);
 				response.appendContentString("<" + elementName + " ");
 				appendTagAttributeToResponse(response, "id", id);
-				appendTagAttributeToResponse(response, "class", valueForBinding("class", component));
-				appendTagAttributeToResponse(response, "style", valueForBinding("style", component));
 				appendTagAttributeToResponse(response, "data-updateUrl", AjaxUtils.ajaxComponentActionUrl(context));
 				// Emit the resolved morph decision explicitly in both states so the JS side has a
 				// single, unambiguous source of truth. An explicit data-morph="false" forces classic
 				// innerHTML replacement and keeps doing so even after MORPH_BY_DEFAULT flips to true.
 				appendTagAttributeToResponse(response, "data-morph", shouldMorph(component) ? "true" : "false");
-				// Pass through any author-supplied attribute this element does not handle itself
-				// (data-*, role, aria-*, title, ...). An AjaxUpdateContainer is a <wo:container> with
-				// ajax behavior; attributes it has no special meaning for belong on the rendered tag,
-				// not silently dropped.
+				// Pass through every author-supplied binding this element does not handle itself - class,
+				// style, data-*, role, aria-*, title, ... An AjaxUpdateContainer is a <wo:container> with
+				// ajax behavior; attributes it has no special meaning for belong on the rendered tag, not
+				// silently dropped. (class/style are not special-cased here; they flow through like any
+				// other passthrough attribute.)
 				appendPassthroughAttributes(response, component);
 				response.appendContentString(">");
 				if (hasChildrenElements()) {
@@ -187,18 +186,15 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	}
 
 	/**
-	 * The binding names this element interprets itself - either as behaviour (morph, action handling,
-	 * self-update) or as an attribute it emits explicitly (id, class, style, data-updateUrl, data-morph).
-	 * Every OTHER author-supplied binding is passed through to the rendered tag by
-	 * {@link #appendPassthroughAttributes}. Subclasses that add their own bindings extend this via
-	 * {@link #handledBindingNames()}.
+	 * The binding names THIS element interprets itself - the ones it reads to drive its own behavior or
+	 * emits as a specific tag attribute. Every OTHER author-supplied binding is passed through verbatim
+	 * to the rendered tag by {@link #appendPassthroughAttributes}: it is not our job to enumerate or
+	 * suppress attributes that belong to some other framework or to plain HTML (class, style, data-*,
+	 * role, aria-*, ...) - those just flow through. Subclasses that consume their own bindings add them
+	 * via {@link #handledBindingNames()}.
 	 */
 	private static final NSArray<String> HANDLED_BINDINGS = new NSArray<>(new String[] {
-		"id", "elementName", "class", "style", "morph", "onRefreshComplete", "optional",
-		// AjaxSelfUpdatingContainer's bindings, listed here so they don't leak onto the tag for that
-		// subclass (cheap to include unconditionally - a passive container never sets them anyway).
-		"action", "updateContainerID", "frequency", "stopped", "canStop", "observeFieldID",
-		"observeFieldFrequency", "observeDelay", "onBeforeSubmit", "onComplete", "onSuccess", "fullSubmit"
+		"id", "elementName", "morph", "onRefreshComplete", "optional"
 	});
 
 	/**

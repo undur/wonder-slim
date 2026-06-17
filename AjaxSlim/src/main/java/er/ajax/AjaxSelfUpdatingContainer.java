@@ -7,6 +7,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.foundation.ERXValueUtilities;
@@ -41,8 +42,18 @@ import er.extensions.foundation.ERXValueUtilities;
  */
 public class AjaxSelfUpdatingContainer extends AjaxUpdateContainer {
 
+	/** The self-update bindings this subclass consumes, on top of the ones the base handles. */
+	private static final NSArray<String> HANDLED_BINDINGS = new NSArray<>(new String[] {
+		"frequency", "stopped", "observeFieldID", "fullSubmit", "action"
+	});
+
 	public AjaxSelfUpdatingContainer(String name, NSDictionary<String, WOAssociation> associations, WOElement children) {
 		super(name, associations, children);
+	}
+
+	@Override
+	protected NSArray<String> handledBindingNames() {
+		return super.handledBindingNames().arrayByAddingObjectsFromArray(HANDLED_BINDINGS);
 	}
 
 	/**

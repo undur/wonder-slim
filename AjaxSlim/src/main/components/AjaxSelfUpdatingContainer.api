@@ -15,8 +15,5 @@
 
 		<binding defaults="Boolean" name="optional"/>
 		<binding name="morph" defaults="Boolean"/>
-
-		<binding name="class"/>
-		<binding name="style"/>
 	</wo>
 </wodefinitions>
