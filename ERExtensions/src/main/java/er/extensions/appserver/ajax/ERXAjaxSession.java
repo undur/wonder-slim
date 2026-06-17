@@ -256,6 +256,11 @@ public class ERXAjaxSession extends WOSession {
         // because it is old; only whole expired pages are dropped.
         enforcePageReplacementCachePageLimit(pageReplacementCache, originalContextID);
 
+        // Storing a fragment is also an access of its page: pull this page's existing fragments to the
+        // tail so the whole page stays grouped and most-recent before we append the new one. Keeps the
+        // LRU order coherent even when a save isn't immediately preceded by a restore of the same page.
+        touchPageInReplacementCache(pageReplacementCache, originalContextID);
+
         TransactionRecord pageRecord = new TransactionRecord(page, context, pageCacheKey, originalContextID);
         pageReplacementCache.put(context.contextID(), pageRecord);
         log.debug("{} new context = {}", pageCacheKey, context.contextID());
@@ -445,6 +450,46 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
   }
 
   /**
+   * Marks a page as just-accessed by moving all of its fragment records to the most-recent end of the
+   * cache's insertion order. The page-limit eviction reads that order oldest-first, so touching a page
+   * on access turns the eviction policy from "drop the first-inserted page" (FIFO) into "drop the
+   * least-recently-<em>used</em> page" (LRU) - which is the only correct policy for a cache whose job is
+   * to keep the pages the user is actually working with. Without this, a page you open first and keep
+   * returning to (a receipt you edit while wandering off to look up related data) is the oldest by
+   * insertion and so the first evicted, even though it is the page you care about most.
+   * <p>
+   * Moving a record is a {@code remove}+{@code put} on the {@link LinkedHashMap}, which re-appends it at
+   * the tail. We move every record sharing this {@code pageID} so the whole page travels together and
+   * stays grouped (the eviction and {@link #pageReplacementCacheSummary()} both reason per page).
+   *
+   * @param pageReplacementCache the cache
+   * @param pageID the page (originalContextID) that was just accessed; no-op if null or not present
+   */
+  protected void touchPageInReplacementCache(LinkedHashMap pageReplacementCache, String pageID) {
+    if (pageReplacementCache == null || pageID == null) {
+      return;
+    }
+    // Collect this page's entries first (can't re-put while iterating), then re-append them at the tail
+    // in their existing relative order.
+    LinkedHashMap<Object, TransactionRecord> moved = new LinkedHashMap<>();
+    Iterator entriesEnum = pageReplacementCache.entrySet().iterator();
+    while (entriesEnum.hasNext()) {
+      Map.Entry entry = (Map.Entry) entriesEnum.next();
+      TransactionRecord record = (TransactionRecord) entry.getValue();
+      if (pageID.equals(record.pageID())) {
+        moved.put(entry.getKey(), record);
+      }
+    }
+    if (moved.isEmpty()) {
+      return;
+    }
+    for (Map.Entry<Object, TransactionRecord> e : moved.entrySet()) {
+      pageReplacementCache.remove(e.getKey());
+      pageReplacementCache.put(e.getKey(), e.getValue());
+    }
+  }
+
+  /**
    * Bounds the page-replacement cache by the number of distinct PAGES it holds, not by the number of
    * fragment entries (and not by a blind insertion-order LRU over individual fragments).
    * <p>
@@ -462,7 +507,9 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
    * @param currentPageID the page id (originalContextID) of the entry about to be added; never evicted
    */
   protected void enforcePageReplacementCachePageLimit(LinkedHashMap pageReplacementCache, String currentPageID) {
-    // Distinct page ids, in first-seen (oldest-first) order.
+    // Distinct page ids in cache order, which is least-recently-USED first: a page's fragments are
+    // moved to the tail on every access (see touchPageInReplacementCache), so the head is the page the
+    // user has gone longest without touching - the right one to evict (LRU, not FIFO).
     LinkedHashSet<String> pageIDs = new LinkedHashSet<>();
     Iterator recordsEnum = pageReplacementCache.values().iterator();
     while (recordsEnum.hasNext()) {
@@ -646,6 +693,9 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
       if (pageRecord != null) {
           log.debug("Restoring page for contextID: {} pageRecord = {}", contextID, pageRecord);
           page = pageRecord.page();
+          // Access = most-recently-used: move this page's fragments to the tail so the page-limit
+          // eviction drops the least-recently-USED page, not the first-inserted one (LRU, not FIFO).
+          touchPageInReplacementCache(pageReplacementCache, pageRecord.pageID());
       }
       else if (page == null) {
         log.debug("No page in pageReplacementCache for contextID: {}", contextID);
