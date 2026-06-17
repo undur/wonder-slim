@@ -697,6 +697,26 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return response;
 	}
 
+	/**
+	 * Overridden to give the page-restoration error response a real error status instead of WO's
+	 * default 200.
+	 * <p>
+	 * When a request's context can no longer be restored (the page has aged out of the caches - the
+	 * classic "backtracked too far"), WO renders an error page but ships it with a 200 OK. That is fine
+	 * for a full-page browser backtrack, but it is actively harmful for an Ajax request: the client
+	 * sees a successful response and morphs the error-page HTML straight into the target container. A
+	 * non-2xx status is the signal the Ajax client needs to surface the failure to the user (show a
+	 * "reload" notice) instead of injecting the error page into the DOM - so we set 500 here, matching
+	 * {@link #handleException}. The body is unchanged, so a normal browser backtrack still shows the
+	 * same error page; only the status differs.
+	 */
+	@Override
+	public WOResponse handlePageRestorationErrorInContext(WOContext context) {
+		final WOResponse response = super.handlePageRestorationErrorInContext(context);
+		response.setStatus(500);
+		return response;
+	}
+
 	public ERXExceptionManager exceptionManager() {
 		return _exceptionManager;
 	}
