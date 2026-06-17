@@ -30,15 +30,25 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.hacks.ERXPrivateKVC;
 
 /**
- * ERXAjaxSession is the part of ERXSession that handles Ajax requests.
- * If you want to use the Ajax framework without using other parts of Project
- * Wonder (i.e. ERXSession or ERXApplication), you should steal all of the code
- * in ERXAjaxSession, ERXAjaxApplication, and ERXAjaxContext.
- * 
+ * ERXAjaxSession is the part of ERXSession that handles Ajax requests. It owns the ajax
+ * page-replacement cache: the overrides of {@link #savePage}, {@link #restorePageForContextID},
+ * {@link #_saveCurrentPage} and {@link #savePageInPermanentCache}, plus the permanent-page cache, that
+ * let component actions live inside ajax-updated regions without filling WO's small backtrack cache.
+ * <p>
+ * The cache keys each rendered page by its render contextID. Every request mints a new contextID, so
+ * one page instance accumulates many contextID keys over its life - a still-rendered link carries the
+ * contextID it was rendered in, and that key is still here, so it resolves directly however many
+ * interactions ago it was rendered. The cache is bounded by the number of distinct page INSTANCES (not
+ * contextIDs); evicting an instance drops all its contextID keys together.
+ * <p>
+ * If you want to use the Ajax framework without using other parts of Project Wonder (i.e. ERXSession or
+ * ERXApplication), you should steal all of the code in ERXAjaxSession, ERXAjaxApplication, and
+ * ERXAjaxContext.
+ *
  * @property er.extensions.maxPageReplacementCacheSize=30
  * @property er.extensions.appserver.ajax.ERXAjaxSession.storesPageInfo=false
  * @property er.extensions.overridePrivateCache
- * 
+ *
  * @author mschrag
  */
 public class ERXAjaxSession extends WOSession {
@@ -91,91 +101,39 @@ public class ERXAjaxSession extends WOSession {
   }
   
   /**
-   * ERTransactionRecord is a reimplementation of WOTransactionRecord for
-   * use with Ajax background request page caching.
-   * 
-   * @author mschrag
+   * One cache entry: a live page instance plus the container key it was rendered for (for diagnostics).
+   * The map is keyed by contextID; the record carries the instance the lookup resolves to.
    */
   static class TransactionRecord implements Serializable {
 
     private String _contextID;
     private WOComponent _page;
     private String _key;
-    private String _pageID;
-    private boolean _oldPage;
-    private long _lastModified;
 
     public TransactionRecord(WOComponent page, WOContext context, String key) {
-      this(page, context, key, null);
-    }
-
-    public TransactionRecord(WOComponent page, WOContext context, String key, String pageID) {
       _page = page;
       _contextID = context._requestContextID();
       _key = key;
-      _pageID = pageID;
-      touch();
-    }
-
-    /** The identity of the page this fragment belongs to (the originalContextID the ajax session
-     *  sprang from). All fragments of one page share a pageID and are evicted together. */
-    public String pageID() {
-      return _pageID;
-    }
-    
-    public void touch() {
-      _lastModified = System.currentTimeMillis();
-    }
-
-    @Override
-    public int hashCode() {
-      return _key.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object _obj) {
-      return (_obj instanceof TransactionRecord && ((TransactionRecord) _obj)._key.equals(_key));
     }
 
     public WOComponent page() {
       return _page;
     }
 
-    // MS: The preferrable behavior here is for Ajax records to expire
-    // when the original context it's associated with expires from the 
-    // page cache, but we can't get to the _contextRecords map in
-    // WOSession, so for now, we just turn off explicit expiration.  As
-    // a result, entries will fall out of the cache when the cache gets
-    // too big only unless it's an "old page," in which case it will expire 
-    // within 5 minutes.
-    public boolean isExpired() {
-      boolean expired = _oldPage && ((System.currentTimeMillis() - _lastModified) > 5 * 60 * 1000 /* 5 minutes */);
-      return expired;
-    }
-
     public String key() {
       return _key;
     }
 
-    public void setOldPage(boolean oldPage) {
-      _oldPage = oldPage;
-      touch();
-    }
-
-    public boolean isOldPage() {
-      return _oldPage;
-    }
-
     @Override
     public String toString() {
-      return "[TransactionRecord: page = " + _page.name() + "; context = " + _contextID + "; key = " + _key + "; oldPage? " + _oldPage + "]";
+      return "[TransactionRecord: page = " + _page.name() + "; context = " + _contextID + "; key = " + _key + "]";
     }
   }
   
   public ERXAjaxSession() {
 	  super();
   }
-  
+
   public ERXAjaxSession(String sessionID) {
 	  super(sessionID);
   }
@@ -223,47 +181,40 @@ public class ERXAjaxSession extends WOSession {
       WOResponse response = context.response();
       String pageCacheKey = null;
       if (response != null) {
-    	  pageCacheKey = response.headerForKey(ERXAjaxSession.PAGE_REPLACEMENT_CACHE_LOOKUP_KEY);
+    	  pageCacheKey = response.headerForKey(PAGE_REPLACEMENT_CACHE_LOOKUP_KEY);
       }
       if (pageCacheKey == null && request != null) {
-    	  pageCacheKey = request.headerForKey(ERXAjaxSession.PAGE_REPLACEMENT_CACHE_LOOKUP_KEY);
+    	  pageCacheKey = request.headerForKey(PAGE_REPLACEMENT_CACHE_LOOKUP_KEY);
       }
 
       // A null pageCacheKey should mean an Ajax request that is not returning a content update or an expliclty not cached non-Ajax request
       if (pageCacheKey != null) {
         log.debug("Will use pageCacheKey {}", pageCacheKey);
-        // The cache key identifies a FRAGMENT by (page, container): originalContextID is the page the
-        // ajax session sprang from; pageCacheKey is the update-container id. A container can only hold
-        // one valid state at a time, so the cache is sized by (pages x containers), NOT by the number
-        // of interactions - see the eviction logic below and cleanPageReplacementCacheIfNecessary.
-        String originalContextID = context.request().headerForKey(ERXAjaxSession.ORIGINAL_CONTEXT_ID_KEY);
-        pageCacheKey = originalContextID + "_" + pageCacheKey;
-        LinkedHashMap pageReplacementCache = (LinkedHashMap) objectForKey(ERXAjaxSession.PAGE_REPLACEMENT_CACHE_KEY);
+        // Key by context.contextID() - the context THIS render happened in, which is exactly the
+        // contextID a link rendered now will carry when the user later clicks it. So a returning link
+        // does a direct get(contextID) hit. Every interaction mints a new contextID, so one PAGE INSTANCE
+        // accumulates many contextID keys over its life - that is fine: they are cheap pointers to the
+        // same live object. We do NOT bound the contextID count; we bound the number of distinct page
+        // INSTANCES (see enforcePageReplacementCacheInstanceLimit). When an instance is evicted, all of
+        // its contextID keys go together. No reverse-map through WO's backtrack cache, no aging-out of a
+        // live page's links; contextIDs are globally unique so two pages never collide (no bleed).
+        LinkedHashMap pageReplacementCache = (LinkedHashMap) objectForKey(PAGE_REPLACEMENT_CACHE_KEY);
         if (pageReplacementCache == null) {
           pageReplacementCache = new LinkedHashMap();
-          setObjectForKey(pageReplacementCache, ERXAjaxSession.PAGE_REPLACEMENT_CACHE_KEY);
+          setObjectForKey(pageReplacementCache, PAGE_REPLACEMENT_CACHE_KEY);
         }
 
-        // Age the PRIOR state of THIS fragment (mark it old / drop the one already marked old). This
-        // keeps at most two records per (page, container) - the current state and one previous state
-        // for the brief race window where the browser still shows the prior HTML and clicks its link.
-        cleanPageReplacementCacheIfNecessary(pageCacheKey);
+        // Memory bound: cap the number of distinct PAGE INSTANCES, not contextIDs. Adding a context for
+        // an instance we already hold is free; a genuinely new instance over the limit evicts the
+        // least-recently-used instance (all its contextID keys).
+        enforcePageReplacementCacheInstanceLimit(pageReplacementCache, page);
 
-        // Memory bound: cap the number of distinct PAGES (originalContextIDs) in the cache, not the
-        // number of fragments. When a page falls out, all of its fragment leaves go together - the
-        // page is dead, so its fragments are too. This is what stops the cache growing one entry per
-        // interaction: an unrelated, unchanged container's still-valid state is never evicted just
-        // because it is old; only whole expired pages are dropped.
-        enforcePageReplacementCachePageLimit(pageReplacementCache, originalContextID);
+        // Touch: move this instance's existing contextID entries to the tail so eviction is LRU over
+        // instances (drop the instance gone longest without use), not FIFO by first-seen contextID.
+        touchInstanceInReplacementCache(pageReplacementCache, page);
 
-        // Storing a fragment is also an access of its page: pull this page's existing fragments to the
-        // tail so the whole page stays grouped and most-recent before we append the new one. Keeps the
-        // LRU order coherent even when a save isn't immediately preceded by a restore of the same page.
-        touchPageInReplacementCache(pageReplacementCache, originalContextID);
-
-        TransactionRecord pageRecord = new TransactionRecord(page, context, pageCacheKey, originalContextID);
+        TransactionRecord pageRecord = new TransactionRecord(page, context, pageCacheKey);
         pageReplacementCache.put(context.contextID(), pageRecord);
-        log.debug("{} new context = {}", pageCacheKey, context.contextID());
         log.debug("{} = {}", pageCacheKey, pageReplacementCache.keySet());
 
         // Per-request visibility into the fragment cache. Off by default (free in production); set
@@ -288,200 +239,51 @@ public class ERXAjaxSession extends WOSession {
   }
 
   /**
-   * Iterates through the page replacement cache (if there is one) and removes expired records.
-   */
-  protected void cleanPageReplacementCacheIfNecessary() {
-    cleanPageReplacementCacheIfNecessary(null);
-  }
-
-  /**
-   * Iterates through the page replacement cache (if there is one) and removes expired records.
-   * 
-   * @param _cacheKeyToAge optional cache key to age via setOldPage
-   * @return whether or not a cache entry was removed
-   */
-protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
-    boolean removedCacheEntry = false;
-    LinkedHashMap pageReplacementCache = (LinkedHashMap) objectForKey(ERXAjaxSession.PAGE_REPLACEMENT_CACHE_KEY);
-    if (log.isDebugEnabled()) log.debug("keys in pageReplacementCache: {}", pageReplacementCache.keySet());
-    if (pageReplacementCache != null) {
-      Iterator transactionRecordsEnum = pageReplacementCache.entrySet().iterator();
-      while (transactionRecordsEnum.hasNext()) {
-        Map.Entry pageRecordEntry = (Map.Entry) transactionRecordsEnum.next();
-        TransactionRecord tempPageRecord = (TransactionRecord) pageRecordEntry.getValue();
-        // If the page has been GC'd, toss the transaction record ...
-        if (tempPageRecord.isExpired()) {
-          log.debug("deleting expired page record {}", tempPageRecord);
-          transactionRecordsEnum.remove();
-          removedCacheEntry = true;
-        }
-        else if (_cacheKeyToAge != null) {
-          String transactionRecordKey = tempPageRecord.key();
-          if (_cacheKeyToAge.equals(transactionRecordKey)) {
-            // If this is the "old page", then delete the entry ...
-            if (tempPageRecord.isOldPage()) {
-              log.debug("{} removing old page {}", _cacheKeyToAge, tempPageRecord);
-              transactionRecordsEnum.remove();
-              removedCacheEntry = true;
-            }
-            // Otherwise, flag this entry as the old page ...
-            else {
-              log.debug("{} marking as old page", _cacheKeyToAge);
-              tempPageRecord.setOldPage(true);
-            }
-          }
-        }
-      }
-
-      // Only remove the replacement cache is there wasn't a cache key.  If there WAS a
-      // cache key, then we're being called by savePage and it's going to expect a cache
-      // to exist.
-      if (_cacheKeyToAge == null && pageReplacementCache.isEmpty()) {
-        removeObjectForKey(ERXAjaxSession.PAGE_REPLACEMENT_CACHE_KEY);
-        log.debug("Removing empty page cache");
-      }
-    }
-    return removedCacheEntry;
-  }
-
-  /**
-   * A human-readable summary of the page-replacement (fragment) cache for the current session: total
-   * fragment-record count, distinct page count, and the tree of pages -> their cached container
-   * fragments (with how many records each container is holding - normally 1, or 2 during the
-   * old-page race window). Useful for confirming the cache stays sized by (pages x containers) rather
-   * than growing one entry per interaction, and for debugging stale-link issues in real apps.
+   * A human-readable summary of the page-replacement cache for the current session: how many contextID
+   * entries it holds and how many DISTINCT page instances those point at. The cache is bounded by the
+   * instance count (each instance accumulates many contextID keys over its life), so this is the line to
+   * watch: entries can climb freely while instances stays small and bounded.
    *
-   * @return a single-line summary string, e.g.
-   *         {@code pageReplacementCache: 4 fragments / 2 page(s) | page 0.3[linesContainer, totalsPanel, renderedInvoice] | page 1.7[detailPanel]}
+   * @return a single-line summary, e.g. {@code pageReplacementCache: 42 contexts / 2 instance(s)}
    */
   public String pageReplacementCacheSummary() {
     @SuppressWarnings("unchecked")
-    LinkedHashMap<String, TransactionRecord> cache = (LinkedHashMap<String, TransactionRecord>) objectForKey(ERXAjaxSession.PAGE_REPLACEMENT_CACHE_KEY);
+    LinkedHashMap<String, TransactionRecord> cache = (LinkedHashMap<String, TransactionRecord>) objectForKey(PAGE_REPLACEMENT_CACHE_KEY);
     if (cache == null || cache.isEmpty()) {
       return "pageReplacementCache: empty";
     }
-    // page id -> (container id -> record count). The composite key is "<pageID>_<containerID>", and a
-    // container id may itself contain '_', so we recover the container by stripping the known pageID
-    // prefix rather than splitting on '_'.
-    LinkedHashMap<String, LinkedHashMap<String, Integer>> byPage = new LinkedHashMap<>();
+    LinkedHashSet<WOComponent> instances = new LinkedHashSet<>();
     for (TransactionRecord record : cache.values()) {
-      String pageID = record.pageID() == null ? "(none)" : record.pageID();
-      String container = record.key();
-      String prefix = pageID + "_";
-      if (container != null && container.startsWith(prefix)) {
-        container = container.substring(prefix.length());
+      if (record.page() != null) {
+        instances.add(record.page());
       }
-      LinkedHashMap<String, Integer> containers = byPage.computeIfAbsent(pageID, k -> new LinkedHashMap<>());
-      containers.merge(container, 1, Integer::sum);
     }
-    // Single line (no embedded newlines) so it survives line-based log capture and stays grep-friendly:
-    //   pageReplacementCache: 4 fragments / 1 page(s) | page 0[linebox-1, totalsPanel, renderedInvoice]
-    StringBuilder sb = new StringBuilder();
-    sb.append("pageReplacementCache: ").append(cache.size()).append(" fragments / ").append(byPage.size()).append(" page(s)");
-    for (Map.Entry<String, LinkedHashMap<String, Integer>> pageEntry : byPage.entrySet()) {
-      sb.append(" | page ").append(pageEntry.getKey()).append("[");
-      boolean first = true;
-      for (Map.Entry<String, Integer> c : pageEntry.getValue().entrySet()) {
-        if (!first) sb.append(", ");
-        first = false;
-        sb.append(c.getKey());
-        if (c.getValue() > 1) sb.append("(x").append(c.getValue()).append(")");
-      }
-      sb.append("]");
-    }
-    return sb.toString();
+    return "pageReplacementCache: " + cache.size() + " contexts / " + instances.size() + " instance(s)";
   }
 
   /**
-   * Resolves a cached page record by the request's TARGET CONTAINER(S) ({@code _u}) rather than its
-   * context id, for the case where a still-rendered action link carries a context that has aged out of
-   * the cache. The link's {@code _u} names the container(s) it targets; we match ANY of them against a
-   * cached fragment whose key ends in {@code _<container>}. Because every fragment of a page shares one
-   * page instance, any surviving fragment for any of the targeted containers resolves the live page.
+   * Moves every cache entry pointing at {@code page} to the most-recent end of the map's insertion
+   * order, so the instance limit (which reads that order oldest-first) evicts the least-recently-USED
+   * instance rather than the first-inserted one (LRU, not FIFO). Without this, an instance you open
+   * first and keep returning to is the oldest by insertion and so the first evicted.
    * <p>
-   * Trying ALL of {@code _u}'s containers matters for multi-target updates: such a request renders
-   * several containers but only stores ONE fragment, keyed by whichever container the update pass
-   * rendered LAST (each container's render overwrites the page-replacement-cache-key request header).
-   * So for {@code _u=a;b;c} the stored fragment may be under {@code c}, not {@code a} - we must check
-   * all three, not just the first.
-   *
-   * @param pageReplacementCache the fragment cache
-   * @return a matching record, or null if the request has no {@code _u} or no fragment matches
-   */
-  protected TransactionRecord pageRecordForRequestContainer(LinkedHashMap pageReplacementCache, WOComponent ownPage) {
-    WOContext context = context();
-    WORequest request = context != null ? context.request() : null;
-    if (request == null || ownPage == null) {
-      // Without a known page instance to scope to, the container-name match is unsafe (it could return a
-      // different live page's fragment), so we don't attempt it - see restorePageForContextID.
-      return null;
-    }
-    String updateContainerIDs = request.stringFormValueForKey(ERXAjaxApplication.KEY_UPDATE_CONTAINER_ID);
-    if (updateContainerIDs == null || updateContainerIDs.length() == 0) {
-      return null;
-    }
-    // _u may name several containers ("a;b;c"); the stored fragment is keyed by one of them (the last
-    // rendered), so check them all. Container ids are not page-unique, so we only accept records that
-    // belong to ownPage (the page instance this request actually belongs to) - a same-named container on
-    // another live page instance is skipped so its content can't bleed in. Prefer a current (not old-page)
-    // record over an old-page one.
-    String[] containers = updateContainerIDs.split(";");
-    TransactionRecord fallback = null;
-    for (String container : containers) {
-      if (container.length() == 0) {
-        continue;
-      }
-      String suffix = "_" + container;
-      Iterator recordsEnum = pageReplacementCache.values().iterator();
-      while (recordsEnum.hasNext()) {
-        TransactionRecord record = (TransactionRecord) recordsEnum.next();
-        String key = record.key();
-        if (key != null && key.endsWith(suffix) && record.page() == ownPage) {
-          if (!record.isOldPage()) {
-            return record;
-          }
-          if (fallback == null) {
-            fallback = record;
-          }
-        }
-      }
-    }
-    return fallback;
-  }
-
-  /**
-   * Marks a page as just-accessed by moving all of its fragment records to the most-recent end of the
-   * cache's insertion order. The page-limit eviction reads that order oldest-first, so touching a page
-   * on access turns the eviction policy from "drop the first-inserted page" (FIFO) into "drop the
-   * least-recently-<em>used</em> page" (LRU) - which is the only correct policy for a cache whose job is
-   * to keep the pages the user is actually working with. Without this, a page you open first and keep
-   * returning to (a receipt you edit while wandering off to look up related data) is the oldest by
-   * insertion and so the first evicted, even though it is the page you care about most.
-   * <p>
-   * Moving a record is a {@code remove}+{@code put} on the {@link LinkedHashMap}, which re-appends it at
-   * the tail. We move every record sharing this {@code pageID} so the whole page travels together and
-   * stays grouped (the eviction and {@link #pageReplacementCacheSummary()} both reason per page).
+   * Matching is by object identity ({@code record.page() == page}), so all the contextID keys that point
+   * at this one live instance travel together.
    *
    * @param pageReplacementCache the cache
-   * @param pageID the page (originalContextID) that was just accessed; no-op if null or not present
+   * @param page the page instance that was just stored or restored; no-op if null or not present
    */
-  protected void touchPageInReplacementCache(LinkedHashMap pageReplacementCache, String pageID) {
-    if (pageReplacementCache == null || pageID == null) {
+  protected void touchInstanceInReplacementCache(LinkedHashMap pageReplacementCache, WOComponent page) {
+    if (pageReplacementCache == null || page == null) {
       return;
     }
-    // Collect this page's entries first (can't re-put while iterating), then re-append them at the tail
-    // in their existing relative order.
     LinkedHashMap<Object, TransactionRecord> moved = new LinkedHashMap<>();
-    Iterator entriesEnum = pageReplacementCache.entrySet().iterator();
-    while (entriesEnum.hasNext()) {
-      Map.Entry entry = (Map.Entry) entriesEnum.next();
+    for (Object o : pageReplacementCache.entrySet()) {
+      Map.Entry entry = (Map.Entry) o;
       TransactionRecord record = (TransactionRecord) entry.getValue();
-      if (pageID.equals(record.pageID())) {
+      if (record.page() == page) {
         moved.put(entry.getKey(), record);
       }
-    }
-    if (moved.isEmpty()) {
-      return;
     }
     for (Map.Entry<Object, TransactionRecord> e : moved.entrySet()) {
       pageReplacementCache.remove(e.getKey());
@@ -490,46 +292,39 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
   }
 
   /**
-   * Bounds the page-replacement cache by the number of distinct PAGES it holds, not by the number of
-   * fragment entries (and not by a blind insertion-order LRU over individual fragments).
+   * Bounds the cache by the number of distinct page INSTANCES it holds, not by the number of contextID
+   * entries. One page instance accumulates many contextID keys over its life (one per interaction) -
+   * those are cheap pointers to the same live object and are NOT bounded. What is bounded is the count
+   * of distinct live instances: when a genuinely new instance would push us over the limit, the
+   * least-recently-used instance is evicted and ALL of its contextID keys go with it.
    * <p>
-   * The legacy behaviour evicted the single oldest fragment entry whenever the cache passed
-   * {@code MAX_PAGE_REPLACEMENT_CACHE_SIZE * 2}. That is wrong for pages that do many <em>targeted</em>
-   * partial updates: a container that is rarely re-rendered keeps a perfectly valid cached state, but
-   * its entry is the oldest by insertion, so it gets evicted - and a still-current action link inside
-   * it then 500s with "backtracked too far". Here we instead evict whole pages: a fragment's state is
-   * only dropped when the <em>page</em> it belongs to is the oldest and we are over the page limit, in
-   * which case all of that page's fragments go together (the page is dead, so its fragments are too).
-   * The cache therefore stays sized by (live pages x containers-per-page), independent of how many
-   * interactions have happened.
+   * Instances are compared by object identity. The cache's insertion order is LRU-over-instances (see
+   * {@link #touchInstanceInReplacementCache}), so the instance owning the head entry is the one gone
+   * longest without use - the right one to drop.
    *
    * @param pageReplacementCache the cache being added to
-   * @param currentPageID the page id (originalContextID) of the entry about to be added; never evicted
+   * @param currentPage the page instance about to be (re)stored; never evicted
    */
-  protected void enforcePageReplacementCachePageLimit(LinkedHashMap pageReplacementCache, String currentPageID) {
-    // Distinct page ids in cache order, which is least-recently-USED first: a page's fragments are
-    // moved to the tail on every access (see touchPageInReplacementCache), so the head is the page the
-    // user has gone longest without touching - the right one to evict (LRU, not FIFO).
-    LinkedHashSet<String> pageIDs = new LinkedHashSet<>();
-    Iterator recordsEnum = pageReplacementCache.values().iterator();
-    while (recordsEnum.hasNext()) {
-      TransactionRecord record = (TransactionRecord) recordsEnum.next();
-      if (record.pageID() != null) {
-        pageIDs.add(record.pageID());
+  protected void enforcePageReplacementCacheInstanceLimit(LinkedHashMap pageReplacementCache, WOComponent currentPage) {
+    // Distinct instances in cache order (least-recently-used first), using identity.
+    LinkedHashSet<WOComponent> instances = new LinkedHashSet<>();
+    for (Object o : pageReplacementCache.values()) {
+      WOComponent p = ((TransactionRecord) o).page();
+      if (p != null) {
+        instances.add(p);
       }
     }
-    // Already tracking this page, or still under the limit -> nothing to evict.
-    if (pageIDs.contains(currentPageID) || pageIDs.size() < ERXAjaxSession.MAX_PAGE_REPLACEMENT_CACHE_SIZE) {
+    // Already holding this instance, or under the limit -> nothing to evict.
+    if (instances.contains(currentPage) || instances.size() < MAX_PAGE_REPLACEMENT_CACHE_SIZE) {
       return;
     }
-    // Over the page limit and adding a NEW page: drop every fragment of the oldest page.
-    String oldestPageID = pageIDs.iterator().next();
+    // Over the limit and adding a NEW instance: drop every entry of the least-recently-used instance.
+    WOComponent oldest = instances.iterator().next();
     Iterator evictEnum = pageReplacementCache.entrySet().iterator();
     while (evictEnum.hasNext()) {
       Map.Entry entry = (Map.Entry) evictEnum.next();
-      TransactionRecord record = (TransactionRecord) entry.getValue();
-      if (oldestPageID.equals(record.pageID())) {
-        if (log.isDebugEnabled()) log.debug("Page-limit reached; evicting fragment {} of oldest page {}", record.key(), oldestPageID);
+      if (((TransactionRecord) entry.getValue()).page() == oldest) {
+        if (log.isDebugEnabled()) log.debug("Instance-limit reached; evicting context {} of LRU instance", entry.getKey());
         evictEnum.remove();
       }
     }
@@ -661,65 +456,26 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
     @Override
   public WOComponent restorePageForContextID(String contextID) {
 	log.debug("Restoring page for contextID: {}", contextID);
-    LinkedHashMap pageReplacementCache = (LinkedHashMap) objectForKey(ERXAjaxSession.PAGE_REPLACEMENT_CACHE_KEY);
+    LinkedHashMap pageReplacementCache = (LinkedHashMap) objectForKey(PAGE_REPLACEMENT_CACHE_KEY);
 
     WOComponent page = null;
     if (pageReplacementCache != null) {
+      // The incoming contextID is the context a still-rendered link was RENDERED in - and we keyed the
+      // page under exactly that contextID when we rendered it. So this is a direct O(1) hit: no
+      // reverse-map through WO's backtrack cache, no container scan. ContextIDs are globally unique, so a
+      // hit is always THIS page (no cross-instance bleed), and a link never ages out while its instance
+      // is still in the cache - however many interactions ago it was rendered.
       TransactionRecord pageRecord = (TransactionRecord) pageReplacementCache.get(contextID);
-      if (pageRecord == null) {
-        // Fallback: a still-rendered action link carries the context it was rendered in, which may have
-        // aged out of the cache - but it also carries its target container(s) in _u, and every fragment
-        // of one page shares ONE page instance, so we can resolve the page by container instead. This is
-        // what stops a long-lived link from 500ing once its original context falls out of the cache.
-        //
-        // Container ids are NOT page-unique: two instances of the same component in one session render the
-        // same container names, so a name-only match could return a DIFFERENT page instance's fragment and
-        // bleed its content into this request's container. So we resolve the page this contextID really
-        // belongs to first - WO's own backtrack cache maps the link's render context to the right live page
-        // - and only ever accept a container match on THAT same instance. If WO can no longer identify the
-        // page (its context has aged out of WO's cache too) we deliberately do NOT guess: a different page
-        // may still be sitting in the fragment cache, and serving it would be exactly the bleed we are
-        // preventing. We return null instead and let the request honestly 500 ("backtracked too far") - a
-        // dead-link error is strictly better than restoring the wrong object's content.
-        WOComponent ownPage = super.restorePageForContextID(contextID);
-        if (ownPage != null) {
-          pageRecord = pageRecordForRequestContainer(pageReplacementCache, ownPage);
-          if (pageRecord == null) {
-            // No fragment for this page's container - serve WO's own (un-fragmented) page instance.
-            page = ownPage;
-          }
-        }
-        else {
-          // We could not identify the page this stale context belongs to (it has aged out of BOTH the
-          // fragment cache and WO's backtrack cache), so we refuse rather than risk serving a different
-          // page's fragment. For an AJAX request (one carrying target containers in _u) this means the
-          // request is about to 500 ("backtracked too far"). Log WHY at WARN - not behind the debug flag
-          // - so a real-world dead-link failure leaves a breadcrumb instead of failing silently: the
-          // missed context, the containers it wanted, and the cache it missed in. Gated on _u so a normal
-          // non-ajax backtrack (which legitimately falls through to super below) doesn't cry wolf.
-          WORequest rq = context() != null ? context().request() : null;
-          String wantedContainers = rq != null ? rq.stringFormValueForKey(ERXAjaxApplication.KEY_UPDATE_CONTAINER_ID) : null;
-          if (wantedContainers != null && wantedContainers.length() > 0 && log.isWarnEnabled()) {
-            log.warn("Ajax page-cache MISS, request will fail: contextID={} could not be resolved - aged "
-                + "out of both the fragment cache and WO's backtrack cache. _u={} | {}",
-              contextID, wantedContainers, pageReplacementCacheSummary());
-          }
-        }
-      }
       if (pageRecord != null) {
           log.debug("Restoring page for contextID: {} pageRecord = {}", contextID, pageRecord);
           page = pageRecord.page();
-          // Access = most-recently-used: move this page's fragments to the tail so the page-limit
-          // eviction drops the least-recently-USED page, not the first-inserted one (LRU, not FIFO).
-          touchPageInReplacementCache(pageReplacementCache, pageRecord.pageID());
+          // Access = most-recently-used for this INSTANCE: move all its contextID entries to the tail so
+          // eviction drops the least-recently-used instance, not the first-inserted one.
+          touchInstanceInReplacementCache(pageReplacementCache, page);
       }
-      else if (page == null) {
+      else {
         log.debug("No page in pageReplacementCache for contextID: {}", contextID);
-        // If we got the page out of the replacement cache above, then we're obviously still
-        // using Ajax, and it's likely our cache will be cleaned out in an Ajax update.  If the
-        // requested page was not in the cache, though, then we might be done with Ajax,
-        // so give the cache a quick run-through for expired pages.
-        cleanPageReplacementCacheIfNecessary();
+        // Not one of ours - fall through to the permanent / backtrack caches below.
       }
     }
     // AK: this will get handled last in the super implementation, so we do it here
@@ -742,7 +498,7 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
       // MS: I suspect we don't have to do this all the time, but I don't know if we have 
       // enough information at this point to know whether to do it or not, unfortunately.
       if (request != null) {
-        request.setHeader(contextID, ERXAjaxSession.ORIGINAL_CONTEXT_ID_KEY);
+        request.setHeader(contextID, ORIGINAL_CONTEXT_ID_KEY);
       }
     }
 
