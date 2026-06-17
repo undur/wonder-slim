@@ -3,6 +3,8 @@
     <wo class="AjaxBusySpinner" wocomponentcontent="false">
         <binding name="id"/>
         <binding name="class"/>
+        <binding name="delay"/>
+        <binding name="fade"/>
         <binding name="style"/>
     </wo>
 </wodefinitions>

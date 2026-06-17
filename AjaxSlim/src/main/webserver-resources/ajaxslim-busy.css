@@ -4,16 +4,69 @@
  * ajaxslim.js sets data-ajaxslim-busy="true" on <html> while any ajax request is in flight and removes
  * it when idle. The spinner is hidden by default and revealed only while that attribute is present, so
  * no per-spinner JavaScript is needed. Three pulsing dots, no images, no dependencies.
+ *
+ * Two independent anti-flash knobs, both default 0ms:
+ *   --ajaxslim-busy-delay (`delay` binding): wait this long after going busy before showing. A burst
+ *     of fast requests that ends within the wait never reveals the spinner.
+ *   --ajaxslim-busy-fade  (`fade` binding): fade in/out over this duration. A soft fade-out turns a
+ *     brief near-threshold show into a gentle glide instead of a hard blink.
+ * Use them together (e.g. delay=200 fade=200) or either alone.
+ *
+ * Pure CSS via opacity + visibility transitions; no JavaScript timing. Because a fade-out needs the box
+ * to remain while it fades, we hide with visibility (not display), so the spinner reserves its (small,
+ * inline) layout space when idle. For the floating `.fixed` variant that costs nothing (out of flow);
+ * for an in-flow spinner it holds a small gap, fine for a toolbar indicator.
  */
 .ajaxslim-busy-spinner {
-	display: none;
+	display: inline-flex;
 	gap: 0.35em;
 	align-items: center;
+	/* idle: invisible. Fade OUT over `fade` with no wait; visibility flips hidden after the fade. */
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity var(--ajaxslim-busy-fade, 0ms) linear,
+	            visibility 0s linear var(--ajaxslim-busy-fade, 0ms);
 }
 
-/* Reveal whenever the document is in the busy state. */
+/* Busy: wait `delay`, then fade IN over `fade`; visibility flips visible up front so the fade shows. */
 html[data-ajaxslim-busy] .ajaxslim-busy-spinner {
-	display: inline-flex;
+	opacity: 1;
+	visibility: visible;
+	transition: opacity var(--ajaxslim-busy-fade, 0ms) linear var(--ajaxslim-busy-delay, 0ms),
+	            visibility 0s linear var(--ajaxslim-busy-delay, 0ms);
+
+	/*
+	 * If a request is already in flight when the spinner FIRST renders (e.g. an AjaxUpdateTrigger that
+	 * fires on page load), there is no prior opacity:0 frame to transition from, so without this the
+	 * fade-in snaps to 1 - the spinner blinks instead of fading. @starting-style declares the value to
+	 * animate from on first render, so the fade-in runs even then. Modern browsers only; older ones
+	 * gracefully skip just the first fade.
+	 */
+	@starting-style {
+		opacity: 0;
+	}
+}
+
+/*
+ * Opt-in "fixed" variant: <wo:AjaxBusySpinner class="fixed"/>. Floats the spinner in the top-right
+ * corner of the viewport instead of sitting in the document flow, so a site-wide spinner (e.g. one
+ * dropped in a layout component) never takes up space or pushes content down when it appears. The
+ * default in-flow behaviour (a spinner next to a button) is unchanged.
+ *
+ * It inherits the show/hide + delay behaviour above (a .fixed spinner is still a
+ * .ajaxslim-busy-spinner); this rule only adds the fixed positioning and pill styling.
+ */
+.ajaxslim-busy-spinner.fixed {
+	position: fixed;
+	top: 1rem;
+	right: 1rem;
+	z-index: 2147483647;
+	padding: 0.6em 0.8em;
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	pointer-events: none;
 }
 
 .ajaxslim-busy-spinner .ajaxslim-busy-dot {

@@ -19,8 +19,22 @@ import com.webobjects.appserver.WOResponse;
  * the <code>ajaxslim:busy</code>/<code>ajaxslim:idle</code> events the runtime dispatches on document.)
  * </p>
  *
+ * <p>
+ * By default the spinner is an in-flow inline element - drop it next to a button or in a toolbar. For a
+ * site-wide indicator (e.g. one placed in a layout component, where it would otherwise take up space and
+ * push content down when it appears), add <code>class="fixed"</code>: the bundled CSS then floats it in
+ * the bottom-right corner of the viewport, out of the document flow.
+ * </p>
+ *
  * @binding id optional id for the spinner element
- * @binding class optional extra CSS class(es) on the spinner element
+ * @binding class optional extra CSS class(es) on the spinner element; use <code>"fixed"</code> for a
+ *          viewport-floating indicator instead of the in-flow default
+ * @binding delay optional show-delay (anti-flash): the spinner only appears after this much sustained
+ *          ajax activity, so a burst of fast requests never flashes it. A bare number is milliseconds
+ *          (<code>delay="200"</code>); a CSS time value is also accepted (<code>"0.2s"</code>).
+ * @binding fade optional fade-in/out duration: the spinner fades over this time instead of appearing
+ *          and vanishing instantly, so a brief near-threshold show glides rather than blinks. Same
+ *          value format as <code>delay</code>. Independent of <code>delay</code>; use either or both.
  * @binding style optional inline style on the spinner element
  */
 public class AjaxBusySpinner extends AjaxComponent {
@@ -55,8 +69,38 @@ public class AjaxBusySpinner extends AjaxComponent {
 		return valueForBinding("id", null);
 	}
 
+	/**
+	 * The inline style for the spinner. Emits the CSS custom properties the anti-flash CSS reads for any
+	 * bound timing: {@code --ajaxslim-busy-delay} (the {@code delay} binding - wait before showing) and
+	 * {@code --ajaxslim-busy-fade} (the {@code fade} binding - fade in/out duration), each before any
+	 * author-supplied {@code style}. Both accept a bare number (milliseconds, e.g. {@code "200"}) or any
+	 * CSS time value ({@code "0.2s"}).
+	 */
 	public Object style() {
-		return valueForBinding("style", null);
+		StringBuilder vars = new StringBuilder();
+		appendTimeVar(vars, "--ajaxslim-busy-delay", "delay");
+		appendTimeVar(vars, "--ajaxslim-busy-fade", "fade");
+		Object style = valueForBinding("style", null);
+		if (vars.length() == 0) {
+			return style;
+		}
+		return style == null ? vars.toString() : vars + " " + style;
+	}
+
+	/** Append "<cssVar>: <value>;" if the named binding is set, normalising a bare number to ms. */
+	private void appendTimeVar(StringBuilder out, String cssVar, String bindingName) {
+		Object value = valueForBinding(bindingName, null);
+		if (value == null) {
+			return;
+		}
+		String time = value.toString().trim();
+		if (time.matches("\\d+")) {
+			time = time + "ms";
+		}
+		if (out.length() > 0) {
+			out.append(' ');
+		}
+		out.append(cssVar).append(": ").append(time).append(';');
 	}
 
 	@Override
