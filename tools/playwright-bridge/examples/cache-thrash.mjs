@@ -274,6 +274,48 @@ async function main() {
     await ctx.close();
   }
 
+  // ============================================================================================
+  // CASE 8: stale link on an UNTOUCHED row (the original reported bug).
+  //   Edit ONLY the lower rows, many times, never touching the top row. The top row's move/down
+  //   link keeps its original page-load context the whole time (it is never re-rendered), so that
+  //   context ages out. Clicking it must still resolve via the fallback (same page, anchored by a
+  //   surviving fragment of the page) - NOT 500 with "backtracked too far".
+  // ============================================================================================
+  console.log('\nCASE 8: stale link on an untouched top row resolves via fallback (no backtrack 500)');
+  {
+    const ctx = await browser.newContext();
+    const p = await freshPage(ctx);
+    await gotoInvoice(p);
+    await p.click('#addLine'); await p.waitForTimeout(350); // 4 lines, like the report
+
+    // Snapshot the top row's down-arrow context, then churn ONLY the lower rows for a long time.
+    const ctxOf = el => (el.getAttribute('onclick') || '').match(/ajax\/([0-9.]+)/)?.[1] || '?';
+    const topBefore = await p.$eval("#linebox-1 a[title='Move down']", ctxOf);
+    for (let r = 0; r < 40; r++) {
+      await setQty(p, 2, (r % 6) + 1);
+      await setQty(p, 3, (r % 6) + 1);
+      await setQty(p, 4, (r % 6) + 1);
+    }
+    const topAfter = await p.$eval("#linebox-1 a[title='Move down']", ctxOf);
+    ok('C8 top-row link context went stale (never re-rendered)', topBefore === topAfter,
+       `before=${topBefore} after=${topAfter}`);
+
+    // Now click the stale top-row down arrow. Watch for a 500 specifically on this click.
+    let failed500 = false;
+    const onResp = res => { if (res.status() >= 500) failed500 = true; };
+    p.on('response', onResp);
+    await p.click("#linebox-1 a[title='Move down']");
+    await p.waitForTimeout(600);
+    p.off('response', onResp);
+    const body = (await p.$eval('body', e => e.innerText)).replace(/\s+/g, ' ');
+    ok('C8 no 500 on stale top-row click', !failed500);
+    ok('C8 no "backtracked too far" page', !/backtrack|Missing Page/i.test(body), body.slice(0, 100));
+    // and the page is still alive (grand total still present)
+    const stillThere = await p.$$eval('#grandTotal', e => e.length > 0);
+    ok('C8 page still rendered after stale click', stillThere);
+    await ctx.close();
+  }
+
   await browser.close();
   console.log(`\n================  ${pass} passed, ${fail} failed  ================`);
   if (fail) { console.log('FAILED:', fails.join(', ')); process.exitCode = 1; }

@@ -689,6 +689,22 @@ protected boolean cleanPageReplacementCacheIfNecessary(String _cacheKeyToAge) {
             page = ownPage;
           }
         }
+        else {
+          // We could not identify the page this stale context belongs to (it has aged out of BOTH the
+          // fragment cache and WO's backtrack cache), so we refuse rather than risk serving a different
+          // page's fragment. For an AJAX request (one carrying target containers in _u) this means the
+          // request is about to 500 ("backtracked too far"). Log WHY at WARN - not behind the debug flag
+          // - so a real-world dead-link failure leaves a breadcrumb instead of failing silently: the
+          // missed context, the containers it wanted, and the cache it missed in. Gated on _u so a normal
+          // non-ajax backtrack (which legitimately falls through to super below) doesn't cry wolf.
+          WORequest rq = context() != null ? context().request() : null;
+          String wantedContainers = rq != null ? rq.stringFormValueForKey(ERXAjaxApplication.KEY_UPDATE_CONTAINER_ID) : null;
+          if (wantedContainers != null && wantedContainers.length() > 0 && log.isWarnEnabled()) {
+            log.warn("Ajax page-cache MISS, request will fail: contextID={} could not be resolved - aged "
+                + "out of both the fragment cache and WO's backtrack cache. _u={} | {}",
+              contextID, wantedContainers, pageReplacementCacheSummary());
+          }
+        }
       }
       if (pageRecord != null) {
           log.debug("Restoring page for contextID: {} pageRecord = {}", contextID, pageRecord);
