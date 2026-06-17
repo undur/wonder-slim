@@ -36,4 +36,14 @@ public class ScenarioScripts extends PlaygroundPage {
 		_updateCount++;
 		return null;
 	}
+
+	/**
+	 * Deliberately throws during an ajax update, so the server returns its exception page as the
+	 * response. Used to exercise the client's error reporting: the failure must NOT be morphed into the
+	 * container; instead the built-in presenter shows a banner with a "Show details" overlay rendering
+	 * this exception page.
+	 */
+	public WOActionResults triggerServerError() {
+		throw new IllegalStateException("Deliberate server error from the AjaxSlim playground - this exception page is what the error overlay renders.");
+	}
 }

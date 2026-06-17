@@ -257,6 +257,11 @@
 	// intentionally tiny and dependency-free. Apps that want their own look replace AjaxSlim.Notify.error
 	// wholesale, or listen for 'ajaxslim:error' and preventDefault(). Re-uses one banner element so a
 	// burst of failures doesn't stack.
+	//
+	// When the failure carries a server response body (an HTTP error - typically a WebObjects/Wonder
+	// exception page, which is genuinely informative), the banner also offers a "Show details" button
+	// that opens that exact HTML in an iframe overlay (see AjaxSlim.Notify.showDetails). The summary
+	// message stays the at-a-glance line; the full page is one click away.
 	AjaxSlim.Notify = AjaxSlim.Notify || {
 		error: function (detail) {
 			try {
@@ -268,7 +273,19 @@
 					bar.setAttribute('role', 'alert');
 					bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;'
 						+ 'background:#b00020;color:#fff;font:14px/1.4 system-ui,sans-serif;'
-						+ 'padding:10px 40px 10px 14px;box-shadow:0 1px 4px rgba(0,0,0,.3);';
+						+ 'padding:10px 40px 10px 14px;box-shadow:0 1px 4px rgba(0,0,0,.3);'
+						+ 'display:flex;align-items:center;gap:12px;';
+					bar._msg = document.createElement('span');
+					bar._msg.style.cssText = 'flex:1 1 auto;';
+					bar.appendChild(bar._msg);
+					// "Show details" - only wired up below when there's a body to show; hidden otherwise.
+					bar._details = document.createElement('button');
+					bar._details.type = 'button';
+					bar._details.textContent = 'Show details';
+					bar._details.style.cssText = 'flex:0 0 auto;background:rgba(255,255,255,.15);'
+						+ 'border:1px solid rgba(255,255,255,.6);color:#fff;font:inherit;'
+						+ 'padding:3px 10px;border-radius:4px;cursor:pointer;';
+					bar.appendChild(bar._details);
 					var close = document.createElement('button');
 					close.type = 'button';
 					close.setAttribute('aria-label', 'Dismiss');
@@ -277,8 +294,6 @@
 						+ 'color:#fff;font-size:20px;line-height:1;cursor:pointer;';
 					close.onclick = function () { if (bar.parentNode) { bar.parentNode.removeChild(bar); } };
 					bar.appendChild(close);
-					bar._msg = document.createElement('span');
-					bar.appendChild(bar._msg);
 					document.body.appendChild(bar);
 				}
 				var msg = (detail && detail.status)
@@ -287,8 +302,85 @@
 					: 'The server could not be reached and the page could not be updated. '
 						+ 'Please check your connection and try again.';
 				bar._msg.textContent = msg;
+				// Offer the full server response only when there actually is one (HTTP errors carry the
+				// exception page; a bare network failure - status 0 - has no body).
+				var body = detail && detail.body;
+				if (body && String(body).trim().length > 0) {
+					bar._details.style.display = '';
+					bar._details.onclick = function () { AjaxSlim.Notify.showDetails(detail); };
+				}
+				else {
+					bar._details.style.display = 'none';
+					bar._details.onclick = null;
+				}
 			}
 			catch (e) { /* last-resort: never let the error presenter itself throw */ }
+		},
+
+		// Open the server's returned HTML (a WO/Wonder exception page, usually) in a modal overlay. The
+		// body is rendered inside an iframe via srcdoc, so the exception page's own styles AND scripts
+		// behave exactly as a normal full-page load would - the collapsible stack-trace rows (onclick
+		// handlers) stay interactive. The body always comes from our own server (it's just an error
+		// response to an ajax request we made), so no cross-origin sandboxing is needed. One reused
+		// overlay; ESC or the close button dismisses it.
+		showDetails: function (detail) {
+			try {
+				var id = 'ajaxslim-error-overlay';
+				var overlay = document.getElementById(id);
+				if (!overlay) {
+					overlay = document.createElement('div');
+					overlay.id = id;
+					overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;'
+						+ 'background:rgba(0,0,0,.55);display:flex;flex-direction:column;'
+						+ 'padding:24px;box-sizing:border-box;';
+
+					var dismiss = function () {
+						overlay.style.display = 'none';
+						overlay._frame.removeAttribute('srcdoc');
+						document.removeEventListener('keydown', overlay._onKey);
+					};
+					overlay._onKey = function (e) { if (e.key === 'Escape') { dismiss(); } };
+					// Click on the backdrop (outside the panel) closes; clicks inside don't bubble out.
+					overlay.onclick = function (e) { if (e.target === overlay) { dismiss(); } };
+
+					var panel = document.createElement('div');
+					panel.style.cssText = 'background:#fff;border-radius:8px;overflow:hidden;'
+						+ 'box-shadow:0 8px 40px rgba(0,0,0,.4);display:flex;flex-direction:column;'
+						+ 'flex:1 1 auto;min-height:0;width:80vw;margin:0 auto;';
+
+					var head = document.createElement('div');
+					head.style.cssText = 'flex:0 0 auto;display:flex;align-items:center;gap:12px;'
+						+ 'background:#b00020;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:10px 14px;';
+					overlay._title = document.createElement('strong');
+					overlay._title.style.cssText = 'flex:1 1 auto;';
+					head.appendChild(overlay._title);
+					var closeBtn = document.createElement('button');
+					closeBtn.type = 'button';
+					closeBtn.setAttribute('aria-label', 'Close');
+					closeBtn.textContent = '×';
+					closeBtn.style.cssText = 'background:none;border:0;color:#fff;font-size:22px;'
+						+ 'line-height:1;cursor:pointer;';
+					closeBtn.onclick = dismiss;
+					head.appendChild(closeBtn);
+					panel.appendChild(head);
+
+					overlay._frame = document.createElement('iframe');
+					overlay._frame.setAttribute('title', 'Server error details');
+					overlay._frame.style.cssText = 'flex:1 1 auto;width:100%;border:0;background:#fff;';
+					panel.appendChild(overlay._frame);
+
+					overlay.appendChild(panel);
+					document.body.appendChild(overlay);
+					overlay._dismiss = dismiss;
+				}
+				overlay._title.textContent = (detail && detail.status)
+					? ('Server error ' + detail.status + (detail.statusText ? ' — ' + detail.statusText : ''))
+					: 'Request failed';
+				overlay._frame.srcdoc = String(detail && detail.body || '');
+				overlay.style.display = 'flex';
+				document.addEventListener('keydown', overlay._onKey);
+			}
+			catch (e) { /* last-resort: never let the detail presenter itself throw */ }
 		}
 	};
 

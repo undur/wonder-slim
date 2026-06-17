@@ -24,6 +24,7 @@
 			<p>Marker A: <span class="marker" id="markerAOut">unset</span></p>
 			<p>Marker B (set by a script AFTER the throwing one): <span class="marker" id="markerBOut">unset</span></p>
 			<wo:AjaxUpdateLink updateContainerID="scriptContainer" action="$bumpCounter" id="scriptBump" class="btn">Bump (morph &amp; re-run scripts)</wo:AjaxUpdateLink>
+			<wo:AjaxUpdateLink updateContainerID="scriptContainer" action="$triggerServerError" id="scriptBoom" class="btn" style="background:#b00020;margin-left:.5rem">Trigger a server error</wo:AjaxUpdateLink>
 
 			<script>
 				// 1) sets marker A
