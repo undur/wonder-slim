@@ -88,7 +88,18 @@ public class ERXAjaxSession extends WOSession {
   private static boolean overridePrivateCache = storesPageInfo || ERXProperties.booleanForKey("er.extensions.overridePrivateCache");
   
   private static final Logger log = LoggerFactory.getLogger(ERXAjaxSession.class);
-  
+
+  /**
+   * The maximum number of distinct page INSTANCES the ajax replacement cache holds per session (one
+   * instance accumulates many contextID keys; only the instance count is bounded). Configured via
+   * {@code er.extensions.maxPageReplacementCacheSize} (default 30).
+   *
+   * @return the configured instance limit
+   */
+  public static int maxPageReplacementCacheSize() {
+    return MAX_PAGE_REPLACEMENT_CACHE_SIZE;
+  }
+
   public boolean storesPageInfo() {
 	  return storesPageInfo;
   }
