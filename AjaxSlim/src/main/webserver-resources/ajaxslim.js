@@ -732,14 +732,33 @@
 			if (field == null) {
 				return;
 			}
-			var signature = 'p:' + (partial ? 1 : 0) + '|u:' + (targetId != null ? targetId : '')
-				+ '|f:' + frequencySeconds + '|d:' + observeDelaySeconds;
-			var observed = field._ajaxObservedSignatures || (field._ajaxObservedSignatures = {});
-			if (observed[signature]) {
-				return; // this exact observer is already attached to this preserved element
-			}
-			observed[signature] = true;
 			options = options || {};
+
+			// The observer's IDENTITY (which logical AjaxObserveField this is) vs its positional
+			// SUBMIT NAME. The submitButtonName is the field's WO element-id (e.g. "5.3.3.1.1.7"); it is
+			// POSITIONAL, so when a row moves (drag-reorder, insert/remove above it) the same logical
+			// observer must now submit a DIFFERENT name. Idiomorph preserves the field node across that
+			// morph, so the stale `fire` closure - capturing the OLD submitButtonName - would otherwise
+			// stay bound and submit the wrong row's element-id, landing the server's repetition on the
+			// wrong item. So: key idempotency on the stable identity, but treat a changed submitButtonName
+			// as a re-registration that REBINDS (detaching the prior handlers first), not a no-op.
+			var identity = 'p:' + (partial ? 1 : 0) + '|u:' + (targetId != null ? targetId : '')
+				+ '|f:' + frequencySeconds + '|d:' + observeDelaySeconds;
+			var submitName = options.submitButtonName != null ? String(options.submitButtonName) : '';
+			var observers = field._ajaxObservers || (field._ajaxObservers = {});
+			var prior = observers[identity];
+			if (prior) {
+				if (prior.submitName === submitName) {
+					return; // this exact observer (same target AND same submit name) is already attached
+				}
+				// Same logical observer, but the positional submit name changed under a morph: detach the
+				// stale listeners before rebinding so the node never carries a handler that submits an
+				// outdated element-id (and never accumulates duplicates).
+				field.removeEventListener('change', prior.handler);
+				if (prior.delayMs > 0) {
+					field.removeEventListener('input', prior.handler);
+				}
+			}
 
 			var fire = function () {
 				if (options.onBeforeSubmit && options.onBeforeSubmit(field) === false) {
@@ -758,6 +777,7 @@
 
 			var delayMs = debounceMsFor(frequencySeconds, observeDelaySeconds);
 			var handler = delayMs > 0 ? debounce(fire, delayMs) : fire;
+			observers[identity] = { submitName: submitName, handler: handler, delayMs: delayMs };
 			// 'change' fires on commit (blur / option pick); 'input' gives live debounced behavior
 			// for text fields. We bind 'change' always, and 'input' too when debounced so typing
 			// triggers the debounced submit (matching the legacy frequency-poll feel) without firing
