@@ -148,8 +148,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		ERXLoggingSupport.reInitConsoleAppenders();
 
 		// Register and initialize the parsley template parser
-		Parsley.register();
-		Parsley.showInlineRenderingErrors( isDevelopmentModeSafe() );
+		Parsley.configure()
+			.inlineErrors( isDevelopmentModeSafe() )
+			.register();
 
 		// FIXME: Figure out why this is getting initialized here and document it // Hugi 2025-06-07
 		ERXStats.initStatisticsIfNecessary();
