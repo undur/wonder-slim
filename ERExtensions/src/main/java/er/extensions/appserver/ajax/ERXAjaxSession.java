@@ -7,7 +7,11 @@
 package er.extensions.appserver.ajax;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -114,17 +118,26 @@ public class ERXAjaxSession extends WOSession {
   /**
    * One cache entry: a live page instance plus the container key it was rendered for (for diagnostics).
    * The map is keyed by contextID; the record carries the instance the lookup resolves to.
+   * <p>
+   * Two timestamps are tracked purely for diagnostics (e.g. the exception-page cache report): when the
+   * entry was first stored ({@link #createdAt()}) and when it was last resolved by a restore
+   * ({@link #lastAccessedAt()}). They do not drive eviction - that is LRU over instances via the cache's
+   * insertion order - so they are free to read and never affect cache behavior.
    */
   static class TransactionRecord implements Serializable {
 
     private String _contextID;
     private WOComponent _page;
     private String _key;
+    private Instant _createdAt;
+    private Instant _lastAccessedAt;
 
     public TransactionRecord(WOComponent page, WOContext context, String key) {
       _page = page;
       _contextID = context._requestContextID();
       _key = key;
+      _createdAt = Instant.now();
+      _lastAccessedAt = _createdAt;
     }
 
     public WOComponent page() {
@@ -133,6 +146,25 @@ public class ERXAjaxSession extends WOSession {
 
     public String key() {
       return _key;
+    }
+
+    public String contextID() {
+      return _contextID;
+    }
+
+    /** When this entry was stored in the cache. */
+    public Instant createdAt() {
+      return _createdAt;
+    }
+
+    /** When this entry was last resolved by a restore (= the created time until it is first reused). */
+    public Instant lastAccessedAt() {
+      return _lastAccessedAt;
+    }
+
+    /** Mark this entry as just used (called when a restore resolves it). */
+    public void markAccessed() {
+      _lastAccessedAt = Instant.now();
     }
 
     @Override
@@ -264,12 +296,22 @@ public class ERXAjaxSession extends WOSession {
       return "pageReplacementCache: empty";
     }
     LinkedHashSet<WOComponent> instances = new LinkedHashSet<>();
+    Instant oldestStored = null;
+    Instant newestUsed = null;
     for (TransactionRecord record : cache.values()) {
       if (record.page() != null) {
         instances.add(record.page());
       }
+      if (oldestStored == null || record.createdAt().isBefore(oldestStored)) {
+        oldestStored = record.createdAt();
+      }
+      if (newestUsed == null || record.lastAccessedAt().isAfter(newestUsed)) {
+        newestUsed = record.lastAccessedAt();
+      }
     }
-    return "pageReplacementCache: " + cache.size() + " contexts / " + instances.size() + " instance(s)";
+    Instant now = Instant.now();
+    return "pageReplacementCache: " + cache.size() + " contexts / " + instances.size() + " instance(s)"
+        + " (oldest stored " + ago(oldestStored, now) + ", last used " + ago(newestUsed, now) + ")";
   }
 
   /**
@@ -480,6 +522,7 @@ public class ERXAjaxSession extends WOSession {
       if (pageRecord != null) {
           log.debug("Restoring page for contextID: {} pageRecord = {}", contextID, pageRecord);
           page = pageRecord.page();
+          pageRecord.markAccessed();
           // Access = most-recently-used for this INSTANCE: move all its contextID entries to the tail so
           // eviction drops the least-recently-used instance, not the first-inserted one.
           touchInstanceInReplacementCache(pageReplacementCache, page);
@@ -506,7 +549,7 @@ public class ERXAjaxSession extends WOSession {
           context = page.context();
       }
       WORequest request = context.request();
-      // MS: I suspect we don't have to do this all the time, but I don't know if we have 
+      // MS: I suspect we don't have to do this all the time, but I don't know if we have
       // enough information at this point to know whether to do it or not, unfortunately.
       if (request != null) {
         request.setHeader(contextID, ORIGINAL_CONTEXT_ID_KEY);
@@ -514,5 +557,119 @@ public class ERXAjaxSession extends WOSession {
     }
 
     return page;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Diagnostics / formatting helpers. Read-only, derived from already-held state;
+  // kept at the end so they don't crowd the load-bearing cache logic above.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * A multi-line, human-readable diagnostic of this session's ajax page caches, for inclusion in the
+   * exception extra-info (see {@code ERXExceptionManager}). Where the raw session {@code toString()}
+   * dumps the page-replacement cache as a flat, unreadable contextID-&gt;record soup, this groups it by
+   * the live page INSTANCE (the thing the cache is actually bounded by), and for each instance lists the
+   * container keys it is cached under, its contextIDs, and how long ago it was stored / last used.
+   * <p>
+   * Everything here is read-only and derived from already-held state, so it is safe to call at any time
+   * (notably while handling an exception). Returns a short "empty" line when there is nothing cached.
+   *
+   * @return the formatted report
+   */
+  public String ajaxCacheDiagnostics() {
+    final Instant now = Instant.now();
+    final StringBuilder out = new StringBuilder();
+
+    out.append("config: maxInstances=").append(MAX_PAGE_REPLACEMENT_CACHE_SIZE)
+       .append("  overridePrivateCache=").append(overridePrivateCache)
+       .append("  storesPageInfo=").append(storesPageInfo).append('\n');
+
+    @SuppressWarnings("unchecked")
+    LinkedHashMap<String, TransactionRecord> cache = (LinkedHashMap<String, TransactionRecord>) objectForKey(PAGE_REPLACEMENT_CACHE_KEY);
+    if (cache == null || cache.isEmpty()) {
+      out.append("pageReplacementCache: empty");
+    }
+    else {
+      // Group the map by the live page instance it points at, preserving the cache's insertion order
+      // (which is LRU-over-instances: least-recently-used instance first). We carry the MAP KEY through
+      // - that is the contextID the cache is actually keyed by (context.contextID(), the value a rendered
+      // link will carry back), which is the useful one for matching a stale link to its entry.
+      LinkedHashMap<WOComponent, NSMutableArray<Map.Entry<String, TransactionRecord>>> byInstance = new LinkedHashMap<>();
+      for (Map.Entry<String, TransactionRecord> entry : cache.entrySet()) {
+        WOComponent page = entry.getValue().page();
+        NSMutableArray<Map.Entry<String, TransactionRecord>> entries = byInstance.get(page);
+        if (entries == null) {
+          entries = new NSMutableArray<>();
+          byInstance.put(page, entries);
+        }
+        entries.add(entry);
+      }
+
+      out.append("pageReplacementCache: ").append(cache.size()).append(" contexts / ")
+         .append(byInstance.size()).append(" instance(s)").append("  (oldest-used first)\n");
+
+      for (Map.Entry<WOComponent, NSMutableArray<Map.Entry<String, TransactionRecord>>> e : byInstance.entrySet()) {
+        WOComponent page = e.getKey();
+        NSMutableArray<Map.Entry<String, TransactionRecord>> entries = e.getValue();
+        String pageName = page == null ? "(null page)" : page.name();
+        out.append("  ").append(pageName).append("  (").append(entries.count()).append(" context(s))\n");
+
+        // The container keys this instance is cached under (e.g. "28_baseData"), de-duplicated, plus the
+        // contextID keys (the map keys), and the oldest-stored / most-recently-used timestamps. Joined
+        // by hand into single inline lines (NSArray/Set toString would inject brackets and line breaks).
+        LinkedHashSet<String> containerKeys = new LinkedHashSet<>();
+        List<String> contextIDs = new ArrayList<>();
+        Instant created = null;
+        Instant lastAccessed = null;
+        for (Map.Entry<String, TransactionRecord> entry : entries) {
+          TransactionRecord record = entry.getValue();
+          contextIDs.add(entry.getKey());
+          if (record.key() != null) {
+            containerKeys.add(record.key());
+          }
+          if (created == null || record.createdAt().isBefore(created)) {
+            created = record.createdAt();
+          }
+          if (lastAccessed == null || record.lastAccessedAt().isAfter(lastAccessed)) {
+            lastAccessed = record.lastAccessedAt();
+          }
+        }
+        out.append("    containers: ").append(String.join(", ", containerKeys)).append('\n');
+        out.append("    contexts:   ").append(String.join(", ", contextIDs)).append('\n');
+        out.append("    stored ").append(ago(created, now))
+           .append(", last used ").append(ago(lastAccessed, now)).append('\n');
+      }
+    }
+
+    // The permanent page cache (only populated when overridePrivateCache is on).
+    if (_permanentPageCache != null && !_permanentPageCache.isEmpty()) {
+      out.append('\n').append("permanentPageCache: ").append(_permanentPageCache.count()).append(" context(s)\n");
+      for (Object contextID : _permanentPageCache.allKeys()) {
+        WOComponent p = (WOComponent) _permanentPageCache.objectForKey(contextID);
+        out.append("  ctx ").append(contextID).append(" -> ").append(p == null ? "(null)" : p.name()).append('\n');
+      }
+    }
+
+    return out.toString().stripTrailing();
+  }
+
+  /** Render an Instant as a compact "Ns/Nm Ns/Nh Nm ago" relative age against {@code now}. */
+  private static String ago(Instant then, Instant now) {
+    if (then == null) {
+      return "(unknown)";
+    }
+    long seconds = Duration.between(then, now).getSeconds();
+    if (seconds < 0) {
+      seconds = 0;
+    }
+    if (seconds < 60) {
+      return seconds + "s ago";
+    }
+    if (seconds < 3600) {
+      return (seconds / 60) + "m" + (seconds % 60) + "s ago";
+    }
+    long hours = seconds / 3600;
+    long minutes = (seconds % 3600) / 60;
+    return hours + "h" + minutes + "m ago";
   }
 }

@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 import com.webobjects.appserver.WOContext;
+import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -27,7 +28,7 @@ public class ERXExceptionManager {
 	public record LoggedException( Throwable throwable, LocalDateTime dateTime, String id, NSDictionary extraInfo ) {
 		
 		public String extraInfoString() {
-			return NSPropertyListSerialization.stringFromPropertyList(extraInfo);
+			return Util.formatExtraInfo(extraInfo);
 		}
 		
 		public String stackTraceString() {
@@ -145,13 +146,89 @@ public class ERXExceptionManager {
 						extraInfo.setObjectForKey(context.session().statistics(), "PreviousPageList");
 					}
 					extraInfo.setObjectForKey(context.session(), "Session");
+					// Add a focused, readable view of OUR ajax page caches (page-replacement + permanent),
+					// grouped by page instance with container keys and entry ages - far more useful when
+					// debugging a stale-link / backtrack exception than the flat blob in the session dump.
+					if (context.session() instanceof er.extensions.appserver.ajax.ERXAjaxSession ajaxSession) {
+						extraInfo.setObjectForKey(ajaxSession.ajaxCacheDiagnostics(), "AjaxPageCache");
+					}
 				}
 			}
 
 			return extraInfo;
 		}
-		
-	    /** 
+
+		/**
+		 * Renders the exception "extra info" dictionary as a human-readable, indented block for the log,
+		 * instead of the single-line, quote-and-escape plist form that {@link NSPropertyListSerialization}
+		 * produces. Almost everyone reads this straight from the log rather than parsing it, so values are
+		 * laid out as {@code key: value}, nested dictionaries/arrays are indented under their key, and a
+		 * multi-line string value (e.g. the {@code AjaxPageCache} report) keeps its own line breaks,
+		 * indented to sit under its key. The structured dictionary handed to {@code ERXExceptionManager.log}
+		 * is unchanged, so anything consuming the raw data still gets it.
+		 *
+		 * @param extraInfo the extra-info dictionary
+		 * @return a multi-line, indented string
+		 */
+		public static String formatExtraInfo(NSDictionary<?, ?> extraInfo) {
+			final StringBuilder out = new StringBuilder();
+			appendValue(out, extraInfo, 0);
+			return out.toString().stripTrailing();
+		}
+
+		private static final String INDENT = "  ";
+
+		@SuppressWarnings("unchecked")
+		private static void appendValue(StringBuilder out, Object value, int depth) {
+			final String pad = INDENT.repeat(depth);
+			if (value instanceof NSDictionary<?, ?> dict) {
+				// Keys sorted for stable, scannable output.
+				final List<String> keys = new ArrayList<>();
+				for (Object k : dict.allKeys()) {
+					keys.add(String.valueOf(k));
+				}
+				Collections.sort(keys);
+				for (String key : keys) {
+					final Object child = ((NSDictionary<Object, Object>) dict).objectForKey(key);
+					if (isScalar(child)) {
+						out.append(pad).append(key).append(": ").append(child).append('\n');
+					}
+					else {
+						out.append(pad).append(key).append(":\n");
+						appendValue(out, child, depth + 1);
+					}
+				}
+			}
+			else if (value instanceof NSArray<?> array) {
+				for (Object item : array) {
+					if (isScalar(item)) {
+						out.append(pad).append("- ").append(item).append('\n');
+					}
+					else {
+						out.append(pad).append("-\n");
+						appendValue(out, item, depth + 1);
+					}
+				}
+			}
+			else {
+				// A scalar (or multi-line string): print each line at this indent so embedded newlines
+				// (the AjaxPageCache report, a Session toString) stay readable rather than collapsing.
+				final String text = String.valueOf(value);
+				for (String line : text.split("\n", -1)) {
+					out.append(pad).append(line).append('\n');
+				}
+			}
+		}
+
+		/** A value we render inline as {@code key: value} - a single-line string or a non-collection. */
+		private static boolean isScalar(Object value) {
+			if (value instanceof NSDictionary || value instanceof NSArray) {
+				return false;
+			}
+			return value == null || !String.valueOf(value).contains("\n");
+		}
+
+	    /**
 	     * Returns the version string of the given framework.
 	     * It checks <code>CFBundleShortVersionString</code> property 
 	     * in the <code>info.plist</code> resource and returns 
