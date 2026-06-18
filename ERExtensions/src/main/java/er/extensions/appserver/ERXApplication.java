@@ -66,7 +66,7 @@ import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.routes.RouteAction;
 import er.extensions.routes.RouteTable;
 import er.extensions.statistics.ERXStats;
-import parsley.Parsley;
+import parsley.ParsleyConfiguration;
 
 /**
  * FIXME: Application/plugin initialization phases // Hugi 2025-10-29
@@ -147,10 +147,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
 		ERXLoggingSupport.reInitConsoleAppenders();
 
-		// Register and initialize the parsley template parser
-		Parsley.configure()
-			.inlineErrors( isDevelopmentModeSafe() )
-			.register();
+		// Register and initialize the parsley template parser, with development features
+		// (inline errors, the controls strip) on in development mode and off in production.
+		final ParsleyConfiguration.Builder parsleyConfiguration = isDevelopmentModeSafe()
+				? ParsleyConfiguration.defaultDevConfiguration()
+				: ParsleyConfiguration.defaultProductionConfiguration();
+
+		parsleyConfiguration.register();
 
 		// FIXME: Figure out why this is getting initialized here and document it // Hugi 2025-06-07
 		ERXStats.initStatisticsIfNecessary();
