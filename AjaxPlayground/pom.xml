@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>is.rebbi.slim</groupId>
 		<artifactId>wonder-slim-reactor</artifactId>
-		<version>8.0.2-SNAPSHOT</version>
+		<version>8.0.2</version>
 	</parent>
 	<artifactId>AjaxPlayground</artifactId>
 	<name>Ajax Playground</name>
@@ -16,6 +16,16 @@
 		components - the canonical test surface for the morph-as-default work and the wider Ajax
 		cleanup. Component-gallery pages plus danger-matrix scenario pages.
 	</description>
+
+	<properties>
+		<!--
+			This is a purely local test/demo application, not a release artifact: it must NOT be
+			published to the WOCommunity repository alongside the frameworks. It is kept as a reactor
+			module only so it builds and is exercised during development; deployment is skipped.
+			(It also depends on a SNAPSHOT adaptor, which a released artifact could not.)
+		-->
+		<maven.deploy.skip>true</maven.deploy.skip>
+	</properties>
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
