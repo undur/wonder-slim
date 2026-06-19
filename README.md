@@ -21,7 +21,7 @@ To use in an existing project:
  * You'll also need wo add `ERLoggingReload4j` as a dependency if you want logging. It's currently the only implementation of our "logging bridge".
  * Remove `JavaWOExtensions` and `WOOgnl` if present. `JavaWOExtensions` is now included in `ERExtensions` and `WOOgnl` has been replaced by Parsley).
 
-_Don't use the `AjaxSlim` framework unless you like experimentation. It's experimental work in progress on slimming down `Ajax.framework` (that really should have gotten it's own repository)_
+_`AjaxSlim` is a morph-native, fetch-based rewrite of a subset of `Ajax.framework` — no Prototype, no Scriptaculous. It lives in the same `er.ajax` package and is a drop-in replacement for `Ajax` (use one or the other, never both). Still young, so treat it as opt-in._
 
 Since `slim` is heavily refactored and includes only a fraction of the original Wonder frameworks and code, compatibility with existing projects will be **extremely** hit and miss. If you're using *any* frameworks that depend on the old Project Wonder, directly or transiently, don't expect them to work.
 
