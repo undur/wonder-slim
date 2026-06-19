@@ -1,13 +1,13 @@
 package er.ajax;
 
 import com.webobjects.appserver.WOAssociation;
-import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.appserver.ERXMarkerClassAssociation;
 import er.extensions.foundation.ERXPatcher;
 
 /**
@@ -34,28 +34,17 @@ public class AjaxBrowser extends ERXPatcher.DynamicElementsPatches.Browser {
 	public static final String MARKER_CLASS = "ajax-popup-button";
 
 	public AjaxBrowser(String name, NSDictionary associations, WOElement element) {
-		super(name, withMarkerClass(associations), element);
+		super(name, withWonderSelectAssociations(associations), element);
 	}
 
 	/**
-	 * Returns a copy of the associations with (1) the marker class merged into the "class" binding,
-	 * preserving any class the developer set (which may be dynamic), and (2) the noSelectionString
-	 * surfaced as a "data-placeholder" attribute. Unlike WOPopUpButton, WOBrowser renders no
-	 * "no selection" option for a multi-select, so the widget can't read the placeholder text from
-	 * an option - data-placeholder is how wonder-select's placeholderFor() picks it up.
+	 * Merges the marker class into the "class" binding (via {@link ERXMarkerClassAssociation}) and
+	 * surfaces noSelectionString as a "data-placeholder" attribute. Unlike WOPopUpButton, WOBrowser
+	 * renders no "no selection" option for a multi-select, so the widget can't read the placeholder text
+	 * from an option - data-placeholder is how wonder-select's placeholderFor() picks it up.
 	 */
-	@SuppressWarnings("unchecked")
-	private static NSDictionary withMarkerClass(NSDictionary associations) {
-		NSMutableDictionary<String, WOAssociation> merged = associations == null
-				? new NSMutableDictionary<>()
-				: associations.mutableClone();
-		WOAssociation existing = (WOAssociation) merged.objectForKey("class");
-		if (existing == null) {
-			merged.setObjectForKey(WOAssociation.associationWithValue(MARKER_CLASS), "class");
-		}
-		else {
-			merged.setObjectForKey(new MarkerClassAssociation(existing), "class");
-		}
+	private static NSDictionary withWonderSelectAssociations(NSDictionary associations) {
+		NSMutableDictionary<String, WOAssociation> merged = ERXMarkerClassAssociation.mergeMarkerClass(associations, MARKER_CLASS);
 		// Surface noSelectionString as data-placeholder so the multi-select widget can show it when
 		// nothing is selected. (noSelectionString is not a real WOBrowser binding, so we don't pass
 		// it through as-is - we map it to a plain HTML attribute the widget reads.)
@@ -71,45 +60,5 @@ public class AjaxBrowser extends ERXPatcher.DynamicElementsPatches.Browser {
 		AjaxUtils.addScriptResourceInHead(context, response, "wonder-select.js");
 		AjaxUtils.addStylesheetResourceInHead(context, response, "wonder-select.css");
 		super.appendToResponse(response, context);
-	}
-
-	/**
-	 * Wraps the developer's "class" association and appends the marker class to whatever it resolves
-	 * to at render time, so a dynamic class binding still keeps working.
-	 */
-	private static class MarkerClassAssociation extends WOAssociation {
-
-		private final WOAssociation _delegate;
-
-		MarkerClassAssociation(WOAssociation delegate) {
-			_delegate = delegate;
-		}
-
-		@Override
-		public Object valueInComponent(WOComponent component) {
-			Object value = _delegate.valueInComponent(component);
-			String base = value == null ? "" : value.toString().trim();
-			return base.isEmpty() ? MARKER_CLASS : base + " " + MARKER_CLASS;
-		}
-
-		@Override
-		public boolean isValueConstant() {
-			return _delegate.isValueConstant();
-		}
-
-		@Override
-		public boolean isValueSettable() {
-			return false;
-		}
-
-		@Override
-		public String keyPath() {
-			return _delegate.keyPath();
-		}
-
-		@Override
-		public String bindingInComponent(WOComponent component) {
-			return _delegate.bindingInComponent(component);
-		}
 	}
 }
