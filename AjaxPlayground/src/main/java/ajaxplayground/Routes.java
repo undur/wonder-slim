@@ -14,6 +14,7 @@ import ajaxplayground.components.gallery.GalleryWonderSelect;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioCheckbox;
 import ajaxplayground.components.scenario.ScenarioDropdownViewport;
+import ajaxplayground.components.scenario.InvoiceSimple;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioInvoice;
 import ajaxplayground.components.scenario.ScenarioMultiObserve;
@@ -42,8 +43,9 @@ public class Routes {
 		// Index
 		routes.map( "/", Main.class );
 
-		// Integration scenario
-		routes.map( "/invoice", ScenarioInvoice.class );
+		// Invoice editors
+		routes.map( "/invoice", InvoiceSimple.class );
+		routes.map( "/invoice-stress", ScenarioInvoice.class );
 
 		// Reference
 		routes.map( "/reference", AjaxSlimReference.class );

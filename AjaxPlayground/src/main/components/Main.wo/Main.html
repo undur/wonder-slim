@@ -18,9 +18,10 @@
 	<h1>Ajax Playground</h1>
 	<p class="lead">A login-free, database-free harness for exercising the Ajax framework - the test surface for DOM morphing becoming the default update mechanism, and for the wider Ajax cleanup. Every page below is reached by a clean route URL (see <code>Routes</code>).</p>
 
-	<h2>Integration scenario</h2>
+	<h2>Invoice editors</h2>
 	<ul>
-		<li><a href="/invoice"><strong>Invoice editor</strong></a> - a real-feeling app that uses EVERY AjaxSlim element together. The grand total is a live sum across several elements, so any cross-element conflict makes it visibly wrong. Best demo + integration test.</li>
+		<li><a href="/invoice"><strong>Invoice, nice and simple</strong></a> - a customer picker, multi-select tags, drag-to-reorder lines, and a live preview, with one observe field driving the lot.</li>
+		<li><a href="/invoice-stress">Invoice, overly complex (for testing)</a> - the same idea cranked up to use EVERY AjaxSlim element and far too many update containers (for stress testing), so any cross-element regression shows up as a visibly wrong total.</li>
 	</ul>
 
 	<h2>Reference</h2>

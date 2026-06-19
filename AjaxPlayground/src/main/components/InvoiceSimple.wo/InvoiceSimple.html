@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Invoice, nice and simple</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 52rem; color: #1f2933; line-height: 1.5; }
+		a { color: #2b6cb0; text-decoration: none; }
+		a:hover { text-decoration: underline; }
+		h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+		.lead { color: #66707a; margin-top: 0; }
+
+		.card { border: 1px solid #e4e7eb; border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+
+		.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+		.field label { display: block; font-size: .8rem; font-weight: 600; color: #66707a; margin-bottom: .35rem; }
+
+		table.lines { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+		table.lines th { text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #9aa5b1; padding: 0 .5rem .5rem; }
+		table.lines th.num, table.lines td.num { text-align: right; }
+		table.lines td { padding: .5rem; border-top: 1px solid #f0f2f4; vertical-align: middle; }
+		table.lines input { width: 100%; box-sizing: border-box; border: 1px solid #d2d6dc; border-radius: 6px; padding: .35rem .5rem; font: inherit; text-align: right; }
+		table.lines td.product { min-width: 12rem; }
+		.grip { color: #cbd2d9; cursor: grab; user-select: none; }
+		.amount { font-variant-numeric: tabular-nums; }
+
+		.totals { display: flex; justify-content: flex-end; gap: 2rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 2px solid #e4e7eb; }
+		.totals .label { color: #66707a; }
+		.totals .grand { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+		.preview { background: #f9fafb; }
+		.doc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+		.doc-title { font-size: 1.3rem; font-weight: 700; letter-spacing: .08em; color: #1f2933; }
+		.doc-meta { color: #66707a; font-size: .9rem; }
+		.tag { display: inline-block; background: #e6f0fb; color: #2b6cb0; border-radius: 999px; padding: .1rem .6rem; font-size: .75rem; margin-left: .25rem; }
+		table.doc { width: 100%; border-collapse: collapse; }
+		table.doc th { text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #9aa5b1; border-bottom: 1px solid #e4e7eb; padding: .4rem .5rem; }
+		table.doc th.num, table.doc td.num { text-align: right; }
+		table.doc td { padding: .5rem; border-bottom: 1px solid #f0f2f4; }
+		table.doc tfoot td { border-bottom: none; border-top: 2px solid #e4e7eb; font-weight: 700; padding-top: .75rem; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>Invoice, nice and simple</h1>
+	<p class="lead">Pick a customer, add tags, edit the lines, drag to reorder. Three update containers - the lines, the totals, and the live preview (it could all be one container, but this also shows off multi-container updates). One observe field watches the whole form and refreshes all three on change.</p>
+
+	<wo:form>
+		<wo:AjaxObserveField updateContainerID="lineItems;totals;preview" elementName="div">
+			<div class="card">
+				<div class="fields">
+					<div class="field">
+						<label>Customer</label>
+						<wo:AjaxPopUpButton list="$customers" item="$currentCustomer" selection="$customer" />
+					</div>
+					<div class="field">
+						<label>Tags</label>
+						<wo:AjaxBrowser list="$allTags" item="$currentTag" selections="$tags" multiple="$true" noSelectionString="Add tags..." />
+					</div>
+				</div>
+
+				<wo:AjaxUpdateContainer elementName="div" id="lineItems">
+					<wo:AjaxSortable listID="lineItems" action="$reorderLines" updateContainerID="lineItems;totals;preview" />
+					<table class="lines">
+						<thead>
+							<tr>
+								<th></th>
+								<th>Product</th>
+								<th class="num">Qty</th>
+								<th class="num">Unit price</th>
+								<th class="num">Amount</th>
+							</tr>
+						</thead>
+						<tbody>
+							<wo:repetition list="$lines" item="$currentLine">
+								<tr data-sortable-item="true">
+									<td><span class="grip" data-sortable-grip="true">&#x2630;</span></td>
+									<td class="product"><wo:AjaxPopUpButton list="$products" item="$currentProduct" selection="$currentLine.product" id="$productFieldID" /></td>
+									<td class="num"><wo:textfield value="$currentLine.quantityField" id="$qtyFieldID" /></td>
+									<td class="num"><wo:textfield value="$currentLine.unitPriceField" id="$priceFieldID" /></td>
+									<td class="num amount"><wo:str value="$currentLine.lineTotal" /></td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</wo:AjaxUpdateContainer>
+
+				<wo:AjaxUpdateContainer elementName="div" id="totals" class="totals">
+					<span class="label">Total</span>
+					<span class="grand"><wo:str value="$grandTotal" /></span>
+				</wo:AjaxUpdateContainer>
+			</div>
+		</wo:AjaxObserveField>
+	</wo:form>
+
+	<wo:AjaxUpdateContainer elementName="div" id="preview" class="card preview">
+		<div class="doc-head">
+			<div>
+				<div class="doc-title">INVOICE</div>
+				<div class="doc-meta">Bill to <strong><wo:str value="$customer" /></strong></div>
+			</div>
+			<wo:if condition="$hasTags">
+				<div class="doc-meta"><wo:repetition list="$tags" item="$currentTag"><span class="tag"><wo:str value="$currentTag" /></span></wo:repetition></div>
+			</wo:if>
+		</div>
+		<table class="doc">
+			<thead>
+				<tr>
+					<th>Product</th>
+					<th class="num">Qty</th>
+					<th class="num">Unit price</th>
+					<th class="num">Amount</th>
+				</tr>
+			</thead>
+			<tbody>
+				<wo:repetition list="$lines" item="$currentLine">
+					<tr>
+						<td><wo:str value="$currentLine.product" /></td>
+						<td class="num"><wo:str value="$currentLine.quantity" /></td>
+						<td class="num"><wo:str value="$currentLine.unitPrice" /></td>
+						<td class="num"><wo:str value="$currentLine.lineTotal" /></td>
+					</tr>
+				</wo:repetition>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="3" class="num">Total</td>
+					<td class="num"><wo:str value="$grandTotal" /></td>
+				</tr>
+			</tfoot>
+		</table>
+	</wo:AjaxUpdateContainer>
+</body>
+</html>
