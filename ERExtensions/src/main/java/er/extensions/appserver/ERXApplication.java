@@ -333,8 +333,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
      * @returns Request handler used to handle the given request.
      * 
      * Overridden to disable WOStaticResourceRequestHandler being returned for URLs ending with resource-suffixes.
-     * 
-     * FIXME: I'm 99,99% sure this is fine for everyone. Labeling it for a while though // Hugi 2026-01-28
      */
 	@Override
     public WORequestHandler handlerForRequest(WORequest request) {
@@ -343,7 +341,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
     }
 
 	/**
-	 * @return An unchecked dynamic URL initialized with the given string.
+	 * @return An dynamic URL initialized with the given string. Overridden to return UncheckedDynamicURL, allowing us to handle funky URLs
 	 */
 	@Override
 	public UncheckedDynamicURL newDynamicURL( String url ) {
@@ -351,13 +349,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * WODynamicURL implementation created to override and disable the check() method, allowing us to handle freestyle URLs/routing.
-	 * 
-	 * FIXME: For use while we're experimenting with generic URL-handling. Needs work // Hugi 2026-01-28
+	 * Replaces the check() method with an empty implementation, allowing us to handle freestyle URLs/routing.
 	 */
-	public static class UncheckedDynamicURL extends WODynamicURL {
-
-		public UncheckedDynamicURL() {}
+	private static class UncheckedDynamicURL extends WODynamicURL {
 
 		public UncheckedDynamicURL( String url ) {
 			super( url );
