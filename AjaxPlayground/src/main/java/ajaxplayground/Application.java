@@ -4,9 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.routes.RouteTable;
-
-import ajaxplayground.components.Main;
 
 /**
  * Minimal WebObjects application that exercises the Ajax framework's components. It is
@@ -31,7 +28,7 @@ public class Application extends ERXApplication {
 		// No login, so a generous default page cache is plenty and keeps backtracking snappy.
 		setPageCacheSize( 100 );
 
-		// Map "/" to the playground index so the bare app URL lands on the front page.
-		RouteTable.defaultRouteTable().map( "/", Main.class );
+		// Clean, flat URLs for page-to-page navigation (see Routes).
+		Routes.register();
 	}
 }

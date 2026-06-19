@@ -14,7 +14,7 @@
 	</style>
 </head>
 <body>
-	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<p><a href="/">&larr; Playground index</a></p>
 	<h1>Multiple observe fields on one field</h1>
 	<p class="lead">One source field fans out to three separate AjaxObserveFields, each updating a different container. Changing the field (blur/Tab) must update ALL THREE counters. If any stays at 0, the observer-idempotency guard is collapsing distinct observers (the bug that once dropped a "refresh the next row" observer).</p>
 

@@ -15,7 +15,7 @@
 	</style>
 </head>
 <body>
-	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<p><a href="/">&larr; Playground index</a></p>
 	<h1>Nested update containers</h1>
 	<p class="lead">An inner container's registration (an observe field) re-runs every time the outer container morphs. The danger is the inner observer stacking. Test: morph the outer container several times, then change the inner field once - it must fire a single request, not one-per-outer-morph.</p>
 

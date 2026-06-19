@@ -14,7 +14,7 @@
 	</style>
 </head>
 <body>
-	<p><wo:link action="$home">&larr; Playground index</wo:link></p>
+	<p><a href="/">&larr; Playground index</a></p>
 	<h1>UUID / dashed element ids</h1>
 	<p class="lead">The main container's id is a UUID with dashes (<code><wo:str value="$uuidContainerID" /></code>). Updating it used to throw in <code>AUC.register</code>'s eval and abort later scripts in the same response - silently killing the <code>AjaxUpdateTrigger</code> inside it. Now: bumping the main container should update its count AND fire the trigger that refreshes the second container.</p>
 
