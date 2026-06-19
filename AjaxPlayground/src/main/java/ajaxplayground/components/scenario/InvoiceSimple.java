@@ -33,6 +33,7 @@ public class InvoiceSimple extends PlaygroundPage {
 	public NSArray<String> tags;
 
 	private final List<InvoiceLine> _lines;
+	private int _nextLineID;
 
 	public InvoiceSimple(WOContext context) {
 		super(context);
@@ -40,6 +41,7 @@ public class InvoiceSimple extends PlaygroundPage {
 		_lines.add(new InvoiceLine(1, "Widget", 2, 500));
 		_lines.add(new InvoiceLine(2, "Gadget", 1, 1200));
 		_lines.add(new InvoiceLine(3, "Sprocket", 4, 75));
+		_nextLineID = 4;
 		customer = "Acme Corp";
 		tags = new NSArray<>();
 	}
@@ -89,6 +91,16 @@ public class InvoiceSimple extends PlaygroundPage {
 	}
 
 	public WOActionResults edited() {
+		return null;
+	}
+
+	public WOActionResults addLine() {
+		_lines.add(new InvoiceLine(_nextLineID++, "Widget", 1, 100));
+		return null;
+	}
+
+	public WOActionResults removeLine() {
+		_lines.remove(currentLine);
 		return null;
 	}
 

@@ -171,7 +171,7 @@
 				<wo:if condition="$hasInvalidLine"><span class="err" id="invoiceError"> &mdash; fix invalid line(s) before saving</span></wo:if>
 			</div>
 			<p style="margin-top:.6rem">
-				Status: <span class="$statusPillClass" id="statusPill"><wo:str value="$finalisedLabel" /></span>
+				Status: <wo:container elementName="span" class="$statusPillClass" id="statusPill"><wo:str value="$finalisedLabel" /></wo:container>
 				<wo:AjaxUpdateLink action="$toggleFinalised" updateContainerID="totalsPanel;renderedInvoice" class="btn ghost small" id="toggleFinal">toggle</wo:AjaxUpdateLink>
 				<!-- toggling status cascades a refresh to the summary panel via a trigger -->
 				<wo:AjaxUpdateTrigger updateContainerID="summaryPanel" />
@@ -188,9 +188,9 @@
 	     cascade, distinct from multi-update). -->
 	<h2>Summary</h2>
 	<wo:AjaxUpdateContainer id="summaryPanel" elementName="div">
-		<p class="pill $statusPillClass">
+		<wo:container elementName="p" class="$statusPillClass">
 			<wo:str value="$finalisedLabel" /> &middot; <wo:str value="$lineCount" /> lines &middot; total <wo:str value="$grandTotal" />
-		</p>
+		</wo:container>
 	</wo:AjaxUpdateContainer>
 
 	<!-- BACKGROUND POLLERS: a self-updating "last activity" ticker, and a concurrent-edit AjaxPing
@@ -217,7 +217,7 @@
 					<div class="muted">Bill to: <strong><wo:str value="$customer" /></strong></div>
 					<wo:if condition="$hasTags"><div class="muted">Tags: <wo:str value="$tagsDisplay" /></div></wo:if>
 				</div>
-				<div class="doc-status"><span class="$statusPillClass"><wo:str value="$finalisedLabel" /></span></div>
+				<div class="doc-status"><wo:container elementName="span" class="$statusPillClass"><wo:str value="$finalisedLabel" /></wo:container></div>
 			</div>
 			<table class="doc-lines">
 				<thead>
@@ -225,12 +225,12 @@
 				</thead>
 				<tbody>
 					<wo:repetition list="$lines" item="$currentLine">
-						<tr class="$lineRowClass">
+						<wo:container elementName="tr" class="$lineRowClass">
 							<td><wo:str value="$currentLine.product" /></td>
 							<td class="num"><wo:str value="$currentLine.quantity" /></td>
 							<td class="num"><wo:str value="$currentLine.unitPrice" /></td>
 							<td class="num"><wo:str value="$currentLine.lineTotal" /></td>
-						</tr>
+						</wo:container>
 					</wo:repetition>
 				</tbody>
 				<tfoot>

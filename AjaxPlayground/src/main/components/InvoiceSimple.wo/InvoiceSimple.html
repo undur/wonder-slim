@@ -21,7 +21,12 @@
 		table.lines td { padding: .5rem; border-top: 1px solid #f0f2f4; vertical-align: middle; }
 		table.lines input { width: 100%; box-sizing: border-box; border: 1px solid #d2d6dc; border-radius: 6px; padding: .35rem .5rem; font: inherit; text-align: right; }
 		table.lines td.product { min-width: 12rem; }
+		table.lines td.remove { text-align: center; width: 1.5rem; }
+		table.lines td.remove a { color: #cbd2d9; text-decoration: none; font-size: 1.1rem; }
+		table.lines td.remove a:hover { color: #e12d39; }
 		.grip { color: #cbd2d9; cursor: grab; user-select: none; }
+		.add-line { display: inline-block; margin-top: .75rem; color: #2b6cb0; text-decoration: none; font-size: .9rem; }
+		.add-line:hover { text-decoration: underline; }
 		.amount { font-variant-numeric: tabular-nums; }
 
 		.totals { display: flex; justify-content: flex-end; gap: 2rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 2px solid #e4e7eb; }
@@ -46,51 +51,56 @@
 	<p class="lead">Pick a customer, add tags, edit the lines, drag to reorder. Three update containers - the lines, the totals, and the live preview (it could all be one container, but this also shows off multi-container updates). One observe field watches the whole form and refreshes all three on change.</p>
 
 	<wo:form>
-		<wo:AjaxObserveField updateContainerID="lineItems;totals;preview" elementName="div">
-			<div class="card">
-				<div class="fields">
-					<div class="field">
-						<label>Customer</label>
-						<wo:AjaxPopUpButton list="$customers" item="$currentCustomer" selection="$customer" />
+		<wo:AjaxUpdateContainer elementName="div" id="editor">
+			<wo:AjaxObserveField updateContainerID="lineItems;totals;preview" elementName="div">
+				<div class="card">
+					<div class="fields">
+						<div class="field">
+							<label>Customer</label>
+							<wo:AjaxPopUpButton list="$customers" item="$currentCustomer" selection="$customer" />
+						</div>
+						<div class="field">
+							<label>Tags</label>
+							<wo:AjaxBrowser list="$allTags" item="$currentTag" selections="$tags" multiple="$true" noSelectionString="Add tags..." />
+						</div>
 					</div>
-					<div class="field">
-						<label>Tags</label>
-						<wo:AjaxBrowser list="$allTags" item="$currentTag" selections="$tags" multiple="$true" noSelectionString="Add tags..." />
-					</div>
-				</div>
 
-				<wo:AjaxUpdateContainer elementName="div" id="lineItems">
-					<wo:AjaxSortable listID="lineItems" action="$reorderLines" updateContainerID="lineItems;totals;preview" />
-					<table class="lines">
-						<thead>
-							<tr>
-								<th></th>
-								<th>Product</th>
-								<th class="num">Qty</th>
-								<th class="num">Unit price</th>
-								<th class="num">Amount</th>
-							</tr>
-						</thead>
-						<tbody>
-							<wo:repetition list="$lines" item="$currentLine">
-								<tr data-sortable-item="true">
-									<td><span class="grip" data-sortable-grip="true">&#x2630;</span></td>
-									<td class="product"><wo:AjaxPopUpButton list="$products" item="$currentProduct" selection="$currentLine.product" id="$productFieldID" /></td>
-									<td class="num"><wo:textfield value="$currentLine.quantityField" id="$qtyFieldID" /></td>
-									<td class="num"><wo:textfield value="$currentLine.unitPriceField" id="$priceFieldID" /></td>
-									<td class="num amount"><wo:str value="$currentLine.lineTotal" /></td>
+					<wo:AjaxUpdateContainer elementName="div" id="lineItems">
+						<wo:AjaxSortable listID="lineItems" action="$reorderLines" updateContainerID="lineItems;totals;preview" />
+						<table class="lines">
+							<thead>
+								<tr>
+									<th></th>
+									<th>Product</th>
+									<th class="num">Qty</th>
+									<th class="num">Unit price</th>
+									<th class="num">Amount</th>
+									<th></th>
 								</tr>
-							</wo:repetition>
-						</tbody>
-					</table>
-				</wo:AjaxUpdateContainer>
+							</thead>
+							<tbody>
+								<wo:repetition list="$lines" item="$currentLine">
+									<tr data-sortable-item="true">
+										<td><span class="grip" data-sortable-grip="true">&#x2630;</span></td>
+										<td class="product"><wo:AjaxPopUpButton list="$products" item="$currentProduct" selection="$currentLine.product" id="$productFieldID" /></td>
+										<td class="num"><wo:textfield value="$currentLine.quantityField" id="$qtyFieldID" /></td>
+										<td class="num"><wo:textfield value="$currentLine.unitPriceField" id="$priceFieldID" /></td>
+										<td class="num amount"><wo:str value="$currentLine.lineTotal" /></td>
+										<td class="remove"><wo:AjaxUpdateLink action="$removeLine" updateContainerID="editor;totals;preview" title="Remove line">&times;</wo:AjaxUpdateLink></td>
+									</tr>
+								</wo:repetition>
+							</tbody>
+						</table>
+						<p><wo:AjaxUpdateLink action="$addLine" updateContainerID="editor;totals;preview" class="add-line">+ Add line</wo:AjaxUpdateLink></p>
+					</wo:AjaxUpdateContainer>
 
-				<wo:AjaxUpdateContainer elementName="div" id="totals" class="totals">
-					<span class="label">Total</span>
-					<span class="grand"><wo:str value="$grandTotal" /></span>
-				</wo:AjaxUpdateContainer>
-			</div>
-		</wo:AjaxObserveField>
+					<wo:AjaxUpdateContainer elementName="div" id="totals" class="totals">
+						<span class="label">Total</span>
+						<span class="grand"><wo:str value="$grandTotal" /></span>
+					</wo:AjaxUpdateContainer>
+				</div>
+			</wo:AjaxObserveField>
+		</wo:AjaxUpdateContainer>
 	</wo:form>
 
 	<wo:AjaxUpdateContainer elementName="div" id="preview" class="card preview">
