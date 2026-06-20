@@ -30,8 +30,9 @@ import com.webobjects.appserver.WOResponse;
  * @binding class optional extra CSS class(es) on the spinner element; use <code>"fixed"</code> for a
  *          viewport-floating indicator instead of the in-flow default
  * @binding delay optional show-delay (anti-flash): the spinner only appears after this much sustained
- *          ajax activity, so a burst of fast requests never flashes it. A bare number is milliseconds
- *          (<code>delay="200"</code>); a CSS time value is also accepted (<code>"0.2s"</code>).
+ *          ajax activity, so a burst of fast requests never flashes it. A bare number is seconds
+ *          (<code>delay="0.2"</code>); a CSS time value with its own unit is also accepted
+ *          (<code>"200ms"</code>).
  * @binding fade optional fade-in/out duration: the spinner fades over this time instead of appearing
  *          and vanishing instantly, so a brief near-threshold show glides rather than blinks. Same
  *          value format as <code>delay</code>. Independent of <code>delay</code>; use either or both.
@@ -73,8 +74,8 @@ public class AjaxBusySpinner extends AjaxComponent {
 	 * The inline style for the spinner. Emits the CSS custom properties the anti-flash CSS reads for any
 	 * bound timing: {@code --ajaxslim-busy-delay} (the {@code delay} binding - wait before showing) and
 	 * {@code --ajaxslim-busy-fade} (the {@code fade} binding - fade in/out duration), each before any
-	 * author-supplied {@code style}. Both accept a bare number (milliseconds, e.g. {@code "200"}) or any
-	 * CSS time value ({@code "0.2s"}).
+	 * author-supplied {@code style}. Both accept a bare number (seconds, e.g. {@code "0.2"}) or any
+	 * CSS time value with its own unit ({@code "200ms"}, {@code "0.2s"}).
 	 */
 	public Object style() {
 		StringBuilder vars = new StringBuilder();
@@ -87,15 +88,17 @@ public class AjaxBusySpinner extends AjaxComponent {
 		return style == null ? vars.toString() : vars + " " + style;
 	}
 
-	/** Append "<cssVar>: <value>;" if the named binding is set, normalising a bare number to ms. */
+	/** Append "<cssVar>: <value>;" if the named binding is set, normalising a bare number to seconds. */
 	private void appendTimeVar(StringBuilder out, String cssVar, String bindingName) {
 		Object value = valueForBinding(bindingName, null);
 		if (value == null) {
 			return;
 		}
 		String time = value.toString().trim();
-		if (time.matches("\\d+")) {
-			time = time + "ms";
+		// A bare number is SECONDS (e.g. "0.2"). A CSS time value with its own unit ("200ms", "0.2s")
+		// passes through untouched.
+		if (time.matches("\\d+(\\.\\d+)?")) {
+			time = time + "s";
 		}
 		if (out.length() > 0) {
 			out.append(' ');

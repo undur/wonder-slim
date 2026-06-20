@@ -109,6 +109,11 @@
 				<td class="new">— (dropped)</td>
 				<td>The Prototype <code>Ajax.Request</code> transport options are gone — the transport that consumed them (Prototype) was replaced by <code>fetch</code>.</td>
 			</tr>
+			<tr>
+				<td class="old">AjaxPing frequency<br/>(milliseconds)</td>
+				<td class="new">AjaxPing frequency<br/>(seconds)</td>
+				<td><strong>Time-bound bindings are now in seconds, everywhere.</strong> <code>AjaxPing.frequency</code> changed from milliseconds to seconds to match <code>AjaxSelfUpdatingContainer.frequency</code>, <code>observeDelay</code>, and the rest — so an old <code>frequency="15000"</code> (15&nbsp;s) becomes <code>frequency="15"</code>; the default went 3000&nbsp;→&nbsp;3. A bare number on <code>AjaxBusySpinner.delay</code>/<code>fade</code> is likewise seconds now (was ms).</td>
+			</tr>
 		</tbody>
 	</table>
 	<p class="lead" style="margin-top:.8rem"><strong>Also worth knowing:</strong> updates now <strong>morph</strong> the DOM (Idiomorph) by default instead of replacing innerHTML — focus, scroll and selection survive a refresh; bind <code>morph="$false"</code> for the old replace-everything behaviour. And ~40 rarely-used legacy elements (Accordion, Tree, Slider, DatePicker, drag/drop, in-place editors, the Scriptaculous effects, …) were <strong>not</strong> ported — AjaxSlim is the actually-used core; reach for a platform/native equivalent for those.</p>
@@ -369,7 +374,7 @@
 				<tr><td class="b-name">id</td><td class="b-type">String</td><td>Optional id for the spinner element.</td></tr>
 				<tr><td class="b-name">class</td><td class="b-type">String</td><td>Optional extra CSS class(es) on the spinner.</td></tr>
 				<tr><td class="b-name">style</td><td class="b-type">String</td><td>Optional inline style on the spinner.</td></tr>
-				<tr><td class="b-name">delay</td><td class="b-type">String</td><td>Optional show-delay (anti-flash): the spinner only appears after this much sustained Ajax activity. A bare number is milliseconds (<code>delay="200"</code>); a CSS time value (<code>"0.2s"</code>) is also accepted.</td></tr>
+				<tr><td class="b-name">delay</td><td class="b-type">String</td><td>Optional show-delay (anti-flash): the spinner only appears after this much sustained Ajax activity. A bare number is seconds (<code>delay="0.2"</code>); a CSS time value with its own unit (<code>"200ms"</code>) is also accepted.</td></tr>
 				<tr><td class="b-name">fade</td><td class="b-type">String</td><td>Optional fade-in/out duration: the spinner fades over this time instead of appearing and vanishing instantly. Same value format as <code>delay</code>; independent of it.</td></tr>
 			</tbody>
 		</table>
@@ -384,13 +389,13 @@
 			<tbody>
 				<tr><td class="b-name">updateContainerID</td><td class="b-type">String</td><td>The id of the update container to refresh when the key changes.</td></tr>
 				<tr><td class="b-name">cacheKey</td><td class="b-type">Object</td><td>A value that represents the state of the target container.</td></tr>
-				<tr><td class="b-name">frequency</td><td class="b-type">Number (ms)</td><td>The frequency of the ping, <strong>in milliseconds</strong>. Defaults to 3000.</td></tr>
+				<tr><td class="b-name">frequency</td><td class="b-type">Number (s)</td><td>The frequency of the ping, <strong>in seconds</strong>. Defaults to 3.</td></tr>
 				<tr><td class="b-name">onBeforeUpdate</td><td class="b-type">String (JS)</td><td>A JS function to call before updating; return true to allow the update.</td></tr>
 				<tr><td class="b-name">stop</td><td class="b-type">Boolean</td><td>If true, the ping stops; if false it runs (refresh the ping's container to restart it).</td></tr>
 				<tr><td class="b-name">id</td><td class="b-type">String</td><td>Optional id of the ping container.</td></tr>
 			</tbody>
 		</table>
-<pre class="sketch">&lt;wo:AjaxPing updateContainerID="bigPanel" cacheKey="$panelVersion" frequency="5000"/&gt;</pre>
+<pre class="sketch">&lt;wo:AjaxPing updateContainerID="bigPanel" cacheKey="$panelVersion" frequency="5"/&gt;</pre>
 	</div>
 
 	<div class="el">
@@ -404,7 +409,7 @@
 				<tr><td class="b-name">onBeforeUpdate</td><td class="b-type">String (JS)</td><td>A JS function to call before updating; return true to allow the update.</td></tr>
 			</tbody>
 		</table>
-<pre class="sketch">&lt;wo:AjaxPing frequency="5000" cacheKey="$tick"&gt;
+<pre class="sketch">&lt;wo:AjaxPing frequency="5" cacheKey="$tick"&gt;
   &lt;wo:AjaxPingUpdate updateContainerID="panelA" cacheKey="$versionA"/&gt;
   &lt;wo:AjaxPingUpdate updateContainerID="panelB" cacheKey="$versionB"/&gt;
 &lt;/wo:AjaxPing&gt;</pre>

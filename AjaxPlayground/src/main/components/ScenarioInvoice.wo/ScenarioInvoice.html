@@ -201,7 +201,7 @@
 		Server time <strong id="serverTime"><wo:str value="$serverTime" /></strong> &middot; refresh #<wo:str value="$activityTick" /> (a background self-update every 10s; the clock proves a real round-trip, and it should never disturb your editing)
 	</wo:AjaxSelfUpdatingContainer>
 
-	<wo:AjaxPing frequency="15000" updateContainerID="summaryPanel" cacheKey="$invoiceCacheKey" id="concurrentWatch" />
+	<wo:AjaxPing frequency="15" updateContainerID="summaryPanel" cacheKey="$invoiceCacheKey" id="concurrentWatch" />
 	<p class="muted">A ping checks the invoice cache key every 15s and refreshes the summary only when it actually changed.</p>
 
 	<!-- RENDERED INVOICE: a read-only render of the whole invoice (customer, tags, every line, grand

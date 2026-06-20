@@ -12,7 +12,7 @@ import er.extensions.foundation.ERXValueUtilities;
  *
  * <p>
  * AjaxPing is itself a tiny AjaxUpdateContainer that re-fetches every <code>frequency</code>
- * milliseconds. Its server-side content depends only on the <code>cacheKey</code>, so while the key is
+ * seconds. Its server-side content depends only on the <code>cacheKey</code>, so while the key is
  * unchanged the periodic refresh returns the same trivial content cheaply; when the key changes, the
  * embedded {@link AjaxPingUpdate} emits a script that refreshes the (potentially large) target
  * container. So the expensive container is rebuilt only when something actually changed.
@@ -24,7 +24,7 @@ import er.extensions.foundation.ERXValueUtilities;
  * Prototype - there is no Prototype, no eval'd <code>&lt;id&gt;Update()</code> global.
  * </p>
  *
- * @binding frequency the frequency of refresh (in millis), defaults to 3000
+ * @binding frequency the frequency of refresh (in seconds), defaults to 3
  * @binding updateContainerID the id of the AjaxUpdateContainer to refresh when the cacheKey changes
  * @binding targetContainerID deprecated alias for {@code updateContainerID}; kept for backward
  *          compatibility, prefer {@code updateContainerID}
@@ -50,32 +50,25 @@ public class AjaxPing extends WOComponent {
 		return false;
 	}
 
-	/**
-	 * @return the refresh frequency in millis (default 3000); kept for the binding contract
-	 */
-	public Object frequency() {
-		Object frequency = valueForBinding("frequency");
-		if (frequency == null) {
-			frequency = "3000";
-		}
-		return frequency;
-	}
+	private static final double DEFAULT_FREQUENCY_SECONDS = 3;
 
 	/**
-	 * The ping container is an AjaxUpdateContainer whose <code>frequency</code> binding is in SECONDS,
-	 * but AjaxPing's <code>frequency</code> binding is in MILLISECONDS (legacy contract). Convert.
+	 * The refresh frequency, in SECONDS, that gets handed to the AjaxUpdateContainer (whose
+	 * <code>frequency</code> binding is also seconds).
 	 *
-	 * @return the refresh frequency in seconds
+	 * @return the refresh frequency in seconds (default 3)
 	 */
 	public double frequencyInSeconds() {
-		double millis;
+		Object frequency = valueForBinding("frequency");
+		if (frequency == null) {
+			return DEFAULT_FREQUENCY_SECONDS;
+		}
 		try {
-			millis = Double.parseDouble(String.valueOf(frequency()).trim());
+			return Double.parseDouble(String.valueOf(frequency).trim());
 		}
 		catch (NumberFormatException e) {
-			millis = 3000;
+			return DEFAULT_FREQUENCY_SECONDS;
 		}
-		return millis / 1000.0;
 	}
 
 	/**
