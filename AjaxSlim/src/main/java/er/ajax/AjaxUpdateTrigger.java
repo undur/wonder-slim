@@ -26,21 +26,27 @@ import com.webobjects.foundation.NSDictionary;
  * <b>Dropped (vs legacy):</b> the <code>evalScripts</code> binding (the fetch path always runs the
  * fragment's scripts, isolated per-script).
  *
- * @binding updateContainerID a single update container id to refresh
- * @binding updateContainerIDs an array of update container ids to refresh
- * @binding resetAfterUpdate if true, the array of ids is cleared after appendToResponse
+ * @binding updateContainerID the update container id(s) to refresh - a single id, a {@code ";"}-joined
+ *          set of ids, or a {@code List} of ids (resolved by
+ *          {@link AjaxUpdateContainer#updateContainerID(Object)}, exactly like every other element's
+ *          {@code updateContainerID} binding).
+ * @binding resetAfterUpdate if true, the ids are cleared after appendToResponse
  *
  * @author mschrag
  */
 public class AjaxUpdateTrigger extends WODynamicElement {
 	private WOAssociation _updateContainerID;
-	private WOAssociation _updateContainerIDs;
 	private WOAssociation _resetAfterUpdate;
+
+	// FIXME: Remove. Deprecated - superseded by updateContainerID, which now accepts a List too, so
+	// the separate "updateContainerIDs" binding is redundant. Kept only so existing templates that
+	// bind updateContainerIDs keep working; drop this field and its branch below once nothing uses it.
+	private WOAssociation _updateContainerIDs_deprecated;
 
 	public AjaxUpdateTrigger(String name, NSDictionary<String, WOAssociation> associations, WOElement template) {
 		super(name, associations, template);
 		_updateContainerID = associations.objectForKey("updateContainerID");
-		_updateContainerIDs = associations.objectForKey("updateContainerIDs");
+		_updateContainerIDs_deprecated = associations.objectForKey("updateContainerIDs");
 		_resetAfterUpdate = associations.objectForKey("resetAfterUpdate");
 	}
 
@@ -50,20 +56,13 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 		final WOComponent component = context.component();
 		final List<String> containersToUpdate = new ArrayList<>();
 
-		if (_updateContainerID != null) {
-			final String updateContainerID = (String) _updateContainerID.valueInComponent(component);
-			if (updateContainerID != null) {
-				containersToUpdate.add(updateContainerID);
-			}
-		}
+		// updateContainerID is resolved by the same central helper every other element uses, so it
+		// accepts a single id, a ";"-joined set, or a List - all normalized to the canonical
+		// ";"-joined string, which we split back out to iterate.
+		addResolved(containersToUpdate, _updateContainerID, component);
 
-		if (_updateContainerIDs != null) {
-			@SuppressWarnings("unchecked")
-			final List<String> updateContainerIDs = (List<String>) _updateContainerIDs.valueInComponent(component);
-			if (updateContainerIDs != null) {
-				containersToUpdate.addAll(updateContainerIDs);
-			}
-		}
+		// FIXME: Remove. Deprecated updateContainerIDs binding (see field above).
+		addResolved(containersToUpdate, _updateContainerIDs_deprecated, component);
 
 		if (!containersToUpdate.isEmpty()) {
 			AjaxUtils.appendScriptHeader(response);
@@ -76,6 +75,27 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 
 			if (_resetAfterUpdate != null && _resetAfterUpdate.booleanValueInComponent(component)) {
 				containersToUpdate.clear();
+			}
+		}
+	}
+
+	/**
+	 * Resolves the given association's value through {@link AjaxUpdateContainer#updateContainerID(Object)}
+	 * (which accepts a String, a ";"-joined set, or a List) and adds each container id to {@code target}.
+	 * A null association, or a value that resolves to null, is a no-op.
+	 */
+	private static void addResolved(List<String> target, WOAssociation association, WOComponent component) {
+		if (association == null) {
+			return;
+		}
+		final String resolved = AjaxUpdateContainer.updateContainerID(association.valueInComponent(component));
+		if (resolved == null) {
+			return;
+		}
+		for (String id : resolved.split(AjaxUpdateContainer.MULTI_UPDATE_SEPARATOR)) {
+			// String.split on an empty string yields a single "" element; skip that artifact.
+			if (!id.isEmpty()) {
+				target.add(id);
 			}
 		}
 	}

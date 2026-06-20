@@ -1,5 +1,7 @@
 package er.ajax;
 
+import java.util.List;
+
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
@@ -375,8 +377,29 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	}
 
 	public static String updateContainerID(AjaxDynamicElement element, String bindingName, WOComponent component) {
-		String updateContainerID = (String) element.valueForBinding(bindingName, component);
-		return AjaxUpdateContainer.updateContainerID(updateContainerID);
+		return AjaxUpdateContainer.updateContainerID(element.valueForBinding(bindingName, component));
+	}
+
+	/**
+	 * Resolves an {@code updateContainerID} binding value to the canonical, {@code ";"}-joined string
+	 * form the rest of the framework uses (the wire format for {@code _u=a;b;c} and the JS
+	 * {@code AUC.update('a;b;c')}). The binding may be:
+	 * <ul>
+	 * <li>a single id, or a {@code ";"}-separated set of ids, as a String (the long-standing form);</li>
+	 * <li>a {@code List} (e.g. {@code List<String>}) of ids - joined with {@code ";"} here, so callers
+	 *     never have to care which they were given.</li>
+	 * </ul>
+	 * {@code "_parent"} still resolves to the enclosing container.
+	 *
+	 * @param value the raw binding value (String, List, or null)
+	 * @return the {@code ";"}-joined container ids, or null
+	 */
+	@SuppressWarnings("unchecked")
+	public static String updateContainerID(Object value) {
+		if (value instanceof List<?> list) {
+			return String.join(MULTI_UPDATE_SEPARATOR, (List<String>) list);
+		}
+		return AjaxUpdateContainer.updateContainerID((String) value);
 	}
 
 	public static String updateContainerID(String updateContainerID) {

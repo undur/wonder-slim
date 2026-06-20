@@ -22,7 +22,7 @@
 		<div class="box">
 			<p>Main count (UUID-id container): <span id="mainCount"><wo:str value="$mainCount" /></span></p>
 			<wo:AjaxUpdateLink updateContainerID="$uuidContainerID" action="$bumpMain" id="mainBump" class="btn">Bump main (morph the UUID-id container)</wo:AjaxUpdateLink>
-			<wo:AjaxUpdateTrigger updateContainerIDs="$triggeredContainersInArray" />
+			<wo:AjaxUpdateTrigger updateContainerID="$triggeredContainersInArray" />
 		</div>
 	</wo:AjaxUpdateContainer>
 

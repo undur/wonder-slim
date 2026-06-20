@@ -2,7 +2,6 @@
 <wodefinitions>
     <wo class="AjaxUpdateTrigger" wocomponentcontent="false">
         <binding name="updateContainerID"/>
-        <binding name="updateContainerIDs"/>
         <binding name="resetAfterUpdate"/>
     </wo>
 </wodefinitions>
