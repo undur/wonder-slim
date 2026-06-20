@@ -25,13 +25,15 @@ import com.webobjects.foundation.NSDictionary;
  * @binding id the HTML id of this submit button
  * @binding class the HTML class of this submit button
  * @binding accesskey hot key that should trigger the button (optional)
+ * @binding disabled if true, the button does not handle the form submission on the server
  * @binding onClick JavaScript to run on the client after the request is sent
  * @binding onClickBefore if the given expression is false, the click is ignored (e.g. confirm(..))
  * @binding onClickServer if the action returns null, this binding's value is returned as JS
+ * @binding ignoreActionResponse if true, the action's result is ignored and an empty/onClickServer response is returned instead
  * @binding onComplete JavaScript to run after the update/morph completes
  * @binding onSuccess JavaScript to run after a successful update/morph completes
  * @binding formName the name of the form to submit (defaults to the containing form)
- * @binding formSerializer accepted for compatibility; the runtime always serializes the form itself
+ * @binding replaceID the id of an element to replace with the action's response (alternative to updateContainerID)
  * @binding updateContainerID the update container(s) to morph after the action - a single id, a {@code ";"}-joined set, or a {@code List} of ids; {@code "_parent"} targets the nearest enclosing container (see {@link AjaxUpdateContainer#updateContainerID(Object)})
  */
 public class AjaxDefaultSubmitButton extends AjaxSubmitButton {

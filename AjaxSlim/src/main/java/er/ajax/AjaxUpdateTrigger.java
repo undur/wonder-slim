@@ -30,6 +30,9 @@ import com.webobjects.foundation.NSDictionary;
  *          set, or a {@code List} of ids; {@code "_parent"} targets the nearest enclosing container.
  *          Resolved by {@link AjaxUpdateContainer#updateContainerID(Object)}, exactly like every other
  *          element's {@code updateContainerID} binding.
+ * @binding updateContainerIDs deprecated alias for {@code updateContainerID} (which now also accepts a
+ *          {@code List}); read and resolved the same way. Kept only for backward compatibility with
+ *          existing templates - prefer {@code updateContainerID}.
  *
  * @author mschrag
  */

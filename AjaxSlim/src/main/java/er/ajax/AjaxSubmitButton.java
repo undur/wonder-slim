@@ -61,6 +61,7 @@ import er.extensions.foundation.ERXProperties;
  * @binding replaceID the id of the element whose contents are replaced with the results of this action
  * @binding elementName the element name to use when rendering a link (defaults to "a")
  * @binding disabled if true, the button is disabled (defaults to false)
+ * @binding ignoreActionResponse if true, the action's result is ignored and an empty/onClickServer response is returned instead
  *
  * @property er.extensions.foundation.ERXPatcher.DynamicElementsPatches.SubmitButton.useButtonTag
  */

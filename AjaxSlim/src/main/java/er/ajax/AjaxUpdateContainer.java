@@ -47,8 +47,9 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
  * @binding morph if true, content updates reconcile the existing DOM via Idiomorph instead of replacing
  *                innerHTML, preserving focus/scroll/selection and unchanged subtrees. Bind morph="$false"
  *                to force classic innerHTML replacement. When unbound, {@link #MORPH_BY_DEFAULT} applies.
- * @binding class the CSS class of the container element
- * @binding style the inline style of the container element
+ * <p>
+ * Any other attribute (class, style, data-*, role, aria-*, ...) is passed through verbatim onto the
+ * rendered tag - it is not a binding this element interprets, so it is not listed above or in the .api.
  */
 public class AjaxUpdateContainer extends AjaxDynamicElement {
 	private static final String CURRENT_UPDATE_CONTAINER_ID_KEY = "er.ajax.AjaxUpdateContainer.currentID";

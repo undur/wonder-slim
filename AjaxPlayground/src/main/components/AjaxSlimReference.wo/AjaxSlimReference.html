@@ -176,7 +176,11 @@
 				<tr><td class="b-name">elementName</td><td class="b-type">String</td><td>The element name to use. Defaults to <code>a</code>.</td></tr>
 				<tr><td class="b-name">button</td><td class="b-type">Boolean</td><td>If true, renders an <code>&lt;input type="button"&gt;</code>.</td></tr>
 				<tr><td class="b-name">disabled</td><td class="b-type">Boolean</td><td>If true, the link tag is not rendered.</td></tr>
-				<tr><td class="b-name">id / class / style / title / accesskey</td><td class="b-type">String</td><td>Standard HTML attributes on the rendered element.</td></tr>
+				<tr><td class="b-name">title</td><td class="b-type">String</td><td>The HTML title attribute, passed through to the rendered tag.</td></tr>
+				<tr><td class="b-name">class</td><td class="b-type">String</td><td>The HTML class attribute, passed through to the rendered tag.</td></tr>
+				<tr><td class="b-name">style</td><td class="b-type">String</td><td>The HTML style attribute, passed through to the rendered tag.</td></tr>
+				<tr><td class="b-name">id</td><td class="b-type">String</td><td>The HTML id attribute, passed through to the rendered tag.</td></tr>
+				<tr><td class="b-name">accesskey</td><td class="b-type">String</td><td>The HTML accesskey attribute, passed through to the rendered tag.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;wo:AjaxUpdateLink action="$edit" updateContainerID="detail" string="Edit"/&gt;
@@ -194,15 +198,25 @@
 				<tr><td class="b-name">replaceID</td><td class="b-type">String</td><td>The id of the region to replace (mutually exclusive with <code>updateContainerID</code>).</td></tr>
 				<tr><td class="b-name">value</td><td class="b-type">String</td><td>The button text.</td></tr>
 				<tr><td class="b-name">name</td><td class="b-type">String</td><td>The HTML name of the button.</td></tr>
-				<tr><td class="b-name">button</td><td class="b-type">Boolean</td><td>Render as a link rather than a button.</td></tr>
+				<tr><td class="b-name">button</td><td class="b-type">Boolean</td><td>If false, renders a link instead of a button (default true).</td></tr>
 				<tr><td class="b-name">useButtonTag</td><td class="b-type">Boolean</td><td>Render a <code>&lt;button&gt;</code> instead of <code>&lt;input type="button"&gt;</code>.</td></tr>
 				<tr><td class="b-name">formName</td><td class="b-type">String</td><td>The name of the form to submit (defaults to the containing form).</td></tr>
 				<tr><td class="b-name">functionName</td><td class="b-type">String</td><td>If set, exposes the submit as a named JS function (the UI then defaults to hidden).</td></tr>
 				<tr><td class="b-name">showUI</td><td class="b-type">Boolean</td><td>When <code>functionName</code> is set (which hides the UI by default), set true to render the button anyway.</td></tr>
-				<tr><td class="b-name">onClick / onClickBefore / onClickServer</td><td class="b-type">String (JS)</td><td>Client hook after the request / gate before it / server-returned JS.</td></tr>
-				<tr><td class="b-name">onSuccess / onComplete</td><td class="b-type">String (JS)</td><td>Post-update hooks (run after the morph).</td></tr>
+				<tr><td class="b-name">onClick</td><td class="b-type">String (JS)</td><td>Client hook run after the request is sent.</td></tr>
+				<tr><td class="b-name">onClickBefore</td><td class="b-type">String (JS)</td><td>Gate evaluated before the request; if it is false the click is ignored.</td></tr>
+				<tr><td class="b-name">onClickServer</td><td class="b-type">String (JS)</td><td>Server-returned JS used when the action returns null.</td></tr>
+				<tr><td class="b-name">onSuccess</td><td class="b-type">String (JS)</td><td>Post-update hook (run after a successful morph).</td></tr>
+				<tr><td class="b-name">onComplete</td><td class="b-type">String (JS)</td><td>Post-update hook (run after the morph).</td></tr>
 				<tr><td class="b-name">disabled</td><td class="b-type">Boolean</td><td>Renders the <code>disabled</code> attribute.</td></tr>
-				<tr><td class="b-name">id / class / style / title / tabindex / accesskey / elementName</td><td class="b-type">String</td><td>Standard HTML attributes on the rendered element.</td></tr>
+				<tr><td class="b-name">ignoreActionResponse</td><td class="b-type">Boolean</td><td>If true, the action's result is ignored and an empty (or <code>onClickServer</code>) response is returned instead.</td></tr>
+				<tr><td class="b-name">id</td><td class="b-type">String</td><td>The HTML id attribute on the rendered element.</td></tr>
+				<tr><td class="b-name">class</td><td class="b-type">String</td><td>The HTML class attribute on the rendered element.</td></tr>
+				<tr><td class="b-name">style</td><td class="b-type">String</td><td>The HTML style attribute on the rendered element.</td></tr>
+				<tr><td class="b-name">title</td><td class="b-type">String</td><td>The HTML title attribute on the rendered element.</td></tr>
+				<tr><td class="b-name">tabindex</td><td class="b-type">String</td><td>The HTML tabindex attribute on the rendered element.</td></tr>
+				<tr><td class="b-name">accesskey</td><td class="b-type">String</td><td>The HTML accesskey attribute on the rendered element.</td></tr>
+				<tr><td class="b-name">elementName</td><td class="b-type">String</td><td>The element name used when rendering a link (defaults to <code>a</code>).</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;wo:AjaxSubmitButton action="$save" updateContainerID="result" value="Save"/&gt;</pre>
@@ -216,11 +230,13 @@
 			<tbody>
 				<tr><td class="b-name">action</td><td class="b-type">action</td><td>The action to execute on Enter.</td></tr>
 				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container(s) to morph after the action — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids. <code>"_parent"</code> targets the nearest enclosing container.</td></tr>
+				<tr><td class="b-name">replaceID</td><td class="b-type">String</td><td>The id of an element to replace with the action's response (alternative to <code>updateContainerID</code>).</td></tr>
 				<tr><td class="b-name">formName</td><td class="b-type">String</td><td>The name of the form to submit (defaults to the containing form).</td></tr>
-				<tr><td class="b-name">formSerializer</td><td class="b-type">—</td><td>Accepted for compatibility; the runtime always serializes the form itself.</td></tr>
 				<tr><td class="b-name">name / value</td><td class="b-type">String</td><td>HTML name/value of the hidden button (optional).</td></tr>
 				<tr><td class="b-name">onClick / onClickBefore / onClickServer</td><td class="b-type">String (JS)</td><td>Client hook after the request / gate before it / server-returned JS.</td></tr>
+				<tr><td class="b-name">ignoreActionResponse</td><td class="b-type">Boolean</td><td>If true, the action's result is ignored and an empty/<code>onClickServer</code> response is returned instead.</td></tr>
 				<tr><td class="b-name">onSuccess / onComplete</td><td class="b-type">String (JS)</td><td>Post-update hooks.</td></tr>
+				<tr><td class="b-name">disabled</td><td class="b-type">Boolean</td><td>If true, the button does not handle the form submission on the server.</td></tr>
 				<tr><td class="b-name">id / class / accesskey</td><td class="b-type">String</td><td>Standard attributes.</td></tr>
 			</tbody>
 		</table>
@@ -243,9 +259,13 @@
 				<tr><td class="b-name">observeDelay</td><td class="b-type">Number (s)</td><td>The debounce, in seconds, before the submit fires.</td></tr>
 				<tr><td class="b-name">observeFieldFrequency</td><td class="b-type">Number (s)</td><td>Legacy poll interval, in seconds; now treated as a debounce.</td></tr>
 				<tr><td class="b-name">onBeforeSubmit</td><td class="b-type">String (JS)</td><td>JS called before submitting; return false to deny the submit.</td></tr>
-				<tr><td class="b-name">onSuccess / onComplete</td><td class="b-type">String (JS)</td><td>Post-update hooks.</td></tr>
+				<tr><td class="b-name">onSuccess</td><td class="b-type">String (JS)</td><td>JavaScript to run after a successful update/morph completes.</td></tr>
+				<tr><td class="b-name">onComplete</td><td class="b-type">String (JS)</td><td>JavaScript to run after the update/morph completes.</td></tr>
 				<tr><td class="b-name">name</td><td class="b-type">String</td><td>The HTML name used as the ajax submit-button name (defaults to the element id).</td></tr>
-				<tr><td class="b-name">id / elementName / class / style</td><td class="b-type">String</td><td>The wrapper element (only used in descendant mode). <code>elementName</code> defaults to <code>div</code>.</td></tr>
+				<tr><td class="b-name">id</td><td class="b-type">String</td><td>The id of the observe-field wrapper (only used in descendant mode).</td></tr>
+				<tr><td class="b-name">elementName</td><td class="b-type">String</td><td>The wrapper element name (only used in descendant mode). Defaults to <code>div</code>.</td></tr>
+				<tr><td class="b-name">class</td><td class="b-type">String</td><td>CSS class of the wrapper (only used in descendant mode), passed through to the rendered tag.</td></tr>
+				<tr><td class="b-name">style</td><td class="b-type">String</td><td>CSS style of the wrapper (only used in descendant mode), passed through to the rendered tag.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;!-- single field --&gt;
@@ -265,6 +285,7 @@
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
 				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container(s) to refresh — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids. <code>"_parent"</code> targets the nearest enclosing container.</td></tr>
+				<tr><td class="b-name">updateContainerIDs</td><td class="b-type">String | List</td><td>Deprecated alias for <code>updateContainerID</code> (which now also accepts a <code>List</code>); resolved the same way. Kept only for backward compatibility — prefer <code>updateContainerID</code>.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;!-- inside a region that, when re-rendered, should refresh others: --&gt;
@@ -329,7 +350,9 @@
 				<tr><td class="b-name">title</td><td class="b-type">String</td><td>Optional title shown at the top of the dialog (and as the button's <code>title</code>).</td></tr>
 				<tr><td class="b-name">closeLabel</td><td class="b-type">String</td><td>The text on the dialog's close button. Defaults to "Close".</td></tr>
 				<tr><td class="b-name">open</td><td class="b-type">Boolean</td><td>If true, the dialog is open on initial render.</td></tr>
-				<tr><td class="b-name">id / class / style</td><td class="b-type">String</td><td>Attributes for the trigger button.</td></tr>
+				<tr><td class="b-name">id</td><td class="b-type">String</td><td>Optional id for the trigger button.</td></tr>
+				<tr><td class="b-name">class</td><td class="b-type">String</td><td>The HTML class attribute, passed through to the trigger button.</td></tr>
+				<tr><td class="b-name">style</td><td class="b-type">String</td><td>The HTML style attribute, passed through to the trigger button.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;wo:AjaxModalContainer label="Details" title="Order details" id="box"&gt;
@@ -346,6 +369,8 @@
 				<tr><td class="b-name">id</td><td class="b-type">String</td><td>Optional id for the spinner element.</td></tr>
 				<tr><td class="b-name">class</td><td class="b-type">String</td><td>Optional extra CSS class(es) on the spinner.</td></tr>
 				<tr><td class="b-name">style</td><td class="b-type">String</td><td>Optional inline style on the spinner.</td></tr>
+				<tr><td class="b-name">delay</td><td class="b-type">String</td><td>Optional show-delay (anti-flash): the spinner only appears after this much sustained Ajax activity. A bare number is milliseconds (<code>delay="200"</code>); a CSS time value (<code>"0.2s"</code>) is also accepted.</td></tr>
+				<tr><td class="b-name">fade</td><td class="b-type">String</td><td>Optional fade-in/out duration: the spinner fades over this time instead of appearing and vanishing instantly. Same value format as <code>delay</code>; independent of it.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;wo:AjaxBusySpinner/&gt;</pre>
