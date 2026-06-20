@@ -264,9 +264,7 @@
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
-				<tr><td class="b-name">updateContainerID</td><td class="b-type">String</td><td>A single update container id to refresh.</td></tr>
-				<tr><td class="b-name">updateContainerIDs</td><td class="b-type">Array&lt;String&gt;</td><td>An array of update container ids to refresh.</td></tr>
-				<tr><td class="b-name">resetAfterUpdate</td><td class="b-type">Boolean</td><td>If true, the array of ids is cleared after <code>appendToResponse</code>.</td></tr>
+				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container id(s) to refresh — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;!-- inside a region that, when re-rendered, should refresh others: --&gt;

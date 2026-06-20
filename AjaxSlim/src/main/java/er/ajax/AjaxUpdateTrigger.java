@@ -30,13 +30,11 @@ import com.webobjects.foundation.NSDictionary;
  *          set of ids, or a {@code List} of ids (resolved by
  *          {@link AjaxUpdateContainer#updateContainerID(Object)}, exactly like every other element's
  *          {@code updateContainerID} binding).
- * @binding resetAfterUpdate if true, the ids are cleared after appendToResponse
  *
  * @author mschrag
  */
 public class AjaxUpdateTrigger extends WODynamicElement {
 	private WOAssociation _updateContainerID;
-	private WOAssociation _resetAfterUpdate;
 
 	// FIXME: Remove. Deprecated - superseded by updateContainerID, which now accepts a List too, so
 	// the separate "updateContainerIDs" binding is redundant. Kept only so existing templates that
@@ -47,7 +45,6 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 		super(name, associations, template);
 		_updateContainerID = associations.objectForKey("updateContainerID");
 		_updateContainerIDs_deprecated = associations.objectForKey("updateContainerIDs");
-		_resetAfterUpdate = associations.objectForKey("resetAfterUpdate");
 	}
 
 	@Override
@@ -72,10 +69,6 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 				response.appendContentString(" }\n");
 			}
 			AjaxUtils.appendScriptFooter(response);
-
-			if (_resetAfterUpdate != null && _resetAfterUpdate.booleanValueInComponent(component)) {
-				containersToUpdate.clear();
-			}
 		}
 	}
 
