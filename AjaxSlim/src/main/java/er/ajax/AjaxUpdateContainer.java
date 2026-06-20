@@ -383,13 +383,17 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	/**
 	 * Resolves an {@code updateContainerID} binding value to the canonical, {@code ";"}-joined string
 	 * form the rest of the framework uses (the wire format for {@code _u=a;b;c} and the JS
-	 * {@code AUC.update('a;b;c')}). The binding may be:
+	 * {@code AUC.update('a;b;c')}). This is the single place every element's {@code updateContainerID}
+	 * binding is resolved, so the accepted forms are uniform across the framework. The binding may be:
 	 * <ul>
-	 * <li>a single id, or a {@code ";"}-separated set of ids, as a String (the long-standing form);</li>
+	 * <li>a single container id, as a String;</li>
+	 * <li>a {@code ";"}-separated set of ids, as a String ({@code "a;b;c"});</li>
 	 * <li>a {@code List} (e.g. {@code List<String>}) of ids - joined with {@code ";"} here, so callers
-	 *     never have to care which they were given.</li>
+	 *     never have to care which they were given;</li>
+	 * <li>the magic value {@code "_parent"}, which resolves to the nearest enclosing
+	 *     {@link AjaxUpdateContainer} (so an element can target the container it lives in without
+	 *     naming it). This applies to a String value only - it is not interpreted inside a list.</li>
 	 * </ul>
-	 * {@code "_parent"} still resolves to the enclosing container.
 	 *
 	 * @param value the raw binding value (String, List, or null)
 	 * @return the {@code ";"}-joined container ids, or null

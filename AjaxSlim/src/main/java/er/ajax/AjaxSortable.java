@@ -53,8 +53,9 @@ import com.webobjects.foundation.NSDictionary;
  *
  * @binding listID the id of the container holding the rows marked with {@code data-sortable-item}
  * @binding action the server action fired on drop. Read the move with {@link #dragResult(WORequest)}.
- * @binding updateContainerID the container id(s) to morph from the action's response (";"-joined for a
- *          multi-container update, e.g. the list plus a totals panel).
+ * @binding updateContainerID the update container(s) to morph from the action's response - a single id,
+ *          a {@code ";"}-joined set, or a {@code List} of ids; {@code "_parent"} targets the nearest
+ *          enclosing container (see {@link AjaxUpdateContainer#updateContainerID(Object)})
  */
 public class AjaxSortable extends AjaxDynamicElement {
 

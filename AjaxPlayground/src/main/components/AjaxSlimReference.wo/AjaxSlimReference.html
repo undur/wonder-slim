@@ -162,7 +162,7 @@
 			<tbody>
 				<tr><td class="b-name">action</td><td class="b-type">action</td><td>The action to call when the link executes.</td></tr>
 				<tr><td class="b-name">directActionName</td><td class="b-type">String</td><td>The direct action to call when the link executes (requires <code>replaceID</code>).</td></tr>
-				<tr><td class="b-name">updateContainerID</td><td class="b-type">String</td><td>The id of the AjaxUpdateContainer to morph after the action. May be a <code>;</code>-separated list to update several at once.</td></tr>
+				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container(s) to morph after the action — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids. <code>"_parent"</code> targets the nearest enclosing container.</td></tr>
 				<tr><td class="b-name">replaceID</td><td class="b-type">String</td><td>The id of the element whose contents are replaced with the action's result.</td></tr>
 				<tr><td class="b-name">string</td><td class="b-type">String</td><td>String prepended to the contained elements (the link text).</td></tr>
 				<tr><td class="b-name">onClick</td><td class="b-type">String (JS)</td><td>JavaScript to run on the client before the request is sent.</td></tr>
@@ -190,7 +190,7 @@
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
 				<tr><td class="b-name">action</td><td class="b-type">action</td><td>The action to execute when the button is pressed.</td></tr>
-				<tr><td class="b-name">updateContainerID</td><td class="b-type">String</td><td>The id of the container to morph after submitting. May be a <code>;</code>-separated list.</td></tr>
+				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container(s) to morph after submitting — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids. <code>"_parent"</code> targets the nearest enclosing container.</td></tr>
 				<tr><td class="b-name">replaceID</td><td class="b-type">String</td><td>The id of the region to replace (mutually exclusive with <code>updateContainerID</code>).</td></tr>
 				<tr><td class="b-name">value</td><td class="b-type">String</td><td>The button text.</td></tr>
 				<tr><td class="b-name">name</td><td class="b-type">String</td><td>The HTML name of the button.</td></tr>
@@ -215,7 +215,7 @@
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
 				<tr><td class="b-name">action</td><td class="b-type">action</td><td>The action to execute on Enter.</td></tr>
-				<tr><td class="b-name">updateContainerID</td><td class="b-type">String</td><td>The id of the container to morph after the action.</td></tr>
+				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container(s) to morph after the action — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids. <code>"_parent"</code> targets the nearest enclosing container.</td></tr>
 				<tr><td class="b-name">formName</td><td class="b-type">String</td><td>The name of the form to submit (defaults to the containing form).</td></tr>
 				<tr><td class="b-name">formSerializer</td><td class="b-type">—</td><td>Accepted for compatibility; the runtime always serializes the form itself.</td></tr>
 				<tr><td class="b-name">name / value</td><td class="b-type">String</td><td>HTML name/value of the hidden button (optional).</td></tr>
@@ -237,7 +237,7 @@
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
 				<tr><td class="b-name">observeFieldID</td><td class="b-type">String</td><td>The id of the field to observe. <strong>Omit to observe all descendant fields</strong> of this element (descendant mode).</td></tr>
-				<tr><td class="b-name">updateContainerID</td><td class="b-type">String</td><td>The id of the container to morph on change. Use <code>"_parent"</code> for the nearest enclosing one. May be a <code>;</code>-separated list.</td></tr>
+				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container(s) to morph on change — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids. <code>"_parent"</code> targets the nearest enclosing container.</td></tr>
 				<tr><td class="b-name">action</td><td class="b-type">action</td><td>The action to call when the observer fires.</td></tr>
 				<tr><td class="b-name">fullSubmit</td><td class="b-type">Boolean</td><td>When false (default), only the changed field is submitted (partial); when true, the whole form is submitted.</td></tr>
 				<tr><td class="b-name">observeDelay</td><td class="b-type">Number (s)</td><td>The debounce, in seconds, before the submit fires.</td></tr>
@@ -264,7 +264,7 @@
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
-				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container id(s) to refresh — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids.</td></tr>
+				<tr><td class="b-name">updateContainerID</td><td class="b-type">String | List</td><td>The update container(s) to refresh — a single id, a <code>;</code>-separated set, or a <code>List</code> of ids. <code>"_parent"</code> targets the nearest enclosing container.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;!-- inside a region that, when re-rendered, should refresh others: --&gt;

@@ -57,7 +57,7 @@ import er.extensions.foundation.ERXProperties;
  * @binding formName if button is false, the name of the form to submit
  * @binding functionName if set, the button becomes a named JavaScript function instead
  * @binding showUI if functionName is set, the UI defaults to hidden; showUI re-enables it
- * @binding updateContainerID the id of the AjaxUpdateContainer to morph after performing this action
+ * @binding updateContainerID the update container(s) to morph after the action - a single id, a {@code ";"}-joined set, or a {@code List} of ids; {@code "_parent"} targets the nearest enclosing container (see {@link AjaxUpdateContainer#updateContainerID(Object)})
  * @binding replaceID the id of the element whose contents are replaced with the results of this action
  * @binding elementName the element name to use when rendering a link (defaults to "a")
  * @binding disabled if true, the button is disabled (defaults to false)

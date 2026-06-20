@@ -32,7 +32,7 @@ import com.webobjects.foundation.NSDictionary;
  * @binding onSuccess JavaScript to run after a successful update/morph completes
  * @binding formName the name of the form to submit (defaults to the containing form)
  * @binding formSerializer accepted for compatibility; the runtime always serializes the form itself
- * @binding updateContainerID the id of the AjaxUpdateContainer to morph after performing this action
+ * @binding updateContainerID the update container(s) to morph after the action - a single id, a {@code ";"}-joined set, or a {@code List} of ids; {@code "_parent"} targets the nearest enclosing container (see {@link AjaxUpdateContainer#updateContainerID(Object)})
  */
 public class AjaxDefaultSubmitButton extends AjaxSubmitButton {
 

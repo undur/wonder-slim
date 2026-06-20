@@ -26,10 +26,10 @@ import com.webobjects.foundation.NSDictionary;
  * <b>Dropped (vs legacy):</b> the <code>evalScripts</code> binding (the fetch path always runs the
  * fragment's scripts, isolated per-script).
  *
- * @binding updateContainerID the update container id(s) to refresh - a single id, a {@code ";"}-joined
- *          set of ids, or a {@code List} of ids (resolved by
- *          {@link AjaxUpdateContainer#updateContainerID(Object)}, exactly like every other element's
- *          {@code updateContainerID} binding).
+ * @binding updateContainerID the update container(s) to refresh - a single id, a {@code ";"}-joined
+ *          set, or a {@code List} of ids; {@code "_parent"} targets the nearest enclosing container.
+ *          Resolved by {@link AjaxUpdateContainer#updateContainerID(Object)}, exactly like every other
+ *          element's {@code updateContainerID} binding.
  *
  * @author mschrag
  */

@@ -42,7 +42,7 @@ import er.extensions.foundation.ERXMutableURL;
  *
  * @binding action the action to call when the link executes
  * @binding directActionName the direct action to call when the link executes (requires replaceID)
- * @binding updateContainerID the id of the AjaxUpdateContainer to morph after performing this action
+ * @binding updateContainerID the update container(s) to morph after the action - a single id, a {@code ";"}-joined set, or a {@code List} of ids; {@code "_parent"} targets the nearest enclosing container (see {@link AjaxUpdateContainer#updateContainerID(Object)})
  * @binding replaceID the id of the element whose contents are replaced with the results of this action
  * @binding onComplete JavaScript to run after the update/morph completes
  * @binding onSuccess JavaScript to run after a successful update/morph completes (before onComplete)

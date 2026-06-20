@@ -37,7 +37,9 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
  * (onLoading/onException/insertion/evalScripts) - the transport that consumed it is gone.
  *
  * @binding observeFieldID the id of the field to observe (omit to observe all descendant fields)
- * @binding updateContainerID the id of the container to morph. Use "_parent" for the nearest one.
+ * @binding updateContainerID the update container(s) to morph after the change - a single id, a
+ *          {@code ";"}-joined set, or a {@code List} of ids; {@code "_parent"} targets the nearest
+ *          enclosing container (see {@link AjaxUpdateContainer#updateContainerID(Object)})
  * @binding action the action to call when the observer fires
  * @binding fullSubmit when false (default), only the changed field is submitted (partial); when true,
  *          the whole form is submitted
