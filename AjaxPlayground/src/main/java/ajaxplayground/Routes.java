@@ -1,7 +1,5 @@
 package ajaxplayground;
 
-import er.extensions.routes.RouteTable;
-
 import ajaxplayground.components.AjaxOverview;
 import ajaxplayground.components.AjaxSlimReference;
 import ajaxplayground.components.Main;
@@ -11,10 +9,10 @@ import ajaxplayground.components.gallery.GalleryAjaxSlimUpdateContainer;
 import ajaxplayground.components.gallery.GalleryLargeList;
 import ajaxplayground.components.gallery.GalleryUpdateContainer;
 import ajaxplayground.components.gallery.GalleryWonderSelect;
+import ajaxplayground.components.scenario.InvoiceSimple;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioCheckbox;
 import ajaxplayground.components.scenario.ScenarioDropdownViewport;
-import ajaxplayground.components.scenario.InvoiceSimple;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioInvoice;
 import ajaxplayground.components.scenario.ScenarioMultiObserve;
@@ -23,6 +21,7 @@ import ajaxplayground.components.scenario.ScenarioNested;
 import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioScripts;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
+import er.extensions.routes.RouteTable;
 
 /**
  * The playground's URL routes - one clean, flat URL per page, so the navigation between pages shows

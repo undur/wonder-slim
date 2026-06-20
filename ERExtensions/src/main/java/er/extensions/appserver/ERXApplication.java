@@ -43,7 +43,6 @@ import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSNotification;
-import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation._NSUtilities;
 import com.webobjects.woextensions.error.WOExceptionPage;

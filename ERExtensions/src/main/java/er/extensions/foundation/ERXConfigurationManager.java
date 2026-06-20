@@ -16,7 +16,6 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
 
-import er.extensions.ERXExtensions;
 import er.extensions.ERXLoggingSupport;
 
 /**

@@ -9,8 +9,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 
-import er.extensions.appserver.ajax.ERXAjaxApplication;
-
 /**
  * Makes the rows of a list drag-reorderable. Drop this element inside (or next to) the container whose
  * children should be sortable; it renders the one-time client registration and, on drop, fires your

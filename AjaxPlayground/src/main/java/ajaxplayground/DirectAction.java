@@ -3,8 +3,8 @@ package ajaxplayground;
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WORequest;
 
-import er.extensions.appserver.ERXDirectAction;
 import ajaxplayground.components.Main;
+import er.extensions.appserver.ERXDirectAction;
 
 /**
  * Entry points that create a session, so playground pages (which contain stateful Ajax components)
