@@ -16,7 +16,9 @@ import com.webobjects.appserver.WOContext;
  * refresh goes through {@code AjaxSlim.AUC.update(id)} instead of Prototype's <code>AUC.update</code>.
  * </p>
  *
- * @binding targetContainerID the ID of the update container to refresh when a change is detected
+ * @binding updateContainerID the id of the AjaxUpdateContainer to refresh when the cacheKey changes
+ * @binding targetContainerID deprecated alias for {@code updateContainerID}; kept for backward
+ *          compatibility, prefer {@code updateContainerID}
  * @binding cacheKey some value that represents the state of the target container
  * @binding onBeforeUpdate (optional) a javascript function to call before updating (returns true to allow the update)
  *
@@ -72,7 +74,16 @@ public class AjaxPingUpdate extends WOComponent {
 		return valueForBinding("onBeforeUpdate");
 	}
 
-	public String targetContainerID() {
-		return (String) valueForBinding("targetContainerID");
+	/**
+	 * The id of the AjaxUpdateContainer to refresh when the cacheKey changes. Reads {@code updateContainerID},
+	 * falling back to the deprecated {@code targetContainerID} alias.
+	 */
+	public String updateContainerID() {
+		String id = (String) valueForBinding("updateContainerID");
+		// FIXME: Remove. Deprecated alias - prefer updateContainerID (consistent with AjaxUpdateTrigger).
+		if (id == null) {
+			id = (String) valueForBinding("targetContainerID");
+		}
+		return id;
 	}
 }

@@ -378,11 +378,11 @@
 
 	<div class="el">
 		<h3 id="AjaxPing"><code>AjaxPing</code> <span class="tag t-trigger">Activity</span></h3>
-		<p class="role">Refreshes a large content area based on periodic refreshes of a very small one. A tiny self-refreshing container whose content depends only on <code>cacheKey</code>: while the key is unchanged the periodic ping is cheap; when it changes, the embedded <code>AjaxPingUpdate</code> refreshes the (potentially large) <code>targetContainerID</code>. So the expensive container is rebuilt only when something actually changed.</p>
+		<p class="role">Refreshes a large content area based on periodic refreshes of a very small one. A tiny self-refreshing container whose content depends only on <code>cacheKey</code>: while the key is unchanged the periodic ping is cheap; when it changes, the embedded <code>AjaxPingUpdate</code> refreshes the (potentially large) <code>updateContainerID</code>. So the expensive container is rebuilt only when something actually changed.</p>
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
-				<tr><td class="b-name">targetContainerID</td><td class="b-type">String</td><td>The id of the update container to refresh when the key changes.</td></tr>
+				<tr><td class="b-name">updateContainerID</td><td class="b-type">String</td><td>The id of the update container to refresh when the key changes.</td></tr>
 				<tr><td class="b-name">cacheKey</td><td class="b-type">Object</td><td>A value that represents the state of the target container.</td></tr>
 				<tr><td class="b-name">frequency</td><td class="b-type">Number (ms)</td><td>The frequency of the ping, <strong>in milliseconds</strong>. Defaults to 3000.</td></tr>
 				<tr><td class="b-name">onBeforeUpdate</td><td class="b-type">String (JS)</td><td>A JS function to call before updating; return true to allow the update.</td></tr>
@@ -390,7 +390,7 @@
 				<tr><td class="b-name">id</td><td class="b-type">String</td><td>Optional id of the ping container.</td></tr>
 			</tbody>
 		</table>
-<pre class="sketch">&lt;wo:AjaxPing targetContainerID="bigPanel" cacheKey="$panelVersion" frequency="5000"/&gt;</pre>
+<pre class="sketch">&lt;wo:AjaxPing updateContainerID="bigPanel" cacheKey="$panelVersion" frequency="5000"/&gt;</pre>
 	</div>
 
 	<div class="el">
@@ -399,14 +399,14 @@
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
 			<tbody>
-				<tr><td class="b-name">targetContainerID</td><td class="b-type">String</td><td>The id of the update container to refresh when the key changes.</td></tr>
+				<tr><td class="b-name">updateContainerID</td><td class="b-type">String</td><td>The id of the update container to refresh when the key changes.</td></tr>
 				<tr><td class="b-name">cacheKey</td><td class="b-type">Object</td><td>A value that represents the state of the target container.</td></tr>
 				<tr><td class="b-name">onBeforeUpdate</td><td class="b-type">String (JS)</td><td>A JS function to call before updating; return true to allow the update.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;wo:AjaxPing frequency="5000" cacheKey="$tick"&gt;
-  &lt;wo:AjaxPingUpdate targetContainerID="panelA" cacheKey="$versionA"/&gt;
-  &lt;wo:AjaxPingUpdate targetContainerID="panelB" cacheKey="$versionB"/&gt;
+  &lt;wo:AjaxPingUpdate updateContainerID="panelA" cacheKey="$versionA"/&gt;
+  &lt;wo:AjaxPingUpdate updateContainerID="panelB" cacheKey="$versionB"/&gt;
 &lt;/wo:AjaxPing&gt;</pre>
 	</div>
 

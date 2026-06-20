@@ -2,7 +2,7 @@
 <wodefinitions>
     <wo class="AjaxPing" wocomponentcontent="true">
         <binding name="frequency"/>
-        <binding name="targetContainerID"/>
+        <binding name="updateContainerID"/>
         <binding name="cacheKey"/>
         <binding name="onBeforeUpdate"/>
         <binding name="id"/>

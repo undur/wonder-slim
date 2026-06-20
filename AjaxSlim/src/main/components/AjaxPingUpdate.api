@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wodefinitions>
     <wo class="AjaxPingUpdate" wocomponentcontent="false">
-        <binding name="targetContainerID"/>
+        <binding name="updateContainerID"/>
         <binding name="cacheKey"/>
         <binding name="onBeforeUpdate"/>
     </wo>

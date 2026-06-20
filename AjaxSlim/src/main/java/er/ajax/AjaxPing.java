@@ -25,7 +25,9 @@ import er.extensions.foundation.ERXValueUtilities;
  * </p>
  *
  * @binding frequency the frequency of refresh (in millis), defaults to 3000
- * @binding targetContainerID the ID of the update container to refresh when a change is detected
+ * @binding updateContainerID the id of the AjaxUpdateContainer to refresh when the cacheKey changes
+ * @binding targetContainerID deprecated alias for {@code updateContainerID}; kept for backward
+ *          compatibility, prefer {@code updateContainerID}
  * @binding cacheKey some value that represents the state of the target container
  * @binding onBeforeUpdate (optional) a javascript function to call before updating (returns true to allow the update)
  * @binding id (optional) the id of the ping container
@@ -87,7 +89,16 @@ public class AjaxPing extends WOComponent {
 		return valueForBinding("cacheKey");
 	}
 
-	public String targetContainerID() {
+	/**
+	 * The id of the AjaxUpdateContainer to refresh when the cacheKey changes. Reads {@code updateContainerID},
+	 * falling back to the deprecated {@code targetContainerID} alias.
+	 */
+	public String updateContainerID() {
+		if (hasBinding("updateContainerID")) {
+			return (String) valueForBinding("updateContainerID");
+		}
+		// FIXME: Remove. Deprecated alias - prefer updateContainerID (consistent with AjaxUpdateTrigger,
+		// which uses updateContainerID for the same "signal another container to refresh" job).
 		return (String) valueForBinding("targetContainerID");
 	}
 
@@ -95,8 +106,8 @@ public class AjaxPing extends WOComponent {
 		return valueForBinding("onBeforeUpdate");
 	}
 
-	public boolean hasTargetContainerID() {
-		return valueForBinding("targetContainerID") != null;
+	public boolean hasUpdateContainerID() {
+		return updateContainerID() != null;
 	}
 
 	/**

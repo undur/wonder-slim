@@ -1,6 +1,6 @@
 <wo:AjaxSelfUpdatingContainer id="$id" frequency="$frequencyInSeconds" stopped="$stopped" elementName="span" style="display:none">
-	<wo:if condition="$hasTargetContainerID">
-		<wo:AjaxPingUpdate cacheKey="$cacheKey" targetContainerID="$targetContainerID" onBeforeUpdate="$onBeforeUpdate" />
+	<wo:if condition="$hasUpdateContainerID">
+		<wo:AjaxPingUpdate cacheKey="$cacheKey" updateContainerID="$updateContainerID" onBeforeUpdate="$onBeforeUpdate" />
 	</wo:if>
 	<wo:WOComponentContent />
 </wo:AjaxSelfUpdatingContainer>
