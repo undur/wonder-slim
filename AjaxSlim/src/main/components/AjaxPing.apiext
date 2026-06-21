@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxPing" wocomponentcontent="true">
+
+		<doc><![CDATA[Refreshes a large content area based on periodic refreshes of a very small one. A tiny self-refreshing container whose content depends only on `cacheKey`: while the key is unchanged the periodic ping is cheap; when it changes, the embedded `AjaxPingUpdate` refreshes the (potentially large) `updateContainerID`. So the expensive container is rebuilt only when something actually changed.
+
+```html
+<wo:AjaxPing updateContainerID="bigPanel" cacheKey="$panelVersion" frequency="5"/>
+```]]></doc>
+
+		<tags>
+			<tag>trigger</tag>
+		</tags>
+
+		<binding name="updateContainerID">
+			<type>java.lang.String</type>
+			<doc>The id of the update container to refresh when the key changes.</doc>
+		</binding>
+		<binding name="cacheKey">
+			<type>java.lang.Object</type>
+			<doc>A value that represents the state of the target container.</doc>
+		</binding>
+		<binding name="frequency">
+			<type>java.lang.Number</type>
+			<doc>The frequency of the ping, **in seconds**. Defaults to 3.</doc>
+		</binding>
+		<binding name="onBeforeUpdate">
+			<type>java.lang.String</type>
+			<doc>A JS function to call before updating; return true to allow the update.</doc>
+		</binding>
+		<binding name="stop" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>If true, the ping stops; if false it runs (refresh the ping's container to restart it).</doc>
+		</binding>
+		<binding name="id">
+			<type>java.lang.String</type>
+			<doc>Optional id of the ping container.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

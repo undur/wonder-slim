@@ -52,11 +52,23 @@ public class ApiextElement {
 		}
 	}
 
+	/** A constraint across bindings, carried verbatim from the .api: a message plus the predicates whose
+	 *  simultaneous truth makes it fire (e.g. two {@code bound} predicates = "only one of these"). */
+	public static class Validation {
+		public String message;
+		/** Each predicate is "bound:name" or "unbound:name" - kept as a human string for display. */
+		public final List<String> predicates = new ArrayList<>();
+
+		public String message() { return message; }
+		public List<String> predicates() { return predicates; }
+	}
+
 	public String className;
 	public boolean passthrough;
 	public String doc;
 	public final List<String> tags = new ArrayList<>();
 	public final List<Binding> bindings = new ArrayList<>();
+	public final List<Validation> validations = new ArrayList<>();
 
 	public String className() { return className; }
 	public boolean passthrough() { return passthrough; }
@@ -65,6 +77,8 @@ public class ApiextElement {
 	public String docHtml() { return Markdown.toHtml(doc); }
 	public List<String> tags() { return tags; }
 	public List<Binding> bindings() { return bindings; }
+	public List<Validation> validations() { return validations; }
+	public boolean hasValidations() { return !validations.isEmpty(); }
 
 	/**
 	 * Read and parse {@code <elementName>.apiext} from the given framework's components folder.
@@ -117,6 +131,18 @@ public class ApiextElement {
 			}
 			binding.doc = textOf(firstChildElement(b, "doc"));
 			out.bindings.add(binding);
+		}
+
+		for (Element v : childElements(wo, "validation")) {
+			Validation validation = new Validation();
+			validation.message = v.getAttribute("message");
+			for (Element p : childElements(v, "bound")) {
+				validation.predicates.add("bound: " + p.getAttribute("name"));
+			}
+			for (Element p : childElements(v, "unbound")) {
+				validation.predicates.add("unbound: " + p.getAttribute("name"));
+			}
+			out.validations.add(validation);
 		}
 
 		return out;

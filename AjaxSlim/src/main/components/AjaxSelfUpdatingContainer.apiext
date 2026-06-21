@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxSelfUpdatingContainer" wocomponentcontent="true" passthrough="true">
+
+		<doc><![CDATA[An update container that refreshes **itself** — on a timer (`frequency`) and/or when a field changes (`observeFieldID`) — and may invoke its own `action` when it does. The counterpart to the passive `AjaxUpdateContainer`; it also inherits all of that element's bindings (`id`, `elementName`, `morph`, `onRefreshComplete`, `optional`) and the same attribute passthrough (`class`, `style`, `data-*`, …).
+
+```html
+<wo:AjaxSelfUpdatingContainer id="clock" frequency="5" action="$tick">
+  Server time: <wo:str value="$now"/>
+</wo:AjaxSelfUpdatingContainer>
+```]]></doc>
+
+		<tags>
+			<tag>update</tag>
+		</tags>
+
+		<binding name="frequency">
+			<type>java.lang.Number</type>
+			<doc>The frequency, in seconds, of a periodic self-refresh.</doc>
+		</binding>
+		<binding name="stopped" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>Whether a periodic container loads stopped (so it can be started later by refreshing it).</doc>
+		</binding>
+		<binding name="observeFieldID">
+			<type>java.lang.String</type>
+			<doc>The DOM id of a field whose changes trigger a self-refresh of this container.</doc>
+		</binding>
+		<binding name="fullSubmit" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>When observing a field, whether to submit the whole form (true) or just the field (false).</doc>
+		</binding>
+		<binding name="action">
+			<type>com.webobjects.appserver.WOActionResults</type>
+			<doc>The action to invoke when this container refreshes itself.</doc>
+		</binding>
+
+		<binding name="id">
+			<type>java.lang.String</type>
+			<doc>The DOM id of the container (defaults to a safe generated element id). This is the id other elements target.</doc>
+		</binding>
+		<binding name="elementName">
+			<type>java.lang.String</type>
+			<doc>The HTML tag to render. Defaults to `div`.</doc>
+		</binding>
+		<binding name="morph" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>When true (the default), content updates reconcile the existing DOM via Idiomorph — preserving focus/scroll/selection and unchanged subtrees. Bind `morph="$false"` to force classic `innerHTML` replacement.</doc>
+		</binding>
+		<binding name="onRefreshComplete">
+			<type>java.lang.String</type>
+			<doc>JavaScript to run after the container has been refreshed/morphed.</doc>
+		</binding>
+		<binding name="optional" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>Set true to skip rendering the container tags when this element is already inside another update container (renders only its children).</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

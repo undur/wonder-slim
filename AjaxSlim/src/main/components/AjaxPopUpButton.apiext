@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxPopUpButton" wocomponentcontent="false">
+
+		<doc><![CDATA[A drop-in `WOPopUpButton` that renders a searchable single-select instead of a bare `<select>`. Reach for it when a long option list needs type-to-filter. The widget auto-enhances any matching `<select>` on the page, so it needs no per-page init.
+
+```html
+<wo:AjaxPopUpButton list="$items" item="$item" selection="$sel"
+  displayString="$item.name" noSelectionString="Pick one…"/>
+```]]></doc>
+
+		<tags>
+			<tag>widget</tag>
+		</tags>
+
+		<binding name="list" required="true">
+			<type>java.util.List</type>
+			<doc>The list of objects to choose from.</doc>
+		</binding>
+		<binding name="item">
+			<type>java.lang.Object</type>
+			<doc>The repetition item (current object) during rendering.</doc>
+		</binding>
+		<binding name="selection">
+			<type>java.lang.Object</type>
+			<doc>The currently selected object (settable).</doc>
+		</binding>
+		<binding name="displayString">
+			<type>java.lang.String</type>
+			<doc>The text shown for each option (defaults to the item's `toString`).</doc>
+		</binding>
+		<binding name="noSelectionString">
+			<type>java.lang.String</type>
+			<doc>Placeholder option text shown when nothing is selected.</doc>
+		</binding>
+		<binding name="value">
+			<type>java.lang.Object</type>
+			<doc>Value-based selection (as on WOPopUpButton).</doc>
+		</binding>
+		<binding name="selectedValue">
+			<type>java.lang.Object</type>
+			<doc>Value-based selection (as on WOPopUpButton).</doc>
+		</binding>
+		<binding name="disabled" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>Standard WOPopUpButton behaviour.</doc>
+		</binding>
+		<binding name="escapeHTML" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>Standard WOPopUpButton behaviour.</doc>
+		</binding>
+		<binding name="otherTagString">
+			<type>java.lang.String</type>
+			<doc>Additional attributes appended verbatim to the rendered tag (standard WOPopUpButton passthrough).</doc>
+		</binding>
+		<binding name="id">
+			<type>java.lang.String</type>
+			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
+		</binding>
+		<binding name="name">
+			<type>java.lang.String</type>
+			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
+		</binding>
+		<binding name="class">
+			<type>java.lang.String</type>
+			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
+		</binding>
+		<binding name="style">
+			<type>java.lang.String</type>
+			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
+		</binding>
+
+		<validation message="'list' must not be a constant">
+			<and>
+				<bound name="list"/>
+				<ungettable name="list"/>
+			</and>
+		</validation>
+
+		<validation message="'item' may not be a constant when 'displayString' or 'value' is bound">
+			<and>
+				<or>
+					<bound name="displayString"/>
+					<bound name="value"/>
+				</or>
+				<unsettable name="item"/>
+			</and>
+		</validation>
+
+		<validation message="'item' must be bound when 'displayString' or 'value' is bound">
+			<and>
+				<or>
+					<bound name="displayString"/>
+					<bound name="value"/>
+				</or>
+				<unbound name="item"/>
+			</and>
+		</validation>
+
+		<validation message="'selectedValue' and 'selection' cannot both be bound">
+			<and>
+				<bound name="selection"/>
+				<bound name="selectedValue"/>
+			</and>
+		</validation>
+	</wo>
+</wodefinitions>

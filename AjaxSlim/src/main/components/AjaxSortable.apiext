@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxSortable" wocomponentcontent="false">
+
+		<doc><![CDATA[Makes the rows of a list drag-reorderable. Drop this element inside (or next to) the container whose children should be sortable; it renders the one-time client registration and, on drop, fires your `action` and morphs your `updateContainerID` — so reordering is a normal server action that can mutate the model and refresh whatever it needs.
+
+The browser side is a dependency-free, morph-safe sortable that drags by a handle and, on drop, reports the move *positionally* — the dragged row's original index and its final index. There is no per-row id binding; the contract is purely positional. The live drag is optimistic (rows reorder under the pointer); the authoritative server response morphs the list back in and makes it real.
+
+The reorderable rows and their drag grips are marked in your own row markup with data attributes — `data-sortable-item` on each draggable row and `data-sortable-grip` on the grab handle inside it — so the container's internal DOM structure stays out of the template bindings. A drag only starts from a grip, so the row's own controls (inputs, links) don't initiate one.
+
+Server side, read the move in your action with the `AjaxSortable.dragResult(request)` helper:
+
+```java
+public WOActionResults reorderLines() {
+  AjaxSortable.DragResult move = AjaxSortable.dragResult(context().request());
+  if (move != null && move.isValidFor(_lines.size())) {
+    _lines.add(move.toIndex(), _lines.remove(move.fromIndex()));
+  }
+  return null;
+}
+```
+
+```html
+<wo:AjaxUpdateContainer id="linesContainer" elementName="div">
+  <wo:AjaxSortable listID="linesContainer" action="$reorderLines"
+     updateContainerID="linesContainer;totalsPanel;renderedInvoice" />
+  <table>
+    <tr ... data-sortable-item>
+      <td data-sortable-grip>&#x283F;</td> ...
+    </tr>
+  </table>
+</wo:AjaxUpdateContainer>
+```]]></doc>
+
+		<binding name="listID" required="true">
+			<type>java.lang.String</type>
+			<doc>The id of the container holding the rows marked with `data-sortable-item`.</doc>
+		</binding>
+		<binding name="action">
+			<type>com.webobjects.appserver.WOActionResults</type>
+			<doc>The server action fired on drop. Read the move with `AjaxSortable.dragResult(request)`.</doc>
+		</binding>
+		<binding name="updateContainerID">
+			<type>java.lang.String</type>
+			<type>java.util.List</type>
+			<doc>The update container(s) to morph from the action's response — a single id, a `;`-joined set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

@@ -2,17 +2,16 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>.apiext render test — AjaxUpdateContainer</title>
+	<title>AjaxSlim reference (rendered from .apiext)</title>
 	<style>
 		body { font-family: -apple-system, system-ui, sans-serif; margin: 0; color: #1a1a1a; line-height: 1.5; }
 		.wrap { max-width: 64rem; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
 		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
-		h2 { margin-top: 2.6rem; border-bottom: 1px solid #ddd; padding-bottom: .25rem; color: #2b3a55; }
 		h3 { margin: 1.8rem 0 .2rem; font-size: 1.15rem; display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; scroll-margin-top: 1rem; }
 		h3 code { font-size: 1em; background: none; padding: 0; color: #1a4f8a; font-weight: 700; }
 		.lead { color: #555; } .muted { color: #999; }
 		.el { padding: .2rem 0 1.4rem; border-bottom: 1px solid #eee; margin-bottom: .4rem; }
-		.role { margin: .3rem 0 .6rem; }
+		.role { margin: .3rem 0 .6rem; } .role p { margin: .3rem 0 .6rem; }
 		.tag { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; padding: .12rem .45rem; border-radius: 4px; white-space: nowrap; }
 		.t-widget { background: #e6fbe6; color: #167a16; border: 1px solid #b5e6b5; }
 		.t-update { background: #e3f0ff; color: #1c4f8a; border: 1px solid #bcd8f5; }
@@ -27,75 +26,56 @@
 		table.bindings td.b-name { white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #1a4f8a; font-size: .88rem; }
 		table.bindings td.b-type { white-space: nowrap; color: #888; font-size: .82rem; font-family: ui-monospace, monospace; }
 		.req { color: #c0392b; font-weight: 700; }
-		pre.sketch, pre.md-code { background: #f7f8fa; border: 1px solid #e6e8ec; border-left: 3px solid #2b6cb0; border-radius: 0 5px 5px 0; padding: .6rem .8rem; margin: .6rem 0; overflow-x: auto; font-size: .85rem; line-height: 1.45; }
+		pre.md-code { background: #f7f8fa; border: 1px solid #e6e8ec; border-left: 3px solid #2b6cb0; border-radius: 0 5px 5px 0; padding: .6rem .8rem; margin: .6rem 0; overflow-x: auto; font-size: .85rem; line-height: 1.45; }
 		pre.md-code code { background: none; padding: 0; font-size: 1em; }
-		.role p { margin: .3rem 0 .6rem; }
-		.col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
-		.panel { border: 1px solid #e2e2e2; border-radius: 8px; padding: 1rem 1.2rem; }
-		.panel > .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #9aa5b1; font-weight: 700; margin-bottom: .4rem; }
+		.valids { margin: .5rem 0 0; padding: .5rem .8rem; background: #fffbea; border-left: 3px solid #f0c000; border-radius: 4px; font-size: .85rem; }
+		.valids .vmsg { margin: .15rem 0; color: #7a5b00; }
+		.valids code { background: #fff4cc; }
 	</style>
 </head>
 <body>
 <div class="wrap">
 	<p><a href="/">&larr; Playground index</a></p>
-	<h1>.apiext render test</h1>
-	<p class="lead">Left: the hand-written reference section. Right: the <strong>same section rendered entirely from <code>AjaxUpdateContainer.apiext</code></strong> via the resource manager. If they match, the format captures everything.</p>
+	<h1>AjaxSlim element reference</h1>
+	<p class="lead">Rendered entirely from the <code>.apiext</code> files (read via the resource manager), not hand-written HTML. This is the prototype of the reference-page-as-template.</p>
 
-	<div class="col2">
+	<wo:repetition list="$elements" item="$currentElement">
+		<div class="el">
+			<h3><code><wo:str value="$currentElement.className" /></code>
+				<wo:repetition list="$currentElement.tags" item="$currentTag">
+					<span class="$currentTagBadgeClass"><wo:str value="$currentTagBadgeLabel" /></span>
+				</wo:repetition>
+				<wo:if condition="$currentElement.passthrough"><span class="tag t-passthrough">Passthrough</span></wo:if>
+			</h3>
 
-		<!-- ============ HAND-WRITTEN (copied verbatim from AjaxSlimReference) ============ -->
-		<div class="panel">
-			<div class="label">Hand-written (current reference)</div>
-			<div class="el">
-				<h3><code>AjaxUpdateContainer</code> <span class="tag t-update">Update</span> <span class="tag t-passthrough">Passthrough</span></h3>
-				<p class="role">A region of the page that can be refreshed independently via an Ajax request, morphing the freshly-rendered HTML into the live DOM (preserving focus, scroll, selection and unchanged subtrees) instead of replacing its <code>innerHTML</code>. <strong>Passive</strong>: it is refreshed by <em>other</em> elements that name it in <code>updateContainerID</code>; it has no action and no self-refresh of its own.</p>
-				<table class="bindings">
-					<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
-					<tbody>
-						<tr><td class="b-name">id</td><td class="b-type">String</td><td>The DOM id of the container (defaults to a safe generated element id). This is the id other elements target.</td></tr>
-						<tr><td class="b-name">elementName</td><td class="b-type">String</td><td>The HTML tag to render. Defaults to <code>div</code>.</td></tr>
-						<tr><td class="b-name">morph</td><td class="b-type">Boolean</td><td>When true (the default), content updates reconcile the existing DOM via Idiomorph — preserving focus/scroll/selection and unchanged subtrees. Bind <code>morph="$false"</code> to force classic <code>innerHTML</code> replacement.</td></tr>
-						<tr><td class="b-name">onRefreshComplete</td><td class="b-type">String (JS)</td><td>JavaScript to run after the container has been refreshed/morphed.</td></tr>
-						<tr><td class="b-name">optional</td><td class="b-type">Boolean</td><td>Set true to skip rendering the container tags when this element is already inside another update container (renders only its children).</td></tr>
-					</tbody>
-				</table>
-				<p class="role">Any other attribute you set — <code>class</code>, <code>style</code>, <code>data-*</code>, <code>role</code>, <code>aria-*</code>, <code>title</code>, … — is passed through verbatim onto the rendered tag.</p>
-<pre class="sketch">&lt;wo:AjaxUpdateContainer id="detail"&gt; ...content... &lt;/wo:AjaxUpdateContainer&gt;
-&lt;!-- refresh it from elsewhere: --&gt;
-&lt;wo:AjaxUpdateLink action="$reload" updateContainerID="detail"&gt;Reload&lt;/wo:AjaxUpdateLink&gt;</pre>
-			</div>
-		</div>
+			<div class="role"><wo:str value="$currentElement.docHtml" escapeHTML="$false" /></div>
 
-		<!-- ============ RENDERED FROM .apiext ============ -->
-		<div class="panel">
-			<div class="label">Rendered from .apiext</div>
-			<div class="el">
-				<h3><code><wo:str value="$element.className" /></code>
-					<wo:repetition list="$element.tags" item="$currentTag">
-						<wo:if condition="$currentTagIsUpdate"><span class="tag t-update">Update</span></wo:if>
+			<table class="bindings">
+				<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
+				<tbody>
+					<wo:repetition list="$currentElement.bindings" item="$currentBinding">
+						<tr>
+							<td class="b-name"><wo:str value="$currentBinding.name" /><wo:if condition="$currentBindingRequired"> <span class="req">&bull;</span></wo:if></td>
+							<td class="b-type"><wo:str value="$currentBinding.displayType" /></td>
+							<td><wo:str value="$currentBinding.docHtml" escapeHTML="$false" /></td>
+						</tr>
 					</wo:repetition>
-					<wo:if condition="$element.passthrough"><span class="tag t-passthrough">Passthrough</span></wo:if>
-				</h3>
-				<div class="role"><wo:str value="$element.docHtml" escapeHTML="$false" /></div>
-				<table class="bindings">
-					<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
-					<tbody>
-						<wo:repetition list="$bindings" item="$currentBinding">
-							<tr>
-								<td class="b-name"><wo:str value="$currentBinding.name" /><wo:if condition="$currentBindingRequired"> <span class="req">&bull;</span></wo:if></td>
-								<td class="b-type"><wo:str value="$currentBinding.displayType" /></td>
-								<td><wo:str value="$currentBinding.docHtml" escapeHTML="$false" /></td>
-							</tr>
-						</wo:repetition>
-					</tbody>
-				</table>
-				<wo:if condition="$element.passthrough">
-					<p class="role">Any other attribute you set — <code>class</code>, <code>style</code>, <code>data-*</code>, <code>role</code>, <code>aria-*</code>, <code>title</code>, … — is passed through verbatim onto the rendered tag.</p>
-				</wo:if>
-			</div>
-		</div>
+				</tbody>
+			</table>
 
-	</div>
+			<wo:if condition="$currentElement.passthrough">
+				<p class="role muted">Any other attribute (<code>data-*</code>, <code>aria-*</code>, <code>role</code>, <code>class</code>, …) is passed through verbatim onto the rendered tag.</p>
+			</wo:if>
+
+			<wo:if condition="$currentElement.hasValidations">
+				<div class="valids">
+					<wo:repetition list="$currentElement.validations" item="$currentValidation">
+						<p class="vmsg"><wo:str value="$currentValidation.message" /></p>
+					</wo:repetition>
+				</div>
+			</wo:if>
+		</div>
+	</wo:repetition>
 </div>
 </body>
 </html>

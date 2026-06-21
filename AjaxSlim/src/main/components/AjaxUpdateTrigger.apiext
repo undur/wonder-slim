@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxUpdateTrigger" wocomponentcontent="false">
+
+		<doc><![CDATA[A server-side-only element with no UI of its own: when it is rendered into a response, it forces named `AjaxUpdateContainer`s elsewhere on the page to refresh. Useful when a central area controls several others — e.g. an edit view that, on opening, tells all the sibling read-only views to re-render. A missing target is silently skipped.
+
+```html
+<!-- inside a region that, when re-rendered, should refresh others: -->
+<wo:AjaxUpdateTrigger updateContainerID="summaryPanel"/>
+```]]></doc>
+
+		<tags>
+			<tag>server</tag>
+		</tags>
+
+		<binding name="updateContainerID">
+			<type>java.lang.String</type>
+			<type>java.util.List</type>
+			<doc>The update container(s) to refresh — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

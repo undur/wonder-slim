@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxBusySpinner" wocomponentcontent="false">
+
+		<doc><![CDATA[Shows a busy indicator while AjaxSlim has one or more Ajax requests in flight, and hides it when idle. A pure-CSS spinner driven by the runtime's activity broker — `ajaxslim.js` sets `data-ajaxslim-busy` on the document element while any request is in flight. No configuration: a busy indicator is the same everywhere. (Apps wanting a bespoke one can style `.ajaxslim-busy-spinner` or react to the `ajaxslim:busy`/`ajaxslim:idle` events on `document`.)
+
+```html
+<wo:AjaxBusySpinner/>
+```]]></doc>
+
+		<tags>
+			<tag>trigger</tag>
+		</tags>
+
+		<binding name="id">
+			<type>java.lang.String</type>
+			<doc>Optional id for the spinner element.</doc>
+		</binding>
+		<binding name="class">
+			<type>java.lang.String</type>
+			<doc>Optional extra CSS class(es) on the spinner.</doc>
+		</binding>
+		<binding name="style">
+			<type>java.lang.String</type>
+			<doc>Optional inline style on the spinner.</doc>
+		</binding>
+		<binding name="delay">
+			<type>java.lang.String</type>
+			<doc>Optional show-delay (anti-flash): the spinner only appears after this much sustained Ajax activity. A bare number is seconds (`delay="0.2"`); a CSS time value with its own unit (`"200ms"`) is also accepted.</doc>
+		</binding>
+		<binding name="fade">
+			<type>java.lang.String</type>
+			<doc>Optional fade-in/out duration: the spinner fades over this time instead of appearing and vanishing instantly. Same value format as `delay`; independent of it.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

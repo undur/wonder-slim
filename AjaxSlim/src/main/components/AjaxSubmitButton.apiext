@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxSubmitButton" wocomponentcontent="true" passthrough="true">
+
+		<doc><![CDATA[Like a `WOSubmitButton`, but submits its form in the background via Ajax and morphs the result into a target container (`updateContainerID`) or replaces a region (`replaceID`). Honours the `AJAX_SUBMIT_BUTTON_NAME` partial-submit contract, so it works correctly in multiple-submit forms.
+
+```html
+<wo:AjaxSubmitButton action="$save" updateContainerID="result" value="Save"/>
+```]]></doc>
+
+		<tags>
+			<tag>update</tag>
+		</tags>
+
+		<binding name="action">
+			<type>com.webobjects.appserver.WOActionResults</type>
+			<doc>The action to execute when the button is pressed.</doc>
+		</binding>
+		<binding name="updateContainerID">
+			<type>java.lang.String</type>
+			<type>java.util.List</type>
+			<doc>The update container(s) to morph after submitting — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.</doc>
+		</binding>
+		<binding name="replaceID">
+			<type>java.lang.String</type>
+			<doc>The id of the region to replace (mutually exclusive with `updateContainerID`).</doc>
+		</binding>
+
+		<binding name="value">
+			<type>java.lang.String</type>
+			<doc>The button text.</doc>
+		</binding>
+		<binding name="name">
+			<type>java.lang.String</type>
+			<doc>The HTML name of the button.</doc>
+		</binding>
+		<binding name="button">
+			<type>java.lang.Boolean</type>
+			<doc>If false, renders a link instead of a button (default true).</doc>
+		</binding>
+		<binding name="useButtonTag" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc><![CDATA[Render a `<button>` instead of `<input type="button">`.]]></doc>
+		</binding>
+		<binding name="formName">
+			<type>java.lang.String</type>
+			<doc>The name of the form to submit (defaults to the containing form).</doc>
+		</binding>
+		<binding name="functionName">
+			<type>java.lang.String</type>
+			<doc>If set, exposes the submit as a named JS function (the UI then defaults to hidden).</doc>
+		</binding>
+		<binding name="showUI">
+			<type>java.lang.Boolean</type>
+			<doc>When `functionName` is set (which hides the UI by default), set true to render the button anyway.</doc>
+		</binding>
+
+		<binding name="onClick">
+			<type>java.lang.String</type>
+			<doc>Client hook run after the request is sent.</doc>
+		</binding>
+		<binding name="onClickBefore">
+			<type>java.lang.String</type>
+			<doc>Gate evaluated before the request; if it is false the click is ignored.</doc>
+		</binding>
+		<binding name="onClickServer">
+			<type>java.lang.String</type>
+			<doc>Server-returned JS used when the action returns null.</doc>
+		</binding>
+		<binding name="onSuccess">
+			<type>java.lang.String</type>
+			<doc>Post-update hook (run after a successful morph).</doc>
+		</binding>
+		<binding name="onComplete">
+			<type>java.lang.String</type>
+			<doc>Post-update hook (run after the morph).</doc>
+		</binding>
+
+		<binding name="disabled" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>Renders the `disabled` attribute.</doc>
+		</binding>
+		<binding name="ignoreActionResponse">
+			<type>java.lang.Boolean</type>
+			<doc>If true, the action's result is ignored and an empty (or `onClickServer`) response is returned instead.</doc>
+		</binding>
+		<binding name="id">
+			<type>java.lang.String</type>
+			<doc>The HTML id attribute on the rendered element.</doc>
+		</binding>
+		<binding name="elementName">
+			<type>java.lang.String</type>
+			<doc>The element name used when rendering a link (defaults to `a`).</doc>
+		</binding>
+
+		<validation message="Only one of 'replaceID' or 'updateContainerID' can be bound.">
+			<bound name="replaceID"/>
+			<bound name="updateContainerID"/>
+		</validation>
+
+	</wo>
+</wodefinitions>

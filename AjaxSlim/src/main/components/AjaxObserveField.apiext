@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxObserveField" wocomponentcontent="true">
+
+		<doc><![CDATA[Performs an Ajax submit (and optional container morph) when a form field changes. Two modes: give it an `observeFieldID` to watch a **single field**; or omit `observeFieldID` to watch **every descendant form field** inside it (it then renders a wrapper element). Binds native `change`/`input` listeners with a debounce. `fullSubmit="false"` (the default) sends only the changed field (partial submit).
+
+```html
+<!-- single field -->
+<wo:textfield value="$q" id="q"/>
+<wo:AjaxObserveField observeFieldID="q" updateContainerID="results" action="$search"/>
+
+<!-- descendant mode: watch every field inside the wrapper -->
+<wo:AjaxObserveField updateContainerID="results" action="$refresh">
+  <wo:popUpButton .../> <wo:textfield .../>
+</wo:AjaxObserveField>
+```]]></doc>
+
+		<tags>
+			<tag>update</tag>
+		</tags>
+
+		<binding name="observeFieldID">
+			<type>java.lang.String</type>
+			<doc><![CDATA[The id of the field to observe. **Omit to observe all descendant fields** of this element (descendant mode).]]></doc>
+		</binding>
+		<binding name="updateContainerID">
+			<type>java.lang.String</type>
+			<type>java.util.List</type>
+			<doc><![CDATA[The update container(s) to morph on change — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.]]></doc>
+		</binding>
+		<binding name="action">
+			<type>com.webobjects.appserver.WOActionResults</type>
+			<doc>The action to call when the observer fires.</doc>
+		</binding>
+		<binding name="fullSubmit" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>When false (default), only the changed field is submitted (partial); when true, the whole form is submitted.</doc>
+		</binding>
+		<binding name="observeDelay">
+			<type>java.lang.Number</type>
+			<doc>The debounce, in seconds, before the submit fires.</doc>
+		</binding>
+		<binding name="observeFieldFrequency">
+			<type>java.lang.Number</type>
+			<doc>Legacy poll interval, in seconds; now treated as a debounce.</doc>
+		</binding>
+		<binding name="onBeforeSubmit">
+			<type>java.lang.String</type>
+			<doc>JS called before submitting; return false to deny the submit.</doc>
+		</binding>
+		<binding name="onSuccess">
+			<type>java.lang.String</type>
+			<doc>JavaScript to run after a successful update/morph completes.</doc>
+		</binding>
+		<binding name="onComplete">
+			<type>java.lang.String</type>
+			<doc>JavaScript to run after the update/morph completes.</doc>
+		</binding>
+		<binding name="name">
+			<type>java.lang.String</type>
+			<doc>The HTML name used as the ajax submit-button name (defaults to the element id).</doc>
+		</binding>
+		<binding name="id">
+			<type>java.lang.String</type>
+			<doc>The id of the observe-field wrapper (only used in descendant mode).</doc>
+		</binding>
+		<binding name="elementName">
+			<type>java.lang.String</type>
+			<doc>The wrapper element name (only used in descendant mode). Defaults to `div`.</doc>
+		</binding>
+		<binding name="class">
+			<type>java.lang.String</type>
+			<doc>CSS class of the wrapper (only used in descendant mode), passed through to the rendered tag.</doc>
+		</binding>
+		<binding name="style">
+			<type>java.lang.String</type>
+			<doc>CSS style of the wrapper (only used in descendant mode), passed through to the rendered tag.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

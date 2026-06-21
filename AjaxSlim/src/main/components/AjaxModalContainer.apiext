@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxModalContainer" wocomponentcontent="true">
+
+		<doc><![CDATA[Renders a trigger button that opens its inline content in a modal dialog, built on the platform's native `<dialog>` (free backdrop, focus trapping and Esc-to-close). The content stays in place in the DOM, so forms/links inside the dialog — including update containers — work exactly as anywhere else. Only the inline-content use is supported (iframe / direct-action / skin / locked modes are dropped).
+
+```html
+<wo:AjaxModalContainer label="Details" title="Order details" id="box">
+  ...dialog content (may contain its own update container)...
+</wo:AjaxModalContainer>
+```]]></doc>
+
+		<tags>
+			<tag>update</tag>
+		</tags>
+
+		<binding name="label">
+			<type>java.lang.String</type>
+			<doc>The text on the trigger button.</doc>
+		</binding>
+		<binding name="title">
+			<type>java.lang.String</type>
+			<doc>Optional title shown at the top of the dialog (and as the button's `title`).</doc>
+		</binding>
+		<binding name="closeLabel">
+			<type>java.lang.String</type>
+			<doc>The text on the dialog's close button. Defaults to "Close".</doc>
+		</binding>
+		<binding name="open" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>If true, the dialog is open on initial render.</doc>
+		</binding>
+		<binding name="id">
+			<type>java.lang.String</type>
+			<doc>Optional id for the trigger button.</doc>
+		</binding>
+		<binding name="class">
+			<type>java.lang.String</type>
+			<doc>The HTML class attribute, passed through to the trigger button.</doc>
+		</binding>
+		<binding name="style">
+			<type>java.lang.String</type>
+			<doc>The HTML style attribute, passed through to the trigger button.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

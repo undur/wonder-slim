@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="AjaxUpdateLink" wocomponentcontent="true">
+
+		<doc><![CDATA[A link (or button, or named JS function) that fires a server action and morphs the result into a target container (`updateContainerID`) or replaces a region (`replaceID`). The standard "click to update part of the page".
+
+`updateContainerID` may name several containers separated by `;` to refresh them all in one round-trip.
+
+```html
+<wo:AjaxUpdateLink action="$edit" updateContainerID="detail" string="Edit"/>
+<wo:AjaxUpdateLink action="$bumpAll" updateContainerID="boxA;boxB;boxC">Bump all</wo:AjaxUpdateLink>
+```]]></doc>
+
+		<tags>
+			<tag>update</tag>
+		</tags>
+
+		<binding name="action">
+			<type>com.webobjects.appserver.WOActionResults</type>
+			<doc>The action to call when the link executes.</doc>
+		</binding>
+		<binding name="directActionName">
+			<type>java.lang.String</type>
+			<doc>The direct action to call when the link executes (requires `replaceID`).</doc>
+		</binding>
+		<binding name="updateContainerID">
+			<type>java.lang.String</type>
+			<type>java.util.List</type>
+			<doc>The update container(s) to morph after the action — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.</doc>
+		</binding>
+		<binding name="replaceID">
+			<type>java.lang.String</type>
+			<doc>The id of the element whose contents are replaced with the action's result.</doc>
+		</binding>
+
+		<binding name="string">
+			<type>java.lang.String</type>
+			<doc>String prepended to the contained elements (the link text).</doc>
+		</binding>
+		<binding name="onClick">
+			<type>java.lang.String</type>
+			<doc>JavaScript to run on the client before the request is sent.</doc>
+		</binding>
+		<binding name="onClickBefore">
+			<type>java.lang.String</type>
+			<doc>If this expression is false, the click is ignored (e.g. `confirm(...)`).</doc>
+		</binding>
+		<binding name="onClickServer">
+			<type>java.lang.String</type>
+			<doc>JS returned from the server after the action when there is no update.</doc>
+		</binding>
+		<binding name="onSuccess">
+			<type>java.lang.String</type>
+			<doc>JavaScript to run after a successful update/morph (before `onComplete`).</doc>
+		</binding>
+		<binding name="onComplete">
+			<type>java.lang.String</type>
+			<doc>JavaScript to run after the update/morph completes.</doc>
+		</binding>
+		<binding name="ignoreActionResponse" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>If true, the action's response is thrown away.</doc>
+		</binding>
+		<binding name="function">
+			<type>java.lang.String</type>
+			<doc>A custom JS function to call, passed the action url.</doc>
+		</binding>
+		<binding name="functionName">
+			<type>java.lang.String</type>
+			<doc>If set, the link becomes a named JavaScript function instead of an element.</doc>
+		</binding>
+		<binding name="elementName">
+			<type>java.lang.String</type>
+			<doc>The element name to use. Defaults to `a`.</doc>
+		</binding>
+		<binding name="button">
+			<type>java.lang.Boolean</type>
+			<doc>If true, renders an `&lt;input type="button"&gt;`.</doc>
+		</binding>
+		<binding name="disabled" defaults="Boolean">
+			<type>java.lang.Boolean</type>
+			<doc>If true, the link tag is not rendered.</doc>
+		</binding>
+
+		<binding name="title">
+			<type>java.lang.String</type>
+			<doc>The HTML title attribute, passed through to the rendered tag.</doc>
+		</binding>
+		<binding name="class">
+			<type>java.lang.String</type>
+			<doc>The HTML class attribute, passed through to the rendered tag.</doc>
+		</binding>
+		<binding name="style">
+			<type>java.lang.String</type>
+			<doc>The HTML style attribute, passed through to the rendered tag.</doc>
+		</binding>
+		<binding name="id">
+			<type>java.lang.String</type>
+			<doc>The HTML id attribute, passed through to the rendered tag.</doc>
+		</binding>
+		<binding name="accesskey">
+			<type>java.lang.String</type>
+			<doc>The HTML accesskey attribute, passed through to the rendered tag.</doc>
+		</binding>
+
+		<validation message="'action' and 'directActionName' cannot both be bound.">
+			<bound name="action"/>
+			<bound name="directActionName"/>
+		</validation>
+		<validation message="If 'directActionName' is bound, then 'replaceID' must also be bound.">
+			<bound name="directActionName"/>
+			<unbound name="replaceID"/>
+		</validation>
+		<validation message="'updateContainerID', 'action', 'directActionName' must be bound.">
+			<unbound name="action"/>
+			<unbound name="directActionName"/>
+			<unbound name="updateContainerID"/>
+		</validation>
+		<validation message="Only one of 'replaceID' or 'ignoreActionResponse' can be bound.">
+			<bound name="replaceID"/>
+			<bound name="ignoreActionResponse"/>
+		</validation>
+		<validation message="Only one of 'directActionName' or 'ignoreActionResponse' can be bound.">
+			<bound name="directActionName"/>
+			<bound name="ignoreActionResponse"/>
+		</validation>
+		<validation message="Only one of 'replaceID' or 'updateContainerID' can be bound.">
+			<bound name="replaceID"/>
+			<bound name="updateContainerID"/>
+		</validation>
+		<validation message="Only one of 'updateContainerID' or 'ignoreActionResponse' can be bound.">
+			<bound name="updateContainerID"/>
+			<bound name="ignoreActionResponse"/>
+		</validation>
+
+	</wo>
+</wodefinitions>
