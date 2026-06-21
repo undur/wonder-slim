@@ -428,7 +428,7 @@
 			//     handles one fragment or many, skips containers no longer on the page, and honours each
 			//     one's data-morph.
 			//   - otherwise it's JS to run globally (a text/javascript body, or <script> tags) - e.g. the
-			//     legacy AjaxUpdateContainer.updateContainerWithID, or an action returning arbitrary JS.
+			//     the AjaxUpdater.update JS-command path, or an action returning arbitrary JS.
 			// targetId is only a hint (for logging / a fire-and-forget caller); the body decides.
 			if (/<ajaxslim-fragment\b/i.test(text)) {
 				applyFragments(text);
@@ -518,8 +518,8 @@
 			// the registry). Calling fireRefreshComplete here too would run it a SECOND time.
 		}
 		// Run any scripts that live OUTSIDE the fragments. A response can carry a container fragment AND
-		// trailing server-pushed JS - e.g. a client update of allBox1 whose action also called the legacy
-		// AjaxUpdateContainer.updateContainerWithID('allBox2'), which appends <script>AUC.update('allBox2')
+		// trailing server-pushed JS - e.g. a client update of allBox1 whose action also called
+		// AjaxUpdater.update('allBox2'), which appends <script>AUC.update('allBox2')
 		// </script> after the fragment. Those scripts are not inside any fragment, so the morph loop above
 		// never runs them; run them here. (Scripts INSIDE a fragment already ran via Morph.morph, and
 		// stripping whole <ajaxslim-fragment> blocks first means we don't double-run them.)

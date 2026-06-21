@@ -7,15 +7,15 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 
 import ajaxplayground.components.PlaygroundPage;
-import er.ajax.elements.AjaxUpdateContainer;
+import er.ajax.AjaxUpdater;
 import er.ajax.AjaxUpdates;
 
 /**
- * Scenario: SERVER-SIDE update targeting via {@link AjaxUpdateContainer#updateContainerWithID}.
+ * Scenario: SERVER-SIDE update targeting via {@link AjaxUpdater#update(String, com.webobjects.appserver.WOContext)}.
  *
  * Unlike {@link ScenarioMultiUpdate} (where the CLIENT declares the target set via
  * <code>updateContainerID="a;b;c"</code>), here the action declares the targets on the SERVER: it
- * calls {@code updateContainerWithID(id, context())} for each container it decided should refresh,
+ * calls {@code AjaxUpdater.update(id, context())} for each container it decided should refresh,
  * and returns null. The framework appends an {@code AjaxSlim.AUC.update('id')} script per call, and
  * the client turns around and re-fetches each named container.
  *
@@ -58,8 +58,8 @@ public class ScenarioServerUpdate extends PlaygroundPage {
 	public WOActionResults selectCustomer() {
 		_countBasic++;
 		_countBottom++;
-		AjaxUpdateContainer.updateContainerWithID( "basicInfo", context() );
-		AjaxUpdateContainer.updateContainerWithID( "bottomContainer", context() );
+		AjaxUpdater.update( "basicInfo", context() );
+		AjaxUpdater.update( "bottomContainer", context() );
 		return null;
 	}
 
@@ -83,7 +83,7 @@ public class ScenarioServerUpdate extends PlaygroundPage {
 		containers.remove( AjaxUpdates.currentUpdateContainerID() );
 
 		for( final String id : containers ) {
-			AjaxUpdateContainer.updateContainerWithID( id, context() );
+			AjaxUpdater.update( id, context() );
 		}
 
 		return null;

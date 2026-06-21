@@ -279,29 +279,4 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 		}
 		return id;
 	}
-
-	/**
-	 * @param updateContainerID the HTML ID of the container to update
-	 * @param context WOContext for response
-	 *
-	 * @deprecated moved to {@link AjaxUpdater#update(String, WOContext)} - server-side update API does not
-	 *             belong on the element class. This delegate is kept for backward compatibility and is
-	 *             itself deprecated (the JS-command approach; prefer the fragment path {@link AjaxUpdater#add}).
-	 */
-	@Deprecated
-	public static void updateContainerWithID(String updateContainerID, WOContext context) {
-		AjaxUpdater.update(updateContainerID, context);
-	}
-
-	/**
-	 * @param updateContainerID the HTML ID of the container to update
-	 * @param context WOContext for response
-	 *
-	 * @deprecated moved to {@link AjaxUpdater#safeUpdate(String, WOContext)}. Kept as a delegate for
-	 *             backward compatibility; itself deprecated - prefer the fragment path ({@link AjaxUpdater#add}).
-	 */
-	@Deprecated
-	public static void safeUpdateContainerWithID(String updateContainerID, WOContext context) {
-		AjaxUpdater.safeUpdate(updateContainerID, context);
-	}
 }
