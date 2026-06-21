@@ -42,7 +42,7 @@ import er.extensions.appserver.ERXWOContext;
  * @binding optional set to true to skip rendering the container tags when already inside an update container
  * @binding morph if true, content updates reconcile the existing DOM via Idiomorph instead of replacing
  *                innerHTML, preserving focus/scroll/selection and unchanged subtrees. Bind morph="$false"
- *                to force classic innerHTML replacement. When unbound, {@link #MORPH_BY_DEFAULT} applies.
+ *                to force classic innerHTML replacement. When unbound, morphing applies.
  * <p>
  * Any other attribute (class, style, data-*, role, aria-*, ...) is passed through verbatim onto the
  * rendered tag - it is not a binding this element interprets, so it is not listed above or in the .api.
@@ -50,20 +50,12 @@ import er.extensions.appserver.ERXWOContext;
 public class AjaxUpdateContainer extends AjaxDynamicElement {
 
 	/**
-	 * The framework-wide default for whether AjaxUpdateContainers morph their content on update
-	 * (as opposed to replacing innerHTML). This is the SINGLE SOURCE OF TRUTH for the default -
-	 * flipping morphing on globally is a one-line change here. A per-container "morph" binding
-	 * always overrides this default in either direction, so morph="$false" remains a permanent,
-	 * reliable opt-out even after the default flips to true.
-	 */
-	public static final boolean MORPH_BY_DEFAULT = true;
-
-	/**
-	 * Resolves whether the given container should morph: the per-container "morph" binding if
-	 * present, otherwise {@link #MORPH_BY_DEFAULT}.
+	 * Resolves whether the given container should morph: the per-container "morph" binding if present,
+	 * otherwise the framework default (morph). Bind {@code morph="$false"} for classic innerHTML
+	 * replacement.
 	 */
 	public boolean shouldMorph(WOComponent component) {
-		return booleanValueForBinding("morph", MORPH_BY_DEFAULT, component);
+		return booleanValueForBinding("morph", true, component);
 	}
 
 	public AjaxUpdateContainer(String name, NSDictionary<String, WOAssociation> associations, WOElement children) {
@@ -138,9 +130,9 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				response.appendContentString("<" + elementName + " ");
 				appendTagAttributeToResponse(response, "id", id);
 				appendTagAttributeToResponse(response, "data-updateUrl", AjaxUtils.ajaxComponentActionUrl(context));
-				// Emit the resolved morph decision explicitly in both states so the JS side has a
-				// single, unambiguous source of truth. An explicit data-morph="false" forces classic
-				// innerHTML replacement and keeps doing so even after MORPH_BY_DEFAULT flips to true.
+				// Emit the resolved morph decision explicitly in both states so the JS side has a single,
+				// unambiguous source of truth - an explicit data-morph="false" forces classic innerHTML
+				// replacement.
 				appendTagAttributeToResponse(response, "data-morph", shouldMorph(component) ? "true" : "false");
 				// Pass through every author-supplied binding this element does not handle itself - class,
 				// style, data-*, role, aria-*, title, ... An AjaxUpdateContainer is a <wo:container> with

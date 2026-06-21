@@ -118,7 +118,7 @@ keys on it). Every path routes through one shared `fetchAndMorph(targetId, url, 
 - `data-updateUrl` — the ajax component-action URL to refetch this container from.
 - `data-morph` — `"true"` (Idiomorph reconcile) or `"false"` (classic replace). **Always emitted
   explicitly** so the JS side has a single, unambiguous source of truth; an explicit
-  `data-morph="false"` is a permanent opt-out even after `MORPH_BY_DEFAULT` flips.
+  `data-morph="false"` is a permanent, reliable opt-out from morphing.
 
 The element also emits, inside a script block: one `AjaxSlim.AUC.register('id', {...})` call, plus an
 optional `registerPeriodic(...)` (when `frequency` is bound) and `observeField(...)` (when
@@ -311,8 +311,7 @@ ms→s before feeding it through.
   current minimal observer always refreshes the container).
 - `onRefreshComplete` — post-update callback, fired by the runtime after the morph/replace completes.
 - `optional` — skip rendering the container tags when already inside an update container.
-- `morph` — per-container override of `MORPH_BY_DEFAULT` (which defaults to **`true`**, same as
-  legacy).
+- `morph` — per-container override of the framework default, which is **`true`** (morphing).
 
 ### How the morph path works without Prototype
 
