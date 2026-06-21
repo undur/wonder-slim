@@ -7,9 +7,9 @@ import com.webobjects.appserver.WOContext;
  * full binding table. Static documentation (no live widgets) - the content is sourced verbatim from
  * each element's javadoc @binding docs, so this page IS the human-readable form of that contract.
  */
-public class AjaxSlimReference extends PlaygroundPage {
+public class AjaxSlimGuide extends PlaygroundPage {
 
-	public AjaxSlimReference(WOContext context) {
+	public AjaxSlimGuide(WOContext context) {
 		super(context);
 	}
 }

@@ -1,8 +1,8 @@
 package ajaxplayground;
 
 import ajaxplayground.components.AjaxOverview;
-import ajaxplayground.components.AjaxSlimReference;
-import ajaxplayground.components.ApiextRenderTest;
+import ajaxplayground.components.AjaxSlimGuide;
+import ajaxplayground.components.AjaxSlimElementReference;
 import ajaxplayground.components.Main;
 import ajaxplayground.components.gallery.GalleryAjaxBrowser;
 import ajaxplayground.components.gallery.GalleryAjaxPopUpButton;
@@ -50,8 +50,8 @@ public class Routes {
 		routes.map( "/invoice-stress", ScenarioInvoice.class );
 
 		// Reference
-		routes.map( "/reference", AjaxSlimReference.class );
-		routes.map( "/apiext-test", ApiextRenderTest.class );
+		routes.map( "/reference", AjaxSlimGuide.class );
+		routes.map( "/element-reference", AjaxSlimElementReference.class );
 		routes.map( "/overview", AjaxOverview.class );
 
 		// Scenario pages (danger matrix)

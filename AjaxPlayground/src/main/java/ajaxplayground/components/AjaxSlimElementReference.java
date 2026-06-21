@@ -8,11 +8,11 @@ import com.webobjects.appserver.WOContext;
 import ajaxplayground.apiext.ApiextElement;
 
 /**
- * Renders the AjaxSlim element reference ENTIRELY from the {@code .apiext} files - the prototype of the
- * end-state where the hand-written reference page is replaced by a template that loops over these files.
- * Loads every element via the resource manager, in reference order.
+ * The AjaxSlim element reference, rendered ENTIRELY from the {@code .apiext} files - no hand-written
+ * element docs. Loads every element via the resource manager, in reference order, and renders each
+ * section (badges, role, bindings table, validations) from its parsed model.
  */
-public class ApiextRenderTest extends PlaygroundPage {
+public class AjaxSlimElementReference extends PlaygroundPage {
 
 	/** The 14 AjaxSlim elements, in the order the hand-written reference presents them. */
 	private static final String[] ELEMENT_NAMES = {
@@ -26,7 +26,7 @@ public class ApiextRenderTest extends PlaygroundPage {
 	private ApiextElement.Validation currentValidation;
 	private String currentTag;
 
-	public ApiextRenderTest( WOContext context ) {
+	public AjaxSlimElementReference( WOContext context ) {
 		super( context );
 	}
 
