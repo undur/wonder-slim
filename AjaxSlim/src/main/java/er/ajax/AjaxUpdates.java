@@ -77,7 +77,9 @@ public class AjaxUpdates {
 	 */
 	public static NSArray<String> requestedUpdateContainerIDs(WORequest request) {
 		String id = AjaxUpdates.updateContainerID(request);
-		if (id == null) {
+		if (id == null || id.trim().isEmpty()) {
+			// Null = no update pass; "" = a deliberately empty set (clearUpdateContainers writes the empty
+			// string). Both mean "no containers targeted" - NOT one container whose id is the empty string.
 			return NSArray.emptyArray();
 		}
 		if (id.indexOf(MULTI_UPDATE_SEPARATOR) == -1) {

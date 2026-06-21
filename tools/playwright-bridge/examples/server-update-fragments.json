@@ -38,12 +38,15 @@
     { "do": "assert", "name": "replace: bottomContainer morphed (1 -> 2)", "that": "bottomAfterReplace", "equals": "2" },
     { "do": "assert", "name": "replace: basicInfo untouched (still 2)", "that": "basicAfterReplace", "equals": "2" },
 
-    { "do": "comment", "text": "EMPTY set: a deliberate 'update nothing' - no error, no change" },
+    { "do": "comment", "text": "EMPTY set: a deliberate 'update nothing' - a clean 200, no change, NO 500. The 500 here was invisible to DOM checks (empty body either way), so assert no failed response too." },
+    { "do": "marker", "label": "empty" },
     { "do": "click", "selector": "#updateNothing", "tag": "empty" },
-    { "do": "wait", "ms": 300 },
+    { "do": "wait", "ms": 400 },
     { "do": "read", "name": "basicAfterEmpty", "selector": "#valBasic", "what": "text" },
     { "do": "read", "name": "bottomAfterEmpty", "selector": "#valBottom", "what": "text" },
+    { "do": "read", "name": "emptyServerErrors", "selector": null, "what": "failedRequestCount", "marker": "empty" },
     { "do": "assert", "name": "empty: nothing changed (basic still 2)", "that": "basicAfterEmpty", "equals": "2" },
-    { "do": "assert", "name": "empty: nothing changed (bottom still 2)", "that": "bottomAfterEmpty", "equals": "2" }
+    { "do": "assert", "name": "empty: nothing changed (bottom still 2)", "that": "bottomAfterEmpty", "equals": "2" },
+    { "do": "assert", "name": "empty: clean response, no 500", "that": "emptyServerErrors", "equals": 0 }
   ]
 }

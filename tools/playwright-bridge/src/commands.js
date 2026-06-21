@@ -29,6 +29,7 @@ export async function runScript(page, script) {
 		url: script.url,
 		console: [],
 		requests: [],
+		failedResponses: [],
 		steps: [],
 		failures: [],
 	};
@@ -44,11 +45,22 @@ export async function runScript(page, script) {
 	page.on('request', (req) => {
 		result.requests.push({ marker: currentMarker, method: req.method(), url: req.url() });
 	});
+	// Record server-error responses (status >= 400) so a scenario can assert that an interaction produced
+	// no 500 - a 500 with an empty body is otherwise invisible (no page error, no DOM change). Tag each by
+	// the marker its REQUEST was sent under (matched by url): the response hook fires asynchronously, so
+	// currentMarker at receive-time is unreliable - the request-time marker is the correct attribution.
+	page.on('response', (res) => {
+		if (res.status() >= 400) {
+			const req = result.requests.filter((r) => r.url === res.url()).pop();
+			result.failedResponses.push({ marker: req ? req.marker : currentMarker, status: res.status(), url: res.url() });
+		}
+	});
 
 	// Reads are stored by name so later asserts can reference them.
 	const reads = {};
 
 	const requestsSince = (marker) => result.requests.filter((r) => r.marker === marker);
+	const failedSince = (marker) => result.failedResponses.filter((r) => r.marker === marker);
 
 	for (let i = 0; i < (script.steps || []).length; i++) {
 		const step = script.steps[i];
@@ -90,7 +102,7 @@ export async function runScript(page, script) {
 					currentMarker = step.label;
 					break;
 				case 'read': {
-					const v = await readValue(page, step, reads, requestsSince);
+					const v = await readValue(page, step, reads, requestsSince, failedSince);
 					reads[step.name] = v;
 					result.steps.push({ tag, name: step.name, value: v });
 					break;
@@ -114,7 +126,7 @@ export async function runScript(page, script) {
 	return result;
 }
 
-async function readValue(page, step, reads, requestsSince) {
+async function readValue(page, step, reads, requestsSince, failedSince) {
 	switch (step.what) {
 		case 'value':
 			return await page.inputValue(step.selector);
@@ -140,6 +152,11 @@ async function readValue(page, step, reads, requestsSince) {
 			return await page.locator(step.selector).first().isVisible();
 		case 'requestCount':
 			return requestsSince(step.marker).length;
+		case 'failedRequestCount':
+			// How many responses with status >= 400 occurred since the marker. Use to assert an
+			// interaction produced no server error (e.g. a deliberately-empty ajax update must be a clean
+			// 200, not a 500 - which is invisible to DOM/console checks).
+			return failedSince(step.marker).length;
 		case 'jsExpression':
 			// Evaluate an arbitrary JS expression in the page and return its value (stringified if not a
 			// primitive, so it composes with the string/number asserts). For probing state a selector
