@@ -8,6 +8,7 @@ import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODynamicElementCreationException;
+import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ajax.ERXAjaxApplication;
@@ -42,11 +43,6 @@ import er.extensions.foundation.ERXProperties;
  * @binding value the HTML value of this submit button (optional)
  * @binding action the action to execute when this button is pressed
  * @binding id the HTML id of this submit button
- * @binding class the HTML class of this submit button
- * @binding style the HTML style of this submit button
- * @binding tabindex tab index of this submit button
- * @binding title the HTML title of this submit button
- * @binding accesskey hot key that should trigger the button (optional)
  * @binding onClick JavaScript to run on the client after the request is sent
  * @binding onClickBefore if the given expression is false, the click is ignored (e.g. confirm(..))
  * @binding onClickServer if the action returns null, this binding's value is returned as JS
@@ -62,6 +58,10 @@ import er.extensions.foundation.ERXProperties;
  * @binding elementName the element name to use when rendering a link (defaults to "a")
  * @binding disabled if true, the button is disabled (defaults to false)
  * @binding ignoreActionResponse if true, the action's result is ignored and an empty/onClickServer response is returned instead
+ * <p>
+ * Any other attribute (class, style, title, tabindex, accesskey, data-*, role, aria-*, ...) is passed
+ * through verbatim onto the rendered button - it is not a binding this element interprets, so it is not
+ * listed above.
  *
  * @property er.extensions.foundation.ERXPatcher.DynamicElementsPatches.SubmitButton.useButtonTag
  */
@@ -73,6 +73,51 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 
 	public AjaxSubmitButton(String name, NSDictionary<String, WOAssociation> associations, WOElement children) {
 		super(name, associations, children);
+	}
+
+	/**
+	 * The binding names this element interprets itself - either to drive its behaviour
+	 * ({@code action}, {@code button}, the {@code on*} callbacks, ...) or to emit as a specific,
+	 * computed tag attribute ({@code name} becomes the submit name, {@code value} the label, ...). Every
+	 * OTHER author-supplied binding is passed through verbatim onto the rendered tag by
+	 * {@link #appendPassthroughAttributes} - so {@code data-*}, {@code aria-*}, {@code role}, {@code lang},
+	 * ... placed on a {@code <wo:AjaxSubmitButton>} land on the button instead of being silently dropped.
+	 * <p>
+	 * Note this list deliberately EXCLUDES the plain HTML attributes the element used to emit by hand
+	 * ({@code class}, {@code style}, {@code id}, {@code tabindex}, {@code title}) - those now flow through
+	 * the generic passthrough like any other attribute. ({@code accesskey} stays handled: it is emitted
+	 * only in the button branch, so leaving it as-is keeps rendering identical.)
+	 */
+	private static final NSArray<String> HANDLED_BINDINGS = new NSArray<>(new String[] {
+		"action", "name", "value", "disabled", "accesskey", "elementName", "button", "useButtonTag",
+		"showUI", "functionName", "formName", "formSerializer", "updateContainerID", "replaceID",
+		"ignoreActionResponse", "onClick", "onClickBefore", "onClickServer", "onComplete", "onSuccess"
+	});
+
+	/**
+	 * @return the binding names this element handles itself and must NOT pass through onto the tag.
+	 */
+	protected NSArray<String> handledBindingNames() {
+		return HANDLED_BINDINGS;
+	}
+
+	/**
+	 * Emit every author-supplied binding this element does not handle itself as a tag attribute, so
+	 * arbitrary HTML attributes (data-*, aria-*, role, class, style, id, ...) land on the rendered button.
+	 *
+	 * @param response the response being built
+	 * @param component the current component (for evaluating each association)
+	 */
+	protected void appendPassthroughAttributes(WOResponse response, WOComponent component) {
+		NSArray<String> handled = handledBindingNames();
+		for (String name : associations().allKeys()) {
+			if (handled.containsObject(name)) {
+				continue;
+			}
+			WOAssociation association = associations().objectForKey(name);
+			Object value = association.valueInComponent(component);
+			appendTagAttributeToResponse(response, name, value);
+		}
 	}
 
 	public boolean disabledInComponent(WOComponent component) {
@@ -203,11 +248,11 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 					response.appendContentString("<" + elementName + " ");
 				}
 			}
-			appendTagAttributeToResponse(response, "class", valueForBinding("class", component));
-			appendTagAttributeToResponse(response, "style", valueForBinding("style", component));
-			appendTagAttributeToResponse(response, "id", valueForBinding("id", component));
-			appendTagAttributeToResponse(response, "tabindex", valueForBinding("tabindex", component));
-			appendTagAttributeToResponse(response, "title", valueForBinding("title", component));
+			// Pass through every author-supplied binding this element does not handle itself - class,
+			// style, id, tabindex, title, plus arbitrary data-*, aria-*, role, ... - onto the rendered
+			// button, instead of forwarding only a hand-picked few. Behavioural bindings and the
+			// computed attributes (name/value/onclick/...) are excluded via handledBindingNames().
+			appendPassthroughAttributes(response, component);
 			if (functionName == null) {
 				appendTagAttributeToResponse(response, "onclick", onClick);
 			}

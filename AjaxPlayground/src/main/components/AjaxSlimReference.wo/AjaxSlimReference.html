@@ -18,6 +18,7 @@
 		.t-update { background: #e3f0ff; color: #1c4f8a; border: 1px solid #bcd8f5; }
 		.t-trigger { background: #fff3e0; color: #9a5b17; border: 1px solid #f0d2a8; }
 		.t-server { background: #efe9ff; color: #5b3aa3; border: 1px solid #d4c8f5; }
+		.t-passthrough { background: #f1f3f5; color: #495057; border: 1px solid #d3d8de; }
 		code { background: #f4f4f4; padding: .05rem .3rem; border-radius: 3px; font-size: .9em; }
 		a { color: #2b6cb0; text-decoration: none; } a:hover { text-decoration: underline; }
 		table.bindings { width: 100%; border-collapse: collapse; margin: .6rem 0 .2rem; font-size: .92rem; }
@@ -49,6 +50,9 @@
 		<span class="tag t-update">Update</span> a refreshable region / its triggers &middot;
 		<span class="tag t-trigger">Activity</span> busy &amp; polling &middot;
 		<span class="tag t-server">Server</span> no UI of its own.
+		<br/>
+		<span class="tag t-passthrough">Passthrough</span> forwards any attribute it doesn't handle itself (<code>data-*</code>, <code>aria-*</code>, <code>role</code>, <code>class</code>, …) verbatim onto the rendered tag.
+		<br/>
 		A <span class="req">•</span> marks a required binding.
 	</div>
 
@@ -123,7 +127,7 @@
 	<p class="lead">The load-bearing spine: partial-page updates and Ajax form submission, all reconciled into the live DOM via Idiomorph.</p>
 
 	<div class="el">
-		<h3 id="AjaxUpdateContainer"><code>AjaxUpdateContainer</code> <span class="tag t-update">Update</span></h3>
+		<h3 id="AjaxUpdateContainer"><code>AjaxUpdateContainer</code> <span class="tag t-update">Update</span> <span class="tag t-passthrough">Passthrough</span></h3>
 		<p class="role">A region of the page that can be refreshed independently via an Ajax request, morphing the freshly-rendered HTML into the live DOM (preserving focus, scroll, selection and unchanged subtrees) instead of replacing its <code>innerHTML</code>. <strong>Passive</strong>: it is refreshed by <em>other</em> elements that name it in <code>updateContainerID</code>; it has no action and no self-refresh of its own.</p>
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
@@ -142,7 +146,7 @@
 	</div>
 
 	<div class="el">
-		<h3 id="AjaxSelfUpdatingContainer"><code>AjaxSelfUpdatingContainer</code> <span class="tag t-update">Update</span></h3>
+		<h3 id="AjaxSelfUpdatingContainer"><code>AjaxSelfUpdatingContainer</code> <span class="tag t-update">Update</span> <span class="tag t-passthrough">Passthrough</span></h3>
 		<p class="role">An update container that refreshes <strong>itself</strong> — on a timer (<code>frequency</code>) and/or when a field changes (<code>observeFieldID</code>) — and may invoke its own <code>action</code> when it does. The counterpart to the passive <code>AjaxUpdateContainer</code>; it also inherits all of that element's bindings (<code>id</code>, <code>elementName</code>, <code>morph</code>, <code>onRefreshComplete</code>, <code>optional</code>) and the same attribute passthrough (<code>class</code>, <code>style</code>, <code>data-*</code>, …).</p>
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
@@ -193,7 +197,7 @@
 	</div>
 
 	<div class="el">
-		<h3 id="AjaxSubmitButton"><code>AjaxSubmitButton</code> <span class="tag t-update">Update</span></h3>
+		<h3 id="AjaxSubmitButton"><code>AjaxSubmitButton</code> <span class="tag t-update">Update</span> <span class="tag t-passthrough">Passthrough</span></h3>
 		<p class="role">Like a WOSubmitButton, but submits its form in the background via Ajax and morphs the result into a target container (<code>updateContainerID</code>) or replaces a region (<code>replaceID</code>). Honours the <code>AJAX_SUBMIT_BUTTON_NAME</code> partial-submit contract, so it works correctly in multiple-submit forms.</p>
 		<table class="bindings">
 			<thead><tr><th>Binding</th><th>Type</th><th>Description</th></tr></thead>
@@ -216,12 +220,8 @@
 				<tr><td class="b-name">disabled</td><td class="b-type">Boolean</td><td>Renders the <code>disabled</code> attribute.</td></tr>
 				<tr><td class="b-name">ignoreActionResponse</td><td class="b-type">Boolean</td><td>If true, the action's result is ignored and an empty (or <code>onClickServer</code>) response is returned instead.</td></tr>
 				<tr><td class="b-name">id</td><td class="b-type">String</td><td>The HTML id attribute on the rendered element.</td></tr>
-				<tr><td class="b-name">class</td><td class="b-type">String</td><td>The HTML class attribute on the rendered element.</td></tr>
-				<tr><td class="b-name">style</td><td class="b-type">String</td><td>The HTML style attribute on the rendered element.</td></tr>
-				<tr><td class="b-name">title</td><td class="b-type">String</td><td>The HTML title attribute on the rendered element.</td></tr>
-				<tr><td class="b-name">tabindex</td><td class="b-type">String</td><td>The HTML tabindex attribute on the rendered element.</td></tr>
-				<tr><td class="b-name">accesskey</td><td class="b-type">String</td><td>The HTML accesskey attribute on the rendered element.</td></tr>
 				<tr><td class="b-name">elementName</td><td class="b-type">String</td><td>The element name used when rendering a link (defaults to <code>a</code>).</td></tr>
+				<tr><td class="b-name muted">…</td><td class="b-type">Passthrough</td><td>Any other attribute — <code>class</code>, <code>style</code>, <code>title</code>, <code>tabindex</code>, <code>accesskey</code>, <code>data-*</code>, <code>aria-*</code>, <code>role</code>, … — is forwarded verbatim onto the rendered button.</td></tr>
 			</tbody>
 		</table>
 <pre class="sketch">&lt;wo:AjaxSubmitButton action="$save" updateContainerID="result" value="Save"/&gt;</pre>
