@@ -259,31 +259,14 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 		WOResponse response = AjaxUtils.createResponse(request, context);
 		AjaxUtils.setPageReplacementCacheKey(context, id);
 
-		// Frame each container's content in an inert <ajaxslim-fragment data-id> wrapper the client
-		// demuxes when EITHER:
-		//   - it's a client multi-target update (updateContainerID="a;b;c"): several containers render
-		//     into ONE response, so each must be framed; OR
-		//   - the set was declared SERVER-side (action called addUpdateContainer/setUpdateContainers):
-		//     the client's bare-action AUL.request demuxes fragments and has no single morph target, so
-		//     even a ONE-container server-declared update must be framed (otherwise the client would try
-		//     to eval the bare HTML as a script).
-		// A client SINGLE-target update (_u=x, no server declaration) is NOT framed - the body stays
-		// byte-for-byte identical to before (bare children + any onRefreshComplete script), and the
-		// client morphs it straight into #x.
-		//
-		// FIXME: This 3-way split (multi -> framed, server-declared -> framed, client-single -> unframed)
-		// exists only because the client has TWO consumption paths: AUL.update('x') morphs a raw body
-		// into #x, while the bare-action AUL.request demuxes fragments. The end-state we want is uniform:
-		// ALL content returned from the server destined for an update container is wrapped in an
-		// <ajaxslim-fragment>, and the client ALWAYS demuxes (framing decided purely by "is the target set
-		// non-empty", no isMultiUpdate/isServerDeclaredUpdate distinction). That deletes both those flags
-		// and the client raw-morph single path - but it changes the hottest, most-tested path
-		// (client single update), so it wants its own focused change + full regression pass. The
-		// content-type discriminator already separates fragments-vs-JS on the client, so it composes. // 2026-06
-		boolean multi = AjaxUpdateContainer.isMultiUpdate(request) || AjaxUpdateContainer.isServerDeclaredUpdate(request);
-		if (multi) {
-			response.appendContentString("<ajaxslim-fragment data-id=\"" + id + "\">");
-		}
+		// UNIFORM framing: every container that renders into an ajax update response frames its content in
+		// an inert <ajaxslim-fragment data-id> wrapper, which the client always demuxes - whether the
+		// update targets one container or many, and whether the target set came from the client
+		// (updateContainerID="a;b;c") or the server (addUpdateContainer/setUpdateContainers). "Content
+		// destined for an update container IS a fragment" - one rule, no single-vs-multi or
+		// client-vs-server special case. The client morphs each fragment into its container; the response's
+		// content-type still distinguishes a fragment response (morph) from a text/javascript one (run).
+		response.appendContentString("<ajaxslim-fragment data-id=\"" + id + "\">");
 
 		if (hasChildrenElements()) {
 			appendChildrenToResponse(response, context);
@@ -295,9 +278,7 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 			AjaxUtils.appendScriptFooter(response);
 		}
 
-		if (multi) {
-			response.appendContentString("</ajaxslim-fragment>");
-		}
+		response.appendContentString("</ajaxslim-fragment>");
 		return null;
 	}
 
@@ -532,27 +513,6 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	private static void _writeUpdateContainerSet(NSMutableArray<String> ids, WOContext context) {
 		String joined = String.join(MULTI_UPDATE_SEPARATOR, ids);
 		ERXWOContext.contextDictionary().setObjectForKey(joined, ERXAjaxApplication.KEY_UPDATE_CONTAINER_ID);
-		ERXWOContext.contextDictionary().setObjectForKey(Boolean.TRUE, SERVER_DECLARED_UPDATE_KEY);
 		AjaxUtils.createResponse(context.request(), context);
-	}
-
-	/**
-	 * Marks that the update set was declared SERVER-side (via {@link #addUpdateContainer} et al.) rather
-	 * than sent by the client. The client consumes a server-declared response by demuxing fragments
-	 * (its bare-action {@code AUL.request} has no single morph target), so each targeted container must
-	 * frame its content as an {@code <ajaxslim-fragment>} even when the set has only ONE id - unlike a
-	 * client single-update ({@code _u=x}), which wants bare content to morph straight into {@code #x}.
-	 */
-	private static final String SERVER_DECLARED_UPDATE_KEY = "er.ajax.AjaxUpdateContainer.serverDeclaredUpdate";
-
-	/**
-	 * True if the current update set was declared by the server (an action calling
-	 * {@link #addUpdateContainer} / {@link #setUpdateContainers} / {@link #clearUpdateContainers}).
-	 *
-	 * @param request the current request
-	 * @return whether the update set is server-declared
-	 */
-	public static boolean isServerDeclaredUpdate(WORequest request) {
-		return ERXWOContext.contextDictionary().objectForKey(SERVER_DECLARED_UPDATE_KEY) != null;
 	}
 }

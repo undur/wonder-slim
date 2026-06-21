@@ -421,36 +421,20 @@
 			}
 			return response.text();
 		}).then(function (text) {
-			if (targetId == null) {
-				// No client-declared target. The response describes itself, and we act on what it IS:
-				//   - fragment HTML (<ajaxslim-fragment>s) => the action declared an update set SERVER-side
-				//     (AjaxUpdateContainer.addUpdateContainer / setUpdateContainers); demux + morph each,
-				//     exactly like a client-driven multi-update.
-				//   - otherwise it's JS to run globally (a text/javascript body, or <script> tags) - e.g.
-				//     the legacy AjaxUpdateContainer.updateContainerWithID, or an action returning arbitrary
-				//     JS. Eval a raw-JS body directly and run any <script> tags it carries.
-				if (/<ajaxslim-fragment\b/i.test(text)) {
-					applyFragments(text);
-				}
-				else {
-					Morph.runResponseScripts(text, responseContentType);
-				}
+			// The response describes itself, and we act on what it IS - not on what we asked for:
+			//   - it carries <ajaxslim-fragment>s => demux + morph each into its container. This is the
+			//     UNIFORM update path: every container update (single or multi, client- or server-targeted)
+			//     comes back framed, so there is no single-vs-multi special case here. applyFragments
+			//     handles one fragment or many, skips containers no longer on the page, and honours each
+			//     one's data-morph.
+			//   - otherwise it's JS to run globally (a text/javascript body, or <script> tags) - e.g. the
+			//     legacy AjaxUpdateContainer.updateContainerWithID, or an action returning arbitrary JS.
+			// targetId is only a hint (for logging / a fire-and-forget caller); the body decides.
+			if (/<ajaxslim-fragment\b/i.test(text)) {
+				applyFragments(text);
 			}
 			else {
-				var receiver = elementFor(targetId);
-				if (receiver == null) {
-					if (window.console) {
-						console.warn('AjaxSlim: no element with id "' + targetId + '" to update');
-					}
-					return;
-				}
-				var doMorph = receiver.getAttribute('data-morph') !== 'false';
-				if (doMorph) {
-					Morph.morph(receiver, text);
-				}
-				else {
-					Morph.replace(receiver, text);
-				}
+				Morph.runResponseScripts(text, responseContentType);
 			}
 			if (typeof onDone === 'function') {
 				onDone();
@@ -533,6 +517,14 @@
 			// matching the single-update path (fetchAndMorph also relies on the morphed-in script, not
 			// the registry). Calling fireRefreshComplete here too would run it a SECOND time.
 		}
+		// Run any scripts that live OUTSIDE the fragments. A response can carry a container fragment AND
+		// trailing server-pushed JS - e.g. a client update of allBox1 whose action also called the legacy
+		// AjaxUpdateContainer.updateContainerWithID('allBox2'), which appends <script>AUC.update('allBox2')
+		// </script> after the fragment. Those scripts are not inside any fragment, so the morph loop above
+		// never runs them; run them here. (Scripts INSIDE a fragment already ran via Morph.morph, and
+		// stripping whole <ajaxslim-fragment> blocks first means we don't double-run them.)
+		var outside = text.replace(/<ajaxslim-fragment\b[\s\S]*?<\/ajaxslim-fragment\s*>/gi, '');
+		Morph.runScripts(outside);
 	}
 
 	var AUC = {
@@ -574,8 +566,8 @@
 				return;
 			}
 			if (ids.length === 1) {
-				// Degenerate case: not actually multi - the server would return a bare (unframed)
-				// response, so route through the normal single path.
+				// Degenerate case: not actually multi - route through the normal single path (which also
+				// demuxes the single framed fragment the server returns).
 				return AUC.update(ids[0], options);
 			}
 			var joined = ids.join(';');
