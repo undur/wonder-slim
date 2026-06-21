@@ -26,7 +26,7 @@ import com.webobjects.foundation.NSMutableArray;
  * </p>
  *
  * <p>
- * The legacy {@link #update}/{@link #safeUpdate} emit an {@code AjaxSlim.AUC.update('x')} JavaScript
+ * The legacy {@link #triggerUpdate}/{@link #triggerSafeUpdate} emit an {@code AjaxSlim.AUC.update('x')} JavaScript
  * command per container (the client then fires a separate fetch each) - kept for backward compatibility
  * but deprecated in favour of the fragment path.
  * </p>
@@ -96,22 +96,22 @@ public class AjaxUpdater {
 	 *             back in THIS response.
 	 */
 	@Deprecated
-	public static void update(String containerID, WOContext context) {
+	public static void triggerUpdate(String containerID, WOContext context) {
 		AjaxUtils.javascriptResponse("AjaxSlim.AUC.update('" + containerID + "');", context);
 	}
 
 	/**
-	 * Like {@link #update} but guards against a missing container: if no element with that id exists on
-	 * the page, does nothing.
+	 * Like {@link #triggerUpdate} but guards against a missing container: if no element with that id
+	 * exists on the page, does nothing.
 	 *
 	 * @param containerID the HTML ID of the container to update
 	 * @param context the current context
 	 *
-	 * @deprecated for refactoring. See {@link #update} - same JS-command approach, with a guard for a
-	 *             missing container. Prefer the fragment path ({@link #add} / {@link #set}).
+	 * @deprecated for refactoring. See {@link #triggerUpdate} - same JS-command approach, with a guard
+	 *             for a missing container. Prefer the fragment path ({@link #add} / {@link #set}).
 	 */
 	@Deprecated
-	public static void safeUpdate(String containerID, WOContext context) {
+	public static void triggerSafeUpdate(String containerID, WOContext context) {
 		AjaxUtils.javascriptResponse("if (document.getElementById('" + containerID + "') != null) AjaxSlim.AUC.update('" + containerID + "');", context);
 	}
 }

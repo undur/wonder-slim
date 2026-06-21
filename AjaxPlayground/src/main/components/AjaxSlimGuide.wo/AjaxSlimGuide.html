@@ -128,8 +128,8 @@
 		<tbody>
 			<tr>
 				<td class="old">AjaxUpdateContainer<br/>.updateContainerWithID(id, ctx)</td>
-				<td class="new">AjaxUpdater.update(id, ctx)</td>
-				<td>The server-side "refresh this container" API moved onto <code>AjaxUpdater</code> (<code>safeUpdateContainerWithID</code> → <code>AjaxUpdater.safeUpdate</code>). Both are themselves deprecated — prefer the same-pass <code>AjaxUpdater.add</code>/<code>set</code>; see <a href="#how-it-works">How it works</a>.</td>
+				<td class="new">AjaxUpdater.triggerUpdate(id, ctx)</td>
+				<td>The server-side "refresh this container" API moved onto <code>AjaxUpdater</code> (<code>safeUpdateContainerWithID</code> → <code>AjaxUpdater.triggerSafeUpdate</code>). Both are themselves deprecated — prefer the same-pass <code>AjaxUpdater.add</code>/<code>set</code>; see <a href="#how-it-works">How it works</a>.</td>
 			</tr>
 			<tr>
 				<td class="old">AjaxUpdateContainer<br/>.updateContainerID(…), .currentUpdateContainerID(), …</td>

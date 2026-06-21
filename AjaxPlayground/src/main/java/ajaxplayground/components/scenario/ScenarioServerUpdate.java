@@ -15,7 +15,7 @@ import er.ajax.AjaxUpdateProtocol;
  *
  * Unlike {@link ScenarioMultiUpdate} (where the CLIENT declares the target set via
  * <code>updateContainerID="a;b;c"</code>), here the action declares the targets on the SERVER: it
- * calls {@code AjaxUpdater.update(id, context())} for each container it decided should refresh,
+ * calls {@code AjaxUpdater.triggerUpdate(id, context())} for each container it decided should refresh,
  * and returns null. The framework appends an {@code AjaxSlim.AUC.update('id')} script per call, and
  * the client turns around and re-fetches each named container.
  *
@@ -58,8 +58,8 @@ public class ScenarioServerUpdate extends PlaygroundPage {
 	public WOActionResults selectCustomer() {
 		_countBasic++;
 		_countBottom++;
-		AjaxUpdater.update( "basicInfo", context() );
-		AjaxUpdater.update( "bottomContainer", context() );
+		AjaxUpdater.triggerUpdate( "basicInfo", context() );
+		AjaxUpdater.triggerUpdate( "bottomContainer", context() );
 		return null;
 	}
 
@@ -83,7 +83,7 @@ public class ScenarioServerUpdate extends PlaygroundPage {
 		containers.remove( AjaxUpdateProtocol.currentUpdateContainerID() );
 
 		for( final String id : containers ) {
-			AjaxUpdater.update( id, context() );
+			AjaxUpdater.triggerUpdate( id, context() );
 		}
 
 		return null;

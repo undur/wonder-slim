@@ -19,7 +19,7 @@
 <body>
 	<p><a href="/">&larr; Playground index</a></p>
 	<h1>Server-side update targeting</h1>
-	<p class="lead">Here the <strong>server</strong> decides which containers refresh - the action calls <code>AjaxUpdater.update("id", context())</code> for each target and returns null. The client never declares an <code>updateContainerID</code>. This is the idiom real apps use (fire two named containers; or fire a set minus the current one).</p>
+	<p class="lead">Here the <strong>server</strong> decides which containers refresh - the action calls <code>AjaxUpdater.triggerUpdate("id", context())</code> for each target and returns null. The client never declares an <code>updateContainerID</code>. This is the idiom real apps use (fire two named containers; or fire a set minus the current one).</p>
 
 	<!-- NB PATTERN: the link's action refreshes two OTHER named containers server-side. The link
 	     carries NO updateContainerID - the server chooses {basicInfo, bottomContainer}. The third
