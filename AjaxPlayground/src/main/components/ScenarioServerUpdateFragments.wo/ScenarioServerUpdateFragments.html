@@ -4,36 +4,79 @@
 	<meta charset="utf-8" />
 	<title>Scenario: server-side update (fragments)</title>
 	<style>
-		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 52rem; color: #222; }
-		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
-		.lead { color: #666; }
-		.row { display: flex; gap: 1rem; margin: .8rem 0; }
-		.box { flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 1rem; background: #fafafa; text-align: center; }
-		.count { font-size: 1.8rem; color: #2b6cb0; font-weight: 700; }
-		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; border: none; font: inherit; }
-		a { color: #2b6cb0; }
-		code { background: #eee; padding: 0 .25rem; border-radius: 3px; }
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 54rem; color: #1f2933; line-height: 1.5; }
+		a { color: #2b6cb0; text-decoration: none; }
+		a:hover { text-decoration: underline; }
+		h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+		.lead { color: #66707a; margin-top: 0; }
+		code { background: #eef1f4; padding: .05rem .3rem; border-radius: 4px; font-size: .85em; }
+
+		.card { border: 1px solid #e4e7eb; border-radius: 12px; padding: 1.4rem 1.5rem; margin-top: 1.5rem; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+		.card h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: #9aa5b1; margin: 0 0 1rem; }
+
+		/* Action toolbar: each action is a labelled button so a viewer reads WHAT it demonstrates. */
+		.actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+		.action { flex: 1 1 11rem; display: flex; flex-direction: column; gap: .4rem; }
+		.btn { display: block; text-align: center; padding: .55rem .9rem; background: #2b6cb0; color: #fff; border-radius: 8px;
+		       cursor: pointer; border: none; font: inherit; font-weight: 600; transition: background .12s; }
+		.btn:hover { background: #245993; text-decoration: none; }
+		.btn.ghost { background: #fff; color: #52606d; border: 1px solid #d2d6dc; }
+		.btn.ghost:hover { background: #f5f7fa; }
+		.action .what { font-size: .78rem; color: #7b8794; text-align: center; }
+
+		/* Result boxes: clear cards, the count is the focal point. */
+		.boxes { display: flex; gap: 1rem; }
+		.box { flex: 1; border: 1px solid #e4e7eb; border-radius: 10px; padding: 1.1rem 1rem; background: #f9fafb; text-align: center; }
+		.box .name { font-size: .8rem; font-weight: 600; color: #52606d; }
+		.box .role { display: block; font-size: .7rem; color: #9aa5b1; font-weight: 400; margin-top: .15rem; }
+		.box .count { font-size: 2rem; color: #2b6cb0; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: .5rem; }
+		.box.muted { background: #fbfbfc; }
+		.box.muted .count { color: #b0b8c1; }
 	</style>
 </head>
 <body>
 	<p><a href="/">&larr; Playground index</a></p>
-	<h1>Server-side update targeting (fragments, modern path)</h1>
-	<p class="lead">The action declares the containers via <code>AjaxUpdateContainer.addUpdateContainer(id, context())</code>; they come back as <code>&lt;ajaxslim-fragment&gt;</code>s in THIS response and the client morphs them - one round-trip, no <code>AUC.update</code> JavaScript. The link declares no <code>updateContainerID</code>: the server decides the whole set.</p>
+	<h1>Server-side update targeting</h1>
+	<p class="lead">The <strong>server</strong> decides which containers refresh. Each action calls <code>AjaxUpdater.add/set/clear</code>, and the chosen containers come back as <code>&lt;ajaxslim-fragment&gt;</code>s in <em>this</em> response &mdash; one round-trip, no <code>AUC.update</code> JavaScript. The link itself declares no <code>updateContainerID</code>.</p>
 
-	<wo:AjaxUpdateLink action="$refreshBasicAndBottom" id="refreshBasicAndBottom" class="btn">Refresh basicInfo + bottomContainer (server-decided fragments)</wo:AjaxUpdateLink>
-	<wo:AjaxUpdateLink action="$refreshBasicOnly" id="refreshBasicOnly" class="btn">Refresh basicInfo ONLY (single-container edge)</wo:AjaxUpdateLink>
-	<wo:AjaxUpdateLink action="$replaceWithBottom" id="replaceWithBottom" class="btn">Replace set with bottomContainer only</wo:AjaxUpdateLink>
-	<wo:AjaxUpdateLink action="$updateNothing" id="updateNothing" class="btn">Update nothing (empty set, no 500)</wo:AjaxUpdateLink>
-	<div class="row">
-		<wo:AjaxUpdateContainer id="basicInfo" elementName="div" class="box">
-			<p>basicInfo <small>(server-targeted)</small></p><p class="count" id="valBasic"><wo:str value="$countBasic" /></p>
-		</wo:AjaxUpdateContainer>
-		<wo:AjaxUpdateContainer id="bottomContainer" elementName="div" class="box">
-			<p>bottomContainer <small>(server-targeted)</small></p><p class="count" id="valBottom"><wo:str value="$countBottom" /></p>
-		</wo:AjaxUpdateContainer>
-		<wo:AjaxUpdateContainer id="untouched" elementName="div" class="box">
-			<p>untouched <small>(never added)</small></p><p class="count" id="valUntouched"><wo:str value="$countUntouched" /></p>
-		</wo:AjaxUpdateContainer>
+	<div class="card">
+		<h2>Actions</h2>
+		<div class="actions">
+			<div class="action">
+				<wo:AjaxUpdateLink action="$refreshBasicAndBottom" id="refreshBasicAndBottom" class="btn">Augment &middot; two</wo:AjaxUpdateLink>
+				<span class="what"><code>add</code> basicInfo + bottomContainer</span>
+			</div>
+			<div class="action">
+				<wo:AjaxUpdateLink action="$refreshBasicOnly" id="refreshBasicOnly" class="btn">Augment &middot; one</wo:AjaxUpdateLink>
+				<span class="what"><code>add</code> basicInfo only</span>
+			</div>
+			<div class="action">
+				<wo:AjaxUpdateLink action="$replaceWithBottom" id="replaceWithBottom" class="btn">Replace</wo:AjaxUpdateLink>
+				<span class="what"><code>set</code> bottomContainer only</span>
+			</div>
+			<div class="action">
+				<wo:AjaxUpdateLink action="$updateNothing" id="updateNothing" class="btn ghost">Clear</wo:AjaxUpdateLink>
+				<span class="what"><code>clear</code> &mdash; update nothing</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="card">
+		<h2>Containers</h2>
+		<div class="boxes">
+			<wo:AjaxUpdateContainer id="basicInfo" elementName="div" class="box">
+				<span class="name">basicInfo<span class="role">server-targeted</span></span>
+				<div class="count" id="valBasic"><wo:str value="$countBasic" /></div>
+			</wo:AjaxUpdateContainer>
+			<wo:AjaxUpdateContainer id="bottomContainer" elementName="div" class="box">
+				<span class="name">bottomContainer<span class="role">server-targeted</span></span>
+				<div class="count" id="valBottom"><wo:str value="$countBottom" /></div>
+			</wo:AjaxUpdateContainer>
+			<wo:AjaxUpdateContainer id="untouched" elementName="div" class="box muted">
+				<span class="name">untouched<span class="role">never added</span></span>
+				<div class="count" id="valUntouched"><wo:str value="$countUntouched" /></div>
+			</wo:AjaxUpdateContainer>
+		</div>
 	</div>
 </body>
 </html>
