@@ -270,6 +270,16 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 		// A client SINGLE-target update (_u=x, no server declaration) is NOT framed - the body stays
 		// byte-for-byte identical to before (bare children + any onRefreshComplete script), and the
 		// client morphs it straight into #x.
+		//
+		// FIXME: This 3-way split (multi -> framed, server-declared -> framed, client-single -> unframed)
+		// exists only because the client has TWO consumption paths: AUL.update('x') morphs a raw body
+		// into #x, while the bare-action AUL.request demuxes fragments. The end-state we want is uniform:
+		// ALL content returned from the server destined for an update container is wrapped in an
+		// <ajaxslim-fragment>, and the client ALWAYS demuxes (framing decided purely by "is the target set
+		// non-empty", no isMultiUpdate/isServerDeclaredUpdate distinction). That deletes both those flags
+		// and the client raw-morph single path - but it changes the hottest, most-tested path
+		// (client single update), so it wants its own focused change + full regression pass. The
+		// content-type discriminator already separates fragments-vs-JS on the client, so it composes. // 2026-06
 		boolean multi = AjaxUpdateContainer.isMultiUpdate(request) || AjaxUpdateContainer.isServerDeclaredUpdate(request);
 		if (multi) {
 			response.appendContentString("<ajaxslim-fragment data-id=\"" + id + "\">");
