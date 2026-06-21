@@ -45,6 +45,11 @@ public class ApiextRenderTest extends PlaygroundPage {
 	public ApiextElement currentElement() { return currentElement; }
 	public void setCurrentElement( ApiextElement value ) { currentElement = value; }
 
+	/** The TOC anchor href for the current element, e.g. "#AjaxUpdateContainer". */
+	public String currentElementAnchor() {
+		return currentElement == null ? "#" : "#" + currentElement.className();
+	}
+
 	public ApiextElement.Binding currentBinding() { return currentBinding; }
 	public void setCurrentBinding( ApiextElement.Binding value ) { currentBinding = value; }
 

@@ -41,16 +41,35 @@
 <div class="wrap">
 	<p><a href="/">&larr; Playground index</a></p>
 	<h1>AjaxSlim element reference</h1>
-	<p class="lead">Rendered entirely from the <code>.apiext</code> files (read via the resource manager), not hand-written HTML. This is the prototype of the reference-page-as-template.</p>
+	<p class="lead">Every element in the AjaxSlim library: what it does and its full set of bindings. Rendered from the <code>.apiext</code> files (read via the resource manager). For migration notes and the bigger picture, see the <a href="/reference">guide</a>.</p>
+
+	<div class="legend">
+		<span class="tag t-update">Update</span> a refreshable region / its triggers &middot;
+		<span class="tag t-widget">Widget</span> a form-input UI element &middot;
+		<span class="tag t-trigger">Activity</span> busy &amp; polling &middot;
+		<span class="tag t-server">Server</span> no UI of its own.
+		<br/>
+		<span class="tag t-passthrough">Passthrough</span> forwards any attribute it doesn't handle itself (<code>data-*</code>, <code>aria-*</code>, <code>role</code>, <code>class</code>, …) verbatim onto the rendered tag.
+		<br/>
+		A <span class="req">&bull;</span> marks a required binding.
+	</div>
+
+	<div class="toc">
+		<ul>
+			<wo:repetition list="$elements" item="$currentElement">
+				<li><wo:container elementName="a" href="$currentElementAnchor"><wo:str value="$currentElement.className" /></wo:container></li>
+			</wo:repetition>
+		</ul>
+	</div>
 
 	<wo:repetition list="$elements" item="$currentElement">
 		<div class="el">
-			<h3><code><wo:str value="$currentElement.className" /></code>
+			<wo:container elementName="h3" id="$currentElement.className"><code><wo:str value="$currentElement.className" /></code>
 				<wo:repetition list="$currentElement.tags" item="$currentTag">
-					<span class="$currentTagBadgeClass"><wo:str value="$currentTagBadgeLabel" /></span>
+					<wo:container elementName="span" class="$currentTagBadgeClass"><wo:str value="$currentTagBadgeLabel" /></wo:container>
 				</wo:repetition>
 				<wo:if condition="$currentElement.passthrough"><span class="tag t-passthrough">Passthrough</span></wo:if>
-			</h3>
+			</wo:container>
 
 			<div class="role"><wo:str value="$currentElement.docHtml" escapeHTML="$false" /></div>
 
