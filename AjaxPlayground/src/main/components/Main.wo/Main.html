@@ -27,7 +27,6 @@
 	<h2>Reference</h2>
 	<ul>
 		<li><a href="/reference"><strong>AjaxSlim element reference</strong></a> - the canonical reference for every AjaxSlim element: what it does and its full bindings table.</li>
-		<li><a href="/overview">Ajax framework overview</a> - a catalogue of the legacy Ajax framework's elements, grouped by role, with a maturity badge each.</li>
 	</ul>
 
 	<h2>Scenario pages (danger matrix)</h2>
@@ -57,5 +56,13 @@
 		<li><a href="/browser">AjaxBrowser</a> - the multi-select form.</li>
 		<li><a href="/large-list">Large list</a> - render performance with 2000 options.</li>
 	</ul>
+
+	<wo:if condition="$application.isDevelopmentMode">
+		<h2>Development</h2>
+		<p class="lead">Only shown when running locally (<code>isDevelopmentMode</code>); not in the deployed demo.</p>
+		<ul>
+			<li><a href="/overview">Ajax framework overview</a> - a catalogue of the legacy Ajax framework's elements, grouped by role, with a maturity badge each.</li>
+		</ul>
+	</wo:if>
 </body>
 </html>
