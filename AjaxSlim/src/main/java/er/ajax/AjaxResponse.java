@@ -76,7 +76,13 @@ public class AjaxResponse extends WOResponse {
 						responseAppender.appendToResponse(this, _context);
 					}
 				}
-				if (_contentLength() == 0) {
+				// An empty response is normally a mistake (typically a misspelled updateContainerID that
+				// matched no container), so we flag it. But a SERVER-DECLARED empty set is a deliberate,
+				// valid "nothing changed, update nothing" outcome - not an error - so don't 500 that.
+				// FIXME: This whole content-length heuristic is a blunt instrument; replace it with precise
+				// detection (server: a targeted id matched no container on the page; client: a fragment for
+				// an unknown container) once that's built. // 2026-06
+				if (_contentLength() == 0 && !AjaxUpdateContainer.isServerDeclaredUpdate(_request)) {
 					setStatus(HTTP_STATUS_INTERNAL_ERROR);
 					log.warn("You performed an Ajax update, but no response was generated. A common cause of this is that you spelled your updateContainerID wrong.  You specified a container ID '" + AjaxUpdateContainer.updateContainerID(_request) + "'.");
 				}

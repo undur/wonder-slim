@@ -422,13 +422,19 @@
 			return response.text();
 		}).then(function (text) {
 			if (targetId == null) {
-				// No container to update - the response is JS to run globally (e.g. an action that
-				// pushed AjaxSlim.AUC.update('someOtherContainer') server-side via
-				// AjaxUpdateContainer.updateContainerWithID). When there is no _u marker on the request,
-				// the server returns the script as a RAW text/javascript body (no <script> wrapper); when
-				// there is, it wraps it in <script> tags. Handle both: eval a raw-JS body directly, and
-				// also run any <script> tags the body carries.
-				Morph.runResponseScripts(text, responseContentType);
+				// No client-declared target. The response describes itself, and we act on what it IS:
+				//   - fragment HTML (<ajaxslim-fragment>s) => the action declared an update set SERVER-side
+				//     (AjaxUpdateContainer.addUpdateContainer / setUpdateContainers); demux + morph each,
+				//     exactly like a client-driven multi-update.
+				//   - otherwise it's JS to run globally (a text/javascript body, or <script> tags) - e.g.
+				//     the legacy AjaxUpdateContainer.updateContainerWithID, or an action returning arbitrary
+				//     JS. Eval a raw-JS body directly and run any <script> tags it carries.
+				if (/<ajaxslim-fragment\b/i.test(text)) {
+					applyFragments(text);
+				}
+				else {
+					Morph.runResponseScripts(text, responseContentType);
+				}
 			}
 			else {
 				var receiver = elementFor(targetId);
