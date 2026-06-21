@@ -11,7 +11,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
 
 import ajaxplayground.components.PlaygroundPage;
-import er.ajax.AjaxSortable;
+import er.ajax.elements.AjaxSortable;
 
 /**
  * Integration scenario: a working invoice editor.

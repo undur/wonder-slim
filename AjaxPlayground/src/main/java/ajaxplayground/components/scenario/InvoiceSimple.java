@@ -9,7 +9,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
 
 import ajaxplayground.components.PlaygroundPage;
-import er.ajax.AjaxSortable;
+import er.ajax.elements.AjaxSortable;
 
 /**
  * A small, clear invoice editor that shows the AjaxSlim essentials without the heavy testing scaffolding

@@ -1,4 +1,6 @@
-package er.ajax;
+package er.ajax.elements;
+
+import er.ajax.*;
 
 import java.util.ArrayList;
 import java.util.List;

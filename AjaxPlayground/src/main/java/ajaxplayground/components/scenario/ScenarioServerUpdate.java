@@ -7,7 +7,7 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 
 import ajaxplayground.components.PlaygroundPage;
-import er.ajax.AjaxUpdateContainer;
+import er.ajax.elements.AjaxUpdateContainer;
 import er.ajax.AjaxUpdates;
 
 /**

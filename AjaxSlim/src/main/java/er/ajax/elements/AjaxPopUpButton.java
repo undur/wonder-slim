@@ -1,4 +1,6 @@
-package er.ajax;
+package er.ajax.elements;
+
+import er.ajax.*;
 
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
