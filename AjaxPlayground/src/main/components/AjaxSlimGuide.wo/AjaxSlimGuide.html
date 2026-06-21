@@ -8,8 +8,12 @@
 		.wrap { max-width: 64rem; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
 		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
 		h2 { margin-top: 2.6rem; border-bottom: 1px solid #ddd; padding-bottom: .25rem; color: #2b3a55; }
-		h3 { margin: 1.8rem 0 .2rem; font-size: 1.15rem; display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; scroll-margin-top: 1rem; }
+		h3 { margin: 1.8rem 0 .4rem; font-size: 1.05rem; color: #2b3a55; }
 		h3 code { font-size: 1em; background: none; padding: 0; color: #1a4f8a; font-weight: 700; }
+		pre.code { background: #f7f8fa; border: 1px solid #e6e8ec; border-left: 3px solid #2b6cb0; border-radius: 0 5px 5px 0; padding: .7rem .9rem; margin: .7rem 0; overflow-x: auto; font-size: .85rem; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+		pre.code strong { color: #1a4f8a; font-weight: 700; }
+		pre.code .cmt { color: #8a97a5; }
+		ul { margin: .5rem 0; } li { margin: .3rem 0; }
 		.lead { color: #555; } .muted { color: #999; }
 		.el { padding: .2rem 0 1.4rem; border-bottom: 1px solid #eee; margin-bottom: .4rem; }
 		.role { margin: .3rem 0 .6rem; }
@@ -43,11 +47,45 @@
 <div class="wrap">
 	<p><a href="/">&larr; Playground index</a></p>
 	<h1>AjaxSlim — guide</h1>
-	<p class="lead">AjaxSlim is the morph-native, fetch-based rebuild of the classic Ajax framework — <strong>zero Prototype, zero Scriptaculous</strong>. Elements live in package <code>er.ajax</code> as a drop-in replacement; the client runtime is the dependency-free <code>ajaxslim.js</code> (fetch + Idiomorph). For the per-element bindings, see the <a href="/element-reference">element reference</a>.</p>
+	<p class="lead">AjaxSlim is a morph-native, multi-container-supporting subset of Wonder's <code>Ajax.framework</code>, without Prototype or Scriptaculous. Dynamic elements live in <code>er.ajax.elements</code> and look and feel similar to the old <code>Ajax</code> elements. For a detailed overview of ported elements and their bindings, see the <a href="/element-reference">element reference</a>.</p>
+
+	<!-- ============================ HOW IT WORKS ============================ -->
+	<h2 id="how-it-works">How it works</h2>
+
+	<h3>The big picture</h3>
+	<p>An AjaxSlim update is one HTTP round-trip that refreshes <em>parts</em> of a page in place. The unit of refresh is an <strong><code>AjaxUpdateContainer</code></strong> — a named region of the page. Something triggers an update (a link, a form submit, a timer, a field change, or a server action), the framework re-renders the targeted container(s) on the server, and the client reconciles the fresh HTML into the live DOM by <strong>morphing</strong> (Idiomorph) rather than replacing — so focus, scroll, selection and unchanged subtrees survive.</p>
+	<p>The whole flow turns on a single request marker, <code>_u</code>, that carries the <strong>target set</strong>: the <code>;</code>-joined ids of the containers to refresh (e.g. <code>_u=detail</code> or <code>_u=boxA;boxB</code>). On a request carrying <code>_u</code>, the page renders as usual but only the targeted containers emit their content to the response. Everything else — who decides the set, how it travels back, how the client applies it — hangs off that one idea.</p>
+
+	<h3>Server-side API for specifying update targets</h3>
+	<p>Optional use. Elements like <code>AjaxUpdateLink</code> set the target set for you. But when the <em>server</em> should decide which containers refresh (the action picks them, not the client), call <strong><code>AjaxUpdater</code></strong> from your action:</p>
+<pre class="code"><strong>AjaxUpdater.add</strong>(containerID, context)   <span class="cmt">// augment the set the client asked for</span>
+<strong>AjaxUpdater.set</strong>(context, id1, id2, …) <span class="cmt">// replace it — the server has the final say</span>
+<strong>AjaxUpdater.clear</strong>(context)             <span class="cmt">// refresh nothing (a valid "nothing changed")</span></pre>
+	<p>These mutate the request's target set; the normal render pass then emits exactly those containers <em>in the current response</em> — one round-trip, no extra fetches. The contract is a <strong>phase</strong> one: call them from your action, because the set is read once when rendering begins (after the action returns) and must be final by then. See the <a href="/server-update-fragments">server-side targeting</a> scenario.</p>
+	<p>The other public surface is <strong><code>AjaxUtils</code></strong> — lower-level helpers most apps never touch directly: <code>createResponse</code>, <code>javascriptResponse</code>, header/script append helpers, <code>isAjaxRequest</code>, and the resource-in-head helpers. And <strong><code>AjaxUpdateProtocol</code></strong> is the internal targeting protocol itself (reading/writing <code>_u</code>, the current-container stack, resolving <code>updateContainerID</code> bindings and <code>"_parent"</code>) — framework plumbing, not normally called by apps.</p>
+
+	<h3>Over the wire</h3>
+	<p>The server frames every container's content uniformly. A targeted container emits its HTML wrapped in an inert element tagged with its id:</p>
+<pre class="code"><span class="cmt">// _u=cartCount;cartLines;total — three containers refreshed in one round-trip</span>
+&lt;ajaxslim-fragment data-id="cartCount"&gt;<strong>3 items</strong>&lt;/ajaxslim-fragment&gt;
+&lt;ajaxslim-fragment data-id="cartLines"&gt;
+    &lt;tr&gt;&lt;td&gt;Coffee&lt;/td&gt;&lt;td&gt;2&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Filters&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
+&lt;/ajaxslim-fragment&gt;
+&lt;ajaxslim-fragment data-id="total"&gt;<strong>$24.00</strong>&lt;/ajaxslim-fragment&gt;</pre>
+	<p><strong>One rule:</strong> content destined for an update container <em>is</em> a fragment — whether one container or many, whether the target set came from the client (<code>updateContainerID="a;b;c"</code>) or the server (<code>AjaxUpdater.set</code>). No single-vs-multi, no client-vs-server special case. A multi-update response is simply several <code>&lt;ajaxslim-fragment&gt;</code>s back to back, as above — the client morphs each into its own container independently.</p>
+	<p>On the client, <code>ajaxslim.js</code> fetches the URL and <strong>acts on what the response IS, not on what it asked for</strong>:</p>
+	<ul>
+		<li>If the body contains <code>&lt;ajaxslim-fragment&gt;</code>s → it demuxes each one (by regex, robust to order) and <strong>morphs</strong> the inner HTML into the live container of that <code>data-id</code>. Each fragment is applied independently: a container no longer on the page is skipped, the rest still update, and each honours its own <code>data-morph</code> and fires its <code>onRefreshComplete</code>.</li>
+		<li>Otherwise the body is <strong>JavaScript to run</strong> (a <code>text/javascript</code> response, or <code>&lt;script&gt;</code> tags) — e.g. an action returning arbitrary JS, or the legacy <code>AjaxSlim.AUC.update('x')</code> command path.</li>
+	</ul>
+	<p>HTTP errors are never morphed — a 500/404 is diverted to an error reporter instead of the server's error page landing in your container. The client API mirrors the elements: <code>AjaxSlim.AUC</code> (update containers), <code>AjaxSlim.AUL</code> (update links), <code>AjaxSlim.ASB</code> (submit buttons), each exposing <code>update</code>/<code>request</code>-style entry points.</p>
+	<p class="muted" style="font-size:.88rem">This fragment framing is the protocol <em>today</em>; it is evolving toward a more explicit command protocol (the response telling the client what to <em>do</em>, not only what to morph). The shape above is what ships now.</p>
 
 	<!-- ============================ MIGRATING FROM Ajax ============================ -->
 	<h2>Migrating from the Ajax framework</h2>
-	<p class="lead">AjaxSlim is a drop-in replacement (same <code>er.ajax</code> package), so most templates need no change. The things that actually break a port — almost all client-side, because the Prototype/Scriptaculous runtime is gone:</p>
+	<p class="lead">AjaxSlim is largely a drop-in replacement, so most templates need no change. The things that actually break a port are almost all client-side, because the Prototype/Scriptaculous runtime is gone:</p>
+	<h3>Client side</h3>
 	<table class="migrate">
 		<tbody>
 			<tr>
@@ -83,6 +121,28 @@
 		</tbody>
 	</table>
 	<p class="lead" style="margin-top:.8rem"><strong>Also worth knowing:</strong> updates now <strong>morph</strong> the DOM (Idiomorph) by default instead of replacing innerHTML — focus, scroll and selection survive a refresh; bind <code>morph="$false"</code> for the old replace-everything behaviour. And ~40 rarely-used legacy elements (Accordion, Tree, Slider, DatePicker, drag/drop, in-place editors, the Scriptaculous effects, …) were <strong>not</strong> ported — AjaxSlim is the actually-used core; reach for a platform/native equivalent for those.</p>
+
+	<h3>Server side</h3>
+	<p>Java code that only binds elements in templates is unaffected. The classic <code>AjaxUpdateContainer</code> was also a grab-bag of <code>static</code> methods; those were tidied off the element and into the core API surface where invokable logic belongs. Code that called them needs these changes:</p>
+	<table class="migrate">
+		<tbody>
+			<tr>
+				<td class="old">AjaxUpdateContainer<br/>.updateContainerWithID(id, ctx)</td>
+				<td class="new">AjaxUpdater.update(id, ctx)</td>
+				<td>The server-side "refresh this container" API moved onto <code>AjaxUpdater</code> (<code>safeUpdateContainerWithID</code> → <code>AjaxUpdater.safeUpdate</code>). Both are themselves deprecated — prefer the same-pass <code>AjaxUpdater.add</code>/<code>set</code>; see <a href="#how-it-works">How it works</a>.</td>
+			</tr>
+			<tr>
+				<td class="old">AjaxUpdateContainer<br/>.updateContainerID(…), .currentUpdateContainerID(), …</td>
+				<td class="new">AjaxUpdateProtocol</td>
+				<td>The update-targeting protocol — reading/writing the request's target set, the current-container stack, resolving the <code>updateContainerID</code> binding — moved verbatim (same method names) onto <code>AjaxUpdateProtocol</code>. Rarely called by apps directly.</td>
+			</tr>
+			<tr>
+				<td class="old">AjaxUpdateContainer<br/>.expandInsertion(…), .removeDefaultOptions(…)</td>
+				<td class="new">— (dropped)</td>
+				<td>Scriptaculous insertion/effect-option helpers, gone with the effects runtime.</td>
+			</tr>
+		</tbody>
+	</table>
 
 </div>
 </body>
