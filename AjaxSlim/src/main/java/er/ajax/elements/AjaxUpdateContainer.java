@@ -74,20 +74,20 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	}
 
 	protected boolean shouldRenderContainer(WOComponent component) {
-		boolean renderContainer = !booleanValueForBinding("optional", false, component) || AjaxUpdates.currentUpdateContainerID() == null;
+		boolean renderContainer = !booleanValueForBinding("optional", false, component) || AjaxUpdateProtocol.currentUpdateContainerID() == null;
 		return renderContainer;
 	}
 
 	@Override
 	public void takeValuesFromRequest(WORequest request, WOContext context) {
 		if (shouldRenderContainer(context.component())) {
-			String previousUpdateContainerID = AjaxUpdates.currentUpdateContainerID();
+			String previousUpdateContainerID = AjaxUpdateProtocol.currentUpdateContainerID();
 			try {
-				AjaxUpdates.setCurrentUpdateContainerID(_containerID(context));
+				AjaxUpdateProtocol.setCurrentUpdateContainerID(_containerID(context));
 				super.takeValuesFromRequest(request, context);
 			}
 			finally {
-				AjaxUpdates.setCurrentUpdateContainerID(previousUpdateContainerID);
+				AjaxUpdateProtocol.setCurrentUpdateContainerID(previousUpdateContainerID);
 			}
 		}
 		else {
@@ -99,13 +99,13 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	public WOActionResults invokeAction(WORequest request, WOContext context) {
 		WOActionResults results;
 		if (shouldRenderContainer(context.component())) {
-			String previousUpdateContainerID = AjaxUpdates.currentUpdateContainerID();
+			String previousUpdateContainerID = AjaxUpdateProtocol.currentUpdateContainerID();
 			try {
-				AjaxUpdates.setCurrentUpdateContainerID(_containerID(context));
+				AjaxUpdateProtocol.setCurrentUpdateContainerID(_containerID(context));
 				results = super.invokeAction(request, context);
 			}
 			finally {
-				AjaxUpdates.setCurrentUpdateContainerID(previousUpdateContainerID);
+				AjaxUpdateProtocol.setCurrentUpdateContainerID(previousUpdateContainerID);
 			}
 		}
 		else {
@@ -124,11 +124,11 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 			super.appendToResponse(response, context);
 		}
 		else {
-			String previousUpdateContainerID = AjaxUpdates.currentUpdateContainerID();
+			String previousUpdateContainerID = AjaxUpdateProtocol.currentUpdateContainerID();
 			try {
 				String elementName = (String) valueForBinding("elementName", "div", component);
 				String id = _containerID(context);
-				AjaxUpdates.setCurrentUpdateContainerID(id);
+				AjaxUpdateProtocol.setCurrentUpdateContainerID(id);
 				response.appendContentString("<" + elementName + " ");
 				appendTagAttributeToResponse(response, "id", id);
 				appendTagAttributeToResponse(response, "data-updateUrl", AjaxUtils.ajaxComponentActionUrl(context));
@@ -172,7 +172,7 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				AjaxUtils.appendScriptFooter(response);
 			}
 			finally {
-				AjaxUpdates.setCurrentUpdateContainerID(previousUpdateContainerID);
+				AjaxUpdateProtocol.setCurrentUpdateContainerID(previousUpdateContainerID);
 			}
 		}
 	}

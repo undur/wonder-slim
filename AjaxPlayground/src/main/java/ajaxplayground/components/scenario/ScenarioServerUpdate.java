@@ -8,7 +8,7 @@ import com.webobjects.appserver.WOContext;
 
 import ajaxplayground.components.PlaygroundPage;
 import er.ajax.AjaxUpdater;
-import er.ajax.AjaxUpdates;
+import er.ajax.AjaxUpdateProtocol;
 
 /**
  * Scenario: SERVER-SIDE update targeting via {@link AjaxUpdater#update(String, com.webobjects.appserver.WOContext)}.
@@ -80,7 +80,7 @@ public class ScenarioServerUpdate extends PlaygroundPage {
 		containers.add( "allBox1" );
 		containers.add( "allBox2" );
 		containers.add( "allBox3" );
-		containers.remove( AjaxUpdates.currentUpdateContainerID() );
+		containers.remove( AjaxUpdateProtocol.currentUpdateContainerID() );
 
 		for( final String id : containers ) {
 			AjaxUpdater.update( id, context() );

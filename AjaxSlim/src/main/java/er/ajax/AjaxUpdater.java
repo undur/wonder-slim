@@ -47,11 +47,11 @@ public class AjaxUpdater {
 		if (containerID == null) {
 			return;
 		}
-		NSMutableArray<String> ids = new NSMutableArray<>(AjaxUpdates.requestedUpdateContainerIDs(context.request()));
+		NSMutableArray<String> ids = new NSMutableArray<>(AjaxUpdateProtocol.requestedUpdateContainerIDs(context.request()));
 		if (!ids.containsObject(containerID)) {
 			ids.addObject(containerID);
 		}
-		AjaxUpdates.writeUpdateContainerSet(ids, context);
+		AjaxUpdateProtocol.writeUpdateContainerSet(ids, context);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class AjaxUpdater {
 				ids.addObject(id);
 			}
 		}
-		AjaxUpdates.writeUpdateContainerSet(ids, context);
+		AjaxUpdateProtocol.writeUpdateContainerSet(ids, context);
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class AjaxUpdater {
 	 * @param context the current context
 	 */
 	public static void clear(WOContext context) {
-		AjaxUpdates.writeUpdateContainerSet(new NSMutableArray<>(), context);
+		AjaxUpdateProtocol.writeUpdateContainerSet(new NSMutableArray<>(), context);
 	}
 
 	/**

@@ -74,7 +74,7 @@ public class AjaxObserveField extends AjaxDynamicElement {
 
 		WOComponent component = context.component();
 		String observeFieldID = stringValueForBinding("observeFieldID", component);
-		String updateContainerID = AjaxUpdates.updateContainerID(this, component);
+		String updateContainerID = AjaxUpdateProtocol.updateContainerID(this, component);
 		boolean fullSubmit = booleanValueForBinding("fullSubmit", false, component);
 		boolean observeFieldDescendents;
 		if (observeFieldID != null) {
@@ -163,8 +163,8 @@ public class AjaxObserveField extends AjaxDynamicElement {
 		String nameInContext = nameInContext(context, component, this);
 		boolean shouldHandleRequest = !context.wasActionInvoked() && context.wasFormSubmitted() && nameInContext.equals(ERXAjaxApplication.ajaxSubmitButtonName(request));
 		if (shouldHandleRequest) {
-			String updateContainerID = AjaxUpdates.updateContainerID(this, component);
-			AjaxUpdates.setUpdateContainerID(request, updateContainerID);
+			String updateContainerID = AjaxUpdateProtocol.updateContainerID(this, component);
+			AjaxUpdateProtocol.setUpdateContainerID(request, updateContainerID);
 			context.setActionInvoked(true);
 			result = (WOActionResults) valueForBinding("action", component);
 			if (result == null) {

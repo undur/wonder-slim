@@ -129,7 +129,7 @@ public class AjaxSortable extends AjaxDynamicElement {
 		if (listID == null) {
 			throw new IllegalStateException("AjaxSortable requires a 'listID' binding (the id of the container whose rows are sortable).");
 		}
-		String updateContainerID = AjaxUpdates.updateContainerID(this, component);
+		String updateContainerID = AjaxUpdateProtocol.updateContainerID(this, component);
 		// A component-action URL that routes back to THIS element's handleRequest (where we fire the
 		// action and morph). The sortable appends &_oldIndex=..&_newIndex=.. to it on drop.
 		String actionUrl = AjaxUtils.ajaxComponentActionUrl(context);
@@ -162,8 +162,8 @@ public class AjaxSortable extends AjaxDynamicElement {
 		// Tell the response pass which container(s) to render, then fire the app's reorder action. The
 		// action reads the move via dragResult(request) and mutates its model; the morph reflects it.
 		// updateContainerID may be a single id or a ";"-joined multi-target set ("a;b;c").
-		String updateContainerID = AjaxUpdates.updateContainerID(this, component);
-		AjaxUpdates.setUpdateContainerID(request, updateContainerID);
+		String updateContainerID = AjaxUpdateProtocol.updateContainerID(this, component);
+		AjaxUpdateProtocol.setUpdateContainerID(request, updateContainerID);
 		WOActionResults result = (WOActionResults) valueForBinding("action", component);
 		// Mirror AjaxUpdateLink: when the action returns null (the usual case - it just mutated the
 		// model), set the page-replacement cache key and return null, letting AjaxDynamicElement's

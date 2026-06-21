@@ -59,7 +59,7 @@ public class AjaxResponse extends WOResponse {
 
 	@Override
 	public WOResponse generateResponse() {
-		if (AjaxUpdates.hasUpdateContainerID(_request)) {
+		if (AjaxUpdateProtocol.hasUpdateContainerID(_request)) {
 			String originalSenderID = _context.senderID();
 			_context._setSenderID("");
 			try {
@@ -82,10 +82,10 @@ public class AjaxResponse extends WOResponse {
 				// deliberate, valid "nothing changed, update nothing" outcome, not an error.
 				// FIXME: still a content-length heuristic; the precise check is "a targeted id matched no
 				// container on the page" - build that and this becomes exact. // 2026-06
-				boolean targetedSomething = !AjaxUpdates.requestedUpdateContainerIDs(_request).isEmpty();
+				boolean targetedSomething = !AjaxUpdateProtocol.requestedUpdateContainerIDs(_request).isEmpty();
 				if (_contentLength() == 0 && targetedSomething) {
 					setStatus(HTTP_STATUS_INTERNAL_ERROR);
-					log.warn("You performed an Ajax update, but no response was generated. A common cause of this is that you spelled your updateContainerID wrong.  You specified a container ID '" + AjaxUpdates.updateContainerID(_request) + "'.");
+					log.warn("You performed an Ajax update, but no response was generated. A common cause of this is that you spelled your updateContainerID wrong.  You specified a container ID '" + AjaxUpdateProtocol.updateContainerID(_request) + "'.");
 				}
 			}
 			finally {
@@ -133,7 +133,7 @@ public class AjaxResponse extends WOResponse {
 					if (updateContainerID != null) {
 						// .. .and let's make an AjaxResponse so we get our update container
 						// to be evaluated
-						AjaxUpdates.setUpdateContainerID(request, updateContainerID);
+						AjaxUpdateProtocol.setUpdateContainerID(request, updateContainerID);
 						finalActionResults = AjaxUtils.createResponse(request, context);
 					}
 				}

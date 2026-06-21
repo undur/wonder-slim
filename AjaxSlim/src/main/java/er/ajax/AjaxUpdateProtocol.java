@@ -37,9 +37,9 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
  * The action-side counterpart - declaring which containers should refresh - is {@link AjaxUpdater}.
  * </p>
  */
-public class AjaxUpdates {
+public class AjaxUpdateProtocol {
 
-	private AjaxUpdates() {
+	private AjaxUpdateProtocol() {
 	}
 
 	/** The character separating ids in a multi-target update request ({@code _u=a;b;c}). */
@@ -59,7 +59,7 @@ public class AjaxUpdates {
 	}
 
 	public static boolean hasUpdateContainerID(WORequest request) {
-		return AjaxUpdates.updateContainerID(request) != null;
+		return AjaxUpdateProtocol.updateContainerID(request) != null;
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class AjaxUpdates {
 	 * separated set). Drives the framed-fragment response format; a single-target update is unaffected.
 	 */
 	public static boolean isMultiUpdate(WORequest request) {
-		String id = AjaxUpdates.updateContainerID(request);
+		String id = AjaxUpdateProtocol.updateContainerID(request);
 		return id != null && id.indexOf(MULTI_UPDATE_SEPARATOR) != -1;
 	}
 
@@ -76,7 +76,7 @@ public class AjaxUpdates {
 	 * a multi-target update ({@code updateContainerID="a;b;c"}). Empty/blank ids are dropped.
 	 */
 	public static NSArray<String> requestedUpdateContainerIDs(WORequest request) {
-		String id = AjaxUpdates.updateContainerID(request);
+		String id = AjaxUpdateProtocol.updateContainerID(request);
 		if (id == null || id.trim().isEmpty()) {
 			// Null = no update pass; "" = a deliberately empty set (clearUpdateContainers writes the empty
 			// string). Both mean "no containers targeted" - NOT one container whose id is the empty string.
@@ -103,35 +103,35 @@ public class AjaxUpdates {
 		if (containerID == null) {
 			return false;
 		}
-		String id = AjaxUpdates.updateContainerID(request);
+		String id = AjaxUpdateProtocol.updateContainerID(request);
 		if (id == null) {
 			return false;
 		}
 		if (id.indexOf(MULTI_UPDATE_SEPARATOR) == -1) {
 			return containerID.equals(id);
 		}
-		return AjaxUpdates.requestedUpdateContainerIDs(request).containsObject(containerID);
+		return AjaxUpdateProtocol.requestedUpdateContainerIDs(request).containsObject(containerID);
 	}
 
 	public static String currentUpdateContainerID() {
-		return (String) ERXWOContext.contextDictionary().objectForKey(AjaxUpdates.CURRENT_UPDATE_CONTAINER_ID_KEY);
+		return (String) ERXWOContext.contextDictionary().objectForKey(AjaxUpdateProtocol.CURRENT_UPDATE_CONTAINER_ID_KEY);
 	}
 
 	public static void setCurrentUpdateContainerID(String updateContainerID) {
 		if (updateContainerID == null) {
-			ERXWOContext.contextDictionary().removeObjectForKey(AjaxUpdates.CURRENT_UPDATE_CONTAINER_ID_KEY);
+			ERXWOContext.contextDictionary().removeObjectForKey(AjaxUpdateProtocol.CURRENT_UPDATE_CONTAINER_ID_KEY);
 		}
 		else {
-			ERXWOContext.contextDictionary().setObjectForKey(updateContainerID, AjaxUpdates.CURRENT_UPDATE_CONTAINER_ID_KEY);
+			ERXWOContext.contextDictionary().setObjectForKey(updateContainerID, AjaxUpdateProtocol.CURRENT_UPDATE_CONTAINER_ID_KEY);
 		}
 	}
 
 	public static String updateContainerID(AjaxDynamicElement element, WOComponent component) {
-		return AjaxUpdates.updateContainerID(element, "updateContainerID", component);
+		return AjaxUpdateProtocol.updateContainerID(element, "updateContainerID", component);
 	}
 
 	public static String updateContainerID(AjaxDynamicElement element, String bindingName, WOComponent component) {
-		return AjaxUpdates.updateContainerID(element.valueForBinding(bindingName, component));
+		return AjaxUpdateProtocol.updateContainerID(element.valueForBinding(bindingName, component));
 	}
 
 	/**
@@ -157,12 +157,12 @@ public class AjaxUpdates {
 		if (value instanceof List<?> list) {
 			return String.join(MULTI_UPDATE_SEPARATOR, (List<String>) list);
 		}
-		return AjaxUpdates.updateContainerID((String) value);
+		return AjaxUpdateProtocol.updateContainerID((String) value);
 	}
 
 	public static String updateContainerID(String updateContainerID) {
 		if ("_parent".equals(updateContainerID)) {
-			updateContainerID = AjaxUpdates.currentUpdateContainerID();
+			updateContainerID = AjaxUpdateProtocol.currentUpdateContainerID();
 		}
 		return updateContainerID;
 	}
