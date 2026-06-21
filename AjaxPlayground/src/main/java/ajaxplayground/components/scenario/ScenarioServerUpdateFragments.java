@@ -49,6 +49,19 @@ public class ScenarioServerUpdateFragments extends PlaygroundPage {
 		return null;
 	}
 
+	/**
+	 * AMEND path: the CLIENT requested basicInfo (the link declares updateContainerID="basicInfo"), and
+	 * the server adds bottomContainer ON TOP via {@link AjaxUpdater#add} - the union refreshes. This is
+	 * the case that proves add() AUGMENTS the client's set rather than replacing it; the other buttons
+	 * are server-only (no client updateContainerID). "untouched" stays put.
+	 */
+	public WOActionResults amendClientSet() {
+		_countBasic++;
+		_countBottom++;
+		AjaxUpdater.add( "bottomContainer", context() );
+		return null;
+	}
+
 	/** REPLACE case: ignore any client set, render exactly bottomContainer. */
 	public WOActionResults replaceWithBottom() {
 		_countBottom++;

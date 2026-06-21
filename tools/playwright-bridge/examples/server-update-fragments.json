@@ -47,6 +47,20 @@
     { "do": "read", "name": "emptyServerErrors", "selector": null, "what": "failedRequestCount", "marker": "empty" },
     { "do": "assert", "name": "empty: nothing changed (basic still 2)", "that": "basicAfterEmpty", "equals": "2" },
     { "do": "assert", "name": "empty: nothing changed (bottom still 2)", "that": "bottomAfterEmpty", "equals": "2" },
-    { "do": "assert", "name": "empty: clean response, no 500", "that": "emptyServerErrors", "equals": 0 }
+    { "do": "assert", "name": "empty: clean response, no 500", "that": "emptyServerErrors", "equals": 0 },
+
+    { "do": "comment", "text": "AMEND: the client link requests basicInfo (updateContainerID), the action adds bottomContainer on top - the UNION refreshes in one request. Proves add() augments the client's set, not replaces it. (basic 2->3, bottom 2->3, untouched still 0.)" },
+    { "do": "marker", "label": "amend" },
+    { "do": "click", "selector": "#amendClientSet", "tag": "amend" },
+    { "do": "wait", "ms": 500 },
+    { "do": "read", "name": "basicAfterAmend", "selector": "#valBasic", "what": "text" },
+    { "do": "read", "name": "bottomAfterAmend", "selector": "#valBottom", "what": "text" },
+    { "do": "read", "name": "untouchedAfterAmend", "selector": "#valUntouched", "what": "text" },
+    { "do": "read", "name": "amendRequests", "selector": null, "what": "requestCount", "marker": "amend" },
+    { "do": "read", "name": "amendErrors", "selector": null, "what": "failedRequestCount", "marker": "amend" },
+    { "do": "assert", "name": "amend: client's basicInfo refreshed (2 -> 3)", "that": "basicAfterAmend", "equals": "3" },
+    { "do": "assert", "name": "amend: server-added bottomContainer refreshed (2 -> 3)", "that": "bottomAfterAmend", "equals": "3" },
+    { "do": "assert", "name": "amend: untouched still untouched", "that": "untouchedAfterAmend", "equals": "0" },
+    { "do": "assert", "name": "amend: no server error", "that": "amendErrors", "equals": 0 }
   ]
 }
