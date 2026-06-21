@@ -1,0 +1,31 @@
+{
+  "url": "http://localhost:<PORT>/server-update",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#selectCustomer" },
+
+    { "do": "comment", "text": "NB pattern: action refreshes basicInfo + bottomContainer server-side; untouched must stay 0" },
+    { "do": "read", "name": "basicBefore", "selector": "#valBasic", "what": "text" },
+    { "do": "read", "name": "untouchedBefore", "selector": "#valUntouched", "what": "text" },
+    { "do": "click", "selector": "#selectCustomer", "tag": "selectCustomer" },
+    { "do": "wait", "ms": 400 },
+    { "do": "read", "name": "basicAfter", "selector": "#valBasic", "what": "text" },
+    { "do": "read", "name": "bottomAfter", "selector": "#valBottom", "what": "text" },
+    { "do": "read", "name": "untouchedAfter", "selector": "#valUntouched", "what": "text" },
+
+    { "do": "comment", "text": "Scrabble pattern: link inside allBox1; action fires allBox2+allBox3 server-side, allBox1 via its own update" },
+    { "do": "click", "selector": "#bumpSet", "tag": "bumpSet" },
+    { "do": "wait", "ms": 500 },
+    { "do": "read", "name": "all1After", "selector": "#valAll1", "what": "text" },
+    { "do": "read", "name": "all2After", "selector": "#valAll2", "what": "text" },
+    { "do": "read", "name": "all3After", "selector": "#valAll3", "what": "text" },
+
+    { "do": "assert", "name": "basicInfo refreshed (0 -> 1)", "that": "basicAfter", "equals": "1" },
+    { "do": "assert", "name": "bottomContainer refreshed (0 -> 1)", "that": "bottomAfter", "equals": "1" },
+    { "do": "assert", "name": "untouched stayed put (server chose a precise set)", "that": "untouchedAfter", "equals": "0" },
+
+    { "do": "assert", "name": "allBox1 refreshed (its own update pass)", "that": "all1After", "equals": "1" },
+    { "do": "assert", "name": "allBox2 refreshed (server-side call)", "that": "all2After", "equals": "1" },
+    { "do": "assert", "name": "allBox3 refreshed (server-side call)", "that": "all3After", "equals": "1" }
+  ]
+}

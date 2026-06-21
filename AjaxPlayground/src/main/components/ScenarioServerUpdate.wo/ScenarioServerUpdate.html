@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: server-side update targeting</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 52rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		h2 { margin-top: 1.6rem; color: #444; font-size: 1.05rem; }
+		.lead { color: #666; }
+		.row { display: flex; gap: 1rem; margin: .8rem 0; }
+		.box { flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 1rem; background: #fafafa; text-align: center; }
+		.count { font-size: 1.8rem; color: #2b6cb0; font-weight: 700; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; border: none; font: inherit; }
+		a { color: #2b6cb0; }
+		code { background: #eee; padding: 0 .25rem; border-radius: 3px; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>Server-side update targeting</h1>
+	<p class="lead">Here the <strong>server</strong> decides which containers refresh - the action calls <code>AjaxUpdateContainer.updateContainerWithID("id", context())</code> for each target and returns null. The client never declares an <code>updateContainerID</code>. This is the idiom real apps use (NB fires two named containers; Scrabble fires a set minus the current one).</p>
+
+	<!-- NB PATTERN: the link's action refreshes two OTHER named containers server-side. The link
+	     carries NO updateContainerID - the server chooses {basicInfo, bottomContainer}. The third
+	     container ("untouched") is never named by the action, so it must NOT change: that's the proof
+	     the server-chosen set is precise, not "refresh everything". -->
+	<h2>NB pattern: action refreshes two named siblings</h2>
+	<wo:AjaxUpdateLink action="$selectCustomer" id="selectCustomer" class="btn">Select customer (server refreshes basicInfo + bottomContainer)</wo:AjaxUpdateLink>
+	<div class="row">
+		<wo:AjaxUpdateContainer id="basicInfo" elementName="div" class="box">
+			<p>basicInfo <small>(server-targeted)</small></p><p class="count" id="valBasic"><wo:str value="$countBasic" /></p>
+		</wo:AjaxUpdateContainer>
+		<wo:AjaxUpdateContainer id="bottomContainer" elementName="div" class="box">
+			<p>bottomContainer <small>(server-targeted)</small></p><p class="count" id="valBottom"><wo:str value="$countBottom" /></p>
+		</wo:AjaxUpdateContainer>
+		<wo:AjaxUpdateContainer id="untouched" elementName="div" class="box">
+			<p>untouched <small>(never named)</small></p><p class="count" id="valUntouched"><wo:str value="$countUntouched" /></p>
+		</wo:AjaxUpdateContainer>
+	</div>
+
+	<!-- SCRABBLE PATTERN: the link lives INSIDE allBox1, so currentUpdateContainerID() resolves to
+	     "allBox1" during the action. updateContainers() refreshes {allBox1,allBox2,allBox3} MINUS the
+	     current one, so the server fires allBox2 + allBox3 (allBox1 is already being refreshed by the
+	     click itself). All three counters bump; the proof is whether allBox1 re-renders via the click's
+	     own refresh while allBox2/allBox3 refresh via the server-side calls. -->
+	<h2>Scrabble pattern: refresh a set, minus the current container</h2>
+	<p class="lead">The triggering link is inside <code>allBox1</code>, which the action drops from its set (it is refreshed by the click itself) and fires <code>allBox2</code> + <code>allBox3</code> server-side.</p>
+	<div class="row">
+		<wo:AjaxUpdateContainer id="allBox1" elementName="div" class="box">
+			<p>allBox1 <small>(current; holds the link)</small></p><p class="count" id="valAll1"><wo:str value="$countAll1" /></p>
+			<wo:AjaxUpdateLink action="$bumpSetExceptCurrent" updateContainerID="allBox1" id="bumpSet" class="btn">Bump set (minus current)</wo:AjaxUpdateLink>
+		</wo:AjaxUpdateContainer>
+		<wo:AjaxUpdateContainer id="allBox2" elementName="div" class="box">
+			<p>allBox2 <small>(server-targeted)</small></p><p class="count" id="valAll2"><wo:str value="$countAll2" /></p>
+		</wo:AjaxUpdateContainer>
+		<wo:AjaxUpdateContainer id="allBox3" elementName="div" class="box">
+			<p>allBox3 <small>(server-targeted)</small></p><p class="count" id="valAll3"><wo:str value="$countAll3" /></p>
+		</wo:AjaxUpdateContainer>
+	</div>
+</body>
+</html>
