@@ -69,8 +69,16 @@ public class ScenarioServerUpdateFragments extends PlaygroundPage {
 		return null;
 	}
 
-	/** EMPTY case: clear the set - a deliberate "nothing changed" with no visible outcome and NO 500. */
+	/**
+	 * EMPTY case: clear the update set - a deliberate "render nothing" with NO 500. The action STILL RAN,
+	 * though: it resets all three counters server-side. Because the update set is empty, you don't see
+	 * that this round - but the next button press renders 0-based counts, proving "update nothing" did
+	 * not mean "do nothing": the action executed and mutated state, it just refreshed no container.
+	 */
 	public WOActionResults updateNothing() {
+		_countBasic = 0;
+		_countBottom = 0;
+		_countUntouched = 0;
 		AjaxUpdater.clear( context() );
 		return null;
 	}
