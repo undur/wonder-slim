@@ -412,105 +412,44 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	}
 
 	/**
-	 * Creates or updates an Ajax response so that the indicated AUC will get updated when the response
-	 * is processed in the browser. Adds JavaScript like <code>AjaxSlim.AUC.update('SomeContainerID');</code>
-	 *
-	 * @param updateContainerID the HTML ID of the element implementing the AUC
+	 * @param updateContainerID the HTML ID of the container to update
 	 * @param context WOContext for response
+	 *
+	 * @deprecated moved to {@link AjaxUpdater#update(String, WOContext)} - server-side update API does not
+	 *             belong on the element class. This delegate is kept for backward compatibility and is
+	 *             itself deprecated (the JS-command approach; prefer the fragment path {@link AjaxUpdater#add}).
 	 */
+	@Deprecated
 	public static void updateContainerWithID(String updateContainerID, WOContext context) {
-		AjaxUtils.javascriptResponse("AjaxSlim.AUC.update('" + updateContainerID + "');", context);
+		AjaxUpdater.update(updateContainerID, context);
 	}
 
 	/**
-	 * Creates or updates an Ajax response so that the indicated AUC will get updated when the response
-	 * is processed in the browser. If the container element does not exist, does nothing.
-	 *
-	 * @param updateContainerID the HTML ID of the element implementing the AUC
+	 * @param updateContainerID the HTML ID of the container to update
 	 * @param context WOContext for response
+	 *
+	 * @deprecated moved to {@link AjaxUpdater#safeUpdate(String, WOContext)}. Kept as a delegate for
+	 *             backward compatibility; itself deprecated - prefer the fragment path ({@link AjaxUpdater#add}).
 	 */
+	@Deprecated
 	public static void safeUpdateContainerWithID(String updateContainerID, WOContext context) {
-		AjaxUtils.javascriptResponse("if (document.getElementById('" + updateContainerID + "') != null) AjaxSlim.AUC.update('" + updateContainerID + "');", context);
-	}
-
-	// ---------------------------------------------------------------------------------------------
-	// Server-side update targeting (the modern path).
-	//
-	// Instead of emitting AjaxSlim.AUC.update('x') JavaScript for the client to run (the legacy
-	// updateContainerWithID above, which makes the client fire a SEPARATE fetch per container), these
-	// let an ACTION declare which containers should refresh, and the CURRENT response renders them as
-	// <ajaxslim-fragment>s in this same pass - one round-trip, response-as-data, no JS commands.
-	//
-	// The mechanism is just the multi-update request set (the "_u" value): an action mutates it, and
-	// the existing fragment-render walk (isMultiUpdate / requestedUpdateContainerIDs / handleRequest)
-	// picks the new targets up. So adding a container here is exactly equivalent to the client having
-	// sent it in updateContainerID - the server simply gets the final say.
-	//
-	// PHASE CONTRACT: call these from your ACTION (invokeAction). The set is read once when rendering
-	// begins (after your action returns), so it must be final by the end of the action. You can target
-	// any container on the page regardless of template position; you cannot grow the set from inside a
-	// container's own rendering.
-	// ---------------------------------------------------------------------------------------------
-
-	/**
-	 * Adds {@code containerID} to the set of containers this request will refresh (AUGMENT) - on top of
-	 * whatever the client already requested. The container renders as a fragment in the current
-	 * response. Call from an action.
-	 *
-	 * @param containerID the id of an AjaxUpdateContainer on the current page to refresh
-	 * @param context the current context
-	 */
-	public static void addUpdateContainer(String containerID, WOContext context) {
-		if (containerID == null) {
-			return;
-		}
-		NSMutableArray<String> ids = new NSMutableArray<>(requestedUpdateContainerIDs(context.request()));
-		if (!ids.containsObject(containerID)) {
-			ids.addObject(containerID);
-		}
-		_writeUpdateContainerSet(ids, context);
-	}
-
-	/**
-	 * Replaces the set of containers this request will refresh with exactly {@code containerIDs}
-	 * (REPLACE) - discarding whatever the client requested. The server gets the final, authoritative
-	 * say. Pass no ids (or call {@link #clearUpdateContainers}) to refresh nothing. Call from an action.
-	 *
-	 * @param context the current context
-	 * @param containerIDs the ids of AjaxUpdateContainers on the current page to refresh
-	 */
-	public static void setUpdateContainers(WOContext context, String... containerIDs) {
-		NSMutableArray<String> ids = new NSMutableArray<>();
-		for (String id : containerIDs) {
-			if (id != null && !ids.containsObject(id)) {
-				ids.addObject(id);
-			}
-		}
-		_writeUpdateContainerSet(ids, context);
-	}
-
-	/**
-	 * Clears the update set so this request refreshes NOTHING (a deliberate, valid "nothing changed"
-	 * outcome - not an error). Call from an action.
-	 *
-	 * @param context the current context
-	 */
-	public static void clearUpdateContainers(WOContext context) {
-		_writeUpdateContainerSet(new NSMutableArray<>(), context);
+		AjaxUpdater.safeUpdate(updateContainerID, context);
 	}
 
 	/**
 	 * Writes the resolved id set back to the request's "_u" value as the canonical ";"-joined string,
-	 * so the existing fragment-render machinery (requestedUpdateContainerIDs / isRequestedUpdateContainer)
-	 * reads it. An empty set is written as the empty string - present but targeting nothing - which the
-	 * render pass treats as "update nothing", distinct from a null (no update pass at all).
+	 * so the fragment-render machinery (requestedUpdateContainerIDs / isRequestedUpdateContainer) reads
+	 * it. An empty set is written as the empty string - present but targeting nothing - which the render
+	 * pass treats as "update nothing", distinct from a null (no update pass at all).
 	 * <p>
 	 * Also ensures the context's response is an {@link AjaxResponse}: declaring an update set means "this
 	 * is an ajax update response", and it is {@code AjaxResponse.generateResponse} that runs the
 	 * fragment-render pass. A bare-action link (no client {@code updateContainerID}) would otherwise leave
 	 * a plain WOResponse in the context, so the pass would never fire and the response would be empty.
+	 * <p>
+	 * Package-private render machinery: the author-facing entry points live on {@link AjaxUpdater}.
 	 */
-	private static void _writeUpdateContainerSet(NSMutableArray<String> ids, WOContext context) {
+	static void writeUpdateContainerSet(NSMutableArray<String> ids, WOContext context) {
 		String joined = String.join(MULTI_UPDATE_SEPARATOR, ids);
 		ERXWOContext.contextDictionary().setObjectForKey(joined, ERXAjaxApplication.KEY_UPDATE_CONTAINER_ID);
 		AjaxUtils.createResponse(context.request(), context);

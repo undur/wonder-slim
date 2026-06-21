@@ -4,13 +4,13 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 
 import ajaxplayground.components.PlaygroundPage;
-import er.ajax.AjaxUpdateContainer;
+import er.ajax.AjaxUpdater;
 
 /**
  * Scenario: the MODERN server-side update path - the action declares which containers refresh via
- * {@link AjaxUpdateContainer#addUpdateContainer} / {@link AjaxUpdateContainer#setUpdateContainers},
- * and they come back as <ajaxslim-fragment>s in THIS response (one round-trip, response-as-data),
- * instead of the legacy updateContainerWithID emitting AUC.update('x') JavaScript + N follow-up fetches.
+ * {@link AjaxUpdater#add} / {@link AjaxUpdater#set}, and they come back as <ajaxslim-fragment>s in THIS
+ * response (one round-trip, response-as-data), instead of the legacy AUC.update('x') JavaScript +
+ * N follow-up fetches.
  *
  * Sits BESIDE {@link ScenarioServerUpdate} (the legacy JS-command path), which stays as the control.
  */
@@ -36,8 +36,8 @@ public class ScenarioServerUpdateFragments extends PlaygroundPage {
 	public WOActionResults refreshBasicAndBottom() {
 		_countBasic++;
 		_countBottom++;
-		AjaxUpdateContainer.addUpdateContainer( "basicInfo", context() );
-		AjaxUpdateContainer.addUpdateContainer( "bottomContainer", context() );
+		AjaxUpdater.add( "basicInfo", context() );
+		AjaxUpdater.add( "bottomContainer", context() );
 		return null;
 	}
 
@@ -45,20 +45,20 @@ public class ScenarioServerUpdateFragments extends PlaygroundPage {
 	 *  fragment and morphs - the edge that isMultiUpdate's ";"-check could miss. */
 	public WOActionResults refreshBasicOnly() {
 		_countBasic++;
-		AjaxUpdateContainer.addUpdateContainer( "basicInfo", context() );
+		AjaxUpdater.add( "basicInfo", context() );
 		return null;
 	}
 
 	/** REPLACE case: ignore any client set, render exactly bottomContainer. */
 	public WOActionResults replaceWithBottom() {
 		_countBottom++;
-		AjaxUpdateContainer.setUpdateContainers( context(), "bottomContainer" );
+		AjaxUpdater.set( context(), "bottomContainer" );
 		return null;
 	}
 
 	/** EMPTY case: clear the set - a deliberate "nothing changed" with no visible outcome and NO 500. */
 	public WOActionResults updateNothing() {
-		AjaxUpdateContainer.clearUpdateContainers( context() );
+		AjaxUpdater.clear( context() );
 		return null;
 	}
 }
