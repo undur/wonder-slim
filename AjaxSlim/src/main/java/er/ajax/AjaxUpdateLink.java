@@ -78,7 +78,7 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 
 		String onClick = (String) valueForBinding("onClick", component);
 		String onClickBefore = (String) valueForBinding("onClickBefore", component);
-		String updateContainerID = AjaxUpdateContainer.updateContainerID(this, component);
+		String updateContainerID = AjaxUpdates.updateContainerID(this, component);
 		String functionName = (String) valueForBinding("functionName", component);
 		String function = (String) valueForBinding("function", component);
 		String replaceID = (String) valueForBinding("replaceID", component);
@@ -257,8 +257,8 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 		boolean disabled = booleanValueForBinding("disabled", false, component);
 		// updateContainerID may be a single id or a ";"-joined multi-target set ("a;b;c") - either way it
 		// is set as the _u value, and the update pass renders every container it names.
-		String updateContainerID = AjaxUpdateContainer.updateContainerID(this, component);
-		AjaxUpdateContainer.setUpdateContainerID(request, updateContainerID);
+		String updateContainerID = AjaxUpdates.updateContainerID(this, component);
+		AjaxUpdates.setUpdateContainerID(request, updateContainerID);
 		WOActionResults results = null;
 		if (!disabled) {
 			results = (WOActionResults) valueForBinding("action", component);

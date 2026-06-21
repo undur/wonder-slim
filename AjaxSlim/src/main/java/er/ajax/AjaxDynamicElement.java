@@ -48,7 +48,7 @@ public abstract class AjaxDynamicElement extends ERXDynamicElement implements IA
 			// result - otherwise WO stops at the first matched container. Returning null lets the page
 			// walk reach the sibling targets too (each appends to the same shared response). The single
 			// case is unchanged: it returns the response and stops, exactly as before.
-			boolean multi = AjaxUpdateContainer.isMultiUpdate(request);
+			boolean multi = AjaxUpdates.isMultiUpdate(request);
 			if (result == null && !ERXAjaxApplication.isAjaxReplacement(request) && !multi) {
 				result = AjaxUtils.createResponse(request, context);
 			}

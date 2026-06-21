@@ -75,10 +75,6 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 		super(name, associations, children);
 	}
 
-	public static boolean isAjaxSubmit(WORequest request) {
-		return request.formValueForKey(KEY_AJAX_SUBMIT_BUTTON_NAME) != null;
-	}
-
 	public boolean disabledInComponent(WOComponent component) {
 		return booleanValueForBinding("disabled", false, component);
 	}
@@ -126,7 +122,7 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 			buffer.append(") {");
 		}
 
-		String updateContainerID = AjaxUpdateContainer.updateContainerID(this, component);
+		String updateContainerID = AjaxUpdates.updateContainerID(this, component);
 		String replaceID = (String) valueForBinding("replaceID", component);
 		String target = (updateContainerID == null) ? replaceID : updateContainerID;
 		boolean replace = replaceID != null && updateContainerID == null;
@@ -249,8 +245,8 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 		String nameInContext = nameInContext(context, component);
 		boolean shouldHandleRequest = (!disabledInComponent(component) && context.wasFormSubmitted()) && ((context.isMultipleSubmitForm() && nameInContext.equals(request.formValueForKey(KEY_AJAX_SUBMIT_BUTTON_NAME))) || !context.isMultipleSubmitForm());
 		if (shouldHandleRequest) {
-			String updateContainerID = AjaxUpdateContainer.updateContainerID(this, component);
-			AjaxUpdateContainer.setUpdateContainerID(request, updateContainerID);
+			String updateContainerID = AjaxUpdates.updateContainerID(this, component);
+			AjaxUpdates.setUpdateContainerID(request, updateContainerID);
 			context.setActionInvoked(true);
 			result = handleRequest(request, context);
 			ERXAjaxApplication.enableShouldNotStorePage();
@@ -278,7 +274,7 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 			result = response;
 		}
 		else {
-			String updateContainerID = AjaxUpdateContainer.updateContainerID(this, component);
+			String updateContainerID = AjaxUpdates.updateContainerID(this, component);
 			if (updateContainerID != null) {
 				AjaxUtils.setPageReplacementCacheKey(context, updateContainerID);
 			}

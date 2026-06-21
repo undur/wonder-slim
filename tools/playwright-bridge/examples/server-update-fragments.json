@@ -1,0 +1,49 @@
+{
+  "url": "http://localhost:<PORT>/server-update-fragments",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#refreshBasicAndBottom" },
+
+    { "do": "comment", "text": "modern path: bare-action link, server declares the set via addUpdateContainer; fragments come back in ONE response and morph in" },
+    { "do": "read", "name": "basicBefore", "selector": "#valBasic", "what": "text" },
+    { "do": "read", "name": "untouchedBefore", "selector": "#valUntouched", "what": "text" },
+
+    { "do": "click", "selector": "#refreshBasicAndBottom", "tag": "refresh" },
+    { "do": "wait", "ms": 400 },
+
+    { "do": "read", "name": "basicAfter", "selector": "#valBasic", "what": "text" },
+    { "do": "read", "name": "bottomAfter", "selector": "#valBottom", "what": "text" },
+    { "do": "read", "name": "untouchedAfter", "selector": "#valUntouched", "what": "text" },
+
+    { "do": "comment", "text": "ONE round-trip: the click should fire exactly one ajax request (not one-per-container like the legacy AUC.update path)" },
+    { "do": "read", "name": "refreshRequests", "selector": null, "what": "requestCount", "tag": "refresh" },
+
+    { "do": "assert", "name": "basicInfo morphed (0 -> 1)", "that": "basicAfter", "equals": "1" },
+    { "do": "assert", "name": "bottomContainer morphed (0 -> 1)", "that": "bottomAfter", "equals": "1" },
+    { "do": "assert", "name": "untouched stayed put (server chose a precise set)", "that": "untouchedAfter", "equals": "0" },
+
+    { "do": "comment", "text": "SINGLE-container server-declared update (one id, no ';') must still frame + morph" },
+    { "do": "click", "selector": "#refreshBasicOnly", "tag": "single" },
+    { "do": "wait", "ms": 400 },
+    { "do": "read", "name": "basicAfterSingle", "selector": "#valBasic", "what": "text" },
+    { "do": "read", "name": "bottomAfterSingle", "selector": "#valBottom", "what": "text" },
+    { "do": "assert", "name": "single: basicInfo morphed again (1 -> 2)", "that": "basicAfterSingle", "equals": "2" },
+    { "do": "assert", "name": "single: bottomContainer untouched (still 1)", "that": "bottomAfterSingle", "equals": "1" },
+
+    { "do": "comment", "text": "REPLACE: ignore any client set, render exactly bottomContainer" },
+    { "do": "click", "selector": "#replaceWithBottom", "tag": "replace" },
+    { "do": "wait", "ms": 400 },
+    { "do": "read", "name": "basicAfterReplace", "selector": "#valBasic", "what": "text" },
+    { "do": "read", "name": "bottomAfterReplace", "selector": "#valBottom", "what": "text" },
+    { "do": "assert", "name": "replace: bottomContainer morphed (1 -> 2)", "that": "bottomAfterReplace", "equals": "2" },
+    { "do": "assert", "name": "replace: basicInfo untouched (still 2)", "that": "basicAfterReplace", "equals": "2" },
+
+    { "do": "comment", "text": "EMPTY set: a deliberate 'update nothing' - no error, no change" },
+    { "do": "click", "selector": "#updateNothing", "tag": "empty" },
+    { "do": "wait", "ms": 300 },
+    { "do": "read", "name": "basicAfterEmpty", "selector": "#valBasic", "what": "text" },
+    { "do": "read", "name": "bottomAfterEmpty", "selector": "#valBottom", "what": "text" },
+    { "do": "assert", "name": "empty: nothing changed (basic still 2)", "that": "basicAfterEmpty", "equals": "2" },
+    { "do": "assert", "name": "empty: nothing changed (bottom still 2)", "that": "bottomAfterEmpty", "equals": "2" }
+  ]
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: server-side update (fragments)</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 52rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.row { display: flex; gap: 1rem; margin: .8rem 0; }
+		.box { flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 1rem; background: #fafafa; text-align: center; }
+		.count { font-size: 1.8rem; color: #2b6cb0; font-weight: 700; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; border: none; font: inherit; }
+		a { color: #2b6cb0; }
+		code { background: #eee; padding: 0 .25rem; border-radius: 3px; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>Server-side update targeting (fragments, modern path)</h1>
+	<p class="lead">The action declares the containers via <code>AjaxUpdateContainer.addUpdateContainer(id, context())</code>; they come back as <code>&lt;ajaxslim-fragment&gt;</code>s in THIS response and the client morphs them - one round-trip, no <code>AUC.update</code> JavaScript. The link declares no <code>updateContainerID</code>: the server decides the whole set.</p>
+
+	<wo:AjaxUpdateLink action="$refreshBasicAndBottom" id="refreshBasicAndBottom" class="btn">Refresh basicInfo + bottomContainer (server-decided fragments)</wo:AjaxUpdateLink>
+	<wo:AjaxUpdateLink action="$refreshBasicOnly" id="refreshBasicOnly" class="btn">Refresh basicInfo ONLY (single-container edge)</wo:AjaxUpdateLink>
+	<wo:AjaxUpdateLink action="$replaceWithBottom" id="replaceWithBottom" class="btn">Replace set with bottomContainer only</wo:AjaxUpdateLink>
+	<wo:AjaxUpdateLink action="$updateNothing" id="updateNothing" class="btn">Update nothing (empty set, no 500)</wo:AjaxUpdateLink>
+	<div class="row">
+		<wo:AjaxUpdateContainer id="basicInfo" elementName="div" class="box">
+			<p>basicInfo <small>(server-targeted)</small></p><p class="count" id="valBasic"><wo:str value="$countBasic" /></p>
+		</wo:AjaxUpdateContainer>
+		<wo:AjaxUpdateContainer id="bottomContainer" elementName="div" class="box">
+			<p>bottomContainer <small>(server-targeted)</small></p><p class="count" id="valBottom"><wo:str value="$countBottom" /></p>
+		</wo:AjaxUpdateContainer>
+		<wo:AjaxUpdateContainer id="untouched" elementName="div" class="box">
+			<p>untouched <small>(never added)</small></p><p class="count" id="valUntouched"><wo:str value="$countUntouched" /></p>
+		</wo:AjaxUpdateContainer>
+	</div>
+</body>
+</html>

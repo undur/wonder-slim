@@ -1,7 +1,5 @@
 package er.ajax;
 
-import java.util.List;
-
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
@@ -11,10 +9,8 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableArray;
 
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.appserver.ajax.ERXAjaxApplication;
 
 /**
  * AjaxUpdateContainer - a region of a page that can be refreshed independently via an ajax request,
@@ -46,29 +42,20 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
  * @binding optional set to true to skip rendering the container tags when already inside an update container
  * @binding morph if true, content updates reconcile the existing DOM via Idiomorph instead of replacing
  *                innerHTML, preserving focus/scroll/selection and unchanged subtrees. Bind morph="$false"
- *                to force classic innerHTML replacement. When unbound, {@link #MORPH_BY_DEFAULT} applies.
+ *                to force classic innerHTML replacement. When unbound, morphing applies.
  * <p>
  * Any other attribute (class, style, data-*, role, aria-*, ...) is passed through verbatim onto the
  * rendered tag - it is not a binding this element interprets, so it is not listed above or in the .api.
  */
 public class AjaxUpdateContainer extends AjaxDynamicElement {
-	private static final String CURRENT_UPDATE_CONTAINER_ID_KEY = "er.ajax.AjaxUpdateContainer.currentID";
 
 	/**
-	 * The framework-wide default for whether AjaxUpdateContainers morph their content on update
-	 * (as opposed to replacing innerHTML). This is the SINGLE SOURCE OF TRUTH for the default -
-	 * flipping morphing on globally is a one-line change here. A per-container "morph" binding
-	 * always overrides this default in either direction, so morph="$false" remains a permanent,
-	 * reliable opt-out even after the default flips to true.
-	 */
-	public static final boolean MORPH_BY_DEFAULT = true;
-
-	/**
-	 * Resolves whether the given container should morph: the per-container "morph" binding if
-	 * present, otherwise {@link #MORPH_BY_DEFAULT}.
+	 * Resolves whether the given container should morph: the per-container "morph" binding if present,
+	 * otherwise the framework default (morph). Bind {@code morph="$false"} for classic innerHTML
+	 * replacement.
 	 */
 	public boolean shouldMorph(WOComponent component) {
-		return booleanValueForBinding("morph", MORPH_BY_DEFAULT, component);
+		return booleanValueForBinding("morph", true, component);
 	}
 
 	public AjaxUpdateContainer(String name, NSDictionary<String, WOAssociation> associations, WOElement children) {
@@ -85,20 +72,20 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	}
 
 	protected boolean shouldRenderContainer(WOComponent component) {
-		boolean renderContainer = !booleanValueForBinding("optional", false, component) || AjaxUpdateContainer.currentUpdateContainerID() == null;
+		boolean renderContainer = !booleanValueForBinding("optional", false, component) || AjaxUpdates.currentUpdateContainerID() == null;
 		return renderContainer;
 	}
 
 	@Override
 	public void takeValuesFromRequest(WORequest request, WOContext context) {
 		if (shouldRenderContainer(context.component())) {
-			String previousUpdateContainerID = AjaxUpdateContainer.currentUpdateContainerID();
+			String previousUpdateContainerID = AjaxUpdates.currentUpdateContainerID();
 			try {
-				AjaxUpdateContainer.setCurrentUpdateContainerID(_containerID(context));
+				AjaxUpdates.setCurrentUpdateContainerID(_containerID(context));
 				super.takeValuesFromRequest(request, context);
 			}
 			finally {
-				AjaxUpdateContainer.setCurrentUpdateContainerID(previousUpdateContainerID);
+				AjaxUpdates.setCurrentUpdateContainerID(previousUpdateContainerID);
 			}
 		}
 		else {
@@ -110,13 +97,13 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 	public WOActionResults invokeAction(WORequest request, WOContext context) {
 		WOActionResults results;
 		if (shouldRenderContainer(context.component())) {
-			String previousUpdateContainerID = AjaxUpdateContainer.currentUpdateContainerID();
+			String previousUpdateContainerID = AjaxUpdates.currentUpdateContainerID();
 			try {
-				AjaxUpdateContainer.setCurrentUpdateContainerID(_containerID(context));
+				AjaxUpdates.setCurrentUpdateContainerID(_containerID(context));
 				results = super.invokeAction(request, context);
 			}
 			finally {
-				AjaxUpdateContainer.setCurrentUpdateContainerID(previousUpdateContainerID);
+				AjaxUpdates.setCurrentUpdateContainerID(previousUpdateContainerID);
 			}
 		}
 		else {
@@ -135,17 +122,17 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 			super.appendToResponse(response, context);
 		}
 		else {
-			String previousUpdateContainerID = AjaxUpdateContainer.currentUpdateContainerID();
+			String previousUpdateContainerID = AjaxUpdates.currentUpdateContainerID();
 			try {
 				String elementName = (String) valueForBinding("elementName", "div", component);
 				String id = _containerID(context);
-				AjaxUpdateContainer.setCurrentUpdateContainerID(id);
+				AjaxUpdates.setCurrentUpdateContainerID(id);
 				response.appendContentString("<" + elementName + " ");
 				appendTagAttributeToResponse(response, "id", id);
 				appendTagAttributeToResponse(response, "data-updateUrl", AjaxUtils.ajaxComponentActionUrl(context));
-				// Emit the resolved morph decision explicitly in both states so the JS side has a
-				// single, unambiguous source of truth. An explicit data-morph="false" forces classic
-				// innerHTML replacement and keeps doing so even after MORPH_BY_DEFAULT flips to true.
+				// Emit the resolved morph decision explicitly in both states so the JS side has a single,
+				// unambiguous source of truth - an explicit data-morph="false" forces classic innerHTML
+				// replacement.
 				appendTagAttributeToResponse(response, "data-morph", shouldMorph(component) ? "true" : "false");
 				// Pass through every author-supplied binding this element does not handle itself - class,
 				// style, data-*, role, aria-*, title, ... An AjaxUpdateContainer is a <wo:container> with
@@ -183,7 +170,7 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				AjaxUtils.appendScriptFooter(response);
 			}
 			finally {
-				AjaxUpdateContainer.setCurrentUpdateContainerID(previousUpdateContainerID);
+				AjaxUpdates.setCurrentUpdateContainerID(previousUpdateContainerID);
 			}
 		}
 	}
@@ -259,15 +246,14 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 		WOResponse response = AjaxUtils.createResponse(request, context);
 		AjaxUtils.setPageReplacementCacheKey(context, id);
 
-		// Multi-target update (updateContainerID="a;b;c"): several containers render their content into
-		// ONE response in this same update pass, so each frames its content in an inert
-		// <ajaxslim-fragment data-id> wrapper the client demuxes. For a single-target update this is
-		// skipped, so the response body is byte-for-byte identical to before (just the children, plus
-		// any onRefreshComplete script).
-		boolean multi = AjaxUpdateContainer.isMultiUpdate(request);
-		if (multi) {
-			response.appendContentString("<ajaxslim-fragment data-id=\"" + id + "\">");
-		}
+		// UNIFORM framing: every container that renders into an ajax update response frames its content in
+		// an inert <ajaxslim-fragment data-id> wrapper, which the client always demuxes - whether the
+		// update targets one container or many, and whether the target set came from the client
+		// (updateContainerID="a;b;c") or the server (addUpdateContainer/setUpdateContainers). "Content
+		// destined for an update container IS a fragment" - one rule, no single-vs-multi or
+		// client-vs-server special case. The client morphs each fragment into its container; the response's
+		// content-type still distinguishes a fragment response (morph) from a text/javascript one (run).
+		response.appendContentString("<ajaxslim-fragment data-id=\"" + id + "\">");
 
 		if (hasChildrenElements()) {
 			appendChildrenToResponse(response, context);
@@ -279,9 +265,7 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 			AjaxUtils.appendScriptFooter(response);
 		}
 
-		if (multi) {
-			response.appendContentString("</ajaxslim-fragment>");
-		}
+		response.appendContentString("</ajaxslim-fragment>");
 		return null;
 	}
 
@@ -294,145 +278,28 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 		return id;
 	}
 
-	public static String updateContainerID(WORequest request) {
-		return (String) ERXWOContext.contextDictionary().objectForKey(ERXAjaxApplication.KEY_UPDATE_CONTAINER_ID);
-	}
-
-	public static void setUpdateContainerID(WORequest request, String updateContainerID) {
-		if (updateContainerID != null) {
-			ERXWOContext.contextDictionary().setObjectForKey(updateContainerID, ERXAjaxApplication.KEY_UPDATE_CONTAINER_ID);
-		}
-	}
-
-	public static boolean hasUpdateContainerID(WORequest request) {
-		return AjaxUpdateContainer.updateContainerID(request) != null;
-	}
-
-	/** The character separating ids in a multi-target update request ({@code _u=a;b;c}). */
-	public static final String MULTI_UPDATE_SEPARATOR = ";";
-
 	/**
-	 * True when the current update pass targets MORE THAN ONE container (the {@code _u} value is a
-	 * separated set). Drives the framed-fragment response format; a single-target update is unaffected.
-	 */
-	public static boolean isMultiUpdate(WORequest request) {
-		String id = AjaxUpdateContainer.updateContainerID(request);
-		return id != null && id.indexOf(MULTI_UPDATE_SEPARATOR) != -1;
-	}
-
-	/**
-	 * The set of requested update container ids for this pass. One id for a normal update; several for
-	 * a multi-target update ({@code updateContainerID="a;b;c"}). Empty/blank ids are dropped.
-	 */
-	public static NSArray<String> requestedUpdateContainerIDs(WORequest request) {
-		String id = AjaxUpdateContainer.updateContainerID(request);
-		if (id == null) {
-			return NSArray.emptyArray();
-		}
-		if (id.indexOf(MULTI_UPDATE_SEPARATOR) == -1) {
-			return new NSArray<>(id);
-		}
-		NSMutableArray<String> ids = new NSMutableArray<>();
-		for (String part : id.split(MULTI_UPDATE_SEPARATOR)) {
-			String trimmed = part.trim();
-			if (trimmed.length() > 0) {
-				ids.addObject(trimmed);
-			}
-		}
-		return ids;
-	}
-
-	/**
-	 * True if {@code containerID} is (one of) the requested update target(s). For a single-target
-	 * request this is exactly an id equality check; for multi-target it is set membership.
-	 */
-	public static boolean isRequestedUpdateContainer(WORequest request, String containerID) {
-		if (containerID == null) {
-			return false;
-		}
-		String id = AjaxUpdateContainer.updateContainerID(request);
-		if (id == null) {
-			return false;
-		}
-		if (id.indexOf(MULTI_UPDATE_SEPARATOR) == -1) {
-			return containerID.equals(id);
-		}
-		return AjaxUpdateContainer.requestedUpdateContainerIDs(request).containsObject(containerID);
-	}
-
-	public static String currentUpdateContainerID() {
-		return (String) ERXWOContext.contextDictionary().objectForKey(AjaxUpdateContainer.CURRENT_UPDATE_CONTAINER_ID_KEY);
-	}
-
-	public static void setCurrentUpdateContainerID(String updateContainerID) {
-		if (updateContainerID == null) {
-			ERXWOContext.contextDictionary().removeObjectForKey(AjaxUpdateContainer.CURRENT_UPDATE_CONTAINER_ID_KEY);
-		}
-		else {
-			ERXWOContext.contextDictionary().setObjectForKey(updateContainerID, AjaxUpdateContainer.CURRENT_UPDATE_CONTAINER_ID_KEY);
-		}
-	}
-
-	public static String updateContainerID(AjaxDynamicElement element, WOComponent component) {
-		return AjaxUpdateContainer.updateContainerID(element, "updateContainerID", component);
-	}
-
-	public static String updateContainerID(AjaxDynamicElement element, String bindingName, WOComponent component) {
-		return AjaxUpdateContainer.updateContainerID(element.valueForBinding(bindingName, component));
-	}
-
-	/**
-	 * Resolves an {@code updateContainerID} binding value to the canonical, {@code ";"}-joined string
-	 * form the rest of the framework uses (the wire format for {@code _u=a;b;c} and the JS
-	 * {@code AUC.update('a;b;c')}). This is the single place every element's {@code updateContainerID}
-	 * binding is resolved, so the accepted forms are uniform across the framework. The binding may be:
-	 * <ul>
-	 * <li>a single container id, as a String;</li>
-	 * <li>a {@code ";"}-separated set of ids, as a String ({@code "a;b;c"});</li>
-	 * <li>a {@code List} (e.g. {@code List<String>}) of ids - joined with {@code ";"} here, so callers
-	 *     never have to care which they were given;</li>
-	 * <li>the magic value {@code "_parent"}, which resolves to the nearest enclosing
-	 *     {@link AjaxUpdateContainer} (so an element can target the container it lives in without
-	 *     naming it). This applies to a String value only - it is not interpreted inside a list.</li>
-	 * </ul>
-	 *
-	 * @param value the raw binding value (String, List, or null)
-	 * @return the {@code ";"}-joined container ids, or null
-	 */
-	@SuppressWarnings("unchecked")
-	public static String updateContainerID(Object value) {
-		if (value instanceof List<?> list) {
-			return String.join(MULTI_UPDATE_SEPARATOR, (List<String>) list);
-		}
-		return AjaxUpdateContainer.updateContainerID((String) value);
-	}
-
-	public static String updateContainerID(String updateContainerID) {
-		if ("_parent".equals(updateContainerID)) {
-			updateContainerID = AjaxUpdateContainer.currentUpdateContainerID();
-		}
-		return updateContainerID;
-	}
-
-	/**
-	 * Creates or updates an Ajax response so that the indicated AUC will get updated when the response
-	 * is processed in the browser. Adds JavaScript like <code>AjaxSlim.AUC.update('SomeContainerID');</code>
-	 *
-	 * @param updateContainerID the HTML ID of the element implementing the AUC
+	 * @param updateContainerID the HTML ID of the container to update
 	 * @param context WOContext for response
+	 *
+	 * @deprecated moved to {@link AjaxUpdater#update(String, WOContext)} - server-side update API does not
+	 *             belong on the element class. This delegate is kept for backward compatibility and is
+	 *             itself deprecated (the JS-command approach; prefer the fragment path {@link AjaxUpdater#add}).
 	 */
+	@Deprecated
 	public static void updateContainerWithID(String updateContainerID, WOContext context) {
-		AjaxUtils.javascriptResponse("AjaxSlim.AUC.update('" + updateContainerID + "');", context);
+		AjaxUpdater.update(updateContainerID, context);
 	}
 
 	/**
-	 * Creates or updates an Ajax response so that the indicated AUC will get updated when the response
-	 * is processed in the browser. If the container element does not exist, does nothing.
-	 *
-	 * @param updateContainerID the HTML ID of the element implementing the AUC
+	 * @param updateContainerID the HTML ID of the container to update
 	 * @param context WOContext for response
+	 *
+	 * @deprecated moved to {@link AjaxUpdater#safeUpdate(String, WOContext)}. Kept as a delegate for
+	 *             backward compatibility; itself deprecated - prefer the fragment path ({@link AjaxUpdater#add}).
 	 */
+	@Deprecated
 	public static void safeUpdateContainerWithID(String updateContainerID, WOContext context) {
-		AjaxUtils.javascriptResponse("if (document.getElementById('" + updateContainerID + "') != null) AjaxSlim.AUC.update('" + updateContainerID + "');", context);
+		AjaxUpdater.safeUpdate(updateContainerID, context);
 	}
 }

@@ -20,6 +20,7 @@ import ajaxplayground.components.scenario.ScenarioMultiUpdate;
 import ajaxplayground.components.scenario.ScenarioNested;
 import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioServerUpdate;
+import ajaxplayground.components.scenario.ScenarioServerUpdateFragments;
 import ajaxplayground.components.scenario.ScenarioScripts;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
 import er.extensions.routes.RouteTable;
@@ -62,6 +63,7 @@ public class Routes {
 		routes.map( "/multi-observe", ScenarioMultiObserve.class );
 		routes.map( "/multi-update", ScenarioMultiUpdate.class );
 		routes.map( "/server-update", ScenarioServerUpdate.class );
+		routes.map( "/server-update-fragments", ScenarioServerUpdateFragments.class );
 		routes.map( "/checkbox", ScenarioCheckbox.class );
 
 		// Component gallery

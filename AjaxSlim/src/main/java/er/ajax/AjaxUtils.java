@@ -164,7 +164,7 @@ public class AjaxUtils {
 		// both - for the single case it is exactly the old `containerID.equals(updateContainerID)`.
 		boolean targetedContainer = false;
 		if (containerID != null && AjaxResponse.isAjaxUpdatePass(request)) {
-			targetedContainer = AjaxUpdateContainer.isRequestedUpdateContainer(request, containerID);
+			targetedContainer = AjaxUpdates.isRequestedUpdateContainer(request, containerID);
 		}
 		boolean shouldHandleRequest = elementID != null && (elementID.equals(senderID) || targetedContainer || elementID.equals(ERXAjaxApplication.ajaxSubmitButtonName(request)));
 		return shouldHandleRequest;
@@ -210,7 +210,7 @@ public class AjaxUtils {
 	}
 
 	public static void appendScriptHeaderIfNecessary(WORequest request, WOResponse response) {
-		if (AjaxUpdateContainer.hasUpdateContainerID(request)) {
+		if (AjaxUpdates.hasUpdateContainerID(request)) {
 			AjaxUtils.appendScriptHeader(response);
 		}
 		else {
@@ -223,7 +223,7 @@ public class AjaxUtils {
 	}
 
 	public static void appendScriptFooterIfNecessary(WORequest request, WOResponse response) {
-		if (AjaxUpdateContainer.hasUpdateContainerID(request)) {
+		if (AjaxUpdates.hasUpdateContainerID(request)) {
 			AjaxUtils.appendScriptFooter(response);
 		}
 	}

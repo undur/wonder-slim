@@ -84,11 +84,11 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 		if (association == null) {
 			return;
 		}
-		final String resolved = AjaxUpdateContainer.updateContainerID(association.valueInComponent(component));
+		final String resolved = AjaxUpdates.updateContainerID(association.valueInComponent(component));
 		if (resolved == null) {
 			return;
 		}
-		for (String id : resolved.split(AjaxUpdateContainer.MULTI_UPDATE_SEPARATOR)) {
+		for (String id : resolved.split(AjaxUpdates.MULTI_UPDATE_SEPARATOR)) {
 			// String.split on an empty string yields a single "" element; skip that artifact.
 			if (!id.isEmpty()) {
 				target.add(id);
