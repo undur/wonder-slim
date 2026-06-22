@@ -25,8 +25,10 @@
 		table.lines td.remove a { color: #cbd2d9; text-decoration: none; font-size: 1.1rem; }
 		table.lines td.remove a:hover { color: #e12d39; }
 		.grip { color: #cbd2d9; cursor: grab; user-select: none; }
-		.add-line { display: inline-block; margin-top: .75rem; color: #2b6cb0; text-decoration: none; font-size: .9rem; }
-		.add-line:hover { text-decoration: underline; }
+		.add-line-bar { margin: .75rem 0 .6rem; }
+		.add-line { display: inline-block; padding: .3rem .7rem; border: 1px solid #cbd5e0; border-radius: 6px; background: #f7fafc; color: #2b6cb0; text-decoration: none; font-size: .85rem; font-weight: 600; line-height: 1.4; cursor: pointer; }
+		.add-line:hover { background: #edf2f7; border-color: #a0aec0; }
+		.add-line:active { background: #e2e8f0; }
 		.amount { font-variant-numeric: tabular-nums; }
 
 		.totals { display: flex; justify-content: flex-end; gap: 2rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 2px solid #e4e7eb; }
@@ -67,6 +69,7 @@
 
 					<wo:AjaxUpdateContainer elementName="div" id="lineItems">
 						<wo:AjaxSortable listID="lineItems" action="$reorderLines" updateContainerID="lineItems;totals;preview" />
+						<p class="add-line-bar"><wo:AjaxUpdateLink action="$addLine" updateContainerID="editor;totals;preview" class="add-line">+ Add line</wo:AjaxUpdateLink></p>
 						<table class="lines">
 							<thead>
 								<tr>
@@ -91,7 +94,6 @@
 								</wo:repetition>
 							</tbody>
 						</table>
-						<p><wo:AjaxUpdateLink action="$addLine" updateContainerID="editor;totals;preview" class="add-line">+ Add line</wo:AjaxUpdateLink></p>
 					</wo:AjaxUpdateContainer>
 
 					<wo:AjaxUpdateContainer elementName="div" id="totals" class="totals">
