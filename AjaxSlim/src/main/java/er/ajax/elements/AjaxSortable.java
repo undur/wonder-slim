@@ -118,6 +118,7 @@ public class AjaxSortable extends AjaxDynamicElement {
 		addScriptResourceInHead(context, response, "idiomorph.js");
 		addScriptResourceInHead(context, response, "ajaxslim.js");
 		addScriptResourceInHead(context, response, "ajaxslim-sortable.js");
+		addStylesheetResourceInHead(context, response, "ajaxslim-sortable.css");
 	}
 
 	@Override
