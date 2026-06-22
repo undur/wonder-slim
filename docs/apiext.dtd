@@ -1,0 +1,114 @@
+<!--
+  apiext.dtd — DTD for the .apiext extended element-API format (and the .api format it extends).
+
+  PURPOSE
+  This DTD validates BOTH:
+    (a) the classic WebObjects .api format (Apple's WebObjectsDefinitions.dtd vocabulary), so existing
+        .api files validate unchanged, AND
+    (b) the .apiext extension used by AjaxSlim, which adds per-element/per-binding documentation, typed
+        bindings, framework tags, and an element-level passthrough flag.
+  It is intended as a working contract for tooling (e.g. a WOLips fork) that reads a document validated
+  against this DTD and renders a tag's API preview from it. Everything needed for that preview is
+  declarable here.
+
+  RELATIONSHIP TO WO's DTD
+  Apple ships com/webobjects/appserver/WebObjectsDefinitions.dtd. This DTD is a SUPERSET: it keeps that
+  vocabulary verbatim (wodefinitions/wo/binding/validation/and/or/count/bound/unbound/ungettable/
+  unsettable/documentation) and adds the .apiext elements/attributes marked "EXTENSION" below. It is also
+  deliberately PERMISSIVE about validation nesting to match real-world files: although WO's DTD nominally
+  restricts <validation> children to <and>/<count>, real .api/.apiext files frequently place the
+  predicate elements (<bound>/<unbound>/...) DIRECTLY under <validation>, so we allow that here.
+
+  All attributes are CDATA #IMPLIED, matching WO: the format is untyped strings (e.g. boolean values are
+  the strings "true"/"false" or "YES"/"NO"). Typing/validation of those values is a tooling concern, not
+  expressed in the DTD.
+
+  USAGE
+    <!DOCTYPE wodefinitions SYSTEM "apiext.dtd">
+
+  Status: captures the CURRENT format (WO .api + the AjaxSlim .apiext additions). No speculative fields;
+  the larger v2 wishlist (deprecation, direction, value-sets, shortcuts, ...) is intentionally NOT here.
+-->
+
+<!-- ============================ root ============================ -->
+
+<!ELEMENT wodefinitions (#PCDATA | wo)*>
+
+<!--
+  An element definition. WO attributes: class (the component class, simple or fully-qualified) and
+  wocomponentcontent (whether it wraps child content; "true"/"false").
+  EXTENSION attribute: passthrough — "true" if the element forwards attributes it does not itself handle
+  onto the rendered tag (the .apiext element-level passthrough flag).
+  Children: WO allows binding/validation/documentation; EXTENSION adds doc (element role/description,
+  may contain Markdown in CDATA) and tags (framework categorization).
+-->
+<!ELEMENT wo (#PCDATA | binding | validation | documentation | doc | tags)*>
+<!ATTLIST wo class               CDATA #IMPLIED>
+<!ATTLIST wo wocomponentcontent  CDATA #IMPLIED>
+<!ATTLIST wo passthrough         CDATA #IMPLIED>  <!-- EXTENSION -->
+
+<!-- ============================ bindings ============================ -->
+
+<!--
+  A binding. WO attributes: name, defaults (autocomplete preset string), passthrough, required, settable.
+  EXTENSION children: type (one or more — the accepted Java types / value sets, repeatable for a binding
+  that accepts several, e.g. String OR List) and doc (the binding's description, may contain Markdown in
+  CDATA). WO's <binding> was #PCDATA only; the extension makes it carry these child elements.
+-->
+<!ELEMENT binding (#PCDATA | type | doc)*>
+<!ATTLIST binding name         CDATA #IMPLIED>
+<!ATTLIST binding defaults     CDATA #IMPLIED>
+<!ATTLIST binding passthrough  CDATA #IMPLIED>
+<!ATTLIST binding required     CDATA #IMPLIED>
+<!ATTLIST binding settable     CDATA #IMPLIED>
+
+<!-- EXTENSION: an accepted type for a binding — a fully-qualified Java class (e.g. java.lang.String) or
+     a known value-set name. Repeatable: multiple <type> = the set of accepted types. -->
+<!ELEMENT type (#PCDATA)>
+
+<!-- ============================ documentation (EXTENSION) ============================ -->
+
+<!-- EXTENSION: human documentation for an element (under <wo>) or a binding (under <binding>). Free text;
+     may contain a Markdown subset (inline `code`, **bold**, *italic*, [links](), fenced code blocks),
+     typically wrapped in CDATA so the Markdown's own characters don't need XML escaping. -->
+<!ELEMENT doc (#PCDATA)>
+
+<!-- EXTENSION: framework categorization tags (e.g. update / widget / server / trigger). The tag VALUE is
+     portable; how a tool renders it (badge colour/label) is the tool's concern. -->
+<!ELEMENT tags (#PCDATA | tag)*>
+<!ELEMENT tag (#PCDATA)>
+
+<!-- ============================ validation (WO) ============================ -->
+
+<!--
+  A cross-binding rule. When the rule's predicate(s) hold, the message is reported. WO's DTD nominally
+  restricts children to <and>/<count>; we ALSO allow the predicate elements directly (real files do this)
+  and <or>, to validate the files that exist.
+-->
+<!ELEMENT validation (#PCDATA | and | or | count | bound | unbound | ungettable | unsettable)*>
+<!ATTLIST validation message CDATA #IMPLIED>
+
+<!-- Boolean combinators over predicates. -->
+<!ELEMENT and (#PCDATA | and | or | bound | unbound | count | ungettable | unsettable)*>
+<!ELEMENT or  (#PCDATA | and | or | bound | unbound | count | ungettable | unsettable)*>
+
+<!-- Count-based predicate (e.g. "how many of these are bound"); test carries the comparison. -->
+<!ELEMENT count (#PCDATA | bound | unbound | or | and)*>
+<!ATTLIST count test CDATA #IMPLIED>
+
+<!-- Leaf predicates, each naming a binding. -->
+<!ELEMENT bound      (#PCDATA)>
+<!ATTLIST bound      name CDATA #IMPLIED>
+<!ELEMENT unbound    (#PCDATA)>
+<!ATTLIST unbound    name CDATA #IMPLIED>
+<!ELEMENT ungettable (#PCDATA)>
+<!ATTLIST ungettable name CDATA #IMPLIED>
+<!ELEMENT unsettable (#PCDATA)>
+<!ATTLIST unsettable name CDATA #IMPLIED>
+
+<!-- WO's external-documentation pointer (directory/domain/path to doc resources). Rarely used; kept for
+     .api compatibility. Distinct from the EXTENSION inline <doc>. -->
+<!ELEMENT documentation (#PCDATA)>
+<!ATTLIST documentation directory CDATA #IMPLIED>
+<!ATTLIST documentation domain    CDATA #IMPLIED>
+<!ATTLIST documentation path      CDATA #IMPLIED>
