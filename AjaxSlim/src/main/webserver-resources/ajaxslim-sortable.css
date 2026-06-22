@@ -5,15 +5,22 @@
  * the cues need no JavaScript of their own and an app can override or replace the file wholesale:
  *
  *   [data-sortable-grip]          the grab handle inside a row -> grab cursor (it's draggable)
- *   .ajaxslim-dragging            the row currently being dragged -> a "picked up" lift
+ *   .ajaxslim-dragging            the row currently being dragged -> a "picked up" lift; it also tracks
+ *                                 the cursor via an inline translateY the JS sets (so no transition here)
  *   html.ajaxslim-sorting         set on <html> for the duration of any drag -> grabbing cursor +
  *                                 suppress text selection so a drag doesn't select row text
  *
- * Deliberately minimal: a lift on the dragged row (the one cue touch genuinely needs - no hover/cursor
- * on mobile means without it there is NO feedback that the drag took) plus grip/cursor affordances on
- * the desktop. No drop-gap indicator, no animation that could fight an app's table styling. Everything
- * is class-scoped and low-specificity, so app CSS wins by default; the lift is tunable via custom
- * properties.
+ * The dragged row follows the cursor and the other rows slide (FLIP) to open a gap where it will land,
+ * previewing the drop - both pure transforms (work on <tr> table rows too) driven by the JS. This CSS
+ * only supplies the lift and the cursor/selection affordances; the motion is inline transforms.
+ *
+ * Tunable custom properties (set on the sortable container or :root):
+ *   --ajaxslim-drag-opacity   the dragged row's opacity        (default 0.9)
+ *   --ajaxslim-drag-shadow    the dragged row's lift shadow     (default a soft drop shadow)
+ *   --ajaxslim-drag-flip      sibling slide duration in ms      (default 150; 0 disables the slide)
+ *   --ajaxslim-drag-follow    set to `none` to disable follow-cursor (dragged row snaps to slots)
+ *
+ * Everything is class-scoped and low-specificity with no !important, so app CSS wins by default.
  */
 
 /* The grip advertises itself as draggable. Scoped to grips so the rest of the row keeps its own cursors. */
@@ -43,5 +50,9 @@ html.ajaxslim-sorting * {
 	opacity: var(--ajaxslim-drag-opacity, 0.9);
 	box-shadow: var(--ajaxslim-drag-shadow, 0 2px 10px rgba(0, 0, 0, 0.25));
 	position: relative; /* lift it above its neighbours so the shadow isn't clipped by sibling rows */
-	z-index: 1;
+	z-index: 2;         /* keep the lifted row above its sliding neighbours */
+	/* The JS sets translateY every pointer move to follow the cursor; it must apply instantly, so the
+	   dragged row must NOT transition its transform (a sibling FLIP transition would make it lag). */
+	transition: none;
+	will-change: transform;
 }

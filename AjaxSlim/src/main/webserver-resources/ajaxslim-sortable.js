@@ -97,26 +97,122 @@
 		return null; // past the last item -> append at end
 	}
 
+	// The drop animation duration (ms) for the FLIP slide of the rows that shift to make room. Read from
+	// the --ajaxslim-drag-flip custom property so an app can tune or disable it (0 = no animation).
+	function flipDurationMs(container) {
+		var raw = getComputedStyle(container).getPropertyValue('--ajaxslim-drag-flip').trim();
+		var n = parseFloat(raw);
+		return isFinite(n) ? n : 150;
+	}
+
+	// FLIP (First-Last-Invert-Play): the dragged row is reordered in the DOM by onMove; the OTHER rows
+	// jump to their new slots instantly. To make them SLIDE instead, we snapshot each row's top BEFORE a
+	// reorder (first), let the reorder happen (last), then for each row whose position changed we set an
+	// inverse translateY with no transition and, next frame, transition it back to 0 - so it animates
+	// from where it was to where it now is. The dragged item is excluded (it's positioned by the cursor).
+	// Pure transform, so it works on <tr> table rows (which can't be positioned) as well as div/li lists.
+	function firstRects(items, dragged) {
+		var map = new Map();
+		for (var i = 0; i < items.length; i++) {
+			if (items[i] !== dragged) {
+				map.set(items[i], items[i].getBoundingClientRect().top);
+			}
+		}
+		return map;
+	}
+
+	function playFlip(container, items, dragged, firstTops, durationMs) {
+		if (!durationMs) {
+			return;
+		}
+		for (var i = 0; i < items.length; i++) {
+			var el = items[i];
+			if (el === dragged) {
+				continue;
+			}
+			var prevTop = firstTops.get(el);
+			if (prevTop == null) {
+				continue;
+			}
+			var delta = prevTop - el.getBoundingClientRect().top;
+			if (!delta) {
+				continue;
+			}
+			el.style.transition = 'none';
+			el.style.transform = 'translateY(' + delta + 'px)';
+		}
+		// Next frame: clear the inverse transform WITH a transition, so each shifted row slides home.
+		requestAnimationFrame(function () {
+			for (var j = 0; j < items.length; j++) {
+				var e = items[j];
+				if (e === dragged || firstTops.get(e) == null) {
+					continue;
+				}
+				e.style.transition = 'transform ' + durationMs + 'ms ease';
+				e.style.transform = '';
+			}
+		});
+	}
+
+	// Clear any transform/transition we parked on the non-dragged rows (on drop, or when degrading).
+	function clearFlip(items, dragged) {
+		for (var i = 0; i < items.length; i++) {
+			if (items[i] !== dragged) {
+				items[i].style.transition = '';
+				items[i].style.transform = '';
+			}
+		}
+	}
+
 	// One live drag. Pointer-events based so it works for mouse and touch uniformly.
+	//
+	// The dragged row FOLLOWS the cursor (a translateY tracking the pointer, so it isn't snapped to its
+	// grid slot), while the other rows SLIDE (FLIP) to open a gap where it will land - previewing the
+	// result before the drop. Both effects are pure transforms and degrade safely: if anything in the
+	// enhancement throws, the drag still reorders the DOM (today's snap behaviour), so the move is never
+	// lost. The transform tracking can be disabled wholesale with --ajaxslim-drag-follow: none.
 	function beginDrag(container, item, startEvent) {
 		startEvent.preventDefault();
 		var startIndex = indexOfItem(container, item);
 		var moved = false;
 
+		var startY = startEvent.touches ? startEvent.touches[0].clientY : startEvent.clientY;
+		var follow = getComputedStyle(container).getPropertyValue('--ajaxslim-drag-follow').trim() !== 'none';
+		var flipMs = flipDurationMs(container);
+		// As the dragged row is reordered into a new DOM slot, its own laid-out position jumps; we track
+		// the cumulative jump so the follow-cursor transform stays anchored to the pointer, not the slot.
+		var slotShift = 0;
+
 		container.setAttribute('data-morph-ignore', '');      // freeze morphs during the drag
 		item.classList.add('ajaxslim-dragging');
 		document.documentElement.classList.add('ajaxslim-sorting');
+
+		function track(clientY) {
+			if (follow) {
+				try { item.style.transform = 'translateY(' + ((clientY - startY) - slotShift) + 'px)'; }
+				catch (e) { follow = false; }
+			}
+		}
 
 		function onMove(ev) {
 			var clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
 			var before = itemUnderPointer(container, item, clientY);
 			var parent = item.parentNode;
-			if (before == null) {
-				if (item.nextSibling !== null) { parent.appendChild(item); moved = true; }
+			var willMove = (before == null) ? (item.nextSibling !== null) : (before !== item.nextSibling);
+
+			if (willMove) {
+				var items = itemsOf(container);
+				var firstTops = firstRects(items, item);          // FLIP: measure before
+				var ownTopBefore = item.getBoundingClientRect().top;
+				if (before == null) { parent.appendChild(item); }
+				else { parent.insertBefore(item, before); }
+				moved = true;
+				// the dragged row's own slot moved by this much; fold it into the follow offset so it
+				// doesn't visually jump when it changes DOM position.
+				slotShift += item.getBoundingClientRect().top - ownTopBefore;
+				playFlip(container, itemsOf(container), item, firstTops, flipMs);  // FLIP: invert + play
 			}
-			else if (before !== item.nextSibling) {
-				parent.insertBefore(item, before); moved = true;
-			}
+			track(clientY);
 		}
 
 		function onUp() {
@@ -126,6 +222,11 @@
 			document.removeEventListener('touchend', onUp, true);
 			item.classList.remove('ajaxslim-dragging');
 			document.documentElement.classList.remove('ajaxslim-sorting');
+			// drop all the transient transforms BEFORE the authoritative morph lands, so the server's
+			// reconciled order doesn't double-animate against our FLIP/follow transforms.
+			item.style.transition = '';
+			item.style.transform = '';
+			clearFlip(itemsOf(container), item);
 			container.removeAttribute('data-morph-ignore');
 
 			var endIndex = indexOfItem(container, item);
