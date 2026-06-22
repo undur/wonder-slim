@@ -9,10 +9,6 @@
   multiple="$true" displayString="$item.name" noSelectionString="Add some…"/>
 ```]]></doc>
 
-		<tags>
-			<tag>widget</tag>
-		</tags>
-
 		<binding name="list" required="true">
 			<type>java.util.List</type>
 			<doc>The list of objects to choose from.</doc>

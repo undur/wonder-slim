@@ -10,10 +10,6 @@
 </wo:AjaxSelfUpdatingContainer>
 ```]]></doc>
 
-		<tags>
-			<tag>update</tag>
-		</tags>
-
 		<binding name="frequency">
 			<type>java.lang.Number</type>
 			<doc>The frequency, in seconds, of a periodic self-refresh.</doc>

@@ -15,10 +15,6 @@
 </wo:AjaxObserveField>
 ```]]></doc>
 
-		<tags>
-			<tag>update</tag>
-		</tags>
-
 		<binding name="observeFieldID">
 			<type>java.lang.String</type>
 			<doc><![CDATA[The id of the field to observe. **Omit to observe all descendant fields** of this element (descendant mode).]]></doc>

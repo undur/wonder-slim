@@ -8,10 +8,6 @@
 <wo:AjaxPing updateContainerID="bigPanel" cacheKey="$panelVersion" frequency="5"/>
 ```]]></doc>
 
-		<tags>
-			<tag>trigger</tag>
-		</tags>
-
 		<binding name="updateContainerID">
 			<type>java.lang.String</type>
 			<doc>The id of the update container to refresh when the key changes.</doc>

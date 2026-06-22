@@ -11,10 +11,6 @@
 </wo:AjaxPing>
 ```]]></doc>
 
-		<tags>
-			<tag>server</tag>
-		</tags>
-
 		<binding name="updateContainerID">
 			<type>java.lang.String</type>
 			<doc>The id of the update container to refresh when the key changes.</doc>

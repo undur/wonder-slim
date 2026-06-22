@@ -12,8 +12,8 @@
 
 `.api` files declare a dynamic element's binding API (for IDE autocomplete/validation and live preview).
 `.apiext` is a backward-compatible **superset**: same XML structure, plus per-element and per-binding
-documentation, typed bindings, framework tags, and an element-level passthrough flag — everything a tool
-needs to render a rich preview of a tag's API.
+documentation, typed bindings, and an element-level passthrough flag — everything a tool needs to render
+a rich preview of a tag's API.
 
 The DTD [`apiext.dtd`](./apiext.dtd) validates all three of: existing `.api` files, our `.apiext` files,
 and WO's own canonical `WebObjectsDefinitions.xml` (39 elements). A document that validates against it is
@@ -32,8 +32,6 @@ guaranteed parseable by a conforming consumer.
   <wo class="AjaxUpdateContainer" wocomponentcontent="true" passthrough="true">
 
     <doc><![CDATA[A region of the page refreshed independently via Ajax… (Markdown allowed)]]></doc>
-
-    <tags><tag>update</tag></tags>
 
     <binding name="updateContainerID" required="true">
       <type>java.lang.String</type>
@@ -58,7 +56,6 @@ guaranteed parseable by a conforming consumer.
 | `wocomponentcontent` | `.api` | `"true"` if the element wraps child content. |
 | `passthrough` | **.apiext** | `"true"` if the element forwards unhandled attributes onto the rendered tag (show a "Passthrough" affordance + a "any other attribute is passed through" note). |
 | `<doc>` | **.apiext** | The element's role/description. May contain a Markdown subset (see below). |
-| `<tags><tag>` | **.apiext** | Framework categorization (`update`/`widget`/`server`/`trigger`/…). The value is portable; badge colour/label is the tool's choice. |
 
 ### Binding — `<binding>`
 
@@ -92,10 +89,30 @@ inline `` `code` ``, `**bold**`, `*italic*`, `[text](url)`, and fenced ` ```lang
 `<![CDATA[ … ]]>` so its characters need no XML escaping. A consumer that doesn't render Markdown can show
 the raw text and lose only formatting.
 
+## Why there are no category "tags" in the format
+
+An earlier draft carried a `<tags>` element (AjaxSlim's `update`/`widget`/`server`/`trigger` badges). It
+was **removed**: those values are AjaxSlim's own editorial taxonomy, not facts about an element's API
+contract, and nothing structural consumes them (they only drove badge colours on AjaxSlim's reference
+page). The format describes the *binding contract*; framework-specific categorization and its presentation
+belong to the framework's own tooling, not the shared format — the same reason badge styling was always
+client-side.
+
+For the record, AjaxSlim's reference page categorizes its elements like so (this mapping lives in the
+`AjaxSlimElementReference` component, not in the `.apiext` files):
+
+| Category | Elements |
+|---|---|
+| Update | AjaxUpdateContainer, AjaxSelfUpdatingContainer, AjaxUpdateLink, AjaxSubmitButton, AjaxDefaultSubmitButton, AjaxObserveField, AjaxModalContainer |
+| Widget | AjaxPopUpButton, AjaxBrowser |
+| Server | AjaxUpdateTrigger, AjaxPingUpdate |
+| Activity (`trigger`) | AjaxBusySpinner, AjaxPing |
+| (none) | AjaxSortable |
+
 ## Relationship to WO's DTD
 
 WO ships `com/webobjects/appserver/WebObjectsDefinitions.dtd`. `apiext.dtd` keeps that vocabulary verbatim
 (`wodefinitions`/`wo`/`binding`/`validation`/`and`/`or`/`count`/`bound`/`unbound`/`ungettable`/
-`unsettable`/`documentation`) and adds only the `.apiext` items above (`passthrough` on `<wo>`; `<doc>`,
-`<tags>`/`<tag>` under `<wo>`; `<type>`, `<doc>` under `<binding>`). So every existing `.api` validates
-unchanged, and the extension is additive.
+`unsettable`/`documentation`) and adds only the `.apiext` items above (`passthrough` on `<wo>`; `<doc>`
+under `<wo>`; `<type>`, `<doc>` under `<binding>`). So every existing `.api` validates unchanged, and the
+extension is additive.

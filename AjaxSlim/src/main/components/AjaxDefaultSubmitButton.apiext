@@ -11,10 +11,6 @@
 </wo:form>
 ```]]></doc>
 
-		<tags>
-			<tag>update</tag>
-		</tags>
-
 		<binding name="action">
 			<type>com.webobjects.appserver.WOActionResults</type>
 			<doc>The action to execute on Enter.</doc>

@@ -65,7 +65,7 @@
 	<wo:repetition list="$elements" item="$currentElement">
 		<div class="el">
 			<wo:container elementName="h3" id="$currentElement.className"><code><wo:str value="$currentElement.className" /></code>
-				<wo:repetition list="$currentElement.tags" item="$currentTag">
+				<wo:repetition list="$currentElementTags" item="$currentTag">
 					<wo:container elementName="span" class="$currentTagBadgeClass"><wo:str value="$currentTagBadgeLabel" /></wo:container>
 				</wo:repetition>
 				<wo:if condition="$currentElement.passthrough"><span class="tag t-passthrough">Passthrough</span></wo:if>

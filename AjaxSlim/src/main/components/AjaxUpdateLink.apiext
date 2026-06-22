@@ -11,10 +11,6 @@
 <wo:AjaxUpdateLink action="$bumpAll" updateContainerID="boxA;boxB;boxC">Bump all</wo:AjaxUpdateLink>
 ```]]></doc>
 
-		<tags>
-			<tag>update</tag>
-		</tags>
-
 		<binding name="action">
 			<type>com.webobjects.appserver.WOActionResults</type>
 			<doc>The action to call when the link executes.</doc>

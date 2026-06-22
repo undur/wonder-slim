@@ -6,7 +6,7 @@
     (a) the classic WebObjects .api format (Apple's WebObjectsDefinitions.dtd vocabulary), so existing
         .api files validate unchanged, AND
     (b) the .apiext extension used by AjaxSlim, which adds per-element/per-binding documentation, typed
-        bindings, framework tags, and an element-level passthrough flag.
+        bindings, and an element-level passthrough flag.
   It is intended as a working contract for tooling (e.g. a WOLips fork) that reads a document validated
   against this DTD and renders a tag's API preview from it. Everything needed for that preview is
   declarable here.
@@ -40,9 +40,9 @@
   EXTENSION attribute: passthrough — "true" if the element forwards attributes it does not itself handle
   onto the rendered tag (the .apiext element-level passthrough flag).
   Children: WO allows binding/validation/documentation; EXTENSION adds doc (element role/description,
-  may contain Markdown in CDATA) and tags (framework categorization).
+  may contain Markdown in CDATA).
 -->
-<!ELEMENT wo (#PCDATA | binding | validation | documentation | doc | tags)*>
+<!ELEMENT wo (#PCDATA | binding | validation | documentation | doc)*>
 <!ATTLIST wo class               CDATA #IMPLIED>
 <!ATTLIST wo wocomponentcontent  CDATA #IMPLIED>
 <!ATTLIST wo passthrough         CDATA #IMPLIED>  <!-- EXTENSION -->
@@ -72,11 +72,6 @@
      may contain a Markdown subset (inline `code`, **bold**, *italic*, [links](), fenced code blocks),
      typically wrapped in CDATA so the Markdown's own characters don't need XML escaping. -->
 <!ELEMENT doc (#PCDATA)>
-
-<!-- EXTENSION: framework categorization tags (e.g. update / widget / server / trigger). The tag VALUE is
-     portable; how a tool renders it (badge colour/label) is the tool's concern. -->
-<!ELEMENT tags (#PCDATA | tag)*>
-<!ELEMENT tag (#PCDATA)>
 
 <!-- ============================ validation (WO) ============================ -->
 

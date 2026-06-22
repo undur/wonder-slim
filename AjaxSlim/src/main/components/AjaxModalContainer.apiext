@@ -10,10 +10,6 @@
 </wo:AjaxModalContainer>
 ```]]></doc>
 
-		<tags>
-			<tag>update</tag>
-		</tags>
-
 		<binding name="label">
 			<type>java.lang.String</type>
 			<doc>The text on the trigger button.</doc>

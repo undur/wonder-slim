@@ -9,10 +9,6 @@
 <wo:AjaxUpdateTrigger updateContainerID="summaryPanel"/>
 ```]]></doc>
 
-		<tags>
-			<tag>server</tag>
-		</tags>
-
 		<binding name="updateContainerID">
 			<type>java.lang.String</type>
 			<type>java.util.List</type>

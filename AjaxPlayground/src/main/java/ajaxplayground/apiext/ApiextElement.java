@@ -17,7 +17,7 @@ import com.webobjects.foundation.NSArray;
 
 /**
  * The parsed model of one element's {@code .apiext} file - the extended API format that carries
- * everything the hand-written HTML element reference shows (role, per-binding types + docs, tags,
+ * everything the hand-written HTML element reference shows (role, per-binding types + docs,
  * passthrough, validations), on top of the structural {@code .api} payload.
  * <p>
  * This is a display-first model: the reference page renders from it. It is read by name + framework
@@ -66,7 +66,6 @@ public class ApiextElement {
 	public String className;
 	public boolean passthrough;
 	public String doc;
-	public final List<String> tags = new ArrayList<>();
 	public final List<Binding> bindings = new ArrayList<>();
 	public final List<Validation> validations = new ArrayList<>();
 
@@ -75,7 +74,6 @@ public class ApiextElement {
 	public String doc() { return doc; }
 	/** The element doc rendered from the Markdown subset to safe HTML (paragraphs + fenced code samples). */
 	public String docHtml() { return Markdown.toHtml(doc); }
-	public List<String> tags() { return tags; }
 	public List<Binding> bindings() { return bindings; }
 	public List<Validation> validations() { return validations; }
 	public boolean hasValidations() { return !validations.isEmpty(); }
@@ -113,13 +111,6 @@ public class ApiextElement {
 		out.className = wo.getAttribute("class");
 		out.passthrough = "true".equals(wo.getAttribute("passthrough"));
 		out.doc = textOf(firstChildElement(wo, "doc"));
-
-		Element tagsEl = firstChildElement(wo, "tags");
-		if (tagsEl != null) {
-			for (Element t : childElements(tagsEl, "tag")) {
-				out.tags.add(textOf(t));
-			}
-		}
 
 		for (Element b : childElements(wo, "binding")) {
 			Binding binding = new Binding();

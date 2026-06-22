@@ -12,10 +12,6 @@
 <wo:AjaxUpdateLink action="$reload" updateContainerID="detail">Reload</wo:AjaxUpdateLink>
 ```]]></doc>
 
-		<tags>
-			<tag>update</tag>
-		</tags>
-
 		<binding name="id">
 			<type>java.lang.String</type>
 			<doc>The DOM id of the container (defaults to a safe generated element id). This is the id other elements target.</doc>

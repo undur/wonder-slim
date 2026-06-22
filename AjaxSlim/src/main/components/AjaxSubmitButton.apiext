@@ -8,10 +8,6 @@
 <wo:AjaxSubmitButton action="$save" updateContainerID="result" value="Save"/>
 ```]]></doc>
 
-		<tags>
-			<tag>update</tag>
-		</tags>
-
 		<binding name="action">
 			<type>com.webobjects.appserver.WOActionResults</type>
 			<doc>The action to execute when the button is pressed.</doc>

@@ -8,10 +8,6 @@
 <wo:AjaxBusySpinner/>
 ```]]></doc>
 
-		<tags>
-			<tag>trigger</tag>
-		</tags>
-
 		<binding name="id">
 			<type>java.lang.String</type>
 			<doc>Optional id for the spinner element.</doc>
