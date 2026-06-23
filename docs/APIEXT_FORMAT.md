@@ -103,6 +103,35 @@ For preview: show the pull type by default; for a two-way binding render both (e
 surface the direction lightly — AjaxSlim's reference page uses `↓` (pull), `↑` (push), `↕` (two-way), with
 the writeable case highlighted so it stands out.
 
+#### Worked example: a binding whose type differs by direction
+
+A complete illustrative file lives at [`examples/WOTextField.apiext`](./examples/WOTextField.apiext) — not
+a shipping element, but the canonical demonstration (no AjaxSlim element has a real type split, since they
+are update/widget/server elements rather than plain inputs).
+
+The canonical case is a text field's `value`. It **pulls** whatever object you bind (to render it as text)
+but **pushes** back a `java.lang.String` — the raw text the user typed. The two types are genuinely
+different, which is the whole reason `<type>` lives *inside* `<pull>`/`<push>` rather than on the binding:
+
+```xml
+<binding name="value" required="true">
+  <pull><type>java.lang.Object</type></pull>   <!-- reads any object, renders its toString() -->
+  <push><type>java.lang.String</type></push>   <!-- writes back the typed text -->
+  <doc>The field's value: any object is displayed; the user's input is pushed back as a String.</doc>
+</binding>
+```
+
+How a consumer renders that one binding (this is what the reference page / IDE tooltip produces):
+
+| Binding | Type | Description |
+|---|---|---|
+| `value` • | `↕ Object → String` | The field's value: any object is displayed; the user's input is pushed back as a String. |
+
+The `↕` marks it two-way and the `Object → String` shows the pull type resolving to a different push type —
+the at-a-glance signal that *what you bind* and *what comes back* are not the same shape. Contrast a
+pull-only binding, which shows just `↓ String` (one type, read-only), and a same-type two-way binding (like
+a pop-up's `selection`), which shows `↕ Object` (two-way, but no split because pull and push types match).
+
 ### Validation — `<validation>`
 
 A cross-binding rule: `message` plus a predicate tree. When the predicates hold, the message applies.

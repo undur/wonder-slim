@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ILLUSTRATIVE EXAMPLE - not a shipping element, not normative.
+
+  WOTextField is the canonical case for the .apiext <pull>/<push> directionality split: its `value`
+  binding PULLS any java.lang.Object (rendered as text) but PUSHES back a java.lang.String (the raw text
+  the user typed). The two types genuinely differ, which is the whole reason <type> lives INSIDE
+  <pull>/<push> rather than directly on <binding>.
+
+  This file exists so the format's headline feature has a concrete, validating demonstration - something
+  the reference page / IDE preview can render to show the "Object -> String" split and the two-way (the
+  glyph). No AjaxSlim element exercises a real type split (they are update/widget/server elements, not
+  plain text inputs), so this stands in for it. See docs/APIEXT_FORMAT.md, "Directionality".
+-->
+<wodefinitions>
+	<wo class="WOTextField" wocomponentcontent="false">
+
+		<doc><![CDATA[A single-line text input. Displays the bound `value` as text and pushes the user's edited text back. The textbook *type-differs-by-direction* binding.]]></doc>
+
+		<binding name="value" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.String</type></push>
+			<doc>The field's value. Any object is **pulled** and rendered as text (via its `toString`/formatter); the user's input is **pushed** back as a `java.lang.String`.</doc>
+		</binding>
+
+		<binding name="formatter">
+			<pull><type>com.webobjects.foundation.NSFormatter</type></pull>
+			<doc>An optional formatter applied when displaying `value` and parsing the typed text back.</doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The HTML form-field name.</doc>
+		</binding>
+
+		<binding name="disabled" defaults="Boolean">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>Renders the `disabled` attribute when true.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>
