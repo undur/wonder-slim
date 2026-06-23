@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.webobjects.appserver.WOContext;
 
+import er.extensions.appserver.ERXApplication;
 import ajaxplayground.apiext.ApiextElement;
 
 /**
@@ -43,6 +44,16 @@ public class AjaxSlimElementReference extends PlaygroundPage {
 		ELEMENT_TAGS.put( "AjaxSortable", List.of() );
 	}
 
+	/**
+	 * Non-AjaxSlim WO elements used ONLY to exercise / preview .apiext format features that no real
+	 * AjaxSlim element happens to demonstrate - the directionality type-split (WOCheckBox: pulls a truthy
+	 * Object, pushes a Boolean), the truthy interpretation (WOConditional), and the "push type is honestly
+	 * Object because a formatter decides it" case (WOTextField). They are illustrative fixtures, not
+	 * AjaxSlim elements, so they render only in development mode and ship as .apiext files in THIS
+	 * (playground) bundle, not in the AjaxSlim framework. The canonical copies live in docs/examples/.
+	 */
+	private static final List<String> DEV_EXAMPLE_ELEMENTS = List.of( "WOCheckBox", "WOConditional", "WOTextField" );
+
 	private ApiextElement currentElement;
 	private ApiextElement.Binding currentBinding;
 	private ApiextElement.Validation currentValidation;
@@ -59,6 +70,15 @@ public class AjaxSlimElementReference extends PlaygroundPage {
 			ApiextElement el = ApiextElement.load( name, "AjaxSlim" );
 			if ( el != null ) {
 				out.add( el );
+			}
+		}
+		// Dev-only: append the format-feature example fixtures (from this bundle, not AjaxSlim).
+		if ( ERXApplication.isDevelopmentModeSafe() ) {
+			for ( String name : DEV_EXAMPLE_ELEMENTS ) {
+				ApiextElement el = ApiextElement.load( name, "AjaxPlayground" );
+				if ( el != null ) {
+					out.add( el );
+				}
 			}
 		}
 		return out;
@@ -90,16 +110,6 @@ public class AjaxSlimElementReference extends PlaygroundPage {
 		return currentBinding != null && currentBinding.required;
 	}
 
-	/**
-	 * CSS class for the current binding's direction arrow. Pull-only (the norm) is faint so it recedes;
-	 * anything that pushes is highlighted, since a writeable binding is the notable, easy-to-miss case.
-	 */
-	public String currentBindingDirectionClass() {
-		if ( currentBinding != null && currentBinding.pushes() ) {
-			return "dir dir-push";
-		}
-		return "dir dir-pull";
-	}
 
 	// --- tag -> badge mapping (framework-specific presentation of the portable tag value) ------------
 

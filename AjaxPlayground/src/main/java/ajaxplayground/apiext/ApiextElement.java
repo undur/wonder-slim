@@ -26,14 +26,34 @@ import com.webobjects.foundation.NSArray;
  */
 public class ApiextElement {
 
+	/**
+	 * One accepted type for a binding: a fully-qualified Java class (the validatable constraint) plus an
+	 * optional interpretation (a reading rule that does NOT change the type, e.g. "truthy"). The
+	 * interpretation is shown as a qualifier - e.g. "Object (truthy)" - but validation uses the class.
+	 */
+	public static class Type {
+		public final String fqn;
+		public final String interpretation; // null, or e.g. "truthy"
+
+		public Type(String fqn, String interpretation) {
+			this.fqn = fqn;
+			this.interpretation = interpretation;
+		}
+
+		/** Short class name + interpretation qualifier, e.g. "String", "Object (truthy)". */
+		public String display() {
+			int dot = fqn == null ? -1 : fqn.lastIndexOf('.');
+			String shortName = (fqn == null) ? "" : (dot == -1 ? fqn : fqn.substring(dot + 1));
+			return (interpretation == null || interpretation.isEmpty()) ? shortName : shortName + " (" + interpretation + ")";
+		}
+	}
+
 	public static class Binding {
 		public String name;
-		/** Direction-agnostic types declared directly under <binding> (the simple/legacy .api shape). */
-		public final List<String> types = new ArrayList<>();
 		/** Types the binding PULLS (reads/displays). Presence => the binding is read. */
-		public final List<String> pullTypes = new ArrayList<>();
+		public final List<Type> pullTypes = new ArrayList<>();
 		/** Types the binding PUSHES (writes back). Presence => the binding is written. */
-		public final List<String> pushTypes = new ArrayList<>();
+		public final List<Type> pushTypes = new ArrayList<>();
 		public String doc;
 		public boolean required;
 		public String defaults;
@@ -45,6 +65,7 @@ public class ApiextElement {
 
 		public boolean pulls() { return !pullTypes.isEmpty(); }
 		public boolean pushes() { return !pushTypes.isEmpty(); }
+		public boolean hasDirection() { return pulls() || pushes(); }
 
 		/** Pull type(s), shortened + joined (e.g. "String | List"). */
 		public String displayPullType() { return shortJoin(pullTypes); }
@@ -52,58 +73,70 @@ public class ApiextElement {
 		public String displayPushType() { return shortJoin(pushTypes); }
 
 		/**
-		 * The type to show in the binding table's Type column. Prefers the directional types: a pull-only
-		 * binding shows its pull type, a push-only its push type, a two-way binding whose pull and push
-		 * types match shows that one (the common case), and a true split shows "Object → String". Falls
-		 * back to direction-agnostic &lt;type&gt; for legacy/.api bindings.
+		 * True when the binding is two-way AND its pull and push types differ (e.g. pulls Object, pushes
+		 * String). The renderer shows a split like this as two stacked rows (↓ pull / ↑ push) instead of
+		 * the single-glyph form, which gets confusing once the types are long or multi-valued.
+		 */
+		public boolean typeSplit() {
+			return pulls() && pushes() && !displayPullType().equals(displayPushType());
+		}
+
+		/**
+		 * The single-row type display: the directional type when one suffices (pull-only, push-only, or a
+		 * two-way binding whose pull and push types match). NOT used for the split case -
+		 * {@link #typeSplit()} drives the two-row form there.
 		 */
 		public String displayType() {
 			String pull = displayPullType();
-			String push = displayPushType();
-			if (!pull.isEmpty() && !push.isEmpty()) {
-				return pull.equals(push) ? pull : pull + " → " + push;
-			}
-			if (!pull.isEmpty()) { return pull; }
-			if (!push.isEmpty()) { return push; }
-			return shortJoin(types);
+			return !pull.isEmpty() ? pull : displayPushType();  // same-type two-way resolves via pull (pull==push)
 		}
 
-		/** A short directionality label, e.g. "pull", "push", "pull / push", or "" if unknown. */
-		public String directionLabel() {
-			if (pulls() && pushes()) { return "pull / push"; }
-			if (pulls()) { return "pull"; }
-			if (pushes()) { return "push"; }
+		// --- direction markers (shared by the single-glyph form and the per-row split form) -----------
+
+		/** The whole-binding arrow: ↕ two-way, ↓ pull-only, ↑ push-only, "" if unknown. */
+		public String directionArrow() { return arrowFor(pulls(), pushes()); }
+		/** The whole-binding marker CSS class (colour by behaviour: push=orange, both=red, pull=faint). */
+		public String directionClass() { return classFor(pulls(), pushes()); }
+		/** Hover text spelling out the whole-binding direction. */
+		public String directionTitle() { return titleFor(pulls(), pushes()); }
+
+		/** Per-row markers for the split form: the pull row (↓, faint) ... */
+		public String pullArrow() { return arrowFor(true, false); }
+		public String pullClass() { return classFor(true, false); }
+		public String pullTitle() { return titleFor(true, false); }
+		/** ... and the push row (↑, orange). */
+		public String pushArrow() { return arrowFor(false, true); }
+		public String pushClass() { return classFor(false, true); }
+		public String pushTitle() { return titleFor(false, true); }
+
+		private static String arrowFor(boolean pull, boolean push) {
+			if (pull && push) { return "↕"; } // ↕
+			if (pull)         { return "↓"; } // ↓
+			if (push)         { return "↑"; } // ↑
 			return "";
 		}
 
-		/** An arrow glyph for the direction: ↓ pulled (read), ↑ pushed (written), ↕ both, "" if unknown. */
-		public String directionArrow() {
-			if (pulls() && pushes()) { return "↕"; } // ↕
-			if (pulls()) { return "↓"; }             // ↓
-			if (pushes()) { return "↑"; }            // ↑
-			return "";
+		private static String classFor(boolean pull, boolean push) {
+			if (pull && push) { return "dir dir-both"; } // two-way: most notable (red)
+			if (push)         { return "dir dir-push"; } // writes back: notable (orange)
+			return "dir dir-pull";                       // read-only: the safe norm (faint)
 		}
 
-		/** Hover/title text spelling out the direction (so the glyph is self-explaining). */
-		public String directionTitle() {
-			if (pulls() && pushes()) { return "Two-way: pulled (read) and pushed (written back)"; }
-			if (pulls()) { return "Pulled (read by the element)"; }
-			if (pushes()) { return "Pushed (written back by the element)"; }
-			return "";
+		private static String titleFor(boolean pull, boolean push) {
+			if (pull && push) { return "Two-way: pulled (read) and pushed (written back)"; }
+			if (push)         { return "Pushed (written back by the element)"; }
+			return "Pulled (read by the element)";
 		}
 
-		public boolean hasDirection() { return pulls() || pushes(); }
-
-		private static String shortJoin(List<String> fqns) {
-			if (fqns.isEmpty()) {
+		private static String shortJoin(List<Type> typeList) {
+			if (typeList.isEmpty()) {
 				return "";
 			}
-			List<String> shortNames = new ArrayList<>();
-			for (String t : fqns) {
-				int dot = t.lastIndexOf('.');
-				shortNames.add(dot == -1 ? t : t.substring(dot + 1));
+			List<String> rendered = new ArrayList<>();
+			for (Type t : typeList) {
+				rendered.add(t.display());
 			}
-			return String.join(" | ", shortNames);
+			return String.join(" | ", rendered);
 		}
 	}
 
@@ -172,21 +205,17 @@ public class ApiextElement {
 			binding.name = b.getAttribute("name");
 			binding.required = "true".equals(b.getAttribute("required"));
 			binding.defaults = b.hasAttribute("defaults") ? b.getAttribute("defaults") : null;
-			// Direction-agnostic types directly under <binding> (legacy/.api shape).
-			for (Element ty : childElements(b, "type")) {
-				binding.types.add(textOf(ty));
-			}
-			// Directional types: <pull>/<push> blocks, each holding <type>(s).
+			// Types live in <pull>/<push> blocks (a type always has a direction).
 			Element pull = firstChildElement(b, "pull");
 			if (pull != null) {
 				for (Element ty : childElements(pull, "type")) {
-					binding.pullTypes.add(textOf(ty));
+					binding.pullTypes.add(typeOf(ty));
 				}
 			}
 			Element push = firstChildElement(b, "push");
 			if (push != null) {
 				for (Element ty : childElements(push, "type")) {
-					binding.pushTypes.add(textOf(ty));
+					binding.pushTypes.add(typeOf(ty));
 				}
 			}
 			binding.doc = textOf(firstChildElement(b, "doc"));
@@ -236,5 +265,11 @@ public class ApiextElement {
 		}
 		String t = el.getTextContent();
 		return t == null ? null : t.strip();
+	}
+
+	/** Build a Type from a <type> element: its text is the FQN, its optional `interpretation` the rule. */
+	private static Type typeOf(Element ty) {
+		String interp = ty.hasAttribute("interpretation") ? ty.getAttribute("interpretation") : null;
+		return new Type(textOf(ty), interp);
 	}
 }

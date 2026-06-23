@@ -61,6 +61,7 @@ stuff at this stage" stance.
 | `required` | ✅ have it |
 | Cross-binding rules (`<validation>`) | ✅ have it |
 | Directionality (pull / push / both) | ✅ have it — `<pull>`/`<push>` blocks; presence = direction; type can differ per direction |
+| Value interpretation (e.g. truthiness) | ✅ have it — `<type interpretation="truthy">`; rides alongside the type without changing it (validation uses the type) |
 | Default values (`<default>`) | 🔲 not in format |
 | Deprecation (with migration docs) | 🔲 not in format |
 | Allowed value-sets (enum-style, `<values-from>`) | 🔲 not in format (`defaults` is WO's hardcoded version) |

@@ -76,7 +76,7 @@ guaranteed parseable by a conforming consumer.
 | `defaults` | `.api` | WO autocomplete-preset string (e.g. `Boolean`, `Actions`, `Page Names`). |
 | `passthrough` | `.api` | Present in WO's vocabulary; per-binding pass-through flag. |
 | `<pull>` / `<push>` | **.apiext** | **Directionality** — see below. Each holds the `<type>`(s) for that direction. Their *presence* declares the direction. |
-| `<type>` (repeatable) | **.apiext** | Accepted type(s): a fully-qualified Java class (`java.lang.String`) or a value-set name. Lives inside `<pull>`/`<push>` (direction-specific), or directly under `<binding>` for the legacy/direction-agnostic case. Multiple = the accepted set (render shortened + joined, e.g. `String \| List`). |
+| `<type>` (repeatable) | **.apiext** | Accepted type(s): a fully-qualified Java class (`java.lang.String`) or a value-set name. **Always** inside a `<pull>`/`<push>` block — never a direct child of `<binding>` — so a declared type always has a direction. Multiple = the accepted set (render shortened + joined, e.g. `String \| List`). Optional `interpretation` attribute (see below). |
 | `<doc>` | **.apiext** | The binding's description (Markdown subset). |
 
 ### Directionality — `<pull>` / `<push>`
@@ -99,38 +99,62 @@ authoring/display facts (value-sets, default values) stay on `<binding>` — a v
 against a *pushed* value (you only know its type, not its value), so per-direction value-sets would buy
 nothing.
 
-For preview: show the pull type by default; for a two-way binding render both (e.g. `Object → String`), and
-surface the direction lightly — AjaxSlim's reference page uses `↓` (pull), `↑` (push), `↕` (two-way), with
-the writeable case highlighted so it stands out.
+For preview, surface the direction lightly. AjaxSlim's reference page uses `↓` (pull), `↑` (push), `↕`
+(two-way), and:
+
+- **single type** (pull-only, push-only, or a two-way binding whose pull/push types **match**) → one row,
+  e.g. `↓ String`, `↑ Boolean`, `↕ Object`.
+- **a true split** (two-way with **different** pull/push types) → **two rows**, `↓ pullType` over
+  `↑ pushType` — clearer than an inline `→`, especially once types are long or multi-valued.
+
+Colour the markers by behaviour (the glyphs are thin, so the colour needs to be saturated): pull faint,
+**push orange**, **two-way red** — the writeable cases stand out.
 
 #### Worked example: a binding whose type differs by direction
 
-A complete illustrative file lives at [`examples/WOTextField.apiext`](./examples/WOTextField.apiext) — not
-a shipping element, but the canonical demonstration (no AjaxSlim element has a real type split, since they
-are update/widget/server elements rather than plain inputs).
-
-The canonical case is a text field's `value`. It **pulls** whatever object you bind (to render it as text)
-but **pushes** back a `java.lang.String` — the raw text the user typed. The two types are genuinely
-different, which is the whole reason `<type>` lives *inside* `<pull>`/`<push>` rather than on the binding:
+The cleanest real case is a checkbox's `checked` (see [`examples/WOCheckBox.apiext`](./examples/WOCheckBox.apiext)
+— an illustrative file, not a shipping element; no AjaxSlim element happens to have a genuine split). It
+**pulls** any object read by *truthiness* (to decide the initial checked state) and **pushes** a hard
+`java.lang.Boolean` (the state the user left it in):
 
 ```xml
-<binding name="value" required="true">
-  <pull><type>java.lang.Object</type></pull>   <!-- reads any object, renders its toString() -->
-  <push><type>java.lang.String</type></push>   <!-- writes back the typed text -->
-  <doc>The field's value: any object is displayed; the user's input is pushed back as a String.</doc>
+<binding name="checked">
+  <pull><type interpretation="truthy">java.lang.Object</type></pull>
+  <push><type>java.lang.Boolean</type></push>
 </binding>
 ```
 
-How a consumer renders that one binding (this is what the reference page / IDE tooltip produces):
+Rendered as two rows (this is what the reference page / IDE tooltip produces):
 
 | Binding | Type | Description |
 |---|---|---|
-| `value` • | `↕ Object → String` | The field's value: any object is displayed; the user's input is pushed back as a String. |
+| `checked` | `↓ Object (truthy)`<br/>`↑ Boolean` | Pulled by truthiness to decide the initial state; pushed back as a Boolean. |
 
-The `↕` marks it two-way and the `Object → String` shows the pull type resolving to a different push type —
-the at-a-glance signal that *what you bind* and *what comes back* are not the same shape. Contrast a
-pull-only binding, which shows just `↓ String` (one type, read-only), and a same-type two-way binding (like
-a pop-up's `selection`), which shows `↕ Object` (two-way, but no split because pull and push types match).
+The split shows at a glance that *what you bind* (any value, read as a boolean) and *what comes back* (a
+`Boolean`) are not the same shape. Contrast a pull-only binding (`↓ String`) and a same-type two-way one
+(`↕ Object`), which stay on a single row.
+
+### Interpretation — `<type interpretation="...">`
+
+Some bindings read a value through a **coercion rule** rather than by its type. The classic case is
+truthiness: `WOConditional`'s `condition` accepts *any* value but reads it as a boolean — `null`, the
+number `0`, and `false` are false; everything else is true. That rule is **not a type** (the binding isn't
+"a Boolean"; it's "anything, read as a boolean").
+
+The optional `interpretation` attribute on `<type>` names that rule **without changing the type**:
+
+```xml
+<pull><type interpretation="truthy">java.lang.Object</type></pull>
+```
+
+- **The type stays the real, validatable constraint** — `Object` here means "accepts anything", which is
+  the honest, enforceable claim. A validator uses the type and ignores the interpretation.
+- **The interpretation is documentation** — shown as a qualifier, e.g. `Object (truthy)`, telling the
+  author *how* the value is read. The only value today is `truthy`.
+
+This keeps validation honest (always a real type) while surfacing the human-facing "how it's interpreted"
+signal — the same discipline as everywhere else: the validatable thing stays clean, the editorial nuance
+is additive.
 
 ### Validation — `<validation>`
 
@@ -177,5 +201,6 @@ For the record, AjaxSlim's reference page categorizes its elements like so (this
 WO ships `com/webobjects/appserver/WebObjectsDefinitions.dtd`. `apiext.dtd` keeps that vocabulary verbatim
 (`wodefinitions`/`wo`/`binding`/`validation`/`and`/`or`/`count`/`bound`/`unbound`/`ungettable`/
 `unsettable`/`documentation`) and adds only the `.apiext` items above (`passthrough` on `<wo>`; `<doc>`
-under `<wo>`; `<type>`, `<doc>`, `<pull>`, `<push>` under `<binding>`). So every existing `.api` validates
-unchanged, and the extension is additive.
+under `<wo>`; `<doc>`, `<pull>`, `<push>` under `<binding>`; `<type>` — with an optional `interpretation`
+attribute — inside `<pull>`/`<push>`). So every existing `.api` validates unchanged (they carry no
+`.apiext` children), and the extension is additive.

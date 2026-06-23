@@ -25,9 +25,16 @@
 		table.bindings td { padding: .35rem .5rem; border-bottom: 1px solid #f2f2f2; vertical-align: top; }
 		table.bindings td.b-name { white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #1a4f8a; font-size: .88rem; }
 		table.bindings td.b-type { white-space: nowrap; color: #888; font-size: .82rem; font-family: ui-monospace, monospace; }
-		.dir { font-family: sans-serif; cursor: help; margin-right: .15rem; }
-		.dir-pull { color: #c2c8d0; }                 /* pull-only: faint, recedes (it's the norm) */
-		.dir-push { color: #1c7e3f; font-weight: 700; } /* pushes: highlighted (the notable, writeable case) */
+		/* Directionality markers. The glyphs are thin, so behaviour-changing directions get FLASHY,
+		   saturated colours + bold weight so the colour reads at a glance:
+		     pull (read-only, the norm) -> faint grey, recedes
+		     push (writes back)         -> orange (a change in behaviour)
+		     both (two-way)             -> red (the most notable; not alarm-red) */
+		.dir { font-family: sans-serif; cursor: help; margin-right: .2rem; font-weight: 700; }
+		.dir-pull { color: #c2c8d0; font-weight: 400; } /* read-only: quiet */
+		.dir-push { color: #e8730c; }                   /* writes back: orange */
+		.dir-both { color: #e0142b; }                   /* two-way: red */
+		.dir-row { white-space: nowrap; line-height: 1.5; }  /* a split type stacks pull / push on two rows */
 		/* Markdown wraps a doc in <p>; zero the first/last margins so a one-paragraph description aligns
 		   with the name/type cells (which hold bare text), while multi-paragraph docs keep their spacing. */
 		table.bindings td p { margin: 0; }
@@ -56,7 +63,7 @@
 		<br/>
 		A <span class="req">&bull;</span> marks a required binding.
 		<br/>
-		On a binding's type, <span class="dir dir-pull">↓</span> = pulled (read), <span class="dir dir-push">↕</span> = two-way (read &amp; written back); a writeable binding stands out.
+		On a binding's type: <span class="dir dir-pull">↓</span> pulled (read), <span class="dir dir-push">↑</span> pushed (written back), <span class="dir dir-both">↕</span> two-way. A binding whose pulled and pushed types differ shows them on two rows.
 	</div>
 
 	<div class="toc">
@@ -84,7 +91,7 @@
 					<wo:repetition list="$currentElement.bindings" item="$currentBinding">
 						<tr>
 							<td class="b-name"><wo:str value="$currentBinding.name" /><wo:if condition="$currentBindingRequired"> <span class="req">&bull;</span></wo:if></td>
-							<td class="b-type"><wo:if condition="$currentBinding.hasDirection"><wo:container elementName="span" class="$currentBindingDirectionClass" title="$currentBinding.directionTitle"><wo:str value="$currentBinding.directionArrow" /></wo:container> </wo:if><wo:str value="$currentBinding.displayType" /></td>
+							<td class="b-type"><wo:if condition="$currentBinding.typeSplit"><div class="dir-row"><wo:container elementName="span" class="$currentBinding.pullClass" title="$currentBinding.pullTitle"><wo:str value="$currentBinding.pullArrow" /></wo:container> <wo:str value="$currentBinding.displayPullType" /></div><div class="dir-row"><wo:container elementName="span" class="$currentBinding.pushClass" title="$currentBinding.pushTitle"><wo:str value="$currentBinding.pushArrow" /></wo:container> <wo:str value="$currentBinding.displayPushType" /></div></wo:if><wo:if condition="$currentBinding.typeSplit" negate="$true"><wo:if condition="$currentBinding.hasDirection"><wo:container elementName="span" class="$currentBinding.directionClass" title="$currentBinding.directionTitle"><wo:str value="$currentBinding.directionArrow" /></wo:container> </wo:if><wo:str value="$currentBinding.displayType" /></wo:if></td>
 							<td><wo:str value="$currentBinding.docHtml" escapeHTML="$false" /></td>
 						</tr>
 					</wo:repetition>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ILLUSTRATIVE EXAMPLE - not a shipping element, not normative.
+
+  WOConditional is the canonical case for the `interpretation="truthy"` marker. Its `condition` binding
+  accepts ANY value (so its type is honestly java.lang.Object - the validatable constraint), but the value
+  is READ AS A BOOLEAN by the truthiness rule: null, the number 0, and Boolean false are false; every
+  other value is true. That reading rule is not a type - it rides alongside the type as an interpretation,
+  shown as a qualifier ("Object (truthy)"). See docs/APIEXT_FORMAT.md, "Interpretation".
+-->
+<wodefinitions>
+	<wo class="WOConditional" wocomponentcontent="true">
+
+		<doc><![CDATA[Renders its content only when `condition` is **truthy**. The textbook *value-read-as-boolean* element.]]></doc>
+
+		<binding name="condition" required="true">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc>The condition. Read by **truthiness**: `null`, the number `0`, and `false` are false; every other value (a non-empty object, a non-zero number, a bound EO, …) is true. Validation only knows it accepts any `Object`; the truthiness reading is interpretation, not type.</doc>
+		</binding>
+
+		<binding name="negate" defaults="Boolean">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc>If truthy, flips the `condition` — content renders when the condition is *false*.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>
