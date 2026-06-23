@@ -12,7 +12,7 @@
   docs/APIEXT_FORMAT.md, "Directionality" and the known-limitation note.
 -->
 <wodefinitions>
-	<wo class="WOTextField" wocomponentcontent="false">
+	<wo class="WOTextField" wocomponentcontent="false" passthrough="true">
 
 		<doc><![CDATA[A single-line text input. Displays the bound `value` and pushes the user's edited input back — coerced by the bound formatter, if any.]]></doc>
 

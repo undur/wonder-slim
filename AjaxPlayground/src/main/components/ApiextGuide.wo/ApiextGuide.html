@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>.apiext — extended element-API format</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 0; color: #1a1a1a; line-height: 1.5; }
+		.wrap { max-width: 64rem; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		h2 { margin-top: 2.6rem; border-bottom: 1px solid #ddd; padding-bottom: .25rem; color: #2b3a55; }
+		h3 { margin: 1.8rem 0 .4rem; font-size: 1.05rem; color: #2b3a55; }
+		.lead { color: #555; } .muted { color: #999; }
+		code { background: #f4f4f4; padding: .05rem .3rem; border-radius: 3px; font-size: .9em; }
+		a { color: #2b6cb0; text-decoration: none; } a:hover { text-decoration: underline; }
+		ul { margin: .5rem 0; } li { margin: .35rem 0; }
+		pre.code { background: #f7f8fa; border: 1px solid #e6e8ec; border-left: 3px solid #2b6cb0; border-radius: 0 5px 5px 0; padding: .7rem .9rem; margin: .7rem 0; overflow-x: auto; font-size: .85rem; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+		pre.code .cmt { color: #8a97a5; }
+		pre.code .ext { color: #1a7431; font-weight: 700; }
+		table.t { width: 100%; border-collapse: collapse; margin: .6rem 0; font-size: .92rem; }
+		table.t th { text-align: left; color: #777; font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; border-bottom: 2px solid #eee; padding: .3rem .5rem; }
+		table.t td { padding: .35rem .5rem; border-bottom: 1px solid #f2f2f2; vertical-align: top; }
+		table.t td.k { white-space: nowrap; font-family: ui-monospace, Menlo, monospace; color: #1a4f8a; font-size: .85rem; }
+		.have { color: #1a7431; } .want { color: #9a5b17; }
+		.arrow-pull { color: #c2c8d0; font-weight: 700; }
+		.arrow-push { color: #e8730c; font-weight: 700; }
+		.arrow-both { color: #e0142b; font-weight: 700; }
+	</style>
+</head>
+<body>
+<div class="wrap">
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>.apiext — extended element-API format</h1>
+	<p class="lead">A superset of WebObjects' <code>.api</code> format adding per-element and per-binding documentation, binding types, directionality, and value interpretation — enough to render an element's API in an editor. Proposal stage; in use here. The <a href="/element-reference">element reference</a> renders entirely from <code>.apiext</code> files.</p>
+
+	<p>The current/old <code>.api</code> declares an element's bindings — names, a few flags, cross-binding validation — and nothing about what a binding means, its type, or its direction. <code>.apiext</code> adds that as a strict superset: existing <code>.api</code> files validate unchanged, and the new information is additive. The WO runtime does not read <code>.api</code>; only tooling does (WOLips, Parslips), so a successor format is constrained only by "don't break existing files".</p>
+
+	<h2>Format</h2>
+	<p>Same skeleton as <code>.api</code> (<code>&lt;wodefinitions&gt;</code> / <code>&lt;wo&gt;</code> / <code>&lt;binding&gt;</code> / <code>&lt;validation&gt;</code>); extensions in <span style="color:#1a7431;font-weight:700">green</span>:</p>
+<pre class="code">&lt;wodefinitions&gt;
+  &lt;wo class="WOCheckBox" wocomponentcontent="false"<span class="ext"> passthrough="true"</span>&gt;
+
+    <span class="ext">&lt;doc&gt;&lt;![CDATA[A checkbox. Use **either** `checked` or `value`+`selection`.]]&gt;&lt;/doc&gt;</span>
+
+    &lt;binding name="checked"&gt;
+      <span class="ext">&lt;pull&gt;&lt;type interpretation="truthy"&gt;java.lang.Object&lt;/type&gt;&lt;/pull&gt;</span>
+      <span class="ext">&lt;push&gt;&lt;type&gt;java.lang.Boolean&lt;/type&gt;&lt;/push&gt;</span>
+      <span class="ext">&lt;doc&gt;The checked state.&lt;/doc&gt;</span>
+    &lt;/binding&gt;
+
+    &lt;validation message="A WOCheckBox uses either 'checked' or 'value', not both."&gt;
+      &lt;bound name="checked"/&gt; &lt;bound name="value"/&gt;
+    &lt;/validation&gt;
+
+  &lt;/wo&gt;
+&lt;/wodefinitions&gt;</pre>
+
+	<h3>Documentation</h3>
+	<p>Each element and binding may carry a <code>&lt;doc&gt;</code>. Bodies use an injection-safe Markdown subset (inline <code>`code`</code>, <code>**bold**</code>, <code>*italic*</code>, links, fenced code blocks); a plain consumer can show the raw text.</p>
+
+	<h3>Types</h3>
+	<p>A binding declares one or more <code>&lt;type&gt;</code> — a fully-qualified Java class (or, later, a value-set name). Multiple types mean "accepts any of these" (e.g. <code>updateContainerID</code>: <code>String</code> or <code>List</code>). Intended for validation, not only display.</p>
+
+	<h3>Directionality — <code>&lt;pull&gt;</code> / <code>&lt;push&gt;</code></h3>
+	<p>A binding's type can differ by direction: a checkbox's <code>checked</code> pulls any value (read as a boolean) and pushes back a <code>Boolean</code>. The type lives inside a direction block; the presence of <code>&lt;pull&gt;</code>/<code>&lt;push&gt;</code> declares the direction (no separate <code>direction=</code> attribute).</p>
+	<ul>
+		<li><span class="arrow-pull">&#8595;</span> <code>&lt;pull&gt;</code> → read.</li>
+		<li><span class="arrow-push">&#8593;</span> <code>&lt;push&gt;</code> → written back.</li>
+		<li><span class="arrow-both">&#8597;</span> both → two-way.</li>
+	</ul>
+	<p>Only type is direction-specific; name, doc, and required stay on the binding. A <code>&lt;type&gt;</code> is always inside a direction block, never a direct child of <code>&lt;binding&gt;</code>.</p>
+
+	<h3>Interpretation — <code>interpretation="truthy"</code></h3>
+	<p>Some bindings read a value by a coercion rule, not by type. <code>WOConditional.condition</code> accepts anything but reads it as a boolean (<code>null</code>, <code>0</code>, <code>false</code> → false). The <code>interpretation</code> attribute names that rule without changing the type: <code>&lt;type interpretation="truthy"&gt;java.lang.Object&lt;/type&gt;</code>. The type remains the validatable constraint (<code>Object</code>); the interpretation is shown as a qualifier, <code>Object (truthy)</code>.</p>
+
+	<h2>Out of scope</h2>
+	<p>The format describes a binding's contract, not the runtime. A type that is only determined at runtime is declared as its widest honest type. Example: <code>WOTextField.value</code> pushes a <code>String</code>, <code>Number</code>, or <code>NSTimestamp</code> depending on the bound formatter (anything, for a custom one), so its push type is declared <code>Object</code>, with the detail in <code>&lt;doc&gt;</code>.</p>
+
+	<h2>Status</h2>
+	<table class="t">
+		<thead><tr><th>Capability</th><th>Status</th></tr></thead>
+		<tbody>
+			<tr><td class="k">per-element / per-binding doc (Markdown)</td><td class="have">present</td></tr>
+			<tr><td class="k">typed bindings (multi-type)</td><td class="have">present (declared; enforcement is future work)</td></tr>
+			<tr><td class="k">required, cross-binding validation</td><td class="have">present (verbatim from <code>.api</code>)</td></tr>
+			<tr><td class="k">directionality (pull / push)</td><td class="have">present</td></tr>
+			<tr><td class="k">value interpretation (truthiness)</td><td class="have">present</td></tr>
+			<tr><td class="k">default values, deprecation, value-sets, unknown-binding policy</td><td class="want">not yet</td></tr>
+		</tbody>
+	</table>
+	<p>Validates as a superset of WO's DTD (including <code>WebObjectsDefinitions.xml</code>). Grammar: <code>docs/apiext.dtd</code>. Field-by-field spec: <code>docs/APIEXT_FORMAT.md</code>. Status: <code>docs/APIEXT_STATUS.md</code>. Repo: <a href="https://github.com/undur/wonder-slim">github.com/undur/wonder-slim</a>.</p>
+</div>
+</body>
+</html>

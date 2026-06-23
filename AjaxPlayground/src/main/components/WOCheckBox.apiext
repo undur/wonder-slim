@@ -13,7 +13,7 @@
   docs/APIEXT_FORMAT.md, "Directionality" and "Interpretation".
 -->
 <wodefinitions>
-	<wo class="WOCheckBox" wocomponentcontent="false">
+	<wo class="WOCheckBox" wocomponentcontent="false" passthrough="true">
 
 		<doc><![CDATA[A checkbox (`<input type="checkbox">`). Use **either** `checked` (a truthy in, a Boolean out) **or** `value`+`selection` (membership-style) — not both.]]></doc>
 
