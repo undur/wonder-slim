@@ -28,7 +28,12 @@ public class ApiextElement {
 
 	public static class Binding {
 		public String name;
+		/** Direction-agnostic types declared directly under <binding> (the simple/legacy .api shape). */
 		public final List<String> types = new ArrayList<>();
+		/** Types the binding PULLS (reads/displays). Presence => the binding is read. */
+		public final List<String> pullTypes = new ArrayList<>();
+		/** Types the binding PUSHES (writes back). Presence => the binding is written. */
+		public final List<String> pushTypes = new ArrayList<>();
 		public String doc;
 		public boolean required;
 		public String defaults;
@@ -38,13 +43,63 @@ public class ApiextElement {
 			return Markdown.toHtml(doc);
 		}
 
-		/** The accepted types, shortened to simple class names and joined - e.g. "String | List". */
+		public boolean pulls() { return !pullTypes.isEmpty(); }
+		public boolean pushes() { return !pushTypes.isEmpty(); }
+
+		/** Pull type(s), shortened + joined (e.g. "String | List"). */
+		public String displayPullType() { return shortJoin(pullTypes); }
+		/** Push type(s), shortened + joined. */
+		public String displayPushType() { return shortJoin(pushTypes); }
+
+		/**
+		 * The type to show in the binding table's Type column. Prefers the directional types: a pull-only
+		 * binding shows its pull type, a push-only its push type, a two-way binding whose pull and push
+		 * types match shows that one (the common case), and a true split shows "Object → String". Falls
+		 * back to direction-agnostic &lt;type&gt; for legacy/.api bindings.
+		 */
 		public String displayType() {
-			if (types.isEmpty()) {
+			String pull = displayPullType();
+			String push = displayPushType();
+			if (!pull.isEmpty() && !push.isEmpty()) {
+				return pull.equals(push) ? pull : pull + " → " + push;
+			}
+			if (!pull.isEmpty()) { return pull; }
+			if (!push.isEmpty()) { return push; }
+			return shortJoin(types);
+		}
+
+		/** A short directionality label, e.g. "pull", "push", "pull / push", or "" if unknown. */
+		public String directionLabel() {
+			if (pulls() && pushes()) { return "pull / push"; }
+			if (pulls()) { return "pull"; }
+			if (pushes()) { return "push"; }
+			return "";
+		}
+
+		/** An arrow glyph for the direction: ↓ pulled (read), ↑ pushed (written), ↕ both, "" if unknown. */
+		public String directionArrow() {
+			if (pulls() && pushes()) { return "↕"; } // ↕
+			if (pulls()) { return "↓"; }             // ↓
+			if (pushes()) { return "↑"; }            // ↑
+			return "";
+		}
+
+		/** Hover/title text spelling out the direction (so the glyph is self-explaining). */
+		public String directionTitle() {
+			if (pulls() && pushes()) { return "Two-way: pulled (read) and pushed (written back)"; }
+			if (pulls()) { return "Pulled (read by the element)"; }
+			if (pushes()) { return "Pushed (written back by the element)"; }
+			return "";
+		}
+
+		public boolean hasDirection() { return pulls() || pushes(); }
+
+		private static String shortJoin(List<String> fqns) {
+			if (fqns.isEmpty()) {
 				return "";
 			}
 			List<String> shortNames = new ArrayList<>();
-			for (String t : types) {
+			for (String t : fqns) {
 				int dot = t.lastIndexOf('.');
 				shortNames.add(dot == -1 ? t : t.substring(dot + 1));
 			}
@@ -117,8 +172,22 @@ public class ApiextElement {
 			binding.name = b.getAttribute("name");
 			binding.required = "true".equals(b.getAttribute("required"));
 			binding.defaults = b.hasAttribute("defaults") ? b.getAttribute("defaults") : null;
+			// Direction-agnostic types directly under <binding> (legacy/.api shape).
 			for (Element ty : childElements(b, "type")) {
 				binding.types.add(textOf(ty));
+			}
+			// Directional types: <pull>/<push> blocks, each holding <type>(s).
+			Element pull = firstChildElement(b, "pull");
+			if (pull != null) {
+				for (Element ty : childElements(pull, "type")) {
+					binding.pullTypes.add(textOf(ty));
+				}
+			}
+			Element push = firstChildElement(b, "push");
+			if (push != null) {
+				for (Element ty : childElements(push, "type")) {
+					binding.pushTypes.add(textOf(ty));
+				}
 			}
 			binding.doc = textOf(firstChildElement(b, "doc"));
 			out.bindings.add(binding);

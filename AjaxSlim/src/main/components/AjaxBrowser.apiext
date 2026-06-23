@@ -10,60 +10,94 @@
 ```]]></doc>
 
 		<binding name="list" required="true">
-			<type>java.util.List</type>
+			<pull>
+				<type>java.util.List</type>
+			</pull>
 			<doc>The list of objects to choose from.</doc>
 		</binding>
 		<binding name="item">
-			<type>java.lang.Object</type>
+			<pull>
+				<type>java.lang.Object</type>
+			</pull>
 			<doc>The repetition item during rendering.</doc>
 		</binding>
 		<binding name="selections" settable="YES">
-			<type>java.util.List</type>
+			<pull>
+				<type>java.util.List</type>
+			</pull>
+			<push>
+				<type>java.util.List</type>
+			</push>
 			<doc>The currently selected objects (settable).</doc>
 		</binding>
 		<binding name="selectedValues">
-			<type>java.util.List</type>
+			<pull>
+				<type>java.util.List</type>
+			</pull>
+			<push>
+				<type>java.util.List</type>
+			</push>
 			<doc>Value-based multi-selection (as on `WOBrowser`).</doc>
 		</binding>
 		<binding name="value">
-			<type>java.lang.Object</type>
+			<pull>
+				<type>java.lang.Object</type>
+			</pull>
 			<doc>The value for each option, taken from `item` during rendering.</doc>
 		</binding>
 		<binding name="multiple">
-			<type>java.lang.Boolean</type>
+			<pull>
+				<type>java.lang.Boolean</type>
+			</pull>
 			<doc>Whether the browser is multi-select (bind `multiple="$true"` for tags).</doc>
 		</binding>
 		<binding name="displayString">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The text shown for each option.</doc>
 		</binding>
 		<binding name="otherTagString">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Extra attributes appended to the rendered `&lt;select&gt;` tag.</doc>
 		</binding>
 		<binding name="disabled" defaults="Boolean">
-			<type>java.lang.Boolean</type>
+			<pull>
+				<type>java.lang.Boolean</type>
+			</pull>
 			<doc>Standard `WOBrowser` behaviour — renders the select as disabled.</doc>
 		</binding>
 		<binding name="escapeHTML" defaults="Boolean">
-			<type>java.lang.Boolean</type>
+			<pull>
+				<type>java.lang.Boolean</type>
+			</pull>
 			<doc>Standard `WOBrowser` behaviour — whether the display string is HTML-escaped.</doc>
 		</binding>
 
 		<binding name="id">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Standard HTML `id` attribute.</doc>
 		</binding>
 		<binding name="name">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Standard HTML `name` attribute.</doc>
 		</binding>
 		<binding name="class">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Standard HTML `class` attribute.</doc>
 		</binding>
 		<binding name="style">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Standard HTML `style` attribute.</doc>
 		</binding>
 

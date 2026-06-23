@@ -10,59 +10,93 @@
 ```]]></doc>
 
 		<binding name="list" required="true">
-			<type>java.util.List</type>
+			<pull>
+				<type>java.util.List</type>
+			</pull>
 			<doc>The list of objects to choose from.</doc>
 		</binding>
 		<binding name="item">
-			<type>java.lang.Object</type>
+			<pull>
+				<type>java.lang.Object</type>
+			</pull>
 			<doc>The repetition item (current object) during rendering.</doc>
 		</binding>
 		<binding name="selection">
-			<type>java.lang.Object</type>
+			<pull>
+				<type>java.lang.Object</type>
+			</pull>
+			<push>
+				<type>java.lang.Object</type>
+			</push>
 			<doc>The currently selected object (settable).</doc>
 		</binding>
 		<binding name="displayString">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The text shown for each option (defaults to the item's `toString`).</doc>
 		</binding>
 		<binding name="noSelectionString">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Placeholder option text shown when nothing is selected.</doc>
 		</binding>
 		<binding name="value">
-			<type>java.lang.Object</type>
+			<pull>
+				<type>java.lang.Object</type>
+			</pull>
 			<doc>Value-based selection (as on WOPopUpButton).</doc>
 		</binding>
 		<binding name="selectedValue">
-			<type>java.lang.Object</type>
+			<pull>
+				<type>java.lang.Object</type>
+			</pull>
+			<push>
+				<type>java.lang.Object</type>
+			</push>
 			<doc>Value-based selection (as on WOPopUpButton).</doc>
 		</binding>
 		<binding name="disabled" defaults="Boolean">
-			<type>java.lang.Boolean</type>
+			<pull>
+				<type>java.lang.Boolean</type>
+			</pull>
 			<doc>Standard WOPopUpButton behaviour.</doc>
 		</binding>
 		<binding name="escapeHTML" defaults="Boolean">
-			<type>java.lang.Boolean</type>
+			<pull>
+				<type>java.lang.Boolean</type>
+			</pull>
 			<doc>Standard WOPopUpButton behaviour.</doc>
 		</binding>
 		<binding name="otherTagString">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Additional attributes appended verbatim to the rendered tag (standard WOPopUpButton passthrough).</doc>
 		</binding>
 		<binding name="id">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
 		</binding>
 		<binding name="name">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
 		</binding>
 		<binding name="class">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
 		</binding>
 		<binding name="style">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
 		</binding>
 

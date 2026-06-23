@@ -90,6 +90,17 @@ public class AjaxSlimElementReference extends PlaygroundPage {
 		return currentBinding != null && currentBinding.required;
 	}
 
+	/**
+	 * CSS class for the current binding's direction arrow. Pull-only (the norm) is faint so it recedes;
+	 * anything that pushes is highlighted, since a writeable binding is the notable, easy-to-miss case.
+	 */
+	public String currentBindingDirectionClass() {
+		if ( currentBinding != null && currentBinding.pushes() ) {
+			return "dir dir-push";
+		}
+		return "dir dir-pull";
+	}
+
 	// --- tag -> badge mapping (framework-specific presentation of the portable tag value) ------------
 
 	/** The CSS badge class for the current tag (e.g. "update" -> "t-update"). */

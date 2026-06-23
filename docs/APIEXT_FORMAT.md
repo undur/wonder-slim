@@ -34,9 +34,18 @@ guaranteed parseable by a conforming consumer.
     <doc><![CDATA[A region of the page refreshed independently via Ajax… (Markdown allowed)]]></doc>
 
     <binding name="updateContainerID" required="true">
-      <type>java.lang.String</type>
-      <type>java.util.List</type>
+      <pull>
+        <type>java.lang.String</type>
+        <type>java.util.List</type>
+      </pull>
       <doc>The container(s) to refresh — a single id, a `;`-separated set, or a `List`.</doc>
+    </binding>
+
+    <!-- a two-way binding: pulls one type to display, pushes another back -->
+    <binding name="selection">
+      <pull><type>java.lang.Object</type></pull>
+      <push><type>java.lang.Object</type></push>
+      <doc>The currently selected object.</doc>
     </binding>
 
     <validation message="Only one of 'replaceID' or 'updateContainerID' can be bound.">
@@ -66,8 +75,33 @@ guaranteed parseable by a conforming consumer.
 | `settable` | `.api` | `"true"` → binding is push-capable (two-way). |
 | `defaults` | `.api` | WO autocomplete-preset string (e.g. `Boolean`, `Actions`, `Page Names`). |
 | `passthrough` | `.api` | Present in WO's vocabulary; per-binding pass-through flag. |
-| `<type>` (repeatable) | **.apiext** | Accepted type(s): a fully-qualified Java class (`java.lang.String`) or a value-set name. Multiple `<type>` = the accepted set (render shortened + joined, e.g. `String \| List`). |
+| `<pull>` / `<push>` | **.apiext** | **Directionality** — see below. Each holds the `<type>`(s) for that direction. Their *presence* declares the direction. |
+| `<type>` (repeatable) | **.apiext** | Accepted type(s): a fully-qualified Java class (`java.lang.String`) or a value-set name. Lives inside `<pull>`/`<push>` (direction-specific), or directly under `<binding>` for the legacy/direction-agnostic case. Multiple = the accepted set (render shortened + joined, e.g. `String \| List`). |
 | `<doc>` | **.apiext** | The binding's description (Markdown subset). |
+
+### Directionality — `<pull>` / `<push>`
+
+A binding's value type can differ by **direction**: an element may *pull* one type (read it, to display) and
+*push* a different type back (e.g. a text field pulls `java.lang.Object` to display, but pushes
+`java.lang.String` — what the user typed). So directionality isn't a flat attribute; it's a split in the
+binding's *value* definition.
+
+The model is deliberately narrow and self-documenting:
+
+- **`<pull>` present** → the binding is **read** (its value is pulled to render). Holds the pulled `<type>`(s).
+- **`<push>` present** → the binding is **written** (the element pushes a value back). Holds the pushed `<type>`(s).
+- **both** → two-way. **neither** (a bare `<type>` under `<binding>`) → direction-agnostic/legacy.
+
+The **presence of the block is itself the directionality declaration** — there is no separate
+`direction="pull|push|both"` attribute to contradict it, and `settable` becomes redundant (a `<push>` *is*
+"push-capable"). Only **type** is direction-specific; identity facts (`name`, `doc`, `required`) and
+authoring/display facts (value-sets, default values) stay on `<binding>` — a value-set can't be validated
+against a *pushed* value (you only know its type, not its value), so per-direction value-sets would buy
+nothing.
+
+For preview: show the pull type by default; for a two-way binding render both (e.g. `Object → String`), and
+surface the direction lightly — AjaxSlim's reference page uses `↓` (pull), `↑` (push), `↕` (two-way), with
+the writeable case highlighted so it stands out.
 
 ### Validation — `<validation>`
 
@@ -114,5 +148,5 @@ For the record, AjaxSlim's reference page categorizes its elements like so (this
 WO ships `com/webobjects/appserver/WebObjectsDefinitions.dtd`. `apiext.dtd` keeps that vocabulary verbatim
 (`wodefinitions`/`wo`/`binding`/`validation`/`and`/`or`/`count`/`bound`/`unbound`/`ungettable`/
 `unsettable`/`documentation`) and adds only the `.apiext` items above (`passthrough` on `<wo>`; `<doc>`
-under `<wo>`; `<type>`, `<doc>` under `<binding>`). So every existing `.api` validates unchanged, and the
-extension is additive.
+under `<wo>`; `<type>`, `<doc>`, `<pull>`, `<push>` under `<binding>`). So every existing `.api` validates
+unchanged, and the extension is additive.

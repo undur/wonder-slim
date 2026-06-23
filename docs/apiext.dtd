@@ -51,11 +51,19 @@
 
 <!--
   A binding. WO attributes: name, defaults (autocomplete preset string), passthrough, required, settable.
-  EXTENSION children: type (one or more — the accepted Java types / value sets, repeatable for a binding
-  that accepts several, e.g. String OR List) and doc (the binding's description, may contain Markdown in
-  CDATA). WO's <binding> was #PCDATA only; the extension makes it carry these child elements.
+  EXTENSION children:
+    - doc: the binding's description (may contain Markdown in CDATA).
+    - pull / push: DIRECTIONALITY. A binding's value type can differ by direction — an element may PULL
+      one type (read/display) and PUSH another back (e.g. a text field pulls java.lang.Object to display
+      but pushes java.lang.String). The PRESENCE of <pull> / <push> is itself the directionality
+      declaration: a <pull> means the binding is read, a <push> means it is written, both means two-way.
+      Each carries the <type>(s) accepted in THAT direction. Identity facts (name, doc, required) and
+      value-set/default facts stay on <binding>; only type is direction-specific.
+    - type: still allowed DIRECTLY under <binding> for the simple/legacy case (a single direction-agnostic
+      type, and for vanilla .api files). When directionality matters, use <pull>/<push> instead.
+  WO's <binding> was #PCDATA only; the extension makes it carry these child elements.
 -->
-<!ELEMENT binding (#PCDATA | type | doc)*>
+<!ELEMENT binding (#PCDATA | type | doc | pull | push)*>
 <!ATTLIST binding name         CDATA #IMPLIED>
 <!ATTLIST binding defaults     CDATA #IMPLIED>
 <!ATTLIST binding passthrough  CDATA #IMPLIED>
@@ -63,8 +71,15 @@
 <!ATTLIST binding settable     CDATA #IMPLIED>
 
 <!-- EXTENSION: an accepted type for a binding — a fully-qualified Java class (e.g. java.lang.String) or
-     a known value-set name. Repeatable: multiple <type> = the set of accepted types. -->
+     a known value-set name. Repeatable: multiple <type> = the set of accepted types. May appear directly
+     under <binding> (direction-agnostic) or inside <pull>/<push> (direction-specific). -->
 <!ELEMENT type (#PCDATA)>
+
+<!-- EXTENSION: directionality blocks. Presence = direction; content = the type(s) for that direction.
+     Kept deliberately narrow: type is the only fact that genuinely differs by direction (value-sets and
+     defaults are authoring/display facts, not push-validatable, so they stay on <binding>). -->
+<!ELEMENT pull (#PCDATA | type)*>
+<!ELEMENT push (#PCDATA | type)*>
 
 <!-- ============================ documentation (EXTENSION) ============================ -->
 

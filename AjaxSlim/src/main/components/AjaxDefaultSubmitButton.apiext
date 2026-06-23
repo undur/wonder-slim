@@ -12,68 +12,100 @@
 ```]]></doc>
 
 		<binding name="action">
-			<type>com.webobjects.appserver.WOActionResults</type>
+			<pull>
+				<type>com.webobjects.appserver.WOActionResults</type>
+			</pull>
 			<doc>The action to execute on Enter.</doc>
 		</binding>
 		<binding name="updateContainerID">
-			<type>java.lang.String</type>
-			<type>java.util.List</type>
+			<pull>
+				<type>java.lang.String</type>
+				<type>java.util.List</type>
+			</pull>
 			<doc>The update container(s) to morph after the action — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.</doc>
 		</binding>
 		<binding name="replaceID">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The id of an element to replace with the action's response (alternative to `updateContainerID`).</doc>
 		</binding>
 		<binding name="formName">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The name of the form to submit (defaults to the containing form).</doc>
 		</binding>
 		<binding name="name">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>HTML name of the hidden button (optional).</doc>
 		</binding>
 		<binding name="value">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>HTML value of the hidden button (optional).</doc>
 		</binding>
 		<binding name="onClick">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Client hook: JavaScript to run after the request is sent.</doc>
 		</binding>
 		<binding name="onClickBefore">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Gate before the request: if the given expression is false, the click is ignored (e.g. `confirm(...)`).</doc>
 		</binding>
 		<binding name="onClickServer">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>If the action returns null, this binding's value is returned as server JS.</doc>
 		</binding>
 		<binding name="ignoreActionResponse">
-			<type>java.lang.Boolean</type>
+			<pull>
+				<type>java.lang.Boolean</type>
+			</pull>
 			<doc>If true, the action's result is ignored and an empty/`onClickServer` response is returned instead.</doc>
 		</binding>
 		<binding name="onSuccess">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Post-update hook: JavaScript to run after a successful update/morph completes.</doc>
 		</binding>
 		<binding name="onComplete">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Post-update hook: JavaScript to run after the update/morph completes.</doc>
 		</binding>
 		<binding name="disabled">
-			<type>java.lang.Boolean</type>
+			<pull>
+				<type>java.lang.Boolean</type>
+			</pull>
 			<doc>If true, the button does not handle the form submission on the server.</doc>
 		</binding>
 		<binding name="id">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The HTML id of this submit button.</doc>
 		</binding>
 		<binding name="class">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The HTML class of this submit button.</doc>
 		</binding>
 		<binding name="accesskey">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Hot key that should trigger the button (optional).</doc>
 		</binding>
 

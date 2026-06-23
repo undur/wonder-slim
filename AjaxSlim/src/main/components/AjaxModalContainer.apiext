@@ -11,31 +11,45 @@
 ```]]></doc>
 
 		<binding name="label">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The text on the trigger button.</doc>
 		</binding>
 		<binding name="title">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Optional title shown at the top of the dialog (and as the button's `title`).</doc>
 		</binding>
 		<binding name="closeLabel">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The text on the dialog's close button. Defaults to "Close".</doc>
 		</binding>
 		<binding name="open" defaults="Boolean">
-			<type>java.lang.Boolean</type>
+			<pull>
+				<type>java.lang.Boolean</type>
+			</pull>
 			<doc>If true, the dialog is open on initial render.</doc>
 		</binding>
 		<binding name="id">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>Optional id for the trigger button.</doc>
 		</binding>
 		<binding name="class">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The HTML class attribute, passed through to the trigger button.</doc>
 		</binding>
 		<binding name="style">
-			<type>java.lang.String</type>
+			<pull>
+				<type>java.lang.String</type>
+			</pull>
 			<doc>The HTML style attribute, passed through to the trigger button.</doc>
 		</binding>
 
