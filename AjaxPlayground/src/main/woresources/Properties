@@ -9,3 +9,13 @@ wolips.port=9485
 # store - so you can watch the cache stay sized by (pages x containers) instead of growing per
 # interaction. Dev/showcase only; off by default in the framework.
 er.extensions.appserver.ajax.ERXAjaxSession.logPageReplacementCache=true
+
+# Logging. Without an explicit appender, log4j falls back to a default layout whose timestamp is %r
+# (milliseconds since logging started) - which reads like a counter, not a clock. Configure a console
+# appender with a dated pattern so the Eclipse console shows real wall-clock times (and the
+# "No appenders could be found" warning goes away).
+log4j.loggerFactory=er.extensions.logging.ERXLogger$Factory
+log4j.rootCategory=INFO, A1
+log4j.appender.A1=org.apache.log4j.ConsoleAppender
+log4j.appender.A1.layout=er.extensions.logging.ERXPatternLayout
+log4j.appender.A1.layout.ConversionPattern=%d{MMM dd HH:mm:ss} %-5p %c - %m%n

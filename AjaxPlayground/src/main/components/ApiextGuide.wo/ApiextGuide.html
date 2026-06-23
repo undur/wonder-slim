@@ -32,7 +32,7 @@
 	<h1>.apiext — extended element-API format</h1>
 	<p class="lead">A superset of WebObjects' <code>.api</code> format adding per-element and per-binding documentation, binding types, directionality, and value interpretation — enough to render an element's API in an editor. Proposal stage; in use here. The <a href="/element-reference">element reference</a> renders entirely from <code>.apiext</code> files.</p>
 
-	<p>The current/old <code>.api</code> declares an element's bindings — names, a few flags, cross-binding validation — and nothing about what a binding means, its type, or its direction. <code>.apiext</code> adds that as a strict superset: existing <code>.api</code> files validate unchanged, and the new information is additive. The WO runtime does not read <code>.api</code>; only tooling does (WOLips, Parslips), so a successor format is constrained only by "don't break existing files".</p>
+	<p>The current/old <code>.api</code> declares an element's bindings — names, a few flags, cross-binding validation — and little to nothing about what a binding means or it's typing. <code>.apiext</code> adds that as a strict superset: existing <code>.api</code> files validate unchanged, and the new information is additive. The WO runtime does not read <code>.api</code>; only tooling does (WOLips, Parslips), so a successor format is constrained only by "don't break existing files".</p>
 
 	<h2>Format</h2>
 	<p>Same skeleton as <code>.api</code> (<code>&lt;wodefinitions&gt;</code> / <code>&lt;wo&gt;</code> / <code>&lt;binding&gt;</code> / <code>&lt;validation&gt;</code>); extensions in <span style="color:#1a7431;font-weight:700">green</span>:</p>
