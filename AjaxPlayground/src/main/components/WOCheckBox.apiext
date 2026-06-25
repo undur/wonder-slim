@@ -10,7 +10,7 @@
 
   So `checked` renders as a two-row split: Object (truthy) -> Boolean. It exercises BOTH the directionality
   split (different pull/push types) AND the truthy interpretation in a single binding. See
-  docs/APIEXT_FORMAT.md, "Directionality" and "Interpretation".
+  the apiext-format spec (github.com/undur/apiext-format, FORMAT.md), "Directionality" and "Interpretation".
 -->
 <wodefinitions>
 	<wo class="WOCheckBox" wocomponentcontent="false" passthrough="true">

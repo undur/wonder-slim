@@ -6,7 +6,7 @@
   accepts ANY value (so its type is honestly java.lang.Object - the validatable constraint), but the value
   is READ AS A BOOLEAN by the truthiness rule: null, the number 0, and Boolean false are false; every
   other value is true. That reading rule is not a type - it rides alongside the type as an interpretation,
-  shown as a qualifier ("Object (truthy)"). See docs/APIEXT_FORMAT.md, "Interpretation".
+  shown as a qualifier ("Object (truthy)"). See the apiext-format spec (github.com/undur/apiext-format, FORMAT.md), "Interpretation".
 -->
 <wodefinitions>
 	<wo class="WOConditional" wocomponentcontent="true">

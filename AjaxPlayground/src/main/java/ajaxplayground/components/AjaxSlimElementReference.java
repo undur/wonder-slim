@@ -18,7 +18,7 @@ import ajaxplayground.apiext.ApiextElement;
  * The category BADGES (Update/Widget/Server/Activity) are AjaxSlim's own editorial taxonomy, NOT part of
  * the element-API contract, so they live here rather than in the {@code .apiext} files: this component
  * owns the element -> tag mapping (below) and the tag -> badge presentation. See
- * {@code docs/APIEXT_FORMAT.md} for why the format itself carries no tags.
+ * the apiext-format spec (github.com/undur/apiext-format) for why the format itself carries no tags.
  */
 public class AjaxSlimElementReference extends PlaygroundPage {
 

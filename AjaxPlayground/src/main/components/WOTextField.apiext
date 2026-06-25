@@ -9,7 +9,7 @@
   (it's runtime-dependent on a sibling binding, and open-ended for custom formatters), so the only honest,
   validatable push type is java.lang.Object. Since pull and push are both Object, this renders as a
   same-type two-way binding (a single ↕ row); the formatter nuance lives in the doc. See
-  docs/APIEXT_FORMAT.md, "Directionality" and the known-limitation note.
+  the apiext-format spec (github.com/undur/apiext-format, FORMAT.md), "Directionality" and the known-limitation note.
 -->
 <wodefinitions>
 	<wo class="WOTextField" wocomponentcontent="false" passthrough="true">
