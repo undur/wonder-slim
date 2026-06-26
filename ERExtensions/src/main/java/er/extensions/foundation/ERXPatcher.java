@@ -14,28 +14,15 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOActiveImage;
 import com.webobjects.appserver._private.WOBrowser;
 import com.webobjects.appserver._private.WOCheckBoxList;
-import com.webobjects.appserver._private.WOForm;
 import com.webobjects.appserver._private.WOHiddenField;
-import com.webobjects.appserver._private.WOHyperlink;
 import com.webobjects.appserver._private.WOPasswordField;
 import com.webobjects.appserver._private.WOPopUpButton;
-import com.webobjects.appserver._private.WORepetition;
-import com.webobjects.appserver._private.WOString;
 import com.webobjects.appserver._private.WOSubmitButton;
-import com.webobjects.appserver._private.WOSwitchComponent;
 import com.webobjects.appserver._private.WOText;
-import com.webobjects.appserver._private.WOTextField;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation._NSUtilities;
 
 import er.extensions.appserver.ERXSession;
-import er.extensions.components.ERXWOForm;
-import er.extensions.components.ERXWOHyperlink;
-import er.extensions.components.ERXWORepetition;
-import er.extensions.components.ERXWOString;
-import er.extensions.components.ERXWOSwitchComponent;
-import er.extensions.components.ERXWOTextField;
 
 /**
  * Contains some of Wonder's patches for WO's built in dynamic elements  
@@ -43,29 +30,11 @@ import er.extensions.components.ERXWOTextField;
 
 public class ERXPatcher {
 
-	public static synchronized void installPatches() {
-		replaceClass(WOActiveImage.class, DynamicElementsPatches.ActiveImage.class);
-		replaceClass(WOBrowser.class, DynamicElementsPatches.Browser.class);
-		replaceClass(WOCheckBoxList.class, DynamicElementsPatches.CheckBoxList.class);
-		replaceClass(WOForm.class, ERXWOForm.class);
-		replaceClass(WOHiddenField.class, DynamicElementsPatches.HiddenField.class);
-		replaceClass(WOHyperlink.class, ERXWOHyperlink.class);
-		replaceClass(WOPasswordField.class, DynamicElementsPatches.PasswordField.class);
-		replaceClass(WOPopUpButton.class, DynamicElementsPatches.PopUpButton.class);
-		replaceClass(WORepetition.class, ERXWORepetition.class);
-		replaceClass(WOString.class, ERXWOString.class);
-		replaceClass(WOSubmitButton.class, DynamicElementsPatches.SubmitButton.class);
-		replaceClass(WOSwitchComponent.class, ERXWOSwitchComponent.class);
-		replaceClass(WOText.class, DynamicElementsPatches.Text.class);
-		replaceClass(WOTextField.class, ERXWOTextField.class);
-	}
-
-	/**
-	 * Register a class by simple name in the _NSUtilities simple class name lookup (used for e.g. elements/components/directactions) 
-	 */
-	private static void replaceClass(final Class classToReplace, final Class replacementClass) {
-		_NSUtilities.setClassForName(replacementClass, classToReplace.getSimpleName());
-	}
+	// Element class substitutions (WOString -> ERXWOString, etc.) are no longer installed at
+	// runtime here. They are declared in ERExtensions' parsley-tag-aliases.properties and
+	// applied by Parsley's tag registry during template parsing, so the substitution is
+	// statically declared and tooling-readable. The DynamicElementsPatches inner classes
+	// below remain — the declarative aliases resolve to them by fully-qualified name.
 
 	public static class DynamicElementsPatches {
 

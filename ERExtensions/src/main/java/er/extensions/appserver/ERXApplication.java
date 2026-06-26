@@ -56,7 +56,6 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
-import er.extensions.foundation.ERXPatcher;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.resources.ERXAppBasedResourceManager;
@@ -164,7 +163,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		checkEnvironment();
 
-		ERXPatcher.installPatches();
 		setContextClassName(ERXWOContext.class.getName());
 
 		_lowMemoryHandler = new ERXLowMemoryHandler();
