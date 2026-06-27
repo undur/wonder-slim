@@ -8,7 +8,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ERXMarkerClassAssociation;
-import er.extensions.foundation.ERXPatcher;
+import er.extensions.foundation.ERXDynamicElementsPatches;
 
 /**
  * The MULTI-SELECT companion to {@link AjaxPopUpButton}: a plain WOBrowser that renders the
@@ -29,7 +29,7 @@ import er.extensions.foundation.ERXPatcher;
  * to wonder-select on purpose, so it can coexist with another select-enhancing library on the same
  * page without both enhancing the same select.
  */
-public class AjaxBrowser extends ERXPatcher.DynamicElementsPatches.Browser {
+public class AjaxBrowser extends ERXDynamicElementsPatches.Browser {
 
 	public static final String MARKER_CLASS = "ajax-popup-button";
 

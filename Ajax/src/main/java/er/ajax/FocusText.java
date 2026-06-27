@@ -8,7 +8,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.foundation.ERXPatcher.DynamicElementsPatches.Text;
+import er.extensions.foundation.ERXDynamicElementsPatches;
 
 /**
  * Focus text is a convenience version of ERXWOText that provides support for grabbing default focus via javascript.
@@ -20,7 +20,7 @@ import er.extensions.foundation.ERXPatcher.DynamicElementsPatches.Text;
  * @binding focus if false, focus will not be grabbed
  * @binding onEnter javascript to execute when the enter key is pressed
  */
-public class FocusText extends Text {
+public class FocusText extends ERXDynamicElementsPatches.Text {
 	protected WOAssociation _selectAll;
 	protected WOAssociation _focus;
 	protected WOAssociation _onEnter;
