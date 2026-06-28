@@ -18,18 +18,20 @@ import com.webobjects.foundation.NSValidation;
 
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
-import er.extensions.hacks.ERXPrivateKVC;
 
 /**
- * Replacement for WOTextField. Provides for localized formatters. 
- * Never use this directly, rather use WOTextField and let the ERXPatcher handle the
+ * Replacement for WOTextField. Provides for localized formatters. Never use
+ * this directly, rather use WOTextField and let the ERXPatcher handle the
  * replacement of WOTextField in all cases.
  * 
- * @binding blankIsNull if false, "" will not be converted to null; if true, "" will be converted to null. Default is true.
+ * @binding blankIsNull if false, "" will not be converted to null; if true, ""
+ *          will be converted to null. Default is true.
  * 
  * @author ak
  */
+
 public class ERXWOTextField extends WOInput {
+
 	protected WOAssociation _formatter;
 	protected WOAssociation _dateFormat;
 	protected WOAssociation _numberFormat;
@@ -40,9 +42,11 @@ public class ERXWOTextField extends WOInput {
 
 	public ERXWOTextField(String tagname, NSDictionary nsdictionary, WOElement woelement) {
 		super("input", nsdictionary, woelement);
-		if(_value == null || !_value.isValueSettable())
+
+		if (_value == null || !_value.isValueSettable()) {
 			throw new WODynamicElementCreationException("<" + getClass().getName() + "> 'value' attribute not present or is a constant");
-		
+		}
+
 		_formatter = _associations.removeObjectForKey("formatter");
 		_dateFormat = _associations.removeObjectForKey("dateformat");
 		_numberFormat = _associations.removeObjectForKey("numberformat");
@@ -50,24 +54,26 @@ public class ERXWOTextField extends WOInput {
 		_blankIsNull = _associations.removeObjectForKey("blankIsNull");
 		_readonly = _associations.removeObjectForKey("readonly");
 		_typeAss = _associations.removeObjectForKey("type");
-		
-		if(_dateFormat != null && _numberFormat != null) {
+
+		if (_dateFormat != null && _numberFormat != null) {
 			throw new WODynamicElementCreationException("<" + getClass().getName() + "> Cannot have 'dateFormat' and 'numberFormat' attributes at the same time.");
 		}
 	}
-	
+
 	@Override
 	public String type() {
 		return "text";
 	}
 
 	/**
-	 * Overridden to support supplying an overridden "type" attribute for the field
+	 * Overridden to support supplying an overridden "type" attribute for the
+	 * field
 	 */
+	@Override
 	protected void _appendTypeAttributeToResponse(WOResponse response, WOContext context) {
 		final String type;
 
-		if( _typeAss != null ) {
+		if (_typeAss != null) {
 			type = (String) _typeAss.valueInComponent(context.component());
 		}
 		else {
@@ -79,18 +85,22 @@ public class ERXWOTextField extends WOInput {
 		}
 	}
 
-    protected boolean isReadonlyInContext(WOContext context) {
-    	return _readonly != null && _readonly.booleanValueInComponent(context.component());
-    }
+	protected boolean isReadonlyInContext(WOContext context) {
+		return _readonly != null && _readonly.booleanValueInComponent(context.component());
+	}
 
 	@Override
 	public void takeValuesFromRequest(WORequest worequest, WOContext wocontext) {
-		WOComponent component = wocontext.component();
-		if(!isDisabledInContext(wocontext) && wocontext.wasFormSubmitted() && !isReadonlyInContext(wocontext)) {
+		final WOComponent component = wocontext.component();
+
+		if (!isDisabledInContext(wocontext) && wocontext.wasFormSubmitted() && !isReadonlyInContext(wocontext)) {
 			String name = nameInContext(wocontext, component);
-			if(name != null) {
+
+			if (name != null) {
 				String stringValue;
+
 				boolean blankIsNull = _blankIsNull == null || _blankIsNull.booleanValueInComponent(component);
+
 				if (blankIsNull) {
 					stringValue = worequest.stringFormValueForKey(name);
 				}
@@ -98,48 +108,61 @@ public class ERXWOTextField extends WOInput {
 					Object objValue = worequest.formValueForKey(name);
 					stringValue = (objValue == null) ? null : objValue.toString();
 				}
+
 				Object result = stringValue;
-				if(stringValue != null) {
+
+				if (stringValue != null) {
 					Format format = null;
 					boolean hasFormatter = false;
-					if(stringValue.length() != 0) {
-						if(_formatter != null) {
-							format = (Format)_formatter.valueInComponent(component);
+
+					if (stringValue.length() != 0) {
+						if (_formatter != null) {
+							format = (Format) _formatter.valueInComponent(component);
 						}
-						if(format == null) {
-							if(_dateFormat != null) {
-								String formatString = (String)_dateFormat.valueInComponent(component);
-								if(formatString != null) {
+
+						if (format == null) {
+							if (_dateFormat != null) {
+								String formatString = (String) _dateFormat.valueInComponent(component);
+
+								if (formatString != null) {
 									format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
 								}
-							} else if(_numberFormat != null) {
-								String formatString = (String)_numberFormat.valueInComponent(component);
-								if(formatString != null) {
+							}
+							else if (_numberFormat != null) {
+								String formatString = (String) _numberFormat.valueInComponent(component);
+
+								if (formatString != null) {
 									format = ERXNumberFormatter.numberFormatterForPattern(formatString);
 								}
 							}
-						} else {
+						}
+						else {
 							hasFormatter = true;
 						}
 					}
-					if(format != null) {
+
+					if (format != null) {
 						try {
 							Object parsedObject = format.parseObject(stringValue);
 							String reformatedObject = format.format(parsedObject);
 							result = format.parseObject(reformatedObject);
-						} catch(ParseException parseexception) {
+						}
+						catch (ParseException parseexception) {
 							String keyPath = _value.keyPath();
 							NSValidation.ValidationException validationexception = new NSValidation.ValidationException(parseexception.getMessage(), stringValue, keyPath);
 							component.validationFailedWithException(validationexception, stringValue, keyPath);
 							return;
 						}
-						if(result != null && _useDecimalNumber != null && _useDecimalNumber.booleanValueInComponent(component)) {
+
+						if (result != null && _useDecimalNumber != null && _useDecimalNumber.booleanValueInComponent(component)) {
 							result = new BigDecimal(result.toString());
 						}
-					} else if(blankIsNull && result.toString().length() == 0) {
+					}
+					else if (blankIsNull && result.toString().length() == 0) {
 						result = null;
 					}
 				}
+
 				_value.setValue(result, component);
 			}
 		}
@@ -147,47 +170,61 @@ public class ERXWOTextField extends WOInput {
 
 	@Override
 	protected void _appendValueAttributeToResponse(WOResponse woresponse, WOContext wocontext) {
-		WOComponent component = wocontext.component();
+		final WOComponent component = wocontext.component();
+
 		Object valueInComponent = _value.valueInComponent(component);
-		if(valueInComponent != null) {
+
+		if (valueInComponent != null) {
 			String stringValue = null;
 			Format format = null;
 			boolean hasFormatter = false;
-			if(_formatter != null) {
-				format = (Format)_formatter.valueInComponent(component);
+
+			if (_formatter != null) {
+				format = (Format) _formatter.valueInComponent(component);
 			}
-			if(format == null) {
-				if(_dateFormat != null) {
-					String formatString = (String)_dateFormat.valueInComponent(component);
-					if(formatString != null) {
+
+			if (format == null) {
+				if (_dateFormat != null) {
+					String formatString = (String) _dateFormat.valueInComponent(component);
+
+					if (formatString != null) {
 						format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
 					}
-				} else if(_numberFormat != null) {
-					String formatString = (String)_numberFormat.valueInComponent(component);
-					if(formatString != null) {
+				}
+				else if (_numberFormat != null) {
+					String formatString = (String) _numberFormat.valueInComponent(component);
+
+					if (formatString != null) {
 						format = ERXNumberFormatter.numberFormatterForPattern(formatString);
 					}
 				}
-			} else {
+			}
+			else {
 				hasFormatter = true;
 			}
-			if(format != null) {
+
+			if (format != null) {
 				try {
 					String formatedValue = format.format(valueInComponent);
 					Object reparsedObject = format.parseObject(formatedValue);
 					stringValue = format.format(reparsedObject);
-				} catch(IllegalArgumentException illegalargumentexception) {
+				}
+				catch (IllegalArgumentException illegalargumentexception) {
 					NSLog._conditionallyLogPrivateException(illegalargumentexception);
 					stringValue = null;
-				} catch(ParseException parseexception) {
+				}
+				catch (ParseException parseexception) {
 					NSLog._conditionallyLogPrivateException(parseexception);
 				}
 			}
-			if(stringValue == null) {
+
+			if (stringValue == null) {
 				stringValue = valueInComponent.toString();
 			}
+
 			woresponse._appendTagAttributeAndValue("value", stringValue, true);
 		}
+
 		if (isReadonlyInContext(wocontext)) {
 			woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
 		}
