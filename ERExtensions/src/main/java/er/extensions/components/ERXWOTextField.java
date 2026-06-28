@@ -79,12 +79,6 @@ public class ERXWOTextField extends WOInput {
 		}
 	}
 
-    @Override
-    protected boolean isDisabledInContext(WOContext context) {
-    	WOAssociation disabled = (WOAssociation) ERXPrivateKVC.privateValueForKey(this, "_disabled");
-    	return disabled != null && disabled.booleanValueInComponent(context.component());
-    }
-	   
     protected boolean isReadonlyInContext(WOContext context) {
     	return _readonly != null && _readonly.booleanValueInComponent(context.component());
     }
