@@ -113,7 +113,6 @@ public class ERXWOTextField extends WOInput {
 
 				if (stringValue != null) {
 					Format format = null;
-					boolean hasFormatter = false;
 
 					if (stringValue.length() != 0) {
 						if (_formatter != null) {
@@ -135,9 +134,6 @@ public class ERXWOTextField extends WOInput {
 									format = ERXNumberFormatter.numberFormatterForPattern(formatString);
 								}
 							}
-						}
-						else {
-							hasFormatter = true;
 						}
 					}
 
@@ -177,7 +173,6 @@ public class ERXWOTextField extends WOInput {
 		if (valueInComponent != null) {
 			String stringValue = null;
 			Format format = null;
-			boolean hasFormatter = false;
 
 			if (_formatter != null) {
 				format = (Format) _formatter.valueInComponent(component);
@@ -198,9 +193,6 @@ public class ERXWOTextField extends WOInput {
 						format = ERXNumberFormatter.numberFormatterForPattern(formatString);
 					}
 				}
-			}
-			else {
-				hasFormatter = true;
 			}
 
 			if (format != null) {
