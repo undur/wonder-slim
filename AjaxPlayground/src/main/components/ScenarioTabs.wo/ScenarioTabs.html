@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Scenario: Tabs without AjaxTabbedPanel</title>
+		<style>
+			body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+			h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+			.lead { color: #666; }
+			a { color: #2b6cb0; }
+	
+			/* The whole tab UI is these few rules - no framework CSS needed. */
+			.tabstrip { display: flex; gap: .25rem; border-bottom: 2px solid #2b6cb0; margin-top: 1.5rem; }
+			.tab { padding: .5rem 1rem; border: 1px solid #ccc; border-bottom: none; border-radius: 6px 6px 0 0; background: #f2f2f2; color: #2b6cb0; cursor: pointer; }
+			.tab:hover { background: #e8eef7; }
+			.tab.active { background: #2b6cb0; color: #fff; border-color: #2b6cb0; cursor: default; }
+			.panel { border: 1px solid #ccc; border-top: none; padding: 1.2rem; background: #fff; min-height: 5rem; }
+		</style>
+	</head>
+	<body>
+		<p><a href="/">&larr; Playground index</a></p>
+		<h1>Tabs, without AjaxTabbedPanel</h1>
+		<p class="lead">A working tabbed panel built from two primitives: <code>AjaxUpdateContainer</code> (the
+		content region) and <code>AjaxUpdateLink</code> (the tab clicks). The selected tab is just a field on
+		the component; a click sets it and updates the container, which re-renders the strip (highlighting the
+		active tab) and the matching panel. No JavaScript, no child components, no <code>AjaxTabbedPanel</code>.</p>
+	
+		<wo:AjaxUpdateContainer id="tabContainer">
+
+			<!-- The tab strip: one AjaxUpdateLink per tab. The active one is a plain span, not a link. -->
+			<div class="tabstrip">
+				<wo:repetition list="$tabs" item="$currentTab">
+					<wo:if condition="$isCurrentTabSelected">
+						<span class="tab active"><wo:str value="$currentTab" /></span>
+					</wo:if>
+					<wo:if condition="$isCurrentTabSelected" negate="true">
+						<wo:AjaxUpdateLink class="tab" action="$selectTab" updateContainerID="tabContainer"><wo:str value="$currentTab" /></wo:AjaxUpdateLink>
+					</wo:if>
+				</wo:repetition>
+			</div>
+	
+			<!-- The panels: WOKeyValueConditional shows each one only when selectedTab matches its value. -->
+			<div class="panel">
+				<wo:WOKeyValueConditional key="selectedTab" value="Overview">
+					<h3>Overview</h3>
+					<p>The big picture. This panel shows because <code>selectedTab</code> equals <code>"Overview"</code>.</p>
+				</wo:WOKeyValueConditional>
+				<wo:WOKeyValueConditional key="selectedTab" value="Details">
+					<h3>Details</h3>
+					<p>The fine print. Each panel is just a <code>WOKeyValueConditional</code> keyed on the same field the tabs set.</p>
+				</wo:WOKeyValueConditional>
+				<wo:WOKeyValueConditional key="selectedTab" value="Settings">
+					<h3>Settings</h3>
+					<p>Knobs and dials. Add a tab by adding a name to the list and a panel here - nothing else.</p>
+				</wo:WOKeyValueConditional>
+			</div>
+		</wo:AjaxUpdateContainer>
+	</body>
+</html>

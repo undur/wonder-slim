@@ -24,6 +24,7 @@ import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioServerUpdate;
 import ajaxplayground.components.scenario.ScenarioServerUpdateFragments;
 import ajaxplayground.components.scenario.ScenarioScripts;
+import ajaxplayground.components.scenario.ScenarioTabs;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
 import er.extensions.routes.RouteTable;
 
@@ -69,6 +70,7 @@ public class Routes {
 		routes.map( "/server-update", ScenarioServerUpdate.class );
 		routes.map( "/server-update-fragments", ScenarioServerUpdateFragments.class );
 		routes.map( "/checkbox", ScenarioCheckbox.class );
+		routes.map( "/tabs", ScenarioTabs.class );
 
 		// Component gallery
 		routes.map( "/gallery-update-container", GalleryUpdateContainer.class );
