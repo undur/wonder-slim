@@ -315,6 +315,46 @@ public class ERXAjaxSession extends WOSession {
   }
 
   /**
+   * A read-only snapshot of the replacement cache for monitoring/reporting. Returns one neutral
+   * {@code [pageClass, contextID, createdAt, lastAccessedAt]} tuple per entry, in the cache's current
+   * (LRU) order. Purely additive: it reads the existing {@link TransactionRecord} fields and does NOT
+   * touch eviction, storage, ordering, or access timestamps - calling it never changes cache behavior.
+   * <p>
+   * The element type is {@code Object[]} of {@code {String, String, Instant, Instant}} to avoid coupling
+   * this framework package to the cache-monitor model; the monitor adapter maps these to its own DTO.
+   *
+   * @return one tuple per cached entry (empty if the cache is absent/empty)
+   */
+  public java.util.List<Object[]> replacementCacheSnapshot() {
+    @SuppressWarnings("unchecked")
+    LinkedHashMap<String, TransactionRecord> cache = (LinkedHashMap<String, TransactionRecord>) objectForKey(PAGE_REPLACEMENT_CACHE_KEY);
+    java.util.List<Object[]> snapshot = new java.util.ArrayList<>();
+    if (cache != null) {
+      // Copy the values out before reading them: a concurrent request may evict/touch the cache while a
+      // monitoring page iterates it (esp. across sessions, under concurrent request handling), which could
+      // otherwise throw ConcurrentModificationException. A best-effort copy degrades to a partial/empty
+      // snapshot rather than failing the page.
+      java.util.List<TransactionRecord> records;
+      try {
+        records = new java.util.ArrayList<>(cache.values());
+      }
+      catch (RuntimeException e) {
+        log.debug("replacementCacheSnapshot: cache changed during copy, returning empty: {}", e.toString());
+        return snapshot;
+      }
+      for (TransactionRecord record : records) {
+        WOComponent page = record.page();
+        snapshot.add(new Object[] {
+            page == null ? "(null)" : page.getClass().getSimpleName(),
+            record.contextID(),
+            record.createdAt(),
+            record.lastAccessedAt() });
+      }
+    }
+    return snapshot;
+  }
+
+  /**
    * Moves every cache entry pointing at {@code page} to the most-recent end of the map's insertion
    * order, so the instance limit (which reads that order oldest-first) evicts the least-recently-USED
    * instance rather than the first-inserted one (LRU, not FIFO). Without this, an instance you open

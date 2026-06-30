@@ -1,0 +1,57 @@
+<div class="erx-cache-overview">
+	<style>
+		/* Self-contained, Bootstrap 3/5-neutral. Stable class intersection only; colors inline so we don't
+		   depend on badge-/bg- utility names that differ across Bootstrap versions. */
+		.erx-cache-overview .erx-cache-block { border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1rem; }
+		.erx-cache-overview .erx-cache-head { padding: .5rem .8rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .5rem; }
+		.erx-cache-overview .erx-cache-name { font-weight: 600; }
+		.erx-cache-overview .erx-bar { height: 7px; background: #eee; border-radius: 4px; overflow: hidden; min-width: 8rem; margin: .35rem .8rem 0; }
+		.erx-cache-overview .erx-bar > span { display: block; height: 100%; background: #2b6cb0; }
+		.erx-cache-overview .erx-badge { display: inline-block; padding: .12rem .5rem; border-radius: 10px; font-size: .78rem; background: #eef; color: #224; }
+		.erx-cache-overview .erx-badge.erx-stale { background: #fde8e8; color: #922; }
+		.erx-cache-overview .erx-muted { color: #888; }
+		.erx-cache-overview table { width: 100%; margin: 0; }
+		.erx-cache-overview .erx-num { text-align: right; font-variant-numeric: tabular-nums; }
+	</style>
+
+	<wo:repetition list="$reports" item="$currentReport">
+		<div class="erx-cache-block">
+			<div class="erx-cache-head">
+				<div>
+					<span class="erx-cache-name"><wo:str value="$currentReport.cacheName" /></span>
+					<span class="erx-muted">— <wo:str value="$occupancyLabel" /> held</span>
+				</div>
+				<div>
+					<span class="erx-badge">active: <wo:str value="$activeLabel" /></span>
+					<span class="erx-badge erx-stale">stale: <wo:str value="$staleLabel" /></span>
+				</div>
+			</div>
+
+			<div class="erx-bar"><wo:WOGenericContainer elementName="span" style="$occupancyBarStyle" /></div>
+
+			<table class="table table-sm table-striped">
+				<thead>
+					<tr>
+						<th>Page class</th>
+						<th class="erx-num">Held</th>
+						<th class="erx-num">Oldest</th>
+						<th class="erx-num">Most idle</th>
+					</tr>
+				</thead>
+				<tbody>
+					<wo:repetition list="$currentByClass" item="$currentUsage">
+						<tr>
+							<td><wo:str value="$currentUsage.pageClass" /></td>
+							<td class="erx-num"><wo:str value="$currentUsage.count" /></td>
+							<td class="erx-num erx-muted"><wo:str value="$usageOldestAge" /></td>
+							<td class="erx-num erx-muted"><wo:str value="$usageMostIdle" /></td>
+						</tr>
+					</wo:repetition>
+					<wo:if condition="$currentReportIsEmpty">
+						<tr><td colspan="4" class="erx-muted">empty</td></tr>
+					</wo:if>
+				</tbody>
+			</table>
+		</div>
+	</wo:repetition>
+</div>

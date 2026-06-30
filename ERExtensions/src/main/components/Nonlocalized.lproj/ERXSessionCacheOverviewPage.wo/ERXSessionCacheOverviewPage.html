@@ -1,0 +1,64 @@
+<div class="erx-cache-page">
+	<style>
+		/* Bootstrap 3/5-neutral: stable class subset only; colors inline (badge-/bg- utilities differ across versions). */
+		.erx-cache-page table { width: 100%; }
+		.erx-cache-page .erx-num { text-align: right; font-variant-numeric: tabular-nums; }
+		.erx-cache-page .erx-muted { color: #888; }
+		.erx-cache-page .erx-stale-row > td { background: #fdf3f3; }
+		.erx-cache-page .erx-sid { font-family: ui-monospace, Menlo, monospace; font-size: .85em; }
+		.erx-cache-page .erx-detail { background: #fafafe; }
+		.erx-cache-page .erx-expand { cursor: pointer; }
+	</style>
+
+	<p class="erx-muted">
+		One row per active session — <strong><wo:str value="$sessionCount" /></strong> session(s), heaviest first.
+		<strong>Held</strong> = entries cached; <strong>active</strong> = touched recently;
+		<strong>stale</strong> = idle past the threshold (retained-but-abandoned). Rows that are mostly stale are
+		highlighted. Click a session to drill into its per-cache, per-class detail.
+	</p>
+
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>Session</th>
+				<th class="erx-num">Held</th>
+				<th class="erx-num">Active</th>
+				<th class="erx-num">Stale</th>
+				<th class="erx-num">Ajax</th>
+				<th class="erx-num">Backtrack</th>
+				<th class="erx-num">Perm</th>
+				<th>Most-idle class</th>
+			</tr>
+		</thead>
+		<tbody>
+			<wo:repetition list="$summaries" item="$currentSummary">
+				<wo:WOGenericContainer elementName="tr" class="$currentRowClass">
+					<td>
+						<wo:link action="$toggleExpand">
+							<span class="erx-sid"><wo:str value="$currentSummary.sessionID" /></span>
+						</wo:link>
+					</td>
+					<td class="erx-num"><wo:str value="$currentSummary.totalHeld" /></td>
+					<td class="erx-num"><wo:str value="$currentSummary.activeHeld" /></td>
+					<td class="erx-num"><wo:str value="$currentSummary.staleHeld" /></td>
+					<td class="erx-num erx-muted"><wo:str value="$currentSummary.ajaxHeld" /></td>
+					<td class="erx-num erx-muted"><wo:str value="$currentSummary.backtrackHeld" /></td>
+					<td class="erx-num erx-muted"><wo:str value="$currentSummary.permanentHeld" /></td>
+					<td class="erx-muted"><wo:str value="$currentTopStale" /></td>
+				</wo:WOGenericContainer>
+
+				<wo:if condition="$isCurrentExpanded">
+					<tr class="erx-detail">
+						<td colspan="8">
+							<wo:ERXSessionCacheOverview session="$expandedSession" />
+						</td>
+					</tr>
+				</wo:if>
+			</wo:repetition>
+
+			<wo:if condition="$summaries.isEmpty">
+				<tr><td colspan="8" class="erx-muted">No active sessions.</td></tr>
+			</wo:if>
+		</tbody>
+	</table>
+</div>
