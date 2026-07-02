@@ -123,6 +123,85 @@ Instead:
   distribution turns out to be needed after seeing idle-time in practice. Phase 1 touches cache behavior
   **zero**.
 
+## TODO — live JVM/heap monitoring on the dashboard (parked)
+
+Separate from the per-session cache view: a **live stacked heap chart** (eden + survivor + old over time,
+GC events marked) on the ops dashboard. Notes from working it out:
+
+- **Right tool for a live dashboard chart = Micrometer → Prometheus → Grafana**, not JFR. Micrometer's JVM
+  binders (`JvmMemoryMetrics`, `JvmGcMetrics`) expose per-generation occupancy + GC counts/pauses as
+  time-series; the stacked-heap chart is a canned Grafana JVM panel. Needs a `/metrics` endpoint (WO can
+  serve it via a direct action) + the binder registration — an afternoon's work.
+- **JFR is the complement, not the dashboard.** JDK Flight Recorder (~1% overhead, built in) is a
+  record-then-analyze forensic tool. Enable continuous recording (`-XX:StartFlightRecording=disk=true,
+  maxage=6h,...`) so the *next* weird event is `jcmd <pid> JFR.dump` + open in JMC. JFR *event streaming*
+  (`RecordingStream`, Java 14+) could feed the same chart but is more work for the same picture.
+- **Both need code/agent in the process → a redeploy.** Land them alongside the cache-cap redeploy.
+- **No-redeploy stopgap:** scrape `jstat -gcutil <pid>` columns into the dashboard (crude, but the same
+  data we watched by eye — zero code, works on the running process).
+- Like the cache monitoring, the reusable part belongs in ERExtensions/helium5 so every app gets it free.
+
+Observed-behavior note (2026-07-01, first-of-month load, ~12 GB G1 heap): healthy sawtooth — Old gen
+climbed ~50%→90% over ~40 min, then a single young GC (~130 ms) dropped it back to ~50%, FGC stayed 0
+throughout. The climb was collectable garbage (abandoned session graphs), not live-set growth: GC already
+reclaims abandoned-session memory regardless of session-store harvesting. Watch the **floor after GC**
+(rising floor = real leak) and **FGC** (0 = concurrent collector keeping up), not the peak. Fat caches
+inflate the sawtooth *amplitude* (less margin, more frequent GC), which is what right-sizing the caps fixes.
+
+## GC baseline — BEFORE the cache-cap fix (measured 2026-07-01, first-of-month load)
+
+Baseline captured on the live accounting instance (NB) running the **absurd defaults**
+(`pageCacheSize=5000`, `permanentPageCacheSize=5000`, `maxPageReplacementCacheSize=10000`; 4-hour session
+timeout). To be compared against the same readings after deploying the fixed values (`100 / 30 / 100`).
+
+- **Environment:** G1GC, `-Xmx` ≈ 12 GB (12582912K reserved, committed). OpenJDK 25. `jstat -gcutil <pid>`.
+- **Live-set floor (Old gen after a young GC):** ~50% (~6 GB).
+- **Sawtooth peak (Old gen before collection):** ~88–90%.
+- **Sawtooth period:** ~30–40 min to climb floor→peak under morning load.
+- **Young GC:** ~one every ~5–6 min under load; ~130–160 ms each; cheap.
+- **Full GC (FGC):** **0** across the whole morning — the concurrent collector never fell behind.
+- **Survivor (S1):** pinned at 100% (promotion straight to old on young GC).
+
+Raw sample points (Old gen % / YGC count / FGC), one busy morning:
+
+| Time (approx) | O (Old %) | YGC | FGC | Note |
+|---|---|---|---|---|
+| start | 49.6 | 122 | 0 | early, light load |
+| +1h | 53.6 | 127 | 0 | ramping |
+| +2h | 62.1 | — | 0 | ramping faster |
+| +2h10m | 89.0 | 134 | 0 | promotion wave (looked alarming) |
+| +2h20m | 89.5 (flat) | 134 | 0 | plateau, allocation quiet |
+| +2h40m | 49.7 | 135 | 0 | **one young GC dropped O 90→50** (~130 ms) |
+| +3h10m | 88.2 | 140 | 0 | climbed again — steady sawtooth |
+| +4h (midday, ~12:00) | floor rose to ~69–94 band | 152→159 | 0 | full-load sawtooth: Old-gen *floor* drifted up from ~50% (morning) to ~69% as more concurrent sessions accumulated live-ish cache. Peaked ~94% (looked alarming — 0 headroom), then **one young GC dropped O 94→69% in ~200 ms, no full GC**. |
+
+**Key lesson (2026-07-01):** a high, pinned Old-gen *floor* (even ~94%) is NOT an OOM risk by itself — G1
+deliberately defers collection until Old gen is high, then reclaims a big chunk cheaply. Confirmed live: O
+sat pinned at ~94% for ~10+ min, then a single young GC reclaimed ~25 points (~3 GB) with FGC still 0. **The
+only true danger signal is FGC leaving 0** (collector *forced* into stop-the-world full GC). It never did,
+all day. Watch the FGC counter, not the O level. The higher midday floor (~69% vs morning ~50%) IS the
+oversized caches (more live sessions retain more cache) — a margin cost the fix targets, not a stability threat.
+
+**Interpretation:** healthy but **high-amplitude** sawtooth. Peak ~90% because the fat caches retain a lot
+of collectable garbage between cycles; floor stable at ~50% (no leak). Fine, but little headroom and
+frequent GC.
+
+### What to capture AFTER the fix (same instance, comparable load — ideally next first-of-month, or any
+comparable busy day)
+
+Record the same fields so the comparison is apples-to-apples:
+- Old-gen **floor** (after a young GC) — expected: similar (~50%; live-set is unchanged by cache caps... or
+  slightly lower if the caches held some genuinely-live abandoned graphs).
+- Old-gen **peak** — **expected to drop** from ~90% to ~65–70% (less garbage retained per cycle).
+- Sawtooth **period** — **expected to lengthen** (less garbage generated per unit time → slower climb).
+- **YGC frequency** — **expected to fall** (fewer collections needed).
+- **FGC** — expected to stay 0 (it already was; headroom only improves).
+- Note load context (time of day, active session count from the cache-overview page) so "comparable load"
+  is honest.
+
+Prediction to test: **peak ↓, period ↑, YGC frequency ↓, floor ≈ unchanged, FGC = 0.** If the floor also
+drops meaningfully, that quantifies how much genuinely-live memory the oversized caches were pinning.
+
 ## Caveat carried throughout
 
 Don't sum per-page byte estimates into a "session total" — shared object graphs (and the shared snapshot
