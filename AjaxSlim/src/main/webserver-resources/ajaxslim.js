@@ -448,22 +448,23 @@
 		if (document.activeElement && document.activeElement !== document.body) {
 			return; // focus already landed somewhere real - don't fight it
 		}
-		var from = document.getElementById(rec.id);
-		if (!from) {
-			return;
-		}
-		var next = nextTabbable(from);
-		if (!next) {
-			return;
-		}
-		// If the destination is a wonder-select's underlying <select>, focus goes to its trigger. But the
-		// morph re-creates a BARE <select>; wonder-select's re-enhance (which wraps it and builds the
-		// trigger) runs on its own async pass, which may not have happened yet. So resolve the focus
-		// target lazily and retry for a few frames until the trigger exists, rather than racing it.
+		// Resolve the destination lazily and retry for a few frames, RE-FINDING the elements by id each
+		// attempt. The morph often re-creates the trigger field's own container (so both it and the next
+		// field are replaced), which would leave any node reference captured now detached/stale - and the
+		// wonder-select re-enhance that builds the destination trigger runs on its own async pass that may
+		// not have happened yet. Re-querying live DOM each attempt handles both.
 		var attempts = 0;
 		(function tryFocus() {
 			if (document.activeElement && document.activeElement !== document.body) {
 				return; // user/enhancer already moved focus - stop
+			}
+			var from = document.getElementById(rec.id);
+			var next = from && nextTabbable(from);
+			if (!next) {
+				if (attempts++ < 20) {
+					(window.requestAnimationFrame || window.setTimeout)(tryFocus, 16);
+				}
+				return;
 			}
 			var target = next;
 			if (next.tagName === 'SELECT' && next.classList.contains('ajax-popup-button')) {
@@ -710,6 +711,12 @@
 				applyFragments(text);
 				runHook(options.onSuccess);
 				runHook(options.onComplete);
+				// Multi-container updates bypass fetchAndMorph, so restore tab-out focus here too (a
+				// multi-update commonly re-renders the container the trigger field lives in). See the
+				// rememberTabSource / restoreTabFocus workaround.
+				(window.requestAnimationFrame || window.setTimeout)(function () {
+					restoreTabFocus();
+				}, 0);
 			}).catch(function (e) {
 				var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
 				reportError({ targetId: ids.join(';'), url: url, status: info.status,
@@ -913,6 +920,12 @@
 					applyFragments(text);
 					runHook(options.onSuccess);
 					runHook(options.onComplete);
+					// Multi-container submit bypasses fetchAndMorph; restore tab-out focus here too (this
+					// is the path an observe-all AjaxObserveField takes when it updates several
+					// containers, e.g. "resultUC;inputUC"). See rememberTabSource / restoreTabFocus.
+					(window.requestAnimationFrame || window.setTimeout)(function () {
+						restoreTabFocus();
+					}, 0);
 				}).catch(function (e) {
 					if (window.console) {
 						console.error('AjaxSlim: multi submit failed for "' + targetId + '"', e);
