@@ -60,7 +60,9 @@
 		<wo:AjaxUpdateContainer id="noIdContainer">
 			<wo:AjaxObserveField updateContainerID="noIdContainer" action="$selfChanged">
 				<div class="box">
-					<label>Fruit (no id, observe-all)</label>
+					<label>A text field above (also triggers the update)</label>
+					<wo:textfield value="$selectedFruit" id="tabSrcField" type="text" />
+					<label>Fruit (no id, observe-all) — Tab into me from the field above</label>
 					<wo:popUpButton list="$fruits" item="$currentFruit" selection="$selfFruit" noSelectionString="Pick a fruit..." class="ajax-popup-button" />
 					<p class="lead">server sees: <strong id="noIdEcho"><wo:str value="$selfFruit" /></strong></p>
 				</div>

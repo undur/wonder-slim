@@ -395,6 +395,118 @@
 		return headers;
 	}
 
+	// --- tab-into-during-morph focus rescue (a WORKAROUND) ---------------------
+	//
+	// WHY THIS EXISTS - and why it's a workaround, not a clean solution:
+	//
+	// When you Tab out of an observed field, two things race: (1) the field's 'change' fires -> a morph
+	// of the container, and (2) the browser moves focus to the NEXT element. The morph reconciles the
+	// container and (especially for a wonder-select widget, whose trigger is client-injected) re-creates
+	// the very node focus was arriving at - so the browser's in-flight focus move lands on nothing and
+	// focus falls to <body>. Net effect: Tab out of a field that triggers an update, and you end up
+	// focused on nothing.
+	//
+	// The "correct" fix would be to restore focus to the element the user was tabbing INTO - but the
+	// browser doesn't reliably tell us what that was: on the change/focusout events here, relatedTarget
+	// is null (the destination is mid-transition, and a hidden <select> behind a wonder-select trigger
+	// confuses relatedTarget resolution). So we can't KNOW the destination.
+	//
+	// THE WORKAROUND: remember the field that triggered the update, and after the morph - only if focus
+	// actually fell to <body> - move focus to the next tabbable element after that field. That
+	// RECONSTRUCTS what the browser's Tab was trying to do. It happens to be right for the common case
+	// (Tab moves forward to the next field), but it is a reconstruction, not the browser's actual intent:
+	// it assumes forward-Tab, can't see Shift+Tab, and picks "next tabbable" by DOM order + tabindex
+	// heuristics rather than the browser's real focus model. Introduced because the morph destroys the
+	// destination before we can observe it - the right reasons would be a browser that preserved the
+	// in-flight focus target across the DOM change, which we don't get.
+	var _tabFrom = null;
+
+	// Record the field whose change triggered the update, so we can find the "next" field after a morph.
+	// Only for fields whose focus the browser will try to move OFF on the change (text/number inputs,
+	// textareas). A wonder-select-managed <select> handles its OWN post-morph focus (see the widget's
+	// _refocus), so we must NOT also move focus to the next field for it - that would fight the widget
+	// and steal focus away from the select the user just used.
+	function rememberTabSource(field) {
+		_tabFrom = null;
+		if (!field || field.nodeType !== 1 || !field.id) {
+			return;
+		}
+		if (field.tagName === 'SELECT' && field.classList && field.classList.contains('ajax-popup-button')) {
+			return; // wonder-select owns its own refocus
+		}
+		_tabFrom = { id: field.id, at: now() };
+	}
+
+	// After a morph, if focus fell to <body> and we remembered a trigger field, move focus to the next
+	// tabbable element after it. Short deadline so a stale record can't later steal focus.
+	function restoreTabFocus() {
+		var rec = _tabFrom;
+		_tabFrom = null;
+		if (!rec || now() - rec.at > 4000) {
+			return;
+		}
+		if (document.activeElement && document.activeElement !== document.body) {
+			return; // focus already landed somewhere real - don't fight it
+		}
+		var from = document.getElementById(rec.id);
+		if (!from) {
+			return;
+		}
+		var next = nextTabbable(from);
+		if (!next) {
+			return;
+		}
+		// If the destination is a wonder-select's underlying <select>, focus goes to its trigger. But the
+		// morph re-creates a BARE <select>; wonder-select's re-enhance (which wraps it and builds the
+		// trigger) runs on its own async pass, which may not have happened yet. So resolve the focus
+		// target lazily and retry for a few frames until the trigger exists, rather than racing it.
+		var attempts = 0;
+		(function tryFocus() {
+			if (document.activeElement && document.activeElement !== document.body) {
+				return; // user/enhancer already moved focus - stop
+			}
+			var target = next;
+			if (next.tagName === 'SELECT' && next.classList.contains('ajax-popup-button')) {
+				var host = next.closest('wonder-select');
+				var trigger = host && host.querySelector('.ws-trigger');
+				if (!trigger) {
+					// Not enhanced yet - wait a frame and retry (bounded).
+					if (attempts++ < 20) {
+						(window.requestAnimationFrame || window.setTimeout)(tryFocus, 16);
+					}
+					return;
+				}
+				target = trigger;
+			}
+			if (target && typeof target.focus === 'function') {
+				target.focus();
+			}
+		})();
+	}
+
+	// The next element in tab order after `from`. Best-effort DOM-order walk over focusable elements
+	// (the browser's real algorithm, incl. tabindex ordering, is more complex - this covers the common
+	// forward-Tab-through-a-form case the workaround targets).
+	function nextTabbable(from) {
+		var focusable = document.querySelectorAll(
+			'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), ' +
+			'select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+		var list = Array.prototype.filter.call(focusable, function (el) {
+			// Skip the hidden <select> behind a wonder-select (you tab to its trigger instead, which is
+			// itself in the list). Skip elements with no layout box (display:none / visibility:hidden).
+			if (el.tagName === 'SELECT' && el.closest && el.closest('wonder-select')) {
+				return false;
+			}
+			return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+		});
+		var i = list.indexOf(from);
+		return i >= 0 && i + 1 < list.length ? list[i + 1] : null;
+	}
+
+	function now() {
+		return (window.performance && window.performance.now) ? window.performance.now() : Date.now();
+	}
+
 	function fetchAndMorph(targetId, url, body, onDone) {
 		var init = {
 			credentials: 'same-origin',
@@ -439,6 +551,13 @@
 			if (typeof onDone === 'function') {
 				onDone();
 			}
+			// If a Tab-out triggered this morph and focus was lost to <body>, move it to the next
+			// tabbable element (the workaround above). Deferred so it runs after the DOM settles AND
+			// after wonder-select's post-morph re-enhance pass (which re-creates the widget trigger) -
+			// otherwise the destination may not exist yet.
+			(window.requestAnimationFrame || window.setTimeout)(function () {
+				restoreTabFocus();
+			}, 0);
 		}).catch(function (e) {
 			// Either a network failure (no e.ajaxslim) or an HTTP error we threw above (e.ajaxslim set).
 			// Surface it to the user; never morph an error response into the container.
@@ -844,7 +963,7 @@
 				// Same logical observer, but the positional submit name changed under a morph: detach the
 				// stale listeners before rebinding so the node never carries a handler that submits an
 				// outdated element-id (and never accumulates duplicates).
-				field.removeEventListener('change', prior.handler);
+				field.removeEventListener('change', prior.changeListener || prior.handler);
 				if (prior.delayMs > 0) {
 					field.removeEventListener('input', prior.handler);
 				}
@@ -867,12 +986,21 @@
 
 			var delayMs = debounceMsFor(frequencySeconds, observeDelaySeconds);
 			var handler = delayMs > 0 ? debounce(fire, delayMs) : fire;
-			observers[identity] = { submitName: submitName, handler: handler, delayMs: delayMs };
 			// 'change' fires on commit (blur / option pick); 'input' gives live debounced behavior
 			// for text fields. We bind 'change' always, and 'input' too when debounced so typing
 			// triggers the debounced submit (matching the legacy frequency-poll feel) without firing
 			// on every keystroke. Radios/checkboxes/selects only emit 'change', which is correct.
-			field.addEventListener('change', handler);
+			//
+			// A 'change' that fires from a blur (e.g. Tab out of the field) triggers a morph that can
+			// re-create the element the user is tabbing INTO, dropping focus to <body>. Remember this
+			// field so the morph can move focus to the next tabbable element afterwards, reconstructing
+			// the Tab the browser lost. See the rememberTabSource / restoreTabFocus workaround above.
+			var changeListener = function (e) {
+				rememberTabSource(field);
+				handler(e);
+			};
+			observers[identity] = { submitName: submitName, handler: handler, changeListener: changeListener, delayMs: delayMs };
+			field.addEventListener('change', changeListener);
 			if (delayMs > 0) {
 				field.addEventListener('input', handler);
 			}
