@@ -51,6 +51,23 @@
 		</wo:AjaxUpdateContainer>
 	</wo:form>
 
+	<h2 style="margin-top:2rem">Self-refreshing, NO id on the select (observe-all)</h2>
+	<p class="lead">The regression case: a select with <strong>no <code>id</code></strong>, observed by an
+	observe-all <code>AjaxObserveField</code> (no <code>observeFieldID</code>), refreshing its own container.
+	Without the derived-id fix, focus drops to <code>&lt;body&gt;</code> on every change. Focus must survive
+	here too, with no id in the template.</p>
+	<wo:form>
+		<wo:AjaxUpdateContainer id="noIdContainer">
+			<wo:AjaxObserveField updateContainerID="noIdContainer" action="$selfChanged">
+				<div class="box">
+					<label>Fruit (no id, observe-all)</label>
+					<wo:popUpButton list="$fruits" item="$currentFruit" selection="$selfFruit" noSelectionString="Pick a fruit..." class="ajax-popup-button" />
+					<p class="lead">server sees: <strong id="noIdEcho"><wo:str value="$selfFruit" /></strong></p>
+				</div>
+			</wo:AjaxObserveField>
+		</wo:AjaxUpdateContainer>
+	</wo:form>
+
 	<wo:ERXJavaScript filename="wonder-select.js" framework="AjaxSlim" />
 </body>
 </html>

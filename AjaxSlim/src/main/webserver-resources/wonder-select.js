@@ -459,6 +459,15 @@
 		// Enhance one select: wrap it in a <wonder-select> host and build the widget.
 		function enhance(select) {
 			if (select.closest('wonder-select')) return;
+			// Post-morph focus restoration (see WonderSelect._refocus) keys on select.id. Authors often
+			// don't bind an id, so a self-updating select would drop focus on every change. Derive a
+			// stable fallback id from the server-rendered `name` (WOPopUpButton always renders one, and it
+			// survives morphs), so refocus works with no template change required. Must be DETERMINISTIC
+			// from `name`: a morph re-runs enhance() and has to compute the same id, or getElementById
+			// can't re-find the (re-created) select afterwards.
+			if (!select.id && select.name) {
+				select.id = 'ws-' + select.name.replace(/[^A-Za-z0-9_-]/g, '_');
+			}
 			var host = document.createElement('wonder-select');
 			select.parentNode.insertBefore(host, select);
 			host.appendChild(select);
