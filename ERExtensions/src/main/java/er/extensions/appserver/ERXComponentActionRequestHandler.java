@@ -50,6 +50,13 @@ import er.extensions.appserver.ajax.ERXAjaxSession;
  * <li>On a repeated-request match, a null result from the page cache falls through to re-rendering
  * the already-restored page; the old handler set a null page element and let the render fail. (A
  * match's page is by construction in the cache, so neither branch should ever run.)</li>
+ * <li>The page-recreation branch ({@code _isPageRecreationEnabled()} - the predicate for WO's
+ * cacheless component-action mode, observed to hold only at {@code pageCacheSize == 0}, where
+ * action URLs carry the page name for fresh recreation) is gone. That mode has been dead in this
+ * lineage since named-page parsing was removed: the embedded page name parses as a session id, so
+ * a cacheless action dies with a session-restoration error before either handler's recreation
+ * branch could run - verified identical through both. A failed restore is therefore always the
+ * page-restoration error.</li>
  * <li>Errors are logged through slf4j like the rest of the framework, not NSLog.</li>
  * </ul>
  * Everything else is behavior-parity with the old handler - including bug-for-bug edges like the
@@ -185,16 +192,11 @@ public class ERXComponentActionRequestHandler extends WORequestHandler {
 			return application.handlePageRestorationErrorInContext(context);
 		}
 
-		WOComponent page = session.restorePageForContextID(url.contextID());
+		final WOComponent page = session.restorePageForContextID(url.contextID());
 
 		// The page's contextID has aged out of the page cache ("backtracked too far").
 		if (page == null) {
-			if (application._isPageRecreationEnabled()) {
-				page = application.pageWithName(null, context);
-			}
-			else {
-				return application.handlePageRestorationErrorInContext(context);
-			}
+			return application.handlePageRestorationErrorInContext(context);
 		}
 
 		context._setPageElement(page);

@@ -9,7 +9,9 @@
   malformed-URL/expired-session edge, run against both handlers and diffed - one intended divergence),
   with deliberate exceptions: a malformed action URL (no contextID)
   gets a clean page-restoration error instead of the old handler's exception page; awake/sleep and session
-  check-in are correctly paired on all paths including exceptions; errors log through slf4j. The complete
+  check-in are correctly paired on all paths including exceptions; errors log through slf4j; the
+  page-recreation branch (WO's cacheless component-action mode, pageCacheSize=0) is gone - that mode has
+  been dead in this lineage since named-page parsing was removed, in both handlers alike. The complete
   divergence list is in the class javadoc. Escape hatch back to the legacy handler:
   `er.extensions.ERXComponentActionRequestHandler.enabled=false`.
 
