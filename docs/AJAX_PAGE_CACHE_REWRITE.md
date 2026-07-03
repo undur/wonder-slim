@@ -1,5 +1,10 @@
 # Ajax page cache — the rewrite
 
+> **Superseded by [`UNIFIED_PAGE_CACHE.md`](UNIFIED_PAGE_CACHE.md).** The contextID-keyed,
+> instance-bounded model described here still holds, but the cache has since absorbed WO's backtrack
+> cache entirely (savePage never calls super anymore), is bounded by `WOApplication.pageCacheSize()`,
+> and owns the refresh-replay guard. Kept for the history of how the keying/eviction model was reached.
+
 How `ERXAjaxSession`'s ajax page-replacement cache works after the rewrite, and why.
 
 ## The problem it solves

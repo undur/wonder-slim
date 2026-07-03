@@ -1,5 +1,6 @@
 // Edit-and-wander endurance harness. Run against an app started with a SMALL
-// maxPageReplacementCacheSize (e.g. 3) so the page limit bites quickly.
+// page cache (e.g. -DWOPageCacheSize=3; the unified cache bounds INSTANCES by
+// WOApplication.pageCacheSize) so the page limit bites quickly.
 //
 // Scenario (the receipt-editing pattern): open a "receipt" (page A) and edit it, then wander through
 // many OTHER pages to look up data, returning to edit A between each. Asserts A survives the whole

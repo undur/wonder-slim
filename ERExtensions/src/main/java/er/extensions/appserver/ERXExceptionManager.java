@@ -146,11 +146,11 @@ public class ERXExceptionManager {
 						extraInfo.setObjectForKey(context.session().statistics(), "PreviousPageList");
 					}
 					extraInfo.setObjectForKey(context.session(), "Session");
-					// Add a focused, readable view of OUR ajax page caches (page-replacement + permanent),
-					// grouped by page instance with container keys and entry ages - far more useful when
-					// debugging a stale-link / backtrack exception than the flat blob in the session dump.
+					// Add a focused, readable view of the unified page cache, grouped by page instance
+					// with container keys and entry ages - far more useful when debugging a stale-link /
+					// backtrack exception than the flat blob in the session dump.
 					if (context.session() instanceof er.extensions.appserver.ajax.ERXAjaxSession ajaxSession) {
-						extraInfo.setObjectForKey(ajaxSession.ajaxCacheDiagnostics(), "AjaxPageCache");
+						extraInfo.setObjectForKey(ajaxSession.pageCacheDiagnostics(), "PageCache");
 					}
 				}
 			}

@@ -1,5 +1,10 @@
 # The Ajax page-fragment cache
 
+> **Historical.** This describes the `(page, container)` design, which was replaced first by the
+> contextID-keyed rewrite ([`AJAX_PAGE_CACHE_REWRITE.md`](AJAX_PAGE_CACHE_REWRITE.md)) and then by
+> the unified page cache ([`UNIFIED_PAGE_CACHE.md`](UNIFIED_PAGE_CACHE.md)), which absorbed WO's
+> backtrack cache entirely. Kept because it documents the two-cache problem and the bleed bug class.
+
 How `ERXAjaxSession`'s page-replacement (fragment) cache works, why it exists, and the
 `(page, container)` redesign that fixed an age-old "backtracked too far" failure.
 

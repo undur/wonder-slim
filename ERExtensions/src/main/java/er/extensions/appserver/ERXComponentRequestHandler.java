@@ -14,6 +14,8 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.appserver.ajax.ERXAjaxSession;
+
 /**
  * Patch to prevent direct access to components via /wo/pagename.wo URLs
  */
@@ -116,7 +118,16 @@ public class ERXComponentRequestHandler extends WORequestHandler {
 		WOResponse aResponse = anApplication.createResponseInContext(aContext);
 		String aSenderID = aContext.senderID();
 
-		String oldContextID = aSession._contextIDMatchingIDs(aContext);
+		// The refresh/double-submit guard: a repeat of an already-handled request re-renders the stored
+		// result instead of re-invoking the action. ERXAjaxSession owns the page cache (WO's private
+		// cache is never fed), so it answers this; stock WO sessions fall back to WO's own matching.
+		String oldContextID;
+		if (aSession instanceof ERXAjaxSession ajaxSession) {
+			oldContextID = ajaxSession.contextIDForRepeatedRequest(aContext);
+		}
+		else {
+			oldContextID = aSession._contextIDMatchingIDs(aContext);
+		}
 		aResponse.setHTTPVersion(aRequest.httpVersion());
 
 		aResponse.setHeader("text/html", "content-type");

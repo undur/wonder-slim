@@ -26,10 +26,15 @@ public class Application extends ERXApplication {
 	public Application() {
 		setIncludeCommentsInResponses( false );
 		setAllowsConcurrentRequestHandling( true );
-		setPageRefreshOnBacktrackEnabled( false );
+		// Off by default; the replay-guard harness starts the app with -DWOPageRefreshOnBacktrackEnabled=true
+		// to exercise the repeated-request guard (which is gated on this flag, as in stock WO).
+		setPageRefreshOnBacktrackEnabled( Boolean.parseBoolean( System.getProperty( "WOPageRefreshOnBacktrackEnabled", "false" ) ) );
 
 		// No login, so a generous default page cache is plenty and keeps backtracking snappy.
-		setPageCacheSize( 100 );
+		// Read WOPageCacheSize from a -D system property ourselves (WO's own plumbing only picks it up
+		// as a launch argument) - the cache-eviction harnesses start the app with a tiny value to force
+		// the instance limit to bite.
+		setPageCacheSize( Integer.parseInt( System.getProperty( "WOPageCacheSize", "100" ) ) );
 
 		// Clean, flat URLs for page-to-page navigation (see Routes).
 		Routes.register();

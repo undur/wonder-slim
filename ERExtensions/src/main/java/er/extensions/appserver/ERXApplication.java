@@ -53,7 +53,6 @@ import er.extensions.ERXKVCReflectionHack;
 import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXMonitorServer;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXProperties;
@@ -432,14 +431,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass().getName(), nsBundle.isJar() ) );
 		}
 
-		// The three page caches and how they're bounded. Surfaced at launch to make the configuration
+		// The page cache and how it's bounded. Surfaced at launch to make the configuration
 		// visible during the page-cache migration; may be removed once that has settled.
 		System.out.println();
 		System.out.println( "============= CACHE CONFIGURATION ==============" );
-		System.out.println( String.format( "%-37s : %s", "ajax replacement cache (instances)", ERXAjaxSession.maxPageReplacementCacheSize() ) );
-		System.out.println( String.format( "%-37s : %s", "WO backtrack cache (contexts)", pageCacheSize() ) );
-		System.out.println( String.format( "%-37s : %s", "permanent page cache (pages)", permanentPageCacheSize() ) );
-		System.out.println( String.format( "%-37s : %s (superseded by ERXAjaxSession)", "WO page fragment cache", pageFragmentCacheSize() ) );
+		System.out.println( String.format( "%-37s : %s", "unified page cache (instances)", pageCacheSize() ) );
+		System.out.println( String.format( "%-37s : %s (obsolete: savePageInPermanentCache throws)", "WO permanent page cache", permanentPageCacheSize() ) );
+		System.out.println( String.format( "%-37s : %s (unused: unified cache handles all restores)", "WO page fragment cache", pageFragmentCacheSize() ) );
 
 		if( isDevelopmentMode() && isDirectConnectEnabled()) {
 			// To make the URL conveniently double clickable, we put it on it's own line.

@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-07-03
+
+- **Unified the page cache: ERXAjaxSession's cache is now THE page cache, WO's private caches are never fed**
+  One session-side `contextID -> live page instance` map now serves every restore — back button, component
+  actions and ajax updates alike. `savePage` never calls super, so the storage routing decision (which cache
+  does this page go in) is gone: an ajax update is just another alias for the same instance and can never
+  evict the foreground page. Bounded by distinct page instances via WO's own knob, `WOPageCacheSize` /
+  `WOApplication.pageCacheSize()` (note: that now counts retained live page trees, not backtrack steps —
+  prefer small values). The repeated-request guard WO's cache used to provide moved with it: entries
+  record request provenance and `ERXComponentRequestHandler` consults
+  `ERXAjaxSession.contextIDForRepeatedRequest` instead of `_contextIDMatchingIDs` — gated on
+  `isPageRefreshOnBacktrackEnabled()` exactly like stock WO (flag off = an identical re-submit
+  re-executes the action, as always; flag on = the repeat re-renders the stored result, because that
+  mode makes the browser re-issue requests during history navigation). The frames-era permanent page
+  cache is obsolete and fails loudly: its machinery is deleted (`er.extensions.overridePrivateCache`
+  and the storage itself, which had a leak in its dormant path) and `savePageInPermanentCache` now
+  throws `UnsupportedOperationException` — instance-LRU eviction removed the context churn that
+  permanent pages needed protection from, and silently downgrading a pinning request to LRU semantics
+  would be a behavior change with no error. Also deleted the dead `original_context_id` header write.
+  `er.extensions.maxPageReplacementCacheSize` is no longer used (startup WARN if set);
+  per-store cache logging renamed to `er.extensions.appserver.ajax.ERXAjaxSession.logPageCache`.
+  See `docs/UNIFIED_PAGE_CACHE.md`.
+
 ## 2022-02-06
 - **Added an updateContainerID binding to AjaxUpdateTrigger**
 

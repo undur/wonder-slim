@@ -5,10 +5,10 @@
 wolips.host=localhost
 wolips.port=9485
 
-# Log the ajax fragment (page-replacement) cache size + page->container structure on every fragment
-# store - so you can watch the cache stay sized by (pages x containers) instead of growing per
-# interaction. Dev/showcase only; off by default in the framework.
-er.extensions.appserver.ajax.ERXAjaxSession.logPageReplacementCache=true
+# Log the unified page cache size + page->container structure on every store - so you can watch
+# the cache stay bounded by page instances instead of growing per interaction. Dev/showcase only;
+# off by default in the framework.
+er.extensions.appserver.ajax.ERXAjaxSession.logPageCache=true
 
 # Logging. Without an explicit appender, log4j falls back to a default layout whose timestamp is %r
 # (milliseconds since logging started) - which reads like a counter, not a clock. Configure a console

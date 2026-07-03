@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: Repeated-request guard</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.count { font-size: 1.4rem; color: #2b6cb0; font-weight: 700; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border-radius: 5px; cursor: pointer; border: 0; font-size: 1rem; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<body>
+	<h1>Repeated-request guard</h1>
+	<p class="lead">
+		Plain (non-ajax) component actions incrementing counters. Refreshing the POST, double-firing
+		the link or backtracking and clicking the very same rendered link must NOT increment again;
+		a genuinely new click (fresh render, fresh contextID) must.
+	</p>
+
+	<div class="box">
+		<h2>Form submit</h2>
+		<wo:form>
+			<wo:textfield value="$note" id="note" />
+			<wo:submit action="$submitAction" value="Submit" id="submitBtn" class="btn" />
+		</wo:form>
+		<p>Submit count: <span class="count" id="submitCount"><wo:str value="$submitCount" /></span></p>
+	</div>
+
+	<div class="box">
+		<h2>Link click</h2>
+		<wo:link action="$linkAction" id="incrementLink">Increment</wo:link>
+		<p>Link count: <span class="count" id="linkCount"><wo:str value="$linkCount" /></span></p>
+	</div>
+
+	<p><a href="/">Home</a></p>
+</body>
+</html>

@@ -202,6 +202,25 @@ Record the same fields so the comparison is apples-to-apples:
 Prediction to test: **peak ↓, period ↑, YGC frequency ↓, floor ≈ unchanged, FGC = 0.** If the floor also
 drops meaningfully, that quantifies how much genuinely-live memory the oversized caches were pinning.
 
+### AFTER the fix — first reading (2026-07-03, fresh JVM, LIGHT/slow-morning load)
+
+Redeployed with the corrected caps (`pageCacheSize=100`, `permanentPageCacheSize=30`,
+`maxPageReplacementCacheSize=100`). Same 12 GB G1 heap. First reading, ~9 young GCs in, low traffic:
+
+- **Old gen: ~0.56%** — essentially empty. (Before: floored ~50%, climbed to 90%+ by mid-morning.)
+- **FGC: 0**, total GC time 0.28s (fresh JVM).
+- **Survivor (S1): 100%** — still pinned. So the *cache fix did not change survivor saturation* (that's a
+  separate tuning axis — survivor ratio / tenuring). But now promotion lands in a near-empty old gen, so
+  S1=100% is harmless here, vs. before when it fed an already-full old gen.
+
+Caveat: this is a **fresh JVM on a light morning**, so part of the low old-gen is "just started + low load",
+not purely the fix. The honest apples-to-apples is a reading once load builds (a busy hour, ideally next
+first-of-month). But even discounted for load, ~0.5% old-gen vs. the old config's early-morning ~50% floor
+is a dramatic, real improvement. **The prediction (floor & peak far lower, FGC 0) is holding so far.**
+
+TODO: capture an **AFTER (full load)** reading to complete the comparison — expect the old-gen floor well
+below the old 50–69%, a shallow low sawtooth, FGC still 0.
+
 ## Caveat carried throughout
 
 Don't sum per-page byte estimates into a "session total" — shared object graphs (and the shared snapshot

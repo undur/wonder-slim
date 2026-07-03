@@ -1,7 +1,8 @@
-// Degenerate-corner harness: the page the request belongs to has aged out of WO's caches entirely,
+// Degenerate-corner harness: the page the request belongs to has aged out of the page cache entirely,
 // while a DIFFERENT instance is still cached. Per the chosen design, the request must FAIL (no page)
 // rather than restore the other instance's content. Run this against an app started with a tiny
-// er.extensions.maxPageReplacementCacheSize (e.g. 1) so eviction is forced.
+// page cache (e.g. -DWOPageCacheSize=1; the unified cache bounds INSTANCES by WOApplication.pageCacheSize)
+// so eviction is forced.
 import { chromium } from '/Users/hugi/git/wonder-slim/tools/playwright-bridge/node_modules/playwright/index.mjs';
 
 const BASE = process.env.BASE

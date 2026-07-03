@@ -18,12 +18,14 @@ import com.webobjects.appserver._private.WOTransactionRecord;
 import er.extensions.appserver.ajax.ERXAjaxSession;
 
 /**
- * Builds framework-neutral {@link CacheReport}s for a session's page caches, over BOTH cache families:
+ * Builds framework-neutral {@link CacheReport}s for a session's page caches:
  * <ul>
- * <li>ERXAjaxSession's replacement cache - via the read-only {@code replacementCacheSnapshot()} accessor
- *     (full age data).</li>
+ * <li>ERXAjaxSession's unified page cache - via the read-only {@code pageCacheSnapshot()} accessor
+ *     (full age data). This is THE page cache; it serves backtrack, component-action and ajax restores.</li>
  * <li>WO's own backtrack and permanent caches - via reflection on {@code WOSession._contextRecords} and
- *     {@code _permanentPageCache} (private, no getter; WO records carry no wall-clock age, so age is null).</li>
+ *     {@code _permanentPageCache} (private, no getter; WO records carry no wall-clock age, so age is null).
+ *     With the unified cache these are never fed, so their cards double as a regression check: anything
+ *     other than "empty" means some code path is still storing pages the old way.</li>
  * </ul>
  * Read-only throughout: it never mutates a cache. The UI/component consumes only the returned reports and
  * is identical across cache families; a future third cache is just another adapter method here.
@@ -68,12 +70,12 @@ public class SessionCacheReporter {
 		return reports;
 	}
 
-	// ---- ERXAjaxSession replacement cache (our cache; full age data) ----
+	// ---- ERXAjaxSession unified page cache (our cache; full age data) ----
 
 	private static CacheReport ajaxReplacementReport( WOSession session ) {
 		List<CachedPageEntry> entries = new ArrayList<>();
 		if( session instanceof ERXAjaxSession ajax ) {
-			for( Object[] t : ajax.replacementCacheSnapshot() ) {
+			for( Object[] t : ajax.pageCacheSnapshot() ) {
 				entries.add( new CachedPageEntry(
 						(String) t[0],
 						(String) t[1],
@@ -82,7 +84,7 @@ public class SessionCacheReporter {
 						null ) ); // reachDepth deferred
 			}
 		}
-		return new CacheReport( "Ajax replacement", ERXAjaxSession.maxPageReplacementCacheSize(), true, entries );
+		return new CacheReport( "Page cache (unified)", WOApplication.application().pageCacheSize(), true, entries );
 	}
 
 	// ---- WO backtrack cache (_contextRecords) - reflection, no age ----
