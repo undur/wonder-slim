@@ -61,8 +61,8 @@
     { "do": "assert", "name": "line 1 total recomputed to 2500", "that": "line1_1", "equals": "2500" },
     { "do": "assert", "name": "grand total recomputed to 4000", "that": "total1", "equals": "4000" },
     { "do": "assert", "name": "line 2 was NOT disturbed by editing line 1", "that": "total1", "notEquals": "2500" },
-    { "do": "comment", "text": "Regression guard for the table-context morph bug: the edited <tr> must keep its 5 <td> cells. Multi-update of a <tr> container used to DOM-parse the fragment out of table context and drop the <td>s, collapsing the row's columns. Now the fragment html is kept as a string and morphed in the receiver's context." },
-    { "do": "assert", "name": "edited row kept its 5 cells (table-context morph not mangled)", "that": "line1_cells", "equals": 5 },
+    { "do": "comment", "text": "Regression guard for the table-context morph bug: the edited <tr> must keep ALL its <td> cells. Multi-update of a <tr> container used to DOM-parse the fragment out of table context and drop the <td>s, collapsing the row's columns. Now the fragment html is kept as a string and morphed in the receiver's context. The count tracks the row template: currently 6 (grip, product, qty, price, lineTotal, controls) - update it when the row gains/loses a column." },
+    { "do": "assert", "name": "edited row kept its 6 cells (table-context morph not mangled)", "that": "line1_cells", "equals": 6 },
 
     { "do": "comment", "text": "Edit line 3 unit price 75 -> 100 (4x100=400). Grand total 4000-300+400 = 4100. Proves a SECOND independent observe field works alongside the first, no cross-talk." },
     { "do": "fill", "selector": "#price-3", "text": "100" },
