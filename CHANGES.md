@@ -2,6 +2,17 @@
 
 ## 2026-07-03
 
+- **New default: ERXComponentActionRequestHandler - component-action dispatch rewritten as owned code**
+  A from-requirements rewrite of the /wo/ handler, replacing the patched-stock ERXComponentRequestHandler
+  as the DEFAULT. Same behavior, verified by the full playground suite, the cache/replay/expired-session
+  harnesses, and a differential URL-matrix probe (dispatch-differential.mjs: happy paths plus every
+  malformed-URL/expired-session edge, run against both handlers and diffed - one intended divergence),
+  with deliberate exceptions: a malformed action URL (no contextID)
+  gets a clean page-restoration error instead of the old handler's exception page; awake/sleep and session
+  check-in are correctly paired on all paths including exceptions; errors log through slf4j. The complete
+  divergence list is in the class javadoc. Escape hatch back to the legacy handler:
+  `er.extensions.ERXComponentActionRequestHandler.enabled=false`.
+
 - **Unified the page cache: ERXAjaxSession's cache is now THE page cache, WO's private caches are never fed**
   One session-side `contextID -> live page instance` map now serves every restore — back button, component
   actions and ajax updates alike. `savePage` never calls super, so the storage routing decision (which cache
