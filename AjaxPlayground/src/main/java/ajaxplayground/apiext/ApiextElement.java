@@ -63,8 +63,16 @@ public class ApiextElement {
 		 * constraint. Not to be confused with {@link #defaults}, the legacy autocomplete-preset hint.
 		 */
 		public String defaultValue;
+		/**
+		 * The migration note when the binding is deprecated (may be empty), or null when it isn't.
+		 * Warning-class only: a deprecated binding still works, so it renders as a nudge, never an error.
+		 */
+		public String deprecated;
 
 		public boolean hasDefault() { return defaultValue != null; }
+		public boolean isDeprecated() { return deprecated != null; }
+		/** The migration note rendered from the Markdown subset to safe HTML. */
+		public String deprecatedHtml() { return Markdown.toHtml(deprecated); }
 
 		/** The doc rendered from the Markdown subset to safe HTML (inline only - bindings rarely fence). */
 		public String docHtml() {
@@ -174,6 +182,8 @@ public class ApiextElement {
 	 * to one of the three values.
 	 */
 	public String unknownAttributes;
+	/** The migration note when the whole element is deprecated (may be empty), or null when it isn't. */
+	public String deprecated;
 	public String doc;
 	public final List<Binding> bindings = new ArrayList<>();
 	public final List<Constraint> constraints = new ArrayList<>();
@@ -181,6 +191,9 @@ public class ApiextElement {
 	public String className() { return className; }
 	public boolean passthrough() { return "passthrough".equals(unknownAttributes); }
 	public boolean forbidden() { return "forbidden".equals(unknownAttributes); }
+	public boolean isDeprecated() { return deprecated != null; }
+	/** The element's migration note rendered from the Markdown subset to safe HTML. */
+	public String deprecatedHtml() { return Markdown.toHtml(deprecated); }
 	public String doc() { return doc; }
 	/** The element doc rendered from the Markdown subset to safe HTML (paragraphs + fenced code samples). */
 	public String docHtml() { return Markdown.toHtml(doc); }
@@ -220,6 +233,7 @@ public class ApiextElement {
 		ApiextElement out = new ApiextElement();
 		out.className = wo.getAttribute("class");
 		out.unknownAttributes = wo.hasAttribute("unknownAttributes") ? wo.getAttribute("unknownAttributes") : null;
+		out.deprecated = textOf(firstChildElement(wo, "deprecated"));
 		out.doc = textOf(firstChildElement(wo, "doc"));
 
 		for (Element b : childElements(wo, "binding")) {
@@ -228,6 +242,7 @@ public class ApiextElement {
 			binding.required = "true".equals(b.getAttribute("required"));
 			binding.defaults = b.hasAttribute("defaults") ? b.getAttribute("defaults") : null;
 			binding.defaultValue = textOf(firstChildElement(b, "default"));
+			binding.deprecated = textOf(firstChildElement(b, "deprecated"));
 			// Types live in <pull>/<push> blocks (a type always has a direction).
 			Element pull = firstChildElement(b, "pull");
 			if (pull != null) {

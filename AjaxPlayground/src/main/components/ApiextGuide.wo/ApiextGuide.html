@@ -78,6 +78,9 @@
 	<h3>Default values — <code>&lt;default&gt;</code></h3>
 	<p>A binding may declare the value the element behaves as if bound to when the binding is unbound: <code>&lt;default&gt;div&lt;/default&gt;</code>. Literals only — computed fallbacks ("the item's <code>toString</code>") stay prose in <code>&lt;doc&gt;</code>. Never directional, and never satisfies validation: "bound" always means explicitly bound in the template, so a default satisfies neither <code>required</code> nor a constraint. Distinct from the legacy <code>defaults</code> attribute (an autocomplete-preset hint).</p>
 
+	<h3>Deprecation — <code>&lt;deprecated&gt;</code></h3>
+	<p>A binding — or, as a child of <code>&lt;wo&gt;</code>, a whole element — may be marked deprecated; the body is the migration note (same Markdown subset as <code>&lt;doc&gt;</code>). Using it is a <em>warning</em>-class diagnostic, never an error: deprecated still works. The message is generated from the fact ("'observeFieldFrequency' is deprecated.") plus the note. <code>&lt;doc&gt;</code> keeps describing what the binding does; <code>&lt;deprecated&gt;</code> says what to do instead.</p>
+
 	<h3>Constraints — <code>&lt;choose&gt;</code> / <code>&lt;requires&gt;</code></h3>
 	<p>Typed, positive cross-binding rules replacing <code>.api</code>'s inverted <code>&lt;validation&gt;</code> predicate trees. <code>&lt;choose min max&gt;</code> is cardinality over a set of alternatives (at-least-one / at-most-one / exactly-one); <code>&lt;requires binding must when&gt;</code> is implication, with <code>must</code> ∈ <code>bound</code>/<code>settable</code>/<code>gettable</code>. Messages are <em>generated</em> from the typed rule (the sample above renders as “Exactly one of 'checked' and 'value' must be bound.”); a <code>message</code> attribute overrides. Every referenced binding must resolve to a declared one — a file with a typo'd reference is rejected, not silently weakened.</p>
 
@@ -95,7 +98,8 @@
 			<tr><td class="k">value interpretation (truthiness)</td><td class="have">present</td></tr>
 			<tr><td class="k">default values (<code>&lt;default&gt;</code>)</td><td class="have">present (display + validation-relevant: a default never satisfies a constraint)</td></tr>
 			<tr><td class="k">unknown-attribute policy (<code>unknownAttributes</code>)</td><td class="have">present (forbidden / allowed / passthrough; absent = tool decides)</td></tr>
-			<tr><td class="k">deprecation, value-sets</td><td class="want">not yet</td></tr>
+			<tr><td class="k">deprecation (<code>&lt;deprecated&gt;</code>, binding + element level)</td><td class="have">present (warning-class, migration note in the body)</td></tr>
+			<tr><td class="k">value-sets</td><td class="want">not yet</td></tr>
 		</tbody>
 	</table>
 	<p>Successor to WO's <code>.api</code>, not a superset — legacy <code>.api</code> files are handled by their own grammar and a mechanical converter. The format spec — grammar (<code>apiext.dtd</code>), field-by-field reference, examples, and status — lives in its own repository: <a href="https://github.com/undur/apiext-format">github.com/undur/apiext-format</a>.</p>

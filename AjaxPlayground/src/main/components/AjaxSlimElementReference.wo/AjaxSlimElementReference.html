@@ -43,6 +43,10 @@
 		/* A binding's declared <default> — rendered as a chip after the description. */
 		.default-chip { white-space: nowrap; font-size: .78rem; color: #6a7180; background: #f2f4f7; border: 1px solid #e2e5ea; border-radius: 4px; padding: .05rem .4rem; margin-left: .35rem; }
 		.default-chip code { background: none; padding: 0; color: #2b6cb0; }
+		/* Deprecation is a nudge, not an error: amber, never red. */
+		.deprecated-chip { white-space: nowrap; font-size: .78rem; color: #7a5b00; background: #fffbea; border: 1px solid #f0c000; border-radius: 4px; padding: .05rem .4rem; margin-left: .35rem; }
+		.deprecated-note { font-size: .85rem; color: #7a5b00; }
+		.deprecated-note p { display: inline; }
 		pre.md-code { background: #f7f8fa; border: 1px solid #e6e8ec; border-left: 3px solid #2b6cb0; border-radius: 0 5px 5px 0; padding: .6rem .8rem; margin: .6rem 0; overflow-x: auto; font-size: .85rem; line-height: 1.45; }
 		pre.md-code code { background: none; padding: 0; font-size: 1em; }
 		.valids { margin: .5rem 0 0; padding: .5rem .8rem; background: #fffbea; border-left: 3px solid #f0c000; border-radius: 4px; font-size: .85rem; }
@@ -86,6 +90,9 @@
 				<wo:if condition="$currentElement.passthrough"><span class="tag t-passthrough">Passthrough</span></wo:if>
 			</wo:container>
 
+			<wo:if condition="$currentElement.isDeprecated">
+				<p class="role deprecated-note"><span class="deprecated-chip">deprecated</span> <wo:str value="$currentElement.deprecatedHtml" escapeHTML="$false" /></p>
+			</wo:if>
 			<div class="role"><wo:str value="$currentElement.docHtml" escapeHTML="$false" /></div>
 
 			<table class="bindings">
@@ -93,9 +100,9 @@
 				<tbody>
 					<wo:repetition list="$currentElement.bindings" item="$currentBinding">
 						<tr>
-							<td class="b-name"><wo:str value="$currentBinding.name" /><wo:if condition="$currentBindingRequired"> <span class="req">&bull;</span></wo:if></td>
+							<td class="b-name"><wo:str value="$currentBinding.name" /><wo:if condition="$currentBindingRequired"> <span class="req">&bull;</span></wo:if><wo:if condition="$currentBinding.isDeprecated"> <span class="deprecated-chip">deprecated</span></wo:if></td>
 							<td class="b-type"><wo:if condition="$currentBinding.typeSplit"><div class="dir-row"><wo:container elementName="span" class="$currentBinding.pullClass" title="$currentBinding.pullTitle"><wo:str value="$currentBinding.pullArrow" /></wo:container> <wo:str value="$currentBinding.displayPullType" /></div><div class="dir-row"><wo:container elementName="span" class="$currentBinding.pushClass" title="$currentBinding.pushTitle"><wo:str value="$currentBinding.pushArrow" /></wo:container> <wo:str value="$currentBinding.displayPushType" /></div></wo:if><wo:if condition="$currentBinding.typeSplit" negate="$true"><wo:if condition="$currentBinding.hasDirection"><wo:container elementName="span" class="$currentBinding.directionClass" title="$currentBinding.directionTitle"><wo:str value="$currentBinding.directionArrow" /></wo:container> </wo:if><wo:str value="$currentBinding.displayType" /></wo:if></td>
-							<td><wo:str value="$currentBinding.docHtml" escapeHTML="$false" /><wo:if condition="$currentBinding.hasDefault"> <span class="default-chip">default: <code><wo:str value="$currentBinding.defaultValue" /></code></span></wo:if></td>
+							<td><wo:str value="$currentBinding.docHtml" escapeHTML="$false" /><wo:if condition="$currentBinding.hasDefault"> <span class="default-chip">default: <code><wo:str value="$currentBinding.defaultValue" /></code></span></wo:if><wo:if condition="$currentBinding.isDeprecated"><div class="deprecated-note"><wo:str value="$currentBinding.deprecatedHtml" escapeHTML="$false" /></div></wo:if></td>
 						</tr>
 					</wo:repetition>
 				</tbody>

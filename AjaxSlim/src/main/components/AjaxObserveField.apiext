@@ -50,6 +50,7 @@
 			<pull>
 				<type>java.lang.Number</type>
 			</pull>
+			<deprecated>Use `observeDelay` instead.</deprecated>
 			<doc>Legacy poll interval, in seconds; now treated as a debounce.</doc>
 		</binding>
 		<binding name="onBeforeSubmit">
