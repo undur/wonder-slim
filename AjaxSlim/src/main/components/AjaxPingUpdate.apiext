@@ -12,21 +12,17 @@
 ```]]></doc>
 
 		<binding name="updateContainerID">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The id of the update container to refresh when the key changes.</doc>
 		</binding>
+
 		<binding name="cacheKey">
-			<pull>
-				<type>java.lang.Object</type>
-			</pull>
+			<pull><type>java.lang.Object</type></pull>
 			<doc>A value that represents the state of the target container.</doc>
 		</binding>
+
 		<binding name="onBeforeUpdate">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>A JS function to call before updating; return true to allow the update.</doc>
 		</binding>
 

@@ -33,23 +33,18 @@ public WOActionResults reorderLines() {
 ```]]></doc>
 
 		<binding name="listID" required="true">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>The id of the container holding the rows marked with `data-sortable-item`.</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The id of the container holding the rows marked with `data-sortable-item`.]]></doc>
 		</binding>
+
 		<binding name="action">
-			<pull>
-				<type>com.webobjects.appserver.WOActionResults</type>
-			</pull>
-			<doc>The server action fired on drop. Read the move with `AjaxSortable.dragResult(request)`.</doc>
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[The server action fired on drop. Read the move with `AjaxSortable.dragResult(request)`.]]></doc>
 		</binding>
+
 		<binding name="updateContainerID">
-			<pull>
-				<type>java.lang.String</type>
-				<type>java.util.List</type>
-			</pull>
-			<doc>The update container(s) to morph from the action's response — a single id, a `;`-joined set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.</doc>
+			<pull><type>java.lang.String</type><type>java.util.List</type></pull>
+			<doc><![CDATA[The update container(s) to morph from the action's response — a single id, a `;`-joined set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.]]></doc>
 		</binding>
 
 	</wo>

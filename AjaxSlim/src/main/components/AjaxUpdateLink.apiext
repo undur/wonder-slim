@@ -12,162 +12,126 @@
 ```]]></doc>
 
 		<binding name="action">
-			<pull>
-				<type>com.webobjects.appserver.WOActionResults</type>
-			</pull>
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
 			<doc>The action to call when the link executes.</doc>
 		</binding>
+
 		<binding name="directActionName">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>The direct action to call when the link executes (requires `replaceID`).</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct action to call when the link executes (requires `replaceID`).]]></doc>
 		</binding>
+
 		<binding name="updateContainerID">
-			<pull>
-				<type>java.lang.String</type>
-				<type>java.util.List</type>
-			</pull>
-			<doc>The update container(s) to morph after the action — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.</doc>
+			<pull><type>java.lang.String</type><type>java.util.List</type></pull>
+			<doc><![CDATA[The update container(s) to morph after the action — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.]]></doc>
 		</binding>
+
 		<binding name="replaceID">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The id of the element whose contents are replaced with the action's result.</doc>
 		</binding>
 
 		<binding name="string">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>String prepended to the contained elements (the link text).</doc>
 		</binding>
+
 		<binding name="onClick">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>JavaScript to run on the client before the request is sent.</doc>
 		</binding>
+
 		<binding name="onClickBefore">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>If this expression is false, the click is ignored (e.g. `confirm(...)`).</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[If this expression is false, the click is ignored (e.g. `confirm(...)`).]]></doc>
 		</binding>
+
 		<binding name="onClickServer">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>JS returned from the server after the action when there is no update.</doc>
 		</binding>
+
 		<binding name="onSuccess">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>JavaScript to run after a successful update/morph (before `onComplete`).</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[JavaScript to run after a successful update/morph (before `onComplete`).]]></doc>
 		</binding>
+
 		<binding name="onComplete">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>JavaScript to run after the update/morph completes.</doc>
 		</binding>
+
 		<binding name="ignoreActionResponse">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
+			<pull><type>java.lang.Boolean</type></pull>
 			<doc>If true, the action's response is thrown away.</doc>
 		</binding>
+
 		<binding name="function">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>A custom JS function to call, passed the action url.</doc>
 		</binding>
+
 		<binding name="functionName">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>If set, the link becomes a named JavaScript function instead of an element.</doc>
 		</binding>
+
 		<binding name="elementName">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<default>a</default>
 			<doc>The element name to use.</doc>
 		</binding>
+
 		<binding name="button">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
-			<doc>If true, renders an `&lt;input type="button"&gt;`.</doc>
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc><![CDATA[If true, renders an `<input type="button">`.]]></doc>
 		</binding>
+
 		<binding name="disabled">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
+			<pull><type>java.lang.Boolean</type></pull>
 			<doc>If true, the link tag is not rendered.</doc>
 		</binding>
 
 		<binding name="title">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The HTML title attribute, passed through to the rendered tag.</doc>
 		</binding>
+
 		<binding name="class">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The HTML class attribute, passed through to the rendered tag.</doc>
 		</binding>
+
 		<binding name="style">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The HTML style attribute, passed through to the rendered tag.</doc>
 		</binding>
+
 		<binding name="id">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The HTML id attribute, passed through to the rendered tag.</doc>
 		</binding>
+
 		<binding name="accesskey">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The HTML accesskey attribute, passed through to the rendered tag.</doc>
 		</binding>
 
-		<!-- The link must have something to do. -->
 		<choose min="1">
 			<binding name="action"/>
 			<binding name="directActionName"/>
 			<binding name="updateContainerID"/>
 		</choose>
-
-		<!-- At most one way to trigger. -->
 		<choose max="1">
 			<binding name="action"/>
 			<binding name="directActionName"/>
 		</choose>
-
-		<!-- At most one way to handle the response (was three pairwise rules in the legacy file). -->
 		<choose max="1">
 			<binding name="updateContainerID"/>
 			<binding name="replaceID"/>
 			<binding name="ignoreActionResponse"/>
 		</choose>
-
-		<!-- A direct action's response can only go to a replace target... -->
 		<requires binding="replaceID" when="directActionName"/>
-
-		<!-- ...and cannot be ignored. Authored although entailed by the two rules above: constraints are
-		     the diagnostic surface, and the entailment chain alone misdiagnoses this state (see
-		     design/constraints.md in apiext-format, "entailment does not justify omission"). -->
 		<choose max="1">
 			<binding name="directActionName"/>
 			<binding name="ignoreActionResponse"/>

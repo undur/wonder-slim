@@ -10,11 +10,8 @@
 ```]]></doc>
 
 		<binding name="updateContainerID">
-			<pull>
-				<type>java.lang.String</type>
-				<type>java.util.List</type>
-			</pull>
-			<doc>The update container(s) to refresh — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.</doc>
+			<pull><type>java.lang.String</type><type>java.util.List</type></pull>
+			<doc><![CDATA[The update container(s) to refresh — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.]]></doc>
 		</binding>
 
 	</wo>

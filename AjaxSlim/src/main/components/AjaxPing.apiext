@@ -9,40 +9,33 @@
 ```]]></doc>
 
 		<binding name="updateContainerID">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The id of the update container to refresh when the key changes.</doc>
 		</binding>
+
 		<binding name="cacheKey">
-			<pull>
-				<type>java.lang.Object</type>
-			</pull>
+			<pull><type>java.lang.Object</type></pull>
 			<doc>A value that represents the state of the target container.</doc>
 		</binding>
+
 		<binding name="frequency">
-			<pull>
-				<type>java.lang.Number</type>
-			</pull>
+			<pull><type>java.lang.Number</type></pull>
 			<default>3</default>
 			<doc>The frequency of the ping, **in seconds**.</doc>
 		</binding>
+
 		<binding name="onBeforeUpdate">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>A JS function to call before updating; return true to allow the update.</doc>
 		</binding>
+
 		<binding name="stop">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
+			<pull><type>java.lang.Boolean</type></pull>
 			<doc>If true, the ping stops; if false it runs (refresh the ping's container to restart it).</doc>
 		</binding>
+
 		<binding name="id">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>Optional id of the ping container.</doc>
 		</binding>
 

@@ -10,112 +10,88 @@
 ```]]></doc>
 
 		<binding name="list" required="true">
-			<pull>
-				<type>java.util.List</type>
-			</pull>
+			<pull><type>java.util.List</type></pull>
 			<doc>The list of objects to choose from.</doc>
 		</binding>
+
 		<binding name="item">
-			<pull>
-				<type>java.lang.Object</type>
-			</pull>
+			<pull><type>java.lang.Object</type></pull>
 			<doc>The repetition item (current object) during rendering.</doc>
 		</binding>
+
 		<binding name="selection">
-			<pull>
-				<type>java.lang.Object</type>
-			</pull>
-			<push>
-				<type>java.lang.Object</type>
-			</push>
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
 			<doc>The currently selected object (settable).</doc>
 		</binding>
+
 		<binding name="displayString">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>The text shown for each option (defaults to the item's `toString`).</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The text shown for each option (defaults to the item's `toString`).]]></doc>
 		</binding>
+
 		<binding name="noSelectionString">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>Placeholder option text shown when nothing is selected.</doc>
 		</binding>
+
 		<binding name="value">
-			<pull>
-				<type>java.lang.Object</type>
-			</pull>
+			<pull><type>java.lang.Object</type></pull>
 			<doc>Value-based selection (as on WOPopUpButton).</doc>
 		</binding>
+
 		<binding name="selectedValue">
-			<pull>
-				<type>java.lang.Object</type>
-			</pull>
-			<push>
-				<type>java.lang.Object</type>
-			</push>
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
 			<doc>Value-based selection (as on WOPopUpButton).</doc>
 		</binding>
+
 		<binding name="disabled">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
+			<pull><type>java.lang.Boolean</type></pull>
 			<doc>Standard WOPopUpButton behaviour.</doc>
 		</binding>
+
 		<binding name="escapeHTML">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
+			<pull><type>java.lang.Boolean</type></pull>
 			<doc>Standard WOPopUpButton behaviour.</doc>
 		</binding>
+
 		<binding name="otherTagString">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>Additional attributes appended verbatim to the rendered tag (standard WOPopUpButton passthrough).</doc>
 		</binding>
+
 		<binding name="id">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)]]></doc>
 		</binding>
+
 		<binding name="name">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)]]></doc>
 		</binding>
+
 		<binding name="class">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)]]></doc>
 		</binding>
+
 		<binding name="style">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Standard HTML attribute. (The marker class `ajax-popup-button` is merged in automatically.)]]></doc>
 		</binding>
 
-		<!-- list must be a real keypath, not a constant. -->
 		<requires binding="list" must="gettable"/>
-
-		<!-- Per-option rendering runs through item: once displayString or value is bound, item must be
-		     bound AND assignable (two stacked obligations - settable does not imply bound). -->
 		<requires binding="item" must="settable">
 			<any-of><binding name="displayString"/><binding name="value"/></any-of>
 		</requires>
 		<requires binding="item">
 			<any-of><binding name="displayString"/><binding name="value"/></any-of>
 		</requires>
-
-		<!-- One selection mechanism. -->
 		<choose max="1">
 			<binding name="selection"/>
 			<binding name="selectedValue"/>
 		</choose>
+
 	</wo>
 </wodefinitions>

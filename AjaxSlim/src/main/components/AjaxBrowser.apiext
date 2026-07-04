@@ -10,113 +10,88 @@
 ```]]></doc>
 
 		<binding name="list" required="true">
-			<pull>
-				<type>java.util.List</type>
-			</pull>
+			<pull><type>java.util.List</type></pull>
 			<doc>The list of objects to choose from.</doc>
 		</binding>
+
 		<binding name="item">
-			<pull>
-				<type>java.lang.Object</type>
-			</pull>
+			<pull><type>java.lang.Object</type></pull>
 			<doc>The repetition item during rendering.</doc>
 		</binding>
+
 		<binding name="selections">
-			<pull>
-				<type>java.util.List</type>
-			</pull>
-			<push>
-				<type>java.util.List</type>
-			</push>
+			<pull><type>java.util.List</type></pull>
+			<push><type>java.util.List</type></push>
 			<doc>The currently selected objects (settable).</doc>
 		</binding>
+
 		<binding name="selectedValues">
-			<pull>
-				<type>java.util.List</type>
-			</pull>
-			<push>
-				<type>java.util.List</type>
-			</push>
-			<doc>Value-based multi-selection (as on `WOBrowser`).</doc>
+			<pull><type>java.util.List</type></pull>
+			<push><type>java.util.List</type></push>
+			<doc><![CDATA[Value-based multi-selection (as on `WOBrowser`).]]></doc>
 		</binding>
+
 		<binding name="value">
-			<pull>
-				<type>java.lang.Object</type>
-			</pull>
-			<doc>The value for each option, taken from `item` during rendering.</doc>
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The value for each option, taken from `item` during rendering.]]></doc>
 		</binding>
+
 		<binding name="multiple">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
-			<doc>Whether the browser is multi-select (bind `multiple="$true"` for tags).</doc>
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc><![CDATA[Whether the browser is multi-select (bind `multiple="$true"` for tags).]]></doc>
 		</binding>
+
 		<binding name="displayString">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The text shown for each option.</doc>
 		</binding>
+
 		<binding name="otherTagString">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Extra attributes appended to the rendered `&lt;select&gt;` tag.</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Extra attributes appended to the rendered `<select>` tag.]]></doc>
 		</binding>
+
 		<binding name="disabled">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
-			<doc>Standard `WOBrowser` behaviour — renders the select as disabled.</doc>
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc><![CDATA[Standard `WOBrowser` behaviour — renders the select as disabled.]]></doc>
 		</binding>
+
 		<binding name="escapeHTML">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
-			<doc>Standard `WOBrowser` behaviour — whether the display string is HTML-escaped.</doc>
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc><![CDATA[Standard `WOBrowser` behaviour — whether the display string is HTML-escaped.]]></doc>
 		</binding>
 
 		<binding name="id">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Standard HTML `id` attribute.</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Standard HTML `id` attribute.]]></doc>
 		</binding>
+
 		<binding name="name">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Standard HTML `name` attribute.</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Standard HTML `name` attribute.]]></doc>
 		</binding>
+
 		<binding name="class">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Standard HTML `class` attribute.</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Standard HTML `class` attribute.]]></doc>
 		</binding>
+
 		<binding name="style">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc>Standard HTML `style` attribute.</doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Standard HTML `style` attribute.]]></doc>
 		</binding>
 
-		<!-- list must be a real keypath, not a constant. -->
 		<requires binding="list" must="gettable"/>
-
-		<!-- Per-option rendering runs through item: once displayString or value is bound, item must be
-		     bound AND assignable (two stacked obligations - settable does not imply bound). -->
 		<requires binding="item" must="settable">
 			<any-of><binding name="displayString"/><binding name="value"/></any-of>
 		</requires>
 		<requires binding="item">
 			<any-of><binding name="displayString"/><binding name="value"/></any-of>
 		</requires>
-
-		<!-- One selection mechanism. -->
 		<choose max="1">
 			<binding name="selections"/>
 			<binding name="selectedValues"/>
 		</choose>
+
 	</wo>
 </wodefinitions>

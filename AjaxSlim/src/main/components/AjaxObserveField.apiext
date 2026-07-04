@@ -16,90 +16,74 @@
 ```]]></doc>
 
 		<binding name="observeFieldID">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
-			<doc><![CDATA[The id of the field to observe. **Omit to observe all descendant fields** of this element (descendant mode).]]></doc>
+			<pull><type>java.lang.String</type></pull>
+			<doc>The id of the field to observe. **Omit to observe all descendant fields** of this element (descendant mode).</doc>
 		</binding>
+
 		<binding name="updateContainerID">
-			<pull>
-				<type>java.lang.String</type>
-				<type>java.util.List</type>
-			</pull>
+			<pull><type>java.lang.String</type><type>java.util.List</type></pull>
 			<doc><![CDATA[The update container(s) to morph on change — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.]]></doc>
 		</binding>
+
 		<binding name="action">
-			<pull>
-				<type>com.webobjects.appserver.WOActionResults</type>
-			</pull>
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
 			<doc>The action to call when the observer fires.</doc>
 		</binding>
+
 		<binding name="fullSubmit">
-			<pull>
-				<type>java.lang.Boolean</type>
-			</pull>
+			<pull><type>java.lang.Boolean</type></pull>
 			<doc>When false (default), only the changed field is submitted (partial); when true, the whole form is submitted.</doc>
 		</binding>
+
 		<binding name="observeDelay">
-			<pull>
-				<type>java.lang.Number</type>
-			</pull>
+			<pull><type>java.lang.Number</type></pull>
 			<doc>The debounce, in seconds, before the submit fires.</doc>
 		</binding>
+
 		<binding name="observeFieldFrequency">
-			<pull>
-				<type>java.lang.Number</type>
-			</pull>
-			<deprecated>Use `observeDelay` instead.</deprecated>
+			<pull><type>java.lang.Number</type></pull>
 			<doc>Legacy poll interval, in seconds; now treated as a debounce.</doc>
+			<deprecated>Use `observeDelay` instead.</deprecated>
 		</binding>
+
 		<binding name="onBeforeSubmit">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>JS called before submitting; return false to deny the submit.</doc>
 		</binding>
+
 		<binding name="onSuccess">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>JavaScript to run after a successful update/morph completes.</doc>
 		</binding>
+
 		<binding name="onComplete">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>JavaScript to run after the update/morph completes.</doc>
 		</binding>
+
 		<binding name="name">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The HTML name used as the ajax submit-button name (defaults to the element id).</doc>
 		</binding>
+
 		<binding name="id">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>The id of the observe-field wrapper (only used in descendant mode).</doc>
 		</binding>
+
 		<binding name="elementName">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<default>div</default>
 			<doc>The wrapper element name (only used in descendant mode).</doc>
 		</binding>
+
 		<binding name="class">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>CSS class of the wrapper (only used in descendant mode), passed through to the rendered tag.</doc>
 		</binding>
+
 		<binding name="style">
-			<pull>
-				<type>java.lang.String</type>
-			</pull>
+			<pull><type>java.lang.String</type></pull>
 			<doc>CSS style of the wrapper (only used in descendant mode), passed through to the rendered tag.</doc>
 		</binding>
 
