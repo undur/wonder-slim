@@ -37,7 +37,7 @@
 	<h2>Format</h2>
 	<p>Same skeleton as <code>.api</code> (<code>&lt;wodefinitions&gt;</code> / <code>&lt;wo&gt;</code> / <code>&lt;binding&gt;</code>); extensions in <span style="color:#1a7431;font-weight:700">green</span>:</p>
 <pre class="code">&lt;wodefinitions&gt;
-  &lt;wo class="WOCheckBox" wrapsContent="false"<span class="ext"> passthrough="true"</span>&gt;
+  &lt;wo class="WOCheckBox" wrapsContent="false"<span class="ext"> unknownAttributes="passthrough"</span>&gt;
 
     <span class="ext">&lt;doc&gt;&lt;![CDATA[A checkbox. Use **either** `checked` or `value`+`selection`.]]&gt;&lt;/doc&gt;</span>
 
@@ -72,6 +72,9 @@
 	<h3>Interpretation — <code>interpretation="truthy"</code></h3>
 	<p>Some bindings read a value by a coercion rule, not by type. <code>WOConditional.condition</code> accepts anything but reads it as a boolean (<code>null</code>, <code>0</code>, <code>false</code> → false). The <code>interpretation</code> attribute names that rule without changing the type: <code>&lt;type interpretation="truthy"&gt;java.lang.Object&lt;/type&gt;</code>. The type remains the validatable constraint (<code>Object</code>); the interpretation is shown as a qualifier, <code>Object (truthy)</code>.</p>
 
+	<h3>Unknown attributes — <code>unknownAttributes</code></h3>
+	<p>An element declares what happens to attributes <em>not</em> named in its binding API: <code>forbidden</code> (an undeclared binding is a validation error — closed set), <code>allowed</code> (accepted; not forwarded, not flagged) or <code>passthrough</code> (accepted and forwarded onto the rendered tag — name preserved, value evaluated, so <code>data-id="$item.id"</code> renders the item's id). One axis: <code>passthrough</code> implies <code>allowed</code>, so "forwarded but flagged" — a contradiction — is unrepresentable. Absent means the author stated <em>no</em> policy and the tool applies its own default; a present value is a portable claim every tool must honour.</p>
+
 	<h3>Default values — <code>&lt;default&gt;</code></h3>
 	<p>A binding may declare the value the element behaves as if bound to when the binding is unbound: <code>&lt;default&gt;div&lt;/default&gt;</code>. Literals only — computed fallbacks ("the item's <code>toString</code>") stay prose in <code>&lt;doc&gt;</code>. Never directional, and never satisfies validation: "bound" always means explicitly bound in the template, so a default satisfies neither <code>required</code> nor a constraint. Distinct from the legacy <code>defaults</code> attribute (an autocomplete-preset hint).</p>
 
@@ -91,7 +94,8 @@
 			<tr><td class="k">directionality (pull / push)</td><td class="have">present</td></tr>
 			<tr><td class="k">value interpretation (truthiness)</td><td class="have">present</td></tr>
 			<tr><td class="k">default values (<code>&lt;default&gt;</code>)</td><td class="have">present (display + validation-relevant: a default never satisfies a constraint)</td></tr>
-			<tr><td class="k">deprecation, value-sets, unknown-binding policy</td><td class="want">not yet</td></tr>
+			<tr><td class="k">unknown-attribute policy (<code>unknownAttributes</code>)</td><td class="have">present (forbidden / allowed / passthrough; absent = tool decides)</td></tr>
+			<tr><td class="k">deprecation, value-sets</td><td class="want">not yet</td></tr>
 		</tbody>
 	</table>
 	<p>Successor to WO's <code>.api</code>, not a superset — legacy <code>.api</code> files are handled by their own grammar and a mechanical converter. The format spec — grammar (<code>apiext.dtd</code>), field-by-field reference, examples, and status — lives in its own repository: <a href="https://github.com/undur/apiext-format">github.com/undur/apiext-format</a>.</p>

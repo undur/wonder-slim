@@ -168,13 +168,19 @@ public class ApiextElement {
 	}
 
 	public String className;
-	public boolean passthrough;
+	/**
+	 * The element's unknown-attribute policy ("forbidden" | "allowed" | "passthrough"), or null when the
+	 * author stated no policy — absent means the consuming tool decides, so null must never be defaulted
+	 * to one of the three values.
+	 */
+	public String unknownAttributes;
 	public String doc;
 	public final List<Binding> bindings = new ArrayList<>();
 	public final List<Constraint> constraints = new ArrayList<>();
 
 	public String className() { return className; }
-	public boolean passthrough() { return passthrough; }
+	public boolean passthrough() { return "passthrough".equals(unknownAttributes); }
+	public boolean forbidden() { return "forbidden".equals(unknownAttributes); }
 	public String doc() { return doc; }
 	/** The element doc rendered from the Markdown subset to safe HTML (paragraphs + fenced code samples). */
 	public String docHtml() { return Markdown.toHtml(doc); }
@@ -213,7 +219,7 @@ public class ApiextElement {
 		}
 		ApiextElement out = new ApiextElement();
 		out.className = wo.getAttribute("class");
-		out.passthrough = "true".equals(wo.getAttribute("passthrough"));
+		out.unknownAttributes = wo.hasAttribute("unknownAttributes") ? wo.getAttribute("unknownAttributes") : null;
 		out.doc = textOf(firstChildElement(wo, "doc"));
 
 		for (Element b : childElements(wo, "binding")) {

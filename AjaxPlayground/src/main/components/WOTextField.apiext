@@ -12,7 +12,7 @@
   the apiext-format spec (github.com/undur/apiext-format, FORMAT.md), "Directionality" and the known-limitation note.
 -->
 <wodefinitions>
-	<wo class="WOTextField" wrapsContent="false" passthrough="true">
+	<wo class="WOTextField" wrapsContent="false" unknownAttributes="passthrough">
 
 		<doc><![CDATA[A single-line text input. Displays the bound `value` and pushes the user's edited input back — coerced by the bound formatter, if any.]]></doc>
 
