@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxPingUpdate" wrapsContent="false">
+	<wo class="AjaxPingUpdate" content="forbidden">
 
 		<doc><![CDATA[Refreshes a target `AjaxUpdateContainer` when its cache key changes. Used *inside* an `AjaxPing` — place several in one ping to drive multiple targets from a single periodic refresh. It tracks `cacheKey` across requests and emits a refresh script for its target only when the key differs from the last seen value.
 
@@ -16,6 +16,12 @@
 			<doc>The id of the update container to refresh when the key changes.</doc>
 		</binding>
 
+		<binding name="targetContainerID">
+			<pull><type>java.lang.String</type></pull>
+			<deprecated>Use `updateContainerID` instead.</deprecated>
+			<doc>Alias for `updateContainerID`, kept for backward compatibility.</doc>
+		</binding>
+
 		<binding name="cacheKey">
 			<pull><type>java.lang.Object</type></pull>
 			<doc>A value that represents the state of the target container.</doc>
@@ -25,6 +31,11 @@
 			<pull><type>java.lang.String</type></pull>
 			<doc>A JS function to call before updating; return true to allow the update.</doc>
 		</binding>
+
+		<choose min="1" max="1">
+			<binding name="updateContainerID"/>
+			<binding name="targetContainerID"/>
+		</choose>
 
 	</wo>
 </wodefinitions>

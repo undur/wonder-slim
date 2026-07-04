@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxObserveField" wrapsContent="true">
+	<wo class="AjaxObserveField" content="allowed">
 
 		<doc><![CDATA[Performs an Ajax submit (and optional container morph) when a form field changes. Two modes: give it an `observeFieldID` to watch a **single field**; or omit `observeFieldID` to watch **every descendant form field** inside it (it then renders a wrapper element). Binds native `change`/`input` listeners with a debounce. `fullSubmit="false"` (the default) sends only the changed field (partial submit).
 

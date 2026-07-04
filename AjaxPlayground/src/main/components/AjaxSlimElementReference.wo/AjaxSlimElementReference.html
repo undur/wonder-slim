@@ -18,6 +18,7 @@
 		.t-trigger { background: #fff3e0; color: #9a5b17; border: 1px solid #f0d2a8; }
 		.t-server { background: #efe9ff; color: #5b3aa3; border: 1px solid #d4c8f5; }
 		.t-passthrough { background: #f1f3f5; color: #495057; border: 1px solid #d3d8de; }
+		.t-container { background: #eef4fb; color: #2b5c8a; border: 1px solid #c9dcef; }
 		code { background: #f4f4f4; padding: .05rem .3rem; border-radius: 3px; font-size: .9em; }
 		a { color: #2b6cb0; text-decoration: none; } a:hover { text-decoration: underline; }
 		table.bindings { width: 100%; border-collapse: collapse; margin: .6rem 0 .2rem; font-size: .92rem; }
@@ -67,6 +68,7 @@
 		<span class="tag t-server">Server</span> no UI of its own.
 		<br/>
 		<span class="tag t-passthrough">Passthrough</span> forwards any attribute it doesn't handle itself (<code>data-*</code>, <code>aria-*</code>, <code>role</code>, <code>class</code>, …) verbatim onto the rendered tag.
+		<span class="tag t-container">Container</span> wraps content — using it empty does nothing.
 		<br/>
 		A <span class="req">&bull;</span> marks a required binding.
 		<br/>
@@ -87,6 +89,7 @@
 				<wo:repetition list="$currentElementTags" item="$currentTag">
 					<wo:container elementName="span" class="$currentTagBadgeClass"><wo:str value="$currentTagBadgeLabel" /></wo:container>
 				</wo:repetition>
+				<wo:if condition="$currentElement.requiresContent"><span class="tag t-container">Container</span></wo:if>
 				<wo:if condition="$currentElement.passthrough"><span class="tag t-passthrough">Passthrough</span></wo:if>
 			</wo:container>
 

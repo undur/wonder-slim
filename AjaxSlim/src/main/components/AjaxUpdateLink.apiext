@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxUpdateLink" wrapsContent="true">
+	<wo class="AjaxUpdateLink" content="allowed">
 
 		<doc><![CDATA[A link (or button, or named JS function) that fires a server action and morphs the result into a target container (`updateContainerID`) or replaces a region (`replaceID`). The standard "click to update part of the page".
 

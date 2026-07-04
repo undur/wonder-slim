@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxUpdateContainer" wrapsContent="true" unknownAttributes="passthrough">
+	<wo class="AjaxUpdateContainer" content="required" unknownAttributes="passthrough">
 
 		<doc><![CDATA[A region of the page that can be refreshed independently via an Ajax request, morphing the freshly-rendered HTML into the live DOM (preserving focus, scroll, selection and unchanged subtrees) instead of replacing its `innerHTML`.
 

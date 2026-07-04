@@ -30,14 +30,14 @@
 <div class="wrap">
 	<p><a href="/">&larr; Playground index</a></p>
 	<h1>.apiext — extended element-API format</h1>
-	<p class="lead">A superset of WebObjects' <code>.api</code> format adding per-element and per-binding documentation, binding types, directionality, and value interpretation — enough to render an element's API in an editor. Proposal stage; in use here. The <a href="/element-reference">element reference</a> renders entirely from <code>.apiext</code> files.</p>
+	<p class="lead">The successor to WebObjects' <code>.api</code> format: per-element and per-binding documentation, binding types, directionality, value interpretation, typed constraints and element policies — enough to render an element's API in an editor and validate templates against it. Proposal stage; in use here. The <a href="/element-reference">element reference</a> renders entirely from <code>.apiext</code> files.</p>
 
 	<p>The current/old <code>.api</code> declares an element's bindings — names, a few flags, cross-binding validation — and little to nothing about what a binding means or it's typing. <code>.apiext</code> keeps that format's skeleton and adds all of it; one legacy area (the <code>&lt;validation&gt;</code> predicate language) is replaced outright by typed <em>constraints</em>, with legacy files handled by a mechanical converter. The WO runtime does not read <code>.api</code>; only tooling does (WOLips, Parslips), so the format is constrained only by "don't strand existing files".</p>
 
 	<h2>Format</h2>
 	<p>Same skeleton as <code>.api</code> (<code>&lt;wodefinitions&gt;</code> / <code>&lt;wo&gt;</code> / <code>&lt;binding&gt;</code>); extensions in <span style="color:#1a7431;font-weight:700">green</span>:</p>
 <pre class="code">&lt;wodefinitions&gt;
-  &lt;wo class="WOCheckBox" wrapsContent="false"<span class="ext"> unknownAttributes="passthrough"</span>&gt;
+  &lt;wo class="WOCheckBox" content="forbidden"<span class="ext"> unknownAttributes="passthrough"</span>&gt;
 
     <span class="ext">&lt;doc&gt;&lt;![CDATA[A checkbox. Use **either** `checked` or `value`+`selection`.]]&gt;&lt;/doc&gt;</span>
 
@@ -72,6 +72,9 @@
 	<h3>Interpretation — <code>interpretation="truthy"</code></h3>
 	<p>Some bindings read a value by a coercion rule, not by type. <code>WOConditional.condition</code> accepts anything but reads it as a boolean (<code>null</code>, <code>0</code>, <code>false</code> → false). The <code>interpretation</code> attribute names that rule without changing the type: <code>&lt;type interpretation="truthy"&gt;java.lang.Object&lt;/type&gt;</code>. The type remains the validatable constraint (<code>Object</code>); the interpretation is shown as a qualifier, <code>Object (truthy)</code>.</p>
 
+	<h3>Child content — <code>content</code></h3>
+	<p>An element declares its policy for child content: <code>required</code> (a wrapper — using it empty is a validation error), <code>allowed</code> (optional — the element has both usages) or <code>forbidden</code> (content is an error). "Wraps content" is not a boolean: <em>must wrap</em> and <em>may wrap</em> are different claims. Absent = no policy stated, the tool decides.</p>
+
 	<h3>Unknown attributes — <code>unknownAttributes</code></h3>
 	<p>An element declares what happens to attributes <em>not</em> named in its binding API: <code>forbidden</code> (an undeclared binding is a validation error — closed set), <code>allowed</code> (accepted; not forwarded, not flagged) or <code>passthrough</code> (accepted and forwarded onto the rendered tag — name preserved, value evaluated, so <code>data-id="$item.id"</code> renders the item's id). One axis: <code>passthrough</code> implies <code>allowed</code>, so "forwarded but flagged" — a contradiction — is unrepresentable. Absent means the author stated <em>no</em> policy and the tool applies its own default; a present value is a portable claim every tool must honour.</p>
 
@@ -98,6 +101,7 @@
 			<tr><td class="k">value interpretation (truthiness)</td><td class="have">present</td></tr>
 			<tr><td class="k">default values (<code>&lt;default&gt;</code>)</td><td class="have">present (display + validation-relevant: a default never satisfies a constraint)</td></tr>
 			<tr><td class="k">unknown-attribute policy (<code>unknownAttributes</code>)</td><td class="have">present (forbidden / allowed / passthrough; absent = tool decides)</td></tr>
+			<tr><td class="k">child-content policy (<code>content</code>)</td><td class="have">present (required / allowed / forbidden; absent = tool decides)</td></tr>
 			<tr><td class="k">deprecation (<code>&lt;deprecated&gt;</code>, binding + element level)</td><td class="have">present (warning-class, migration note in the body)</td></tr>
 			<tr><td class="k">value-sets</td><td class="want">not yet</td></tr>
 		</tbody>

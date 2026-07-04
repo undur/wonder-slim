@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxModalContainer" wrapsContent="true">
+	<wo class="AjaxModalContainer" content="required">
 
 		<doc><![CDATA[Renders a trigger button that opens its inline content in a modal dialog, built on the platform's native `<dialog>` (free backdrop, focus trapping and Esc-to-close). The content stays in place in the DOM, so forms/links inside the dialog — including update containers — work exactly as anywhere else. Only the inline-content use is supported (iframe / direct-action / skin / locked modes are dropped).
 

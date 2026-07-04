@@ -182,6 +182,11 @@ public class ApiextElement {
 	 * to one of the three values.
 	 */
 	public String unknownAttributes;
+	/**
+	 * The element's child-content policy ("required" | "allowed" | "forbidden"), or null when the author
+	 * stated no policy — like unknownAttributes, absent means the consuming tool decides.
+	 */
+	public String content;
 	/** The migration note when the whole element is deprecated (may be empty), or null when it isn't. */
 	public String deprecated;
 	public String doc;
@@ -191,6 +196,7 @@ public class ApiextElement {
 	public String className() { return className; }
 	public boolean passthrough() { return "passthrough".equals(unknownAttributes); }
 	public boolean forbidden() { return "forbidden".equals(unknownAttributes); }
+	public boolean requiresContent() { return "required".equals(content); }
 	public boolean isDeprecated() { return deprecated != null; }
 	/** The element's migration note rendered from the Markdown subset to safe HTML. */
 	public String deprecatedHtml() { return Markdown.toHtml(deprecated); }
@@ -233,6 +239,7 @@ public class ApiextElement {
 		ApiextElement out = new ApiextElement();
 		out.className = wo.getAttribute("class");
 		out.unknownAttributes = wo.hasAttribute("unknownAttributes") ? wo.getAttribute("unknownAttributes") : null;
+		out.content = wo.hasAttribute("content") ? wo.getAttribute("content") : null;
 		out.deprecated = textOf(firstChildElement(wo, "deprecated"));
 		out.doc = textOf(firstChildElement(wo, "doc"));
 

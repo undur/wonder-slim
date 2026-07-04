@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxPing" wrapsContent="true">
+	<wo class="AjaxPing" content="allowed">
 
 		<doc><![CDATA[Refreshes a large content area based on periodic refreshes of a very small one. A tiny self-refreshing container whose content depends only on `cacheKey`: while the key is unchanged the periodic ping is cheap; when it changes, the embedded `AjaxPingUpdate` refreshes the (potentially large) `updateContainerID`. So the expensive container is rebuilt only when something actually changed.
 
@@ -11,6 +11,12 @@
 		<binding name="updateContainerID">
 			<pull><type>java.lang.String</type></pull>
 			<doc>The id of the update container to refresh when the key changes.</doc>
+		</binding>
+
+		<binding name="targetContainerID">
+			<pull><type>java.lang.String</type></pull>
+			<deprecated>Use `updateContainerID` instead.</deprecated>
+			<doc>Alias for `updateContainerID`, kept for backward compatibility.</doc>
 		</binding>
 
 		<binding name="cacheKey">
@@ -38,6 +44,11 @@
 			<pull><type>java.lang.String</type></pull>
 			<doc>Optional id of the ping container.</doc>
 		</binding>
+
+		<choose max="1">
+			<binding name="updateContainerID"/>
+			<binding name="targetContainerID"/>
+		</choose>
 
 	</wo>
 </wodefinitions>

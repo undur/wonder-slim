@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxUpdateTrigger" wrapsContent="false">
+	<wo class="AjaxUpdateTrigger" content="forbidden">
 
 		<doc><![CDATA[A server-side-only element with no UI of its own: when it is rendered into a response, it forces named `AjaxUpdateContainer`s elsewhere on the page to refresh. Useful when a central area controls several others — e.g. an edit view that, on opening, tells all the sibling read-only views to re-render. A missing target is silently skipped.
 

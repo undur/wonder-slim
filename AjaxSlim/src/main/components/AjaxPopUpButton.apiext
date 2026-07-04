@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxPopUpButton" wrapsContent="false">
+	<wo class="AjaxPopUpButton" content="forbidden">
 
 		<doc><![CDATA[A drop-in `WOPopUpButton` that renders a searchable single-select instead of a bare `<select>`. Reach for it when a long option list needs type-to-filter. The widget auto-enhances any matching `<select>` on the page, so it needs no per-page init.
 
