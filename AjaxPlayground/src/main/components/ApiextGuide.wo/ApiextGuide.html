@@ -73,7 +73,7 @@
 	<p>Some bindings read a value by a coercion rule, not by type. <code>WOConditional.condition</code> accepts anything but reads it as a boolean (<code>null</code>, <code>0</code>, <code>false</code> → false). The <code>interpretation</code> attribute names that rule without changing the type: <code>&lt;type interpretation="truthy"&gt;java.lang.Object&lt;/type&gt;</code>. The type remains the validatable constraint (<code>Object</code>); the interpretation is shown as a qualifier, <code>Object (truthy)</code>.</p>
 
 	<h3>Child content — <code>content</code></h3>
-	<p>An element declares its policy for child content: <code>required</code> (a wrapper — using it empty is a validation error), <code>allowed</code> (optional — the element has both usages) or <code>forbidden</code> (content is an error). "Wraps content" is not a boolean: <em>must wrap</em> and <em>may wrap</em> are different claims. Absent = no policy stated, the tool decides.</p>
+	<p>An element declares its policy for child content: <code>expected</code> (usually a container — editors insert <code>&lt;wo:x&gt;&lt;/wo:x&gt;</code> by default; empty usage is fine), <code>allowed</code> (hybrid — works with and without content) or <code>forbidden</code> (content is a validation error, strictly: the tag must be self-closing). Validation lives entirely in <code>forbidden</code>; the other two are documentation and editor affordance. Absent = no policy stated, the tool decides.</p>
 
 	<h3>Unknown attributes — <code>unknownAttributes</code></h3>
 	<p>An element declares what happens to attributes <em>not</em> named in its binding API: <code>forbidden</code> (an undeclared binding is a validation error — closed set), <code>allowed</code> (accepted; not forwarded, not flagged) or <code>passthrough</code> (accepted and forwarded onto the rendered tag — name preserved, value evaluated, so <code>data-id="$item.id"</code> renders the item's id). One axis: <code>passthrough</code> implies <code>allowed</code>, so "forwarded but flagged" — a contradiction — is unrepresentable. Absent means the author stated <em>no</em> policy and the tool applies its own default; a present value is a portable claim every tool must honour.</p>
@@ -101,7 +101,7 @@
 			<tr><td class="k">value interpretation (truthiness)</td><td class="have">present</td></tr>
 			<tr><td class="k">default values (<code>&lt;default&gt;</code>)</td><td class="have">present (display + validation-relevant: a default never satisfies a constraint)</td></tr>
 			<tr><td class="k">unknown-attribute policy (<code>unknownAttributes</code>)</td><td class="have">present (forbidden / allowed / passthrough; absent = tool decides)</td></tr>
-			<tr><td class="k">child-content policy (<code>content</code>)</td><td class="have">present (required / allowed / forbidden; absent = tool decides)</td></tr>
+			<tr><td class="k">child-content policy (<code>content</code>)</td><td class="have">present (expected / allowed / forbidden; only forbidden validates)</td></tr>
 			<tr><td class="k">deprecation (<code>&lt;deprecated&gt;</code>, binding + element level)</td><td class="have">present (warning-class, migration note in the body)</td></tr>
 			<tr><td class="k">value-sets</td><td class="want">not yet</td></tr>
 		</tbody>

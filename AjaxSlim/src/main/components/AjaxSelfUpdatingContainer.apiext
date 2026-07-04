@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxSelfUpdatingContainer" content="required" unknownAttributes="passthrough">
+	<wo class="AjaxSelfUpdatingContainer" content="expected" unknownAttributes="passthrough">
 
 		<doc><![CDATA[An update container that refreshes **itself** — on a timer (`frequency`) and/or when a field changes (`observeFieldID`) — and may invoke its own `action` when it does. The counterpart to the passive `AjaxUpdateContainer`; it also inherits all of that element's bindings (`id`, `elementName`, `morph`, `onRefreshComplete`, `optional`) and the same attribute passthrough (`class`, `style`, `data-*`, …).
 

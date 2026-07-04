@@ -68,7 +68,7 @@
 		<span class="tag t-server">Server</span> no UI of its own.
 		<br/>
 		<span class="tag t-passthrough">Passthrough</span> forwards any attribute it doesn't handle itself (<code>data-*</code>, <code>aria-*</code>, <code>role</code>, <code>class</code>, …) verbatim onto the rendered tag.
-		<span class="tag t-container">Container</span> wraps content — using it empty does nothing.
+		<span class="tag t-container">Container</span> usually used as a container element, wrapping content.
 		<br/>
 		A <span class="req">&bull;</span> marks a required binding.
 		<br/>
@@ -89,7 +89,7 @@
 				<wo:repetition list="$currentElementTags" item="$currentTag">
 					<wo:container elementName="span" class="$currentTagBadgeClass"><wo:str value="$currentTagBadgeLabel" /></wo:container>
 				</wo:repetition>
-				<wo:if condition="$currentElement.requiresContent"><span class="tag t-container">Container</span></wo:if>
+				<wo:if condition="$currentElement.expectsContent"><span class="tag t-container">Container</span></wo:if>
 				<wo:if condition="$currentElement.passthrough"><span class="tag t-passthrough">Passthrough</span></wo:if>
 			</wo:container>
 

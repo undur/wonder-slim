@@ -183,8 +183,10 @@ public class ApiextElement {
 	 */
 	public String unknownAttributes;
 	/**
-	 * The element's child-content policy ("required" | "allowed" | "forbidden"), or null when the author
-	 * stated no policy — like unknownAttributes, absent means the consuming tool decides.
+	 * The element's child-content policy ("expected" | "allowed" | "forbidden"), or null when the author
+	 * stated no policy — like unknownAttributes, absent means the consuming tool decides. Only
+	 * "forbidden" validates (content = error, strictly self-closing); "expected"/"allowed" are
+	 * documentation and editor-insertion affordance, never diagnostics.
 	 */
 	public String content;
 	/** The migration note when the whole element is deprecated (may be empty), or null when it isn't. */
@@ -196,7 +198,7 @@ public class ApiextElement {
 	public String className() { return className; }
 	public boolean passthrough() { return "passthrough".equals(unknownAttributes); }
 	public boolean forbidden() { return "forbidden".equals(unknownAttributes); }
-	public boolean requiresContent() { return "required".equals(content); }
+	public boolean expectsContent() { return "expected".equals(content); }
 	public boolean isDeprecated() { return deprecated != null; }
 	/** The element's migration note rendered from the Markdown subset to safe HTML. */
 	public String deprecatedHtml() { return Markdown.toHtml(deprecated); }

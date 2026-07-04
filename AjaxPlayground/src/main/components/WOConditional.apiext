@@ -9,7 +9,7 @@
   shown as a qualifier ("Object (truthy)"). See the apiext-format spec (github.com/undur/apiext-format, FORMAT.md), "Interpretation".
 -->
 <wodefinitions>
-	<wo class="WOConditional" content="required">
+	<wo class="WOConditional" content="expected">
 
 		<doc><![CDATA[Renders its content only when `condition` is **truthy**. The textbook *value-read-as-boolean* element.]]></doc>
 
