@@ -86,7 +86,8 @@
 			<pull>
 				<type>java.lang.String</type>
 			</pull>
-			<doc>The wrapper element name (only used in descendant mode). Defaults to `div`.</doc>
+			<default>div</default>
+			<doc>The wrapper element name (only used in descendant mode).</doc>
 		</binding>
 		<binding name="class">
 			<pull>

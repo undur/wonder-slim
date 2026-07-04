@@ -26,7 +26,8 @@
 			<pull>
 				<type>java.lang.String</type>
 			</pull>
-			<doc>The text on the dialog's close button. Defaults to "Close".</doc>
+			<default>Close</default>
+			<doc>The text on the dialog's close button.</doc>
 		</binding>
 		<binding name="open">
 			<pull>

@@ -72,6 +72,9 @@
 	<h3>Interpretation — <code>interpretation="truthy"</code></h3>
 	<p>Some bindings read a value by a coercion rule, not by type. <code>WOConditional.condition</code> accepts anything but reads it as a boolean (<code>null</code>, <code>0</code>, <code>false</code> → false). The <code>interpretation</code> attribute names that rule without changing the type: <code>&lt;type interpretation="truthy"&gt;java.lang.Object&lt;/type&gt;</code>. The type remains the validatable constraint (<code>Object</code>); the interpretation is shown as a qualifier, <code>Object (truthy)</code>.</p>
 
+	<h3>Default values — <code>&lt;default&gt;</code></h3>
+	<p>A binding may declare the value the element behaves as if bound to when the binding is unbound: <code>&lt;default&gt;div&lt;/default&gt;</code>. Literals only — computed fallbacks ("the item's <code>toString</code>") stay prose in <code>&lt;doc&gt;</code>. Never directional, and never satisfies validation: "bound" always means explicitly bound in the template, so a default satisfies neither <code>required</code> nor a constraint. Distinct from the legacy <code>defaults</code> attribute (an autocomplete-preset hint).</p>
+
 	<h3>Constraints — <code>&lt;choose&gt;</code> / <code>&lt;requires&gt;</code></h3>
 	<p>Typed, positive cross-binding rules replacing <code>.api</code>'s inverted <code>&lt;validation&gt;</code> predicate trees. <code>&lt;choose min max&gt;</code> is cardinality over a set of alternatives (at-least-one / at-most-one / exactly-one); <code>&lt;requires binding must when&gt;</code> is implication, with <code>must</code> ∈ <code>bound</code>/<code>settable</code>/<code>gettable</code>. Messages are <em>generated</em> from the typed rule (the sample above renders as “Exactly one of 'checked' and 'value' must be bound.”); a <code>message</code> attribute overrides. Every referenced binding must resolve to a declared one — a file with a typo'd reference is rejected, not silently weakened.</p>
 
@@ -87,10 +90,11 @@
 			<tr><td class="k">required + typed cross-binding constraints (choose / requires)</td><td class="have">present (replaces <code>.api</code>'s validation language; messages generated)</td></tr>
 			<tr><td class="k">directionality (pull / push)</td><td class="have">present</td></tr>
 			<tr><td class="k">value interpretation (truthiness)</td><td class="have">present</td></tr>
-			<tr><td class="k">default values, deprecation, value-sets, unknown-binding policy</td><td class="want">not yet</td></tr>
+			<tr><td class="k">default values (<code>&lt;default&gt;</code>)</td><td class="have">present (display + validation-relevant: a default never satisfies a constraint)</td></tr>
+			<tr><td class="k">deprecation, value-sets, unknown-binding policy</td><td class="want">not yet</td></tr>
 		</tbody>
 	</table>
-	<p>Validates as a superset of WO's DTD (including <code>WebObjectsDefinitions.xml</code>). The format spec — grammar (<code>apiext.dtd</code>), field-by-field reference, examples, and status — lives in its own repository: <a href="https://github.com/undur/apiext-format">github.com/undur/apiext-format</a>.</p>
+	<p>Successor to WO's <code>.api</code>, not a superset — legacy <code>.api</code> files are handled by their own grammar and a mechanical converter. The format spec — grammar (<code>apiext.dtd</code>), field-by-field reference, examples, and status — lives in its own repository: <a href="https://github.com/undur/apiext-format">github.com/undur/apiext-format</a>.</p>
 </div>
 </body>
 </html>

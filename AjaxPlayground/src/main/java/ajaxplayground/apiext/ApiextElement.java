@@ -57,6 +57,14 @@ public class ApiextElement {
 		public String doc;
 		public boolean required;
 		public String defaults;
+		/**
+		 * The binding's declared default (the literal the element behaves as when the binding is unbound),
+		 * or null for "no declared default". Display-only here: a default never satisfies required or any
+		 * constraint. Not to be confused with {@link #defaults}, the legacy autocomplete-preset hint.
+		 */
+		public String defaultValue;
+
+		public boolean hasDefault() { return defaultValue != null; }
 
 		/** The doc rendered from the Markdown subset to safe HTML (inline only - bindings rarely fence). */
 		public String docHtml() {
@@ -213,6 +221,7 @@ public class ApiextElement {
 			binding.name = b.getAttribute("name");
 			binding.required = "true".equals(b.getAttribute("required"));
 			binding.defaults = b.hasAttribute("defaults") ? b.getAttribute("defaults") : null;
+			binding.defaultValue = textOf(firstChildElement(b, "default"));
 			// Types live in <pull>/<push> blocks (a type always has a direction).
 			Element pull = firstChildElement(b, "pull");
 			if (pull != null) {

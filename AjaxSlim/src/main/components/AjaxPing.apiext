@@ -24,7 +24,8 @@
 			<pull>
 				<type>java.lang.Number</type>
 			</pull>
-			<doc>The frequency of the ping, **in seconds**. Defaults to 3.</doc>
+			<default>3</default>
+			<doc>The frequency of the ping, **in seconds**.</doc>
 		</binding>
 		<binding name="onBeforeUpdate">
 			<pull>

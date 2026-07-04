@@ -51,13 +51,15 @@
 			<pull>
 				<type>java.lang.String</type>
 			</pull>
-			<doc>The HTML tag to render. Defaults to `div`.</doc>
+			<default>div</default>
+			<doc>The HTML tag to render.</doc>
 		</binding>
 		<binding name="morph">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>
-			<doc>When true (the default), content updates reconcile the existing DOM via Idiomorph — preserving focus/scroll/selection and unchanged subtrees. Bind `morph="$false"` to force classic `innerHTML` replacement.</doc>
+			<default>true</default>
+			<doc>When true, content updates reconcile the existing DOM via Idiomorph — preserving focus/scroll/selection and unchanged subtrees. Bind `morph="$false"` to force classic `innerHTML` replacement.</doc>
 		</binding>
 		<binding name="onRefreshComplete">
 			<pull>

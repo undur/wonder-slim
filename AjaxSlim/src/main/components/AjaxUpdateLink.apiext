@@ -95,7 +95,8 @@
 			<pull>
 				<type>java.lang.String</type>
 			</pull>
-			<doc>The element name to use. Defaults to `a`.</doc>
+			<default>a</default>
+			<doc>The element name to use.</doc>
 		</binding>
 		<binding name="button">
 			<pull>

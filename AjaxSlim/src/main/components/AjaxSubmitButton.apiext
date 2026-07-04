@@ -124,7 +124,8 @@
 			<pull>
 				<type>java.lang.String</type>
 			</pull>
-			<doc>The element name used when rendering a link (defaults to `a`).</doc>
+			<default>a</default>
+			<doc>The element name used when rendering a link.</doc>
 		</binding>
 
 		<!-- At most one way to handle the response - the same single-target mechanics as AjaxUpdateLink
