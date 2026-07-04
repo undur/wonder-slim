@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxBrowser" wocomponentcontent="false">
+	<wo class="AjaxBrowser" wrapsContent="false">
 
 		<doc><![CDATA[The multi-select companion to `AjaxPopUpButton`: a drop-in `WOBrowser` that renders the same searchable wonder-select widget with removable tags instead of a bare multi-select. The shared `wonder-select.js` reads the `<select>`'s `multiple` attribute to switch between single value and removable tags.
 
@@ -21,7 +21,7 @@
 			</pull>
 			<doc>The repetition item during rendering.</doc>
 		</binding>
-		<binding name="selections" settable="YES">
+		<binding name="selections">
 			<pull>
 				<type>java.util.List</type>
 			</pull>
@@ -63,13 +63,13 @@
 			</pull>
 			<doc>Extra attributes appended to the rendered `&lt;select&gt;` tag.</doc>
 		</binding>
-		<binding name="disabled" defaults="Boolean">
+		<binding name="disabled">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>
 			<doc>Standard `WOBrowser` behaviour — renders the select as disabled.</doc>
 		</binding>
-		<binding name="escapeHTML" defaults="Boolean">
+		<binding name="escapeHTML">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>

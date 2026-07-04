@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxSortable" wocomponentcontent="false">
+	<wo class="AjaxSortable" wrapsContent="false">
 
 		<doc><![CDATA[Makes the rows of a list drag-reorderable. Drop this element inside (or next to) the container whose children should be sortable; it renders the one-time client registration and, on drop, fires your `action` and morphs your `updateContainerID` — so reordering is a normal server action that can mutate the model and refresh whatever it needs.
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxModalContainer" wocomponentcontent="true">
+	<wo class="AjaxModalContainer" wrapsContent="true">
 
 		<doc><![CDATA[Renders a trigger button that opens its inline content in a modal dialog, built on the platform's native `<dialog>` (free backdrop, focus trapping and Esc-to-close). The content stays in place in the DOM, so forms/links inside the dialog — including update containers — work exactly as anywhere else. Only the inline-content use is supported (iframe / direct-action / skin / locked modes are dropped).
 
@@ -28,7 +28,7 @@
 			</pull>
 			<doc>The text on the dialog's close button. Defaults to "Close".</doc>
 		</binding>
-		<binding name="open" defaults="Boolean">
+		<binding name="open">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>

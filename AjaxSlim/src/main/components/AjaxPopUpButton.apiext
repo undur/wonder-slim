@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxPopUpButton" wocomponentcontent="false">
+	<wo class="AjaxPopUpButton" wrapsContent="false">
 
 		<doc><![CDATA[A drop-in `WOPopUpButton` that renders a searchable single-select instead of a bare `<select>`. Reach for it when a long option list needs type-to-filter. The widget auto-enhances any matching `<select>` on the page, so it needs no per-page init.
 
@@ -57,13 +57,13 @@
 			</push>
 			<doc>Value-based selection (as on WOPopUpButton).</doc>
 		</binding>
-		<binding name="disabled" defaults="Boolean">
+		<binding name="disabled">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>
 			<doc>Standard WOPopUpButton behaviour.</doc>
 		</binding>
-		<binding name="escapeHTML" defaults="Boolean">
+		<binding name="escapeHTML">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>

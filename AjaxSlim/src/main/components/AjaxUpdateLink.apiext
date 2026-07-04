@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxUpdateLink" wocomponentcontent="true">
+	<wo class="AjaxUpdateLink" wrapsContent="true">
 
 		<doc><![CDATA[A link (or button, or named JS function) that fires a server action and morphs the result into a target container (`updateContainerID`) or replaces a region (`replaceID`). The standard "click to update part of the page".
 
@@ -73,7 +73,7 @@
 			</pull>
 			<doc>JavaScript to run after the update/morph completes.</doc>
 		</binding>
-		<binding name="ignoreActionResponse" defaults="Boolean">
+		<binding name="ignoreActionResponse">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>
@@ -103,7 +103,7 @@
 			</pull>
 			<doc>If true, renders an `&lt;input type="button"&gt;`.</doc>
 		</binding>
-		<binding name="disabled" defaults="Boolean">
+		<binding name="disabled">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>

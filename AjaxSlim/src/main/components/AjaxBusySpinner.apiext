@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxBusySpinner" wocomponentcontent="false">
+	<wo class="AjaxBusySpinner" wrapsContent="false">
 
 		<doc><![CDATA[Shows a busy indicator while AjaxSlim has one or more Ajax requests in flight, and hides it when idle. A pure-CSS spinner driven by the runtime's activity broker — `ajaxslim.js` sets `data-ajaxslim-busy` on the document element while any request is in flight. No configuration: a busy indicator is the same everywhere. (Apps wanting a bespoke one can style `.ajaxslim-busy-spinner` or react to the `ajaxslim:busy`/`ajaxslim:idle` events on `document`.)
 

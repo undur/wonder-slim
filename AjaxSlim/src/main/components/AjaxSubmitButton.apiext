@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxSubmitButton" wocomponentcontent="true" passthrough="true">
+	<wo class="AjaxSubmitButton" wrapsContent="true" passthrough="true">
 
 		<doc><![CDATA[Like a `WOSubmitButton`, but submits its form in the background via Ajax and morphs the result into a target container (`updateContainerID`) or replaces a region (`replaceID`). Honours the `AJAX_SUBMIT_BUTTON_NAME` partial-submit contract, so it works correctly in multiple-submit forms.
 
@@ -46,7 +46,7 @@
 			</pull>
 			<doc>If false, renders a link instead of a button (default true).</doc>
 		</binding>
-		<binding name="useButtonTag" defaults="Boolean">
+		<binding name="useButtonTag">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>
@@ -102,7 +102,7 @@
 			<doc>Post-update hook (run after the morph).</doc>
 		</binding>
 
-		<binding name="disabled" defaults="Boolean">
+		<binding name="disabled">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>

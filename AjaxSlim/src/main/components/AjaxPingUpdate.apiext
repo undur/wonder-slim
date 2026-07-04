@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxPingUpdate" wocomponentcontent="false">
+	<wo class="AjaxPingUpdate" wrapsContent="false">
 
 		<doc><![CDATA[Refreshes a target `AjaxUpdateContainer` when its cache key changes. Used *inside* an `AjaxPing` — place several in one ping to drive multiple targets from a single periodic refresh. It tracks `cacheKey` across requests and emits a refresh script for its target only when the key differs from the last seen value.
 

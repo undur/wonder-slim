@@ -13,7 +13,7 @@
   the apiext-format spec (github.com/undur/apiext-format, FORMAT.md), "Directionality" and "Interpretation".
 -->
 <wodefinitions>
-	<wo class="WOCheckBox" wocomponentcontent="false" passthrough="true">
+	<wo class="WOCheckBox" wrapsContent="false" passthrough="true">
 
 		<doc><![CDATA[A checkbox (`<input type="checkbox">`). Use **either** `checked` (a truthy in, a Boolean out) **or** `value`+`selection` (membership-style) — not both.]]></doc>
 
@@ -28,7 +28,7 @@
 			<doc>This checkbox's value (the `value` attribute). With `selection`, the box is checked when `selection` equals `value`. Mutually exclusive with `checked`.</doc>
 		</binding>
 
-		<binding name="selection" settable="YES">
+		<binding name="selection">
 			<pull><type>java.lang.Object</type></pull>
 			<push><type>java.lang.Object</type></push>
 			<doc>The selected value (used with `value`). On submit it is set to `value` when the box is checked, or nulled when unchecked.</doc>
@@ -39,7 +39,7 @@
 			<doc>The HTML form-field name (auto-assigned if unbound).</doc>
 		</binding>
 
-		<binding name="disabled" defaults="Boolean">
+		<binding name="disabled">
 			<pull><type interpretation="truthy">java.lang.Object</type></pull>
 			<doc>If truthy, renders the checkbox disabled (its `selection` won't be submitted).</doc>
 		</binding>

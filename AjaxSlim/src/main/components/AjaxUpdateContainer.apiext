@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxUpdateContainer" wocomponentcontent="true" passthrough="true">
+	<wo class="AjaxUpdateContainer" wrapsContent="true" passthrough="true">
 
 		<doc><![CDATA[A region of the page that can be refreshed independently via an Ajax request, morphing the freshly-rendered HTML into the live DOM (preserving focus, scroll, selection and unchanged subtrees) instead of replacing its `innerHTML`.
 
@@ -24,7 +24,7 @@
 			</pull>
 			<doc>The HTML tag to render. Defaults to `div`.</doc>
 		</binding>
-		<binding name="morph" defaults="Boolean">
+		<binding name="morph">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>
@@ -36,7 +36,7 @@
 			</pull>
 			<doc>JavaScript to run after the container has been refreshed/morphed.</doc>
 		</binding>
-		<binding name="optional" defaults="Boolean">
+		<binding name="optional">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>

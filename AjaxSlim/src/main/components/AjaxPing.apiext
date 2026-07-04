@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxPing" wocomponentcontent="true">
+	<wo class="AjaxPing" wrapsContent="true">
 
 		<doc><![CDATA[Refreshes a large content area based on periodic refreshes of a very small one. A tiny self-refreshing container whose content depends only on `cacheKey`: while the key is unchanged the periodic ping is cheap; when it changes, the embedded `AjaxPingUpdate` refreshes the (potentially large) `updateContainerID`. So the expensive container is rebuilt only when something actually changed.
 
@@ -32,7 +32,7 @@
 			</pull>
 			<doc>A JS function to call before updating; return true to allow the update.</doc>
 		</binding>
-		<binding name="stop" defaults="Boolean">
+		<binding name="stop">
 			<pull>
 				<type>java.lang.Boolean</type>
 			</pull>

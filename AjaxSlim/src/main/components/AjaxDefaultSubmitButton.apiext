@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxDefaultSubmitButton" wocomponentcontent="false">
+	<wo class="AjaxDefaultSubmitButton" wrapsContent="false">
 
 		<doc><![CDATA[An invisible submit button placed first in a form so that pressing **Enter** performs its action (the form's "default" action) via the background Ajax submit. A subclass of `AjaxSubmitButton`; renders an off-screen `type="submit"` input. Modern browsers fire its click on Enter natively (the legacy IE<9 keypress shim is dropped).
 

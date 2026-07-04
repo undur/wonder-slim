@@ -9,7 +9,7 @@
   shown as a qualifier ("Object (truthy)"). See the apiext-format spec (github.com/undur/apiext-format, FORMAT.md), "Interpretation".
 -->
 <wodefinitions>
-	<wo class="WOConditional" wocomponentcontent="true">
+	<wo class="WOConditional" wrapsContent="true">
 
 		<doc><![CDATA[Renders its content only when `condition` is **truthy**. The textbook *value-read-as-boolean* element.]]></doc>
 
@@ -18,7 +18,7 @@
 			<doc>The condition. Read by **truthiness**: `null`, the number `0`, and `false` are false; every other value (a non-empty object, a non-zero number, a bound EO, …) is true. Validation only knows it accepts any `Object`; the truthiness reading is interpretation, not type.</doc>
 		</binding>
 
-		<binding name="negate" defaults="Boolean">
+		<binding name="negate">
 			<pull><type interpretation="truthy">java.lang.Object</type></pull>
 			<doc>If truthy, flips the `condition` — content renders when the condition is *false*.</doc>
 		</binding>
