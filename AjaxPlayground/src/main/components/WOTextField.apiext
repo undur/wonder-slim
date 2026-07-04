@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ILLUSTRATIVE EXAMPLE - not a shipping element, not normative.
 
@@ -47,10 +47,13 @@
 			<doc>Renders the `disabled` attribute when truthy.</doc>
 		</binding>
 
-		<validation message="'dateFormat' and 'numberFormat' cannot both be bound.">
-			<bound name="dateFormat"/>
-			<bound name="numberFormat"/>
-		</validation>
+		<!-- At most one formatting mechanism - a 3-way set, which the legacy flat pairwise form could
+		     not even express (it needed count test=">1" or a clique of pair rules). -->
+		<choose max="1">
+			<binding name="formatter"/>
+			<binding name="dateFormat"/>
+			<binding name="numberFormat"/>
+		</choose>
 
 	</wo>
 </wodefinitions>

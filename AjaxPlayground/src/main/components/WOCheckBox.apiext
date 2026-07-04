@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ILLUSTRATIVE EXAMPLE - not a shipping element, not normative.
 
@@ -44,10 +44,17 @@
 			<doc>If truthy, renders the checkbox disabled (its `selection` won't be submitted).</doc>
 		</binding>
 
-		<validation message="A WOCheckBox uses either 'checked' or 'value', not both.">
-			<bound name="checked"/>
-			<bound name="value"/>
-		</validation>
+		<!-- Exactly one selection mechanism. -->
+		<choose min="1" max="1">
+			<binding name="checked"/>
+			<binding name="value"/>
+		</choose>
+
+		<!-- value and selection travel together: all-or-none = mutual implication. (The legacy catalog
+		     expressed this as count test="<2" - which also fired when NEITHER was bound, contradicting its
+		     own message at the empty case. The typed form cannot drift like that.) -->
+		<requires binding="selection" when="value"/>
+		<requires binding="value" when="selection"/>
 
 	</wo>
 </wodefinitions>

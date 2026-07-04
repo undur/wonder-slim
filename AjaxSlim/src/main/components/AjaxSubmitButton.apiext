@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
 	<wo class="AjaxSubmitButton" wocomponentcontent="true" passthrough="true">
 
@@ -127,10 +127,13 @@
 			<doc>The element name used when rendering a link (defaults to `a`).</doc>
 		</binding>
 
-		<validation message="Only one of 'replaceID' or 'updateContainerID' can be bound.">
-			<bound name="replaceID"/>
-			<bound name="updateContainerID"/>
-		</validation>
+		<!-- At most one way to handle the response - the same single-target mechanics as AjaxUpdateLink
+		     (ignoreActionResponse added to the legacy pair; one response mode per submit). -->
+		<choose max="1">
+			<binding name="updateContainerID"/>
+			<binding name="replaceID"/>
+			<binding name="ignoreActionResponse"/>
+		</choose>
 
 	</wo>
 </wodefinitions>

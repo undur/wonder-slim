@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
 	<wo class="AjaxUpdateLink" wocomponentcontent="true">
 
@@ -141,35 +141,36 @@
 			<doc>The HTML accesskey attribute, passed through to the rendered tag.</doc>
 		</binding>
 
-		<validation message="'action' and 'directActionName' cannot both be bound.">
-			<bound name="action"/>
-			<bound name="directActionName"/>
-		</validation>
-		<validation message="If 'directActionName' is bound, then 'replaceID' must also be bound.">
-			<bound name="directActionName"/>
-			<unbound name="replaceID"/>
-		</validation>
-		<validation message="'updateContainerID', 'action', 'directActionName' must be bound.">
-			<unbound name="action"/>
-			<unbound name="directActionName"/>
-			<unbound name="updateContainerID"/>
-		</validation>
-		<validation message="Only one of 'replaceID' or 'ignoreActionResponse' can be bound.">
-			<bound name="replaceID"/>
-			<bound name="ignoreActionResponse"/>
-		</validation>
-		<validation message="Only one of 'directActionName' or 'ignoreActionResponse' can be bound.">
-			<bound name="directActionName"/>
-			<bound name="ignoreActionResponse"/>
-		</validation>
-		<validation message="Only one of 'replaceID' or 'updateContainerID' can be bound.">
-			<bound name="replaceID"/>
-			<bound name="updateContainerID"/>
-		</validation>
-		<validation message="Only one of 'updateContainerID' or 'ignoreActionResponse' can be bound.">
-			<bound name="updateContainerID"/>
-			<bound name="ignoreActionResponse"/>
-		</validation>
+		<!-- The link must have something to do. -->
+		<choose min="1">
+			<binding name="action"/>
+			<binding name="directActionName"/>
+			<binding name="updateContainerID"/>
+		</choose>
+
+		<!-- At most one way to trigger. -->
+		<choose max="1">
+			<binding name="action"/>
+			<binding name="directActionName"/>
+		</choose>
+
+		<!-- At most one way to handle the response (was three pairwise rules in the legacy file). -->
+		<choose max="1">
+			<binding name="updateContainerID"/>
+			<binding name="replaceID"/>
+			<binding name="ignoreActionResponse"/>
+		</choose>
+
+		<!-- A direct action's response can only go to a replace target... -->
+		<requires binding="replaceID" when="directActionName"/>
+
+		<!-- ...and cannot be ignored. Authored although entailed by the two rules above: constraints are
+		     the diagnostic surface, and the entailment chain alone misdiagnoses this state (see
+		     design/constraints.md in apiext-format, "entailment does not justify omission"). -->
+		<choose max="1">
+			<binding name="directActionName"/>
+			<binding name="ignoreActionResponse"/>
+		</choose>
 
 	</wo>
 </wodefinitions>

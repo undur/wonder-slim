@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
 	<wo class="AjaxBrowser" wocomponentcontent="false">
 
@@ -101,38 +101,22 @@
 			<doc>Standard HTML `style` attribute.</doc>
 		</binding>
 
-		<validation message="'list' must not be a constant">
-			<and>
-				<bound name="list"/>
-				<ungettable name="list"/>
-			</and>
-		</validation>
+		<!-- list must be a real keypath, not a constant. -->
+		<requires binding="list" must="gettable"/>
 
-		<validation message="'item' may not be a constant when 'displayString' or 'value' is bound">
-			<and>
-				<or>
-					<bound name="displayString"/>
-					<bound name="value"/>
-				</or>
-				<unsettable name="item"/>
-			</and>
-		</validation>
+		<!-- Per-option rendering runs through item: once displayString or value is bound, item must be
+		     bound AND assignable (two stacked obligations - settable does not imply bound). -->
+		<requires binding="item" must="settable">
+			<any-of><binding name="displayString"/><binding name="value"/></any-of>
+		</requires>
+		<requires binding="item">
+			<any-of><binding name="displayString"/><binding name="value"/></any-of>
+		</requires>
 
-		<validation message="'item' must be bound when 'displayString' or 'value' is bound">
-			<and>
-				<unbound name="item"/>
-				<or>
-					<bound name="value"/>
-					<bound name="displayString"/>
-				</or>
-			</and>
-		</validation>
-
-		<validation message="'selectedValues' and 'selections' cannot both be bound">
-			<and>
-				<bound name="selections"/>
-				<bound name="selectedValues"/>
-			</and>
-		</validation>
+		<!-- One selection mechanism. -->
+		<choose max="1">
+			<binding name="selections"/>
+			<binding name="selectedValues"/>
+		</choose>
 	</wo>
 </wodefinitions>
