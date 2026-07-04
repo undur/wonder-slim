@@ -13,7 +13,7 @@ import ajaxplayground.apiext.ApiextElement;
 /**
  * The AjaxSlim element reference, rendered ENTIRELY from the {@code .apiext} files - no hand-written
  * element docs. Loads every element via the resource manager, in reference order, and renders each
- * section (role, bindings table, validations) from its parsed model.
+ * section (role, bindings table, constraints) from its parsed model.
  * <p>
  * The category BADGES (Update/Widget/Server/Activity) are AjaxSlim's own editorial taxonomy, NOT part of
  * the element-API contract, so they live here rather than in the {@code .apiext} files: this component
@@ -56,7 +56,7 @@ public class AjaxSlimElementReference extends PlaygroundPage {
 
 	private ApiextElement currentElement;
 	private ApiextElement.Binding currentBinding;
-	private ApiextElement.Validation currentValidation;
+	private ApiextElement.Constraint currentConstraint;
 	private String currentTag;
 
 	public AjaxSlimElementReference( WOContext context ) {
@@ -100,8 +100,8 @@ public class AjaxSlimElementReference extends PlaygroundPage {
 	public ApiextElement.Binding currentBinding() { return currentBinding; }
 	public void setCurrentBinding( ApiextElement.Binding value ) { currentBinding = value; }
 
-	public ApiextElement.Validation currentValidation() { return currentValidation; }
-	public void setCurrentValidation( ApiextElement.Validation value ) { currentValidation = value; }
+	public ApiextElement.Constraint currentConstraint() { return currentConstraint; }
+	public void setCurrentConstraint( ApiextElement.Constraint value ) { currentConstraint = value; }
 
 	public String currentTag() { return currentTag; }
 	public void setCurrentTag( String value ) { currentTag = value; }

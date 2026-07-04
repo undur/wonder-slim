@@ -102,10 +102,10 @@
 				<p class="role muted">Any other attribute (<code>data-*</code>, <code>aria-*</code>, <code>role</code>, <code>class</code>, …) is passed through verbatim onto the rendered tag.</p>
 			</wo:if>
 
-			<wo:if condition="$currentElement.hasValidations">
+			<wo:if condition="$currentElement.hasConstraints">
 				<div class="valids">
-					<wo:repetition list="$currentElement.validations" item="$currentValidation">
-						<p class="vmsg"><wo:str value="$currentValidation.message" /></p>
+					<wo:repetition list="$currentElement.constraints" item="$currentConstraint">
+						<p class="vmsg"><wo:str value="$currentConstraint.message" /></p>
 					</wo:repetition>
 				</div>
 			</wo:if>

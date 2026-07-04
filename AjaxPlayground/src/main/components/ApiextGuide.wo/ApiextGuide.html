@@ -32,10 +32,10 @@
 	<h1>.apiext — extended element-API format</h1>
 	<p class="lead">A superset of WebObjects' <code>.api</code> format adding per-element and per-binding documentation, binding types, directionality, and value interpretation — enough to render an element's API in an editor. Proposal stage; in use here. The <a href="/element-reference">element reference</a> renders entirely from <code>.apiext</code> files.</p>
 
-	<p>The current/old <code>.api</code> declares an element's bindings — names, a few flags, cross-binding validation — and little to nothing about what a binding means or it's typing. <code>.apiext</code> adds that as a strict superset: existing <code>.api</code> files validate unchanged, and the new information is additive. The WO runtime does not read <code>.api</code>; only tooling does (WOLips, Parslips), so a successor format is constrained only by "don't break existing files".</p>
+	<p>The current/old <code>.api</code> declares an element's bindings — names, a few flags, cross-binding validation — and little to nothing about what a binding means or it's typing. <code>.apiext</code> keeps that format's skeleton and adds all of it; one legacy area (the <code>&lt;validation&gt;</code> predicate language) is replaced outright by typed <em>constraints</em>, with legacy files handled by a mechanical converter. The WO runtime does not read <code>.api</code>; only tooling does (WOLips, Parslips), so the format is constrained only by "don't strand existing files".</p>
 
 	<h2>Format</h2>
-	<p>Same skeleton as <code>.api</code> (<code>&lt;wodefinitions&gt;</code> / <code>&lt;wo&gt;</code> / <code>&lt;binding&gt;</code> / <code>&lt;validation&gt;</code>); extensions in <span style="color:#1a7431;font-weight:700">green</span>:</p>
+	<p>Same skeleton as <code>.api</code> (<code>&lt;wodefinitions&gt;</code> / <code>&lt;wo&gt;</code> / <code>&lt;binding&gt;</code>); extensions in <span style="color:#1a7431;font-weight:700">green</span>:</p>
 <pre class="code">&lt;wodefinitions&gt;
   &lt;wo class="WOCheckBox" wocomponentcontent="false"<span class="ext"> passthrough="true"</span>&gt;
 
@@ -47,9 +47,9 @@
       <span class="ext">&lt;doc&gt;The checked state.&lt;/doc&gt;</span>
     &lt;/binding&gt;
 
-    &lt;validation message="A WOCheckBox uses either 'checked' or 'value', not both."&gt;
-      &lt;bound name="checked"/&gt; &lt;bound name="value"/&gt;
-    &lt;/validation&gt;
+    <span class="ext">&lt;choose min="1" max="1"&gt;
+      &lt;binding name="checked"/&gt; &lt;binding name="value"/&gt;
+    &lt;/choose&gt;</span>
 
   &lt;/wo&gt;
 &lt;/wodefinitions&gt;</pre>
@@ -72,6 +72,9 @@
 	<h3>Interpretation — <code>interpretation="truthy"</code></h3>
 	<p>Some bindings read a value by a coercion rule, not by type. <code>WOConditional.condition</code> accepts anything but reads it as a boolean (<code>null</code>, <code>0</code>, <code>false</code> → false). The <code>interpretation</code> attribute names that rule without changing the type: <code>&lt;type interpretation="truthy"&gt;java.lang.Object&lt;/type&gt;</code>. The type remains the validatable constraint (<code>Object</code>); the interpretation is shown as a qualifier, <code>Object (truthy)</code>.</p>
 
+	<h3>Constraints — <code>&lt;choose&gt;</code> / <code>&lt;requires&gt;</code></h3>
+	<p>Typed, positive cross-binding rules replacing <code>.api</code>'s inverted <code>&lt;validation&gt;</code> predicate trees. <code>&lt;choose min max&gt;</code> is cardinality over a set of alternatives (at-least-one / at-most-one / exactly-one); <code>&lt;requires binding must when&gt;</code> is implication, with <code>must</code> ∈ <code>bound</code>/<code>settable</code>/<code>gettable</code>. Messages are <em>generated</em> from the typed rule (the sample above renders as “Exactly one of 'checked' and 'value' must be bound.”); a <code>message</code> attribute overrides. Every referenced binding must resolve to a declared one — a file with a typo'd reference is rejected, not silently weakened.</p>
+
 	<h2>Out of scope</h2>
 	<p>The format describes a binding's contract, not the runtime. A type that is only determined at runtime is declared as its widest honest type. Example: <code>WOTextField.value</code> pushes a <code>String</code>, <code>Number</code>, or <code>NSTimestamp</code> depending on the bound formatter (anything, for a custom one), so its push type is declared <code>Object</code>, with the detail in <code>&lt;doc&gt;</code>.</p>
 
@@ -81,7 +84,7 @@
 		<tbody>
 			<tr><td class="k">per-element / per-binding doc (Markdown)</td><td class="have">present</td></tr>
 			<tr><td class="k">typed bindings (multi-type)</td><td class="have">present (declared; enforcement is future work)</td></tr>
-			<tr><td class="k">required, cross-binding validation</td><td class="have">present (verbatim from <code>.api</code>)</td></tr>
+			<tr><td class="k">required + typed cross-binding constraints (choose / requires)</td><td class="have">present (replaces <code>.api</code>'s validation language; messages generated)</td></tr>
 			<tr><td class="k">directionality (pull / push)</td><td class="have">present</td></tr>
 			<tr><td class="k">value interpretation (truthiness)</td><td class="have">present</td></tr>
 			<tr><td class="k">default values, deprecation, value-sets, unknown-binding policy</td><td class="want">not yet</td></tr>

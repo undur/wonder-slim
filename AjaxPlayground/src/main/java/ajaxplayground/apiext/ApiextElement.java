@@ -18,7 +18,7 @@ import com.webobjects.foundation.NSArray;
 /**
  * The parsed model of one element's {@code .apiext} file - the extended API format that carries
  * everything the hand-written HTML element reference shows (role, per-binding types + docs,
- * passthrough, validations), on top of the structural {@code .api} payload.
+ * passthrough, constraints), on top of the structural {@code .api} payload.
  * <p>
  * This is a display-first model: the reference page renders from it. It is read by name + framework
  * via the WO resource manager, so a {@code .apiext} in a framework's {@code src/main/components/}
@@ -140,22 +140,30 @@ public class ApiextElement {
 		}
 	}
 
-	/** A constraint across bindings, carried verbatim from the .api: a message plus the predicates whose
-	 *  simultaneous truth makes it fire (e.g. two {@code bound} predicates = "only one of these"). */
-	public static class Validation {
-		public String message;
-		/** Each predicate is "bound:name" or "unbound:name" - kept as a human string for display. */
-		public final List<String> predicates = new ArrayList<>();
+	/**
+	 * A typed cross-binding constraint ({@code <choose>} / {@code <requires>}) with its human message.
+	 * The message is GENERATED from the typed rule - the {@code message} attribute, when present,
+	 * overrides it. This is the display payoff of typed constraints: uniform phrasing with no
+	 * hand-written drift, and (later) localizable by the consumer.
+	 */
+	public static class Constraint {
+		public final String kind;    // "choose" or "requires" (available for styling)
+		public final String message;
 
+		public Constraint(String kind, String message) {
+			this.kind = kind;
+			this.message = message;
+		}
+
+		public String kind() { return kind; }
 		public String message() { return message; }
-		public List<String> predicates() { return predicates; }
 	}
 
 	public String className;
 	public boolean passthrough;
 	public String doc;
 	public final List<Binding> bindings = new ArrayList<>();
-	public final List<Validation> validations = new ArrayList<>();
+	public final List<Constraint> constraints = new ArrayList<>();
 
 	public String className() { return className; }
 	public boolean passthrough() { return passthrough; }
@@ -163,8 +171,8 @@ public class ApiextElement {
 	/** The element doc rendered from the Markdown subset to safe HTML (paragraphs + fenced code samples). */
 	public String docHtml() { return Markdown.toHtml(doc); }
 	public List<Binding> bindings() { return bindings; }
-	public List<Validation> validations() { return validations; }
-	public boolean hasValidations() { return !validations.isEmpty(); }
+	public List<Constraint> constraints() { return constraints; }
+	public boolean hasConstraints() { return !constraints.isEmpty(); }
 
 	/**
 	 * Read and parse {@code <elementName>.apiext} from the given framework's components folder.
@@ -222,19 +230,137 @@ public class ApiextElement {
 			out.bindings.add(binding);
 		}
 
-		for (Element v : childElements(wo, "validation")) {
-			Validation validation = new Validation();
-			validation.message = v.getAttribute("message");
-			for (Element p : childElements(v, "bound")) {
-				validation.predicates.add("bound: " + p.getAttribute("name"));
+		// Constraints in DOCUMENT order (their order is presentation order, like bindings) - so one walk
+		// over wo's children dispatching by tag, not per-tag sweeps.
+		NodeList woChildren = wo.getChildNodes();
+		for (int i = 0; i < woChildren.getLength(); i++) {
+			Node n = woChildren.item(i);
+			if (n.getNodeType() != Node.ELEMENT_NODE) {
+				continue;
 			}
-			for (Element p : childElements(v, "unbound")) {
-				validation.predicates.add("unbound: " + p.getAttribute("name"));
+			if ("choose".equals(n.getNodeName())) {
+				out.constraints.add(parseChoose((Element) n));
 			}
-			out.validations.add(validation);
+			else if ("requires".equals(n.getNodeName())) {
+				out.constraints.add(parseRequires((Element) n));
+			}
 		}
 
 		return out;
+	}
+
+	// --- constraint parsing + message generation ---------------------------------------------------
+
+	/** {@code <choose min max>}: cardinality over alternatives (bindings or any-of groups). */
+	private static Constraint parseChoose(Element c) {
+		String override = c.hasAttribute("message") ? c.getAttribute("message") : null;
+		Integer min = intAttr(c, "min");
+		Integer max = intAttr(c, "max");
+
+		// Render each alternative: 'name', or a grouped ('a' or 'b') for an any-of.
+		List<String> alts = new ArrayList<>();
+		NodeList children = c.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node n = children.item(i);
+			if (n.getNodeType() != Node.ELEMENT_NODE) {
+				continue;
+			}
+			if ("binding".equals(n.getNodeName())) {
+				alts.add(quoted(((Element) n).getAttribute("name")));
+			}
+			else if ("any-of".equals(n.getNodeName())) {
+				alts.add("(" + orJoin(memberNames((Element) n)) + ")");
+			}
+		}
+
+		String message = override != null ? override : chooseMessage(min, max, listJoin(alts));
+		return new Constraint("choose", message);
+	}
+
+	private static String chooseMessage(Integer min, Integer max, String list) {
+		if (min != null && max != null) {
+			if (min == 1 && max == 1) {
+				return "Exactly one of " + list + " must be bound.";
+			}
+			if (min.equals(max)) {
+				return "Exactly " + min + " of " + list + " must be bound.";
+			}
+			return "Between " + min + " and " + max + " of " + list + " must be bound.";
+		}
+		if (max != null) {
+			return (max == 1 ? "At most one of " : "At most " + max + " of ") + list + " may be bound.";
+		}
+		if (min != null) {
+			return (min == 1 ? "At least one of " : "At least " + min + " of ") + list + " must be bound.";
+		}
+		return "Choose among " + list + "."; // min/max both absent is invalid per the format; degrade readably
+	}
+
+	/** {@code <requires binding must when>}: implication - antecedent bound => obligation on the binding. */
+	private static Constraint parseRequires(Element r) {
+		String override = r.hasAttribute("message") ? r.getAttribute("message") : null;
+		String subject = quoted(r.getAttribute("binding"));
+		String must = r.hasAttribute("must") ? r.getAttribute("must") : "bound";
+
+		String antecedent = null; // null = unconditional (settable/gettable only, per the format)
+		if (r.hasAttribute("when")) {
+			antecedent = quoted(r.getAttribute("when"));
+		}
+		else {
+			Element anyOf = firstChildElement(r, "any-of");
+			if (anyOf != null) {
+				antecedent = orJoin(memberNames(anyOf));
+			}
+		}
+		String whenClause = antecedent == null ? "" : " when " + antecedent + " is bound";
+
+		String message;
+		switch (must) {
+			case "settable" -> message = subject + " must be settable (assignable, not a constant)" + whenClause + ".";
+			case "gettable" -> message = subject + " must be a keypath, not a constant" + whenClause + ".";
+			default         -> message = subject + " must be bound" + whenClause + ".";
+		}
+		return new Constraint("requires", override != null ? override : message);
+	}
+
+	private static List<String> memberNames(Element anyOf) {
+		List<String> names = new ArrayList<>();
+		for (Element b : childElements(anyOf, "binding")) {
+			names.add(quoted(b.getAttribute("name")));
+		}
+		return names;
+	}
+
+	private static String quoted(String name) {
+		return "'" + name + "'";
+	}
+
+	/** "a', 'b' or 'c" style join for disjunctions (members already quoted). */
+	private static String orJoin(List<String> quotedNames) {
+		if (quotedNames.size() <= 1) {
+			return quotedNames.isEmpty() ? "" : quotedNames.get(0);
+		}
+		return String.join(", ", quotedNames.subList(0, quotedNames.size() - 1)) + " or " + quotedNames.get(quotedNames.size() - 1);
+	}
+
+	/** "'a', 'b' and 'c'" style join for the choose alternative list (members already quoted/grouped). */
+	private static String listJoin(List<String> alts) {
+		if (alts.size() <= 1) {
+			return alts.isEmpty() ? "" : alts.get(0);
+		}
+		return String.join(", ", alts.subList(0, alts.size() - 1)) + " and " + alts.get(alts.size() - 1);
+	}
+
+	private static Integer intAttr(Element el, String name) {
+		if (!el.hasAttribute(name)) {
+			return null;
+		}
+		try {
+			return Integer.valueOf(el.getAttribute(name).trim());
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
 	}
 
 	// --- tiny DOM helpers (no streams; keep the dependency surface nil) ---------------------------
