@@ -254,13 +254,32 @@
 					return;
 				}
 			});
-			// Close on outside click. Guard against our OWN re-render: picking an option in
-			// multi-select mode rebuilds the option <li>s, so by the time this bubbled click fires the
-			// clicked <li> is detached from the document. A detached target means the click came from
-			// inside our (re-rendered) list - not an outside click - so don't close on it.
+			// Outside-click closing is handled by ONE delegated document listener (wireOutsideClick),
+			// not a per-host listener: a per-host document listener would leak the host's whole subtree
+			// every time a widget is re-created (innerHTML-replace containers, removed repetition rows),
+			// and every click would run one dead handler per leaked widget.
+			wireOutsideClick();
+		}
+
+		// The single document-level outside-click closer, installed once. Closes every OPEN host that
+		// does not contain the click. Guard against a widget's OWN re-render: picking an option in
+		// multi-select mode rebuilds the option <li>s, so by the time the bubbled click fires the
+		// clicked <li> is detached from the document. A detached target means the click came from
+		// inside a (re-rendered) list - not an outside click - so don't close on it.
+		var outsideClickWired = false;
+		function wireOutsideClick() {
+			if (outsideClickWired) {
+				return;
+			}
+			outsideClickWired = true;
 			document.addEventListener('click', function (e) {
 				if (e.target && !document.contains(e.target)) return;
-				if (!host.contains(e.target)) close(host);
+				var openHosts = document.querySelectorAll('.ws-host.ws-open');
+				for (var i = 0; i < openHosts.length; i++) {
+					if (!openHosts[i].contains(e.target)) {
+						close(openHosts[i]);
+					}
+				}
 			});
 		}
 

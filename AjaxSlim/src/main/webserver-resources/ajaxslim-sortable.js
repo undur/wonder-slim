@@ -220,6 +220,7 @@
 			document.removeEventListener('mouseup', onUp, true);
 			document.removeEventListener('touchmove', onMove, { passive: false });
 			document.removeEventListener('touchend', onUp, true);
+			document.removeEventListener('touchcancel', onUp, true);
 			item.classList.remove('ajaxslim-dragging');
 			document.documentElement.classList.remove('ajaxslim-sorting');
 			// drop all the transient transforms BEFORE the authoritative morph lands, so the server's
@@ -240,6 +241,10 @@
 		document.addEventListener('mouseup', onUp, true);
 		document.addEventListener('touchmove', onMove, { passive: false });
 		document.addEventListener('touchend', onUp, true);
+		// touchcancel: the system can end a touch drag without a touchend (incoming call, OS gesture,
+		// tab switch). Without this, onUp never runs - the document listeners stay attached and, worse,
+		// the container keeps data-morph-ignore, silently freezing every later update of the list.
+		document.addEventListener('touchcancel', onUp, true);
 	}
 
 	// Tell the server: item moved from oldIndex to newIndex. Preferred path is a named function (rendered

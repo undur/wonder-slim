@@ -101,6 +101,14 @@
 			Morph.runScripts(html);
 		},
 
+		// Replace the element ITSELF with html (outerHTML semantics) - the ajax-replacement (_r /
+		// replaceID) contract, where the response body IS the new markup for the target element rather
+		// than new children for it. Scripts run explicitly, as in replace().
+		replaceElement: function (receiver, html) {
+			receiver.outerHTML = Morph.stripScripts(html);
+			Morph.runScripts(html);
+		},
+
 		// Remove <script>...</script> blocks from an HTML string.
 		stripScripts: function (html) {
 			return html.replace(/<script[^>]*>([\s\S]*?)<\/script\s*>/gi, '');
@@ -508,7 +516,7 @@
 		return (window.performance && window.performance.now) ? window.performance.now() : Date.now();
 	}
 
-	function fetchAndMorph(targetId, url, body, onDone) {
+	function fetchAndMorph(targetId, url, body, onDone, replace) {
 		var init = {
 			credentials: 'same-origin',
 			headers: postHeaders(body)
@@ -540,11 +548,18 @@
 			//     comes back framed, so there is no single-vs-multi special case here. applyFragments
 			//     handles one fragment or many, skips containers no longer on the page, and honours each
 			//     one's data-morph.
+			//   - a REPLACEMENT (_r / replaceID) response arrives UNFRAMED by design: the server renders
+			//     the action's result page and the body is the new markup for the target element itself
+			//     (outerHTML semantics). Only the replace flag distinguishes this from the script case.
 			//   - otherwise it's JS to run globally (a text/javascript body, or <script> tags) - e.g. the
 			//     the AjaxUpdater.triggerUpdate JS-command path, or an action returning arbitrary JS.
-			// targetId is only a hint (for logging / a fire-and-forget caller); the body decides.
+			// For updates, targetId is only a hint (for logging / a fire-and-forget caller); the body
+			// decides.
 			if (/<ajaxslim-fragment\b/i.test(text)) {
 				applyFragments(text);
+			}
+			else if (replace && targetId != null && elementFor(targetId) != null) {
+				Morph.replaceElement(elementFor(targetId), text);
 			}
 			else {
 				Morph.runResponseScripts(text, responseContentType);
@@ -658,7 +673,12 @@
 		// Fetch the container's update URL and morph (or replace) the response into the element.
 		// The x-requested-with header is REQUIRED: ERXAjaxApplication.isAjaxRequest keys on it, so
 		// without it the server won't treat this as an ajax request and won't return a fragment.
+		// The container's onRefreshComplete hook is NOT fired from here: the server frames it as a
+		// <script> inside the fragment (AjaxUpdateContainer.handleRequest), and the morph runs it -
+		// exactly once, on every path a fragment can arrive by. Caller options carry only the caller's
+		// OWN hooks (onSuccess/onComplete); they never touch the container's registered options.
 		update: function (id, options) {
+			options = options || {};
 			var element = elementFor(id);
 			if (element == null) {
 				if (window.console) {
@@ -666,13 +686,10 @@
 				}
 				return;
 			}
-			if (options) {
-				// A direct update(id, options) call refreshes the stored options too.
-				registry.set(id, options);
-			}
 			var url = buildUpdateUrl(element, id);
-			fetchAndMorph(id, url, null, function () {
-				AUC.fireRefreshComplete(id);
+			return fetchAndMorph(id, url, null, function () {
+				runHook(options.onSuccess);
+				runHook(options.onComplete);
 			});
 		},
 
@@ -686,9 +703,15 @@
 				return;
 			}
 			if (ids.length === 1) {
-				// Degenerate case: not actually multi - route through the normal single path (which also
-				// demuxes the single framed fragment the server returns).
-				return AUC.update(ids[0], options);
+				// Degenerate case: not actually multi - fire the SAME action once with a single _u/_r
+				// marker. Routing through AUC.update(id) here would be wrong twice over: it fetches the
+				// container's own update URL (so the trigger's ACTION would silently never fire), and it
+				// drops the caller's replace flag.
+				var singleUrl = addUpdateParams(actionUrl, ids[0], !!options.replace);
+				return fetchAndMorph(ids[0], singleUrl, null, function () {
+					runHook(options.onSuccess);
+					runHook(options.onComplete);
+				}, !!options.replace);
 			}
 			var joined = ids.join(';');
 			var url = addUpdateParams(actionUrl, joined, !!options.replace);
@@ -776,9 +799,12 @@
 		// Field-observer convenience used by AjaxUpdateContainer's observeFieldID binding: when the
 		// named field changes, refresh container id. This is the "just refresh the container"
 		// shortcut; the full AjaxObserveField element (which can do partial/full form submits to an
-		// action) lives in AjaxSlim.ASB.observeField. fullSubmit is honored here too: when true we
-		// submit the field's whole form to the container's update URL before morphing; when false we
-		// simply re-fetch the container.
+		// action) lives in AjaxSlim.ASB.observeField. fullSubmit is honored here too: when true the
+		// field's whole form is POSTed to the FORM's action URL with the container as the _u render
+		// target; when false only the changed field is sent (a partial submit). Either way the
+		// container is a render target, never the request's sender - so a self-updating container's
+		// own `action` binding does NOT fire on this path (it fires only on the periodic
+		// handleRequest path).
 		observeField: function (id, fieldId, fullSubmit) {
 			ASB.observeField(id, fieldId, null, !fullSubmit, null, {});
 		}
@@ -806,7 +832,7 @@
 			fetchAndMorph(targetId, url, null, function () {
 				runHook(options.onSuccess);
 				runHook(options.onComplete);
-			});
+			}, !!options.replace);
 		},
 
 		// Fire an action with no container to update (e.g. the action returns scripts to run, or the
@@ -842,7 +868,16 @@
 				continue;
 			}
 			var type = (el.type || '').toLowerCase();
-			if (type === 'submit' || type === 'image' || type === 'button' || type === 'reset' || type === 'file') {
+			if (type === 'file') {
+				// Files cannot travel in a URLSearchParams body - a known limitation of the ajax submit.
+				// Warn when an actual selection is being dropped, so the silent data loss is at least
+				// visible in the console.
+				if (el.files && el.files.length && window.console) {
+					console.warn('AjaxSlim: file input "' + el.name + '" is NOT submitted by an ajax submit - use a regular form post for file uploads');
+				}
+				continue;
+			}
+			if (type === 'submit' || type === 'image' || type === 'button' || type === 'reset') {
 				continue;
 			}
 			if ((type === 'checkbox' || type === 'radio') && !el.checked) {
@@ -862,10 +897,15 @@
 	}
 
 	// The form's action URL, switched onto the ajax request handler path the same way
-	// AjaxUtils.ajaxComponentActionUrl does server-side (/wo/ -> /ajax/), with the target marker.
+	// AjaxUtils.ajaxComponentActionUrl does server-side, with the target marker. The handler keys
+	// default to WO's stock 'wo' and AjaxSlim's 'ajax'; an app running a customized
+	// componentRequestHandlerKey must expose both via window.AjaxSlimHandlerKeys =
+	// { component: '...', ajax: '...' } (the form's action URL is server-rendered, so the client
+	// cannot derive the key on its own).
 	function submitUrl(form, targetId, replace) {
 		var action = form.getAttribute('action') || form.action || '';
-		action = action.replace('/wo/', '/ajax/');
+		var keys = window.AjaxSlimHandlerKeys || {};
+		action = action.replace('/' + (keys.component || 'wo') + '/', '/' + (keys.ajax || 'ajax') + '/');
 		return addUpdateParams(action, targetId, replace);
 	}
 
@@ -915,6 +955,16 @@
 					headers: postHeaders(body),
 					body: body
 				}).then(function (response) {
+					// Same as fetchAndMorph and updateMany: never apply an HTTP error response as
+					// fragments (applyFragments would find none and RUN THE ERROR PAGE'S SCRIPTS) -
+					// check response.ok and divert failures to reportError.
+					if (!response.ok) {
+						return response.text().catch(function () { return ''; }).then(function (body) {
+							var err = new Error('AjaxSlim HTTP ' + response.status);
+							err.ajaxslim = { status: response.status, statusText: response.statusText, body: body };
+							throw err;
+						});
+					}
 					return response.text();
 				}).then(function (text) {
 					applyFragments(text);
@@ -927,15 +977,15 @@
 						restoreTabFocus();
 					}, 0);
 				}).catch(function (e) {
-					if (window.console) {
-						console.error('AjaxSlim: multi submit failed for "' + targetId + '"', e);
-					}
+					var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
+					reportError({ targetId: targetId, url: url, status: info.status,
+						statusText: info.statusText, body: info.body, error: e });
 				}).then(activityEnd, activityEnd);
 			}
 			fetchAndMorph(targetId, url, body, function () {
 				runHook(options.onSuccess);
 				runHook(options.onComplete);
-			});
+			}, !!options.replace);
 		},
 
 		// AjaxObserveField: watch a single field. partial=true => partial submit (just this field);
