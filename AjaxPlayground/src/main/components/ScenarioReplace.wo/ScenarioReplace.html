@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: replaceID (ajax replacement)</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 44rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.zone { padding: 1rem; border: 2px dashed #c9dcef; border-radius: 6px; margin: 1rem 0; }
+		a { color: #2b6cb0; }
+		code { background: #f2f2f2; padding: 0 .25rem; border-radius: 3px; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>replaceID (ajax replacement)</h1>
+	<p class="lead">An <code>AjaxUpdateLink</code> with <code>replaceID</code>: the action's result <strong>replaces the target element itself</strong> (outerHTML), instead of morphing a container's children. The replacement carries an inline script that must run exactly once per replacement — after the new markup is in the DOM.</p>
+
+	<div id="replaceZone" class="zone">
+		<p id="replaceState">original</p>
+	</div>
+
+	<p><wo:AjaxUpdateLink action="$replaceRegion" replaceID="replaceZone" id="replaceLink">Replace the region</wo:AjaxUpdateLink></p>
+
+	<p id="staticMarker">untouched</p>
+</body>
+</html>

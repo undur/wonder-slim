@@ -1,0 +1,24 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioReplace",
+  "comment": "AjaxUpdateLink replaceID: the unframed _r response must REPLACE the target element (outerHTML), run its inline script exactly once per replacement, and leave the rest of the page alone. Two clicks prove the region stays replaceable (the replacement re-renders the same id).",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#replaceZone" },
+    { "do": "read", "name": "state_before", "selector": "#replaceState", "what": "text" },
+    { "do": "click", "selector": "#replaceLink" },
+    { "do": "wait", "ms": 800 },
+    { "do": "read", "name": "state_after1", "selector": "#replaceState", "what": "text" },
+    { "do": "read", "name": "script_after1", "what": "jsExpression", "expression": "window.__replaceScriptRan" },
+    { "do": "click", "selector": "#replaceLink" },
+    { "do": "wait", "ms": 800 },
+    { "do": "read", "name": "state_after2", "selector": "#replaceState", "what": "text" },
+    { "do": "read", "name": "script_after2", "what": "jsExpression", "expression": "window.__replaceScriptRan" },
+    { "do": "read", "name": "static_after", "selector": "#staticMarker", "what": "text" },
+    { "do": "assert", "name": "page loads with the original region", "that": "state_before", "equals": "original" },
+    { "do": "assert", "name": "first click replaces the region", "that": "state_after1", "equals": "replaced #1" },
+    { "do": "assert", "name": "replacement's inline script ran once", "that": "script_after1", "equals": 1 },
+    { "do": "assert", "name": "second click replaces again (region stays replaceable)", "that": "state_after2", "equals": "replaced #2" },
+    { "do": "assert", "name": "script ran exactly once per replacement", "that": "script_after2", "equals": 2 },
+    { "do": "assert", "name": "the rest of the page is untouched", "that": "static_after", "equals": "untouched" }
+  ]
+}
