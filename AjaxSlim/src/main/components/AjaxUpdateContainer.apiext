@@ -4,7 +4,7 @@
 
 		<doc><![CDATA[A region of the page that can be refreshed independently via an Ajax request, morphing the freshly-rendered HTML into the live DOM (preserving focus, scroll, selection and unchanged subtrees) instead of replacing its `innerHTML`.
 
-**Passive**: it is refreshed by *other* elements that name it in `updateContainerID`; it has no action and no self-refresh of its own.
+**Passive**: it is refreshed by *other* elements that name it in `updateContainerID`; it has no action and no self-refresh of its own. Binding any of the self-updating bindings (`action`, `frequency`, `observeFieldID`, `stopped`, `fullSubmit`) is rejected with an error — despite the `passthrough` policy, they are never forwarded as attributes; use `AjaxSelfUpdatingContainer`.
 
 ```html
 <wo:AjaxUpdateContainer id="detail"> ...content... </wo:AjaxUpdateContainer>

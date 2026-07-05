@@ -97,7 +97,7 @@ public class AjaxUpdater {
 	 */
 	@Deprecated
 	public static void triggerUpdate(String containerID, WOContext context) {
-		AjaxUtils.javascriptResponse("AjaxSlim.AUC.update('" + containerID + "');", context);
+		AjaxUtils.javascriptResponse("AjaxSlim.AUC.update(" + AjaxUtils.quote(containerID) + ");", context);
 	}
 
 	/**
@@ -112,6 +112,6 @@ public class AjaxUpdater {
 	 */
 	@Deprecated
 	public static void triggerSafeUpdate(String containerID, WOContext context) {
-		AjaxUtils.javascriptResponse("if (document.getElementById('" + containerID + "') != null) AjaxSlim.AUC.update('" + containerID + "');", context);
+		AjaxUtils.javascriptResponse("if (document.getElementById(" + AjaxUtils.quote(containerID) + ") != null) AjaxSlim.AUC.update(" + AjaxUtils.quote(containerID) + ");", context);
 	}
 }

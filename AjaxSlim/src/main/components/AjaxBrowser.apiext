@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxBrowser" content="forbidden">
+	<wo class="AjaxBrowser" content="forbidden" unknownAttributes="passthrough">
 
 		<doc><![CDATA[The multi-select companion to `AjaxPopUpButton`: a drop-in `WOBrowser` that renders the same searchable wonder-select widget with removable tags instead of a bare multi-select. The shared `wonder-select.js` reads the `<select>`'s `multiple` attribute to switch between single value and removable tags.
 
@@ -48,6 +48,7 @@
 
 		<binding name="otherTagString">
 			<pull><type>java.lang.String</type></pull>
+			<deprecated>Unknown attributes pass through to the rendered tag natively — write them directly on the element instead.</deprecated>
 			<doc><![CDATA[Extra attributes appended to the rendered `<select>` tag.]]></doc>
 		</binding>
 

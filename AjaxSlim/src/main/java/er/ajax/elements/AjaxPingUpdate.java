@@ -25,6 +25,13 @@ import com.webobjects.appserver.WOContext;
  * @binding onBeforeUpdate (optional) a javascript function to call before updating (returns true to allow the update)
  *
  * @author mschrag
+ *
+ * <p>
+ * <b>Caveat:</b> the last-seen cache key lives on the component <i>instance</i>, and a WORepetition
+ * renders ONE instance across all its iterations - so an AjaxPingUpdate inside a repetition shares a
+ * single last-seen key across rows, and alternating per-row keys would re-trigger on every tick.
+ * Declare one AjaxPingUpdate per target instead of repeating one over a list.
+ * </p>
  */
 public class AjaxPingUpdate extends WOComponent {
 

@@ -104,6 +104,19 @@ public class AjaxObserveField extends AjaxDynamicElement {
 		AjaxUtils.appendScriptFooter(response);
 	}
 
+	/**
+	 * Renders a numeric binding value as a JS number literal, failing loudly on garbage - the value is
+	 * emitted into a script block, so anything non-numeric would otherwise be injected as raw JS.
+	 */
+	private static String jsNumber(String bindingName, String value) {
+		try {
+			return String.valueOf(Double.parseDouble(value.trim()));
+		}
+		catch (NumberFormatException e) {
+			throw new IllegalStateException("AjaxObserveField: could not parse a number from the '" + bindingName + "' binding value <" + value + ">");
+		}
+	}
+
 	protected void appendObserverScript(WOResponse response, WOContext context, String observeFieldID, boolean observeDescendentFields, String updateContainerID, boolean fullSubmit) {
 		WOComponent component = context.component();
 		String submitButtonName = nameInContext(context, component, this);
@@ -118,11 +131,11 @@ public class AjaxObserveField extends AjaxDynamicElement {
 		response.appendContentString(", ");
 		response.appendContentString(AjaxUtils.quote(observeFieldID));
 		response.appendContentString(", ");
-		response.appendContentString(observeFieldFrequency == null ? "null" : observeFieldFrequency);
+		response.appendContentString(observeFieldFrequency == null ? "null" : jsNumber("observeFieldFrequency", observeFieldFrequency));
 		response.appendContentString(", ");
 		response.appendContentString(String.valueOf(partial));
 		response.appendContentString(", ");
-		response.appendContentString(observeDelay == null ? "null" : observeDelay);
+		response.appendContentString(observeDelay == null ? "null" : jsNumber("observeDelay", observeDelay));
 		response.appendContentString(", ");
 		response.appendContentString(optionsLiteral(component, submitButtonName));
 		response.appendContentString(");");

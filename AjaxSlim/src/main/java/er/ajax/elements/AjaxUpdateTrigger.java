@@ -69,8 +69,8 @@ public class AjaxUpdateTrigger extends WODynamicElement {
 		if (!containersToUpdate.isEmpty()) {
 			AjaxUtils.appendScriptHeader(response);
 			for (String nextUpdateContainerID : containersToUpdate) {
-				response.appendContentString("if (document.getElementById('" + nextUpdateContainerID + "')) { ");
-				response.appendContentString("AjaxSlim.AUC.update('" + nextUpdateContainerID + "');");
+				response.appendContentString("if (document.getElementById(" + AjaxUtils.quote(nextUpdateContainerID) + ")) { ");
+				response.appendContentString("AjaxSlim.AUC.update(" + AjaxUtils.quote(nextUpdateContainerID) + ");");
 				response.appendContentString(" }\n");
 			}
 			AjaxUtils.appendScriptFooter(response);

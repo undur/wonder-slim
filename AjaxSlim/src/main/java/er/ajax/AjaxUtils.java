@@ -34,7 +34,13 @@ public class AjaxUtils {
 	 * @return the quoted value or "null"
 	 */
 	public static String quote(String value) {
-		return value == null ? "null" : "'" + value.replaceAll("'", "\\\\'") + "'";
+		if (value == null) {
+			return "null";
+		}
+		// Backslash first (so we don't double-escape our own escapes), then the quote itself, then
+		// guard "</" so a value containing "</script>" cannot terminate the surrounding script block.
+		String escaped = value.replace("\\", "\\\\").replace("'", "\\'").replace("</", "<\\/");
+		return "'" + escaped + "'";
 	}
 
 	/**

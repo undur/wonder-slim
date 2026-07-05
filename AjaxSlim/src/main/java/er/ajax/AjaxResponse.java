@@ -26,7 +26,7 @@ import er.extensions.appserver.ajax.ERXAjaxApplication.ERXAjaxResponseDelegate;
 public class AjaxResponse extends WOResponse {
 	private static final Logger log = LoggerFactory.getLogger(AjaxResponse.class);
 	public static final String AJAX_UPDATE_PASS = "_ajaxUpdatePass";
-	private static NSMutableArray _responseAppenders;
+	private static final java.util.List<AjaxResponseAppender> _responseAppenders = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	/**
 	 * Add a response appender to the list of response appender. At the end of
@@ -42,10 +42,7 @@ public class AjaxResponse extends WOResponse {
 	 * @param responseAppender the appender to add
 	 */
 	public static void addAjaxResponseAppender(AjaxResponseAppender responseAppender) {
-		if (_responseAppenders == null) {
-			_responseAppenders = new NSMutableArray();
-		}
-		_responseAppenders.addObject(responseAppender);
+		_responseAppenders.add(responseAppender);
 	}
 
 	private WORequest _request;
@@ -69,12 +66,8 @@ public class AjaxResponse extends WOResponse {
 				userInfo.setObjectForKey(Boolean.TRUE, AjaxResponse.AJAX_UPDATE_PASS);
 				WOActionResults woactionresults = WOApplication.application().invokeAction(_request, _context);
 				_content.append(originalContent);
-				if (_responseAppenders != null) {
-					Enumeration responseAppendersEnum = _responseAppenders.objectEnumerator();
-					while (responseAppendersEnum.hasMoreElements()) {
-						AjaxResponseAppender responseAppender = (AjaxResponseAppender) responseAppendersEnum.nextElement();
-						responseAppender.appendToResponse(this, _context);
-					}
+				for (AjaxResponseAppender responseAppender : _responseAppenders) {
+					responseAppender.appendToResponse(this, _context);
 				}
 				// An empty response is a mistake only when a container was actually TARGETED but nothing
 				// rendered for it - typically a misspelled updateContainerID that matched no container on

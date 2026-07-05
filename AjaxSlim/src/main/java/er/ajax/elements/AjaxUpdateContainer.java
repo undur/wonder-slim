@@ -9,6 +9,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.appserver._private.WODynamicElementCreationException;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 
@@ -60,8 +61,26 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 		return booleanValueForBinding("morph", true, component);
 	}
 
+	/**
+	 * The bindings that belong to {@link AjaxSelfUpdatingContainer}, rejected loudly on the passive
+	 * container: passthrough would otherwise EVALUATE them - so a bound {@code action} method would be
+	 * invoked on every render pass (side effects included) and its result emitted as an HTML attribute.
+	 * The legacy combined element accepted all of these, so the mistake is the natural habit.
+	 */
+	private static final NSArray<String> SELF_UPDATING_ONLY_BINDINGS = new NSArray<>(new String[] {
+		"action", "frequency", "stopped", "observeFieldID", "fullSubmit"
+	});
+
 	public AjaxUpdateContainer(String name, NSDictionary<String, WOAssociation> associations, WOElement children) {
 		super(name, associations, children);
+		if (getClass() == AjaxUpdateContainer.class) {
+			for (String selfUpdatingOnly : SELF_UPDATING_ONLY_BINDINGS) {
+				if (associations.objectForKey(selfUpdatingOnly) != null) {
+					throw new WODynamicElementCreationException("AjaxUpdateContainer does not support the '" + selfUpdatingOnly
+							+ "' binding - a passive update container is refreshed by others and has no self-refresh behavior. Use AjaxSelfUpdatingContainer instead.");
+				}
+			}
+		}
 	}
 
 	/**
@@ -158,7 +177,7 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 				// onRefreshComplete hook) keyed by id so a later update(id) can find them. The
 				// options object is a plain JS object literal; we keep it tiny. This is a passive-target
 				// concern (the hook to run after THIS container is morphed), so it stays on the base.
-				response.appendContentString("AjaxSlim.AUC.register('" + id + "', {");
+				response.appendContentString("AjaxSlim.AUC.register(" + AjaxUtils.quote(id) + ", {");
 				if (onRefreshComplete != null) {
 					response.appendContentString("onRefreshComplete: function() { " + onRefreshComplete + " }");
 				}
@@ -255,7 +274,7 @@ public class AjaxUpdateContainer extends AjaxDynamicElement {
 		// destined for an update container IS a fragment" - one rule, no single-vs-multi or
 		// client-vs-server special case. The client morphs each fragment into its container; the response's
 		// content-type still distinguishes a fragment response (morph) from a text/javascript one (run).
-		response.appendContentString("<ajaxslim-fragment data-id=\"" + id + "\">");
+		response.appendContentString("<ajaxslim-fragment data-id=\"" + id.replace("&", "&amp;").replace("\"", "&quot;") + "\">");
 
 		if (hasChildrenElements()) {
 			appendChildrenToResponse(response, context);

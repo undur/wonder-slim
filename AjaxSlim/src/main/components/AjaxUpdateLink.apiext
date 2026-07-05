@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="AjaxUpdateLink" content="allowed">
+	<wo class="AjaxUpdateLink" content="allowed" unknownAttributes="passthrough">
 
 		<doc><![CDATA[A link (or button, or named JS function) that fires a server action and morphs the result into a target container (`updateContainerID`) or replaces a region (`replaceID`). The standard "click to update part of the page".
 
@@ -38,7 +38,7 @@
 
 		<binding name="onClick">
 			<pull><type>java.lang.String</type></pull>
-			<doc>JavaScript to run on the client before the request is sent.</doc>
+			<doc>JavaScript to run on the client after the request is sent (the fetch is asynchronous, so before the response arrives — use `onSuccess`/`onComplete` for after-the-morph hooks).</doc>
 		</binding>
 
 		<binding name="onClickBefore">

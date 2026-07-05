@@ -11,6 +11,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
 
@@ -31,9 +32,11 @@ import er.extensions.foundation.ERXMutableURL;
  * {@link AjaxUpdateContainer}).
  * <p>
  * <b>Kept bindings:</b> action, directActionName, updateContainerID, replaceID, elementName, string,
- * class, style, id, title, accesskey, disabled, button, function, functionName, onClick (a client
- * hook run before the request), onClickBefore (gate), onClickServer (server-returned JS),
- * ignoreActionResponse, and onComplete / onSuccess as post-update JS hooks (run after the morph).
+ * disabled, button, function, functionName, onClick (a client hook run after the request is sent),
+ * onClickBefore (gate), onClickServer (server-returned JS), ignoreActionResponse, and
+ * onComplete / onSuccess as post-update JS hooks (run after the morph). Every other author-supplied
+ * binding (class, style, id, title, accesskey, data-*, aria-*, role, ...) is passed through verbatim
+ * onto the rendered tag, like AjaxUpdateContainer and AjaxSubmitButton do.
  * <p>
  * <b>Dropped (vs legacy):</b> all Scriptaculous effect / insertion bindings
  * (effect/beforeEffect/afterEffect/*EffectID/*Duration, insertion/*InsertionDuration), and the
@@ -48,7 +51,9 @@ import er.extensions.foundation.ERXMutableURL;
  * @binding replaceID the id of the element whose contents are replaced with the results of this action
  * @binding onComplete JavaScript to run after the update/morph completes
  * @binding onSuccess JavaScript to run after a successful update/morph completes (before onComplete)
- * @binding onClick JavaScript to run on the client before the request is sent
+ * @binding onClick JavaScript to run on the client after the request is sent (the fetch is
+ *          asynchronous, so this runs before the response arrives - use onSuccess/onComplete for
+ *          after-the-morph hooks)
  * @binding onClickBefore if the given expression is false, the click is ignored (e.g. confirm(..))
  * @binding onClickServer JS returned from the server after the action when there is no update
  * @binding ignoreActionResponse if true, the action's response is thrown away
@@ -66,8 +71,38 @@ import er.extensions.foundation.ERXMutableURL;
  */
 public class AjaxUpdateLink extends AjaxDynamicElement {
 
+	/**
+	 * The binding names this element interprets itself - behavioral bindings and the attributes it
+	 * computes (href/onclick/type/value). Every OTHER author-supplied binding is passed through
+	 * verbatim onto the rendered tag by {@link #appendPassthroughAttributes}, matching
+	 * AjaxUpdateContainer and AjaxSubmitButton. {@code ?}-prefixed bindings are query parameters for
+	 * the direct-action URL (see ERXComponentUtilities.queryParametersInComponent), never attributes.
+	 */
+	private static final NSArray<String> HANDLED_BINDINGS = new NSArray<>(new String[] {
+		"action", "directActionName", "updateContainerID", "replaceID", "ignoreActionResponse",
+		"function", "functionName", "button", "elementName", "disabled", "string",
+		"onClick", "onClickBefore", "onClickServer", "onSuccess", "onComplete"
+	});
+
 	public AjaxUpdateLink(String name, NSDictionary<String, WOAssociation> associations, WOElement children) {
 		super(name, associations, children);
+	}
+
+	/**
+	 * Emit every author-supplied binding this element does not handle itself as a tag attribute, so
+	 * arbitrary HTML attributes (class, style, id, title, accesskey, data-*, aria-*, role, ...) land
+	 * on the rendered link. Behavioral bindings are excluded via {@link #HANDLED_BINDINGS};
+	 * {@code ?}-prefixed bindings are direct-action query parameters and are skipped too.
+	 */
+	protected void appendPassthroughAttributes(WOResponse response, WOComponent component) {
+		for (String name : associations().allKeys()) {
+			if (HANDLED_BINDINGS.containsObject(name) || name.startsWith("?")) {
+				continue;
+			}
+			WOAssociation association = associations().objectForKey(name);
+			Object value = association.valueInComponent(component);
+			appendTagAttributeToResponse(response, name, value);
+		}
 	}
 
 	/**
@@ -114,7 +149,7 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 			}
 		}
 
-		String actionUrlExpression = "'" + actionUrl + "'";
+		String actionUrlExpression = AjaxUtils.quote(actionUrl);
 		if (functionName != null) {
 			// A named function receives additionalParams to append to the url at call time.
 			actionUrlExpression = actionUrlExpression + " + AjaxSlim.queryString(additionalParams)";
@@ -132,7 +167,7 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 			else {
 				// A "a;b;c" target is a multi-container update (a single id never contains ';'); AUL.update
 				// detects this on the client and routes to updateMany. So no special-casing here.
-				buffer.append("AjaxSlim.AUL.update('" + target + "', " + actionUrlExpression + ", " + options + ")");
+				buffer.append("AjaxSlim.AUL.update(" + AjaxUtils.quote(target) + ", " + actionUrlExpression + ", " + options + ")");
 			}
 		}
 
@@ -212,11 +247,7 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 				if (!disabled) {
 					appendTagAttributeToResponse(response, "onclick", onClick(context, false));
 				}
-				appendTagAttributeToResponse(response, "title", valueForBinding("title", component));
-				appendTagAttributeToResponse(response, "class", valueForBinding("class", component));
-				appendTagAttributeToResponse(response, "style", valueForBinding("style", component));
-				appendTagAttributeToResponse(response, "id", valueForBinding("id", component));
-				appendTagAttributeToResponse(response, "accesskey", valueForBinding("accesskey", component));
+				appendPassthroughAttributes(response, component);
 				if (button) {
 					if (stringValue != null) {
 						appendTagAttributeToResponse(response, "value", stringValue);

@@ -69,7 +69,9 @@ public class AjaxPing extends WOComponent {
 			return Double.parseDouble(String.valueOf(frequency).trim());
 		}
 		catch (NumberFormatException e) {
-			return DEFAULT_FREQUENCY_SECONDS;
+			// Fail loudly, like AjaxSelfUpdatingContainer does for the same binding - silently falling
+			// back to the default would hide a real authoring error.
+			throw new IllegalStateException("AjaxPing: could not parse a number from the 'frequency' binding value <" + frequency + ">");
 		}
 	}
 

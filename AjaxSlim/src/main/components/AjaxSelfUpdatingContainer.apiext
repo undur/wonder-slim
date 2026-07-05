@@ -32,7 +32,7 @@
 
 		<binding name="action">
 			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
-			<doc>The action to invoke when this container refreshes itself.</doc>
+			<doc>The action to invoke on the **periodic** self-refresh. It does *not* fire on an `observeFieldID`-triggered refresh — that path submits the observed field's form, and the container is only the render target.</doc>
 		</binding>
 
 		<binding name="id">

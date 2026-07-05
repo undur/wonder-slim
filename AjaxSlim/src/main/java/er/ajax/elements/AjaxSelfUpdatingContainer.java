@@ -40,7 +40,10 @@ import er.extensions.foundation.ERXValueUtilities;
  * @binding stopped whether a periodic container loads stopped (so it can be started later)
  * @binding observeFieldID the DOM id of a field whose changes trigger a self-refresh of this container
  * @binding fullSubmit when observing a field, whether to submit the whole form (true) or just the field (false)
- * @binding action the action to invoke when this container refreshes itself
+ * @binding action the action to invoke when this container refreshes itself via its PERIODIC
+ *          self-refresh. It does NOT fire on an observeFieldID-triggered refresh - that path submits
+ *          the observed field's form (so the form's action pipeline runs) and the container is only
+ *          the render target.
  */
 public class AjaxSelfUpdatingContainer extends AjaxUpdateContainer {
 
@@ -86,14 +89,14 @@ public class AjaxSelfUpdatingContainer extends AjaxUpdateContainer {
 					canStop = true;
 					stopped = booleanValueForBinding("stopped", false, component);
 				}
-				response.appendContentString("AjaxSlim.AUC.registerPeriodic('" + id + "'," + canStop + "," + stopped + "," + ERXValueUtilities.floatValue(frequency) + ");");
+				response.appendContentString("AjaxSlim.AUC.registerPeriodic(" + AjaxUtils.quote(id) + "," + canStop + "," + stopped + "," + ERXValueUtilities.floatValue(frequency) + ");");
 			}
 		}
 
 		String observeFieldID = (String) valueForBinding("observeFieldID", component);
 		if (observeFieldID != null) {
 			boolean fullSubmit = booleanValueForBinding("fullSubmit", false, component);
-			response.appendContentString("AjaxSlim.AUC.observeField('" + id + "','" + observeFieldID + "'," + fullSubmit + ");");
+			response.appendContentString("AjaxSlim.AUC.observeField(" + AjaxUtils.quote(id) + "," + AjaxUtils.quote(observeFieldID) + "," + fullSubmit + ");");
 		}
 	}
 

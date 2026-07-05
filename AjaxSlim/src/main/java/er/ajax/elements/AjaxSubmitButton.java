@@ -270,7 +270,13 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 					appendChildrenToResponse(response, context);
 				}
 				else {
-					response.appendContentString((String) valueForBinding("value", component));
+					// No children and no value must not render the literal "null" as the button label
+					// (appendContentString does a bare string append). Escaped, matching how
+					// AjaxUpdateLink renders its string label.
+					Object label = valueForBinding("value", component);
+					if (label != null) {
+						response.appendContentHTMLString(label.toString());
+					}
 				}
 				response.appendContentString("</" + elementName + ">");
 			}
