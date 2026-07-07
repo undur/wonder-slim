@@ -28,8 +28,8 @@ public record SessionCacheSummary(
 	 *
 	 * @param sessionID the session id (for the row label / drill-down link)
 	 * @param reports that session's cache reports (from {@link SessionCacheReporter#reportsFor})
-	 * @param activeWindow "active" = touched within this window
-	 * @param staleThreshold "stale" = idle longer than this
+	 * @param activeWindow "active" = INSTANCES touched within this window
+	 * @param staleThreshold "stale" = INSTANCES idle longer than this (every entry idle)
 	 * @param now the render instant (shared so all rows are consistent)
 	 */
 	public static SessionCacheSummary of( String sessionID, List<CacheReport> reports, Duration activeWindow, Duration staleThreshold, Instant now ) {
@@ -51,11 +51,12 @@ public record SessionCacheSummary(
 			}
 
 			// Dispatch on the reporter's shared name constants - a string literal here once drifted from
-			// the reporter's actual cache name, silently zeroing a column.
+			// the reporter's actual cache name, silently zeroing a column. Per-cache columns count
+			// INSTANCES - the tunable, memory-relevant number - like everything else on the page.
 			switch( report.cacheName() ) {
-				case CacheReport.NAME_UNIFIED -> unified = report.size();
-				case CacheReport.NAME_WO_BACKTRACK -> backtrack = report.size();
-				case CacheReport.NAME_WO_PERMANENT -> permanent = report.size();
+				case CacheReport.NAME_UNIFIED -> unified = report.distinctInstances();
+				case CacheReport.NAME_WO_BACKTRACK -> backtrack = report.distinctInstances();
+				case CacheReport.NAME_WO_PERMANENT -> permanent = report.distinctInstances();
 				default -> {
 					// unknown cache - still counted in total above
 				}

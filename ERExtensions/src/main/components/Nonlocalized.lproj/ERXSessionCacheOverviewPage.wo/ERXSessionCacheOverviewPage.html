@@ -12,11 +12,10 @@
 
 	<p class="erx-muted">
 		One row per active session — <strong><wo:str value="$sessionCount" /></strong> session(s), heaviest first.
-		<strong>Instances</strong> = distinct page instances (the number the cache cap bounds);
-		<strong>held</strong> = cache entries — a page instance is typically reachable under <em>many</em>
-		contextID entries, one per interaction, so held far exceeding instances is normal;
-		<strong>active</strong> = touched recently;
-		<strong>stale</strong> = idle past the threshold (retained-but-abandoned). Rows that are mostly stale are
+		All counts are page <strong>instances</strong> — the number the cache cap bounds and the one that
+		costs memory. <strong>Active</strong> = touched recently; <strong>stale</strong> = idle past the
+		threshold (retained-but-abandoned — the tunable tail). <strong>Entries</strong> (muted, diagnostic)
+		counts contextID keys: an instance is typically reachable under many, one per interaction. Rows that are mostly stale are
 		highlighted. Click a session to drill into its per-cache, per-class detail.
 	</p>
 
@@ -25,12 +24,12 @@
 			<tr>
 				<th>Session</th>
 				<th class="erx-num">Instances</th>
-				<th class="erx-num">Held</th>
 				<th class="erx-num">Active</th>
 				<th class="erx-num">Stale</th>
 				<th class="erx-num">Unified</th>
 				<th class="erx-num">Backtrack</th>
 				<th class="erx-num">Perm</th>
+				<th class="erx-num">Entries</th>
 				<th>Most-idle class</th>
 			</tr>
 		</thead>
@@ -43,12 +42,12 @@
 						</wo:link>
 					</td>
 					<td class="erx-num"><strong><wo:str value="$currentSummary.instancesHeld" /></strong></td>
-					<td class="erx-num"><wo:str value="$currentSummary.totalHeld" /></td>
 					<td class="erx-num"><wo:str value="$currentSummary.activeHeld" /></td>
 					<td class="erx-num"><wo:str value="$currentSummary.staleHeld" /></td>
 					<td class="erx-num erx-muted"><wo:str value="$currentSummary.unifiedHeld" /></td>
 					<td class="erx-num erx-muted"><wo:str value="$currentSummary.backtrackHeld" /></td>
 					<td class="erx-num erx-muted"><wo:str value="$currentSummary.permanentHeld" /></td>
+					<td class="erx-num erx-muted"><wo:str value="$currentSummary.totalHeld" /></td>
 					<td class="erx-muted"><wo:str value="$currentTopStale" /></td>
 				</wo:WOGenericContainer>
 

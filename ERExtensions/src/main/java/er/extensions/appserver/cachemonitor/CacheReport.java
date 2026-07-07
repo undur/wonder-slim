@@ -68,31 +68,57 @@ public record CacheReport(
 	}
 
 	/**
-	 * "Active" = entries touched within the window. The live working set. Only meaningful when the cache
-	 * tracks age; returns size() (i.e. "all, unknown") when it does not, so callers can show "-".
+	 * An instance's last touch: the max over its entries of {@code lastAccessedAt ?? createdAt} - storing
+	 * a NEW entry for an instance is an interaction with it, so a live page trailing hours of old
+	 * contextIDs still reads as touched-now. Judging activity per ENTRY instead would misread that trail
+	 * as staleness. Entries whose instance can't be identified are their own pseudo-instances.
+	 *
+	 * @return instanceKey (or a synthetic key for unidentified entries) -> last touch; untouchable
+	 *         entries (no timestamps at all) are omitted
+	 */
+	private Map<Object, Instant> instanceLastTouch() {
+		Map<Object, Instant> touch = new LinkedHashMap<>();
+		int synthetic = 0;
+		for( CachedPageEntry e : entries ) {
+			Instant t = e.lastAccessedAt() != null ? e.lastAccessedAt() : e.createdAt();
+			if( t == null ) {
+				continue;
+			}
+			Object key = e.instanceKey() != null ? e.instanceKey() : "unidentified-" + synthetic++;
+			touch.merge( key, t, ( a, b ) -> a.isAfter( b ) ? a : b );
+		}
+		return touch;
+	}
+
+	/**
+	 * "Active" = INSTANCES touched within the window (any of the instance's entries accessed or created).
+	 * The live working set. Only meaningful when the cache tracks age; -1 when it does not, so callers
+	 * can show "-".
 	 */
 	public int activeCount( Duration window, Instant now ) {
 		if( !tracksAge ) {
 			return -1;
 		}
 		int active = 0;
-		for( CachedPageEntry e : entries ) {
-			Duration idle = e.idle( now );
-			if( idle != null && idle.compareTo( window ) <= 0 ) {
+		for( Instant t : instanceLastTouch().values() ) {
+			if( Duration.between( t, now ).compareTo( window ) <= 0 ) {
 				active++;
 			}
 		}
 		return active;
 	}
 
-	/** Entries idle longer than the threshold - the abandoned-but-retained tail. -1 when age isn't tracked. */
+	/**
+	 * INSTANCES whose every entry has been idle longer than the threshold - the retained-but-abandoned
+	 * tail. -1 when age isn't tracked.
+	 */
 	public int staleCount( Duration threshold, Instant now ) {
 		if( !tracksAge ) {
 			return -1;
 		}
 		int stale = 0;
-		for( CachedPageEntry e : entries ) {
-			if( e.isIdleLongerThan( threshold, now ) ) {
+		for( Instant t : instanceLastTouch().values() ) {
+			if( Duration.between( t, now ).compareTo( threshold ) > 0 ) {
 				stale++;
 			}
 		}
@@ -104,7 +130,10 @@ public record CacheReport(
 		Map<String, int[]> counts = new TreeMap<>(); // class -> [entryCount, unidentifiedCount]
 		Map<String, java.util.Set<Integer>> instances = new LinkedHashMap<>();
 		Map<String, Instant> oldest = new LinkedHashMap<>();
-		Map<String, Instant> mostIdle = new LinkedHashMap<>();
+		// Per-INSTANCE last touch within each class: an instance's idleness is that of its most recently
+		// touched entry, so a live page's trail of old contextIDs doesn't misreport the class as idle.
+		Map<String, Map<Object, Instant>> instanceTouch = new LinkedHashMap<>();
+		int synthetic = 0;
 		for( CachedPageEntry e : entries ) {
 			int[] c = counts.computeIfAbsent( e.pageClass(), k -> new int[2] );
 			c[0]++;
@@ -117,14 +146,25 @@ public record CacheReport(
 			if( e.createdAt() != null ) {
 				oldest.merge( e.pageClass(), e.createdAt(), ( a, b ) -> a.isBefore( b ) ? a : b );
 			}
-			if( e.lastAccessedAt() != null ) {
-				mostIdle.merge( e.pageClass(), e.lastAccessedAt(), ( a, b ) -> a.isBefore( b ) ? a : b );
+			Instant t = e.lastAccessedAt() != null ? e.lastAccessedAt() : e.createdAt();
+			if( t != null ) {
+				Object key = e.instanceKey() != null ? e.instanceKey() : "unidentified-" + synthetic++;
+				instanceTouch.computeIfAbsent( e.pageClass(), k -> new LinkedHashMap<>() ).merge( key, t, ( a, b ) -> a.isAfter( b ) ? a : b );
 			}
 		}
 		List<ClassUsage> usages = new java.util.ArrayList<>();
 		for( Map.Entry<String, int[]> c : counts.entrySet() ) {
 			Instant o = oldest.get( c.getKey() );
-			Instant mi = mostIdle.get( c.getKey() );
+			// the class's most-idle INSTANCE: the earliest of the per-instance last-touches
+			Instant mi = null;
+			Map<Object, Instant> touches = instanceTouch.get( c.getKey() );
+			if( touches != null ) {
+				for( Instant t : touches.values() ) {
+					if( mi == null || t.isBefore( mi ) ) {
+						mi = t;
+					}
+				}
+			}
 			java.util.Set<Integer> keys = instances.get( c.getKey() );
 			usages.add( new ClassUsage(
 					c.getKey(),
@@ -144,7 +184,7 @@ public record CacheReport(
 	 * @param instances how many distinct page INSTANCES of this class are held (what the cap bounds)
 	 * @param count how many entries (contextID keys) of this class are held
 	 * @param oldestAge age of the oldest held entry of this class (null if age not tracked)
-	 * @param mostIdle idle time of the most-idle (longest-untouched) entry of this class - the dead-weight hint (null if not tracked)
+	 * @param mostIdle idle time of the most-idle (longest-untouched) INSTANCE of this class - the dead-weight hint (null if not tracked)
 	 */
 	public record ClassUsage(String pageClass, int instances, int count, Duration oldestAge, Duration mostIdle) {}
 }
