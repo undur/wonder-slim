@@ -79,19 +79,20 @@ public class SessionCacheReporter {
 				entries.add( new CachedPageEntry(
 						(String) t[0],
 						(String) t[1],
+						(Integer) t[4],
 						(Instant) t[2],
 						(Instant) t[3],
 						null ) ); // reachDepth deferred
 			}
 		}
-		return new CacheReport( "Page cache (unified)", WOApplication.application().pageCacheSize(), true, entries );
+		return new CacheReport( CacheReport.NAME_UNIFIED, WOApplication.application().pageCacheSize(), true, entries );
 	}
 
 	// ---- WO backtrack cache (_contextRecords) - reflection, no age ----
 
 	private static CacheReport woBacktrackReport( WOSession session ) {
 		List<CachedPageEntry> entries = woEntriesFromTransactionRecordMap( session, "_contextRecords" );
-		return new CacheReport( "WO backtrack", WOApplication.application().pageCacheSize(), false, entries );
+		return new CacheReport( CacheReport.NAME_WO_BACKTRACK, WOApplication.application().pageCacheSize(), false, entries );
 	}
 
 	// ---- WO permanent cache (_permanentPageCache: contextID -> WOComponent) - reflection, no age ----
@@ -103,9 +104,10 @@ public class SessionCacheReporter {
 			entries.add( new CachedPageEntry(
 					page instanceof WOComponent c ? c.getClass().getSimpleName() : "(unknown)",
 					String.valueOf( e.getKey() ),
+					page == null ? null : Integer.valueOf( System.identityHashCode( page ) ),
 					null, null, null ) );
 		}
-		return new CacheReport( "WO permanent", WOApplication.application().permanentPageCacheSize(), false, entries );
+		return new CacheReport( CacheReport.NAME_WO_PERMANENT, WOApplication.application().permanentPageCacheSize(), false, entries );
 	}
 
 	/** WO's backtrack cache is contextID -> WOTransactionRecord; map each record's responsePage to an entry. */
@@ -113,11 +115,13 @@ public class SessionCacheReporter {
 		List<CachedPageEntry> entries = new ArrayList<>();
 		for( Map.Entry<?, ?> e : copyEntries( readField( session, fieldName ) ) ) {
 			String pageClass = "(unknown)";
+			Integer instanceKey = null;
 			if( e.getValue() instanceof WOTransactionRecord rec ) {
 				WOComponent page = rec.responsePage();
 				pageClass = page == null ? "(null)" : page.getClass().getSimpleName();
+				instanceKey = page == null ? null : Integer.valueOf( System.identityHashCode( page ) );
 			}
-			entries.add( new CachedPageEntry( pageClass, String.valueOf( e.getKey() ), null, null, null ) );
+			entries.add( new CachedPageEntry( pageClass, String.valueOf( e.getKey() ), instanceKey, null, null, null ) );
 		}
 		return entries;
 	}

@@ -19,7 +19,7 @@
 			<div class="erx-cache-head">
 				<div>
 					<span class="erx-cache-name"><wo:str value="$currentReport.cacheName" /></span>
-					<span class="erx-muted">— <wo:str value="$occupancyLabel" /> held</span>
+					<span class="erx-muted">— <wo:str value="$occupancyLabel" /> instances, <wo:str value="$currentReport.size" /> entries</span>
 				</div>
 				<div>
 					<span class="erx-badge">active: <wo:str value="$activeLabel" /></span>
@@ -33,7 +33,8 @@
 				<thead>
 					<tr>
 						<th>Page class</th>
-						<th class="erx-num">Held</th>
+						<th class="erx-num">Instances</th>
+						<th class="erx-num">Entries</th>
 						<th class="erx-num">Oldest</th>
 						<th class="erx-num">Most idle</th>
 					</tr>
@@ -42,13 +43,14 @@
 					<wo:repetition list="$currentByClass" item="$currentUsage">
 						<tr>
 							<td><wo:str value="$currentUsage.pageClass" /></td>
-							<td class="erx-num"><wo:str value="$currentUsage.count" /></td>
+							<td class="erx-num"><strong><wo:str value="$currentUsage.instances" /></strong></td>
+							<td class="erx-num erx-muted"><wo:str value="$currentUsage.count" /></td>
 							<td class="erx-num erx-muted"><wo:str value="$usageOldestAge" /></td>
 							<td class="erx-num erx-muted"><wo:str value="$usageMostIdle" /></td>
 						</tr>
 					</wo:repetition>
 					<wo:if condition="$currentReportIsEmpty">
-						<tr><td colspan="4" class="erx-muted">empty</td></tr>
+						<tr><td colspan="5" class="erx-muted">empty</td></tr>
 					</wo:if>
 				</tbody>
 			</table>

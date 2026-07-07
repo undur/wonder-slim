@@ -7,3 +7,6 @@ dist
 .DS_Store
 /.project
 /.settings/
+
+# Private review notes (name private consumer projects — do not commit)
+/docs/review-2026-07/

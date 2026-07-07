@@ -27,14 +27,44 @@ public record CacheReport(
 		boolean tracksAge,
 		List<CachedPageEntry> entries) {
 
-	/** Total entries held. */
+	/**
+	 * The cache names the reporter emits - shared constants so consumers that dispatch on the name
+	 * (e.g. the summary's per-cache columns) cannot silently drift out of sync with the reporter.
+	 */
+	public static final String NAME_UNIFIED = "Page cache (unified)";
+	public static final String NAME_WO_BACKTRACK = "WO backtrack";
+	public static final String NAME_WO_PERMANENT = "WO permanent";
+
+	/** Total entries held. NOTE: an entry is a contextID key; one page instance typically holds MANY. */
 	public int size() {
 		return entries.size();
 	}
 
-	/** Held / cap as a percentage (0 when cap <= 0), for the occupancy bar. */
+	/**
+	 * Distinct page INSTANCES held - the number a cache cap actually bounds. Entries are deduplicated by
+	 * {@link CachedPageEntry#instanceKey()}; entries whose instance can't be identified (null key) are
+	 * conservatively counted as one instance each.
+	 */
+	public int distinctInstances() {
+		java.util.Set<Integer> keys = new java.util.HashSet<>();
+		int unidentified = 0;
+		for( CachedPageEntry e : entries ) {
+			if( e.instanceKey() == null ) {
+				unidentified++;
+			}
+			else {
+				keys.add( e.instanceKey() );
+			}
+		}
+		return keys.size() + unidentified;
+	}
+
+	/**
+	 * Instances / cap as a percentage (0 when cap <= 0), for the occupancy bar. Measured in INSTANCES,
+	 * not entries, because that is what the cap bounds.
+	 */
 	public int occupancyPercent() {
-		return cap <= 0 ? 0 : Math.min( 100, (int) Math.round( 100.0 * entries.size() / cap ) );
+		return cap <= 0 ? 0 : Math.min( 100, (int) Math.round( 100.0 * distinctInstances() / cap ) );
 	}
 
 	/**
@@ -69,13 +99,21 @@ public record CacheReport(
 		return stale;
 	}
 
-	/** Per-page-class breakdown, ordered by descending count (which classes eat the cache). */
+	/** Per-page-class breakdown, ordered by descending instance count (which classes eat the cache). */
 	public List<ClassUsage> byPageClass( Instant now ) {
-		Map<String, int[]> counts = new TreeMap<>(); // class -> [total, idleAccumulatorSeconds, withIdle]
+		Map<String, int[]> counts = new TreeMap<>(); // class -> [entryCount, unidentifiedCount]
+		Map<String, java.util.Set<Integer>> instances = new LinkedHashMap<>();
 		Map<String, Instant> oldest = new LinkedHashMap<>();
 		Map<String, Instant> mostIdle = new LinkedHashMap<>();
 		for( CachedPageEntry e : entries ) {
-			counts.computeIfAbsent( e.pageClass(), k -> new int[1] )[0]++;
+			int[] c = counts.computeIfAbsent( e.pageClass(), k -> new int[2] );
+			c[0]++;
+			if( e.instanceKey() == null ) {
+				c[1]++;
+			}
+			else {
+				instances.computeIfAbsent( e.pageClass(), k -> new java.util.HashSet<>() ).add( e.instanceKey() );
+			}
 			if( e.createdAt() != null ) {
 				oldest.merge( e.pageClass(), e.createdAt(), ( a, b ) -> a.isBefore( b ) ? a : b );
 			}
@@ -87,13 +125,15 @@ public record CacheReport(
 		for( Map.Entry<String, int[]> c : counts.entrySet() ) {
 			Instant o = oldest.get( c.getKey() );
 			Instant mi = mostIdle.get( c.getKey() );
+			java.util.Set<Integer> keys = instances.get( c.getKey() );
 			usages.add( new ClassUsage(
 					c.getKey(),
+					( keys == null ? 0 : keys.size() ) + c.getValue()[1],
 					c.getValue()[0],
 					o == null ? null : Duration.between( o, now ),
 					mi == null ? null : Duration.between( mi, now ) ) );
 		}
-		usages.sort( ( a, b ) -> Integer.compare( b.count(), a.count() ) );
+		usages.sort( ( a, b ) -> Integer.compare( b.instances(), a.instances() ) );
 		return usages;
 	}
 
@@ -101,9 +141,10 @@ public record CacheReport(
 	 * Per-class roll-up row.
 	 *
 	 * @param pageClass the class
-	 * @param count how many entries of this class are held
+	 * @param instances how many distinct page INSTANCES of this class are held (what the cap bounds)
+	 * @param count how many entries (contextID keys) of this class are held
 	 * @param oldestAge age of the oldest held entry of this class (null if age not tracked)
 	 * @param mostIdle idle time of the most-idle (longest-untouched) entry of this class - the dead-weight hint (null if not tracked)
 	 */
-	public record ClassUsage(String pageClass, int count, Duration oldestAge, Duration mostIdle) {}
+	public record ClassUsage(String pageClass, int instances, int count, Duration oldestAge, Duration mostIdle) {}
 }

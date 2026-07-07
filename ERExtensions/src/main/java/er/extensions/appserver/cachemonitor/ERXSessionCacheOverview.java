@@ -96,10 +96,11 @@ public class ERXSessionCacheOverview extends ERXStatelessComponent {
 		return currentReport.byPageClass( now() );
 	}
 
+	/** Occupancy in INSTANCES (what the cap bounds), e.g. "7 / 30". */
 	public String occupancyLabel() {
 		int cap = currentReport.cap();
 		String capStr = cap <= 0 ? "unbounded" : String.valueOf( cap );
-		return currentReport.size() + " / " + capStr;
+		return currentReport.distinctInstances() + " / " + capStr;
 	}
 
 	public int occupancyPercent() {

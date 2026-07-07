@@ -432,12 +432,17 @@ public class ERXAjaxSession extends WOSession {
 
 	/**
 	 * A read-only snapshot of the page cache for monitoring/reporting. Returns one neutral
-	 * {@code [pageClass, contextID, createdAt, lastAccessedAt]} tuple per entry, in the cache's current
-	 * (LRU) order. Purely additive: it reads the existing {@link TransactionRecord} fields and does NOT
-	 * touch eviction, storage, ordering, or access timestamps - calling it never changes cache behavior.
+	 * {@code [pageClass, contextID, createdAt, lastAccessedAt, instanceKey]} tuple per entry, in the
+	 * cache's current (LRU) order. {@code instanceKey} identifies the live page INSTANCE the entry
+	 * resolves to ({@code System.identityHashCode}) - many contextID entries typically point at one
+	 * instance (one entry per interaction), and the cache's cap bounds INSTANCES, so a consumer must
+	 * dedupe by this key to report anything meaningful against the cap. Purely additive: it reads the
+	 * existing {@link TransactionRecord} fields and does NOT touch eviction, storage, ordering, or access
+	 * timestamps - calling it never changes cache behavior.
 	 * <p>
-	 * The element type is {@code Object[]} of {@code {String, String, Instant, Instant}} to avoid coupling
-	 * this framework package to the cache-monitor model; the monitor adapter maps these to its own DTO.
+	 * The element type is {@code Object[]} of {@code {String, String, Instant, Instant, Integer}} to avoid
+	 * coupling this framework package to the cache-monitor model; the monitor adapter maps these to its
+	 * own DTO.
 	 *
 	 * @return one tuple per cached entry (empty if the cache is absent/empty)
 	 */
@@ -463,7 +468,8 @@ public class ERXAjaxSession extends WOSession {
 						page == null ? "(null)" : page.getClass().getSimpleName(),
 						record.requestContextID(),
 						record.createdAt(),
-						record.lastAccessedAt() });
+						record.lastAccessedAt(),
+						page == null ? null : Integer.valueOf(System.identityHashCode(page)) });
 			}
 		}
 		return snapshot;

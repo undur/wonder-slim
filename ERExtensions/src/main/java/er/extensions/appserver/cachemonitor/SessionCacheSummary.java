@@ -13,10 +13,11 @@ import java.util.List;
  */
 public record SessionCacheSummary(
 		String sessionID,
+		int instancesHeld,
 		int totalHeld,
 		int activeHeld,
 		int staleHeld,
-		int ajaxHeld,
+		int unifiedHeld,
 		int backtrackHeld,
 		int permanentHeld,
 		String topStaleClass,
@@ -32,11 +33,12 @@ public record SessionCacheSummary(
 	 * @param now the render instant (shared so all rows are consistent)
 	 */
 	public static SessionCacheSummary of( String sessionID, List<CacheReport> reports, Duration activeWindow, Duration staleThreshold, Instant now ) {
-		int total = 0, active = 0, stale = 0, ajax = 0, backtrack = 0, permanent = 0;
+		int instances = 0, total = 0, active = 0, stale = 0, unified = 0, backtrack = 0, permanent = 0;
 		String topClass = null;
 		Duration topIdle = null;
 
 		for( CacheReport report : reports ) {
+			instances += report.distinctInstances();
 			total += report.size();
 
 			int a = report.activeCount( activeWindow, now );
@@ -48,10 +50,12 @@ public record SessionCacheSummary(
 				stale += s;
 			}
 
+			// Dispatch on the reporter's shared name constants - a string literal here once drifted from
+			// the reporter's actual cache name, silently zeroing a column.
 			switch( report.cacheName() ) {
-				case "Ajax replacement" -> ajax = report.size();
-				case "WO backtrack" -> backtrack = report.size();
-				case "WO permanent" -> permanent = report.size();
+				case CacheReport.NAME_UNIFIED -> unified = report.size();
+				case CacheReport.NAME_WO_BACKTRACK -> backtrack = report.size();
+				case CacheReport.NAME_WO_PERMANENT -> permanent = report.size();
 				default -> {
 					// unknown cache - still counted in total above
 				}
@@ -68,6 +72,6 @@ public record SessionCacheSummary(
 			}
 		}
 
-		return new SessionCacheSummary( sessionID, total, active, stale, ajax, backtrack, permanent, topClass, topIdle );
+		return new SessionCacheSummary( sessionID, instances, total, active, stale, unified, backtrack, permanent, topClass, topIdle );
 	}
 }
