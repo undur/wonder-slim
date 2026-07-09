@@ -1,6 +1,12 @@
 <div class="erx-cache-page">
 	<style>
 		/* Bootstrap 3/5-neutral: stable class subset only; colors inline (badge-/bg- utilities differ across versions). */
+		/* The page brings its own "card" so it reads correctly on any admin chrome's canvas
+		   (AdminLTE's grey background included) instead of relying on the host's card/box classes. */
+		.erx-cache-page .erx-card { background: #fff; border: 1px solid #d2d6de; border-radius: 3px; box-shadow: 0 1px 1px rgba(0,0,0,.08); padding: 15px 20px; margin-bottom: 20px; }
+		.erx-cache-page .erx-card > h4 { margin-top: 0; }
+		.erx-cache-page .erx-card table { background: #fff; }
+		.erx-cache-page h5 { margin-top: 1.5em; }
 		.erx-cache-page table { width: 100%; }
 		.erx-cache-page .erx-num { text-align: right; font-variant-numeric: tabular-nums; }
 		.erx-cache-page .erx-muted { color: #888; }
@@ -11,6 +17,7 @@
 	</style>
 
 	<wo:if condition="$hasReuseData">
+		<div class="erx-card">
 		<h4>Reuse profile <small class="erx-muted">app-wide, collecting for <wo:str value="$reuseSince" /> — <wo:str value="$reuseHits" /> hit(s), <wo:str value="$reuseMisses" /> miss(es)</small></h4>
 		<p class="erx-muted">
 			Every cache hit records the restored instance's <strong>idle time</strong> and <strong>LRU depth</strong>
@@ -66,9 +73,11 @@
 				</tbody>
 			</table>
 		</wo:if>
-		<hr />
+		</div>
 	</wo:if>
 
+	<div class="erx-card">
+	<h4>Sessions</h4>
 	<p class="erx-muted">
 		One row per active session — <strong><wo:str value="$sessionCount" /></strong> session(s), heaviest first.
 		All counts are page <strong>instances</strong> — the number the cache cap bounds and the one that
@@ -124,4 +133,5 @@
 			</wo:if>
 		</tbody>
 	</table>
+	</div>
 </div>
