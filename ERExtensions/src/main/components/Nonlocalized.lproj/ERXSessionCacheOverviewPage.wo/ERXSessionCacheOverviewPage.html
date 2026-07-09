@@ -10,6 +10,65 @@
 		.erx-cache-page .erx-expand { cursor: pointer; }
 	</style>
 
+	<wo:if condition="$hasReuseData">
+		<h4>Reuse profile <small class="erx-muted">app-wide, collecting for <wo:str value="$reuseSince" /> — <wo:str value="$reuseHits" /> hit(s), <wo:str value="$reuseMisses" /> miss(es)</small></h4>
+		<p class="erx-muted">
+			Every cache hit records the restored instance's <strong>idle time</strong> and <strong>LRU depth</strong>
+			at the moment of restore. <strong>Broken by bound</strong> is the answer column: the number of
+			restores that an idle-TTL (left table) or a cache cap (right table) set at that row's upper
+			bound would have broken. Read down until the column reaches a number you can live with.
+		</p>
+		<div style="display: flex; gap: 3em; flex-wrap: wrap;">
+			<table class="table table-sm" style="width: auto; min-width: 22em;">
+				<thead>
+					<tr><th>Idle at reuse</th><th class="erx-num">Hits</th><th class="erx-num">Broken by TTL at bound</th></tr>
+				</thead>
+				<tbody>
+					<wo:repetition list="$idleProfile" item="$currentProfileRow">
+						<tr>
+							<td><wo:str value="$currentProfileRow.label" /></td>
+							<td class="erx-num"><wo:str value="$currentProfileRow.count" /></td>
+							<td class="erx-num"><wo:str value="$currentProfileRow.beyondBound" /></td>
+						</tr>
+					</wo:repetition>
+				</tbody>
+			</table>
+			<table class="table table-sm" style="width: auto; min-width: 22em;">
+				<thead>
+					<tr><th>LRU depth at reuse</th><th class="erx-num">Hits</th><th class="erx-num">Broken by cap at bound</th></tr>
+				</thead>
+				<tbody>
+					<wo:repetition list="$depthProfile" item="$currentProfileRow">
+						<tr>
+							<td><wo:str value="$currentProfileRow.label" /></td>
+							<td class="erx-num"><wo:str value="$currentProfileRow.count" /></td>
+							<td class="erx-num"><wo:str value="$currentProfileRow.beyondBound" /></td>
+						</tr>
+					</wo:repetition>
+				</tbody>
+			</table>
+		</div>
+		<wo:if condition="$hasNotableReaches">
+			<h5>Notable reaches <small class="erx-muted">hits deeper than 20 or idler than 30m — the pages people actually come back for</small></h5>
+			<table class="table table-sm" style="width: auto; min-width: 30em;">
+				<thead>
+					<tr><th>When</th><th>Page</th><th class="erx-num">Depth</th><th class="erx-num">Had been idle</th></tr>
+				</thead>
+				<tbody>
+					<wo:repetition list="$notableReaches" item="$currentReach">
+						<tr>
+							<td class="erx-muted"><wo:str value="$currentReachAgo" /> ago</td>
+							<td><wo:str value="$currentReach.pageName" /></td>
+							<td class="erx-num"><wo:str value="$currentReach.depth" /></td>
+							<td class="erx-num"><wo:str value="$currentReachIdle" /></td>
+						</tr>
+					</wo:repetition>
+				</tbody>
+			</table>
+		</wo:if>
+		<hr />
+	</wo:if>
+
 	<p class="erx-muted">
 		One row per active session — <strong><wo:str value="$sessionCount" /></strong> session(s), heaviest first.
 		All counts are page <strong>instances</strong> — the number the cache cap bounds and the one that

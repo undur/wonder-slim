@@ -30,6 +30,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.appserver.cachemonitor.PageCacheReuseStats;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -598,10 +599,14 @@ public class ERXAjaxSession extends WOSession {
 			TransactionRecord record = _pageCache.get(contextID);
 			if (record != null) {
 				page = record.page();
+				recordReuseProfile(page);
 				record.markAccessed();
 				// Access = most-recently-used for this INSTANCE: move all its contextID entries to the tail
 				// so eviction drops the least-recently-used instance, not the first-inserted one.
 				touchInstanceInPageCache(_pageCache, page);
+			}
+			else {
+				PageCacheReuseStats.recordMiss();
 			}
 		}
 		if (page == null) {
@@ -613,6 +618,54 @@ public class ERXAjaxSession extends WOSession {
 			page._awakeInContext(context());
 		}
 		return page;
+	}
+
+	/**
+	 * Feeds {@link PageCacheReuseStats} with the hit's reuse profile: how long the restored instance had
+	 * been idle, and how deep it sat in the instance-LRU order (1 = most recently used). Must run BEFORE
+	 * the hit is marked accessed / re-topped, since both numbers describe the state the hit found.
+	 * Measurement only - a failure here must never break a page restore, hence the catch-all.
+	 */
+	private void recordReuseProfile(WOComponent hitPage) {
+		try {
+			// One pass over the cache: distinct instances in LRU order (least recently used first),
+			// and the hit instance's most recent access across all its contextID entries.
+			List<WOComponent> instances = new ArrayList<>();
+			Instant lastAccess = null;
+			for (TransactionRecord record : _pageCache.values()) {
+				WOComponent page = record.page();
+				boolean seen = false;
+				for (WOComponent instance : instances) {
+					if (instance == page) {
+						seen = true;
+						break;
+					}
+				}
+				if (!seen) {
+					instances.add(page);
+				}
+				if (page == hitPage && (lastAccess == null || record.lastAccessedAt().isAfter(lastAccess))) {
+					lastAccess = record.lastAccessedAt();
+				}
+			}
+
+			int position = -1;
+			for (int i = 0; i < instances.size(); i++) {
+				if (instances.get(i) == hitPage) {
+					position = i;
+					break;
+				}
+			}
+
+			if (position >= 0 && lastAccess != null) {
+				int depth = instances.size() - position;
+				long idleSeconds = Duration.between(lastAccess, Instant.now()).getSeconds();
+				PageCacheReuseStats.recordHit(idleSeconds, depth, hitPage == null ? "(null)" : hitPage.name());
+			}
+		}
+		catch (RuntimeException e) {
+			log.debug("Could not record page cache reuse profile: {}", e.toString());
+		}
 	}
 
 	// ---------------------------------------------------------------------------

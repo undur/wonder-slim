@@ -104,6 +104,54 @@ public class ERXSessionCacheOverviewPage extends ERXComponent {
 		return rows;
 	}
 
+	// ---- reuse profile (app-wide, since startup; see PageCacheReuseStats) ----
+
+	/** Repetition state: the histogram row currently being rendered. */
+	public PageCacheReuseStats.ProfileRow currentProfileRow;
+
+	/** Repetition state: the notable reach currently being rendered. */
+	public PageCacheReuseStats.NotableReach currentReach;
+
+	public List<PageCacheReuseStats.ProfileRow> idleProfile() {
+		return PageCacheReuseStats.idleProfile();
+	}
+
+	public List<PageCacheReuseStats.ProfileRow> depthProfile() {
+		return PageCacheReuseStats.depthProfile();
+	}
+
+	public List<PageCacheReuseStats.NotableReach> notableReaches() {
+		return PageCacheReuseStats.notableReaches();
+	}
+
+	public long reuseHits() {
+		return PageCacheReuseStats.hits();
+	}
+
+	public long reuseMisses() {
+		return PageCacheReuseStats.misses();
+	}
+
+	public boolean hasReuseData() {
+		return reuseHits() > 0;
+	}
+
+	public boolean hasNotableReaches() {
+		return !notableReaches().isEmpty();
+	}
+
+	public String reuseSince() {
+		return ERXSessionCacheOverview.humanize( Duration.between( PageCacheReuseStats.since(), now() ) );
+	}
+
+	public String currentReachAgo() {
+		return ERXSessionCacheOverview.humanize( Duration.between( currentReach.at(), now() ) );
+	}
+
+	public String currentReachIdle() {
+		return ERXSessionCacheOverview.humanize( Duration.ofSeconds( currentReach.idleSeconds() ) );
+	}
+
 	// ---- per-row helpers ----
 
 	public String currentTopStale() {
