@@ -459,8 +459,38 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			final String url = "http://localhost:" + defaultAdaptor().port();
 
 			System.out.println();
-			System.out.println( "============= DIRECT CONNECT URL ===============" );
+			System.out.println( "============= DIRECT CONNECT URLS ==============" );
 			System.out.println( url );
+
+			// The jetty adaptor binds all interfaces (its connector sets no host), so the app
+			// is just as reachable from other devices on the network — a phone on the same
+			// Wi-Fi, say. Print those URLs too: IPv4 on interfaces that are up, loopback and
+			// link-local excluded (neither is usefully clickable from another device).
+			// Address enumeration is a convenience and must never disturb startup.
+			try {
+				final var interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+
+				while( interfaces.hasMoreElements() ) {
+					final var networkInterface = interfaces.nextElement();
+
+					if( !networkInterface.isUp() || networkInterface.isLoopback() ) {
+						continue;
+					}
+
+					final var addresses = networkInterface.getInetAddresses();
+
+					while( addresses.hasMoreElements() ) {
+						final var address = addresses.nextElement();
+
+						if( address instanceof java.net.Inet4Address && !address.isLoopbackAddress() && !address.isLinkLocalAddress() ) {
+							System.out.println( "http://" + address.getHostAddress() + ":" + defaultAdaptor().port() );
+						}
+					}
+				}
+			}
+			catch( Exception e ) {
+				log.debug( "Could not enumerate network interfaces for the direct connect banner", e );
+			}
 		}
 
 		System.out.println( "================================================" );
