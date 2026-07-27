@@ -175,7 +175,7 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 		boolean replace = replaceID != null && updateContainerID == null;
 
 		if (target != null) {
-			buffer.append("AjaxSlim.ASB.update('" + target + "', " + formReference + ", ");
+			buffer.append("AjaxSlim.ASB.update(" + AjaxUtils.quote(target) + ", " + formReference + ", ");
 		}
 		else {
 			buffer.append("AjaxSlim.ASB.request(" + formReference + ", ");

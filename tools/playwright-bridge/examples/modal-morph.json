@@ -1,0 +1,22 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioInvoice",
+  "comment": "An OPEN native <dialog> must survive a morph of its enclosing region. The server always renders dialogs CLOSED, so without protection an enclosing morph reconciles the live open dialog against closed markup, strips the `open` attribute and collapses the modal mid-use. The fix marks the dialog data-morph-ignore while open (set on open, lifted on close). This scenario captures the dialog's parent markup while closed, opens the modal, morphs the parent against the closed markup, and asserts the dialog stayed open - then closes it and asserts the opt-out is lifted.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#customerModal" },
+    { "do": "read", "name": "startsClosed", "what": "jsExpression", "expression": "(function(){var d=document.getElementById('customerModal_dialog');window.__closedParentHtml=d.parentElement.innerHTML;return String(!!d && !d.open);})()" },
+    { "do": "assert", "name": "dialog exists and starts closed", "that": "startsClosed", "equals": "true" },
+    { "do": "click", "selector": "#customerModal" },
+    { "do": "read", "name": "openAfterClick", "what": "jsExpression", "expression": "String(document.getElementById('customerModal_dialog').open)" },
+    { "do": "assert", "name": "trigger opens the dialog", "that": "openAfterClick", "equals": "true" },
+    { "do": "read", "name": "ignoredWhileOpen", "what": "jsExpression", "expression": "String(document.getElementById('customerModal_dialog').hasAttribute('data-morph-ignore'))" },
+    { "do": "assert", "name": "open dialog is opted out of morphing", "that": "ignoredWhileOpen", "equals": "true" },
+    { "do": "read", "name": "openAfterEnclosingMorph", "what": "jsExpression", "expression": "(function(){var d=document.getElementById('customerModal_dialog');AjaxSlim.Morph.morph(d.parentElement, window.__closedParentHtml);var d2=document.getElementById('customerModal_dialog');return String(!!d2 && d2.open);})()" },
+    { "do": "assert", "name": "an enclosing morph against closed markup leaves the dialog open", "that": "openAfterEnclosingMorph", "equals": "true" },
+    { "do": "read", "name": "closedNow", "what": "jsExpression", "expression": "(function(){var d=document.getElementById('customerModal_dialog');d.close();return String(d.open);})()" },
+    { "do": "assert", "name": "closing closes the dialog", "that": "closedNow", "equals": "false" },
+    { "do": "wait", "ms": 100 },
+    { "do": "read", "name": "ignoreLifted", "what": "jsExpression", "expression": "String(document.getElementById('customerModal_dialog').hasAttribute('data-morph-ignore'))" },
+    { "do": "assert", "name": "the close event lifts the morph opt-out", "that": "ignoreLifted", "equals": "false" }
+  ]
+}

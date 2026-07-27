@@ -16,6 +16,20 @@
 		if (!dialog) {
 			return;
 		}
+		// An OPEN dialog must be opted out of morphing entirely. showModal() state (the top-layer
+		// promotion, ::backdrop, focus trap) hangs off the `open` attribute, which the server always
+		// renders ABSENT (dialogs render closed) - so a morph of any enclosing region would reconcile
+		// the live dialog against closed markup, strip `open`, and collapse the modal mid-use. While
+		// open, the dialog owns its subtree (same ownership model as wonder-select); the mark comes
+		// off on close so server-rendered content changes flow again from the next update on. Set
+		// BEFORE opening so no morph can land in between.
+		dialog.setAttribute('data-morph-ignore', '');
+		if (!dialog._ajaxslimCloseWired) {
+			dialog._ajaxslimCloseWired = true;
+			dialog.addEventListener('close', function () {
+				dialog.removeAttribute('data-morph-ignore');
+			});
+		}
 		if (typeof dialog.showModal === 'function') {
 			if (!dialog.open) {
 				dialog.showModal();

@@ -1,1 +1,1 @@
-<wo:if condition="$refreshTarget"><script><wo:if condition="$hasOnBeforeUpdate">if (<wo:str value="$onBeforeUpdate" />()) {</wo:if>AjaxSlim.AUC.update('<wo:str value="$updateContainerID" />');<wo:if condition="$hasOnBeforeUpdate"> }</wo:if></script></wo:if>
+<wo:if condition="$refreshTarget"><script><wo:if condition="$hasOnBeforeUpdate">if (<wo:str value="$onBeforeUpdate" />()) {</wo:if>AjaxSlim.AUC.update(<wo:str value="$updateContainerIDQuoted" escapeHTML="$false" />);<wo:if condition="$hasOnBeforeUpdate"> }</wo:if></script></wo:if>

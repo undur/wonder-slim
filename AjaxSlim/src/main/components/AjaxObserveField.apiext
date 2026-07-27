@@ -4,6 +4,8 @@
 
 		<doc><![CDATA[Performs an Ajax submit (and optional container morph) when a form field changes. Two modes: give it an `observeFieldID` to watch a **single field**; or omit `observeFieldID` to watch **every descendant form field** inside it (it then renders a wrapper element). Binds native `change`/`input` listeners with a debounce. `fullSubmit="false"` (the default) sends only the changed field (partial submit).
 
+Element content is only meaningful in **descendant mode** — in single-field mode the element must be empty (use the self-closing form; content there is rejected at template parse time rather than silently dropped).
+
 ```html
 <!-- single field -->
 <wo:textfield value="$q" id="q"/>

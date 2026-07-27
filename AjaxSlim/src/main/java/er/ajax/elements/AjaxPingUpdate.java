@@ -95,4 +95,14 @@ public class AjaxPingUpdate extends WOComponent {
 		}
 		return id;
 	}
+
+	/**
+	 * The update-container id as a complete, quoted JS string literal, ready to emit inside the
+	 * refresh script. The template must not build the literal from a plain {@code <wo:str>} - that
+	 * HTML-escapes, which does not neutralize a quote inside a JS string - so the id goes through
+	 * {@link AjaxUtils#quote(String)} here and is emitted with {@code escapeHTML="$false"}.
+	 */
+	public String updateContainerIDQuoted() {
+		return AjaxUtils.quote(updateContainerID());
+	}
 }

@@ -105,6 +105,16 @@ public class AjaxSelfUpdatingContainer extends AjaxUpdateContainer {
 	 */
 	@Override
 	protected void performSelfUpdateAction(WORequest request, WOContext context) {
+		// handleRequest also runs when this container is merely a render TARGET of the ajax update
+		// pass - some other element (an AjaxUpdateLink, observer or trigger) named it in
+		// updateContainerID. The contract is that `action` fires only when the container refreshes
+		// ITSELF, i.e. when it is the request's sender (the periodic path) - which is never an update
+		// pass. Without this gate, targeting a self-updating container from elsewhere would invoke
+		// its action as a side effect, exactly the surprise the passive/self-updating split exists
+		// to prevent.
+		if (AjaxResponse.isAjaxUpdatePass(request)) {
+			return;
+		}
 		if (associations().objectForKey("action") != null) {
 			@SuppressWarnings("unused")
 			WOActionResults results = (WOActionResults) valueForBinding("action", context.component());

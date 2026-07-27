@@ -245,7 +245,8 @@
 	// preventDefault() to suppress the built-in presenter). If nobody cancels it, a minimal built-in
 	// banner shows - so a failure is NEVER invisible, even in an app that wires up nothing.
 	//
-	// detail = { targetId, url, status (HTTP status or 0 for a network error), statusText, body, error }
+	// detail = { targetId, url, status (HTTP status or 0 for a network error), statusText, body,
+	//            document (true when the body was a full HTML page - the expired-session shape), error }
 	function reportError(detail) {
 		if (window.console) {
 			console.error('AjaxSlim: ajax request failed', detail);
@@ -304,11 +305,19 @@
 					bar.appendChild(close);
 					document.body.appendChild(bar);
 				}
-				var msg = (detail && detail.status)
-					? ('A server error occurred (' + detail.status + ') and the page could not be updated. '
-						+ 'Please reload the page and try again.')
-					: 'The server could not be reached and the page could not be updated. '
+				var msg;
+				if (detail && detail.document) {
+					msg = 'The server sent back a full page instead of an update - your session has '
+						+ 'probably expired. Please reload the page and continue from there.';
+				}
+				else if (detail && detail.status) {
+					msg = 'A server error occurred (' + detail.status + ') and the page could not be updated. '
+						+ 'Please reload the page and try again.';
+				}
+				else {
+					msg = 'The server could not be reached and the page could not be updated. '
 						+ 'Please check your connection and try again.';
+				}
 				bar._msg.textContent = msg;
 				// Offer the full server response only when there actually is one (HTTP errors carry the
 				// exception page; a bare network failure - status 0 - has no body).
@@ -381,9 +390,11 @@
 					document.body.appendChild(overlay);
 					overlay._dismiss = dismiss;
 				}
-				overlay._title.textContent = (detail && detail.status)
-					? ('Server error ' + detail.status + (detail.statusText ? ' — ' + detail.statusText : ''))
-					: 'Request failed';
+				overlay._title.textContent = (detail && detail.document)
+					? 'The server returned a full page (session expired?)'
+					: (detail && detail.status)
+						? ('Server error ' + detail.status + (detail.statusText ? ' — ' + detail.statusText : ''))
+						: 'Request failed';
 				overlay._frame.srcdoc = String(detail && detail.body || '');
 				overlay.style.display = 'flex';
 				document.addEventListener('keydown', overlay._onKey);
@@ -391,6 +402,35 @@
 			catch (e) { /* last-resort: never let the detail presenter itself throw */ }
 		}
 	};
+
+	// Read an ajax response's body, converting the two failure shapes into typed errors that divert
+	// to the callers' .catch -> reportError path (never into a morph):
+	//   - an HTTP error status. fetch() only rejects on a NETWORK error - a 500/404 resolves
+	//     normally - so response.ok must be checked here, or the server's error page (e.g.
+	//     "backtracked too far") would be morphed straight into the target container.
+	//   - a FULL HTML DOCUMENT where a fragment/script body was expected. The server only answers an
+	//     ajax request with a whole page when the request never reached the ajax machinery - the
+	//     classic case is an EXPIRED SESSION, whose login/expired page arrives with status 200
+	//     (possibly via a redirect fetch follows silently). The old behavior - handing the page to
+	//     runResponseScripts - made the user's click silently do nothing. A failure must never be
+	//     invisible, so it is surfaced like any other request failure (detail.document marks it).
+	function readAjaxResponse(response) {
+		if (!response.ok) {
+			return response.text().catch(function () { return ''; }).then(function (body) {
+				var err = new Error('AjaxSlim HTTP ' + response.status);
+				err.ajaxslim = { status: response.status, statusText: response.statusText, body: body };
+				throw err;
+			});
+		}
+		return response.text().then(function (text) {
+			if (/^\s*(?:<!doctype\b|<html[\s>])/i.test(text)) {
+				var err = new Error('AjaxSlim: full-document response to an ajax request (expired session?)');
+				err.ajaxslim = { status: response.status, statusText: response.statusText, body: text, document: true };
+				throw err;
+			}
+			return text;
+		});
+	}
 
 	// Headers for an ajax request. Always sends x-requested-with (ERXAjaxApplication.isAjaxRequest keys
 	// on it). For a URLSearchParams POST body we set form-urlencoded; FormData sets its own multipart
@@ -529,18 +569,9 @@
 		var responseContentType = '';
 		return fetch(url, init).then(function (response) {
 			responseContentType = response.headers.get('Content-Type') || '';
-			// fetch() only rejects on a NETWORK error - an HTTP 500/404/etc. resolves normally. So we
-			// must check response.ok ourselves: otherwise we would morph the server's error page (e.g.
-			// "backtracked too far") straight into the target container. Read the body for diagnostics,
-			// then throw a typed error to divert to the .catch (which reports rather than morphs).
-			if (!response.ok) {
-				return response.text().catch(function () { return ''; }).then(function (body) {
-					var err = new Error('AjaxSlim HTTP ' + response.status);
-					err.ajaxslim = { status: response.status, statusText: response.statusText, body: body };
-					throw err;
-				});
-			}
-			return response.text();
+			// readAjaxResponse checks response.ok and the full-document (expired session) shape, and
+			// throws typed errors that divert to the .catch below (which reports rather than morphs).
+			return readAjaxResponse(response);
 		}).then(function (text) {
 			// The response describes itself, and we act on what it IS - not on what we asked for:
 			//   - it carries <ajaxslim-fragment>s => demux + morph each into its container. This is the
@@ -575,11 +606,12 @@
 				restoreTabFocus();
 			}, 0);
 		}).catch(function (e) {
-			// Either a network failure (no e.ajaxslim) or an HTTP error we threw above (e.ajaxslim set).
-			// Surface it to the user; never morph an error response into the container.
+			// A network failure (no e.ajaxslim) or a typed readAjaxResponse error (HTTP error status,
+			// or a full-document/expired-session body). Surface it to the user; never morph an error
+			// response into the container.
 			var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
 			reportError({ targetId: targetId, url: url, status: info.status, statusText: info.statusText,
-				body: info.body, error: e });
+				body: info.body, document: info.document, error: e });
 		}).then(activityEnd, activityEnd); // finally: always settle the activity counter
 	}
 
@@ -720,16 +752,10 @@
 				credentials: 'same-origin',
 				headers: { 'x-requested-with': 'XMLHttpRequest' }
 			}).then(function (response) {
-				// Same as the single path: don't apply an HTTP error response as fragments - check
-				// response.ok and divert failures to reportError instead of morphing the error page.
-				if (!response.ok) {
-					return response.text().catch(function () { return ''; }).then(function (body) {
-						var err = new Error('AjaxSlim HTTP ' + response.status);
-						err.ajaxslim = { status: response.status, statusText: response.statusText, body: body };
-						throw err;
-					});
-				}
-				return response.text();
+				// Same as the single path: never apply an HTTP error page or a full-document
+				// (expired-session) response as fragments - readAjaxResponse diverts both to the
+				// .catch -> reportError below.
+				return readAjaxResponse(response);
 			}).then(function (text) {
 				applyFragments(text);
 				runHook(options.onSuccess);
@@ -743,7 +769,7 @@
 			}).catch(function (e) {
 				var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
 				reportError({ targetId: ids.join(';'), url: url, status: info.status,
-					statusText: info.statusText, body: info.body, error: e });
+					statusText: info.statusText, body: info.body, document: info.document, error: e });
 			}).then(activityEnd, activityEnd);
 		},
 
@@ -955,17 +981,10 @@
 					headers: postHeaders(body),
 					body: body
 				}).then(function (response) {
-					// Same as fetchAndMorph and updateMany: never apply an HTTP error response as
-					// fragments (applyFragments would find none and RUN THE ERROR PAGE'S SCRIPTS) -
-					// check response.ok and divert failures to reportError.
-					if (!response.ok) {
-						return response.text().catch(function () { return ''; }).then(function (body) {
-							var err = new Error('AjaxSlim HTTP ' + response.status);
-							err.ajaxslim = { status: response.status, statusText: response.statusText, body: body };
-							throw err;
-						});
-					}
-					return response.text();
+					// Same as fetchAndMorph and updateMany: never apply an HTTP error page or a
+					// full-document (expired-session) response as fragments (applyFragments would find
+					// none and RUN THE PAGE'S SCRIPTS) - readAjaxResponse diverts both to reportError.
+					return readAjaxResponse(response);
 				}).then(function (text) {
 					applyFragments(text);
 					runHook(options.onSuccess);
@@ -979,7 +998,7 @@
 				}).catch(function (e) {
 					var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
 					reportError({ targetId: targetId, url: url, status: info.status,
-						statusText: info.statusText, body: info.body, error: e });
+						statusText: info.statusText, body: info.body, document: info.document, error: e });
 				}).then(activityEnd, activityEnd);
 			}
 			fetchAndMorph(targetId, url, body, function () {

@@ -1,0 +1,14 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryUpdateContainer",
+  "comment": "A FULL HTML PAGE answering an ajax update (the expired-session shape: the login/expired page comes back with status 200) must never be silently swallowed or morphed - it must surface through the error contract. This scenario points a container's data-updateUrl at a sessionless component URL (which answers with the full 'session timed out' page), fires an update, and asserts (a) the container content is untouched and (b) the built-in error banner appeared with the session message.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#morphContainer" },
+    { "do": "read", "name": "fired", "what": "jsExpression", "expression": "(function(){var el=document.getElementById('morphContainer');window.__beforeHtml=el.innerHTML;el.setAttribute('data-updateUrl','/cgi-bin/WebObjects/AjaxPlayground.woa/wo/ScenarioFocus');AjaxSlim.AUC.update('morphContainer');return 'fired';})()" },
+    { "do": "wait", "selector": "#ajaxslim-error-banner" },
+    { "do": "read", "name": "bannerText", "selector": "#ajaxslim-error-banner", "what": "text" },
+    { "do": "assert", "name": "banner names the expired-session cause", "that": "bannerText", "contains": "session" },
+    { "do": "read", "name": "contentUntouched", "what": "jsExpression", "expression": "String(document.getElementById('morphContainer').innerHTML === window.__beforeHtml)" },
+    { "do": "assert", "name": "the full page was NOT morphed into the container", "that": "contentUntouched", "equals": "true" }
+  ]
+}

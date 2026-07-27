@@ -9,6 +9,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.appserver._private.WODynamicElementCreationException;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXWOContext;
@@ -20,6 +21,10 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
  * an <code>updateContainerID</code>, that container is morphed after the change. If you do NOT
  * specify an <code>observeFieldID</code>, all descendant form fields of this component are observed
  * (and the component renders a wrapper element to find them client-side).
+ * <p>
+ * Element content is only meaningful in descendant mode (it is the observed content, rendered inside
+ * the wrapper). In single-field mode the element must be empty - content there is rejected loudly at
+ * construction rather than silently dropped (which is what the legacy element did).
  * <p>
  * This is the AjaxSlim rewrite. The legacy element drove Prototype's
  * <code>Form.Element.Observer</code> + <code>Form.serialize</code>; this one emits a call into the
@@ -60,6 +65,17 @@ public class AjaxObserveField extends AjaxDynamicElement {
 
 	public AjaxObserveField(String name, NSDictionary<String, WOAssociation> associations, WOElement children) {
 		super(name, associations, children);
+		// Children only render in DESCENDANT mode (no observeFieldID), where they are the observed
+		// content inside the wrapper. In single-field mode the observed field lives elsewhere on the
+		// page and appendToResponse renders no wrapper - so element content there would be silently
+		// dropped (the legacy element did exactly that). Silent dropping is a debugging trap; reject
+		// it loudly instead.
+		if (associations.objectForKey("observeFieldID") != null && hasChildrenElements()) {
+			throw new WODynamicElementCreationException("AjaxObserveField with an 'observeFieldID' binding must not have element content "
+					+ "(whitespace between the tags counts - use the self-closing form). Children are only rendered in descendant mode "
+					+ "(no observeFieldID), where they are the observed content. Move the content outside the element, or drop "
+					+ "'observeFieldID' to observe the content's fields.");
+		}
 	}
 
 	@Override
