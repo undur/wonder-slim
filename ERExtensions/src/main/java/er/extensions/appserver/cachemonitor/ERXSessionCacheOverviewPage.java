@@ -132,6 +132,10 @@ public class ERXSessionCacheOverviewPage extends ERXComponent {
 		return PageCacheReuseStats.misses();
 	}
 
+	public long reuseExpiredSessionAttempts() {
+		return PageCacheReuseStats.expiredSessionAttempts();
+	}
+
 	public boolean hasReuseData() {
 		return reuseHits() > 0;
 	}

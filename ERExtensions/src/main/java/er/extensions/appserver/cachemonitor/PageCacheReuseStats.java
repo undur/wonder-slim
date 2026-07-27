@@ -43,6 +43,7 @@ public final class PageCacheReuseStats {
 	private static final LongAdder[] _depthBuckets = newAdders( DEPTH_BOUNDS.length + 1 );
 	private static final LongAdder _hits = new LongAdder();
 	private static final LongAdder _misses = new LongAdder();
+	private static final LongAdder _expiredSessionAttempts = new LongAdder();
 	private static final Instant _since = Instant.now();
 
 	private static final ArrayDeque<NotableReach> _notableReaches = new ArrayDeque<>();
@@ -83,6 +84,21 @@ public final class PageCacheReuseStats {
 	/** Records a restore attempt whose contextID had no cache entry. */
 	public static void recordMiss() {
 		_misses.increment();
+	}
+
+	/**
+	 * Records a restore attempt that never reached a cache: the request carried a session ID
+	 * whose session no longer exists. These are the misses the in-session counters cannot see -
+	 * the SESSION TIMEOUT broke the restore before any page cache was consulted - and they are
+	 * the baseline any in-cache eviction policy should be judged against: the session timeout
+	 * is itself the outermost TTL, and this is its breakage count.
+	 */
+	public static void recordExpiredSessionAttempt() {
+		_expiredSessionAttempts.increment();
+	}
+
+	public static long expiredSessionAttempts() {
+		return _expiredSessionAttempts.sum();
 	}
 
 	public static long hits() {

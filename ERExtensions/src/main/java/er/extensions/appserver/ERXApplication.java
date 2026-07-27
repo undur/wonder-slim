@@ -35,6 +35,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.appserver.WOSession;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOComponentDefinition;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
@@ -501,6 +502,33 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		System.out.println( "================================================" );
+	}
+
+	/**
+	 * Overridden to count page-restore attempts against expired sessions. A component-action or
+	 * ajax request whose session ID no longer resolves is a page restore the cache never got to
+	 * see - the session timeout broke it upstream - so without this, the reuse statistics
+	 * undercount exactly the misses the timeout causes. Counted HERE rather than in
+	 * handleSessionRestorationErrorInContext because applications legitimately override that
+	 * method for their own expiry UX (and rarely call super); the failed restore itself is the
+	 * semantic event, and this is its single choke point. Only page-restoring request handlers
+	 * count: a direct action arriving with a dead cookie session recovers invisibly and loses no
+	 * page. ("ajax" is AjaxSlim's handler key - referenced literally since the dependency points
+	 * the other way; it is the de-facto constant of the wonder lineage.)
+	 */
+	@Override
+	public WOSession restoreSessionWithID( String sessionID, WOContext context ) {
+		final WOSession session = super.restoreSessionWithID( sessionID, context );
+
+		if( session == null && sessionID != null && context != null && context.request() != null ) {
+			final String handlerKey = context.request().requestHandlerKey();
+
+			if( componentRequestHandlerKey().equals( handlerKey ) || "ajax".equals( handlerKey ) ) {
+				er.extensions.appserver.cachemonitor.PageCacheReuseStats.recordExpiredSessionAttempt();
+			}
+		}
+
+		return session;
 	}
 
 	/**
