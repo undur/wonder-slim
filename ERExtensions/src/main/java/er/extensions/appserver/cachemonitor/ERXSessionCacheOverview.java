@@ -151,6 +151,10 @@ public class ERXSessionCacheOverview extends ERXStatelessComponent {
 			return m + "m " + ( s % 60 ) + "s";
 		}
 		long h = m / 60;
-		return h + "h " + ( m % 60 ) + "m";
+		if( h < 24 ) {
+			return h + "h " + ( m % 60 ) + "m";
+		}
+		long days = h / 24;
+		return days + "d " + ( h % 24 ) + "h";
 	}
 }
