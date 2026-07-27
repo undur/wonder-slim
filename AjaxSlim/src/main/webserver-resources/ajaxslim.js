@@ -1032,7 +1032,28 @@
 				}
 			}
 
+			// When the form is REALLY submitting (full-page POST), observers must not also fire: on
+			// implicit submission (Enter pressed inside a field) the browser commits the value - firing
+			// 'change' - immediately BEFORE 'submit', so the observer's background request would race
+			// the page navigation, die, and surface as a spurious error banner (the full submit re-runs
+			// the observed action's server-side work anyway, so nothing is lost by skipping). The change
+			// path defers one tick (below) so the submit mark set here is visible by the time the
+			// observer fires. The mark is a timestamp with a short validity window rather than a boolean,
+			// so a submission that never navigates (e.g. cancelled by other JS) can't permanently mute
+			// the form's observers.
+			var form = field.form;
+			if (form && !form._ajaxslimSubmitObserved) {
+				form._ajaxslimSubmitObserved = true;
+				form.addEventListener('submit', function () {
+					form._ajaxslimSubmittedAt = Date.now();
+				});
+			}
+
 			var fire = function () {
+				var submittedAt = field.form && field.form._ajaxslimSubmittedAt;
+				if (submittedAt && (Date.now() - submittedAt) < 500) {
+					return; // a real submission is underway; see the comment above
+				}
 				if (options.onBeforeSubmit && options.onBeforeSubmit(field) === false) {
 					return;
 				}
@@ -1060,7 +1081,13 @@
 			// the Tab the browser lost. See the rememberTabSource / restoreTabFocus workaround above.
 			var changeListener = function (e) {
 				rememberTabSource(field);
-				handler(e);
+				// Deferred one tick: a 'change' fired by an implicit form submission (Enter in a field)
+				// precedes the 'submit' event within the same task, so firing synchronously here would
+				// miss the submit mark checked in fire(). One tick later the mark is set (or there was
+				// no submission, and nothing changes but a few ms of latency).
+				setTimeout(function () {
+					handler(e);
+				}, 0);
 			};
 			observers[identity] = { submitName: submitName, handler: handler, changeListener: changeListener, delayMs: delayMs };
 			field.addEventListener('change', changeListener);
