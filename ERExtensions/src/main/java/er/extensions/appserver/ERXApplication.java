@@ -428,6 +428,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		ERXStats.logStatisticsForOperation(statsLog, "sum");
 
+		printStartupInfo();
+	}
+
+	/**
+	 * Print some useful configuration info at app startup
+	 */
+	private void printStartupInfo() {
 		// Time since the actual JVM process was started (when the process began, before any class initialization including main() or an app’s static initialization) 
 		final long elapsedMSSinceJVMStartup = System.currentTimeMillis() - java.lang.management.ManagementFactory.getRuntimeMXBean().getStartTime();
 
