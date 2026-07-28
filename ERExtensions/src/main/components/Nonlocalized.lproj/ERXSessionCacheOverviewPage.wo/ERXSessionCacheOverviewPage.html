@@ -18,7 +18,7 @@
 
 	<wo:if condition="$hasReuseData">
 		<div class="erx-card">
-		<h4>Reuse profile <small class="erx-muted">app-wide, collecting for <wo:str value="$reuseSince" /> — <wo:str value="$reuseHits" /> hit(s), <wo:str value="$reuseMisses" /> miss(es), <wo:str value="$reuseExpiredSessionAttempts" /> broken by session expiry</small></h4>
+		<h4>Reuse profile <small class="erx-muted">app-wide, collecting for <wo:str value="$reuseSince" /> — <wo:str value="$reuseHits" /> hit(s), <wo:str value="$reuseMisses" /> miss(es), <wo:str value="$reuseExpiredSessionAttempts" /> broken by session expiry<wo:if condition="$hasPressurePurges">, <wo:str value="$pressurePurgedInstances" /> instance(s) purged in <wo:str value="$pressurePurges" /> memory-pressure purge(s)</wo:if></small></h4>
 		<p class="erx-muted">
 			Every cache hit records the restored instance's <strong>idle time</strong> and <strong>LRU depth</strong>
 			at the moment of restore. <strong>Broken by bound</strong> is the answer column: the number of

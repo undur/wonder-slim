@@ -112,6 +112,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final ERXLowMemoryHandler _lowMemoryHandler;
 
 	/**
+	 * Sheds page cache weight under genuine memory pressure (null when disabled by property)
+	 */
+	private final ERXPageCachePressureValve _pageCachePressureValve;
+
+	/**
 	 * Keeps track of exceptions logged by handleException()
 	 */
 	private final ERXExceptionManager _exceptionManager;
@@ -166,6 +171,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		setContextClassName(ERXWOContext.class.getName());
 
 		_lowMemoryHandler = new ERXLowMemoryHandler();
+		_pageCachePressureValve = ERXPageCachePressureValve.installIfEnabled();
 		_exceptionManager = new ERXExceptionManager();
 
 		final ERXAppBasedResourceRequestHandler resourceRequestHandler = new ERXAppBasedResourceRequestHandler();
@@ -455,6 +461,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		System.out.println( String.format( "%-37s : %s", "unified page cache (instances)", pageCacheSize() ) );
 		System.out.println( String.format( "%-37s : %s (obsolete: savePageInPermanentCache throws)", "WO permanent page cache", permanentPageCacheSize() ) );
 		System.out.println( String.format( "%-37s : %s (unused: unified cache handles all restores)", "WO page fragment cache", pageFragmentCacheSize() ) );
+		System.out.println( String.format( "%-37s : %s", "memory pressure valve", _pageCachePressureValve != null ? _pageCachePressureValve.bannerDescription() : "disabled" ) );
 
 		if( isDevelopmentMode() && isDirectConnectEnabled()) {
 			// To make the URL conveniently double clickable, we put it on it's own line.

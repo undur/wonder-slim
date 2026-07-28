@@ -136,6 +136,18 @@ public class ERXSessionCacheOverviewPage extends ERXComponent {
 		return PageCacheReuseStats.expiredSessionAttempts();
 	}
 
+	public long pressurePurgedInstances() {
+		return PageCacheReuseStats.pressurePurgedInstances();
+	}
+
+	public long pressurePurges() {
+		return PageCacheReuseStats.pressurePurges();
+	}
+
+	public boolean hasPressurePurges() {
+		return pressurePurges() > 0;
+	}
+
 	public boolean hasReuseData() {
 		return reuseHits() > 0;
 	}

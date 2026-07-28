@@ -44,6 +44,8 @@ public final class PageCacheReuseStats {
 	private static final LongAdder _hits = new LongAdder();
 	private static final LongAdder _misses = new LongAdder();
 	private static final LongAdder _expiredSessionAttempts = new LongAdder();
+	private static final LongAdder _pressurePurges = new LongAdder();
+	private static final LongAdder _pressurePurgedInstances = new LongAdder();
 	private static final Instant _since = Instant.now();
 
 	private static final ArrayDeque<NotableReach> _notableReaches = new ArrayDeque<>();
@@ -99,6 +101,20 @@ public final class PageCacheReuseStats {
 
 	public static long expiredSessionAttempts() {
 		return _expiredSessionAttempts.sum();
+	}
+
+	/** Records a memory-pressure purge (see ERXPageCachePressureValve): how many instances it evicted. */
+	public static void recordPressurePurge( final long instancesPurged ) {
+		_pressurePurges.increment();
+		_pressurePurgedInstances.add( instancesPurged );
+	}
+
+	public static long pressurePurges() {
+		return _pressurePurges.sum();
+	}
+
+	public static long pressurePurgedInstances() {
+		return _pressurePurgedInstances.sum();
 	}
 
 	public static long hits() {

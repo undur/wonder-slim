@@ -291,36 +291,41 @@ public class ERXAjaxSession extends WOSession {
 	private void storePage(WOComponent page, WOContext context, String diagnosticKey, boolean mayRecordProvenance) {
 		LinkedHashMap<String, TransactionRecord> pageCache = _pageCache();
 
-		// Memory bound: cap the number of distinct PAGE INSTANCES, not contextIDs. Adding a context for
-		// an instance we already hold is free; a genuinely new instance over the limit evicts the
-		// least-recently-used instance (all its contextID keys).
-		enforcePageCacheInstanceLimit(pageCache, page);
+		// The map instance doubles as the lock: mutations from the session's own request thread are
+		// already serialized by session checkout, but the memory-pressure purge (and the cross-session
+		// cache overview) touch this map from other threads. Contention is nil in normal operation.
+		synchronized (pageCache) {
+			// Memory bound: cap the number of distinct PAGE INSTANCES, not contextIDs. Adding a context for
+			// an instance we already hold is free; a genuinely new instance over the limit evicts the
+			// least-recently-used instance (all its contextID keys).
+			enforcePageCacheInstanceLimit(pageCache, page);
 
-		// Touch: move this instance's existing contextID entries to the tail so eviction is LRU over
-		// instances (drop the instance gone longest without use), not FIFO by first-seen contextID.
-		touchInstanceInPageCache(pageCache, page);
+			// Touch: move this instance's existing contextID entries to the tail so eviction is LRU over
+			// instances (drop the instance gone longest without use), not FIFO by first-seen contextID.
+			touchInstanceInPageCache(pageCache, page);
 
-		TransactionRecord record = new TransactionRecord(page, context, diagnosticKey);
-		if (mayRecordProvenance && WOApplication.application().isPageRefreshOnBacktrackEnabled()) {
-			WORequest request = context.request();
-			String senderID = context.senderID();
-			// Provenance only makes sense for a component action (a request with a sender), and only where a
-			// byte-identical replay is detectable: multipart bodies are streamed, not comparable, and ajax
-			// requests are excluded because the guard never applies to them (see contextIDForRepeatedRequest).
-			// Recorded only under page-refresh-on-backtrack - the one mode where the guard can fire.
-			if (request != null && senderID != null && !senderID.isEmpty()
-					&& !request.isMultipartFormData() && !ERXAjaxApplication.isAjaxRequest(request)) {
-				record.recordProvenance(senderID, requestFingerprint(request));
+			TransactionRecord record = new TransactionRecord(page, context, diagnosticKey);
+			if (mayRecordProvenance && WOApplication.application().isPageRefreshOnBacktrackEnabled()) {
+				WORequest request = context.request();
+				String senderID = context.senderID();
+				// Provenance only makes sense for a component action (a request with a sender), and only where a
+				// byte-identical replay is detectable: multipart bodies are streamed, not comparable, and ajax
+				// requests are excluded because the guard never applies to them (see contextIDForRepeatedRequest).
+				// Recorded only under page-refresh-on-backtrack - the one mode where the guard can fire.
+				if (request != null && senderID != null && !senderID.isEmpty()
+						&& !request.isMultipartFormData() && !ERXAjaxApplication.isAjaxRequest(request)) {
+					record.recordProvenance(senderID, requestFingerprint(request));
+				}
 			}
-		}
-		pageCache.put(context.contextID(), record);
+			pageCache.put(context.contextID(), record);
 
-		// Per-request visibility into the page cache. Off by default (free in production); set
-		// er.extensions.appserver.ajax.ERXAjaxSession.logPageCache=true to watch the cache size +
-		// page->container structure on each store - the easiest way to confirm it stays bounded by
-		// instances and to debug stale-link issues.
-		if (logPageCache && log.isInfoEnabled()) {
-			log.info("[page-cache] stored {} for context {} -> {}", record.key() == null ? page.name() : record.key(), context.contextID(), pageCacheSummary());
+			// Per-request visibility into the page cache. Off by default (free in production); set
+			// er.extensions.appserver.ajax.ERXAjaxSession.logPageCache=true to watch the cache size +
+			// page->container structure on each store - the easiest way to confirm it stays bounded by
+			// instances and to debug stale-link issues. (Inside the lock: pageCacheSummary iterates.)
+			if (logPageCache && log.isInfoEnabled()) {
+				log.info("[page-cache] stored {} for context {} -> {}", record.key() == null ? page.name() : record.key(), context.contextID(), pageCacheSummary());
+			}
 		}
 	}
 
@@ -548,6 +553,58 @@ public class ERXAjaxSession extends WOSession {
 	}
 
 	/**
+	 * Trims the cache down to at most {@code maxInstances} distinct page instances, evicting least
+	 * recently used first - the memory-pressure valve's entry point (see
+	 * {@code ERXPageCachePressureValve}). Never trims below one instance: the most recently used one
+	 * is the session's current page for backtracking purposes, and purging it would break the very
+	 * next interaction of a merely-slow user. Safe to call from any thread (synchronizes on the
+	 * cache map, like every other cache access).
+	 *
+	 * @param maxInstances the instance count to trim down to (floored at 1)
+	 * @return the number of page instances evicted
+	 */
+	public int trimPageCacheToInstanceCount(int maxInstances) {
+		LinkedHashMap<String, TransactionRecord> cache = _pageCache;
+		if (cache == null) {
+			return 0;
+		}
+		final int keep = Math.max(1, maxInstances);
+		synchronized (cache) {
+			if (cache.isEmpty()) {
+				return 0;
+			}
+			// Distinct instances in cache order = LRU-over-instances, least recently used first.
+			final java.util.Set<WOComponent> instances = java.util.Collections.newSetFromMap(new java.util.LinkedHashMap<>());
+			for (TransactionRecord record : cache.values()) {
+				instances.add(record.page());
+			}
+			final int evictCount = instances.size() - keep;
+			if (evictCount <= 0) {
+				return 0;
+			}
+			final java.util.Set<WOComponent> doomed = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+			for (WOComponent page : instances) {
+				if (doomed.size() >= evictCount) {
+					break;
+				}
+				doomed.add(page);
+			}
+			final Iterator<Map.Entry<String, TransactionRecord>> entries = cache.entrySet().iterator();
+			while (entries.hasNext()) {
+				if (doomed.contains(entries.next().getValue().page())) {
+					entries.remove();
+				}
+			}
+			if (storesPageInfo()) {
+				for (WOComponent page : doomed) {
+					pageInfoDictionary().removeObjectForKey(page);
+				}
+			}
+			return doomed.size();
+		}
+	}
+
+	/**
 	 * Semi-private method that saves the current page. This is the request handler's per-request entry
 	 * point into page storage; with the unified cache the permanent-cache branching is gone and every
 	 * page goes through {@link #savePage}.
@@ -596,17 +653,19 @@ public class ERXAjaxSession extends WOSession {
 		log.debug("Restoring page for contextID: {}", contextID);
 		WOComponent page = null;
 		if (_pageCache != null) {
-			TransactionRecord record = _pageCache.get(contextID);
-			if (record != null) {
-				page = record.page();
-				recordReuseProfile(page);
-				record.markAccessed();
-				// Access = most-recently-used for this INSTANCE: move all its contextID entries to the tail
-				// so eviction drops the least-recently-used instance, not the first-inserted one.
-				touchInstanceInPageCache(_pageCache, page);
-			}
-			else {
-				PageCacheReuseStats.recordMiss();
+			synchronized (_pageCache) {
+				TransactionRecord record = _pageCache.get(contextID);
+				if (record != null) {
+					page = record.page();
+					recordReuseProfile(page);
+					record.markAccessed();
+					// Access = most-recently-used for this INSTANCE: move all its contextID entries to the tail
+					// so eviction drops the least-recently-used instance, not the first-inserted one.
+					touchInstanceInPageCache(_pageCache, page);
+				}
+				else {
+					PageCacheReuseStats.recordMiss();
+				}
 			}
 		}
 		if (page == null) {
