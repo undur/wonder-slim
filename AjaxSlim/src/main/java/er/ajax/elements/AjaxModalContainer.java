@@ -21,7 +21,9 @@ import er.extensions.appserver.ERXWOContext;
  * iBox lightbox (Prototype-based): it relocated the content node to <code>&lt;body&gt;</code>, drew its
  * own overlay, and supported iframe / direct-action / ajax content loading plus skins and locking.
  * AjaxSlim uses the platform's native <code>&lt;dialog&gt;</code> instead, which provides the backdrop
- * (<code>::backdrop</code>), focus trapping, and Esc-to-close for free, and - crucially - keeps the
+ * (<code>::backdrop</code>), focus trapping, and Esc-to-close for free (ajaxslim-modal.js adds
+ * click-outside-to-close on top - clicking the backdrop dismisses the dialog, clicks inside it,
+ * including a drag that merely ends outside, never do), and - crucially - keeps the
  * content in place in the DOM (no relocation, so no morph collision and no <code>data-morph-ignore</code>
  * relocation hack). The content is the element's inline children, rendered normally, so forms/links
  * inside the dialog submit and navigate exactly as they would anywhere else.

@@ -1,0 +1,22 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioInvoice",
+  "comment": "Light dismiss: clicking the BACKDROP closes the dialog; a click inside the dialog's own box (which also targets the <dialog> element when it lands on padding) must NOT close it; and a drag that starts inside but releases over the backdrop must NOT close it either (that's a text-selection gesture, not a dismissal). Only dialogs opened by ajaxslim-modal.js participate, via the data-ajaxslim-modal marker.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#customerModal" },
+    { "do": "click", "selector": "#customerModal" },
+    { "do": "read", "name": "openAfterTrigger", "what": "jsExpression", "expression": "String(document.getElementById('customerModal_dialog').open)" },
+    { "do": "assert", "name": "trigger opens the dialog", "that": "openAfterTrigger", "equals": "true" },
+    { "do": "read", "name": "marked", "what": "jsExpression", "expression": "String(document.getElementById('customerModal_dialog').hasAttribute('data-ajaxslim-modal'))" },
+    { "do": "assert", "name": "opened dialog carries the ajaxslim marker", "that": "marked", "equals": "true" },
+    { "do": "read", "name": "openAfterInsideClick", "what": "jsExpression", "expression": "(function(){var d=document.getElementById('customerModal_dialog');var r=d.getBoundingClientRect();var mid={bubbles:true,clientX:(r.left+r.right)/2,clientY:(r.top+r.bottom)/2};d.dispatchEvent(new PointerEvent('pointerdown',mid));d.dispatchEvent(new MouseEvent('click',mid));return String(d.open);})()" },
+    { "do": "assert", "name": "a click inside the dialog's box does not dismiss", "that": "openAfterInsideClick", "equals": "true" },
+    { "do": "read", "name": "openAfterDragOut", "what": "jsExpression", "expression": "(function(){var d=document.getElementById('customerModal_dialog');var r=d.getBoundingClientRect();var inside={bubbles:true,clientX:(r.left+r.right)/2,clientY:(r.top+r.bottom)/2};var outside={bubbles:true,clientX:Math.max(1,r.left-20),clientY:Math.max(1,r.top-20)};d.dispatchEvent(new PointerEvent('pointerdown',inside));d.dispatchEvent(new MouseEvent('click',outside));return String(d.open);})()" },
+    { "do": "assert", "name": "a drag from inside released on the backdrop does not dismiss", "that": "openAfterDragOut", "equals": "true" },
+    { "do": "read", "name": "openAfterBackdropClick", "what": "jsExpression", "expression": "(function(){var d=document.getElementById('customerModal_dialog');var r=d.getBoundingClientRect();var outside={bubbles:true,clientX:Math.max(1,r.left-20),clientY:Math.max(1,r.top-20)};d.dispatchEvent(new PointerEvent('pointerdown',outside));d.dispatchEvent(new MouseEvent('click',outside));return String(d.open);})()" },
+    { "do": "assert", "name": "a backdrop click dismisses the dialog", "that": "openAfterBackdropClick", "equals": "false" },
+    { "do": "wait", "ms": 100 },
+    { "do": "read", "name": "ignoreLifted", "what": "jsExpression", "expression": "String(document.getElementById('customerModal_dialog').hasAttribute('data-morph-ignore'))" },
+    { "do": "assert", "name": "light dismiss lifts the morph opt-out like any close", "that": "ignoreLifted", "equals": "false" }
+  ]
+}

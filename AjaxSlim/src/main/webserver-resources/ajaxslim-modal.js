@@ -24,6 +24,8 @@
 		// off on close so server-rendered content changes flow again from the next update on. Set
 		// BEFORE opening so no morph can land in between.
 		dialog.setAttribute('data-morph-ignore', '');
+		// Marks the dialog as ours - light dismiss (below) only applies to marked dialogs.
+		dialog.setAttribute('data-ajaxslim-modal', '');
 		if (!dialog._ajaxslimCloseWired) {
 			dialog._ajaxslimCloseWired = true;
 			dialog.addEventListener('close', function () {
@@ -49,6 +51,39 @@
 		}
 		e.preventDefault();
 		openDialog(document.getElementById(trigger.getAttribute('data-ajaxslim-modal-open')));
+	});
+
+	// Light dismiss: clicking the backdrop closes the dialog (a tiny close button alone is
+	// irritating). Backdrop clicks report the <dialog> ELEMENT as their target (::backdrop can't
+	// be an event target), and they are the only dialog-targeted clicks whose coordinates fall
+	// OUTSIDE the dialog's box - a click in the dialog's own padding also targets the dialog but
+	// lands inside the rect, and must not dismiss. Only dialogs opened by this script (marked in
+	// openDialog) participate, so an app's own <dialog>s keep their behaviour.
+	//
+	// The pointerdown guard handles the classic dismissal trap: a drag that STARTS inside the
+	// dialog (text selection, a slipped click) and releases over the backdrop fires the click on
+	// the dialog with outside coordinates - dismissing would eat the user's selection gesture.
+	// Only a press that itself began on the backdrop qualifies.
+	function onBackdrop(dialog, e) {
+		var r = dialog.getBoundingClientRect();
+		return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+	}
+
+	var pressBeganOnBackdrop = false;
+
+	document.addEventListener('pointerdown', function (e) {
+		var t = e.target;
+		pressBeganOnBackdrop = !!(t && t.tagName === 'DIALOG' && t.open
+				&& t.hasAttribute('data-ajaxslim-modal') && onBackdrop(t, e));
+	});
+
+	document.addEventListener('click', function (e) {
+		var t = e.target;
+		if (pressBeganOnBackdrop && t && t.tagName === 'DIALOG' && t.open
+				&& t.hasAttribute('data-ajaxslim-modal') && onBackdrop(t, e)) {
+			t.close();
+		}
+		pressBeganOnBackdrop = false;
 	});
 
 	// Open any dialog flagged to start open. Run on DOM ready and observe later insertions (morphs).
