@@ -1,4 +1,4 @@
-package er.extensions.appserver;
+package er.extensions.dev;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -9,6 +9,7 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
 

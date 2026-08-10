@@ -1,10 +1,12 @@
-package er.extensions.appserver;
+package er.extensions.dev;
 
 import java.util.List;
 
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
+
+import er.extensions.appserver.ERXApplication;
 
 /**
  * A development-only request handler that returns the application's recently
