@@ -206,6 +206,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		if( isDevelopmentModeSafe() ) {
 			ERXConsoleCapture.install();
 			registerRequestHandler( new ERXConsoleLogRequestHandler(), ERXConsoleLogRequestHandler.KEY );
+			// Dev endpoints shared (in shape and behavior) with ng-objects, backed by ng-core:
+			// evaluate a snippet in the running JVM, and read back the runtime problems the app
+			// rendered into its pages. See the ng-objects /ng/dev/eval and /ng/dev/problems routes.
+			registerRequestHandler( new ERXEvalRequestHandler(), ERXEvalRequestHandler.KEY );
+			registerRequestHandler( new ERXRuntimeProblemsRequestHandler(), ERXRuntimeProblemsRequestHandler.KEY );
 		}
 
 		// Set the routing request handler as the default request handler
