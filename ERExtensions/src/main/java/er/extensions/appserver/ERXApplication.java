@@ -156,6 +156,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
 		ERXLoggingSupport.reInitConsoleAppenders();
 
+		log.info("pid: " + ProcessHandle.current().pid() );
+
 		// Register and initialize the parsley template parser, with development features
 		// (inline errors, the controls strip) on in development mode and off in production.
 		final ParsleyConfiguration.Builder parsleyConfiguration = isDevelopmentModeSafe()
