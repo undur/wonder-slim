@@ -62,7 +62,8 @@ public final class ERXDevServerRegistration {
 		final String url = "http://localhost:" + devServerPort
 				+ "/registerApp?name=" + urlEncode(appName)
 				+ "&port=" + port
-				+ "&pid=" + urlEncode(pid);
+				+ "&pid=" + urlEncode(pid)
+				+ "&runtime=wo"; // lets the dev server / a tool pick the …woa/… endpoint form
 
 		// Background + short timeouts: the dev server is local, so it's either there and
 		// instant, or absent and we don't want to wait on it.
