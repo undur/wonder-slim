@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: WebSocket echo</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+		.btn:disabled { background: #aaa; cursor: default; }
+		#wsStatus { font-weight: 600; }
+		#wsStatus.open { color: #2f855a; }
+		#wsStatus.closed { color: #b00020; }
+		#wsLog { font-family: ui-monospace, monospace; font-size: .85rem; background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: .6rem; margin-top: .8rem; height: 14rem; overflow-y: auto; white-space: pre-wrap; }
+		#wsInput { padding: .4rem; font-size: 1rem; width: 24rem; max-width: 60%; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>WebSocket echo</h1>
+	<p class="lead">Opens a WebSocket to this app's <code>/ws/echo</code> endpoint and echoes whatever
+	you send. Loaded direct-connect this tests the adaptor's WebSocket support; loaded through the
+	front-end proxy it tests WebSocket tunneling — same page either way.</p>
+
+	<div class="box">
+		<p>Connection: <span id="wsStatus" class="closed">connecting…</span> <span id="wsUrl" style="color:#888"></span></p>
+		<form id="wsForm">
+			<input type="text" id="wsInput" placeholder="Type a message and hit enter" autocomplete="off" />
+			<button type="submit" class="btn" id="wsSend" disabled>Send</button>
+			<button type="button" class="btn" id="wsReconnect" style="background:#718096">Reconnect</button>
+		</form>
+		<div id="wsLog"></div>
+	</div>
+
+	<script>
+		const statusEl = document.getElementById('wsStatus');
+		const urlEl = document.getElementById('wsUrl');
+		const logEl = document.getElementById('wsLog');
+		const inputEl = document.getElementById('wsInput');
+		const sendBtn = document.getElementById('wsSend');
+		let ws = null;
+
+		function log(line) {
+			logEl.textContent += new Date().toISOString().substring(11, 23) + '  ' + line + '\n';
+			logEl.scrollTop = logEl.scrollHeight;
+		}
+
+		function connect() {
+			const url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws/echo';
+			urlEl.textContent = '(' + url + ')';
+			log('connecting to ' + url);
+			ws = new WebSocket(url);
+
+			ws.onopen = () => {
+				statusEl.textContent = 'open';
+				statusEl.className = 'open';
+				sendBtn.disabled = false;
+				log('open');
+			};
+			ws.onmessage = (event) => log('« ' + event.data);
+			ws.onerror = () => log('error (see console)');
+			ws.onclose = (event) => {
+				statusEl.textContent = 'closed (' + event.code + ')';
+				statusEl.className = 'closed';
+				sendBtn.disabled = true;
+				log('closed, code ' + event.code + (event.reason ? ', reason: ' + event.reason : ''));
+			};
+		}
+
+		document.getElementById('wsForm').addEventListener('submit', (e) => {
+			e.preventDefault();
+			if (ws && ws.readyState === WebSocket.OPEN && inputEl.value) {
+				log('» ' + inputEl.value);
+				ws.send(inputEl.value);
+				inputEl.value = '';
+			}
+		});
+
+		document.getElementById('wsReconnect').addEventListener('click', () => {
+			if (ws) ws.close();
+			connect();
+		});
+
+		connect();
+	</script>
+</body>
+</html>

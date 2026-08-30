@@ -38,6 +38,11 @@ public class Application extends ERXApplication {
 
 		// Clean, flat URLs for page-to-page navigation (see Routes).
 		Routes.register();
+
+		// WebSocket test endpoint (served by WOAdaptorJetty — the app must
+		// run with -WOAdaptor WOAdaptorJetty for this to be live). Exercised
+		// by the /websocket page, and by modulo's WebSocket tunnel testing.
+		com.webobjects.appserver.websocket.WOWebSocketRegistry.register( "/ws/echo", com.webobjects.appserver.websocket.examples.EchoWebSocketHandler.class );
 	}
 	
 	@Override

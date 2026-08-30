@@ -26,6 +26,7 @@ import ajaxplayground.components.scenario.ScenarioServerUpdateFragments;
 import ajaxplayground.components.scenario.ScenarioScripts;
 import ajaxplayground.components.scenario.ScenarioTabs;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
+import ajaxplayground.components.scenario.ScenarioWebSocket;
 import er.extensions.routes.RouteTable;
 
 /**
@@ -56,6 +57,9 @@ public class Routes {
 		routes.map( "/element-reference", AjaxSlimElementReference.class );
 		routes.map( "/apiext-guide", ApiextGuide.class );
 		routes.map( "/overview", AjaxOverview.class );
+
+		// WebSocket echo demo (needs WOAdaptorJetty)
+		routes.map( "/websocket", ScenarioWebSocket.class );
 
 		// Scenario pages (danger matrix)
 		routes.map( "/focus", ScenarioFocus.class );
