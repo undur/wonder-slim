@@ -78,7 +78,21 @@ public class AjaxResponse extends WOResponse {
 				boolean targetedSomething = !AjaxUpdateProtocol.requestedUpdateContainerIDs(_request).isEmpty();
 				if (_contentLength() == 0 && targetedSomething) {
 					setStatus(HTTP_STATUS_INTERNAL_ERROR);
-					log.warn("You performed an Ajax update, but no response was generated. A common cause of this is that you spelled your updateContainerID wrong.  You specified a container ID '" + AjaxUpdateProtocol.updateContainerID(_request) + "'.");
+					final String targeted = AjaxUpdateProtocol.requestedUpdateContainerIDs(_request).toString();
+					final String pageName = _context.page() == null ? "(no page)" : _context.page().name();
+					final String message = "Ajax update produced NO content for targeted container(s) " + targeted + " on page '" + pageName + "'."
+							+ " Two known causes: (1) the update container did not render during this update pass - typically because it sits inside a"
+							+ " conditional that this very action turned off (deleting the last item of the list the container is conditioned on, say)."
+							+ " The container element must stay rendered even when it has nothing to show, so put the conditional INSIDE the container."
+							+ " (2) The container id is misspelled and matches no container on the page.";
+					// An ERROR, not a warning: the user just got a 500.
+					log.error(message);
+					// And the failure gets a BODY: the client logs the response body on ajax failure, so
+					// the browser console explains WHY instead of showing an empty 500. Sent in production
+					// too - the message holds nothing sensitive (the container id is already in the request
+					// URL), and a blank 500 in a production incident is precisely the unusable kind.
+					setHeader("text/plain; charset=utf-8", "content-type");
+					setContent(message);
 				}
 			}
 			finally {

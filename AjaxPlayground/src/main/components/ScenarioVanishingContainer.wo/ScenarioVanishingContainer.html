@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: vanishing update container</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 44rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.zone { padding: 1rem; border: 2px dashed #efc9c9; border-radius: 6px; margin: 1rem 0; }
+		code { background: #f2f2f2; padding: 0 .25rem; border-radius: 3px; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>Vanishing update container</h1>
+	<p class="lead">Deliberately wrong-by-design: the <code>AjaxUpdateContainer</code> sits inside a
+	conditional, and the action fired from inside it turns that conditional <strong>off</strong> —
+	the shape of deleting the last item of the list the container is conditioned on. The container
+	never renders during the update pass, so the framework must answer with an <em>explanatory</em>
+	500 (body naming the container, the page and the likely cause), not an empty one.</p>
+
+	<wo:if condition="$showList">
+		<wo:AjaxUpdateContainer id="doomedContainer">
+			<div class="zone">
+				<p id="doomedState">the list (one item left)</p>
+				<wo:AjaxUpdateLink action="$emptyTheList" updateContainerID="doomedContainer" id="emptyLink">Delete the last item</wo:AjaxUpdateLink>
+			</div>
+		</wo:AjaxUpdateContainer>
+	</wo:if>
+</body>
+</html>

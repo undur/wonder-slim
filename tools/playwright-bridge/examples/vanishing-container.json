@@ -1,0 +1,22 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioVanishingContainer",
+  "comment": "An action that turns off the conditional its own update container sits inside (deleting the last list item, say) produces an empty update pass. The framework answers 500 - and this scenario guards the DIAGNOSTICS: the response body must explain the failure (targeted container, page name, the conditional-turned-off cause and the put-the-conditional-inside-the-container advice) instead of the historical empty body. A fetch hook captures the ajax response the click triggers.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#emptyLink" },
+    { "do": "read", "name": "hooked", "what": "jsExpression", "expression": "(function(){var of=window.fetch;window.__ajaxCap=null;window.fetch=function(){return of.apply(this,arguments).then(function(r){var c=r.clone();return c.text().then(function(t){window.__ajaxCap={status:r.status,body:t};return r;});});};return 'ok';})()" },
+    { "do": "assert", "name": "fetch hook installed", "that": "hooked", "equals": "ok" },
+    { "do": "click", "selector": "#emptyLink" },
+    { "do": "wait", "ms": 500 },
+    { "do": "read", "name": "status", "what": "jsExpression", "expression": "String(window.__ajaxCap && window.__ajaxCap.status)" },
+    { "do": "assert", "name": "the empty update answers 500", "that": "status", "equals": "500" },
+    { "do": "read", "name": "bodyNamesContainer", "what": "jsExpression", "expression": "String(!!window.__ajaxCap && window.__ajaxCap.body.indexOf('doomedContainer') >= 0)" },
+    { "do": "assert", "name": "the body names the targeted container", "that": "bodyNamesContainer", "equals": "true" },
+    { "do": "read", "name": "bodyNamesPage", "what": "jsExpression", "expression": "String(!!window.__ajaxCap && window.__ajaxCap.body.indexOf('ScenarioVanishingContainer') >= 0)" },
+    { "do": "assert", "name": "the body names the page", "that": "bodyNamesPage", "equals": "true" },
+    { "do": "read", "name": "bodyExplainsCause", "what": "jsExpression", "expression": "String(!!window.__ajaxCap && window.__ajaxCap.body.indexOf('conditional that this very action turned off') >= 0)" },
+    { "do": "assert", "name": "the body explains the vanished-conditional cause", "that": "bodyExplainsCause", "equals": "true" },
+    { "do": "read", "name": "bodyGivesAdvice", "what": "jsExpression", "expression": "String(!!window.__ajaxCap && window.__ajaxCap.body.indexOf('INSIDE the container') >= 0)" },
+    { "do": "assert", "name": "the body prescribes the fix", "that": "bodyGivesAdvice", "equals": "true" }
+  ]
+}
