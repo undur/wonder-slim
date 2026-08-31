@@ -15,6 +15,7 @@ import ajaxplayground.components.scenario.InvoiceSimple;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioCheckbox;
 import ajaxplayground.components.scenario.ScenarioDropdownViewport;
+import ajaxplayground.components.scenario.ScenarioExpansion;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioInvoice;
 import ajaxplayground.components.scenario.ScenarioMultiObserve;
@@ -62,6 +63,7 @@ public class Routes {
 		routes.map( "/websocket", ScenarioWebSocket.class );
 
 		// Scenario pages (danger matrix)
+		routes.map( "/expansion", ScenarioExpansion.class );
 		routes.map( "/focus", ScenarioFocus.class );
 		routes.map( "/accumulation", ScenarioAccumulation.class );
 		routes.map( "/nested", ScenarioNested.class );

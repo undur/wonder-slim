@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="AjaxExpansion" content="expected">
+
+		<doc><![CDATA[A titled disclosure section: a summary line that expands and collapses its inline content, built on the platform's native `<details>/<summary>` (free disclosure behaviour, keyboard handling and accessibility; toggles instantly client-side). Every toggle pings the server with the new state, so re-renders — including morphs of an enclosing update container — always carry the correct open state; an open section never snaps shut because of an unrelated update.
+
+The legacy element's effects (`insertion`, Scriptaculous) and lazy content loading are deliberately gone: content renders inline, and motion — if wanted — belongs in CSS on the `<details>` element.
+
+```html
+<wo:AjaxExpansion label="HTTP Adaptor Settings" id="adaptorSettings">
+  ...section content...
+</wo:AjaxExpansion>
+```
+
+Note: a WORepetition renders one component instance across all iterations, so an unbound AjaxExpansion in a repetition shares one state across rows — bind `expanded` to per-row state there.]]></doc>
+
+		<binding name="label">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The summary line's text.</doc>
+		</binding>
+
+		<binding name="expanded">
+			<pull><type>java.lang.Boolean</type></pull>
+			<push><type>java.lang.Boolean</type></push>
+			<doc><![CDATA[Optionally binds the expansion state. When settable, each toggle pushes the new state into it — letting the page own the state (e.g. per-row in a repetition). When absent, the component keeps the state itself, starting collapsed.]]></doc>
+		</binding>
+
+		<binding name="id">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The id of the `<details>` element.]]></doc>
+		</binding>
+
+		<binding name="class">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[CSS class(es) for the `<details>` element.]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: expansion sections vs morphs</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 44rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		details { border: 1px solid #ccc; border-radius: 4px; padding: .5rem .8rem; margin: .6rem 0; }
+		summary { cursor: pointer; font-weight: 600; }
+	</style>
+</head>
+<body>
+	<h1>Expansion sections vs morphs</h1>
+	<p>
+		Two <code>AjaxExpansion</code> sections inside one update container. Open one, then refresh the
+		container: the section must stay open — the toggle pinged the server, so the re-render carries
+		the right <code>open</code> state. The second section binds its state to the page, which echoes
+		it below.
+	</p>
+
+	<wo:AjaxUpdateContainer id="zone">
+		<wo:AjaxExpansion id="expansionInternal" label="Internal state section">
+			<p id="internalContent">Content of the internally-stateful section.</p>
+		</wo:AjaxExpansion>
+
+		<wo:AjaxExpansion id="expansionBound" label="Bound state section" expanded="$boundExpanded">
+			<p id="boundContent">Content of the bound section.</p>
+		</wo:AjaxExpansion>
+
+		<p>Server sees bound = <span id="boundEcho"><wo:str value="$boundEcho" /></span></p>
+	</wo:AjaxUpdateContainer>
+
+	<p><wo:AjaxUpdateLink id="refreshZone" updateContainerID="zone">Refresh the container</wo:AjaxUpdateLink></p>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+    <wo class="AjaxExpansion" wocomponentcontent="true">
+        <binding name="label"/>
+        <binding defaults="Boolean" name="expanded"/>
+        <binding name="id"/>
+        <binding name="class"/>
+    </wo>
+</wodefinitions>

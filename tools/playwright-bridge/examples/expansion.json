@@ -1,0 +1,32 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioExpansion",
+  "comment": "AjaxExpansion state must survive a morph of its enclosing container: the toggle pings the server, so the re-render carries the correct open attribute. Asserts open-survives-refresh, closed-survives-refresh, and that a bound section's state round-trips into the page (echoed server-side).",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#expansionInternal" },
+    { "do": "read", "name": "startsClosed", "what": "jsExpression", "expression": "String(document.getElementById('expansionInternal').open)" },
+    { "do": "assert", "name": "internal section starts closed", "that": "startsClosed", "equals": "false" },
+    { "do": "click", "selector": "#expansionInternal > summary" },
+    { "do": "read", "name": "openAfterToggle", "what": "jsExpression", "expression": "String(document.getElementById('expansionInternal').open)" },
+    { "do": "assert", "name": "clicking the summary opens instantly", "that": "openAfterToggle", "equals": "true" },
+    { "do": "wait", "ms": 400 },
+    { "do": "click", "selector": "#refreshZone" },
+    { "do": "wait", "ms": 400 },
+    { "do": "read", "name": "openAfterRefresh", "what": "jsExpression", "expression": "String(document.getElementById('expansionInternal').open)" },
+    { "do": "assert", "name": "an open section survives a container refresh", "that": "openAfterRefresh", "equals": "true" },
+    { "do": "click", "selector": "#expansionInternal > summary" },
+    { "do": "wait", "ms": 400 },
+    { "do": "click", "selector": "#refreshZone" },
+    { "do": "wait", "ms": 400 },
+    { "do": "read", "name": "closedAfterRefresh", "what": "jsExpression", "expression": "String(document.getElementById('expansionInternal').open)" },
+    { "do": "assert", "name": "a closed section stays closed after a refresh", "that": "closedAfterRefresh", "equals": "false" },
+    { "do": "click", "selector": "#expansionBound > summary" },
+    { "do": "wait", "ms": 400 },
+    { "do": "click", "selector": "#refreshZone" },
+    { "do": "wait", "ms": 400 },
+    { "do": "read", "name": "boundEchoAfter", "what": "jsExpression", "expression": "document.getElementById('boundEcho').textContent" },
+    { "do": "assert", "name": "the bound section's state round-trips into the page", "that": "boundEchoAfter", "equals": "true" },
+    { "do": "read", "name": "boundOpenAfterRefresh", "what": "jsExpression", "expression": "String(document.getElementById('expansionBound').open)" },
+    { "do": "assert", "name": "the bound section stays open after the refresh", "that": "boundOpenAfterRefresh", "equals": "true" }
+  ]
+}
