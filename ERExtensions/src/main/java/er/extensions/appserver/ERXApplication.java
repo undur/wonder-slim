@@ -133,7 +133,22 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static boolean _wasERXApplicationMainInvoked = false;
 
 	/**
-	 * Registered streaming request handler keys
+	 * Request handler keys whose requests may carry a large body that the handler wants to read as a stream
+	 * (WORequest.contentInputStream()) rather than have materialized in memory.
+	 *
+	 * Why this exists: WORequest hands out the content stream only as long as no form value has been read
+	 * (its _formValuesUsed guard — form parsing may consume the body). But form values get read before any
+	 * request handler or action sees the request: WOContext's constructor calls request.sessionID() (via
+	 * _synchronizeForDistribution), and the session id lookup goes through form values, which for a
+	 * URL-encoded body means contentString() — the entire body pulled into memory, and the stream gone.
+	 * ERXRequest._getSessionIDFromValuesOrCookie() consults this set and, for a registered key, looks the
+	 * session id up in cookies only, leaving the body untouched. WO's own streaming key ("ws",
+	 * streamActionRequestHandlerKey()) is registered by default; register any handler of your own whose
+	 * actions stream their request body. Note that WODirectActionRequestHandler additionally sniffs the
+	 * WOSubmitAction form value to resolve the action path — setAllowsContentInputStream(true) on the
+	 * handler turns that off; both are needed for a streaming direct action.
+	 *
+	 * (Found the hard way while making wotaskd's deploy endpoint stream a 40 MB archive, 2026-09-02.)
 	 */
 	private final Set<String> _streamingRequestHandlerKeys = new HashSet<>(Set.of(streamActionRequestHandlerKey()));
 
@@ -848,6 +863,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return response;
 	}
 
+	/**
+	 * Register a request handler key whose requests should keep their body available as a stream — see
+	 * _streamingRequestHandlerKeys for the why.
+	 */
 	public void registerStreamingRequestHandlerKey(String key) {
 		_streamingRequestHandlerKeys.add(key);
 	}
