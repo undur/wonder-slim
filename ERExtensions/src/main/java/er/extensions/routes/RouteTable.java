@@ -138,6 +138,14 @@ public class RouteTable {
 	public record Route( String pattern, RouteHandler routeHandler ) {}
 
 	/**
+	 * userInfo key that tells wo-adaptor-jetty a response is "unhandled": the adaptor discards it and lets the next Jetty
+	 * handler try the request (e.g. an ng-objects handler in the same server). Same literal as
+	 * WOAdaptorJetty.UNHANDLED_RESPONSE_KEY, duplicated on purpose since ERExtensions must not depend on the adaptor. Other
+	 * adaptors ignore it and just serve the 404.
+	 */
+	public static final String UNHANDLED_RESPONSE_KEY = "wo-unhandled-response";
+
+	/**
 	 * For returning 404
 	 */
 	public static class NotFoundRouteHandler implements RouteHandler {
@@ -146,7 +154,7 @@ public class RouteTable {
 			final WOResponse response = new WOResponse();
 			response.setStatus( 404 );
 			response.setContent( "No route found for URL: " + invocation.url() );
-			response.setUserInfoForKey("true", "wo-unhandled-response"); // FIXME: Experimental, used in conjuction with wo-adaptor-jetty // Hugi 2026-01-27
+			response.setUserInfoForKey( "true", UNHANDLED_RESPONSE_KEY );
 			return response;
 		}
 	}
