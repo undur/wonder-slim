@@ -38,6 +38,11 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>is.rebbi</groupId>
+			<artifactId>wo-adaptor-jetty-websocket</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>${wonder.core.group}</groupId>
 			<artifactId>ERExtensions</artifactId>
 			<version>${wonder.version}</version>
