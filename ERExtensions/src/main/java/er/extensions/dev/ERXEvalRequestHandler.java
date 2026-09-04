@@ -6,9 +6,9 @@ import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXHTTPUtilities;
-import ng.dev.NGDevJson;
-import ng.dev.NGDevLoopback;
-import ng.dev.NGEvalSession;
+import er.extensions.dev.ng.NGDevJson;
+import er.extensions.dev.ng.NGDevLoopback;
+import er.extensions.dev.ng.NGEvalSession;
 
 /**
  * A development-only request handler that evaluates a Java snippet inside this running
