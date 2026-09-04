@@ -1,5 +1,63 @@
 # Changelog
 
+## 2026-09-04 (8.0.4)
+
+- **Page cache reuse measurement**
+  Every cache hit records the restored instance's idle time and instance-LRU depth into app-wide
+  histograms, shown on the session cache overview with a reverse-cumulative "broken by bound" column
+  that reads directly as "a TTL/cap at this bound would have broken N restores". Restores broken by
+  SESSION EXPIRY - invisible to in-cache counters, since the session dies before any cache is
+  consulted - are counted at the `restoreSessionWithID` choke point (deliberately not in
+  `handleSessionRestorationErrorInContext`, which applications override for their own expiry UX).
+  A notable-reaches list names the pages users actually reach back for.
+
+- **ERXPageCachePressureValve: caches trim themselves under real memory pressure**
+  Instead of an always-on TTL (paying with broken deep reaches even when memory is plentiful),
+  eviction now happens only when memory is actually short: when a GC completes with old gen still
+  above `threshold` (default 85%), every session is trimmed to `trimToFraction` (default 50%) of the
+  page cache cap, LRU instances first; above `aggressiveThreshold` (default 90%), to
+  `aggressiveTrimToFraction` (default 25%). A session is never trimmed below its most recently used
+  instance. Push-based (the old-gen pool's collection-usage notification - no polling, no forced
+  GCs), throttled, logged loudly, surfaced on the overview page and in the startup banner. The valve
+  also subscribes to ERXLowMemoryHandler's LowMemory/StarvedMemory notifications. Opt out:
+  `er.extensions.ERXPageCachePressureValve.enabled=false`. Underneath, cache accesses now
+  synchronize on the cache map, properly fixing the overview page's cross-session iteration race.
+
+- **AjaxSlim: AjaxExpansion**
+  The disclosure-section element, rebuilt on native `<details>/<summary>`: four bindings (label,
+  expanded, id, class), instant client-side toggling, and open state that survives morphs of
+  enclosing containers - every toggle pings the server, so re-renders always carry the correct
+  open attribute. The legacy effect bindings and lazy content loading are gone.
+
+- **AjaxSlim: modal light dismiss + pre-adoption hardening**
+  AjaxModalContainer closes on a backdrop click (clicks inside the dialog's box, and drags that
+  merely end outside, never dismiss). The pre-adoption review's fix list landed: an open modal
+  survives morphs of enclosing regions (data-morph-ignore while open); a full-document ajax
+  response - the expired-session shape - is diverted to the error contract instead of being
+  swallowed or morphed into a container; AjaxSelfUpdatingContainer.action no longer fires when the
+  container is merely another trigger's render target; field observers no longer fire into a real
+  form submission; quoting and content-policy fixes throughout. Focus is preserved when tabbing out
+  of a field that triggers a morph, including multi-container updates.
+
+- **Development mode: /eval and /problems endpoints**
+  A JShell REPL inside the running app (`…/App.woa/eval?snippet=…`, loopback-only) and the rendered
+  binding-error boxes as JSON (`…/App.woa/problems`), aligned with ng-objects' dev endpoints. The
+  dev-loop machinery is consolidated under `er.extensions.dev`; apps report runtime and pid when
+  registering with the dev server; the launch banner prints external direct-connect URLs.
+
+- **Release dependency hygiene**
+  Parsley pinned to the released 1.6.0; the ng-core compile dependency severed by temporarily
+  vendoring four small dev-mode classes into `er.extensions.dev.ng` (each marked with its deletion
+  condition: ng-core >= 0.1.2 released and parsley re-pinned). The released artifacts depend only on
+  published artifacts.
+
+- **Elements & housekeeping**
+  Full `.apiext` adoption across AjaxSlim (typed constraints, defaults, deprecations,
+  unknown-attribute and content policies); the empty-update 500 explains itself; experimental
+  SVG-aware ERXWOImage (opt-in); ERXWOTextField cleanups; RouteTable names its unhandled-response
+  userInfo key; json 20260719, junit 6.1.3, vermilingua 1.1.7.
+
+
 ## 2026-07-03
 
 - **New default: ERXComponentActionRequestHandler - component-action dispatch rewritten as owned code**
