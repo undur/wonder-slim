@@ -8,8 +8,8 @@ import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
 
-import er.extensions.dev.ng.NGDevJson;
-import er.extensions.dev.ng.NGRuntimeProblems;
+import ng.dev.NGDevJson;
+import ng.dev.NGRuntimeProblems;
 
 /**
  * A development-only request handler that returns the runtime problems the application rendered

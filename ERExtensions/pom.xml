@@ -29,7 +29,17 @@
 		<dependency>
 			<groupId>is.rebbi.parsley</groupId>
 			<artifactId>parsley</artifactId>
-			<version>1.6.0</version>
+			<version>1.6.1-SNAPSHOT</version>
+		</dependency>
+		<!--
+			We compile directly against ng-core's ng.dev classes (NGDevLoopback, NGDevJson,
+			NGEvalSession — the shared dev-mode engine behind the eval/problems endpoints), so
+			the dependency is declared directly rather than relied on transitively via parsley.
+		-->
+		<dependency>
+			<groupId>is.rebbi.ng</groupId>
+			<artifactId>ng-core</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 		<!--
 			Dependency declared since JavaWebObjects needs it but fails to declare it as a
