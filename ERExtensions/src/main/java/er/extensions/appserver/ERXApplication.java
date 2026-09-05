@@ -44,6 +44,8 @@ import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSNotification;
+import com.webobjects.foundation.NSProperties;
+import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation._NSUtilities;
 import com.webobjects.woextensions.error.WOExceptionPage;
@@ -452,6 +454,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public final void didFinishLaunching(NSNotification n) {
 		didFinishLaunching();
 
+		// Logged here rather than from the constructor on purpose: log.* from the constructor
+		// doesn't reach the console yet (the log4j->stdout appender isn't attached at that point,
+		// though isWarnEnabled() already reads true), so a constructor-time warning is silently lost.
+		warnIfWODisplayExceptionPagesDisabled();
+
 		// Development only: announce our port to the Eclipse dev server so external
 		// tooling/agents can discover where this app runs by name (…/apps) rather than
 		// guessing. Best-effort and on a background thread — a missing dev server never
@@ -709,41 +716,59 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Workaround for WO 5.2 DirectAction lock-ups. As the super-implementation is empty,
-	 * it is fairly safe to override here to call the normal exception handling earlier than usual.
-	 * 
-	 * FIXME: Since this is a fix for WO 5.2, do we still need it in 5.4.3?
+	 * Route action request errors through our exception handling.
+	 *
+	 * WOApplication.handleActionRequestError() is an empty extension point (it returns null) that the action
+	 * request handlers call when an action throws. We answer it with handleException(), so a thrown direct
+	 * action - or a routed action, since our default request handler is action-based - gets the same treatment
+	 * as any other exception: exception ID, logging, ERXExceptionManager recording, the OOM check and a 500
+	 * exception page. Direct actions are the bulk of most applications' requests, so this path matters.
+	 *
+	 * WO 5.4.3 would in fact handle a null return from here on its own - _handleRequest falls back to
+	 * generateErrorResponse(), which calls handleException() too - BUT only when WODisplayExceptionPages is
+	 * true. Answering the hook ourselves makes that gauntlet moot: our error handling runs regardless of the
+	 * property, which is why disabling that property to hide stack traces from end users doesn't silently turn
+	 * off error handling here (it never did in this lineage). To control what users see, override
+	 * handleException() and return a friendly page in production. An explicit WODisplayExceptionPages=false
+	 * draws a startup warning (see warnIfWODisplayExceptionPagesDisabled()) precisely because it no longer
+	 * does the thing its name implies.
+	 *
+	 * The cleanup block turns on WHO created the context, which is the whole point of it:
+	 *
+	 * - Normally the action instance exists and hands us its own context (contextWasMissing == false). That
+	 *   context belongs to WO's action request handler, and 5.4.3's _handleRequest sleeps its components and
+	 *   checks its session back in inside finally blocks on every path, error paths included. So we must do
+	 *   nothing - touching it here would be a double check-in. This is also why the old
+	 *   InstantiationError/InvocationError special-casing is gone: it only duplicated that handler cleanup.
+	 *
+	 * - But when there is no action instance (contextWasMissing == true) there is no context to inherit, so we
+	 *   create one for handleException() to render into. That context is a local of ours - it never enters the
+	 *   request handler's frame, so the handler's finally blocks never see it and can't sleep its components or
+	 *   check its session back in. We are the only holder, so we do that cleanup ourselves. Leaving it dangling
+	 *   is exactly what used to strand awake components and (when the request carried a session) leak a session.
+	 *
+	 * contextWasMissing == true means actionInstance == null: the action class couldn't be found or couldn't be
+	 * instantiated (the InstantiationError / ClassNotFound family), NOT an exception thrown from a running
+	 * action. In that family saveSessionForContext() is often a near-no-op because a request that failed to
+	 * instantiate an action usually carries no session - but "usually" is not "always" (a direct action URL can
+	 * carry a session ID and still fail to instantiate), and the component-sleep half runs regardless, so both
+	 * lines are load-bearing in precisely the corner that reaches them.
 	 */
 	@Override
 	public WOResponse handleActionRequestError(WORequest aRequest, Exception exception, String reason, WORequestHandler aHandler, String actionClassName, String actionName, Class actionClass, WOAction actionInstance) {
 		WOContext context = actionInstance != null ? actionInstance.context() : null;
 
-		boolean didCreateContext = false;
+		final boolean contextWasMissing = context == null;
 
-		if (context == null) {
-			// AK: we provide the "handleException" with not much enough info to output a reasonable error message
+		if (contextWasMissing) {
 			context = createContextForRequest(aRequest);
-			didCreateContext = true;
 		}
 
 		final WOResponse response = handleException(exception, context);
 
-		// CH: If we have created a context, then the request handler won't know about it and can't put the components from
-		// handleException(exception, context) to sleep nor check-in any session that may have been checked out or created (e.g. from a component action URL.
-		//
-		// I'm not sure if the reasoning below was valid, or of the real cause of this deadlocking was creating the context
-		// above and then creating / checking out a session during handleException(exception, context). In any case, a zombie
-		// session was getting created with WO 5.4.3 and this does NOT happen with a pure WO application making the code above
-		// a prime suspect. I am leaving the code below in so that if it does something for prior versions, that will still work.
-		if (didCreateContext) {
-			context._putAwakeComponentsToSleep();
-			saveSessionForContext(context);
-		}
-
-		// AK: bugfix for #4186886 (Session store deadlock with DAs). The bug occurs in 5.2.3, I'm not sure about other versions.
-		// It may create other problems, but this one is very severe to begin with. The crux of the matter is that for certain exceptions, the DA request handler
-		// does not check sessions back in which leads to a deadlock in the session store when the session is accessed again.
-		else if (context.hasSession() && ("InstantiationError".equals(reason) || "InvocationError".equals(reason))) {
+		// Only clean up a context WE created; one handed to us by the action belongs to WO's request handler,
+		// which checks it back in itself (see the method javadoc).
+		if (contextWasMissing) {
 			context._putAwakeComponentsToSleep();
 			saveSessionForContext(context);
 		}
@@ -1010,6 +1035,26 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			logImportantMessage(e.getMessage());
 			e.printStackTrace();
 			System.exit(1);
+		}
+	}
+
+	/**
+	 * Warn if someone set WODisplayExceptionPages=false expecting it to hide stack traces from end users.
+	 *
+	 * In stock WO 5.4.3 that property gates whether action request errors reach handleException() at all
+	 * (via WODirectActionRequestHandler.generateErrorResponse()) - so disabling it doesn't merely hide the
+	 * exception page, it drops error handling for action requests entirely. In slim it does neither: our
+	 * handleActionRequestError() routes those errors to handleException() ourselves, regardless of the
+	 * property. So the property is effectively inert here, and setting it false to control what users see
+	 * won't have that effect. We don't touch the property or fail startup over it (it's a stock WO knob, not
+	 * ours to enforce) - just point out that it isn't doing what its owner likely intends, and where the
+	 * intent belongs instead.
+	 */
+	private static void warnIfWODisplayExceptionPagesDisabled() {
+		final String value = NSProperties.getProperty("WODisplayExceptionPages");
+
+		if (value != null && !NSPropertyListSerialization.booleanForString(value)) {
+			log.warn("WODisplayExceptionPages is set to '{}', but slim routes action request errors through handleException() regardless, so this property has no effect here. To hide stack traces from end users, override handleException() to return a friendly error page in production.", value);
 		}
 	}
 
