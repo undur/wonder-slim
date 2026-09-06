@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOComponentInstance" content="allowed" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Embeds an already constructed component instance. Where `<wo:MyComponent>` (and `WOSwitchComponent`) construct the component themselves by name - leaving bindings as the only way to initialize it and giving you no handle to it - this element takes the instance from you: construct it (`ERXComponentUtilities.instantiate(MyComponent.class, context())`), configure it, keep a reference, call methods on it, and bind it to `instance`.
+
+```html
+<wo:ERXWOComponentInstance instance="$inspector" selectedObject="$object">
+  ...optional wrapped content, rendered by the instance's <wo:content />...
+</wo:ERXWOComponentInstance>
+```
+
+Every other attribute is passed to the instance as a binding, exactly as on a normally embedded component. The instance is registered as a subcomponent of the page on first render, so it survives across requests (page cache, back button) like any embedded component. The binding is evaluated on every phase: bind a different instance and it is adopted immediately, the old one dropped from the page.
+
+Rules, enforced with an exception: `instance` must not evaluate to null; the instance must not be stateless (stateless instances are pooled and shared); an instance already embedded in another parent is refused. Construct with `ERXComponentUtilities.instantiate()`, not `pageWithName()` - the latter awakens the instance and flags it as a page.]]></doc>
+
+		<binding name="instance" required="true">
+			<pull><type>com.webobjects.appserver.WOComponent</type></pull>
+			<doc><![CDATA[The component instance to embed. Evaluated on every request-response phase; binding a different instance replaces the embedded component.]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

@@ -2,8 +2,11 @@ package er.extensions.components;
 
 import java.util.Enumeration;
 
+import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
+import com.webobjects.appserver.WOContext;
+import com.webobjects.appserver._private.WOComponentDefinition;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
@@ -353,5 +356,35 @@ public class ERXComponentUtilities {
 	 */
 	public static NSArray arrayValueForBinding(String name, NSDictionary<String, WOAssociation> associations, WOComponent component) {
 		return arrayValueForBinding(name, null, associations, component);
+	}
+
+	/**
+	 * Constructs a component instance for embedding with ERXWOComponentInstance.
+	 *
+	 * This is what WOComponentReference does when it embeds a component by name - look up the component definition,
+	 * construct an instance in the given context - and nothing more: the instance is NOT awakened and NOT flagged
+	 * as a page. That is the state ERXWOComponentInstance expects to adopt it in (it awakens the instance itself).
+	 * Don't use pageWithName() for this: it awakens the instance and marks it as a page, and adopting it then
+	 * awakens it a second time in the same request.
+	 *
+	 * @param componentClass The component's class. Resolved by simple class name, as component names are
+	 * @param context The context to construct the instance in - normally the constructing component's context()
+	 * @return A new, not yet awakened instance of the component
+	 */
+	public static <T extends WOComponent> T instantiate( Class<T> componentClass, WOContext context ) {
+		return componentClass.cast( instantiate( componentClass.getSimpleName(), context ) );
+	}
+
+	/**
+	 * See {@link #instantiate(Class, WOContext)} - for a component known by name only.
+	 */
+	public static WOComponent instantiate( String componentName, WOContext context ) {
+		final WOComponentDefinition definition = WOApplication.application()._componentDefinition( componentName, context._languages() );
+
+		if( definition == null ) {
+			throw new IllegalArgumentException( "No component named '%s' found".formatted( componentName ) );
+		}
+
+		return definition.componentInstanceInContext( context );
 	}
 }

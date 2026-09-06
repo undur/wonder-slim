@@ -1,0 +1,7 @@
+<div id="embedded" style="border: 1px solid #888; border-radius: 4px; padding: .6rem .9rem; margin: .8rem 0;">
+	<p>Label (set by the page at construction): <strong id="embeddedLabel"><wo:str value="$label" /></strong></p>
+	<p>Count (state owned by this instance): <strong id="embeddedCount"><wo:str value="$count" /></strong></p>
+	<p>Note (pulled from the page's binding): <span id="embeddedNote"><wo:str value="$note" /></span></p>
+	<p><wo:link action="$bumpAction" id="bumpLink">Bump from inside the component</wo:link></p>
+	<div id="wrappedContent"><wo:content /></div>
+</div>

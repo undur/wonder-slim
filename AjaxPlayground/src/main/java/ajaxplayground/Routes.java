@@ -14,6 +14,7 @@ import ajaxplayground.components.gallery.GalleryWonderSelect;
 import ajaxplayground.components.scenario.InvoiceSimple;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioCheckbox;
+import ajaxplayground.components.scenario.ScenarioComponentInstance;
 import ajaxplayground.components.scenario.ScenarioDropdownViewport;
 import ajaxplayground.components.scenario.ScenarioExpansion;
 import ajaxplayground.components.scenario.ScenarioFocus;
@@ -77,6 +78,7 @@ public class Routes {
 		routes.map( "/server-update-fragments", ScenarioServerUpdateFragments.class );
 		routes.map( "/checkbox", ScenarioCheckbox.class );
 		routes.map( "/tabs", ScenarioTabs.class );
+		routes.map( "/component-instance", ScenarioComponentInstance.class );
 
 		// Component gallery
 		routes.map( "/gallery-update-container", GalleryUpdateContainer.class );

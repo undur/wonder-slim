@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: embedding a constructed component instance</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 44rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+	</style>
+</head>
+<body>
+	<h1>Embedding a constructed component instance</h1>
+	<p>
+		The page constructs an <code>EmbeddedCounter</code> itself, sets its label through a plain setter
+		before it is ever rendered, keeps the reference, and embeds it with
+		<code>ERXWOComponentInstance</code>. The component's own action advances its counter (state that must
+		survive across requests); the page can also bump it directly by calling a method on the instance;
+		a <code>note</code> binding is passed alongside; and the instance can be replaced wholesale.
+	</p>
+
+	<p>Generation: <span id="generation"><wo:str value="$generation" /></span></p>
+
+	<wo:ERXWOComponentInstance instance="$boundInstance" note="$note">
+		<p id="wrapped">Wrapped content, rendered by the instance's wo:content.</p>
+	</wo:ERXWOComponentInstance>
+
+	<p>
+		<wo:link action="$bumpDirectlyAction" id="bumpDirectlyLink">Bump by calling a method on the instance</wo:link> ·
+		<wo:link action="$replaceAction" id="replaceLink">Replace the instance</wo:link> ·
+		<wo:link action="$breakWithStatelessAction" id="breakLink">Bind a stateless instance (must fail loudly)</wo:link>
+	</p>
+
+	<p><a href="/">Home</a></p>
+</body>
+</html>
