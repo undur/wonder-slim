@@ -113,8 +113,9 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 ## Short URLs: the application's request handler keys as top-level routes. Accepts
 ## /wa/..., /res/..., /wo/... as if the adaptor prefix (/cgi-bin/WebObjects/YourApp.woa)
 ## were there, and generates URLs without it - in development and deployment alike.
-## Long-form URLs keep working; explicit routes take precedence. Default false.
-# er.extensions.ERXApplication.shortURLs=true
+## Long-form URLs keep working; explicit routes take precedence. On by default;
+## set to false for an application that must keep generating long URLs.
+# er.extensions.ERXApplication.shortURLs=false
 
 ## Escape hatch for a front end that maps the application under a path of its own
 ## choosing: a pattern replaced in every generated URL, plus the front end's rule

@@ -256,7 +256,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		configureStatisticsLogging();
 
 		_urlRewriter = ERXURLRewriter.fromProperties();
-		_shortURLs = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.shortURLs", false);
+		_shortURLs = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.shortURLs", true);
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 
@@ -442,7 +442,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * ({@code /wa/…} for {@code /cgi-bin/WebObjects/App.woa/wa/…}). The long
 	 * form keeps working either way; explicit routes take precedence over the
 	 * shortcut. Property: {@code er.extensions.ERXApplication.shortURLs},
-	 * default false. See {@link ERXShortURLs}.
+	 * default true — the clean form is the default, an application that
+	 * must keep generating long URLs opts out. See {@link ERXShortURLs}.
 	 *
 	 * Why a property and not a front-end rewrite rule: the point is the same
 	 * URLs in development and in deployment, so a page's links work whether

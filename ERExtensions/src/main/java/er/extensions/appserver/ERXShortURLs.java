@@ -5,8 +5,8 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
- * Short URLs: a request handler key as a top-level route. With
- * {@code er.extensions.ERXApplication.shortURLs=true} the application accepts
+ * Short URLs: a request handler key as a top-level route. On by default
+ * ({@code er.extensions.ERXApplication.shortURLs}); the application accepts
  * {@code /wa/…}, {@code /res/…}, {@code /wo/…} — the first path segment naming
  * one of its registered request handlers — as if the adaptor prefix
  * ({@code /cgi-bin/WebObjects/App.woa}) were present, and generates its URLs
