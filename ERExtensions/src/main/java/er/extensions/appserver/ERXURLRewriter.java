@@ -3,56 +3,49 @@ package er.extensions.appserver;
 import er.extensions.foundation.ERXProperties;
 
 /**
- * Holds configuration for an application's URL rewriting
- * 
- * Hook to rewrite generated URLs. Invoked by ERXWOContext.
- * 
- * You can also set "er.extensions.replaceApplicationPath.pattern" to the pattern
- * to match and "er.extensions.replaceApplicationPath.replace" to the value to replace it with.
- * 
- * For example, in Properties: <code>
+ * An optional pattern-and-replacement applied to every generated URL (and
+ * redirect location). The escape hatch for a front end that maps the
+ * application under a path of its own choosing:
+ *
+ * <pre>
  * er.extensions.ERXApplication.replaceApplicationPath.pattern=/cgi-bin/WebObjects/YourApp.woa
  * er.extensions.ERXApplication.replaceApplicationPath.replace=/yourapp
- * </code>
- * 
- * and in Apache 2.2: <code>
- * RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [PT,L]
- * </code>
- * 
- * @param pattern The pattern to match from the URL
- * @param replacement The string to replace the matched pattern with
+ * </pre>
+ *
+ * with the matching front-end rule mapping {@code /yourapp/…} back. For the
+ * common case — the application's own request handlers as top-level routes —
+ * prefer {@link ERXShortURLs} ({@code er.extensions.ERXApplication.shortURLs}),
+ * which needs no pattern and works in both directions.
+ *
+ * History: Wonder's version of this also synthesized the pattern itself when
+ * {@code rewriteDirectConnect} was set in development mode, to strip the
+ * prefix from generated URLs while the matching prepend in
+ * {@code ERXApplication.createRequest()} put it back on incoming ones — the
+ * ancestor of short URLs, tied to development and to direct connect. Short
+ * URLs cover that in both modes, so this class is now only the pattern
+ * rewrite, and a null pattern makes it inert.
+ *
+ * @param pattern The regular expression to match in generated URLs, null for none
+ * @param replacement What to replace the first match with
  */
-
 public record ERXURLRewriter( String pattern, String replacement ) {
-	
-	public ERXURLRewriter( ERXApplication app ) {
-		String propPattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
-		String propReplacement = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.replace");
 
-		if (propPattern != null && propPattern.length() == 0) {
-			propPattern = null;
-		}
-
-		if (propPattern == null && app.shouldRewriteDirectConnectURL()) {
-			propPattern = "/cgi-bin/WebObjects/" + app.name() + app.applicationExtension();
-
-			if (propReplacement == null) {
-				propReplacement = "";
-			}
-		}
-		
-		this( propPattern, propReplacement );
-	}
-	
 	/**
-	 * @return Rewritten URL
+	 * @return The rewriter configured by the properties, or an inert one
+	 */
+	public static ERXURLRewriter fromProperties() {
+		final String pattern = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.pattern");
+		final String replacement = ERXProperties.stringForKey("er.extensions.ERXApplication.replaceApplicationPath.replace");
+		return new ERXURLRewriter( pattern == null || pattern.isEmpty() ? null : pattern, replacement == null ? "" : replacement );
+	}
+
+	/**
+	 * @return The URL with the first match of the pattern replaced; unchanged when no pattern is configured
 	 */
 	public String rewriteURL(final String url) {
-
-		if (url != null && pattern != null && replacement != null) {
+		if (url != null && pattern != null) {
 			return url.replaceFirst(pattern, replacement);
 		}
-
 		return url;
 	}
 }

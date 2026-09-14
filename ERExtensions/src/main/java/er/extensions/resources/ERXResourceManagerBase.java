@@ -83,10 +83,16 @@ public class ERXResourceManagerBase extends WOResourceManager {
 	}
 
 	/**
-	 * @return true if complete resource URLs should be generated in the given context
+	 * @return true if complete resource URLs should be generated in the given context.
+	 *
+	 * Wonder also answered false while its development-only direct-connect
+	 * rewrite was on, because that rewrite matched the relative form of the
+	 * application prefix and a complete URL would have escaped it. That rewrite
+	 * is gone; short URLs remove the prefix from complete URLs as well (see
+	 * ERXShortURLs.shorten), so the context's setting is the only input now.
 	 */
 	public static boolean _shouldGenerateCompleteResourceURL(WOContext context) {
-		return context instanceof ERXWOContext erxc && erxc._generatingCompleteResourceURLs() && !ERXApplication.erxApplication().shouldRewriteDirectConnectURL();
+		return context instanceof ERXWOContext erxc && erxc._generatingCompleteResourceURLs();
 	}
 
 	/**

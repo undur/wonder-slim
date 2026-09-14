@@ -12,6 +12,7 @@ import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
+import er.extensions.appserver.ERXShortURLs;
 import er.extensions.foundation.ERXHTTPUtilities;
 
 /**
@@ -72,25 +73,20 @@ public class RouteTable {
 		return pattern.equals( url );
 	}
 
+	/**
+	 * Handles the request against the route table.
+	 *
+	 * @param urlInParams true to take the route URL from the request's parameters/headers (see {@link #routeURLFromRequestParameters}) instead of the request URI
+	 */
 	public WOActionResults handle( final WORequest request, boolean urlInParams ) {
-		final String routeURL;
-		
-		if( urlInParams ) {
-			routeURL = routeURLFromRequestParameters( request );
-		}
-		else {
-			String uri = request.uri();
-			
-			// WO returns the URI including the query string, so we have to manually remove it ourselves
-			int questionMarkIndex = uri.indexOf('?');
-			
-			if( questionMarkIndex > 0 ) {
-				uri = uri.substring(0, questionMarkIndex);
-			}
+		return handle( request, urlInParams ? routeURLFromRequestParameters( request ) : routePath( request.uri(), null ) );
+	}
 
-			routeURL = uri;
-		}
-
+	/**
+	 * Handles the request against the given route path — the request URL as
+	 * the routes see it. See {@link #routePath(String, String)}.
+	 */
+	public WOActionResults handle( final WORequest request, final String routeURL ) {
 		final String ipAddress = ERXHTTPUtilities.ipAddressFromRequest(request);
 		final String userAgent = request.headerForKey( "user-agent" );
 
@@ -103,6 +99,31 @@ public class RouteTable {
 		}
 
 		return routeHandler.handle( new RouteInvocation( routeURL, request ) );
+	}
+
+	/**
+	 * The path routes match against: the request URI without its query string,
+	 * and without the application's own adaptor prefix when the request carried
+	 * one — so {@code /}, {@code /cgi-bin/WebObjects/App.woa/} and
+	 * {@code /Apps/WebObjects/App.woa/} all route as {@code /}, and an app
+	 * needn't register its routes once per adaptor prefix in circulation.
+	 *
+	 * @param uri The request URI as received
+	 * @param applicationPrefix The prefix the request carried ({@code <adaptor path>/App.woa}), null when it carried none
+	 */
+	static String routePath( final String uri, final String applicationPrefix ) {
+		String path = uri;
+		final int questionMark = path.indexOf( '?' );
+
+		if( questionMark >= 0 ) {
+			path = path.substring( 0, questionMark );
+		}
+
+		if( applicationPrefix != null && !applicationPrefix.isEmpty() && path.startsWith( applicationPrefix ) ) {
+			path = ERXShortURLs.shorten( path, applicationPrefix );
+		}
+
+		return path.isEmpty() ? "/" : path;
 	}
 
 	/**
@@ -119,6 +140,15 @@ public class RouteTable {
 		}
 
 		return url;
+	}
+
+	/**
+	 * @return true if a mapped route claims the given URL (the path, without a
+	 *         query string). Lets other URL handling — short URLs — defer to
+	 *         explicit routes.
+	 */
+	public boolean hasRouteFor( final String url ) {
+		return handlerForURL( url ) != null;
 	}
 
 	public void map( final String pattern, final RouteHandler routeHandler ) {

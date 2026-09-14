@@ -110,12 +110,16 @@ er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
 ## and post a notification to release cache memory. Default is 0, meaning no reserve.
 # er.extensions.ERXApplication.lowMemBufferSize=1024
 
-## If you want to rewrite your application URLs from /cgi-bin/WebObjects/YourApp.woa to
-## /yourapp, you can set the following properties and add the apache rewrite rule:
-## Apache 2.2:
-## RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [PT,L]
-## Apache 1.3:
-## RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [P,L]
+## Short URLs: the application's request handler keys as top-level routes. Accepts
+## /wa/..., /res/..., /wo/... as if the adaptor prefix (/cgi-bin/WebObjects/YourApp.woa)
+## were there, and generates URLs without it - in development and deployment alike.
+## Long-form URLs keep working; explicit routes take precedence. Default false.
+# er.extensions.ERXApplication.shortURLs=true
+
+## Escape hatch for a front end that maps the application under a path of its own
+## choosing: a pattern replaced in every generated URL, plus the front end's rule
+## mapping it back (Apache: RewriteRule ^/yourapp(.*)$ /cgi-bin/WebObjects/YourApp.woa$1 [PT,L]).
+## Prefer shortURLs above for the common case.
 # er.extensions.ERXApplication.replaceApplicationPath.pattern=/cgi-bin/WebObjects/YourApp.woa
 # er.extensions.ERXApplication.replaceApplicationPath.replace=/yourapp
 

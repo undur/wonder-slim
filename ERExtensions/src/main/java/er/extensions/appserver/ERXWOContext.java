@@ -1,11 +1,11 @@
 package er.extensions.appserver;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
+import com.webobjects.appserver.WODynamicURL;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSArray;
@@ -98,11 +98,46 @@ public class ERXWOContext extends ERXAjaxContext {
 		return _generateCompleteURLs;
 	}
 
+	/**
+	 * The single outbound seam: every URL the application generates — component
+	 * actions, direct actions, resources, the public {@code urlWithRequestHandlerKey}
+	 * — is assembled by this method in WOContext, so shortening and rewriting
+	 * here covers them all. Order matters: short URLs first (an exact removal of
+	 * the prefix the URL was built from), then the operator's
+	 * replaceApplicationPath pattern, which is written against whatever form
+	 * the app would otherwise produce. Redirect locations take the same path in
+	 * {@link ERXApplication#_newLocationForRequest(WORequest)}.
+	 *
+	 * The prefix removed is the one WOContext just composed the URL from —
+	 * this context's parsed request URL — not the application's adaptorPath():
+	 * behind a front end that rewrites into {@code /Apps/WebObjects/App.woa/…}
+	 * the two differ, and only the former is in the URL. A context whose URL
+	 * names no application (a dummy or freestyle one) falls back to the
+	 * application's own prefix.
+	 */
 	@Override
 	public String _urlWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString, boolean isSecure, int somePort) {
 		String url = super._urlWithRequestHandlerKey(requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort);
-		url = ERXApplication.erxApplication().urlRewriter().rewriteURL(url);
-		return url;
+		final ERXApplication app = ERXApplication.erxApplication();
+
+		if (app.shortURLs()) {
+			url = ERXShortURLs.shorten(url, generatedApplicationPrefix(app));
+		}
+
+		return app.urlRewriter().rewriteURL(url);
+	}
+
+	/**
+	 * @return {@code <adaptor prefix>/<App>.woa} as this context composes its URLs, see {@link #_urlWithRequestHandlerKey}
+	 */
+	private String generatedApplicationPrefix(final ERXApplication app) {
+		final WODynamicURL url = _url();
+
+		if (url == null || url.applicationName() == null || url.applicationName().isEmpty()) {
+			return app.applicationURLPrefix();
+		}
+
+		return ERXShortURLs.applicationPrefix(url.prefix(), url.applicationName(), app.applicationExtension());
 	}
 
 	/**
@@ -195,22 +230,14 @@ public class ERXWOContext extends ERXAjaxContext {
 		// We must create a request with a relative URL, as using an absolute URL makes the new 
 		// WOContext's URL absolute, and it is then unable to render relative paths. (Long story short.)
 		//
-		// Note: If you configured the adaptor's WebObjectsAlias to something other than the default, 
-		// make sure to also set your WOAdaptorURL property to match.  Otherwise, asking the new context 
+		// The relative URL is the application's own prefix (/cgi-bin/WebObjects/App.woa). Wonder used
+		// to build the complete cgiAdaptorURL() and take the path back out of it through java.net.URL;
+		// applicationURLPrefix() is that path directly, as WOAdaptorURL configures it.
+		//
+		// Note: If you configured the adaptor's WebObjectsAlias to something other than the default,
+		// make sure to also set your WOAdaptorURL property to match.  Otherwise, asking the new context
 		// the path to a direct action or component action URL will give an incorrect result.
-		String requestUrl = app.cgiAdaptorURL() + "/" + app.name() + app.applicationExtension();
-
-		try {
-			URL url = new URL(requestUrl);
-			requestUrl = url.getPath(); // Get just the part of the URL that is relative to the server root.
-		}
-		catch (MalformedURLException mue) {
-			// The above should never fail.  As a last resort, using the empty string will 
-			// look funny in the request, but still allow the context to use a relative url.
-			requestUrl = "";
-		}
-
-		final WORequest dummyRequest = app.createRequest("GET", requestUrl, "HTTP/1.1", null, null, null);
+		final WORequest dummyRequest = app.createRequest("GET", app.applicationURLPrefix(), "HTTP/1.1", null, null, null);
 
 		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.publicHostIsSecure", false)) {
 			dummyRequest.setHeader("on", "https");

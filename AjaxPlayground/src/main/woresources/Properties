@@ -19,3 +19,5 @@ log4j.rootCategory=INFO, A1
 log4j.appender.A1=org.apache.log4j.ConsoleAppender
 log4j.appender.A1.layout=er.extensions.logging.ERXPatternLayout
 log4j.appender.A1.layout.ConversionPattern=%d{MMM dd HH:mm:ss} %-5p %c - %m%n
+
+er.extensions.ERXApplication.shortURLs=true

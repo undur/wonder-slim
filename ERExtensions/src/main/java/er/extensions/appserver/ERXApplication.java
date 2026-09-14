@@ -110,6 +110,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final ERXURLRewriter _urlRewriter;
 
 	/**
+	 * Short URLs: request handler keys as top-level routes. See {@link #shortURLs()}.
+	 */
+	private final boolean _shortURLs;
+
+	/**
 	 * To support load balancing with mod_proxy
 	 */
 	private final ERXProxyBalancerConfig _proxyBalancerConfig;
@@ -250,7 +255,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		_urlRewriter = new ERXURLRewriter(this);
+		_urlRewriter = ERXURLRewriter.fromProperties();
+		_shortURLs = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.shortURLs", false);
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 
@@ -364,8 +370,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			httpVersion = "HTTP/1.0";
 		}
 
-		if (shouldRewriteDirectConnectURL()) {
-			url = adaptorPath() + name() + applicationExtension() + url;
+		// Short URLs are expanded here, before the request exists, because WORequest's
+		// constructor hands the URL to WODynamicURL, which locates the adaptor prefix by
+		// the "WebObjects" token and would otherwise take "wa" in /wa/Foo/bar for the
+		// application name. This is the only inbound seam every adaptor passes through.
+		// (Wonder's old "rewriteDirectConnect" prepend lived here too; it was development-
+		// only and missed the slash between adaptor path and application name.)
+		if (shortURLs()) {
+			url = ERXShortURLs.expand(url, applicationURLPrefix(), adaptorPath(), registeredRequestHandlerKeySet(), RouteTable.defaultRouteTable()::hasRouteFor);
 		}
 
 		return new ERXRequest(method, url, httpVersion, headers, content, info);
@@ -404,12 +416,67 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Called, for example, when refuse new sessions is enabled and the request contains an expired session.
-	 * If mod_rewrite is being used we don't want the adaptor prefix being part of the redirect.
+	 * The location WO redirects to when it won't serve a request itself — for
+	 * example when refusing new sessions and the request carries an expired
+	 * session. WOApplication builds it from the request's adaptor prefix and
+	 * application name (no extension), i.e. in long form, so it is shortened
+	 * and rewritten like every generated URL: otherwise a front end that only
+	 * knows the short (or rewritten) form would receive a redirect it can't
+	 * route. The prefix removed is the request's own, for the reason given at
+	 * {@link ERXShortURLs#applicationPrefix}.
 	 */
 	@Override
 	public String _newLocationForRequest(WORequest aRequest) {
-		return urlRewriter().rewriteURL(super._newLocationForRequest(aRequest));
+		String location = super._newLocationForRequest(aRequest);
+
+		if (shortURLs() && aRequest != null) {
+			location = ERXShortURLs.shorten(location, ERXShortURLs.applicationPrefix(aRequest.adaptorPrefix(), aRequest.applicationName(), ""));
+		}
+
+		return urlRewriter().rewriteURL(location);
+	}
+
+	/**
+	 * Whether the application accepts and generates short URLs — a request
+	 * handler key as the first path segment, no adaptor prefix
+	 * ({@code /wa/…} for {@code /cgi-bin/WebObjects/App.woa/wa/…}). The long
+	 * form keeps working either way; explicit routes take precedence over the
+	 * shortcut. Property: {@code er.extensions.ERXApplication.shortURLs},
+	 * default false. See {@link ERXShortURLs}.
+	 *
+	 * Why a property and not a front-end rewrite rule: the point is the same
+	 * URLs in development and in deployment, so a page's links work whether
+	 * the app is hit directly or through a proxy, with nothing to configure
+	 * per app on the front end. The property is read in the constructor, next
+	 * to the URL rewriter, once the application's properties are loaded.
+	 */
+	public boolean shortURLs() {
+		return _shortURLs;
+	}
+
+	/**
+	 * @return The prefix every long-form URL of this application starts with,
+	 *         {@code /cgi-bin/WebObjects/App.woa} by default: the adaptor path
+	 *         (which carries no trailing slash), the application name and
+	 *         extension
+	 */
+	public String applicationURLPrefix() {
+		return adaptorPath() + "/" + name() + applicationExtension();
+	}
+
+	/**
+	 * @return The registered request handler keys as a set, for the short-URL
+	 *         first-segment check. Built per request rather than cached: handlers
+	 *         may be registered after construction, and the array is small.
+	 */
+	private Set<String> registeredRequestHandlerKeySet() {
+		final Set<String> keys = new HashSet<>();
+
+		for (final Object key : registeredRequestHandlerKeys()) {
+			keys.add(String.valueOf(key));
+		}
+
+		return keys;
 	}
 
 	/**
@@ -922,24 +989,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * @return whether or not to rewrite direct connect URLs
-	 */
-	public boolean shouldRewriteDirectConnectURL() {
-		return isDirectConnectEnabled() && !isCachingEnabled() && isDevelopmentMode() && ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.rewriteDirectConnect", false);
-	}
-
-	/**
-	 * @return The directConnecURL, optionally rewritten.
+	 * @return The direct-connect URL — the application's own front door, so
+	 *         shortened with short URLs on but never passed through the URL
+	 *         rewriter, whose pattern describes a front end's mapping
 	 */
 	@Override
 	public String directConnectURL() {
 		final String url = super.directConnectURL();
-
-		if (shouldRewriteDirectConnectURL()) {
-			return urlRewriter().rewriteURL(url);
-		}
-
-		return url;
+		return shortURLs() ? ERXShortURLs.shorten(url, applicationURLPrefix()) : url;
 	}
 
 	/**
