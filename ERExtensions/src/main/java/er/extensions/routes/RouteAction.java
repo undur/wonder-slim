@@ -31,20 +31,11 @@ public class RouteAction extends WODirectAction {
 	@Override
 	public WOActionResults defaultAction() {
 
-		final WOApplication application = WOApplication.application();
-		final WODynamicURL url = context()._url();
-
-		// The application prefix the request actually carried, so the routes can match the
-		// path beneath it — captured before the fixup below overwrites it. A freestyle URL
-		// parses to no application name (its whole path lands in the prefix) and carries none.
-		final String carriedPrefix = carriedApplicationPrefix( url, request().uri(), application.applicationExtension() );
-
-		// A freestyle request URL won't have an adaptor prefix or an application name, so we have to set it explicitly ourselves to ensure proper dynamic URL generation
-		url.setPrefix(application.adaptorPath());
-
-		if( url.applicationName() == null || url.applicationName().isEmpty() ) {
-			url.setApplicationName(application.name());
-		}
+		// The application prefix the request actually carried, so the routes can match the path
+		// beneath it. Read off the request's own parsed URL, not the context's: the context's
+		// URL base is normalised for URL generation (ERXWOContext._setRequest) and no longer says
+		// what arrived. A freestyle URL parses to no application name and carries no prefix.
+		final String carriedPrefix = carriedApplicationPrefix( request()._uriDecomposed(), request().uri(), WOApplication.application().applicationExtension() );
 
 		return RouteTable.defaultRouteTable().handle( request(), RouteTable.routePath( request().uri(), carriedPrefix ) );
 	}
