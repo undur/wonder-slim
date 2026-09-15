@@ -35,6 +35,14 @@ public class RouteAction extends WODirectAction {
 		// beneath it. Read off the request's own parsed URL, not the context's: the context's
 		// URL base is normalised for URL generation (ERXWOContext._setRequest) and no longer says
 		// what arrived. A freestyle URL parses to no application name and carries no prefix.
+		//
+		// NOTE for the day routing is split out as a library of its own: this action used to fix
+		// up the context's URL base itself (setPrefix(adaptorPath) + a missing application name),
+		// so a freestyle request generated correct URLs. That fixup now lives in
+		// ERXWOContext._setRequest, for every context, and is deliberately NOT duplicated here.
+		// Standing alone, RouteAction would have to do it again - after capturing carriedPrefix,
+		// and on the context's URL, never the request's - and ERXShortURLs.applicationPrefix(),
+		// which carriedApplicationPrefix() below relies on, goes along or gets inlined.
 		final String carriedPrefix = carriedApplicationPrefix( request()._uriDecomposed(), request().uri(), WOApplication.application().applicationExtension() );
 
 		return RouteTable.defaultRouteTable().handle( request(), RouteTable.routePath( request().uri(), carriedPrefix ) );
