@@ -46,11 +46,6 @@
   firing for unchanged attributes, and CSS-special characters in ids; adds a console warning for
   duplicate ids. The full playground bridge suite passes before and after.
 
-- **Release dependency hygiene**
-  As in 8.0.4: parsley pinned to the released 1.6.0 and the ng-core compile dependency severed by
-  vendoring four small dev-mode classes into `er.extensions.dev.ng` (each marked with its deletion
-  condition). The released artifacts depend only on published artifacts.
-
 - **Housekeeping**
   slf4j 2.0.19; `docs/LOGGING.md` documents the logging setup and its known traps (notably that
   `log.*` from the application constructor is silently dropped - log from `didFinishLaunching()`).
@@ -100,12 +95,6 @@
   binding-error boxes as JSON (`…/App.woa/problems`), aligned with ng-objects' dev endpoints. The
   dev-loop machinery is consolidated under `er.extensions.dev`; apps report runtime and pid when
   registering with the dev server; the launch banner prints external direct-connect URLs.
-
-- **Release dependency hygiene**
-  Parsley pinned to the released 1.6.0; the ng-core compile dependency severed by temporarily
-  vendoring four small dev-mode classes into `er.extensions.dev.ng` (each marked with its deletion
-  condition: ng-core >= 0.1.2 released and parsley re-pinned). The released artifacts depend only on
-  published artifacts.
 
 - **Elements & housekeeping**
   Full `.apiext` adoption across AjaxSlim (typed constraints, defaults, deprecations,
