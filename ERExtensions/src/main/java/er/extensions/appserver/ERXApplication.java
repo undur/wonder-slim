@@ -566,25 +566,39 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		System.out.println( String.format( "%-37s : %s (unused: unified cache handles all restores)", "WO page fragment cache", pageFragmentCacheSize() ) );
 		System.out.println( String.format( "%-37s : %s", "memory pressure valve", _pageCachePressureValve != null ? _pageCachePressureValve.bannerDescription() : "disabled" ) );
 
-		if( isDevelopmentMode() && isDirectConnectEnabled()) {
-			// To make the URL conveniently double clickable, we put it on it's own line.
-			// We force the host to "localhost" because directConnectURL() typically resolves to
-			// the machine's mDNS name (e.g. my-macbook.local) which is awkward to connect to
-			// from the same box (firewall prompts, mDNS round-trips). localhost always works.
-			// WOApplication.port() can be -1 here (it's only set when -WOPort was passed); the
-			// bound port lives on the adaptor itself. This is how WO's own directConnectURL()
-			// sources the port (see WOApplication.directConnectURLForAdaptor).
-			final String url = "http://localhost:" + defaultAdaptor().port();
+		// Last, and in every mode, because it's what you reach for first in a log: the name this
+		// application answers to and where it can be reached. The name is what WOApplication.name()
+		// resolved - the -WOApplicationName wotaskd passes for a deployed instance, else the bundle's
+		// name - and the bundle name is shown alongside whenever the two differ, since URL generation
+		// fills in name() for requests that carry no application name and a mismatch is otherwise
+		// invisible until a URL fails to route.
+		System.out.println();
+		System.out.println( "================= APPLICATION ==================" );
 
-			System.out.println();
-			System.out.println( "============= DIRECT CONNECT URLS ==============" );
-			System.out.println( url );
+		final String bundleName = NSBundle.mainBundle() != null ? NSBundle.mainBundle().name() : null;
 
-			// The jetty adaptor binds all interfaces (its connector sets no host), so the app
-			// is just as reachable from other devices on the network — a phone on the same
-			// Wi-Fi, say. Print those URLs too: IPv4 on interfaces that are up, loopback and
-			// link-local excluded (neither is usefully clickable from another device).
-			// Address enumeration is a convenience and must never disturb startup.
+		if( bundleName == null || bundleName.equals( name() ) ) {
+			System.out.println( String.format( "%-15s : %s", "name", name() ) );
+		}
+		else {
+			System.out.println( String.format( "%-15s : %s (deployed name; the bundle is %s)", "name", name(), bundleName ) );
+		}
+
+		if( isDirectConnectEnabled() ) {
+			// One URL per line so each is conveniently double clickable. The host is forced to
+			// "localhost" because directConnectURL() typically resolves to the machine's mDNS name
+			// (e.g. my-macbook.local), which is awkward to connect to from the same box (firewall
+			// prompts, mDNS round-trips). WOApplication.port() can be -1 here (it's only set when
+			// -WOPort was passed); the bound port lives on the adaptor itself, which is how WO's own
+			// directConnectURL() sources it (see WOApplication.directConnectURLForAdaptor).
+			final int port = defaultAdaptor().port();
+			System.out.println( String.format( "%-15s : http://localhost:%s", "direct connect", port ) );
+
+			// The jetty adaptor binds all interfaces (its connector sets no host), so the app is
+			// just as reachable from other devices on the network - a phone on the same Wi-Fi, say.
+			// Print those URLs too: IPv4 on interfaces that are up, loopback and link-local excluded
+			// (neither is usefully clickable from another device). Address enumeration is a
+			// convenience and must never disturb startup.
 			try {
 				final var interfaces = java.net.NetworkInterface.getNetworkInterfaces();
 
@@ -601,13 +615,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 						final var address = addresses.nextElement();
 
 						if( address instanceof java.net.Inet4Address && !address.isLoopbackAddress() && !address.isLinkLocalAddress() ) {
-							System.out.println( "http://" + address.getHostAddress() + ":" + defaultAdaptor().port() );
+							System.out.println( String.format( "%-15s : http://%s:%s", "", address.getHostAddress(), port ) );
 						}
 					}
 				}
 			}
 			catch( Exception e ) {
-				log.debug( "Could not enumerate network interfaces for the direct connect banner", e );
+				log.debug( "Could not enumerate network interfaces for the startup banner", e );
 			}
 		}
 
