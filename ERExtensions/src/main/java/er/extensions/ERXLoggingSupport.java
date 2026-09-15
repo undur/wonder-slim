@@ -14,6 +14,15 @@ public class ERXLoggingSupport {
 		runLoggingBridgeMethod("configureLoggingWithSystemProperties");
 	}
 
+	/**
+	 * Installs a plain console appender (INFO) if the root logger has none yet, so that logging works
+	 * from the first line of main() - before the Properties cascade has been read and the real
+	 * configuration applied by {@link #configureLoggingWithSystemProperties()}, which replaces it.
+	 */
+	public static void configureDefaultLogging() {
+		runLoggingBridgeMethod("configureDefaultLogging");
+	}
+
 	public static void reInitConsoleAppenders() {
 		runLoggingBridgeMethod("reInitConsoleAppenders");
 	}

@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -15,6 +17,23 @@ public class ERXTemporaryLoggingBridge {
 
 	public static void configureLoggingWithSystemProperties() {
 		ERXLogger.configureLoggingWithSystemProperties();
+	}
+
+	/**
+	 * A console appender at INFO on the root logger, so early logging (WO's own initialization,
+	 * framework principals, the application constructor) is neither dropped nor greeted with log4j's
+	 * "No appenders could be found". configureLogging() resets and replaces it with the configured
+	 * appenders once the Properties cascade is loaded.
+	 *
+	 * Unconditional: log4j may already have auto-configured itself from a log4j.properties some jar
+	 * on the classpath happens to ship, which would give the first lines of the log a third format.
+	 * configureLogging() discards such a configuration anyway, so it is discarded here too - the
+	 * Properties cascade is the only logging configuration this stack honours.
+	 */
+	public static void configureDefaultLogging() {
+		LogManager.resetConfiguration();
+		Logger.getRootLogger().addAppender( new ConsoleAppender( new ERXPatternLayout( "%d{MMM dd HH:mm:ss} %-5p %c - %m%n" ), "System.out" ) );
+		Logger.getRootLogger().setLevel( Level.INFO );
 	}
 
 	/**

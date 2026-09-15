@@ -43,6 +43,7 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
@@ -165,10 +166,36 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public static void main(String[] argv, Class applicationClass) {
 		_wasERXApplicationMainInvoked = true;
 
+		// A console appender from the very first line, so nothing logged during WO's and our own
+		// initialization is dropped (log4j's "No appenders could be found" - and, worse, silently lost
+		// constructor-time output). The real configuration from the Properties cascade replaces it
+		// once the bundles have loaded (ERXExtensions.bundleDidLoad -> configureLoggingWithSystemProperties).
+		ERXLoggingSupport.configureDefaultLogging();
+
 		ERXKVCReflectionHack.enable();
 		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
 		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
 		ERXShutdownHook.initERXShutdownHookIfEnabled();
+
+		// WO's own debug chatter - WOProperties.printWODefaults() dumping every WO default as
+		// "[date] <main> WOxxx=yyy", "Application project found", "Cannot use rapid turnaround" and
+		// friends - is emitted through NSLog.debug at the Informational level during WOApplication's
+		// own initialization, before our logging is configured. The properties report and the startup
+		// banner cover what matters from it. Setting the level here would not stick: WO re-derives it
+		// from NSDebugLevel / WODebuggingEnabled inside _initWOApp, just before the dump. So the debug
+		// logger installed here clamps whatever level WO later sets on it; ERXLogger carries the
+		// clamped level over to the log4j bridge when logging is configured. er.extensions.NSLog.debugLevel
+		// (0-3, the NSLog.DebugLevel* values; a -D system property, since this runs before WO reads its
+		// own arguments) raises the cap when WO's debug output is wanted.
+		final int nsLogDebugCap = Integer.getInteger("er.extensions.NSLog.debugLevel", NSLog.DebugLevelCritical);
+
+		NSLog.setDebug(new NSLog.PrintStreamLogger(System.out) {
+			@Override
+			public void setAllowedDebugLevel(int level) {
+				super.setAllowedDebugLevel(Math.min(level, nsLogDebugCap));
+			}
+		});
+		NSLog.debug.setAllowedDebugLevel(nsLogDebugCap);
 
 		WOApplication.main(argv, applicationClass);
 	}
@@ -177,8 +204,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
 		ERXLoggingSupport.reInitConsoleAppenders();
-
-		log.info("pid: " + ProcessHandle.current().pid() );
 
 		// Register and initialize the parsley template parser, with development features
 		// (inline errors, the controls strip) on in development mode and off in production.
@@ -522,9 +547,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public final void didFinishLaunching(NSNotification n) {
 		didFinishLaunching();
 
-		// Logged here rather than from the constructor on purpose: log.* from the constructor
-		// doesn't reach the console yet (the log4j->stdout appender isn't attached at that point,
-		// though isWarnEnabled() already reads true), so a constructor-time warning is silently lost.
+		// Logged post-launch so it lands after the configured logging is in place and near the
+		// startup banner, where a misconfiguration is actually read.
 		warnIfWODisplayExceptionPagesDisabled();
 
 		// Development only: announce our port to the Eclipse dev server so external
@@ -583,6 +607,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		else {
 			System.out.println( String.format( "%-15s : %s (deployed name; the bundle is %s)", "name", name(), bundleName ) );
 		}
+
+		System.out.println( String.format( "%-15s : %s", "pid", ProcessHandle.current().pid() ) );
 
 		if( isDirectConnectEnabled() ) {
 			// One URL per line so each is conveniently double clickable. The host is forced to

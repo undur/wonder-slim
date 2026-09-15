@@ -353,7 +353,7 @@ public class ERXProperties {
     		if(propertiesPaths.containsObject(path)) {
     			log.error("Path was already included: {}", path);
     		}
-    		projectsInfo.addObject("  " + info +" -> " + path);
+    		projectsInfo.addObject(info + "\t" + path);
     		propertiesPaths.addObject(path);
     	}
     }
@@ -370,6 +370,21 @@ public class ERXProperties {
 
         	String propertyPath = pathForResourceNamed("Properties", frameworkName, null);
         	addIfPresent(frameworkName + ".framework", propertyPath, propertiesPaths, projectsInfo);
+
+        	// A framework deployed as a jar has no file path for its Properties - the bundle loads them
+        	// itself - but the startup report should still list it and know which keys it set, so
+        	// it goes into the report (projectsInfo) by URL, and deliberately NOT into propertiesPaths,
+        	// which drives loading.
+        	if (propertyPath == null) {
+        		NSBundle bundle = NSBundle.bundleForName(frameworkName);
+        		if (bundle != null && bundle.isJar()) {
+        			String resourcePath = bundle.resourcePathForLocalizedResourceNamed("Properties", null);
+        			URL url = resourcePath != null ? bundle.pathURLForResourcePath(resourcePath) : null;
+        			if (url != null) {
+        				projectsInfo.addObject(frameworkName + ".framework\t" + url);
+        			}
+        		}
+        	}
 
         	/** Properties.dev -- per-Framework-dev properties 
         	 * This adds support for Properties.dev in your Frameworks new load order will be
@@ -441,18 +456,106 @@ public class ERXProperties {
     	addIfPresent("Application-User Properties", applicationUserPropertiesPath, propertiesPaths, projectsInfo);
 
         /*  Report the result */
-		if (reportLoggingEnabled && projectsInfo.count() > 0 && log.isInfoEnabled()) {
-			StringBuilder message = new StringBuilder();
-			message.append("\n\n").append("ERXProperties has found the following Properties files: \n");
-			message.append(projectsInfo.componentsJoinedByString("\n"));
-			message.append('\n');
-			message.append("ERXProperties currently has the following properties:\n");
-			message.append(ERXProperties.logString(NSProperties._getProperties()));
-			log.info(message.toString());
+		if (reportLoggingEnabled && projectsInfo.count() > 0) {
+			printStartupReport(propertiesPaths, projectsInfo);
 		}
 
     	return propertiesPaths.immutableClone();
     }
+
+	/**
+	 * The startup report on configuration: the Properties files in the order they were loaded, then
+	 * every property in effect - alphabetically, with the ones a Properties file or the command line
+	 * set marked, so the application's own configuration stands out from WebObjects' and the JVM's
+	 * defaults while those stay available (the effective session timeout, worker thread count, caching
+	 * flag or handler keys are as operationally relevant as anything the application set itself).
+	 * Printed in the same banner style as the rest of the startup output.
+	 *
+	 * Values whose key looks like a secret are masked - see {@link #isSecretKey(String)}. The
+	 * classpath is the one value printed one entry per line: as a single line it is unreadable and
+	 * dwarfs everything else.
+	 */
+	private static void printStartupReport(NSArray<String> propertiesPaths, NSArray<String> projectsInfo) {
+		final StringBuilder out = new StringBuilder();
+
+		out.append("============== PROPERTIES FILES ================\n");
+		out.append("(loaded in this order - a later file overrides an earlier one)\n");
+
+		for (String entry : projectsInfo) {
+			final int tab = entry.indexOf('\t');
+			final String info = tab == -1 ? entry : entry.substring(0, tab);
+			final String path = tab == -1 ? "" : entry.substring(tab + 1);
+			out.append(String.format("%-34s : %s%n", info, path));
+		}
+
+		// The keys the files (on disk or inside a framework jar) and the command line set explicitly
+		final java.util.Set<String> explicit = new java.util.HashSet<>();
+
+		for (String entry : projectsInfo) {
+			final int tab = entry.indexOf('\t');
+			final String path = tab == -1 ? entry : entry.substring(tab + 1);
+			final Properties fileProperties = new Properties();
+
+			try (java.io.InputStream in = path.contains("!/") || path.startsWith("jar:") ? new URL(path).openStream() : new FileInputStream(path)) {
+				fileProperties.load(in);
+			}
+			catch (IOException e) {
+				log.warn("Could not read {} for the startup report", path, e);
+				continue;
+			}
+
+			explicit.addAll(fileProperties.stringPropertyNames());
+		}
+
+		explicit.addAll(ERXConfigurationManager.defaultManager().commandLineArgumentProperties().stringPropertyNames());
+
+		final TreeMap<String, String> effective = new TreeMap<>();
+
+		for (String key : NSProperties._getProperties().stringPropertyNames()) {
+			effective.put(key, effectiveValue(key));
+		}
+
+		out.append('\n');
+		out.append("================= PROPERTIES ===================\n");
+		out.append("(* = set by a Properties file or the command line; the rest are WebObjects and JVM defaults)\n");
+
+		for (Map.Entry<String, String> entry : effective.entrySet()) {
+			final String key = entry.getKey();
+			final String marker = explicit.contains(key) ? "*" : " ";
+
+			if (isSecretKey(key)) {
+				out.append(String.format("%s %-46s = ********%n", marker, key));
+			}
+			else if ("java.class.path".equals(key)) {
+				final String[] elements = entry.getValue().split(java.util.regex.Pattern.quote(File.pathSeparator));
+				out.append(String.format("%s %-46s = %s%n", marker, key, elements.length > 0 ? elements[0] : ""));
+
+				for (int i = 1; i < elements.length; i++) {
+					out.append(String.format("  %-46s   %s%n", "", elements[i]));
+				}
+			}
+			else {
+				out.append(String.format("%s %-46s = %s%n", marker, key, entry.getValue().replace("\n", "\\n")));
+			}
+		}
+
+		System.out.print(out);
+	}
+
+	private static String effectiveValue(String key) {
+		final String value = NSProperties.getProperty(key);
+		return value == null ? "" : value;
+	}
+
+	/**
+	 * @return true if the key names something that must not be written to a log: passwords, API keys,
+	 *         tokens, secrets and credentials of any spelling
+	 */
+	public static boolean isSecretKey(String key) {
+		return key != null && SECRET_KEY_PATTERN.matcher(key).find();
+	}
+
+	private static final java.util.regex.Pattern SECRET_KEY_PATTERN = java.util.regex.Pattern.compile("(?i)(password|passwd|secret|api[._-]?key|access[._-]?key|private[._-]?key|token|credential)");
 
     /** 
      * 	Making it possible to use Properties File in the Application more
@@ -587,8 +690,8 @@ public class ERXProperties {
     	Map<String, String> props = new TreeMap<>();
     	for (Enumeration e = properties.keys(); e.hasMoreElements();) {
     		String key = (String) e.nextElement();
-    		if (protectValues && key.toLowerCase().contains("password")) {
-    			props.put(key, "<deleted for log>");
+    		if (protectValues && isSecretKey(key)) {
+    			props.put(key, "********");
     		}
     		else {
     			props.put(key, String.valueOf(properties.getProperty(key)));

@@ -199,7 +199,7 @@ public class ERXLogger extends Logger {
 		if (ERXLogger.log == null) {
 			ERXLogger.log = Logger.getLogger(Logger.class);
 		}
-		ERXLogger.log.info("Updated the logging configuration with the current system properties.");
+		ERXLogger.log.debug("Updated the logging configuration with the current system properties.");
 		if (ERXLogger.log.isDebugEnabled()) {
 			ERXLogger.log.debug("log4j.loggerFactory: " + System.getProperty("log4j.loggerFactory"));
 			ERXLogger.log.debug("Factory: " + ERXLogger.factory);

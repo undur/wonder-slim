@@ -135,7 +135,7 @@ public class ERXFileNotificationCenter {
 		Objects.requireNonNull(file, "Attempting to register a null file." );
 
 		if (!_isDevelopmentMode && checkFilesPeriod() == 0) {
-			log.info("Registering an observer when file checking is disabled (WOCaching must be " +
+			log.debug("Registering an observer when file checking is disabled (WOCaching must be " +
 					"disabled or the er.extensions.ERXFileNotificationCenter.CheckFilesPeriod " +
 					"property must be set).  This observer will not ever by default be called: {}", file);
 		}

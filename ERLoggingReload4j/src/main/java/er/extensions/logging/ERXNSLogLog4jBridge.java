@@ -37,6 +37,11 @@ public class ERXNSLogLog4jBridge extends NSLog.PrintStreamLogger {
 			if( obj == null ) {
 				obj = "";
 			}
+			// WO's NSLog.out/err/debug users write blank lines for spacing (appendln() with no
+			// argument); as log events those are just an empty "WARN NSLog -" line. Drop them.
+			if( obj.toString().isBlank() ) {
+				return;
+			}
 			switch( type ) {
 			case OUT:
 				log.info( obj.toString() );
@@ -70,7 +75,11 @@ public class ERXNSLogLog4jBridge extends NSLog.PrintStreamLogger {
 		super.setAllowedDebugLevel( debugLevel );
 
 		if( type == DEBUG && !ignoreNSLogSettings() ) {
-			log.setLevel( debugLevel != NSLog.DebugLevelOff ? Level.DEBUG : Level.INFO );
+			// NSLog.debug output becomes visible only from the Informational level up. WO writes a
+			// fair amount of unguarded debug chatter (its startup URLs, "Waiting for requests...");
+			// at Off or Critical - ERXApplication.main caps it at Critical by default - that stays
+			// out of the log, where the startup banner already says what matters.
+			log.setLevel( debugLevel >= NSLog.DebugLevelInformational ? Level.DEBUG : Level.INFO );
 		}
 	}
 

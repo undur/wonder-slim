@@ -184,7 +184,13 @@ public abstract class ERXFrameworkPrincipal {
      * Log to System.out while we don't have the logging system set up.
      */
     private static final void log( Object s ) {
-    	String message = s == null ? "[null]" : s.toString();
-    	System.out.println( " == ERXFrameworkPrincipal.log == > " + message);
+    	// Opt-in: the framework lifecycle trace is only interesting when debugging initialization
+    	// order, and it runs before logging is configured, hence System.out.
+    	if( LOG_LIFECYCLE ) {
+    		String message = s == null ? "[null]" : s.toString();
+    		System.out.println( " == ERXFrameworkPrincipal == > " + message);
+    	}
     }
+
+    private static final boolean LOG_LIFECYCLE = Boolean.parseBoolean( System.getProperty( "er.extensions.ERXFrameworkPrincipal.logLifecycle", "false" ) );
 }
