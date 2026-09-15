@@ -1,5 +1,61 @@
 # Changelog
 
+## 2026-09-15 (8.0.5)
+
+- **Short URLs, on by default**
+  An application now accepts `/wa/…`, `/wo/…` and `/res/…` as if the adaptor prefix were present, and
+  generates its URLs without it - the same URLs in development and deployment. The long form keeps
+  working and explicit routes take precedence. Both directions are pure functions of the application's
+  URL prefix and its registered handler keys (ERXShortURLs), hooked in at `createRequest()` inbound and
+  `_urlWithRequestHandlerKey()` / `_newLocationForRequest()` outbound; the prefix removed outbound is the
+  one the request was built from, so a front end rewriting into `/Apps/WebObjects/App.woa/…` is answered
+  in kind. Opt out: `er.extensions.ERXApplication.shortURLs=false`.
+
+- **Routes match beneath any adaptor prefix**
+  `/`, `/cgi-bin/WebObjects/App.woa/` and `/Apps/WebObjects/App.woa/` all route as `/`, so an
+  application no longer registers its routes once per prefix in circulation.
+
+- **URL rewriting reduced to the one escape hatch**
+  ERXURLRewriter is now only `er.extensions.ERXApplication.replaceApplicationPath.pattern` /
+  `.replace` (the unprefixed `er.extensions.replaceApplicationPath.*` spelling is gone). The
+  development-only `rewriteDirectConnect` is removed - it never produced a parseable URL - and the
+  direct connect URL is shortened but never passed through the front-end rewriter.
+
+- **ERXWOComponentInstance: embed a constructed component instance**
+  `<wo:ERXWOComponentInstance instance="$inspector" selectedObject="$object" />` embeds an instance the
+  page constructed and configured itself - bindings, wrapped content, page caching and awake/sleep all as
+  for a normally embedded component - so a page can hold a typed handle to its subcomponent and call
+  methods on it instead of passing everything through bindings. The `instance` binding is re-evaluated
+  every phase; a different instance replaces the embedded one and the old one leaves the page. Null,
+  stateless (pooled) and already-embedded-elsewhere instances are refused with an exception. Construct
+  with `ERXComponentUtilities.instantiate(MyComponent.class, context())`, which - unlike
+  `pageWithName()` - neither awakens the instance nor flags it as a page. Replaces the experimental
+  ERXSwitchComponentInstance (nothing switched; the binding was `componentInstance`).
+
+- **handleActionRequestError() rewritten to its minimal honest form**
+  The override that routed direct-action errors into `handleException()` shed its WO 5.2-era baggage
+  (the InstantiationError/InvocationError session check-in that 5.4.3's own finally blocks made
+  redundant) but stays: answering WO's empty hook ourselves is what keeps action-request error handling
+  independent of `WODisplayExceptionPages` - in stock WO that property does not hide exception pages, it
+  skips `handleException()` for action errors entirely. An explicit `WODisplayExceptionPages=false` now
+  draws a startup warning saying so. To hide stack traces from end users, override `handleException()`.
+
+- **AjaxSlim: Idiomorph 0.7.4 -> 0.8.0**
+  Drop-in update of the vendored morph engine: fixes the focus-restoration TypeError on elements
+  without text selection, namespace preservation for recreated SVG elements, `beforeAttributeUpdated`
+  firing for unchanged attributes, and CSS-special characters in ids; adds a console warning for
+  duplicate ids. The full playground bridge suite passes before and after.
+
+- **Release dependency hygiene**
+  As in 8.0.4: parsley pinned to the released 1.6.0 and the ng-core compile dependency severed by
+  vendoring four small dev-mode classes into `er.extensions.dev.ng` (each marked with its deletion
+  condition). The released artifacts depend only on published artifacts.
+
+- **Housekeeping**
+  slf4j 2.0.19; `docs/LOGGING.md` documents the logging setup and its known traps (notably that
+  `log.*` from the application constructor is silently dropped - log from `didFinishLaunching()`).
+
+
 ## 2026-09-04 (8.0.4)
 
 - **Page cache reuse measurement**
