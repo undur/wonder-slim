@@ -34,6 +34,7 @@
 	<h2>Server push</h2>
 	<ul>
 		<li><a href="/sse"><strong>Server-sent events</strong></a> - an <code>EventSource</code> on the app's <code>/sse/clock</code> route streams a clock tick a second to every subscriber (wo-adaptor-jetty-push). Direct-connect it tests the adaptor's streaming responses; through the front-end proxy it tests unbuffered pass-through.</li>
+		<li><a href="/datastar"><strong>Datastar over SSE</strong></a> - a page driven entirely by Datastar: one long-lived feed the server pushes state through, and every button its own short SSE stream answering with element and signal patches. Shared state, so open it twice.</li>
 		<li><a href="/websocket"><strong>WebSocket echo</strong></a> - opens a socket to the app's <code>/ws/echo</code> endpoint (wo-adaptor-jetty) and echoes what you type. Direct-connect it tests the adaptor's WebSocket support; through the front-end proxy it tests WebSocket tunneling.</li>
 	</ul>
 

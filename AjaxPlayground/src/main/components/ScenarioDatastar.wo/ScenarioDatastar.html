@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: Datastar over SSE</title>
+	<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.3/bundles/datastar.js"></script>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		h2 { font-size: 1.1rem; margin: 0 0 .5rem 0; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+		.btn:disabled { background: #aaa; cursor: default; }
+		.btn.quiet { background: #718096; }
+		.big { font-size: 2.5rem; font-family: ui-monospace, monospace; }
+		.row { display: flex; gap: 2rem; flex-wrap: wrap; }
+		.row > div { flex: 1 1 14rem; }
+		input[type=text] { padding: .4rem; font-size: 1rem; width: 20rem; max-width: 60%; }
+		#messages { font-family: ui-monospace, monospace; font-size: .9rem; background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: .6rem 1.6rem; margin: .8rem 0 0 0; min-height: 3rem; }
+		.bar { height: 1rem; background: #e2e8f0; border-radius: 5px; overflow: hidden; margin-top: .6rem; }
+		.fill { height: 100%; background: #2f855a; transition: width .25s; }
+		.done { color: #2f855a; font-weight: 600; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<!--
+	The feed URL carries a per-load nonce (?t=Date.now()) on purpose. Firefox coalesces concurrent GETs to an IDENTICAL
+	url: it dispatches the first and holds the rest until it completes. A feed never completes, so a second tab opening the
+	same /ds/feed would hang forever with nothing rendered. A unique url per page load sidesteps the coalescing. (Datastar
+	uses fetch()+ReadableStream, not EventSource, but the behaviour is the same.) Cache-Control: no-store does NOT prevent it.
+-->
+<body data-signals="{count: 0, clock: '--:--:--', message: '', subscribers: 0, jobRunning: false}" data-init="@get('/ds/feed?t='+Date.now())">
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>Datastar over SSE</h1>
+	<p class="lead">A page driven entirely by <a href="https://data-star.dev">Datastar</a>: on load it opens one
+	long-lived stream (<code>/ds/feed</code>) that the server pushes state through, and every button below is a short
+	SSE stream of its own that answers with patches and ends. Element patches (outer, inner, append), signal patches,
+	signals sent both as query and as JSON body, a stream that keeps going for a while, and broadcasts to every tab.
+	Open it twice and use one tab; state is shared by everyone, on purpose.</p>
+
+	<div class="box row">
+		<div>
+			<h2>Server clock</h2>
+			<div class="big" data-text="$clock"></div>
+			<p class="lead">A signal patch a second, broadcast on the feed.</p>
+		</div>
+		<div>
+			<h2>Tabs subscribed</h2>
+			<div class="big" data-text="$subscribers"></div>
+			<p class="lead">Broadcast when a feed opens or closes: close a tab and watch it drop.</p>
+		</div>
+	</div>
+
+	<div class="box">
+		<h2>Shared counter</h2>
+		<p><span class="big" data-text="$count"></span></p>
+		<button class="btn" data-on:click="@post('/ds/inc')">+1</button>
+		<button class="btn quiet" data-on:click="@post('/ds/reset')">Reset everything</button>
+		<p class="lead">POST, signals as JSON body. The server bumps the count and patches the signal to every tab.</p>
+	</div>
+
+	<div class="box">
+		<h2>Messages</h2>
+		<form data-on:submit="@post('/ds/say')">
+			<input type="text" data-bind:message placeholder="Say something to every open tab" autocomplete="off" />
+			<button type="submit" class="btn">Say</button>
+		</form>
+		<ul id="messages"></ul>
+		<p class="lead">The text travels as the <code>message</code> signal; the server appends a list item to every tab
+		(patch-elements, mode append) and clears the input by patching the signal back to empty.</p>
+	</div>
+
+	<div class="box">
+		<h2>A job that streams its progress</h2>
+		<button class="btn" data-on:click="@get('/ds/job')" data-indicator:jobRunning data-attr:disabled="$jobRunning">Run job</button>
+		<div id="job"></div>
+		<p class="lead">One request whose stream stays open for a few seconds, patching the bar as it goes (mode inner).
+		The button is disabled by Datastar's indicator signal while the stream is open.</p>
+	</div>
+</body>
+</html>

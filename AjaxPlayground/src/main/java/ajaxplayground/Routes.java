@@ -15,6 +15,7 @@ import ajaxplayground.components.scenario.InvoiceSimple;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioCheckbox;
 import ajaxplayground.components.scenario.ScenarioComponentInstance;
+import ajaxplayground.components.scenario.ScenarioDatastar;
 import ajaxplayground.components.scenario.ScenarioDropdownViewport;
 import ajaxplayground.components.scenario.ScenarioExpansion;
 import ajaxplayground.components.scenario.ScenarioFocus;
@@ -67,6 +68,14 @@ public class Routes {
 		// Server-sent events demo (needs WOAdaptorJetty for the streaming response)
 		routes.map( "/sse", ScenarioSSE.class );
 		routes.map( "/sse/clock", ScenarioSSE::clockStream );
+
+		// Datastar-driven page, everything over SSE (needs WOAdaptorJetty)
+		routes.map( "/datastar", ScenarioDatastar.class );
+		routes.map( "/ds/feed", ScenarioDatastar::feed );
+		routes.map( "/ds/inc", ScenarioDatastar::increment );
+		routes.map( "/ds/say", ScenarioDatastar::say );
+		routes.map( "/ds/job", ScenarioDatastar::job );
+		routes.map( "/ds/reset", ScenarioDatastar::reset );
 
 		// Scenario pages (danger matrix)
 		routes.map( "/expansion", ScenarioExpansion.class );
