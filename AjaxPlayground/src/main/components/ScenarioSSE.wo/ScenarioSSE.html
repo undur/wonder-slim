@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: Server-sent events</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 50rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		.box { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.2rem; margin-top: 1rem; background: #fafafa; }
+		.btn { display: inline-block; padding: .4rem .8rem; background: #2b6cb0; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+		.btn:disabled { background: #aaa; cursor: default; }
+		#sseStatus { font-weight: 600; }
+		#sseStatus.open { color: #2f855a; }
+		#sseStatus.closed { color: #b00020; }
+		#sseClock { font-size: 3rem; font-family: ui-monospace, monospace; margin: .5rem 0; }
+		#sseLog { font-family: ui-monospace, monospace; font-size: .85rem; background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: .6rem; margin-top: .8rem; height: 14rem; overflow-y: auto; white-space: pre-wrap; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>Server-sent events</h1>
+	<p class="lead">Opens an <code>EventSource</code> on this app's <code>/sse/clock</code> route, which streams a
+	<code>tick</code> every second to everyone subscribed and a <code>subscribers</code> count whenever someone joins
+	or leaves. Loaded direct-connect this tests the adaptor's streaming responses; loaded through the front-end proxy it
+	tests the proxy passing an open-ended response through — same page either way. Open it in two tabs and close one:
+	the count drops, which is the server noticing the client go away.</p>
+
+	<div class="box">
+		<p>Connection: <span id="sseStatus" class="closed">connecting…</span> <span id="sseUrl" style="color:#888"></span>
+		&nbsp; Subscribers: <strong id="sseSubscribers">–</strong></p>
+		<div id="sseClock">--:--:--</div>
+		<button type="button" class="btn" id="sseClose">Close</button>
+		<button type="button" class="btn" id="sseReconnect" style="background:#718096">Reconnect</button>
+		<div id="sseLog"></div>
+	</div>
+
+	<script>
+		const statusEl = document.getElementById('sseStatus');
+		const urlEl = document.getElementById('sseUrl');
+		const logEl = document.getElementById('sseLog');
+		const clockEl = document.getElementById('sseClock');
+		const subsEl = document.getElementById('sseSubscribers');
+		let es = null;
+
+		function log(line) {
+			logEl.textContent += new Date().toISOString().substring(11, 23) + '  ' + line + '\n';
+			logEl.scrollTop = logEl.scrollHeight;
+		}
+
+		function connect() {
+			const url = '/sse/clock';
+			urlEl.textContent = '(' + url + ')';
+			log('connecting to ' + url);
+			es = new EventSource(url);
+
+			es.onopen = () => {
+				statusEl.textContent = 'open';
+				statusEl.className = 'open';
+				log('open');
+			};
+			es.addEventListener('hello', (e) => log('hello: ' + e.data));
+			es.addEventListener('tick', (e) => { clockEl.textContent = e.data; });
+			es.addEventListener('subscribers', (e) => { subsEl.textContent = e.data; log('subscribers: ' + e.data); });
+			es.onerror = () => {
+				// EventSource reconnects by itself after an error; readyState tells which phase it is in
+				statusEl.textContent = es.readyState === EventSource.CLOSED ? 'closed' : 'reconnecting…';
+				statusEl.className = 'closed';
+				log(es.readyState === EventSource.CLOSED ? 'closed' : 'error, reconnecting');
+			};
+		}
+
+		document.getElementById('sseClose').addEventListener('click', () => {
+			if (es) { es.close(); statusEl.textContent = 'closed'; statusEl.className = 'closed'; log('closed by us'); }
+		});
+
+		document.getElementById('sseReconnect').addEventListener('click', () => {
+			if (es) es.close();
+			connect();
+		});
+
+		connect();
+	</script>
+</body>
+</html>

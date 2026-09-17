@@ -35,12 +35,12 @@
 		<dependency>
 			<groupId>is.rebbi</groupId>
 			<artifactId>wo-adaptor-jetty</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>is.rebbi</groupId>
-			<artifactId>wo-adaptor-jetty-websocket</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<artifactId>wo-adaptor-jetty-push</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>${wonder.core.group}</groupId>

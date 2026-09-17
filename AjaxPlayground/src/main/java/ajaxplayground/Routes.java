@@ -26,6 +26,7 @@ import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioServerUpdate;
 import ajaxplayground.components.scenario.ScenarioServerUpdateFragments;
 import ajaxplayground.components.scenario.ScenarioScripts;
+import ajaxplayground.components.scenario.ScenarioSSE;
 import ajaxplayground.components.scenario.ScenarioTabs;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
 import ajaxplayground.components.scenario.ScenarioWebSocket;
@@ -62,6 +63,10 @@ public class Routes {
 
 		// WebSocket echo demo (needs WOAdaptorJetty)
 		routes.map( "/websocket", ScenarioWebSocket.class );
+
+		// Server-sent events demo (needs WOAdaptorJetty for the streaming response)
+		routes.map( "/sse", ScenarioSSE.class );
+		routes.map( "/sse/clock", ScenarioSSE::clockStream );
 
 		// Scenario pages (danger matrix)
 		routes.map( "/expansion", ScenarioExpansion.class );
