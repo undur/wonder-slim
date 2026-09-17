@@ -69,6 +69,12 @@ public class ERXResponseCompression {
 	 * FIXME: clean up those checks a bit to make it easier to see what's happening.
 	 */
 	public static boolean shouldCompress( final WORequest request, final WOResponse response ) {
+		// A content stream of unknown length (length 0 with a stream present) is open-ended - server-sent events, for
+		// instance. Compressing would mean reading it to its end first, which never comes. Leave such responses alone.
+		if( response.contentInputStream() != null && response.contentInputStreamLength() <= 0 ) {
+			return false;
+		}
+
 		final String responseContentType = response.headerForKey("content-type");
 		final String responseContentEncoding = response.headerForKey("content-encoding");
 		final String requestAcceptEncoding = request.headerForKey("accept-encoding");
