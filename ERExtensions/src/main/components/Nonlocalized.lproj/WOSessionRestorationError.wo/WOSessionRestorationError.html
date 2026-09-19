@@ -1,21 +1,5 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>Missing Session Error</title>
-	</head>
-	<body>
-		<table border="0" width="100%">
-			<tr>
-				<td align="center" valign="top">
-					<wo:img filename="exclamation.gif" framework="ERExtensions" /><br/>
-					Re-enter<br/>
-					<wo:link directActionName="default"><b><wo:str value="$application.name" /></b></wo:link>
-				</td>
-				<td align="left" valign="middle">
-					<b>Your session has timed out.</b>
-				</td>
-			</tr>
-		</table>
-	</body>
-</html>
+<wo:ERXErrorLayout title="Session expired" heading="Your session has expired">
+	<p>You were inactive for a while, so the application closed your session. Nothing is wrong on your side - start again and carry on from there.</p>
+	<p class="muted">Sessions end after <wo:str value="$sessionTimeoutMinutes" /> minutes without activity.</p>
+	<p class="actions"><wo:link directActionName="default" class="button">Return to <wo:str value="$application.name" /></wo:link></p>
+</wo:ERXErrorLayout>

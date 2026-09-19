@@ -22,6 +22,13 @@ public class WOSessionRestorationError extends WOComponent {
 		return false;
 	}
 
+	/**
+	 * @return The session timeout in whole minutes, for telling the user how long inactivity is tolerated
+	 */
+	public int sessionTimeoutMinutes() {
+		return application().sessionTimeOut().intValue() / 60;
+	}
+
 	@Override
 	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
 		super.appendToResponse(aResponse, aContext);

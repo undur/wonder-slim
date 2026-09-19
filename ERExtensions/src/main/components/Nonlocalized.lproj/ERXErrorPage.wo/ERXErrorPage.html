@@ -1,17 +1,4 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Villa</title>
-	</head>
-	<body>
-		<div class="container">
-			<div class="row">
-				<div class="col-md-12">
-					<h2>Villa</h2>
-					<p><wo:str value="$message" escapeHTML="$false" /></p>
-				</div>
-			</div>
-		</div>
-	</body>
-</html>
+<wo:ERXErrorLayout title="Error" heading="Something went wrong">
+	<p><wo:str value="$message" escapeHTML="$false" /></p>
+	<p class="actions"><wo:link directActionName="default" class="button">Return to <wo:str value="$application.name" /></wo:link></p>
+</wo:ERXErrorLayout>

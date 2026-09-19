@@ -1,21 +1,4 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>Session Creation Error</title>
-	</head>
-	<body>
-		<table border="0" width="100%">
-			<tr>
-				<td align="center" valign="top">
-					<wo:img filename="exclamation.gif" framework="ERExtensions" /><br/>
-					Re-enter<br/>
-					<wo:link directActionName="default" target="_top"><b><wo:str value="$application.name" /></b></wo:link>
-				</td>
-				<td align="left" valign="middle">
-					<b>Your session could not be created.</b>
-				</td>
-			</tr>
-		</table>
-	</body>
-</html>
+<wo:ERXErrorLayout title="Unable to start a session" heading="The application could not start a session for you">
+	<p>It is probably not accepting new visitors at the moment - for example while it is being restarted or maintained. Please try again in a little while.</p>
+	<p class="actions"><wo:link directActionName="default" class="button">Try again</wo:link></p>
+</wo:ERXErrorLayout>

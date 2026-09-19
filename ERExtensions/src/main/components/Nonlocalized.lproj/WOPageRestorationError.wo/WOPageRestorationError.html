@@ -1,23 +1,5 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>Missing Page Error</title>
-	</head>
-	<body>
-		<table border="0" width="100%">
-			<tr>
-				<td align="center" valign="top">
-					<wo:img filename="exclamation.gif" framework="ERExtensions" /><br/>
-					Re-enter<br/>
-					<wo:link directActionName="default" target="_top"><b><wo:str value="$application.name" /></b></wo:link>
-				</td>
-				<td align="left" valign="middle">
-					<b> You backtracked too far.<br/></b>
-					The application backtracking limit of
-					<wo:str value="$application.pageCacheSize" /> has been exceeded.<br/>
-				</td>
-			</tr>
-		</table>
-	</body>
-</html>
+<wo:ERXErrorLayout title="Page no longer available" heading="That page is no longer available">
+	<p>You went back further than the application keeps track of, so the page you asked for has been let go. Return to the start and find your way from there.</p>
+	<p class="muted">The application remembers only a limited number of recent pages for each visitor.</p>
+	<p class="actions"><wo:link directActionName="default" class="button">Return to <wo:str value="$application.name" /></wo:link></p>
+</wo:ERXErrorLayout>
