@@ -3,8 +3,6 @@ package er.extensions.browser;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -14,7 +12,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ERXDirectAction;
 import er.extensions.appserver.ERXSession;
@@ -40,15 +37,6 @@ import er.extensions.foundation.ERXUtilities;
  * provide {@link ERXSession#browser() browser} method 
  * that returns a browser object for the current request for you.
  * <p>
- * Note that <code>ERXSession</code> and <code>ERXDirectAction</code> 
- * call <code>ERXBrowserFactory</code>'s 
- * {@link #retainBrowser retainBrowser} and {@link #releaseBrowser releaseBrowser}  
- * to put the browser object to the browser pool when it is 
- * created and to remove the browser object from the pool when 
- * it is no longer referred from sessions and direct actions. 
- * <code>ERXSession</code> and <code>ERXDirectAction</code> 
- * automatically handle this and you do not have to call these 
- * methods from your code.<br>
  * <p>
  * The current implementation of the parsers support variety of 
  * Web browsers in the market such as Internet Explorer (IE), 
@@ -124,10 +112,19 @@ public class ERXBrowserFactory {
      */
     private static final NSMutableArray<Pattern> robotExpressions = new NSMutableArray();
 
-    /** 
-     * Mapping of UAs to browsers
+    /**
+     * Browsers by the user-agent string they were parsed from, bounded (least recently used out):
+     * user-agent strings are attacker-controlled and endlessly varied, so an unbounded map keyed by
+     * them grows for the life of the process. Access is synchronized on the map.
      */
-    private static final Map _cache = new ConcurrentHashMap<>();
+    private static final int CACHE_SIZE = 1000;
+
+    private static final Map<String, ERXBrowser> _cache = new java.util.LinkedHashMap<>( 64, 0.75f, true ) {
+        @Override
+        protected boolean removeEldestEntry( final Map.Entry<String, ERXBrowser> eldest ) {
+            return size() > CACHE_SIZE;
+        }
+    };
 
     /**
      * Gets the singleton browser factory object.
@@ -202,13 +199,7 @@ public class ERXBrowserFactory {
      * Parses <code>"user-agent"</code> string in the request and gets 
      * the appropriate browser object. 
      * <p>
-     * This is the primary method to call from application logics, and 
-     * once you get a browser object, you are responsible to call 
-     * {@link #retainBrowser retainBrowser} to keep the browser 
-     * object in the browser pool. 
-     * <p>
-     * You are also required to call {@link #releaseBrowser releaseBrowser} 
-     * to release the browser from the pool when it is no longer needed. 
+     * This is the primary method to call from application logic.
      * 
      * @param request - WORequest
      * @return a shared browser object
@@ -229,12 +220,7 @@ public class ERXBrowserFactory {
      * <p>
      * Use this method to retrieve a browser instance from an existing
      * user-agent string rather than a request object (e.g. you're 
-     * recreating a browser instance from a past user-agent string). Once 
-     * you get the browser object, you are responsible for calling {@link 
-     * #retainBrowser retainBrowser} to keep it in the browser pool. 
-     * <p>
-     * You are also required to call {@link #releaseBrowser releaseBrowser} 
-     * to release the browser from the pool when it is no longer needed. 
+     * recreating a browser instance from a past user-agent string).
      * 
      * @param ua - user agent string (e.g. from request headers)
      * @return a shared browser object
@@ -245,7 +231,10 @@ public class ERXBrowserFactory {
             		ERXBrowser.UNKNOWN_VERSION, ERXBrowser.UNKNOWN_PLATFORM, null);
         }
         
-       	ERXBrowser result = (ERXBrowser) _cache.get(ua);
+       	ERXBrowser result;
+       	synchronized( _cache ) {
+       		result = _cache.get(ua);
+       	}
        	if (result == null) {
        		String browserName 		= parseBrowserName(ua);
        		String version 			= parseVersion(ua);
@@ -256,15 +245,16 @@ public class ERXBrowserFactory {
        				new Object[] {"cpu", "geckoRevision"});
        		
         	result = getBrowserInstance(browserName, version, mozillaVersion, platform, userInfo);
-        	_cache.put(ua,result);
+        	synchronized( _cache ) {
+        		_cache.put(ua,result);
+        	}
         }
         return result;
     }
 
     /** 
-     * Gets a shared browser object from browser pool. If such browser 
-     * object does not exist, this method will create one by using 
-     * {@link #createBrowser createBrowser} method.
+     * Creates a browser object for the given parameters via {@link #createBrowser createBrowser};
+     * {@link #browserMatchingUserAgent} caches the result per user-agent string.
      * 
      * @param browserName string
      * @param version string
@@ -274,12 +264,8 @@ public class ERXBrowserFactory {
      * 
      * @return a shared browser object
      */
-    public synchronized ERXBrowser getBrowserInstance(String browserName, String version, String mozillaVersion, String platform, NSDictionary userInfo) {
-        String key = _computeKey(browserName, version, mozillaVersion, platform, userInfo);
-        ERXBrowser browser = (ERXBrowser)_browserPool().objectForKey(key);
-        if (browser == null) 
-            browser = createBrowser(browserName, version, mozillaVersion, platform, userInfo);
-        return browser;
+    public ERXBrowser getBrowserInstance(String browserName, String version, String mozillaVersion, String platform, NSDictionary userInfo) {
+        return createBrowser(browserName, version, mozillaVersion, platform, userInfo);
     }
 
     /** 
@@ -340,34 +326,6 @@ public class ERXBrowserFactory {
                     browserName, version, mozillaVersion, platform, userInfo } );
     }
         
-
-    /**
-     * Retains a given browser object.
-     * 
-     * @param browser to be retained
-     */
-    public synchronized void retainBrowser(ERXBrowser browser) {
-        String key = _computeKey(browser);
-        _browserPool().setObjectForKey(browser, key);
-        _incrementReferenceCounterForKey(key);
-    }
-
-    /**
-     * Decrements the retain count for a given browser object.
-     * 
-     * @param browser to be released
-     */
-    public synchronized void releaseBrowser(ERXBrowser browser) {
-        String key = _computeKey(browser);
-        AtomicInteger count = _decrementReferenceCounterForKey(key);
-        if (count == null) {
-            // Perhaps forgot to call registerBrowser() but try to remove the browser for sure
-            _browserPool().removeObjectForKey(key);
-        } else if (count.intValue() <= 0) {
-            _browserPool().removeObjectForKey(key);
-            _referenceCounters().removeObjectForKey(key);
-        } 
-    }
 
     /**
      * Adds the option to use multiple different ERXBrowser subclasses
@@ -586,51 +544,6 @@ public class ERXBrowserFactory {
         return userAgent;
     }
 
-    private NSMutableDictionary _browserPool;
-    private NSMutableDictionary _browserPool() { 
-        if (_browserPool == null) 
-            _browserPool = new NSMutableDictionary();
-        return _browserPool;
-    }
-
-    private NSMutableDictionary _referenceCounters;
-    private NSMutableDictionary _referenceCounters() {
-        if (_referenceCounters == null)
-            _referenceCounters = new NSMutableDictionary();
-        return _referenceCounters;
-    }
-
-    private AtomicInteger _incrementReferenceCounterForKey(String key) {
-        AtomicInteger count = (AtomicInteger)_referenceCounters().objectForKey(key);
-        if (count != null) {
-        	count.incrementAndGet();
-        }
-        else {
-            count = new AtomicInteger(1);
-            _referenceCounters().setObjectForKey(count, key);
-        }
-        log.debug("_incrementReferenceCounterForKey() - count = {}, key = {}", count, key);
-        return count;
-    }
-
-    private AtomicInteger _decrementReferenceCounterForKey(String key) {
-    	AtomicInteger count = (AtomicInteger)_referenceCounters().objectForKey(key);
-    	
-        if (count != null) {
-        	count.decrementAndGet();
-        }
-        
-        log.debug("_decrementReferenceCounterForKey() - count = {}, key = {}", count, key);
-        return count;
-    }
-
-    private String _computeKey(ERXBrowser browser) {
-        return browser.browserName() + "." + browser.version() + "." + browser.mozillaVersion() + "." + browser.platform() + "." + browser.userInfo();
-    }
-
-    private String _computeKey(String browserName, String version, String mozillaVersion, String platform, NSDictionary userInfo) {
-        return browserName + "." + version + "." + mozillaVersion + "." + platform + "." + userInfo;
-    }
     
     private String _versionString(String userAgent) {
     	String versionString;

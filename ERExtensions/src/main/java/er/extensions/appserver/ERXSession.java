@@ -290,7 +290,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 					_browser = browserFactory.browserMatchingRequest(request);
 				}
 
-				browserFactory.retainBrowser(_browser);
 			}
 		}
 
@@ -434,10 +433,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 			_observer = null;
 		}
 
-		if (_browser != null) {
-			ERXBrowserFactory.factory().releaseBrowser(_browser);
-			_browser = null;
-		}
+		_browser = null;
 
 		log.debug("Will terminate, sessionId is {}", sessionID());
 

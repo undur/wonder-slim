@@ -299,25 +299,11 @@ public  class ERXRequest extends WORequest {
         if (_browser == null) {
             ERXBrowserFactory browserFactory = ERXBrowserFactory.factory();
             _browser = browserFactory.browserMatchingRequest(this);
-            browserFactory.retainBrowser(_browser);            
         }
 
         return _browser;
     }
 
-    /**
-     * Cleaning up retain count on the browser.
-     * 
-     * FIXME: Finalization is dead, remove // Hugi 2025-10-22
-     */
-    @Override
-	public void finalize() throws Throwable {
-        if (_browser != null) {
-            ERXBrowserFactory.factory().releaseBrowser(_browser);
-        }
-        super.finalize();
-    }
-    
     /**
      * @return Whether or not this request is secure
      */
