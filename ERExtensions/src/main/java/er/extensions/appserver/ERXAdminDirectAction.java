@@ -6,6 +6,7 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.appserver;
 
+import java.lang.reflect.Field;
 import java.util.Properties;
 
 import com.webobjects.appserver.WOActionResults;
@@ -15,6 +16,7 @@ import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.appserver.WOStatisticsStore;
 import com.webobjects.woextensions.events.WOEventDisplayPage;
 import com.webobjects.woextensions.events.WOEventSetupPage;
 import com.webobjects.woextensions.stats.WOStatsPage;
@@ -23,7 +25,6 @@ import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.hacks.ERXPrivateKVC;
 import er.extensions.statistics.ERXStats;
 
 public class ERXAdminDirectAction extends WODirectAction {
@@ -155,25 +156,60 @@ public class ERXAdminDirectAction extends WODirectAction {
 	}
 
 	/**
-	 * @return true if the request parameter "pw" matches the pw set for WOStatisticsStore
-	 * 
-	 * FIXME: This is a temporary placeholder until we have a nicer access control implementation // Hugi 2022-03-21 
+	 * @return true if the request parameter "pw" matches the password set on the application's WOStatisticsStore
+	 *
+	 * The store offers no way to read its password back: WOStatisticsStore.validateLogin() needs a session to mark,
+	 * and the field is private. Applications commonly set the password in code rather than through the
+	 * WOStatisticsPassword property, so comparing against the property is not an option. Hence reflection.
+	 *
+	 * FIXME: This is a temporary placeholder until we have a nicer access control implementation // Hugi 2022-03-21
 	 */
 	protected boolean canPerformAction() {
-		
+
 		if (ERXApplication.isDevelopmentModeSafe()) {
 			return true;
 		}
 
 		final String password = request().stringFormValueForKey("pw");
-		
+
 		if( ERXUtilities.stringIsNullOrEmpty( password ) ) {
 			return false;
 		}
-		
-		final Object uglyAssWayToGetThestatisticsStorePassword = ERXPrivateKVC.privateValueForKey(ERXApplication.erxApplication().statisticsStore(), "_password" );
 
-		return password.equals( uglyAssWayToGetThestatisticsStorePassword );
+		return password.equals( statisticsStorePassword() );
+	}
+
+	/**
+	 * @return The password held by the application's statistics store, read off its private "_password" field. Null if unset.
+	 */
+	private static String statisticsStorePassword() {
+		final WOStatisticsStore store = WOApplication.application().statisticsStore();
+
+		try {
+			final Field field = declaredField( store.getClass(), "_password" );
+			field.setAccessible( true );
+			return (String)field.get( store );
+		}
+		catch( NoSuchFieldException | IllegalAccessException e ) {
+			throw new IllegalStateException( "Could not read the statistics store's password", e );
+		}
+	}
+
+	/**
+	 * @return The named field declared by the given class or the nearest superclass declaring it
+	 */
+	private static Field declaredField( Class<?> c, final String name ) throws NoSuchFieldException {
+
+		while( c != null ) {
+			try {
+				return c.getDeclaredField( name );
+			}
+			catch( NoSuchFieldException e ) {
+				c = c.getSuperclass();
+			}
+		}
+
+		throw new NoSuchFieldException( name );
 	}
 
 	/**
