@@ -20,8 +20,10 @@ import er.extensions.appserver.ERXWOContext;
  * @author ak
  * @binding condition
  * @binding negate
- * 
- * FIXME: Shouldn't this be patched in for WOConditional by ERXPatcher? 
+ *
+ * Replaces WOConditional (parsley-tag-aliases.properties maps the name here, as the tag shortcuts
+ * if / conditional / condition already did), so every conditional tracks its state and ERXElse
+ * works after any of them.
  */
 
 public class ERXWOConditional extends WODynamicGroup {
