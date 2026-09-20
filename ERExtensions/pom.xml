@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>is.rebbi.slim</groupId>
 		<artifactId>wonder-slim-reactor</artifactId>
-		<version>8.0.6</version>
+		<version>8.0.7-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ERExtensions</artifactId>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>is.rebbi.parsley</groupId>
 			<artifactId>parsley</artifactId>
-			<version>1.6.0</version>
+			<version>1.6.1-SNAPSHOT</version>
 		</dependency>
 		<!--
 			We compile directly against ng-core's ng.dev classes (NGDevLoopback, NGDevJson,
