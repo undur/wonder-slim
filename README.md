@@ -27,7 +27,7 @@ Since `slim` is heavily refactored and includes only a fraction of the original 
 
 ## Motivation
 
-Project Wonder is a huge collection of frameworks that's had many contributors and has accumulated a lot of cruft over the years. This project aims to improve and simplify Wonder not by adding stuff but by *removing* stuff, cleaning house and understanding and documenting what's left.
+Project Wonder is a huge collection of frameworks that's had many contributors and has accumulated a lot of cruft over the years. This project aims to improve and simplify Wonder not by adding stuff but by *removing* stuff, cleaning house and understanding, documenting and improving what's left.
 
 Below I enumerate a few primary goals of wonder-slim (from here on called just "slim"), they all share the same **ultimate goal**, to have a small, understandable, standardized, manageable and maintainable way to run WO applications in a modern environment and enabling faster development and delivery of features and improvements.
 
@@ -96,9 +96,9 @@ Yes. I've used Slim in all of my projects instead of Project Wonder for half a d
 
 ### Can I use it?
 
-Absolutely. It's made to be used. The real question is probably "should I use it". If you want to stay with EOF and Project Wonder's tight integration with it, it might not be for you. I'm also not doing any stable releases at the moment, but if anyone decides to use Slim, I'll change that.
+Absolutely. It's made to be used. The real question is probably "should I use it". If you want to stay with EOF and Project Wonder's tight integration with it, or some of Project Wonder's other frameworks, it might not be for you.
 
-Also note that I have removed a lot of stuff that _I don't use_ so I may have removed something you need. But stuff that's been removed can always be re-added if considered important.
+Also note that I have removed a lot of stuff _I don't use_ so I may have removed something you need. But removed stuff can always be re-added if considered important.
 
 ### Can I change it?
 
