@@ -1,5 +1,64 @@
 # Changelog
 
+## 2026-09-20 (8.0.6)
+
+- **Legible startup output**
+  The properties report is two banner sections: the Properties files in load order (including
+  framework Properties inside jars, which the old report skipped), and every property in effect,
+  alphabetically, with the keys a Properties file or the command line set marked with `*` - so the
+  application's own configuration stands out while WebObjects' and the JVM's defaults stay
+  available. Keys that look like secrets (passwords, API keys, tokens, credentials) are masked; the
+  classpath is printed one entry per line. WO's own NSLog.debug chatter - the dump of every WO
+  default, "Application project found", "Waiting for requests..." - is capped at DebugLevelCritical
+  by default (`-Der.extensions.NSLog.debugLevel=2` restores it). The banner ends with an
+  application section: the name WebObjects resolved (with the bundle name alongside when the two
+  differ), the pid, and the direct connect URLs - in every mode, and last, since it is what one
+  reaches for first. The ERXFrameworkPrincipal lifecycle trace is opt-in
+  (`er.extensions.ERXFrameworkPrincipal.logLifecycle`).
+
+- **Logging works from the first line**
+  A console appender is installed as `main()`'s first act, so nothing logged during WO's and the
+  application's own initialization is dropped any more and log4j's "No appenders could be found"
+  is gone. That was the root cause of constructor-time log calls silently vanishing: log4j was only
+  configured once the bundles had loaded, which is during the WOApplication constructor.
+  `docs/LOGGING.md` documents the stack, the timeline and the remaining traps.
+
+- **Generated URLs name the application on every request**
+  A root request (`/`, or a front end's rewrite of it that omits the application name) parses to an
+  empty name, and a context created by a handler a route delegates to never saw the fixup RouteAction
+  applied for its own - every URL such a context generated read `/cgi-bin/WebObjects/.woa/wo/…`,
+  which WO accepts but short URLs could not recognise as the application's own. The context's URL
+  base is now normalised in ERXWOContext for every context.
+
+- **User-facing error pages**
+  WOSessionRestorationError, WOPageRestorationError, WOSessionCreationError and ERXErrorPage share
+  one calm layout - a centered card with an icon, a heading, a plain-language explanation, one
+  action back to the application, and the application's name - self-contained (inline CSS, no web
+  resources, no scripts), since an error page must render when something has already gone wrong.
+  The session page tells the user the timeout. The 2000-era tables and exclamation.gif are gone.
+
+- **Browser pool and reference counting removed**
+  ERXBrowserFactory kept shared ERXBrowser objects in a manually reference-counted pool, released
+  from ERXSession.terminate() and ERXRequest.finalize(). The counting never freed anything - the
+  factory also cached every browser by user-agent string in a static, unbounded map, which was the
+  actual leak (one entry per distinct user-agent ever seen). Pool, counters, retainBrowser /
+  releaseBrowser and the finalizer are gone; the user-agent cache is a bounded LRU.
+
+- **WOConditional resolves to ERXWOConditional**
+  The full element name now maps to ERXWOConditional like the `if` / `conditional` / `condition`
+  shortcuts already did, so every conditional tracks its state and `<wo:else>` works after any of
+  them. The `else` shortcut moved into ERExtensions' own tag aliases, next to the element it names.
+
+- **Streams of unknown length are never compressed**
+  An open-ended response (server-sent events, say) has no end to read to; gzipping it would block
+  forever. ERXResponseCompression leaves such responses alone.
+
+- **Housekeeping**
+  ng-core 0.1.2 released, so the dev-mode classes are a regular dependency again; vermilingua 1.1.10;
+  a note in RouteAction on what it would need to stand alone if routing were split out. AjaxPlayground
+  gained server-sent-events and Datastar-over-SSE scenario pages (on the released wo-adaptor-jetty).
+
+
 ## 2026-09-15 (8.0.5)
 
 - **Short URLs, on by default**
