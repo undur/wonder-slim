@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>is.rebbi.parsley</groupId>
 			<artifactId>parsley</artifactId>
-			<version>1.6.1-SNAPSHOT</version>
+			<version>1.6.1</version>
 		</dependency>
 		<!--
 			We compile directly against ng-core's ng.dev classes (NGDevLoopback, NGDevJson,
