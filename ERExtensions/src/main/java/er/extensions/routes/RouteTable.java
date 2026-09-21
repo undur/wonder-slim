@@ -12,7 +12,6 @@ import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
-import er.extensions.appserver.ERXShortURLs;
 import er.extensions.foundation.ERXHTTPUtilities;
 
 /**

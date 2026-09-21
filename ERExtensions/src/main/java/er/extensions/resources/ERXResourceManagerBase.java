@@ -11,7 +11,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 
 import er.extensions.ERXP;
-import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXUtilities;

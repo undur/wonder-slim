@@ -26,6 +26,7 @@ import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.development.NSMavenProjectBundle;
+import com.webobjects.woextensions.error.WOExceptionPage.ContextSnapshot;
 import com.webobjects.woextensions.error.WOExceptionPage.WOExceptionParser.WOParsedErrorLine;
 
 import er.extensions.appserver.ERXApplication;

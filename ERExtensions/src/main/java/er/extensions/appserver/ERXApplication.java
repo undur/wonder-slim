@@ -38,7 +38,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOSession;
 import com.webobjects.appserver.WOTimer;
 import com.webobjects.appserver._private.WOComponentDefinition;
-import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSData;
