@@ -79,12 +79,12 @@ public class RouteTable {
 	 * @param urlInParams true to take the route URL from the request's parameters/headers (see {@link #routeURLFromRequestParameters}) instead of the request URI
 	 */
 	public WOActionResults handle( final WORequest request, boolean urlInParams ) {
-		return handle( request, urlInParams ? routeURLFromRequestParameters( request ) : routePath( request.uri(), null ) );
+		return handle( request, urlInParams ? routeURLFromRequestParameters( request ) : RouteRequestHandler.routePath( request ) );
 	}
 
 	/**
 	 * Handles the request against the given route path — the request URL as
-	 * the routes see it. See {@link #routePath(String, String)}.
+	 * the routes see it. See {@link RouteRequestHandler#routePath(WORequest)}.
 	 */
 	public WOActionResults handle( final WORequest request, final String routeURL ) {
 		final String ipAddress = ERXHTTPUtilities.ipAddressFromRequest(request);
@@ -99,31 +99,6 @@ public class RouteTable {
 		}
 
 		return routeHandler.handle( new RouteInvocation( routeURL, request ) );
-	}
-
-	/**
-	 * The path routes match against: the request URI without its query string,
-	 * and without the application's own adaptor prefix when the request carried
-	 * one — so {@code /}, {@code /cgi-bin/WebObjects/App.woa/} and
-	 * {@code /Apps/WebObjects/App.woa/} all route as {@code /}, and an app
-	 * needn't register its routes once per adaptor prefix in circulation.
-	 *
-	 * @param uri The request URI as received
-	 * @param applicationPrefix The prefix the request carried ({@code <adaptor path>/App.woa}), null when it carried none
-	 */
-	static String routePath( final String uri, final String applicationPrefix ) {
-		String path = uri;
-		final int questionMark = path.indexOf( '?' );
-
-		if( questionMark >= 0 ) {
-			path = path.substring( 0, questionMark );
-		}
-
-		if( applicationPrefix != null && !applicationPrefix.isEmpty() && path.startsWith( applicationPrefix ) ) {
-			path = ERXShortURLs.shorten( path, applicationPrefix );
-		}
-
-		return path.isEmpty() ? "/" : path;
 	}
 
 	/**
@@ -152,7 +127,28 @@ public class RouteTable {
 	}
 
 	public void map( final String pattern, final RouteHandler routeHandler ) {
+		refuseHandlerKeyCollision( pattern );
 		_routes.add( new Route( pattern, routeHandler ) );
+	}
+
+	/**
+	 * A route whose first segment is a registered request handler key can never be reached: the first
+	 * segment decides between WebObjects' request handlers and the route table, and the handler wins.
+	 * Failing at mapping time beats a route that silently never matches.
+	 */
+	private static void refuseHandlerKeyCollision( final String pattern ) {
+		final WOApplication application = WOApplication.application();
+
+		if( application == null || pattern == null || !pattern.startsWith( "/" ) ) {
+			return;
+		}
+
+		final int end = pattern.indexOf( '/', 1 );
+		final String firstSegment = end == -1 ? pattern.substring( 1 ) : pattern.substring( 1, end );
+
+		if( !firstSegment.isEmpty() && !firstSegment.endsWith( "*" ) && application.requestHandlerForKey( firstSegment ) != null ) {
+			throw new IllegalArgumentException( "Route '" + pattern + "' can never be matched: its first segment '" + firstSegment + "' is a registered request handler key, and request handlers take precedence over routes" );
+		}
 	}
 
 	public void map( final String pattern, final Class<? extends WOComponent> componentClass ) {

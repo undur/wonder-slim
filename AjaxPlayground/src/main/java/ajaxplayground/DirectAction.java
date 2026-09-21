@@ -2,9 +2,11 @@ package ajaxplayground;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WORequest;
+import com.webobjects.appserver.WOResponse;
 
 import ajaxplayground.components.Main;
 import er.extensions.appserver.ERXDirectAction;
+import er.extensions.routes.RouteRequestHandler;
 
 /**
  * Entry points that create a session, so playground pages (which contain stateful Ajax components)
@@ -39,5 +41,16 @@ public class DirectAction extends ERXDirectAction {
 		catch( Exception e ) {
 			return pageWithName( Main.class );
 		}
+	}
+
+	/**
+	 * Echoes RouteRequestHandler.routePath() for this request, for the URL-shape probe: a page served by a
+	 * direct action describes itself by its short path whatever shape the request arrived in.
+	 */
+	public WOActionResults routePathAction() {
+		final WOResponse response = new WOResponse();
+		response.setHeader( "text/plain", "content-type" );
+		response.setContent( RouteRequestHandler.routePath( request() ) );
+		return response;
 	}
 }

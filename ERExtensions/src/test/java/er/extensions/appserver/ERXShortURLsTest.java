@@ -14,48 +14,103 @@ public class ERXShortURLsTest {
 	private static final Set<String> KEYS = Set.of( "wa", "wo", "res", "ajax" );
 	private static final Predicate<String> NO_ROUTES = path -> false;
 
-	private static String expand( final String url ) {
-		return ERXShortURLs.expand( url, PREFIX, ADAPTOR, KEYS, NO_ROUTES );
+	private static String canonical( final String url ) {
+		return ERXShortURLs.canonicalize( url, ADAPTOR, "App", ".woa", KEYS, NO_ROUTES );
 	}
 
 	@Test
-	public void aHandlerKeyAsFirstSegmentGetsThePrefix() {
-		assertEquals( PREFIX + "/wa/AppAction/search", expand( "/wa/AppAction/search" ) );
-		assertEquals( PREFIX + "/res/app/x.css", expand( "/res/app/x.css" ) );
-		assertEquals( PREFIX + "/wa", expand( "/wa" ) );
-		assertEquals( PREFIX + "/wa/", expand( "/wa/" ) );
+	public void freestyleHandlerKeyURLsGetTheApplicationPrefix() {
+		assertEquals( PREFIX + "/wa/AppAction/search", canonical( "/wa/AppAction/search" ) );
+		assertEquals( PREFIX + "/res/app/x.css", canonical( "/res/app/x.css" ) );
+		assertEquals( PREFIX + "/wa", canonical( "/wa" ) );
+		assertEquals( PREFIX + "/wa/", canonical( "/wa/" ) );
 	}
 
 	@Test
-	public void theQueryStringRidesAlong() {
-		assertEquals( PREFIX + "/wa/AppAction/search?s=S%C3%A6la&x=1", expand( "/wa/AppAction/search?s=S%C3%A6la&x=1" ) );
-		// A '?' inside the query never confuses the segment check
-		assertEquals( PREFIX + "/wa/x?u=/wo/y", expand( "/wa/x?u=/wo/y" ) );
+	public void theQueryStringIsNeverTouched() {
+		assertEquals( PREFIX + "/wa/AppAction/search?s=S%C3%A6la&x=1", canonical( "/wa/AppAction/search?s=S%C3%A6la&x=1" ) );
+		assertEquals( PREFIX + "/wa/x?u=/wo/y", canonical( "/wa/x?u=/wo/y" ) );
+		assertEquals( PREFIX + "/route/about?u=/wa/y", canonical( "/about?u=/wa/y" ) );
+		assertEquals( PREFIX + "/route/?x=1", canonical( "/?x=1" ) );
 	}
 
 	@Test
-	public void longFormAndAnythingInAdaptorSpaceIsUntouched() {
-		assertEquals( PREFIX + "/wa/x", expand( PREFIX + "/wa/x" ) );
-		assertEquals( "/cgi-bin/WebObjects/Other.woa/wa/x", expand( "/cgi-bin/WebObjects/Other.woa/wa/x" ) );
-		assertEquals( PREFIX + "/2/wa/x", expand( PREFIX + "/2/wa/x" ) );
+	public void longHandlerURLsKeepTheirShape() {
+		assertEquals( PREFIX + "/wa/x", canonical( PREFIX + "/wa/x" ) );
+		assertEquals( PREFIX + "/2/wa/x", canonical( PREFIX + "/2/wa/x" ) );
+		assertEquals( PREFIX + "/-1/wo/abc/0.1", canonical( PREFIX + "/-1/wo/abc/0.1" ) );
+		assertEquals( ADAPTOR + "/App/wa/x", canonical( ADAPTOR + "/App/wa/x" ) ); // the extension is optional in WO URLs
 	}
 
 	@Test
-	public void unknownSegmentsRootAndLookalikesAreUntouched() {
-		assertEquals( "/", expand( "/" ) );
-		assertEquals( "/about", expand( "/about" ) );
-		assertEquals( "/wax/y", expand( "/wax/y" ) );   // not a key, merely starts like one
-		assertEquals( "/WA/y", expand( "/WA/y" ) );     // keys are case-sensitive, like WO's
-		assertEquals( "", expand( "" ) );
-		assertEquals( null, expand( null ) );
-		assertEquals( "http://h/wa/x", expand( "http://h/wa/x" ) ); // only absolute paths
+	public void anotherApplicationsURLsPassThrough() {
+		assertEquals( "/cgi-bin/WebObjects/Other.woa/wa/x", canonical( "/cgi-bin/WebObjects/Other.woa/wa/x" ) );
+		assertEquals( "/cgi-bin/WebObjects/Other.woa/a/b", canonical( "/cgi-bin/WebObjects/Other.woa/a/b" ) );
+		assertEquals( "/cgi-bin/WebObjects/Application.woa/a", canonical( "/cgi-bin/WebObjects/Application.woa/a" ) ); // merely starts like ours
+	}
+
+	@Test
+	public void everythingElseIsARoute() {
+		assertEquals( PREFIX + "/route/", canonical( "/" ) );
+		assertEquals( PREFIX + "/route/about", canonical( "/about" ) );
+		assertEquals( PREFIX + "/route/a/b/c", canonical( "/a/b/c" ) );
+		assertEquals( PREFIX + "/route/2/", canonical( "/2/" ) );           // trailing slash kept
+		assertEquals( PREFIX + "/route/1234", canonical( "/1234" ) );       // a freestyle number is a path
+		assertEquals( PREFIX + "/route/wax/y", canonical( "/wax/y" ) );     // not a key, merely starts like one
+		assertEquals( PREFIX + "/route/WA/y", canonical( "/WA/y" ) );       // keys are case-sensitive, like WO's
+	}
+
+	@Test
+	public void routesUnderAnAdaptorPrefixKeepThePrefixTheyCarried() {
+		assertEquals( PREFIX + "/route/", canonical( PREFIX ) );
+		assertEquals( PREFIX + "/route/", canonical( PREFIX + "/" ) );
+		assertEquals( PREFIX + "/route/a/b", canonical( PREFIX + "/a/b" ) );
+		assertEquals( PREFIX + "/1/route/", canonical( PREFIX + "/1" ) );
+		assertEquals( PREFIX + "/1/route/a/b", canonical( PREFIX + "/1/a/b" ) );
+		assertEquals( PREFIX + "/-3/route/a/b?x=1", canonical( PREFIX + "/-3/a/b?x=1" ) );
+		assertEquals( ADAPTOR + "/App/1/route/a", canonical( ADAPTOR + "/App/1/a" ) );
+		assertEquals( PREFIX + "/1234/route/", canonical( PREFIX + "/1234" ) ); // WO's grammar: a number after .woa is the instance
+	}
+
+	@Test
+	public void theCarriedAdaptorPathNeedNotBeTheApplicationsOwn() {
+		final String foreign = "/Apps/WebObjects/App.woa";
+		assertEquals( foreign + "/route/", canonical( foreign ) );
+		assertEquals( foreign + "/1/route/a/b", canonical( foreign + "/1/a/b" ) );
+		assertEquals( foreign + "/1/route/a/b", canonical( foreign + "/1/route/a/b" ) );
+		assertEquals( foreign + "/1/res/app/x.css", canonical( foreign + "/1/route/res/app/x.css" ) );
+		assertEquals( foreign + "/wa/x?y=1", canonical( foreign + "/wa/x?y=1" ) );
+		assertEquals( "/Apps/WebObjects/Other.woa/a/b", canonical( "/Apps/WebObjects/Other.woa/a/b" ) );
+	}
+
+	@Test
+	public void aRequestAlreadyMarkedAsARouteIsCanonical() {
+		assertEquals( PREFIX + "/route/a/b", canonical( PREFIX + "/route/a/b" ) );
+		assertEquals( PREFIX + "/1/route/1234", canonical( PREFIX + "/1/route/1234" ) );
+		assertEquals( PREFIX + "/1/route/2/", canonical( PREFIX + "/1/route/2/" ) );
+		assertEquals( PREFIX + "/route/", canonical( PREFIX + "/route" ) );
+		assertEquals( PREFIX + "/route/", canonical( "/route/" ) );
+		assertEquals( PREFIX + "/route/routes/x", canonical( "/routes/x" ) ); // not the marker, merely starts like it
+	}
+
+	@Test
+	public void aMarkedHandlerKeyURLGoesToItsHandler() {
+		assertEquals( PREFIX + "/1/res/app/x.css", canonical( PREFIX + "/1/route/res/app/x.css" ) );
+		assertEquals( PREFIX + "/wa/page?name=Main", canonical( PREFIX + "/route/wa/page?name=Main" ) );
+	}
+
+	@Test
+	public void whatIsNotAnAbsolutePathIsLeftAlone() {
+		assertEquals( "", canonical( "" ) );
+		assertEquals( null, canonical( null ) );
+		assertEquals( "http://h/wa/x", canonical( "http://h/wa/x" ) );
 	}
 
 	@Test
 	public void anExplicitRouteWins() {
 		final Predicate<String> waIsARoute = path -> path.startsWith( "/wa/" );
-		assertEquals( "/wa/page", ERXShortURLs.expand( "/wa/page", PREFIX, ADAPTOR, KEYS, waIsARoute ) );
-		assertEquals( PREFIX + "/res/app/x.css", ERXShortURLs.expand( "/res/app/x.css", PREFIX, ADAPTOR, KEYS, waIsARoute ) );
+		assertEquals( PREFIX + "/route/wa/page", ERXShortURLs.canonicalize( "/wa/page", ADAPTOR, "App", ".woa", KEYS, waIsARoute ) );
+		assertEquals( PREFIX + "/res/app/x.css", ERXShortURLs.canonicalize( "/res/app/x.css", ADAPTOR, "App", ".woa", KEYS, waIsARoute ) );
 	}
 
 	@Test

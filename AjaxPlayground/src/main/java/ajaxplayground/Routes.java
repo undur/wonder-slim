@@ -52,6 +52,14 @@ public class Routes {
 		// Index
 		routes.map( "/", Main.class );
 
+		// Echoes RouteRequestHandler.routePath() for the request, for the URL-shape probe
+		routes.map( "/echo/route-path/*", ri -> {
+			final com.webobjects.appserver.WOResponse response = new com.webobjects.appserver.WOResponse();
+			response.setHeader( "text/plain", "content-type" );
+			response.setContent( er.extensions.routes.RouteRequestHandler.routePath( ri.request() ) );
+			return response;
+		} );
+
 		// Invoice editors
 		routes.map( "/invoice", InvoiceSimple.class );
 		routes.map( "/invoice-stress", ScenarioInvoice.class );

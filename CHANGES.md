@@ -1,5 +1,39 @@
 # Changelog
 
+## Unreleased
+
+- **One canonical URL form for every inbound request**
+  `ERXApplication.createRequest()` turns every inbound URL into the canonical WebObjects URL for it
+  before WO parses it (`ERXShortURLs.canonicalize`), so nothing downstream depends on the shape the
+  front end delivered. A URL whose first path segment names a registered request handler becomes
+  `<prefix>[/N]/<key>/...`; everything else is a route and becomes `<prefix>[/N]/route/<path>`.
+  That holds for freestyle URLs (`/a/b`), URLs carrying an adaptor prefix (`/Apps/WebObjects/App.woa/a/b`,
+  whatever adaptor path the front end uses), URLs carrying the instance number mod_WebObjects adds
+  (`/App.woa/1/a/b`), and URLs already in the canonical form. The prefix a request carried is kept;
+  one that carried none gets the application's own. URLs naming another application pass through.
+
+  `route` is a registered request handler key, served by `RouteRequestHandler`, which hands the
+  request to the route table. It is internal: generated URLs never contain it, and public URLs are
+  identical in development and deployment. `RouteRequestHandler` is also the default request handler,
+  as a safety net for a request that arrives uncanonicalized. Since WO only ever parses well-formed
+  URLs now, the `WODynamicURL` subclass that disabled its validity check is gone.
+
+  A front end forwarding paths to a WebObjects adaptor should forward the canonical form itself:
+  `/Apps/WebObjects/App.woa/route/<path>`, for every path. Behind the key the URL is an ordinary WO
+  handler URL the adaptor passes through untouched, so a numeric path such as `/1234` or a trailing
+  slash survive - in the bare-prefix form WO's URL grammar, and the adaptor, read `1234` as an
+  instance number. The application sorts handler-key URLs (`/route/res/...`) from routes itself, so
+  the front end needs no list of handler keys.
+
+  `RouteRequestHandler.routePath(WORequest)` is public: the path a request asked for - the route
+  path of a route, the short path (`/wa/default`) of a handler request - for applications
+  describing the current page (canonical URLs and the like) instead of reading `request.uri()`. Mapping a route whose first segment is a registered request handler key fails at
+  mapping time, since such a route could never be matched. `tools/playwright-bridge/examples/
+  route-url-shapes.mjs` probes the URL-shape matrix.
+
+- **Admin action password check**
+  `ERXAdminDirectAction` reads the statistics store's password itself; `ERXPrivateKVC` is gone.
+
 ## 2026-09-20 (8.0.6)
 
 - **Legible startup output**

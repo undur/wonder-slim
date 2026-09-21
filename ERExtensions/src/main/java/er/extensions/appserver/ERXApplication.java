@@ -29,7 +29,6 @@ import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.appserver.WODynamicURL;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
@@ -71,6 +70,7 @@ import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.routes.RouteAction;
+import er.extensions.routes.RouteRequestHandler;
 import er.extensions.routes.RouteTable;
 import er.extensions.statistics.ERXStats;
 import parsley.ParsleyConfiguration;
@@ -268,8 +268,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			registerRequestHandler( new ERXRuntimeProblemsRequestHandler(), ERXRuntimeProblemsRequestHandler.KEY );
 		}
 
-		// Set the routing request handler as the default request handler
-		setDefaultRequestHandler( new WODirectActionRequestHandler(RouteAction.class.getName(), "default", true) );
+		// Routes: createRequest() canonicalizes every URL that is not a handler URL to /route/<path>, which is how routes
+		// get here. The same handler is the default request handler as well, so that a request which somehow arrives
+		// uncanonicalized with an unknown handler key gets the route table's answer rather than WO's component request
+		// handler. See ERXShortURLs.canonicalize and RouteRequestHandler.
+		final RouteRequestHandler routeRequestHandler = new RouteRequestHandler();
+		registerRequestHandler( routeRequestHandler, ERXShortURLs.ROUTE_KEY );
+		setDefaultRequestHandler( routeRequestHandler );
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 
@@ -395,15 +400,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			httpVersion = "HTTP/1.0";
 		}
 
-		// Short URLs are expanded here, before the request exists, because WORequest's
-		// constructor hands the URL to WODynamicURL, which locates the adaptor prefix by
-		// the "WebObjects" token and would otherwise take "wa" in /wa/Foo/bar for the
-		// application name. This is the only inbound seam every adaptor passes through.
-		// (Wonder's old "rewriteDirectConnect" prepend lived here too; it was development-
-		// only and missed the slash between adaptor path and application name.)
-		if (shortURLs()) {
-			url = ERXShortURLs.expand(url, applicationURLPrefix(), adaptorPath(), registeredRequestHandlerKeySet(), RouteTable.defaultRouteTable()::hasRouteFor);
-		}
+		// Every inbound URL is turned into the canonical WO URL for it here, before the request exists: handler-key
+		// URLs get the application prefix, everything else becomes /route/<path> under the same prefix. WO then parses
+		// a well-formed URL every time, whatever shape the front end delivered (freestyle, adaptor prefix, instance
+		// number, or already marked as a route). See ERXShortURLs.canonicalize.
+		url = ERXShortURLs.canonicalize(url, adaptorPath(), name(), applicationExtension(), registeredRequestHandlerKeySet(), RouteTable.defaultRouteTable()::hasRouteFor);
 
 		return new ERXRequest(method, url, httpVersion, headers, content, info);
 	}
@@ -418,27 +419,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
         WORequestHandler requestHandler = requestHandlerForKey(request.requestHandlerKey());
         return requestHandler != null ? requestHandler : defaultRequestHandler();
     }
-
-	/**
-	 * @return An dynamic URL initialized with the given string. Overridden to return UncheckedDynamicURL, allowing us to handle funky URLs
-	 */
-	@Override
-	public UncheckedDynamicURL newDynamicURL( String url ) {
-		return new UncheckedDynamicURL( url );
-	}
-
-	/**
-	 * Replaces the check() method with an empty implementation, allowing us to handle freestyle URLs/routing.
-	 */
-	private static class UncheckedDynamicURL extends WODynamicURL {
-
-		public UncheckedDynamicURL( String url ) {
-			super( url );
-		}
-
-		@Override
-		public void check() {}
-	}
 
 	/**
 	 * The location WO redirects to when it won't serve a request itself — for
