@@ -31,6 +31,10 @@
   mapping time, since such a route could never be matched. `tools/playwright-bridge/examples/
   route-url-shapes.mjs` probes the URL-shape matrix.
 
+- **Parsley 1.6.1**
+  The `/problems` development endpoint now reports from Parsley's recording store, so it lists the
+  runtime problems the application rendered into its pages.
+
 - **ERXURLRewriter is gone**
   The pattern-and-replacement applied to generated URLs
   (`er.extensions.ERXApplication.replaceApplicationPath.pattern` / `.replace`) has been removed.
