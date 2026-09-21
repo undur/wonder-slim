@@ -230,10 +230,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		final ERXAppBasedResourceRequestHandler resourceRequestHandler = new ERXAppBasedResourceRequestHandler();
 
-		if( ERXAppBasedResourceManager.USE_NEW_URLS ) {
-			RouteTable.defaultRouteTable().map(ERXAppBasedResourceManager.URL_ROUTE_PREFIX + "*", ri -> resourceRequestHandler.handleRequest( ri.request() ) );
-		}
-
 		// The rewritten component-action handler is the default; the patched-stock handler remains
 		// available as an opt-out escape hatch while the rewrite earns trust in production. See
 		// ERXComponentActionRequestHandler's javadoc.
