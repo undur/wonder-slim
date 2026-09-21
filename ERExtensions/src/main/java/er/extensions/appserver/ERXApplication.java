@@ -68,7 +68,6 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
-import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.routes.RouteAction;
 import er.extensions.routes.RouteRequestHandler;
 import er.extensions.routes.RouteTable;
@@ -289,11 +288,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		activateScheduleOfLifeAndDeath();
 
-		// FIXME: Quick fix for our resource manager's initialization issue. Fix // Hugi 2025-10-06
-		if( resourceManager() instanceof ERXResourceManagerBase rmb ) {
-			rmb.loadAdditionalContentTypes(); 
-		}
-		
 		_proxyBalancerConfig = new ERXProxyBalancerConfig(name(), port());
 
 		ERXNotification.DidHandleRequestNotification.addObserver(_proxyBalancerConfig::addBalancerRouteCookieByNotification);

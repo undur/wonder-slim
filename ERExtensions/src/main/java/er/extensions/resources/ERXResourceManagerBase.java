@@ -1,5 +1,8 @@
 package er.extensions.resources;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
@@ -9,11 +12,11 @@ import com.webobjects.appserver.WOResourceManager;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
+import com.webobjects.foundation.NSPropertyListSerialization;
 
 import er.extensions.ERXP;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.foundation.ERXUtilities;
 
 /**
  * Base functionality for managing resources/generating resource URLs 
@@ -22,33 +25,37 @@ import er.extensions.foundation.ERXUtilities;
 public class ERXResourceManagerBase extends WOResourceManager {
 	
 	/**
-	 * Cached content type dictionary, includes both WO's content types and our own.
-	 * 
-	 * FIXME: Make final once initialization is in order // Hugi 2025-10-06
+	 * Content type dictionary, includes both WO's content types and our own.
 	 */
-	private NSDictionary<String,String> _contentTypes;
+	private final NSDictionary<String,String> _contentTypes;
 
 	public ERXResourceManagerBase() {
-		_contentTypes = super._contentTypesDictionary();
-	}
-
-	/**
-	 * FIXME A little hack to allow us to initialize the content types after the resource manager's creation. Should happen in constructor // Hugi 2025-10-06
-	 */
-	public void loadAdditionalContentTypes() {
 		final NSMutableDictionary d = new NSMutableDictionary<>();
 		d.putAll(super._contentTypesDictionary());
-		d.putAll(additionalContentTypesFromBunde("ERExtensions"));
-		d.putAll(additionalContentTypesFromBunde("app"));
+		d.putAll(additionalContentTypesFromBundle("ERExtensions"));
+		d.putAll(additionalContentTypesFromBundle("app"));
 		_contentTypes = d.immutableClone();
 	}
 
 	/**
 	 * @return MimeTypes obtained from the file "AdditionalMimeTypes.plist" in the given bundle. Empty map if file not present/empty.
+	 *
+	 * Read through this resource manager rather than through WOApplication.application().resourceManager(): we are called
+	 * from the constructor, and the application's resource manager is the object under construction.
 	 */
-	private static Map<String,String> additionalContentTypesFromBunde( final String bundleName ) {
-		final Map<String, String> m = (Map<String, String>)ERXUtilities.readPListFromBundleResource("AdditionalMimeTypes.plist", bundleName, null, StandardCharsets.UTF_8);
-		return m != null ? m : Collections.emptyMap(); 
+	private Map<String,String> additionalContentTypesFromBundle( final String bundleName ) {
+		try( final InputStream stream = inputStreamForResourceNamed( "AdditionalMimeTypes.plist", bundleName, null )) {
+
+			if( stream == null ) {
+				return Collections.emptyMap();
+			}
+
+			final Map<String, String> m = (Map<String, String>)NSPropertyListSerialization.propertyListFromString( new String( stream.readAllBytes(), StandardCharsets.UTF_8 ) );
+			return m != null ? m : Collections.emptyMap();
+		}
+		catch( IOException e ) {
+			throw new UncheckedIOException( e );
+		}
 	}
 
 	/**
