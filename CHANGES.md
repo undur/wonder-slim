@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased
+
+- **Routing behind a WebObjects adaptor**
+  Routes resolve the same whatever URL shape the request arrives in: freestyle (`/a/b`), with the
+  adaptor prefix (`/Apps/WebObjects/App.woa/a/b`), with the instance number mod_WebObjects adds
+  (`/App.woa/1/a/b`), or marked as a route (`/App.woa/route/a/b`). The default request handler
+  is `RouteRequestHandler`, which routes the full path of any request without a registered
+  handler key, however many segments it has.
+
+  `route` is a registered request handler key backed by the same handler. A front end that
+  forwards paths to a WebObjects adaptor should use it: `/Apps/WebObjects/App.woa/route/<path>`.
+  Behind the key the URL is an ordinary WO handler URL, so the adaptor passes it through untouched
+  and nothing after the key is reinterpreted - a numeric path such as `/1234` or a trailing slash
+  survive, where in the bare-prefix form WO's URL grammar would read `1234` as an instance number.
+  A marked request is a freestyle request the adaptor wrapped and is handled as exactly that:
+  unwrapped to `/<path>` and dispatched again, so handler-key URLs (`/route/res/...`) reach
+  their handler and everything else is a route, by the same rules as in direct connect. The
+  front end forwards every path the same way and needs no list of handler keys. The key never
+  appears in a generated URL; freestyle URLs (direct connect, modulo) need no marker.
+
+  `RouteRequestHandler.routePath(WORequest)` is public: the route path of a request however it arrived,
+  for applications describing the current page (canonical URLs and the like). Mapping a route
+  whose first segment is a registered request handler key fails at mapping time, since such a
+  route could never be matched. `tools/playwright-bridge/examples/route-url-shapes.mjs` probes
+  the URL-shape matrix.
+
+- **Admin action password check**
+  `ERXAdminDirectAction` reads the statistics store's password itself; `ERXPrivateKVC` is gone.
+
 ## 2026-09-20 (8.0.6)
 
 - **Legible startup output**

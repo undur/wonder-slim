@@ -71,6 +71,7 @@ import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXResourceManagerBase;
 import er.extensions.routes.RouteAction;
+import er.extensions.routes.RouteRequestHandler;
 import er.extensions.routes.RouteTable;
 import er.extensions.statistics.ERXStats;
 import parsley.ParsleyConfiguration;
@@ -268,8 +269,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			registerRequestHandler( new ERXRuntimeProblemsRequestHandler(), ERXRuntimeProblemsRequestHandler.KEY );
 		}
 
-		// Set the routing request handler as the default request handler
-		setDefaultRequestHandler( new WODirectActionRequestHandler(RouteAction.class.getName(), "default", true) );
+		// Routing: the default request handler (no or unregistered handler key) and, under RouteRequestHandler.KEY,
+		// the explicit entry a front end uses to mark a request as a route. See RouteRequestHandler.
+		final RouteRequestHandler routeRequestHandler = new RouteRequestHandler();
+		registerRequestHandler( routeRequestHandler, RouteRequestHandler.KEY );
+		setDefaultRequestHandler( routeRequestHandler );
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 

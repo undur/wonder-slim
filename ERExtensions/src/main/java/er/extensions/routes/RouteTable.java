@@ -152,7 +152,28 @@ public class RouteTable {
 	}
 
 	public void map( final String pattern, final RouteHandler routeHandler ) {
+		refuseHandlerKeyCollision( pattern );
 		_routes.add( new Route( pattern, routeHandler ) );
+	}
+
+	/**
+	 * A route whose first segment is a registered request handler key can never be reached: the first
+	 * segment decides between WebObjects' request handlers and the route table, and the handler wins.
+	 * Failing at mapping time beats a route that silently never matches.
+	 */
+	private static void refuseHandlerKeyCollision( final String pattern ) {
+		final WOApplication application = WOApplication.application();
+
+		if( application == null || pattern == null || !pattern.startsWith( "/" ) ) {
+			return;
+		}
+
+		final int end = pattern.indexOf( '/', 1 );
+		final String firstSegment = end == -1 ? pattern.substring( 1 ) : pattern.substring( 1, end );
+
+		if( !firstSegment.isEmpty() && !firstSegment.endsWith( "*" ) && application.requestHandlerForKey( firstSegment ) != null ) {
+			throw new IllegalArgumentException( "Route '" + pattern + "' can never be matched: its first segment '" + firstSegment + "' is a registered request handler key, and request handlers take precedence over routes" );
+		}
 	}
 
 	public void map( final String pattern, final Class<? extends WOComponent> componentClass ) {
