@@ -31,6 +31,13 @@
   mapping time, since such a route could never be matched. `tools/playwright-bridge/examples/
   route-url-shapes.mjs` probes the URL-shape matrix.
 
+- **ERXURLRewriter is gone**
+  The pattern-and-replacement applied to generated URLs
+  (`er.extensions.ERXApplication.replaceApplicationPath.pattern` / `.replace`) has been removed.
+  It rewrote outbound only, leaving the inbound half to the front end, and with short URLs on it
+  never saw the long form its pattern was written to match. An application that still sets either
+  property refuses to launch and says why, rather than ignoring the configuration.
+
 - **Admin action password check**
   `ERXAdminDirectAction` reads the statistics store's password itself; `ERXPrivateKVC` is gone.
 

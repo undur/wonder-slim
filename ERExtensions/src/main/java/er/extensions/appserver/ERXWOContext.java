@@ -142,11 +142,9 @@ public class ERXWOContext extends ERXAjaxContext {
 	/**
 	 * The single outbound seam: every URL the application generates — component
 	 * actions, direct actions, resources, the public {@code urlWithRequestHandlerKey}
-	 * — is assembled by this method in WOContext, so shortening and rewriting
-	 * here covers them all. Order matters: short URLs first (an exact removal of
-	 * the prefix the URL was built from), then the operator's
-	 * replaceApplicationPath pattern, which is written against whatever form
-	 * the app would otherwise produce. Redirect locations take the same path in
+	 * — is assembled by this method in WOContext, so shortening here covers them
+	 * all: an exact removal of the prefix the URL was built from. Redirect
+	 * locations take the same path in
 	 * {@link ERXApplication#_newLocationForRequest(WORequest)}.
 	 *
 	 * The prefix removed is the one WOContext just composed the URL from —
@@ -166,7 +164,7 @@ public class ERXWOContext extends ERXAjaxContext {
 			url = ERXShortURLs.shorten(url, generatedApplicationPrefix(app));
 		}
 
-		return app.urlRewriter().rewriteURL(url);
+		return url;
 	}
 
 	/**

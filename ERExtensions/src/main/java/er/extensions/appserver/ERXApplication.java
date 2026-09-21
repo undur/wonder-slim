@@ -108,7 +108,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	/**
 	 * Configuration for URL rewriting
 	 */
-	private final ERXURLRewriter _urlRewriter;
 
 	/**
 	 * Short URLs: request handler keys as top-level routes. See {@link #shortURLs()}.
@@ -285,7 +284,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		_urlRewriter = ERXURLRewriter.fromProperties();
+		refuseObsoleteURLRewriterProperties();
 		_shortURLs = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.shortURLs", true);
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
@@ -438,7 +437,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			location = ERXShortURLs.shorten(location, ERXShortURLs.applicationPrefix(aRequest.adaptorPrefix(), aRequest.applicationName(), ""));
 		}
 
-		return urlRewriter().rewriteURL(location);
+		return location;
 	}
 
 	/**
@@ -1003,12 +1002,19 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * @return The URL rewriter
+	 * ERXURLRewriter (a regular expression applied to every generated URL) is gone. It rewrote in one direction only and
+	 * never saw the long form it was written to match once short URLs were on. Configuration that still asks for it
+	 * stops the launch, rather than being silently ignored.
 	 */
-	public ERXURLRewriter urlRewriter() {
-		return _urlRewriter;
-	}
+	private static void refuseObsoleteURLRewriterProperties() {
+		for( final String key : List.of( "er.extensions.ERXApplication.replaceApplicationPath.pattern", "er.extensions.ERXApplication.replaceApplicationPath.replace" ) ) {
+			final String value = ERXProperties.stringForKey( key );
 
+			if( value != null && !value.isEmpty() ) {
+				throw new IllegalStateException( "The property '" + key + "' is set, but URL rewriting by pattern has been removed. Short URLs (er.extensions.ERXApplication.shortURLs, on by default) remove the adaptor prefix from generated URLs and accept them inbound; remove the replaceApplicationPath properties. Serving an application beneath a path of its own is not supported at present." );
+			}
+		}
+	}
 	/**
 	 * @return The direct-connect URL — the application's own front door, so
 	 *         shortened with short URLs on but never passed through the URL
