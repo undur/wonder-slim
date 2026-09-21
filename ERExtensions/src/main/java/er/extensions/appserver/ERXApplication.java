@@ -13,6 +13,7 @@ import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -403,7 +404,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// URLs get the application prefix, everything else becomes /route/<path> under the same prefix. WO then parses
 		// a well-formed URL every time, whatever shape the front end delivered (freestyle, adaptor prefix, instance
 		// number, or already marked as a route). See ERXShortURLs.canonicalize.
-		url = ERXShortURLs.canonicalize(url, adaptorPath(), name(), applicationExtension(), registeredRequestHandlerKeySet(), RouteTable.defaultRouteTable()::hasRouteFor);
+		// The handler keys are read per request rather than cached: handlers may be registered after construction, and the array is small.
+		@SuppressWarnings("unchecked")
+		final Collection<String> handlerKeys = registeredRequestHandlerKeys();
+
+		url = ERXShortURLs.canonicalize(url, adaptorPath(), name(), applicationExtension(), handlerKeys, RouteTable.defaultRouteTable()::hasRouteFor);
 
 		return new ERXRequest(method, url, httpVersion, headers, content, info);
 	}
@@ -467,21 +472,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 */
 	public String applicationURLPrefix() {
 		return adaptorPath() + "/" + name() + applicationExtension();
-	}
-
-	/**
-	 * @return The registered request handler keys as a set, for the short-URL
-	 *         first-segment check. Built per request rather than cached: handlers
-	 *         may be registered after construction, and the array is small.
-	 */
-	private Set<String> registeredRequestHandlerKeySet() {
-		final Set<String> keys = new HashSet<>();
-
-		for (final Object key : registeredRequestHandlerKeys()) {
-			keys.add(String.valueOf(key));
-		}
-
-		return keys;
 	}
 
 	/**
