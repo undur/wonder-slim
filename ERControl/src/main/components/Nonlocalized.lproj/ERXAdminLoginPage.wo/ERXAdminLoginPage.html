@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="robots" content="noindex, nofollow">
+		<title>Log in - <wo:str value="$applicationName" /> admin</title>
+		<wo:element elementName="link" rel="stylesheet" href="$styleSheetURL" />
+	</head>
+	<body>
+		<div class="page-center">
+			<div class="container-tight">
+				<div class="card">
+					<div class="card-body">
+						<div class="page-pretitle">Admin</div>
+						<h2 class="page-title mb-3"><wo:str value="$applicationName" /></h2>
+						<wo:if condition="$noPasswordConfigured">
+							<div class="alert alert-warning">No admin password is set for this application, so the admin pages are closed. Set a password on the statistics store to open them.</div>
+						</wo:if>
+						<wo:if condition="$refused">
+							<div class="alert alert-danger">That password was not accepted.</div>
+						</wo:if>
+						<wo:form>
+							<div class="mb-3">
+								<label class="form-label" for="password">Password</label>
+								<wo:password value="$password" id="password" class="form-control" autofocus="autofocus" autocomplete="current-password" />
+							</div>
+							<wo:submit action="$logIn" value="Log in" class="btn btn-primary w-100" />
+						</wo:form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

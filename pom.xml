@@ -13,6 +13,7 @@
 		<module>ERLoggingReload4j</module>
 		<module>Ajax</module>
 		<module>AjaxSlim</module>
+		<module>ERControl</module>
 		<module>AjaxPlayground</module>
 	</modules>
 

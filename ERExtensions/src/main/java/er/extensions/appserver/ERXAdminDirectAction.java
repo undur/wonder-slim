@@ -17,9 +17,6 @@ import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOStatisticsStore;
-import com.webobjects.woextensions.events.WOEventDisplayPage;
-import com.webobjects.woextensions.events.WOEventSetupPage;
-import com.webobjects.woextensions.stats.WOStatsPage;
 
 import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
@@ -62,9 +59,10 @@ public class ERXAdminDirectAction extends WODirectAction {
 	 * FIXME: Why?
 	 */
     public WOActionResults statsAction() {
-        WOStatsPage nextPage = pageWithName(WOStatsPage.class);
-        nextPage.password = context().request().stringFormValueForKey("pw");
-        return nextPage.submit();
+        // The page lives in ERControl, which need not be present: reached by name, not by class
+        final WOComponent nextPage = pageWithName("WOStatsPage");
+        nextPage.takeValueForKey(context().request().stringFormValueForKey("pw"), "password");
+        return (WOActionResults)nextPage.valueForKey("submit");
     }
 
 	/**
@@ -73,9 +71,9 @@ public class ERXAdminDirectAction extends WODirectAction {
 	 * FIXME: Why?
 	 */
 	public WOActionResults eventsAction() {
-		WOEventDisplayPage nextPage = pageWithName(WOEventDisplayPage.class);
-		nextPage.password = context().request().stringFormValueForKey("pw");
-		return nextPage.submit();
+		final WOComponent nextPage = pageWithName("WOEventDisplayPage");
+		nextPage.takeValueForKey(context().request().stringFormValueForKey("pw"), "password");
+		return (WOActionResults)nextPage.valueForKey("submit");
 	}
 
 	/**
@@ -84,10 +82,10 @@ public class ERXAdminDirectAction extends WODirectAction {
 	 * FIXME: Why?
 	 */
 	public WOActionResults eventsSetupAction() {
-		WOEventSetupPage nextPage = pageWithName(WOEventSetupPage.class);
-		nextPage.password = context().request().stringFormValueForKey("pw");
-		nextPage.submit();
-		nextPage.selectAll();
+		final WOComponent nextPage = pageWithName("WOEventSetupPage");
+		nextPage.takeValueForKey(context().request().stringFormValueForKey("pw"), "password");
+		nextPage.valueForKey("submit");
+		nextPage.valueForKey("selectAll");
 		return eventsAction();
 	}
 
@@ -181,6 +179,10 @@ public class ERXAdminDirectAction extends WODirectAction {
 
 	/**
 	 * @return The password held by the application's statistics store, read off its private "_password" field. Null if unset.
+	 *
+	 * The store offers no way to read its password back: WOStatisticsStore.validateLogin() needs a session to mark,
+	 * and the field is private. Applications commonly set the password in code rather than through the
+	 * WOStatisticsPassword property, so comparing against the property is not an option. Hence reflection.
 	 */
 	private static String statisticsStorePassword() {
 		final WOStatisticsStore store = WOApplication.application().statisticsStore();

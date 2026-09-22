@@ -1,0 +1,28 @@
+<wo:ERXAdminLayout title="Threads" section="threads" subtitle="A thread dump of this JVM, taken when the page rendered.">
+	<wo:if condition="$hasDeadlock"><div class="alert alert-danger">The JVM reports deadlocked threads.</div></wo:if>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title"><wo:str value="$threadCount" /> threads</h3>
+					<span class="card-subtitle"><wo:repetition list="$stateCounts" item="$currentStateCount"><span class="badge"><wo:str value="$currentStateCount.state" /> <wo:str value="$currentStateCount.count" /></span> </wo:repetition></span>
+					<div class="card-actions"><wo:link action="$refresh" class="btn btn-sm">Refresh</wo:link></div>
+				</div>
+				<div class="table-responsive">
+					<table class="table card-table table-fixed">
+						<thead><tr><th style="width: 17rem">Thread</th><th style="width: 15rem">State</th><th>Stack</th></tr></thead>
+						<tbody>
+							<wo:repetition list="$threads" item="$currentThread">
+								<tr>
+									<td><strong><wo:str value="$currentThread.threadName" /></strong><div class="text-secondary">#<wo:str value="$currentThread.threadId" /></div></td>
+									<td><wo:container elementName="span" class="$currentStateClass"><wo:str value="$currentThread.threadState" /></wo:container><wo:if condition="$currentLockDescription"><div class="text-secondary font-monospace"><wo:str value="$currentLockDescription" /></div></wo:if></td>
+									<td><wo:if condition="$currentHasStackTrace"><pre class="stack"><wo:str value="$currentStackTrace" /></pre></wo:if></td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</wo:ERXAdminLayout>

@@ -17,12 +17,12 @@ Conditional2: WOConditional
 }
 
 Conditional3: WOConditional {
-	condition = session.allowedToViewEvents;
+	condition = allowedToViewEvents;
 	negate = true;
 }
 
 Conditional4: WOConditional {
-	condition = session.allowedToViewEvents;
+	condition = allowedToViewEvents;
 }
 
 DisplayModeForm: WOForm

@@ -508,6 +508,7 @@ public class ERXProperties {
 		}
 
 		explicit.addAll(ERXConfigurationManager.defaultManager().commandLineArgumentProperties().stringPropertyNames());
+		_explicitlySetKeys = java.util.Set.copyOf(explicit);
 
 		final TreeMap<String, String> effective = new TreeMap<>();
 
@@ -540,6 +541,16 @@ public class ERXProperties {
 		}
 
 		System.out.print(out);
+	}
+
+	private static volatile java.util.Set<String> _explicitlySetKeys = java.util.Set.of();
+
+	/**
+	 * @return The keys a Properties file or the command line set, as worked out for the startup report. The rest of
+	 *         what is in effect are WebObjects and JVM defaults.
+	 */
+	public static java.util.Set<String> explicitlySetKeys() {
+		return _explicitlySetKeys;
 	}
 
 	private static String effectiveValue(String key) {

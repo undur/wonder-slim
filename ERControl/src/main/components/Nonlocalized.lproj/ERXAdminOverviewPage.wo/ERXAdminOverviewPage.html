@@ -1,0 +1,58 @@
+<wo:ERXAdminLayout title="Overview" section="">
+	<wo:if condition="$notice"><div class="alert alert-info"><wo:str value="$notice" /></div></wo:if>
+
+	<div class="row row-cards">
+		<div class="col-lg-3"><div class="card card-sm"><div class="card-body"><div class="subheader">Uptime</div><div class="h1"><wo:str value="$uptime" /></div><div class="text-secondary">since <wo:str value="$startedAt" /></div></div></div></div>
+		<div class="col-lg-3"><div class="card card-sm"><div class="card-body"><div class="subheader">Active sessions</div><div class="h1"><wo:str value="$activeSessions" /></div><div class="text-secondary">time out after <wo:str value="$sessionTimeoutMinutes" /> min</div></div></div></div>
+		<div class="col-lg-3"><div class="card card-sm"><div class="card-body"><div class="subheader">Memory</div><div class="h1"><wo:str value="$memoryPercent" />%</div><div class="text-secondary"><wo:str value="$memoryUsed" /></div></div></div></div>
+		<div class="col-lg-3"><div class="card card-sm"><div class="card-body"><div class="subheader">Logged exceptions</div><div class="h1"><wo:str value="$loggedExceptions" /></div><div class="text-secondary"><wo:str value="$threadCount" /> threads</div></div></div></div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Instance</h3></div>
+				<div class="card-body">
+					<div class="datagrid">
+						<div class="datagrid-item"><div class="datagrid-title">Application</div><div class="datagrid-content"><wo:str value="$applicationName" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Listening on</div><div class="datagrid-content"><wo:str value="$hostAndPort" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Mode</div><div class="datagrid-content"><wo:str value="$mode" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Process id</div><div class="datagrid-content"><wo:str value="$pid" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Adaptor</div><div class="datagrid-content"><wo:str value="$adaptor" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Short URLs</div><div class="datagrid-content"><wo:str value="$shortURLs" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Refusing new sessions</div><div class="datagrid-content"><wo:if condition="$refusingNewSessions"><span class="badge bg-warning-lt">Yes</span></wo:if><wo:if condition="$refusingNewSessions" negate="$true">No</wo:if></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Processors</div><div class="datagrid-content"><wo:str value="$processors" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Java</div><div class="datagrid-content"><wo:str value="$javaVersion" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Java home</div><div class="datagrid-content font-monospace"><wo:str value="$javaHome" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Working directory</div><div class="datagrid-content font-monospace"><wo:str value="$workingDirectory" /></div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Operations</h3></div>
+				<div class="card-body">
+					<wo:form>
+						<wo:if condition="$confirmingStop">
+							<div class="alert alert-danger">Stop <strong><wo:str value="$applicationName" /></strong> on <wo:str value="$hostAndPort" />? Every session on this instance ends. Under wotaskd with auto-recover the instance starts again.</div>
+							<div class="btn-list">
+								<wo:submit action="$stop" value="Yes, stop the application" class="btn btn-danger" />
+								<wo:submit action="$cancelStop" value="Cancel" class="btn" />
+							</div>
+						</wo:if>
+						<wo:if condition="$confirmingStop" negate="$true">
+							<div class="btn-list">
+								<wo:submit action="$collectGarbage" value="Collect garbage" class="btn" />
+								<wo:submit action="$askToStop" value="Stop the application..." class="btn btn-outline-danger" />
+							</div>
+						</wo:if>
+					</wo:form>
+				</div>
+			</div>
+		</div>
+	</div>
+</wo:ERXAdminLayout>

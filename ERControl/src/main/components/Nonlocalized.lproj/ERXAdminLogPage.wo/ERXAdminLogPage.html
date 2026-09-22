@@ -1,0 +1,21 @@
+<wo:ERXAdminLayout title="Log" section="log" subtitle="The tail of what this instance has logged, from an in-memory ring buffer.">
+	<wo:if condition="$isCapturing" negate="$true">
+		<div class="card"><div class="card-body">
+			<p>Log capture is off. It is switched on automatically in development mode; elsewhere the application's log goes to its output file only.</p>
+			<wo:form><wo:submit action="$startCapturing" value="Start capturing" class="btn btn-primary" /></wo:form>
+		</div></div>
+	</wo:if>
+	<wo:if condition="$isCapturing">
+		<div class="card">
+			<div class="card-header">
+				<wo:form class="d-flex align-items-center gap-2 w-100">
+					<wo:textfield value="$filter" class="form-control" placeholder="Only lines containing..." style="max-width: 22rem" />
+					<wo:textfield value="$tail" class="form-control" numberformat="0" style="max-width: 6rem" />
+					<span class="text-secondary">lines</span>
+					<wo:submit action="$apply" value="Show" class="btn btn-primary" />
+				</wo:form>
+			</div>
+			<pre class="code"><wo:str value="$log" /></pre>
+		</div>
+	</wo:if>
+</wo:ERXAdminLayout>

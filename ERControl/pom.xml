@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>is.rebbi.slim</groupId>
+		<artifactId>wonder-slim-reactor</artifactId>
+		<version>8.0.7-SNAPSHOT</version>
+	</parent>
+	<artifactId>ERControl</artifactId>
+	<name>ERControl Framework</name>
+	<packaging>woframework</packaging>
+
+	<!--
+		ERControl - the framework's control panel: the diagnostic and administrative pages for a
+		running application (statistics, events, exceptions, sessions and caches, threads, the log,
+		properties, bundles), behind one gate and one set of routes beneath /wonder. The counterpart
+		of ng-objects' ng-control. Optional: an application that does not depend on it has no
+		administrative surface at all. Depends on ERExtensions, which owns the data these pages show.
+	-->
+	<dependencies>
+		<dependency>
+			<groupId>${wonder.core.group}</groupId>
+			<artifactId>ERExtensions</artifactId>
+			<version>${wonder.version}</version>
+		</dependency>
+	</dependencies>
+</project>

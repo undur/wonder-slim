@@ -1,0 +1,69 @@
+<wo:ERXAdminLayout title="Events" section="events" subtitle="WOEvent instrumentation: turn recording on for the event classes of interest, exercise the application, then read what was recorded.">
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Recording</h3><span class="card-subtitle">which event classes are recorded</span></div>
+				<wo:form>
+					<table class="table card-table table-vcenter">
+						<thead><tr><th class="w-1"></th><th>Event class</th></tr></thead>
+						<tbody>
+							<wo:repetition list="$eventClasses" item="$currentClass">
+								<tr>
+									<td class="w-1"><wo:checkbox checked="$currentClassIsRecorded" /></td>
+									<td class="font-monospace"><wo:str value="$currentClass.name" /></td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+					<div class="card-footer">
+						<div class="btn-list">
+							<wo:submit action="$applySetup" value="Apply" class="btn btn-primary" />
+							<wo:submit action="$recordAll" value="Record all" class="btn" />
+							<wo:submit action="$recordNone" value="Record none" class="btn" />
+						</div>
+					</div>
+				</wo:form>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Recorded events</h3>
+					<span class="card-subtitle"><wo:str value="$eventCount" numberformat="#,##0" /> events</span>
+					<div class="card-actions">
+						<wo:link action="$refresh" class="btn btn-sm">Refresh</wo:link>
+						<wo:if condition="$hasEvents"><wo:link action="$resetEvents" class="btn btn-sm btn-outline-danger">Reset</wo:link></wo:if>
+					</div>
+				</div>
+				<wo:if condition="$hasEvents" negate="$true">
+					<div class="card-body text-secondary">
+						<wo:if condition="$isRecordingAnything">Nothing recorded yet. Exercise the application, then refresh.</wo:if>
+						<wo:if condition="$isRecordingAnything" negate="$true">Nothing is being recorded. Tick the event classes above and apply.</wo:if>
+					</div>
+				</wo:if>
+				<wo:if condition="$hasEvents">
+					<div class="card-body">
+						<div class="btn-list"><wo:repetition list="$modes" item="$currentMode"><wo:link action="$selectCurrentMode" class="$currentModeClass"><wo:str value="$currentMode.label" /></wo:link></wo:repetition></div>
+					</div>
+					<div class="table-responsive">
+						<table class="table card-table table-vcenter table-sm">
+							<thead><tr><th>Event</th><th>Comment</th><th class="text-end">Time</th><th class="text-end">Calls</th><th style="width: 22%">Relative</th></tr></thead>
+							<tbody>
+								<wo:repetition list="$lines" item="$currentLine">
+									<tr>
+										<wo:container elementName="td" style="$currentLineIndentStyle" class="$currentLineTitleClass"><wo:str value="$currentLine.title" /></wo:container>
+										<td class="text-secondary text-break"><wo:str value="$currentLine.comment" /></td>
+										<td class="text-end text-nowrap"><wo:str value="$currentLine.duration" numberformat="#,##0" /> ms</td>
+										<td class="text-end text-nowrap"><wo:str value="$currentLineCalls" /></td>
+										<td><div class="progress"><wo:container elementName="div" class="progress-bar" style="$currentLineBarStyle"></wo:container></div></td>
+									</tr>
+								</wo:repetition>
+							</tbody>
+						</table>
+					</div>
+					<wo:if condition="$linesTruncated"><div class="card-footer">Showing the first <wo:str value="$lines.size" numberformat="#,##0" /> lines.</div></wo:if>
+				</wo:if>
+			</div>
+		</div>
+	</div>
+</wo:ERXAdminLayout>

@@ -57,5 +57,10 @@
 			<artifactId>AjaxSlim</artifactId>
 			<version>${wonder.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>${wonder.core.group}</groupId>
+			<artifactId>ERControl</artifactId>
+			<version>${wonder.version}</version>
+		</dependency>
 	</dependencies>
 </project>

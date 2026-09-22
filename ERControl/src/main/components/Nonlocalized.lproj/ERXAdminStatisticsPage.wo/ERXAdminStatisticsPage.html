@@ -1,0 +1,83 @@
+<wo:ERXAdminLayout title="Statistics" section="statistics" subtitle="What the statistics store has counted since the instance started.">
+	<div class="row row-cards">
+		<div class="col-lg-3"><div class="card card-sm"><div class="card-body"><div class="subheader">Transactions</div><div class="h1"><wo:str value="$transactions" numberformat="#,##0" /></div><div class="text-secondary"><wo:str value="$transactionRate" /> per minute</div></div></div></div>
+		<div class="col-lg-3"><div class="card card-sm"><div class="card-body"><div class="subheader">Average transaction</div><div class="h1"><wo:str value="$averageTransactionTime" /></div><div class="text-secondary"><wo:str value="$movingAverageTransactionTime" /> over the last <wo:str value="$movingAverageSampleSize" /></div></div></div></div>
+		<div class="col-lg-3"><div class="card card-sm"><div class="card-body"><div class="subheader">Active sessions</div><div class="h1"><wo:str value="$activeSessions" /></div><div class="text-secondary">peak <wo:str value="$peakActiveSessions" /></div></div></div></div>
+		<div class="col-lg-3"><div class="card card-sm"><div class="card-body"><div class="subheader">Memory</div><div class="h1"><wo:str value="$memoryPercent" />%</div><div class="text-secondary"><wo:str value="$memoryUsed" /></div></div></div></div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-lg-6">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Transactions</h3><span class="card-subtitle">since <wo:str value="$startedAt" />, <wo:str value="$runningTime" /> ago</span></div>
+				<table class="table card-table table-vcenter">
+					<tbody><wo:repetition list="$transactionRows" item="$currentRow"><tr><td class="text-secondary w-1"><wo:str value="$currentRow.label" /></td><td><wo:str value="$currentRow.value" /></td></tr></wo:repetition></tbody>
+				</table>
+			</div>
+		</div>
+		<div class="col-lg-6">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Sessions</h3></div>
+				<table class="table card-table table-vcenter">
+					<tbody><wo:repetition list="$sessionRows" item="$currentRow"><tr><td class="text-secondary w-1"><wo:str value="$currentRow.label" /></td><td><wo:str value="$currentRow.value" /></td></tr></wo:repetition></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Pages served</h3><span class="card-subtitle">by component action</span><div class="card-actions"><wo:link action="$refresh" class="btn btn-sm">Refresh</wo:link></div></div>
+				<wo:if condition="$hasPages" negate="$true"><div class="card-body text-secondary">No page has been served through a component action yet.</div></wo:if>
+				<wo:if condition="$hasPages">
+					<div class="table-responsive"><table class="table card-table table-vcenter table-sm">
+						<thead><tr><th>Page</th><th class="text-end">Served</th><th style="width: 30%">Share</th><th class="text-end">Average</th><th class="text-end">Range</th></tr></thead>
+						<tbody><wo:repetition list="$pages" item="$currentServed"><tr>
+							<td><wo:str value="$currentServed.name" /></td>
+							<td class="text-end"><wo:str value="$currentServed.count" numberformat="#,##0" /></td>
+							<td><div class="progress"><wo:container elementName="div" class="progress-bar" style="$currentServedBarStyle"></wo:container></div></td>
+							<td class="text-end text-nowrap"><wo:str value="$currentServedAverage" /></td>
+							<td class="text-end text-nowrap text-secondary"><wo:str value="$currentServedRange" /></td>
+						</tr></wo:repetition></tbody>
+					</table></div>
+				</wo:if>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Direct actions</h3></div>
+				<wo:if condition="$hasDirectActions" negate="$true"><div class="card-body text-secondary">No direct action has been served yet.</div></wo:if>
+				<wo:if condition="$hasDirectActions">
+					<div class="table-responsive"><table class="table card-table table-vcenter table-sm">
+						<thead><tr><th>Action</th><th class="text-end">Served</th><th style="width: 30%">Share</th><th class="text-end">Average</th><th class="text-end">Range</th></tr></thead>
+						<tbody><wo:repetition list="$directActions" item="$currentServed"><tr>
+							<td><wo:str value="$currentServed.name" /></td>
+							<td class="text-end"><wo:str value="$currentServed.count" numberformat="#,##0" /></td>
+							<td><div class="progress"><wo:container elementName="div" class="progress-bar" style="$currentServedBarStyle"></wo:container></div></td>
+							<td class="text-end text-nowrap"><wo:str value="$currentServedAverage" /></td>
+							<td class="text-end text-nowrap text-secondary"><wo:str value="$currentServedRange" /></td>
+						</tr></wo:repetition></tbody>
+					</table></div>
+				</wo:if>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">ERXStats</h3>
+					<span class="card-subtitle">time spent, by type of event</span>
+					<wo:if condition="$hasERXStats"><div class="card-actions"><wo:link action="$resetERXStats" class="btn btn-sm">Reset</wo:link></div></wo:if>
+				</div>
+				<div class="card-body">
+					<wo:if condition="$hasERXStats"><wo:ERXStatsSummary /></wo:if>
+					<wo:if condition="$hasERXStats" negate="$true">
+						<wo:if condition="$isCollectingERXStats">ERXStats is on, but nothing has been timed yet. It records what the application brackets with <span class="font-monospace">ERXStats.markStart()</span> and <span class="font-monospace">markEnd()</span>; the framework itself times nothing.</wo:if>
+						<wo:if condition="$isCollectingERXStats" negate="$true">ERXStats is off. Set <span class="font-monospace">er.extensions.erxStats.enabled=true</span> (it can be set on the running instance under Properties) and bracket the code to time with <span class="font-monospace">ERXStats.markStart()</span> and <span class="font-monospace">markEnd()</span>.</wo:if>
+					</wo:if>
+				</div>
+				<wo:if condition="$logFile"><div class="card-footer">The store also writes a log to <span class="font-monospace"><wo:str value="$logFile" /></span>.</div></wo:if>
+			</div>
+		</div>
+	</div>
+</wo:ERXAdminLayout>

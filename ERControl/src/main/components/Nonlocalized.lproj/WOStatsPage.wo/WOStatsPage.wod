@@ -1,6 +1,6 @@
 
 ALLOWED: WOConditional {
-	condition = session.allowedToViewStatistics;
+	condition = allowedToViewStatistics;
 }
 
 ActionAvg: WOString {
@@ -205,7 +205,7 @@ REFRESH: WOSubmitButton {
 }
 
 REFUSED: WOConditional {
-	condition = session.allowedToViewStatistics;
+	condition = allowedToViewStatistics;
 	negate = "1";
 }
 

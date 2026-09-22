@@ -180,6 +180,13 @@ public class WOStatsPage extends WOComponent {
         return aRunningTimeString;
     }
 
+    /**
+     * @return true if the statistics may be shown: the session logged in on this page's own form, or the request is let into the admin UI
+     */
+    public boolean allowedToViewStatistics() {
+        return session().allowedToViewStatistics() || er.extensions.admin.ERXAdmin.isAuthorized( context() );
+    }
+
     public boolean isLogPath() {
         if (statsDict.objectForKey("LogFile")!=null) {
             return true;

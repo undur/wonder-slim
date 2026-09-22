@@ -25,12 +25,12 @@ ClearAllButton: WOSubmitButton
 
 Conditional1: WOConditional
 {
-	condition = session.allowedToViewEvents;
+	condition = allowedToViewEvents;
 }
 
 Conditional2: WOConditional
 {
-	condition = session.allowedToViewEvents;
+	condition = allowedToViewEvents;
 	negate = true;
 }
 

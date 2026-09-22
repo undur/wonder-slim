@@ -1,0 +1,20 @@
+<wo:ERXAdminLayout title="Bundles" section="bundles" subtitle="The application's main bundle and the frameworks loaded alongside it.">
+	<div class="card">
+		<div class="card-header"><h3 class="card-title"><wo:str value="$bundleCount" /> bundles</h3></div>
+		<div class="table-responsive">
+			<table class="table table-vcenter card-table">
+				<thead><tr><th>Name</th><th>Kind</th><th class="text-end">Classes</th><th>Location</th></tr></thead>
+				<tbody>
+					<wo:repetition list="$bundles" item="$current">
+						<tr>
+							<td class="text-nowrap"><strong><wo:str value="$current.name" /></strong> <wo:if condition="$currentIsMainBundle"><span class="badge bg-primary-lt">main</span></wo:if></td>
+							<td class="text-nowrap text-secondary"><wo:str value="$currentKind" /></td>
+							<td class="text-end"><wo:str value="$currentClassCount" /></td>
+							<td class="font-monospace text-break"><wo:str value="$currentPath" /></td>
+						</tr>
+					</wo:repetition>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</wo:ERXAdminLayout>

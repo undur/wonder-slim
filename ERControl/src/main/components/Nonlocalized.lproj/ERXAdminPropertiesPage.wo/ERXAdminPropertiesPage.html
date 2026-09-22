@@ -1,0 +1,44 @@
+<wo:ERXAdminLayout title="Properties" section="properties" subtitle="Every property in effect. Those a Properties file or the command line set are marked; the rest are WebObjects and JVM defaults.">
+	<wo:if condition="$notice"><div class="alert alert-info"><wo:str value="$notice" /></div></wo:if>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<wo:form class="d-flex align-items-center gap-2 w-100">
+						<wo:textfield value="$filter" class="form-control" placeholder="Filter by key or value..." style="max-width: 24rem" />
+						<label class="d-flex align-items-center gap-2 text-nowrap"><wo:checkbox checked="$onlyExplicit" /> only those set explicitly</label>
+						<wo:submit action="$apply" value="Show" class="btn btn-primary" />
+						<span class="text-secondary ms-auto"><wo:str value="$propertyCount" /> properties</span>
+					</wo:form>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table table-sm">
+						<thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+						<tbody>
+							<wo:repetition list="$properties" item="$current">
+								<tr>
+									<td class="font-monospace text-nowrap"><wo:str value="$current.key" /></td>
+									<td class="font-monospace text-break"><wo:str value="$current.value" /></td>
+									<td class="text-nowrap text-end"><wo:if condition="$current.explicit"><span class="badge bg-primary-lt">set</span></wo:if> <wo:if condition="$current.secret"><span class="badge bg-warning-lt">masked</span></wo:if></td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Set a property on this instance</h3></div>
+				<div class="card-body">
+					<wo:form class="d-flex align-items-center gap-2">
+						<wo:textfield value="$newKey" class="form-control font-monospace" placeholder="key" />
+						<wo:textfield value="$newValue" class="form-control font-monospace" placeholder="value" />
+						<wo:submit action="$setProperty" value="Set" class="btn btn-primary" />
+					</wo:form>
+					<div class="form-hint">Sets a system property and reconfigures logging from the properties, so log levels can be changed this way. Nothing is written to disk; the value lasts until the instance stops.</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</wo:ERXAdminLayout>

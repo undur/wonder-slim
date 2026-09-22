@@ -24,6 +24,13 @@ public class WOEventPage extends WOComponent {
 		return false;
 	}
 
+	/**
+	 * @return true if the events may be shown: the session logged in on this page's own form, or the request is let into the admin UI
+	 */
+	public boolean allowedToViewEvents() {
+		return session().allowedToViewEvents() || er.extensions.admin.ERXAdmin.isAuthorized( context() );
+	}
+
 	public String password() {
 		// we need to do this so that the page always requires
 		// explicit password input (and not recycles old input)

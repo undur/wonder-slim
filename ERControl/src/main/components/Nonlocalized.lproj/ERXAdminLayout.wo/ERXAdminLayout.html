@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="robots" content="noindex, nofollow">
+		<title><wo:str value="$title" /> - <wo:str value="$applicationName" /> admin</title>
+		<wo:element elementName="link" rel="stylesheet" href="$styleSheetURL" />
+	</head>
+	<body>
+		<div class="page">
+			<aside class="navbar navbar-vertical">
+				<span class="navbar-brand"><wo:str value="$applicationName" /><small><wo:str value="$instanceDescription" /> &middot; <wo:str value="$modeDescription" /></small></span>
+				<ul class="navbar-nav">
+					<wo:repetition list="$sections" item="$currentSection">
+						<wo:container elementName="li" class="$currentSectionClass"><wo:container elementName="a" class="nav-link" href="$currentSectionURL"><span class="nav-link-title"><wo:str value="$currentSection.title" /></span></wo:container></wo:container>
+					</wo:repetition>
+				</ul>
+				<wo:if condition="$showLogout"><span class="navbar-text"><wo:container elementName="a" href="$logoutURL">Log out</wo:container></span></wo:if>
+			</aside>
+			<div class="page-wrapper">
+				<div class="page-header">
+					<div class="container-xl">
+						<div class="page-pretitle">Admin</div>
+						<h2 class="page-title"><wo:str value="$title" /></h2>
+						<wo:if condition="$subtitle"><div class="text-secondary"><wo:str value="$subtitle" /></div></wo:if>
+					</div>
+				</div>
+				<div class="page-body">
+					<div class="container-xl">
+						<wo:content />
+					</div>
+				</div>
+				<footer class="footer">
+					<div class="container-xl">wonder-slim admin &middot; <wo:str value="$applicationName" /></div>
+				</footer>
+			</div>
+		</div>
+	</body>
+</html>
