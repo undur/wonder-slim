@@ -14,6 +14,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOSession;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.foundation.ERXProperties;
 import er.extensions.routes.RouteInvocation;
 import er.extensions.routes.RouteTable;
 
@@ -21,7 +22,7 @@ import er.extensions.routes.RouteTable;
  * The framework's admin UI: one gate, one set of routes, one list of sections.
  *
  * Everything lives beneath {@link #PATH}. A request is let in when the application runs in development mode, or when
- * its session has logged in with the admin password. Anything else gets the login page.
+ * its session has logged in with the admin password ({@link #PASSWORD_PROPERTY}). Anything else gets the login page.
  *
  * The routes are registered by the ERControl framework principal once the application object exists, after the
  * application's own, so a route an application maps itself always wins over ours.
@@ -163,10 +164,16 @@ public final class ERXAdmin {
 	}
 
 	/**
-	 * @return The admin password. Hardcoded while the control panel is developed on its branch; becomes a property before it lands.
+	 * The property the admin password is read from: the same one ERXMonitorServer uses, so the deployment tools hand an
+	 * instance one secret that opens both. Unset means the control panel is closed outside development mode.
+	 */
+	public static final String PASSWORD_PROPERTY = "WOMonitorServicePassword";
+
+	/**
+	 * @return The admin password, null if none is set
 	 */
 	static String adminPassword() {
-		return "smu";
+		return ERXProperties.stringForKey( PASSWORD_PROPERTY );
 	}
 
 	/**

@@ -15,7 +15,7 @@
 						<div class="page-pretitle">Admin</div>
 						<h2 class="page-title mb-3"><wo:str value="$applicationName" /></h2>
 						<wo:if condition="$noPasswordConfigured">
-							<div class="alert alert-warning">No admin password is set for this application, so the admin pages are closed. Set a password on the statistics store to open them.</div>
+							<div class="alert alert-warning">No admin password is set for this application, so the admin pages are closed. Set <span class="font-monospace">WOMonitorServicePassword</span> to open them.</div>
 						</wo:if>
 						<wo:if condition="$refused">
 							<div class="alert alert-danger">That password was not accepted.</div>
