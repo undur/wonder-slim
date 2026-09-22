@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2026-09-22 (8.0.7)
 
 - **ERControl: the framework's control panel**
   A new framework, the counterpart of ng-objects' ng-control, holding the diagnostic and
@@ -11,8 +11,9 @@
   caches, threads, the log, properties (everything in effect, explicitly set keys marked, secrets
   masked, set a property on the running instance) and bundles. A request is let in in
   development mode, or once its session has logged in with `WOMonitorServicePassword` - the
-  same property ERXMonitorServer reads, so one secret opens both; unset means closed. Optional:
-  an application that does not depend on the framework has no administrative surface at all.
+  same property ERXMonitorServer reads, so one secret opens both; unset means closed. A logged-in
+  session ends after ten minutes without activity. Optional: an application that does not depend
+  on the framework has no administrative surface at all.
 
   Everything only the control panel uses moves there from ERExtensions, package names
   unchanged: WOStatsPage, the WOEvent pages, ERXExceptionManagementPage, the session cache
@@ -67,6 +68,11 @@
   It rewrote outbound only, leaving the inbound half to the front end, and with short URLs on it
   never saw the long form its pattern was written to match. An application that still sets either
   property refuses to launch and says why, rather than ignoring the configuration.
+
+- **Describing the application to the deployment stack**
+  `/wa/ERXDirectAction/describe` answers `{"framework":"wonder-slim"}`, so wotaskd can tell a
+  wonder-slim application from a Project Wonder or plain WebObjects one. Temporary, until
+  ng-objects and wonder-slim share a response structure for this.
 
 - **Admin action password check**
   `ERXAdminDirectAction` reads the statistics store's password itself; `ERXPrivateKVC` is gone.
