@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- **ERControl: the framework's control panel**
+  A new framework, the counterpart of ng-objects' ng-control, holding the diagnostic and
+  administrative pages for a running application behind one gate and one set of routes beneath
+  `/wonder/admin`. Overview (uptime, sessions, memory, instance facts; collect garbage, stop),
+  statistics (what the statistics store has counted, and the ERXStats summary), events (which
+  event classes are recorded, and the recorded events as a tree), exceptions, sessions and
+  caches, threads, the log, properties (everything in effect, explicitly set keys marked, secrets
+  masked, set a property on the running instance) and bundles. A request is let in in
+  development mode, or once its session has logged in with `WOMonitorServicePassword` - the
+  same property ERXMonitorServer reads, so one secret opens both; unset means closed. Optional:
+  an application that does not depend on the framework has no administrative surface at all.
+
+  Everything only the control panel uses moves there from ERExtensions, package names
+  unchanged: WOStatsPage, the WOEvent pages, ERXExceptionManagementPage, the session cache
+  overview pages, ERXStatsSummary, the WX outline components, and the resources only they use.
+  The data they show stays in ERExtensions. The admin direct actions keep working where the
+  framework is present.
+
 - **One canonical URL form for every inbound request**
   `ERXApplication.createRequest()` turns every inbound URL into the canonical WebObjects URL for it
   before WO parses it (`ERXShortURLs.canonicalize`), so nothing downstream depends on the shape the
