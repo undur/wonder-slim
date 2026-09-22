@@ -49,6 +49,10 @@ public class ERXAdminLoginPage extends ERXComponent {
 		return WOApplication.application().resourceManager().urlForResourceNamed( "admin/erx-admin.css", "ERControl", null, context().request() );
 	}
 
+	public int sessionTimeoutMinutes() {
+		return ERXAdmin.SESSION_TIMEOUT_SECONDS / 60;
+	}
+
 	public String applicationName() {
 		return WOApplication.application().name();
 	}

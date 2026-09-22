@@ -26,6 +26,7 @@
 								<wo:password value="$password" id="password" class="form-control" autofocus="autofocus" autocomplete="current-password" />
 							</div>
 							<wo:submit action="$logIn" value="Log in" class="btn btn-primary w-100" />
+							<div class="form-hint mt-3">An admin session ends after <wo:str value="$sessionTimeoutMinutes" /> minutes without activity.</div>
 						</wo:form>
 					</div>
 				</div>

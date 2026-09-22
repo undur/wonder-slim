@@ -23,6 +23,7 @@ import er.extensions.routes.RouteTable;
  *
  * Everything lives beneath {@link #PATH}. A request is let in when the application runs in development mode, or when
  * its session has logged in with the admin password ({@link #PASSWORD_PROPERTY}). Anything else gets the login page.
+ * A logged-in session times out after {@link #SESSION_TIMEOUT_SECONDS} without activity.
  *
  * The routes are registered by the ERControl framework principal once the application object exists, after the
  * application's own, so a route an application maps itself always wins over ours.
@@ -38,6 +39,12 @@ public final class ERXAdmin {
 	public static final String PATH = "/wonder/admin";
 
 	private static final String AUTHORIZED_KEY = "er.extensions.admin.ERXAdmin.authorized";
+
+	/**
+	 * How long an admin session lives without activity: ten minutes. Set on the session when it logs in, replacing the
+	 * application's timeout for that session; the login page notes it.
+	 */
+	public static final int SESSION_TIMEOUT_SECONDS = 10 * 60;
 
 	/**
 	 * A section of the admin UI: a path beneath {@link #PATH}, its title in the navigation and the page that renders it
@@ -145,6 +152,9 @@ public final class ERXAdmin {
 
 		final WOSession session = context.session();
 		session.setObjectForKey( Boolean.TRUE, AUTHORIZED_KEY );
+
+		// A session holding privileged access is worth keeping short: the application's own timeout is sized for its users
+		session.setTimeOut( SESSION_TIMEOUT_SECONDS );
 
 		return true;
 	}
