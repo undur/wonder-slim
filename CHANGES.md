@@ -49,6 +49,14 @@
   mapping time, since such a route could never be matched. `tools/playwright-bridge/examples/
   route-url-shapes.mjs` probes the URL-shape matrix.
 
+- **`com.webobjects.woextensions` is gone**
+  The components inherited from JavaWOExtensions now live in packages of the framework's own:
+  the error pages in `er.extensions.components.errorpages`, the rest (WOCollapsibleComponentContent,
+  WOIFrame, WOKeyValueConditional, WOLongResponsePage, WOMetaRefresh, and in ERControl the
+  statistics and event pages) in `er.extensions.components.woextensions`. Templates are
+  unaffected; an application importing `ERXErrorPage` or `WOExceptionPage` by class updates the
+  import.
+
 - **Parsley 1.6.1**
   The `/problems` development endpoint now reports from Parsley's recording store, so it lists the
   runtime problems the application rendered into its pages.

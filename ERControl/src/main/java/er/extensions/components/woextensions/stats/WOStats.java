@@ -1,0 +1,25 @@
+/*
+ * WOStats.java
+ * (c) Copyright 2001 Apple Computer, Inc. All rights reserved.
+ * This a modified version.
+ * Original license: http://www.opensource.apple.com/apsl/
+ */
+
+package er.extensions.components.woextensions.stats;
+
+import com.webobjects.appserver.WOActionResults;
+import com.webobjects.appserver.WORequest;
+
+import er.extensions.appserver.ERXDirectAction;
+
+public class WOStats extends ERXDirectAction {
+
+	public WOStats(WORequest aRequest) {
+		super(aRequest);
+	}
+
+	@Override
+	public WOActionResults defaultAction() {
+		return pageWithName( WOStatsPage.class );
+	}
+}

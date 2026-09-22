@@ -1,0 +1,37 @@
+/*
+ * WOSessionRestorationError.java
+ * (c) Copyright 2001 Apple Computer, Inc. All rights reserved.
+ * This a modified version.
+ * Original license: http://www.opensource.apple.com/apsl/
+ */
+
+package er.extensions.components.errorpages;
+
+import com.webobjects.appserver.WOComponent;
+import com.webobjects.appserver.WOContext;
+import com.webobjects.appserver.WOResponse;
+
+public class WOSessionRestorationError extends WOComponent {
+
+	public WOSessionRestorationError(WOContext aContext) {
+		super(aContext);
+	}
+
+	@Override
+	public boolean isEventLoggingEnabled() {
+		return false;
+	}
+
+	/**
+	 * @return The session timeout in whole minutes, for telling the user how long inactivity is tolerated
+	 */
+	public int sessionTimeoutMinutes() {
+		return application().sessionTimeOut().intValue() / 60;
+	}
+
+	@Override
+	public void appendToResponse(WOResponse aResponse, WOContext aContext) {
+		super.appendToResponse(aResponse, aContext);
+		aResponse.disableClientCaching();
+	}
+}

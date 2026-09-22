@@ -1,0 +1,50 @@
+/*
+ * WOEventPage.java
+ * (c) Copyright 2001 Apple Computer, Inc. All rights reserved.
+ * This a modified version.
+ * Original license: http://www.opensource.apple.com/apsl/
+ */
+
+package er.extensions.components.woextensions.events;
+
+import com.webobjects.appserver.WOComponent;
+import com.webobjects.appserver.WOContext;
+
+public class WOEventPage extends WOComponent {
+
+	public String password;
+	public String userName;
+
+	public WOEventPage(WOContext aContext) {
+		super(aContext);
+	}
+
+	@Override
+	public boolean isEventLoggingEnabled() {
+		return false;
+	}
+
+	/**
+	 * @return true if the events may be shown: the session logged in on this page's own form, or the request is let into the admin UI
+	 */
+	public boolean allowedToViewEvents() {
+		return session().allowedToViewEvents() || er.extensions.admin.ERXAdmin.isAuthorized( context() );
+	}
+
+	public String password() {
+		// we need to do this so that the page always requires
+		// explicit password input (and not recycles old input)
+		return null;
+	}
+
+	public String userName() {
+		// we need to do this so that the page always requires
+		// explicit username input (and not recycles old input)
+		return null;
+	}
+
+	public WOComponent submit() {
+		session().validateEventsLogin(password, userName);
+		return null;
+	}
+}

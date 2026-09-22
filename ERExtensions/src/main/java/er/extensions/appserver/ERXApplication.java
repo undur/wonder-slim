@@ -48,7 +48,7 @@ import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation._NSUtilities;
-import com.webobjects.woextensions.error.WOExceptionPage;
+import er.extensions.components.errorpages.WOExceptionPage;
 
 import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
