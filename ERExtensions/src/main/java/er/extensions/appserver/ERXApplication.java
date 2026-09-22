@@ -105,10 +105,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private final String _publicHost;
 
 	/**
-	 * Configuration for URL rewriting
-	 */
-
-	/**
 	 * Short URLs: request handler keys as top-level routes. See {@link #shortURLs()}.
 	 */
 	private final boolean _shortURLs;
