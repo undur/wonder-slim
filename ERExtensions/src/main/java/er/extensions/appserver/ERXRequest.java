@@ -32,7 +32,7 @@ import er.extensions.localization.ERXLocalizer;
  * Subclass of WORequest that fixes several Bugs.
  * The ID's are #2924761 and #2961017. It can also be extended to handle
  * #2957558 ("de-at" is converted to "German" instead of "German_Austria").
- * The request is created via {@link ERXApplication#createRequest(String, String, String, Map, NSData, Map)}.
+ * The request is created via {@link ERXApplication#newRequest(String, String, String, Map, NSData, Map)} (the routing layer canonicalizes its URL first).
  */
 
 public  class ERXRequest extends WORequest {

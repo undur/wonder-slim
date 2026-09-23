@@ -6,12 +6,10 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
 
-import er.extensions.appserver.ERXShortURLs;
-
 /**
  * The request handler behind {@link ERXShortURLs#ROUTE_KEY}: hands the request to the default RouteTable through
  * RouteAction.defaultAction(). Every request that is not a handler URL reaches it, because
- * {@code ERXApplication.createRequest()} canonicalizes such URLs to {@code <prefix>/route/<path>} before WO parses
+ * {@code ERXRoutingApplication.createRequest()} canonicalizes such URLs to {@code <prefix>/route/<path>} before WO parses
  * them - whatever shape the front end delivered (freestyle, adaptor prefix, instance number, or already marked).
  * The key is internal: it never appears in a generated URL, and public URLs are the same in development and
  * deployment. The handler is the application's default request handler too, as a safety net.

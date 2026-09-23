@@ -1,7 +1,8 @@
 package er.extensions.appserver.ajax;
 
-import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
+
+import er.extensions.routes.ERXRoutingContext;
 
 /**
  * ERXAjaxContext provides the overrides necessary methods for partial form
@@ -11,7 +12,7 @@ import com.webobjects.appserver.WORequest;
  * 
  * @author mschrag
  */
-public class ERXAjaxContext extends WOContext {
+public class ERXAjaxContext extends ERXRoutingContext {
 	
 	public ERXAjaxContext(WORequest request) {
 		super(request);

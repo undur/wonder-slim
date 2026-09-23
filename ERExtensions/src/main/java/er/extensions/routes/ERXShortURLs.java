@@ -1,4 +1,4 @@
-package er.extensions.appserver;
+package er.extensions.routes;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -15,10 +15,10 @@ import java.util.regex.Pattern;
  *
  * Both directions are pure functions of the application's URL prefix (an
  * exact string the app computes — no patterns) and its handler keys; the
- * seams that call them are {@code ERXApplication.createRequest()} for inbound
+ * seams that call them are {@code ERXRoutingApplication.createRequest()} for inbound
  * ({@link #canonicalize}, which also puts every route under the {@link #ROUTE_KEY}
- * request handler) and {@code ERXWOContext._urlWithRequestHandlerKey()} /
- * {@code ERXApplication._newLocationForRequest()} for outbound.
+ * request handler) and {@code ERXRoutingContext._urlWithRequestHandlerKey()} /
+ * {@code ERXRoutingApplication._newLocationForRequest()} for outbound.
  *
  * Note that a short URL carries no {@code .woa/N} instance number: URL-based
  * instance pinning doesn't apply to it (a proxy's cookie affinity does).

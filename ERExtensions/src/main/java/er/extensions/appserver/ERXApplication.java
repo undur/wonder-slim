@@ -13,7 +13,6 @@ import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,6 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
-import com.webobjects.foundation._NSUtilities;
 import er.extensions.components.errorpages.WOExceptionPage;
 
 import er.extensions.ERXExtensions;
@@ -68,9 +66,6 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
-import er.extensions.routes.RouteAction;
-import er.extensions.routes.RouteRequestHandler;
-import er.extensions.routes.RouteTable;
 import er.extensions.statistics.ERXStats;
 import parsley.ParsleyConfiguration;
 
@@ -103,11 +98,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Host name used for URL generation when no request is present (for example, in background tasks)
 	 */
 	private final String _publicHost;
-
-	/**
-	 * Short URLs: request handler keys as top-level routes. See {@link #shortURLs()}.
-	 */
-	private final boolean _shortURLs;
 
 	/**
 	 * To support load balancing with mod_proxy
@@ -210,9 +200,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// FIXME: Figure out why this is getting initialized here and document it // Hugi 2025-06-07
 		ERXStats.initStatisticsIfNecessary();
 
-		// RouteAction is a very generic name for a direct action class, so we register it explicitly to prevent problems
-		_NSUtilities.setClassForName( RouteAction.class, "RouteAction" );
-
 		fixBaseURLs();
 
 		checkEnvironment();
@@ -258,13 +245,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			registerRequestHandler( new ERXRuntimeProblemsRequestHandler(), ERXRuntimeProblemsRequestHandler.KEY );
 		}
 
-		// Routes: createRequest() canonicalizes every URL that is not a handler URL to /route/<path>, which is how routes
-		// get here. The same handler is the default request handler as well, so that a request which somehow arrives
-		// uncanonicalized with an unknown handler key gets the route table's answer rather than WO's component request
-		// handler. See ERXShortURLs.canonicalize and RouteRequestHandler.
-		final RouteRequestHandler routeRequestHandler = new RouteRequestHandler();
-		registerRequestHandler( routeRequestHandler, ERXShortURLs.ROUTE_KEY );
-		setDefaultRequestHandler( routeRequestHandler );
 
 		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
 
@@ -275,8 +255,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		refuseObsoleteURLRewriterProperties();
-		_shortURLs = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.shortURLs", true);
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 
@@ -377,86 +355,18 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return context;
 	}
 
+	/**
+	 * @return An ERXRequest. The URL has already been canonicalized by the routing layer (ERXRoutingApplication.createRequest).
+	 */
 	@Override
-	public ERXRequest createRequest(String method, String url, String httpVersion, Map<String, ? extends List<String>> headers, NSData content, Map<String, Object> info) {
+	protected ERXRequest newRequest(String method, String url, String httpVersion, Map<String, ? extends List<String>> headers, NSData content, Map<String, Object> info) {
 
 		// Workaround for #3428067 (Apache Server Side Include module will feed "INCLUDED" as the HTTP version, which causes a request object not to be created by an exception.
 		if (httpVersion == null || httpVersion.startsWith("INCLUDED")) {
 			httpVersion = "HTTP/1.0";
 		}
 
-		// Every inbound URL is turned into the canonical WO URL for it here, before the request exists: handler-key
-		// URLs get the application prefix, everything else becomes /route/<path> under the same prefix. WO then parses
-		// a well-formed URL every time, whatever shape the front end delivered (freestyle, adaptor prefix, instance
-		// number, or already marked as a route). See ERXShortURLs.canonicalize.
-		// The handler keys are read per request rather than cached: handlers may be registered after construction, and the array is small.
-		@SuppressWarnings("unchecked")
-		final Collection<String> handlerKeys = registeredRequestHandlerKeys();
-
-		url = ERXShortURLs.canonicalize(url, adaptorPath(), name(), applicationExtension(), handlerKeys, RouteTable.defaultRouteTable()::hasRouteFor);
-
 		return new ERXRequest(method, url, httpVersion, headers, content, info);
-	}
-
-    /**
-     * @returns Request handler used to handle the given request.
-     * 
-     * Overridden to disable WOStaticResourceRequestHandler being returned for URLs ending with resource-suffixes.
-     */
-	@Override
-    public WORequestHandler handlerForRequest(WORequest request) {
-        WORequestHandler requestHandler = requestHandlerForKey(request.requestHandlerKey());
-        return requestHandler != null ? requestHandler : defaultRequestHandler();
-    }
-
-	/**
-	 * The location WO redirects to when it won't serve a request itself — for
-	 * example when refusing new sessions and the request carries an expired
-	 * session. WOApplication builds it from the request's adaptor prefix and
-	 * application name (no extension), i.e. in long form, so it is shortened
-	 * and rewritten like every generated URL: otherwise a front end that only
-	 * knows the short (or rewritten) form would receive a redirect it can't
-	 * route. The prefix removed is the request's own, for the reason given at
-	 * {@link ERXShortURLs#applicationPrefix}.
-	 */
-	@Override
-	public String _newLocationForRequest(WORequest aRequest) {
-		String location = super._newLocationForRequest(aRequest);
-
-		if (shortURLs() && aRequest != null) {
-			location = ERXShortURLs.shorten(location, ERXShortURLs.applicationPrefix(aRequest.adaptorPrefix(), aRequest.applicationName(), ""));
-		}
-
-		return location;
-	}
-
-	/**
-	 * Whether the application accepts and generates short URLs — a request
-	 * handler key as the first path segment, no adaptor prefix
-	 * ({@code /wa/…} for {@code /cgi-bin/WebObjects/App.woa/wa/…}). The long
-	 * form keeps working either way; explicit routes take precedence over the
-	 * shortcut. Property: {@code er.extensions.ERXApplication.shortURLs},
-	 * default true — the clean form is the default, an application that
-	 * must keep generating long URLs opts out. See {@link ERXShortURLs}.
-	 *
-	 * Why a property and not a front-end rewrite rule: the point is the same
-	 * URLs in development and in deployment, so a page's links work whether
-	 * the app is hit directly or through a proxy, with nothing to configure
-	 * per app on the front end. The property is read in the constructor, next
-	 * to the URL rewriter, once the application's properties are loaded.
-	 */
-	public boolean shortURLs() {
-		return _shortURLs;
-	}
-
-	/**
-	 * @return The prefix every long-form URL of this application starts with,
-	 *         {@code /cgi-bin/WebObjects/App.woa} by default: the adaptor path
-	 *         (which carries no trailing slash), the application name and
-	 *         extension
-	 */
-	public String applicationURLPrefix() {
-		return adaptorPath() + "/" + name() + applicationExtension();
 	}
 
 	/**
@@ -976,30 +886,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return _isDevelopmentMode;
 	}
 
-	/**
-	 * ERXURLRewriter (a regular expression applied to every generated URL) is gone. It rewrote in one direction only and
-	 * never saw the long form it was written to match once short URLs were on. Configuration that still asks for it
-	 * stops the launch, rather than being silently ignored.
-	 */
-	private static void refuseObsoleteURLRewriterProperties() {
-		for( final String key : List.of( "er.extensions.ERXApplication.replaceApplicationPath.pattern", "er.extensions.ERXApplication.replaceApplicationPath.replace" ) ) {
-			final String value = ERXProperties.stringForKey( key );
-
-			if( value != null && !value.isEmpty() ) {
-				throw new IllegalStateException( "The property '" + key + "' is set, but URL rewriting by pattern has been removed. Short URLs (er.extensions.ERXApplication.shortURLs, on by default) remove the adaptor prefix from generated URLs and accept them inbound; remove the replaceApplicationPath properties. Serving an application beneath a path of its own is not supported at present." );
-			}
-		}
-	}
-	/**
-	 * @return The direct-connect URL — the application's own front door, so
-	 *         shortened with short URLs on but never passed through the URL
-	 *         rewriter, whose pattern describes a front end's mapping
-	 */
-	@Override
-	public String directConnectURL() {
-		final String url = super.directConnectURL();
-		return shortURLs() ? ERXShortURLs.shorten(url, applicationURLPrefix()) : url;
-	}
 
 	/**
 	 * Set the application's default encodings

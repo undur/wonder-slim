@@ -10,6 +10,7 @@ import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXProperties;
+import er.extensions.routes.ERXRoutingApplication;
 
 /**
  * ERXAjaxApplication is the part of ERXApplication that handles Ajax requests.
@@ -21,7 +22,7 @@ import er.extensions.foundation.ERXProperties;
  *
  * @author mschrag
  */
-public abstract class ERXAjaxApplication extends WOApplication {
+public abstract class ERXAjaxApplication extends ERXRoutingApplication {
 	
 	public static final String KEY_AJAX_SUBMIT_BUTTON = "AJAX_SUBMIT_BUTTON_NAME";
 	public static final String KEY_PARTIAL_FORM_SENDER_ID = "_partialSenderID";
