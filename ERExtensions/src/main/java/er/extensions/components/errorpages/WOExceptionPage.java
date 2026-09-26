@@ -21,16 +21,14 @@ import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.development.NSMavenProjectBundle;
-import er.extensions.components.errorpages.WOExceptionPage.ContextSnapshot;
-import er.extensions.components.errorpages.WOExceptionPage.WOExceptionParser.WOParsedErrorLine;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.components.ERXComponent;
+import er.extensions.components.errorpages.WOExceptionPage.WOExceptionParser.WOParsedErrorLine;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 
@@ -1345,23 +1343,6 @@ public class WOExceptionPage extends ERXComponent {
 		catch( Exception e ) {
 			return null;
 		}
-	}
-
-	/**
-	 * Provided for convenience when overriding Application.reportException(). Like so:
-	 *
-	 * @Override
-	 * public WOResponse reportException( Throwable exception, WOContext context, NSDictionary extraInfo ) {
-	 *    return ERXExceptionPage.reportException( exception, context, extraInfo );
-	 * }
-	 * 
-	 * @deprecated since this page is now automatically used (Due to it being called WOExceptionPage)
-	 */
-	@Deprecated
-	public static WOResponse reportException( Throwable exception, WOContext context, Map extraInfo ) {
-		WOExceptionPage nextPage = ERXApplication.erxApplication().pageWithName( WOExceptionPage.class, context );
-		nextPage.setException( exception );
-		return nextPage.generateResponse();
 	}
 
 	/**
