@@ -12,24 +12,18 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
-import com.webobjects.appserver._private.WOProperties;
 import com.webobjects.appserver._private.WOShared;
 import com.webobjects.appserver._private.WOURLFormatException;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSComparator;
 import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSForwardException;
-import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.foundation.ERXProperties;
 
 /**
- * Subclass of WORequest that fixes several Bugs.
- * The ID's are #2924761 and #2961017. It can also be extended to handle
- * #2957558 ("de-at" is converted to "German" instead of "German_Austria").
  * The request is created via {@link ERXApplication#newRequest(String, String, String, Map, NSData, Map)} (the routing layer canonicalizes its URL first).
  */
 
@@ -53,11 +47,6 @@ public  class ERXRequest extends WORequest {
      */
     private static final String[] HOST_NAME_HEADERS = {"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"};
     
-    /**
-     * NSArray to keep browserLanguages in
-     */
-    private NSArray<String> _browserLanguages;
-
     /**
      * Specifies whether https should be overridden to be enabled or disabled app-wide. This is 
      * useful if you are developing with DirectConnect and you want to be able to specify secure 
@@ -189,12 +178,6 @@ public  class ERXRequest extends WORequest {
     }
     
 	/**
-	 * The language (a WO language name, {@code English}) appended to {@link #browserLanguages()}, so WO's lookup of
-	 * localized components and resources always ends in it
-	 */
-	public static final String DEFAULT_LANGUAGE_PROPERTY = "er.extensions.ERXRequest.defaultLanguage";
-
-	/**
 	 * The locale this request asks for, see {@link #requestedLocale()}
 	 */
 	private Locale _requestedLocale;
@@ -208,11 +191,6 @@ public  class ERXRequest extends WORequest {
 	 * @return The locale this request asks for in its {@code Accept-Language} header, null when it names none. A hint
 	 *         from the client: the framework never formats in it on its own; an application that wants to honour it
 	 *         says so, for example by setting it as the session's locale ({@link ERXSession#setLocale(Locale)}).
-	 *
-	 * FIXME: Duplicates the header parsing in {@link #browserLanguages()} (which uses {@link #fixAbbreviationArray(NSArray)}),
-	 * with a parser of its own (the JDK's). The two agree on ordinary headers and differ on edge cases: the older parser
-	 * keeps {@code *} and malformed entries as keys (browserLanguages() drops them on lookup) and ignores {@code q=0}.
-	 * Should share one parse // Hugi 2026-09-26
 	 */
 	public Locale requestedLocale() {
 		if (!_requestedLocaleResolved) {
@@ -223,58 +201,6 @@ public  class ERXRequest extends WORequest {
 		return _requestedLocale;
 	}
 
-    /**
-     * Returns a cooked version of the languages the user has set in his Browser.
-     * Adds "Nonlocalized" and the default language ({@value #DEFAULT_LANGUAGE_PROPERTY}, English unless set) if not
-     * already present. Transforms regionalized en_us to English_US as a key.
-     * 
-     * @return cooked version of user's languages
-     */
-	@Override
-	public NSArray<String> browserLanguages() {
-        if (_browserLanguages == null) {
-        	final NSMutableArray<String> languageKeys = new NSMutableArray<>();
-            final String acceptLanguageHeader = headerForKey("accept-language");
-
-            if (acceptLanguageHeader != null) {
-                final NSArray<String> rawLanguages = NSArray.componentsSeparatedByString(acceptLanguageHeader, ",");
-                final NSArray<String> fixedLanguages = fixAbbreviationArray(rawLanguages);
-
-                for (String languageKey : fixedLanguages) {
-					String language = WOProperties.TheLanguageDictionary.objectForKey(languageKey);
-
-					if(language == null) {
-						int index = languageKey.indexOf('_');
-
-						if(index > 0) {
-							String mainLanguageKey = languageKey.substring(0, index);
-							String region = languageKey.substring(index);
-							language = WOProperties.TheLanguageDictionary.objectForKey(mainLanguageKey);
-
-							if(language != null) {
-								language = language + region.toUpperCase();
-							}
-						}
-					}
-
-					if(language != null) {
-						languageKeys.addObject(language);
-					}
-				}
-            }
-
-            languageKeys.addObject("Nonlocalized");
-
-            final String defaultLanguage = ERXProperties.stringForKeyWithDefault(DEFAULT_LANGUAGE_PROPERTY, "English");
-            if(!languageKeys.containsObject(defaultLanguage)) {
-                languageKeys.addObject(defaultLanguage);
-            }
-
-            _browserLanguages = languageKeys.immutableClone();
-        }
-
-        return _browserLanguages;
-    }
     
 	/**
 	 * FIXME: Look into and document. WTF are we doing here // Hugi 2025-10-24
@@ -404,110 +330,6 @@ public  class ERXRequest extends WORequest {
         }
 
         return isRequestSecure;
-    }
-
-    private static class _LanguageComparator extends NSComparator {
-        public _LanguageComparator() {}
-
-        /**
-         * Extract the quality factor from a single Accept-Language entry like {@code "en;q=0.9"}.
-         *
-         * Returns {@code 1.0} when no {@code ;q=} segment is present (per RFC default), or when parsing fails for any
-         * reason. Malformed real-world headers do show up in the wild (duplicated {@code ;q=...;q=...} segments, stray
-         * whitespace, etc.) and shouldn't crash the sort.
-         */
-        private static float quality(String languageString) {
-            if (languageString == null) {
-                return 0f;
-            }
-
-            languageString = languageString.trim();
-            final int semicolon = languageString.indexOf(';');
-
-            if (semicolon == -1) {
-                return 1.0f;
-            }
-
-            // Scan parameters after the first ';' looking for q=. Stop at the next ';' so a duplicate or trailing
-            // parameter can't poison the float parse.
-            final int qIndex = languageString.indexOf("q=", semicolon);
-
-            if (qIndex == -1) {
-                return 1.0f;
-            }
-
-            final int start = qIndex + 2;
-            int end = languageString.indexOf(';', start);
-
-            if (end == -1) {
-                end = languageString.length();
-            }
-
-            try {
-                return Float.parseFloat(languageString.substring(start, end).trim());
-            }
-            catch (NumberFormatException e) {
-                return 1.0f;
-            }
-        }
-        
-        @Override
-		public int compare(Object o1, Object o2) {
-            float f1=quality((String)o1);
-            float f2=quality((String)o2);
-            return f1<f2 ? OrderedDescending : ( f1==f2 ? OrderedSame : OrderedAscending ); // we want DESCENDING SORT!!
-        }
-        
-    }
-
-    private final static NSComparator COMPARE_Qs = new _LanguageComparator();
-
-    /**
-     * Translates ("de", "en-us;q=0.33", "en", "en-gb;q=0.66") to ("de", "en_gb", "en-us", "en").
-     *
-     * @param languages NSArray of Strings
-     * @return sorted NSArray of normalized Strings
-     */
-    // Package-private for tests
-    static NSArray<String> fixAbbreviationArray(NSArray<String> languages) {
-
-        try {
-            languages=languages.sortedArrayUsingComparator(COMPARE_Qs);
-        } catch (NSComparator.ComparisonException | NumberFormatException e) {
-            log.warn("Couldn't sort language array {}.", languages, e);
-        }
-
-        final NSMutableArray<String> languagePrefix = new NSMutableArray<>(languages.count());
-
-        for (int languageNum = languages.count() - 1; languageNum >= 0; languageNum--) {
-            String language = languages.objectAtIndex(languageNum);
-            int offset;
-
-            language = language.trim();
-            offset = language.indexOf(';');
-
-            if (offset > 0) {
-                language = language.substring(0, offset);
-            }
-
-            offset = language.indexOf('-');
-
-            if (offset > 0) {
-                final String langPrefix = language.substring(0, offset);  //  "en" part of "en-us"
-
-                if (!languagePrefix.containsObject(langPrefix)) { 
-                    languagePrefix.insertObjectAtIndex(langPrefix, 0);
-                }
-                // converts "en-us" into "en_us";
-                
-                String cooked = language.replace('-', '_');
-                language = cooked;
-            }
-
-            languagePrefix.insertObjectAtIndex(language, 0);
-        }
-
-        return languagePrefix;
     }
 
     /**

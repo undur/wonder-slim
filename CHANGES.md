@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **WebObjects' own `browserLanguages()`**
+  `ERXRequest` no longer overrides `browserLanguages()`; WebObjects' implementation is used. It
+  takes the `Accept-Language` languages in the order the header lists them (current browsers list
+  them by weight, so the first language is the same), maps regional tags to the base language
+  (`en-US` is `English`, not `English_US`), and no longer appends `Nonlocalized` and a default
+  language. That matters only to an application with language-specific `.lproj` folders, which
+  searched those last; such an application sets the session's languages itself. (#64)
+
 - **User-agent detection reduced to what still holds**
   `ERXUserAgent.of(request)` (or `ERXUserAgent.parse(header)`) tells you the browser family
   (Chrome, Safari, Firefox, Edge, Opera, other) and its major version, the operating system
@@ -32,8 +40,7 @@
   localizer (`ERXSession.localizer()`, `language()`, `setLanguage(String)`,
   `availableLanguagesForTheApplication()`, `availableLanguagesForThisSession()`) and
   `ERXComponent.localizer()`. Any `er.extensions.ERXLocalizer.*` property now stops the launch
-  with a pointer to the replacement. The language appended to a request's `browserLanguages()` is
-  set with `er.extensions.ERXRequest.defaultLanguage` (English by default, as before).
+  with a pointer to the replacement.
 
 ## 2026-09-22 (8.0.7)
 

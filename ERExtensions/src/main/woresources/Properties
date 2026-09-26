@@ -20,9 +20,6 @@ er.extensions.ERExtensions.hasLocalization=true
 # Locale
 #########################################################################
 
-## The WO language appended to every request's browserLanguages(), last in the search for localized components and resources
-# er.extensions.ERXRequest.defaultLanguage = English
-
 ## Which characters to ignore when formatting
 # er.extensions.ERXNumberFormatter.ignoredChars=$%
 

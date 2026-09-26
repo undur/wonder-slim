@@ -381,7 +381,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		for( final String key : System.getProperties().stringPropertyNames() ) {
 			if( key.startsWith( prefix ) ) {
-				throw new IllegalStateException( "The property '" + key + "' is set, but ERXLocalizer has been removed. Remove the er.extensions.ERXLocalizer.* properties. Locale-aware formatting is configured with ERXLocale.setApplicationLocale() or ERXSession.setLocale(); the language appended to a request's browser languages with " + ERXRequest.DEFAULT_LANGUAGE_PROPERTY + ". See er.extensions.appserver.ERXLocale." );
+				throw new IllegalStateException( "The property '" + key + "' is set, but ERXLocalizer has been removed. Remove the er.extensions.ERXLocalizer.* properties. Locale-aware formatting is configured with ERXLocale.setApplicationLocale() or ERXSession.setLocale(). See er.extensions.appserver.ERXLocale." );
 			}
 		}
 	}
