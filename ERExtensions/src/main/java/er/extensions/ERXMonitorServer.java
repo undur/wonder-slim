@@ -30,7 +30,7 @@ public class ERXMonitorServer {
 
 	public static void start() {
 		// We'll only start up the monitor server if a password is set for it
-		final String monitorServerPassword = ERXProperties.stringForKey( "WOMonitorServicePassword" );
+		final String monitorServerPassword = password();
 
 		if( monitorServerPassword != null ) {
 			try {
