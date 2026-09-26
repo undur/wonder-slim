@@ -27,8 +27,6 @@ import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.appserver.ajax.ERXAjaxSession;
-import er.extensions.browser.ERXBrowser;
-import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
@@ -56,11 +54,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 */
 	private Locale _locale;
 
-	/** 
-	 * The browser used for this session
-	 */
-	transient private ERXBrowser _browser;
-
 	/**
 	 * the original name from the WorkerThread which is the value before executing <code>awake()</code>
 	 */
@@ -87,32 +80,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 */
 	public void setLocale( final Locale locale ) {
 		_locale = locale;
-	}
-
-	/**
-	 * @return Browser object representing the web browser's "user-agent"
-	 * string. You can obtain browser name, version, platform and Mozilla
-	 * version, etc. through this object. <br>
-	 * Good for WOConditional's condition binding to deal with different browser versions.
-	 */
-	public ERXBrowser browser() {
-		if (_browser == null && context() != null) {
-			final WORequest request = context().request();
-
-			if (request != null) {
-				final ERXBrowserFactory browserFactory = ERXBrowserFactory.factory();
-
-				if (request instanceof ERXRequest) {
-					_browser = ((ERXRequest) request).browser();
-				}
-				else {
-					_browser = browserFactory.browserMatchingRequest(request);
-				}
-
-			}
-		}
-
-		return _browser;
 	}
 
 	/**
@@ -245,7 +212,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 */
 	@Override
 	public void terminate() {
-		_browser = null;
 
 		log.debug("Will terminate, sessionId is {}", sessionID());
 
@@ -334,7 +300,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	@Override
 	public String toString() {
 		String superString = super.toString();
-		String thisString = " locale=" + _locale + " browser=" + (_browser == null ? "null" : _browser.toString());
+		String thisString = " locale=" + _locale;
 
 		int lastIndex = superString.lastIndexOf(">");
 		String toStr;

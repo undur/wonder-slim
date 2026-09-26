@@ -24,8 +24,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
 
-import er.extensions.browser.ERXBrowser;
-import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -59,11 +57,6 @@ public  class ERXRequest extends WORequest {
      * NSArray to keep browserLanguages in
      */
     private NSArray<String> _browserLanguages;
-
-    /**
-     * Holds a reference to the browser object
-     */
-    private ERXBrowser _browser;
 
     /**
      * Specifies whether https should be overridden to be enabled or disabled app-wide. This is 
@@ -142,7 +135,6 @@ public  class ERXRequest extends WORequest {
 
 		return serverName;
 	}
-
 
     /**
      * @return The remote client host address. Works in various setups, like direct connect, deployed etc. If no host address is found, returns "UNKNOWN".
@@ -326,18 +318,6 @@ public  class ERXRequest extends WORequest {
         }
 
         return date == null ? null : new NSTimestamp(date);
-    }
-
-	/**
-     * @return The ERXBrowser associated with the user-agent of the request.
-     */
-    public ERXBrowser browser() {
-        if (_browser == null) {
-            ERXBrowserFactory browserFactory = ERXBrowserFactory.factory();
-            _browser = browserFactory.browserMatchingRequest(this);
-        }
-
-        return _browser;
     }
 
     /**

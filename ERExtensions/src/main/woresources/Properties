@@ -40,13 +40,6 @@ er.extensions.ERExtensions.hasLocalization=true
 # er.extensions.ERXRequest.secureDisabled=false
 
 #########################################################################
-# Browser
-#########################################################################
-## User-agent sniffing stuff
-# er.extensions.ERXBrowserFactory.FactoryClassName=er.extensions.appserver.ERXBrowserFactory
-# er.extensions.ERXBrowserFactory.BrowserClassName=er.extensions.appserver.ERXBasicBrowser
-
-#########################################################################
 # ERXApplication 
 #########################################################################
 ## Base directory for statistics logging

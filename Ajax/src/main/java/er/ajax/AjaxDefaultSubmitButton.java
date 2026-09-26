@@ -7,8 +7,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.browser.ERXBrowser;
-import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.components.ERXWOForm;
 
 /**
@@ -172,25 +170,5 @@ public class AjaxDefaultSubmitButton extends AjaxSubmitButton
         appendTagAttributeToResponse(response, "onclick", onClickBuffer.toString());
 
         response.appendContentString(" />");
-
-        // fix for IE < 9 that deactivates the standard submit routine of the form and
-        // triggers the onClick handler of this submit element instead if the return key
-        // is pressed within a textfield, radiobutton, checkbox or select
-        ERXBrowser browser = ERXBrowserFactory.factory().browserMatchingRequest(context.request());
-        if (browser.isIE() && browser.majorVersion().compareTo(Integer.valueOf(9)) < 0) {
-            if (!hasBinding("formName")) {
-                formName = ERXWOForm.formName(context, "");
-            }
-            AjaxUtils.appendScriptHeader(response);
-            response.appendContentString("\nEvent.observe(document." + formName + ", 'keypress', function(e){");
-            response.appendContentString("if(e.keyCode==13){"); // return key
-            response.appendContentString("var shouldFire=false;var t=e.target;var tn=t.tagName.toLowerCase();");
-            response.appendContentString("if(tn==='select'){shouldFire=true;}");
-            response.appendContentString("else if(tn==='input'){var ty=t.type.toLowerCase();");
-            response.appendContentString("if(ty==='text' || ty==='radio' || ty==='checkbox'){shouldFire=true;}}");
-            response.appendContentString("if(shouldFire){$$('[name=" + name + "]')[0].fireEvent('onClick');e.returnValue=false;}");
-            response.appendContentString("}});");
-            AjaxUtils.appendScriptFooter(response);
-        }
     }
 }

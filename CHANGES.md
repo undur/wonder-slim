@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **User-agent detection reduced to what still holds**
+  `ERXUserAgent.of(request)` (or `ERXUserAgent.parse(header)`) tells you the browser family
+  (Chrome, Safari, Firefox, Edge, Opera, other) and its major version, the operating system
+  (macOS, Windows, iOS, Android, Linux, other), whether it's a mobile device, and whether it's a
+  bot, matched against a short list of markers covering current crawlers, AI fetchers and scripted
+  clients (`ERXUserAgent.addBotMarkers` extends it). Browsers freeze operating system versions and
+  minor browser versions in the user-agent string, so those are no longer offered.
+  `er.extensions.browser` (`ERXBrowser`, `ERXBasicBrowser`, `ERXBrowserFactory`) and its
+  463-pattern `robots.txt` are removed, as are `ERXRequest.browser()` and `ERXSession.browser()`.
+
 - **Locale-aware formatting replaces ERXLocalizer**
   Numbers and dates formatted and parsed by WOString and WOTextField (`numberformat`,
   `dateformat`) can follow a locale of the application's choosing: the one it gave a session
