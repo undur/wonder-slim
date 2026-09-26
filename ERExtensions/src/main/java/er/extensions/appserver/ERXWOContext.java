@@ -81,7 +81,14 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	/**
-	 * FIXME: Seems to be adding the "-" portnumber prefix when running under a local WS adaptor? Why? // Hugi 2025-10-26
+	 * In development mode with direct connect disabled - a development instance behind a local web server and
+	 * WebObjects adaptor - inserts the instance number {@code -<port>} after {@code App.woa} in relative URLs. The
+	 * adaptor routes an instance number of that form to the instance listening on that port, which a development
+	 * instance needs since it isn't registered in the adaptor's configuration. (Wonder, 2013: "Append the port to the
+	 * relative url for dev apps with direct connect disabled".)
+	 *
+	 * With short URLs on, the routing layer shortens the URL right afterwards and the instance number goes with the
+	 * prefix, so this routing doesn't apply to a development instance behind a local adaptor with short URLs on.
 	 */
 	@Override
 	protected String relativeURLWithRequestHandlerKey(String requestHandlerKey, String requestHandlerPath, String queryString) {
