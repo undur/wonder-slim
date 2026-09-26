@@ -202,29 +202,6 @@ public  class ERXRequest extends WORequest {
 	}
 
     
-	/**
-	 * FIXME: Look into and document. WTF are we doing here // Hugi 2025-10-24
-	 */
-    @Override
-	public String stringFormValueForKey(String key) {
-    	String result = super.stringFormValueForKey(key);
-
-    	if (result == null && "wodata".equals(key)) {
-    		final String requestHandlerKey = _uriDecomposed().requestHandlerKey();
-
-    		if (WOApplication.application().resourceRequestHandlerKey().equals(requestHandlerKey)) {
-    			String requestHandlerPath = _uriDecomposed().requestHandlerPath();
-
-    			if(requestHandlerPath != null) {
-    				requestHandlerPath = "file:/" +  requestHandlerPath.substring("wodata=/".length());
-    				result = requestHandlerPath.replace('+', ' ');
-    			}
-    		}
-    	}
-
-		return result;
-	}
-
     /**
      * Overridden to properly parse into a java.util.Date and then convert to an NSTimestamp
      */
@@ -354,14 +331,13 @@ public  class ERXRequest extends WORequest {
 	private static NSDictionary<String, NSArray<String>> parseCookieValues( final WORequest request ) {
 		final NSMutableDictionary<String, NSArray<String>> cookieDictionary = new NSMutableDictionary<>();
 
-		// from WORequest._cookieDescription()
 		String cookieHeader = request.headerForKey("cookie");
 
 		if (cookieHeader == null || cookieHeader.length() == 0) {
-			// IIS cookies use a different header
+			// The IIS adaptor passes cookies in a header of its own
 			cookieHeader = request.headerForKey("http_cookie");
 		}
-		
+
 		if (cookieHeader != null && cookieHeader.length() > 0) {
 			final String[] cookies = cookieHeader.split(";");
 
@@ -370,11 +346,9 @@ public  class ERXRequest extends WORequest {
 					// only parse one cookie at a time => get(0)
 					final HttpCookie httpCookie = HttpCookie.parse(cookies[i]).get(0);
 
-					// Cookies with longer paths are listed before cookies with shorter paths:
-					// see https://stackoverflow.com/a/24214538
-					// Cookies with longer Patch are more specific than cookies with shorter path 
-					// and should not be replaced by a less specific cookie 
-					// If a cookie with Therfore we do not override cookies if there are already there!
+					// A browser lists cookies with longer (more specific) paths before those with shorter paths
+					// (https://stackoverflow.com/a/24214538). Every value is kept, in that order, so the first value
+					// of a name is the most specific one.
 					final String cookieName  = httpCookie.getName();
 					final String cookieValue = httpCookie.getValue();
 
@@ -387,8 +361,8 @@ public  class ERXRequest extends WORequest {
 					cookieValueArray = cookieValueArray.arrayByAddingObject(cookieValue);
 					cookieDictionary.put( cookieName, cookieValueArray );
 				}
-				catch (Throwable t) {
-					log.warn("Unable to parse cookie '"+cookies[i]+"' : "+t.getMessage());
+				catch (RuntimeException e) {
+					log.warn("Unable to parse cookie '{}': {}", cookies[i], e.getMessage());
 				}
 			}
 		}
