@@ -9,10 +9,12 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 
+import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
@@ -124,7 +126,7 @@ public class ERXExceptionManager {
 					if (context.component() != null) {
 						extraInfo.setObjectForKey(context.component().name(), "CurrentComponent");
 						if (context.component().parent() != null) {
-							extraInfo.setObjectForKey(ERXWOContext.componentPath(context), "CurrentComponentHierarchy");
+							extraInfo.setObjectForKey(componentPath(context), "CurrentComponentHierarchy");
 						}
 					}
 				}
@@ -250,5 +252,27 @@ public class ERXExceptionManager {
 	    	final String versionString = (String) versionDictionary.objectForKey("CFBundleShortVersionString");
 	    	return versionString == null  ?  ""  :  versionString.trim(); // trim() removes the line ending char
 	    }
+	}
+
+	/**
+	 * The path to the current component, as the names of the components from the page down.
+	 * 
+	 * @param context the current context
+	 * @return an array of component names
+	 */
+	private static NSArray<String> componentPath(WOContext context) {
+		final NSMutableArray<String> result = new NSMutableArray<>();
+
+		if (context != null) {
+			WOComponent component = context.component();
+			while (component != null) {
+				if (component.name() != null) {
+					result.insertObjectAtIndex(component.name(), 0);
+				}
+				component = component.parent();
+			}
+		}
+
+		return result;
 	}
 }

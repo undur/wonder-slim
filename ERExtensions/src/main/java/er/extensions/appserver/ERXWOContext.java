@@ -1,13 +1,9 @@
 package er.extensions.appserver;
 
 import com.webobjects.appserver.WOApplication;
-import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOSession;
-import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ajax.ERXAjaxContext;
@@ -157,28 +153,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		}
 
 		return (ERXWOContext) app.createContextForRequest(dummyRequest);
-	}
-
-	/**
-	 * Debugging help, returns the path to current component as a list of component names.
-	 * 
-	 * @param context the current context
-	 * @return an array of component names
-	 */
-	public static NSArray<String> componentPath(WOContext context) {
-		final NSMutableArray<String> result = new NSMutableArray<>();
-
-		if (context != null) {
-			WOComponent component = context.component();
-			while (component != null) {
-				if (component.name() != null) {
-					result.insertObjectAtIndex(component.name(), 0);
-				}
-				component = component.parent();
-			}
-		}
-
-		return result;
 	}
 
 	private static final String SAFE_IDENTIFIER_NAME_KEY = "ERXWOContext.safeIdentifierName";
