@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+- **Locale-aware formatting replaces ERXLocalizer**
+  Numbers and dates formatted and parsed by WOString and WOTextField (`numberformat`,
+  `dateformat`) can follow a locale of the application's choosing: the one it gave a session
+  (`ERXSession.setLocale`), or the application's (`ERXLocale.setApplicationLocale`, typically
+  called once in the application's constructor). Patterns are written in the usual form (`#,##0.00`); the locale
+  decides separators and month and day names - for parsing as well as output, so in an Icelandic
+  locale a text field reads `12.50` as 1250. With no locale configured, formatting and parsing are
+  exactly as before, whatever the JVM's default locale. The locale a request asks for in its
+  `Accept-Language` header is available as `ERXRequest.requestedLocale()`, a hint the application
+  may act on; the framework never formats in it by itself. See `er.extensions.appserver.ERXLocale`.
+
+  Formatters are no longer shared between requests; one is created per use, which costs a
+  microsecond or two and removes the thread-safety problem of the shared instances. The
+  `setNumberFormatterForPattern`, `setDateFormatterForPattern` and `sharedInstance` methods went
+  with the shared repositories.
+
+  `ERXLocalizer` is removed, together with string lookup from `.strings` files, the per-session
+  localizer (`ERXSession.localizer()`, `language()`, `setLanguage(String)`,
+  `availableLanguagesForTheApplication()`, `availableLanguagesForThisSession()`) and
+  `ERXComponent.localizer()`. Any `er.extensions.ERXLocalizer.*` property now stops the launch
+  with a pointer to the replacement. The language appended to a request's `browserLanguages()` is
+  set with `er.extensions.ERXRequest.defaultLanguage` (English by default, as before).
+
 ## 2026-09-22 (8.0.7)
 
 - **ERControl: the framework's control panel**

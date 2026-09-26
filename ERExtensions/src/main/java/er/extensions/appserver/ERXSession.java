@@ -8,9 +8,8 @@ package er.extensions.appserver;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +22,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
-import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSTimestamp;
@@ -35,7 +32,6 @@ import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.localization.ERXLocalizer;
 
 /**
  * Improvements and fixes for WOSession 
@@ -56,25 +52,14 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	private static final SameSite _sameSite = ERXProperties.enumValueForKey(SameSite.class, "er.extensions.ERXSession.cookies.SameSite");
 
 	/**
-	 * Localizer used for this session
+	 * The locale this session formats numbers and dates in, when set explicitly. See {@link ERXLocale}.
 	 */
-	transient private ERXLocalizer _localizer;
-
-	/**
-	 * special variable to hold language name only for when session object gets serialized.
-	 * Do not use this value to get the language name; use {@link #language} method instead.
-	 */
-	private String _serializableLanguageName;
+	private Locale _locale;
 
 	/** 
 	 * The browser used for this session
 	 */
 	transient private ERXBrowser _browser;
-
-	/**
-	 * Receiver of the various notifications
-	 */
-	transient private Observer _observer;
 
 	/**
 	 * the original name from the WorkerThread which is the value before executing <code>awake()</code>
@@ -90,184 +75,18 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * @return the observer object for this session. If it doesn't ever exist, one will be created.
+	 * @return The locale this session formats numbers and dates in, null when none was set (see {@link ERXLocale})
 	 */
-	public Observer observer() {
-		if (_observer == null) {
-			_observer = new Observer(this);
-		}
-
-		return _observer;
+	public Locale locale() {
+		return _locale;
 	}
 
 	/**
-	 * The Observer inner class encapsulates functions to handle various notifications.
+	 * Sets the locale this session formats numbers and dates in, taking precedence over the request's and the
+	 * application's. null reverts to those. See {@link ERXLocale}.
 	 */
-	public static class Observer {
-
-		/**
-		 * The owning session
-		 */
-		transient protected ERXSession session;
-
-		/**
-		 * Prevents instantiation in this way
-		 */
-		private Observer() {}
-
-		/**
-		 * Create observer objects for the given session
-		 */
-		public Observer(ERXSession session) {
-			this.session = session;
-		}
-
-		/**
-		 * Reset the reference to localizer when localization templates or localizer class itself is updated.
-		 */
-		public void localizationDidReset(NSNotification n) {
-
-			if (session._localizer == null) {
-				return;
-			}
-
-			final String currentLanguage = session._localizer.language();
-			session._localizer = ERXLocalizer.localizerForLanguage(currentLanguage);
-			log.debug("Detected changes in the localizers. Reset reference to {} localizer for session {}", currentLanguage, session.sessionID());
-		}
-
-		/**
-		 * Registers this observer object for {@link er.extensions.localization.ERXLocalizer#LocalizationDidResetNotification}
-		 */
-		protected void registerForLocalizationDidResetNotification() {
-			NSNotificationCenter.defaultCenter().addObserver(this, ERXUtilities.notificationSelector("localizationDidReset"), ERXLocalizer.LocalizationDidResetNotification, null);
-		}
-	}
-
-	/**
-	 * Method to get the current localizer for this session. If local instance
-	 * variable is null then a localizer is fetched for the session's
-	 * <code>languages</code> array. See
-	 * {@link er.extensions.localization.ERXLocalizer} for more information
-	 * about using a localizer.
-	 * 
-	 * @return the current localizer for this session
-	 */
-	public ERXLocalizer localizer() {
-		if (_localizer == null) {
-			_localizer = ERXLocalizer.localizerForLanguages(languages());
-
-			if (!WOApplication.application().isCachingEnabled()) {
-				observer().registerForLocalizationDidResetNotification();
-			}
-		}
-
-		return _localizer;
-	}
-
-	/**
-	 * @return The primary language of the current session's localizer. This
-	 * method is just a cover for calling the method <code>localizer().language()</code>.
-	 */
-	public String language() {
-		return localizer().language();
-	}
-
-	/**
-	 * Cover method to set the current localizer to the localizer for that
-	 * language.
-	 * <p>
-	 * Also updates languages list with the new single language.
-	 * 
-	 * @param language to set the current localizer for.
-	 * @see #language
-	 * @see #setLanguages
-	 */
-	public void setLanguage(String language) {
-		final ERXLocalizer newLocalizer = ERXLocalizer.localizerForLanguage(language);
-
-		if (!newLocalizer.equals(_localizer)) {
-			if (_localizer == null && !WOApplication.application().isCachingEnabled()) {
-				observer().registerForLocalizationDidResetNotification();
-			}
-
-			_localizer = newLocalizer;
-			ERXLocalizer.setCurrentLocalizer(_localizer);
-
-			final NSMutableArray languageList = new NSMutableArray(_localizer.language());
-
-			if (!languageList.containsObject("Nonlocalized")) {
-				languageList.addObject("Nonlocalized");
-			}
-
-			setLanguages(languageList);
-		}
-	}
-
-	/**
-	 * Sets the languages list for which the session is localized. The ordering
-	 * of language strings in the array determines the order in which the
-	 * application will search .lproj directories for localized strings, images,
-	 * and component definitions.
-	 * <p>
-	 * Also updates localizer
-	 * 
-	 * @param languageList the array of languages for the session
-	 * @see #language
-	 * @see #setLanguage
-	 */
-	@Override
-	public void setLanguages(NSArray languageList) {
-		super.setLanguages(languageList);
-
-		final ERXLocalizer newLocalizer = ERXLocalizer.localizerForLanguages(languageList);
-
-		if (!newLocalizer.equals(_localizer)) {
-			if (_localizer == null && !WOApplication.application().isCachingEnabled()) {
-				observer().registerForLocalizationDidResetNotification();
-			}
-
-			_localizer = newLocalizer;
-			ERXLocalizer.setCurrentLocalizer(_localizer);
-		}
-	}
-
-	/**
-	 * Returns the NSArray of language names available for this application.
-	 * This is simply a cover method of
-	 * {@link er.extensions.localization.ERXLocalizer#availableLanguages}, but
-	 * will be convenient for binding to dynamic elements like language selector popup.
-	 * 
-	 * @return NSArray of language name strings available for this application
-	 * @see #availableLanguagesForThisSession
-	 * @see er.extensions.localization.ERXLocalizer#availableLanguages
-	 */
-	public NSArray availableLanguagesForTheApplication() {
-		return ERXLocalizer.availableLanguages();
-	}
-
-	/**
-	 * Returns the NSArray of language names available for this particular
-	 * session. The resulting array is an intersect of web browser's language
-	 * array ({@link ERXRequest#browserLanguages()}) and localizer's available
-	 * language array
-	 * ({@link er.extensions.localization.ERXLocalizer#availableLanguages()}).
-	 * <p>
-	 * Note that the order of the resulting language names is not defined at this moment.
-	 * 
-	 * @return NSArray of language name strings available for this particular session
-	 * @see #availableLanguagesForTheApplication
-	 * @see ERXRequest#browserLanguages()
-	 * @see er.extensions.localization.ERXLocalizer#availableLanguages
-	 */
-	public NSArray availableLanguagesForThisSession() {
-		final HashSet<String> languages = new HashSet<>(ERXLocalizer.availableLanguages());
-
-		if (context() != null && context().request() != null) {
-			languages.retainAll(context().request().browserLanguages());
-		}
-
-		return new NSArray<>(languages);
+	public void setLocale( final Locale locale ) {
+		_locale = locale;
 	}
 
 	/**
@@ -303,7 +122,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	public void awake() {
 		super.awake();
 		ERXSession.setSession(this);
-		ERXLocalizer.setCurrentLocalizer(localizer());
 		NSNotificationCenter.defaultCenter().postNotification(SessionDidRestoreNotification, this);
 
 		WORequest request = context() != null ? context().request() : null;
@@ -324,7 +142,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	public void sleep() {
 		NSNotificationCenter.defaultCenter().postNotification(SessionWillSleepNotification, this);
 		super.sleep();
-		ERXLocalizer.setCurrentLocalizer(null);
 		ERXSession.setSession(null);
 		// reset backtracking
 		_didBacktrack = null;
@@ -428,11 +245,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 */
 	@Override
 	public void terminate() {
-		if (_observer != null) {
-			NSNotificationCenter.defaultCenter().removeObserver(_observer);
-			_observer = null;
-		}
-
 		_browser = null;
 
 		log.debug("Will terminate, sessionId is {}", sessionID());
@@ -506,18 +318,8 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	/*
 	 * Serialization support - enables to use a variety of session stores
 	 */
-	private void writeObject(ObjectOutputStream stream) throws IOException {
-		if (_localizer == null)
-			_serializableLanguageName = null;
-		else
-			_serializableLanguageName = language();
-		stream.defaultWriteObject();
-	}
-
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 		stream.defaultReadObject();
-		if (_serializableLanguageName != null)
-			setLanguage(_serializableLanguageName);
 		log.debug("Session has been deserialized: {}", this);
 	}
 
@@ -532,7 +334,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	@Override
 	public String toString() {
 		String superString = super.toString();
-		String thisString = " localizer=" + (_localizer == null ? "null" : _localizer.toString()) + " browser=" + (_browser == null ? "null" : _browser.toString());
+		String thisString = " locale=" + _locale + " browser=" + (_browser == null ? "null" : _browser.toString());
 
 		int lastIndex = superString.lastIndexOf(">");
 		String toStr;

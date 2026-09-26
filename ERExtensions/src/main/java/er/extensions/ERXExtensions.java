@@ -14,7 +14,6 @@ import er.extensions.appserver.ERXNotification;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.localization.ERXLocalizer;
 
 public class ERXExtensions extends ERXFrameworkPrincipal {
 
@@ -54,7 +53,6 @@ public class ERXExtensions extends ERXFrameworkPrincipal {
 		// to set up the main bundle and this one comes too late for static inits
 		ERXConfigurationManager.defaultManager().loadConfiguration();
 		ERXConfigurationManager.defaultManager().configureRapidTurnAround();
-		ERXLocalizer.initialize();
 		ERXProperties.pathsForUserAndBundleProperties(true);
 	}
 }

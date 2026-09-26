@@ -11,13 +11,12 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.FieldPosition;
 import java.text.Format;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.Locale;
 
 import com.webobjects.foundation.NSNumberFormatter;
 
 import er.extensions.foundation.ERXProperties;
-import er.extensions.localization.ERXLocalizer;
+import er.extensions.appserver.ERXLocale;
 
 /**
  * An extension to the number formatter. It
@@ -31,17 +30,6 @@ import er.extensions.localization.ERXLocalizer;
  */
 public class ERXNumberFormatter extends NSNumberFormatter {
 
-	/**
-	 * Holds a reference to the repository
-	 */
-	private static Map<String, NSNumberFormatter> _repository = new Hashtable<>();
-	
-	protected static final String DefaultKey = "ERXNumberFormatter.DefaultKey";
-	
-	static {
-		_repository.put(DefaultKey, new ERXNumberFormatter());
-	}
-	
 	private String _ignoredChars = ERXProperties.stringForKeyWithDefault("er.extensions.ERXNumberFormatter.ignoredChars", "%$");
     private Integer _scale;
     private BigDecimal _factor;
@@ -55,13 +43,6 @@ public class ERXNumberFormatter extends NSNumberFormatter {
     	super(pattern);
     }
     
-    /**
-     * @return the default shared instance
-     */
-    public static NSNumberFormatter sharedInstance() {
-         return numberFormatterForPattern(DefaultKey);
-    }
-
 	public static Format defaultNumberFormatterForObject(Object object) {
 		Format result = null;
 
@@ -78,45 +59,30 @@ public class ERXNumberFormatter extends NSNumberFormatter {
 	}
 
 	/**
-     * @return A shared formatter instance for the specified pattern
-     */
-    public static NSNumberFormatter numberFormatterForPattern(String pattern) {
-    	NSNumberFormatter formatter;
+	 * A new formatter for the given pattern, in the current locale ({@link ERXLocale#current()}); with no locale
+	 * configured, created exactly as {@code new ERXNumberFormatter(pattern)}, as it always was. The locale decides
+	 * parsing as well as output, so it only ever applies when the application set one. A new instance every time:
+	 * formatters are not thread-safe, so they are never shared, and creating one costs about as much as formatting a
+	 * few values.
+	 *
+	 * The pattern is written in the usual form ({@code #,##0.00}) whatever the locale; the locale decides the separators.
+	 *
+	 * @return A formatter for the pattern, owned by the caller
+	 */
+	public static NSNumberFormatter numberFormatterForPattern(String pattern) {
+		final Locale locale = ERXLocale.current();
 
-    	if(ERXLocalizer.useLocalizedFormatters()) {
-    		ERXLocalizer localizer = ERXLocalizer.currentLocalizer();
-    		formatter = (NSNumberFormatter)localizer.localizedNumberFormatForKey(pattern);
-    	}
-    	else {
-    		formatter = _repository.get(pattern);
+		if (locale == null) {
+			return new ERXNumberFormatter(pattern);
+		}
 
-    		if(formatter == null) {
-    			formatter = new ERXNumberFormatter(pattern);
-    			_repository.put(pattern, formatter);
-    		}
-    	}
+		final ERXNumberFormatter formatter = new ERXNumberFormatter();
+		formatter.setLocale(locale);
+		formatter.setLocalizesPattern(true);
+		formatter.setPattern(pattern);
+		return formatter;
+	}
 
-    	return formatter;
-    }
-    
-    /**
-     * Sets a shared instance for the specified pattern.
-     */
-    public static void setNumberFormatterForPattern(NSNumberFormatter formatter, String pattern) {
-    	if(ERXLocalizer.useLocalizedFormatters()) {
-    		ERXLocalizer localizer = ERXLocalizer.currentLocalizer();
-    		localizer.setLocalizedNumberFormatForKey(formatter, pattern);
-    	}
-    	else {
-    		if(formatter == null) {
-    			_repository.remove(pattern);
-    		}
-    		else {
-    			_repository.put(pattern, formatter);
-    		}
-    	}
-    }
-	
 	public void setIgnoredChars(String value) {
 		_ignoredChars = value;
 	}

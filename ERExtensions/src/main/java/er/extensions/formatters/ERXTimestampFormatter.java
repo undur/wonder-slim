@@ -2,36 +2,24 @@ package er.extensions.formatters;
 
 import java.text.DateFormatSymbols;
 import java.text.Format;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.Locale;
 
 import com.webobjects.foundation.NSTimestamp;
 import com.webobjects.foundation.NSTimestampFormatter;
 
-import er.extensions.localization.ERXLocalizer;
+import er.extensions.appserver.ERXLocale;
 
 /**
- * Provides localization to timestamp formatters.
+ * Timestamp formatters for a pattern, in the current formatting locale ({@link ERXLocale}).
  */
 
 public class ERXTimestampFormatter extends NSTimestampFormatter {
-
-	/**
-	 * Holds a reference to the repository
-	 */
-	private static final Map<String, NSTimestampFormatter> _repository = new Hashtable<>();
-
-	private static final String DefaultKey = "ERXTimestampFormatter.DefaultKey";
 
 	/**
 	 * The default pattern used in the UI
 	 */
 	
 	public static final String DEFAULT_PATTERN = "%m/%d/%Y";
-
-	static {
-		_repository.put(DefaultKey, new ERXTimestampFormatter());
-	}
 
 	public ERXTimestampFormatter() {
 		super();
@@ -59,47 +47,14 @@ public class ERXTimestampFormatter extends NSTimestampFormatter {
 	}
 
 	/**
-	 * Returns a shared instance for the specified pattern.
-	 * 
-	 * @return shared instance of formatter
+	 * A new formatter for the given pattern, in the current locale ({@link ERXLocale#current()}); with no locale
+	 * configured, created exactly as {@code new NSTimestampFormatter(pattern)}, as it always was. A new instance every
+	 * time: formatters are not thread-safe, so they are never shared, and creating one is cheap.
+	 *
+	 * @return A formatter for the pattern, owned by the caller
 	 */
 	public static NSTimestampFormatter dateFormatterForPattern(String pattern) {
-		NSTimestampFormatter formatter;
-
-		if (ERXLocalizer.useLocalizedFormatters()) {
-			ERXLocalizer localizer = ERXLocalizer.currentLocalizer();
-			formatter = (NSTimestampFormatter) localizer.localizedDateFormatForKey(pattern);
-		}
-		else {
-			synchronized (_repository) {
-				formatter = _repository.get(pattern);
-				if (formatter == null) {
-					formatter = new NSTimestampFormatter(pattern);
-					_repository.put(pattern, formatter);
-				}
-			}
-		}
-
-		return formatter;
-	}
-
-	/**
-	 * Sets a shared instance for the specified pattern.
-	 */
-	public static void setDateFormatterForPattern(NSTimestampFormatter formatter, String pattern) {
-		if (ERXLocalizer.useLocalizedFormatters()) {
-			ERXLocalizer localizer = ERXLocalizer.currentLocalizer();
-			localizer.setLocalizedDateFormatForKey(formatter, pattern);
-		}
-		else {
-			synchronized (_repository) {
-				if (formatter == null) {
-					_repository.remove(pattern);
-				}
-				else {
-					_repository.put(pattern, formatter);
-				}
-			}
-		}
+		final Locale locale = ERXLocale.current();
+		return locale == null ? new NSTimestampFormatter(pattern) : new NSTimestampFormatter(pattern, new DateFormatSymbols(locale));
 	}
 }

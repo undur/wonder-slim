@@ -255,6 +255,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
+		refuseObsoleteLocalizerProperties();
+
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
 
@@ -367,6 +369,21 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		return new ERXRequest(method, url, httpVersion, headers, content, info);
+	}
+
+	/**
+	 * ERXLocalizer is gone: string lookup from .strings files and the per-session localizer were removed, and
+	 * locale-aware formatting moved to {@link ERXLocale}. Configuration that still addresses the localizer stops the
+	 * launch rather than being silently ignored.
+	 */
+	private static void refuseObsoleteLocalizerProperties() {
+		final String prefix = "er.extensions.ERXLocalizer.";
+
+		for( final String key : System.getProperties().stringPropertyNames() ) {
+			if( key.startsWith( prefix ) ) {
+				throw new IllegalStateException( "The property '" + key + "' is set, but ERXLocalizer has been removed. Remove the er.extensions.ERXLocalizer.* properties. Locale-aware formatting is configured with ERXLocale.setApplicationLocale() or ERXSession.setLocale(); the language appended to a request's browser languages with " + ERXRequest.DEFAULT_LANGUAGE_PROPERTY + ". See er.extensions.appserver.ERXLocale." );
+			}
+		}
 	}
 
 	/**

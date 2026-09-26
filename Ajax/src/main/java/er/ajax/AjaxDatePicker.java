@@ -1,7 +1,9 @@
 package er.ajax;
 
+import java.text.DateFormatSymbols;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
@@ -16,7 +18,7 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestampFormatter;
 
 import er.extensions.appserver.ERXResponseRewriter;
-import er.extensions.localization.ERXLocalizer;
+import er.extensions.appserver.ERXLocale;
 
 /**
  * Shameless port and adoption of Rails Date Kit.  This input understands the format symbols
@@ -30,8 +32,8 @@ import er.extensions.localization.ERXLocalizer;
  * the initial display in the input, the format of the value that the date picker places into the input, and 
  * validation of the input contents on form submission. The use of formatter over format is
  * preferred for reasons of efficiency and localization.</p>
- * <p>FL: The component uses the default Locale to determine the start day of the week. It also uses the current
- * language in ERXLocalizer to translate the day and month names (you must set up the localizations).</p>
+ * <p>FL: The component takes the start day of the week and the day and month names from its locale (the {@code locale}
+ * binding; by default {@link ERXLocale#current()}, or the JVM's default locale when none is configured).</p>
  * 
  * <p><b>NOTE</b>: the AjaxDatePicker does <b>NOT</b> play nice with the AjaxModalDialogOpener.  There is some sort of 
  * initialization conflict (I think) with Prototype that leaves you with a blank page and the browser waiting
@@ -59,11 +61,11 @@ import er.extensions.localization.ERXLocalizer;
  * @binding fireEvent false if the onChange event for the input should NOT be fired when a date is selected in the calendar, defaults to true
  * @binding manualInput false if you want to prevent manual input from the user and force him/her to use the date picker, defaults to true
  * 
- * @binding startDay specify the first day of week to use 0(Sunday)-6(Saturday). The default use the current localizer.
+ * @binding startDay specify the first day of week to use 0(Sunday)-6(Saturday). The default comes from the current locale.
  * @binding dayNames list of day names (Sunday to Saturday) for localization, English is the default
  * @binding monthNames list of month names for localization, English is the default
  * @binding imagesDir directory to take images from, takes them from Ajax.framework by default
- * @binding locale FL: locale can be set if ERXLocalizer returns the wrong one. IE the English localizer returns a US Locale. If you want the UK one then set this binding.
+ * @binding locale the locale for the start day of the week and the day and month names, defaults to {@link ERXLocale#current()} or the JVM's default locale
  * @binding showYearControls: display the prev and next year controls. Default to true.
  * 
  * @binding calendarCSS name of CSS resource with classed for calendar, defaults to "calendar.css"
@@ -84,8 +86,6 @@ public class AjaxDatePicker extends AjaxComponent {
 	 */
 	private static final long serialVersionUID = 1L;
 
-    private static final NSArray<String> _dayNames = new NSArray<>(new String[] {"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"}); 
-    private static final NSArray<String> _monthNames = new NSArray<>(new String[] {"January","February","March","April","May","June","July","August","September","October","November","December"}); 
 
     private static String defaultImagesDir;
 	
@@ -163,32 +163,26 @@ public class AjaxDatePicker extends AjaxComponent {
     }
     
     public Locale locale() {
-    	return (Locale)valueForBinding("locale", ERXLocalizer.currentLocalizer().locale());
+    	final Locale current = ERXLocale.current();
+    	return (Locale)valueForBinding("locale", current != null ? current : Locale.getDefault());
     }
     
     public Integer startDay() {
-    	// Get first day of week from current localizer Locale.
+    	// First day of the week in the component's locale
     	return Integer.valueOf(new GregorianCalendar(locale()).getFirstDayOfWeek() - 1);
     }
     
-    private NSArray<String> localizeStringArray(NSArray<String> strings) {
-    	NSMutableArray<String> localizedStrings = new NSMutableArray<>(strings.count());
-    	ERXLocalizer l = ERXLocalizer.currentLocalizer();
-    	for (String string : strings)
-    		localizedStrings.add(l.localizedStringForKeyWithDefault(string));
-    	return localizedStrings.immutableClone();
-    }
-
     public NSArray<String> dayNames() {
     	if (hasBinding("dayNames"))
     		return (NSArray<String>)valueForBinding("dayNames");
-    	return localizeStringArray(_dayNames);
+    	// Sunday first, as the calendar script expects; DateFormatSymbols indexes weekdays from 1 (Calendar.SUNDAY)
+    	return new NSArray<>(Arrays.copyOfRange(new DateFormatSymbols(locale()).getWeekdays(), 1, 8));
     }
 
     public NSArray<String> monthNames() {
     	if (hasBinding("monthNames"))
     		return (NSArray<String>)valueForBinding("monthNames");
-    	return localizeStringArray(_monthNames);
+    	return new NSArray<>(Arrays.copyOfRange(new DateFormatSymbols(locale()).getMonths(), 0, 12));
     }
     
     public String otherTagString() {

@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
+import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSMutableArray;
 
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
-import er.extensions.localization.ERXLocalizer;
 
 /**
  * ERXConsoleAppender is just like ConsoleAppender except that it display stack
@@ -105,7 +105,12 @@ public class ERXConsoleAppender extends ConsoleAppender {
 				if (skipPatternsFile != null) {
 					NSMutableArray<Pattern> mutableSkipPatterns = new NSMutableArray<>();
 
-					Enumeration<String> frameworksEnum = ERXLocalizer.frameworkSearchPath().reverseObjectEnumerator();
+					// The application first, then every framework bundle
+					final NSMutableArray<String> bundleNames = new NSMutableArray<>("app");
+					for (final NSBundle bundle : NSBundle.frameworkBundles()) {
+						bundleNames.addObject(bundle.name());
+					}
+					Enumeration<String> frameworksEnum = bundleNames.reverseObjectEnumerator();
 					while (frameworksEnum.hasMoreElements()) {
 						String framework = frameworksEnum.nextElement();
 						URL path = WOApplication.application().resourceManager().pathURLForResourceNamed(skipPatternsFile, framework, null);

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: locale-aware formatting</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 44rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		dt { font-weight: 600; margin-top: .6rem; }
+	</style>
+</head>
+<body>
+	<h1>Locale-aware formatting</h1>
+	<p>WOString's <code>numberformat</code> and <code>dateformat</code> in the formatting locale (<code>ERXLocale</code>).</p>
+	<dl>
+		<dt>Locale the browser asks for (a hint)</dt>
+		<dd id="requested"><wo:str value="$requestedLocale" /></dd>
+		<dt>Formatting locale</dt>
+		<dd id="locale"><wo:str value="$formattingLocale" /></dd>
+		<dt>Number, <code>#,##0.00</code></dt>
+		<dd id="number"><wo:str value="$number" numberformat="#,##0.00" /></dd>
+		<dt>Date, <code>%A %d %B %Y</code></dt>
+		<dd id="date"><wo:str value="$date" dateformat="%A %d %B %Y" /></dd>
+	</dl>
+	<p>
+		<wo:link action="$setSessionGermanAction" id="sessionGerman">Set the session's locale to de-DE</wo:link> ·
+		<wo:link action="$useBrowserLocaleAction" id="sessionBrowser">Use the browser's locale</wo:link> ·
+		<wo:link action="$clearSessionLocaleAction" id="sessionClear">Clear the session's locale</wo:link>
+	</p>
+	<p>
+		<wo:link action="$setApplicationIcelandicAction" id="appIcelandic">Set the application's locale to is</wo:link> ·
+		<wo:link action="$clearApplicationLocaleAction" id="appClear">Clear the application's locale</wo:link>
+	</p>
+</body>
+</html>

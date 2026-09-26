@@ -2,6 +2,7 @@ package er.extensions.appserver;
 
 import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Date;
 import java.util.Map;
 
@@ -26,7 +27,6 @@ import com.webobjects.foundation.NSTimestamp;
 import er.extensions.browser.ERXBrowser;
 import er.extensions.browser.ERXBrowserFactory;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.localization.ERXLocalizer;
 
 /**
  * Subclass of WORequest that fixes several Bugs.
@@ -196,9 +196,44 @@ public  class ERXRequest extends WORequest {
     	return _secureDisabled;
     }
     
+	/**
+	 * The language (a WO language name, {@code English}) appended to {@link #browserLanguages()}, so WO's lookup of
+	 * localized components and resources always ends in it
+	 */
+	public static final String DEFAULT_LANGUAGE_PROPERTY = "er.extensions.ERXRequest.defaultLanguage";
+
+	/**
+	 * The locale this request asks for, see {@link #requestedLocale()}
+	 */
+	private Locale _requestedLocale;
+
+	/**
+	 * Whether {@link #_requestedLocale} has been computed (it may legitimately be null)
+	 */
+	private boolean _requestedLocaleResolved;
+
+	/**
+	 * @return The locale this request asks for in its {@code Accept-Language} header, null when it names none. A hint
+	 *         from the client: the framework never formats in it on its own; an application that wants to honour it
+	 *         says so, for example by setting it as the session's locale ({@link ERXSession#setLocale(Locale)}).
+	 *
+	 * FIXME: Duplicates the header parsing in {@link #browserLanguages()} (which uses {@link #fixAbbreviationArray(NSArray)}),
+	 * with a parser of its own (the JDK's). The two agree on ordinary headers and differ on edge cases: the older parser
+	 * keeps {@code *} and malformed entries as keys (browserLanguages() drops them on lookup) and ignores {@code q=0}.
+	 * Should share one parse // Hugi 2026-09-26
+	 */
+	public Locale requestedLocale() {
+		if (!_requestedLocaleResolved) {
+			_requestedLocale = ERXLocale.fromAcceptLanguage(headerForKey("accept-language"), null);
+			_requestedLocaleResolved = true;
+		}
+
+		return _requestedLocale;
+	}
+
     /**
      * Returns a cooked version of the languages the user has set in his Browser.
-     * Adds "Nonlocalized" and {@link er.extensions.localization.ERXLocalizer#defaultLanguage()} if not
+     * Adds "Nonlocalized" and the default language ({@value #DEFAULT_LANGUAGE_PROPERTY}, English unless set) if not
      * already present. Transforms regionalized en_us to English_US as a key.
      * 
      * @return cooked version of user's languages
@@ -238,8 +273,9 @@ public  class ERXRequest extends WORequest {
 
             languageKeys.addObject("Nonlocalized");
 
-            if(!languageKeys.containsObject(ERXLocalizer.defaultLanguage())) {
-                languageKeys.addObject(ERXLocalizer.defaultLanguage());
+            final String defaultLanguage = ERXProperties.stringForKeyWithDefault(DEFAULT_LANGUAGE_PROPERTY, "English");
+            if(!languageKeys.containsObject(defaultLanguage)) {
+                languageKeys.addObject(defaultLanguage);
             }
 
             _browserLanguages = languageKeys.immutableClone();

@@ -17,42 +17,14 @@ er.extensions.ERExtensions.hasLocalization=true
 # er.extensions.ERXProperties.OptionalConfigurationFiles = (/more/files)
 
 #########################################################################
-# Localizer
+# Locale
 #########################################################################
 
-## Is localization enabled (as a lot of the components are already localized, it's kind of mandatory now to turn it on)
-er.extensions.ERXLocalizer.isLocalizationEnabled = true
-
-## The order in which localized files are searched (first entry wins)
-# er.extensions.ERXLocalizer.frameworkSearchPath = (app,ERDirectToWeb,ERExtensions)
-
-## Which files to search
-er.extensions.ERXLocalizer.fileNamesToWatch = ("Localizable.strings","ValidationTemplate.strings")
-
-## The default language for localization. This gets chosen if the request languages array results in no match.
-er.extensions.ERXLocalizer.defaultLanguage = English
-
-## Currently supported languages
-er.extensions.ERXLocalizer.availableLanguages = (English,German,Japanese)
-
-## We actually support a lot of other languages, but they are probably not maintained
-# er.extensions.ERXLocalizer.availableLanguages = (English,German,French,Norwegian,Japanese,Italian)
-
-## These should go away. It's special handling for Japanese, but would be better refactored into a general pluralizing strategy
-# er.extensions.ERXLocalizer.pluralFormClassName = er.extensions.localization.ERXLocalizer
-# er.extensions.ERXLocalizer.nonPluralFormClassName = er.extensions.localization.ERXNonPluralFormLocalizer
-
-## This tells ERXWOString/ERXWOText to use localized formatters. 
-# er.extensions.ERXLocalizer.useLocalizedFormatters = true
+## The WO language appended to every request's browserLanguages(), last in the search for localized components and resources
+# er.extensions.ERXRequest.defaultLanguage = English
 
 ## Which characters to ignore when formatting
 # er.extensions.ERXNumberFormatter.ignoredChars=$%
-
-## Allows you to override the locale for a language
-# er.extensions.ERXLocalizer.German.locale = de
-
-## Fallback to localized value in default language when key is not found for current language. Default is false.
-# er.extensions.ERXLocalizer.fallbackToDefaultLanguage = false
 
 #########################################################################
 # Request and Encoding

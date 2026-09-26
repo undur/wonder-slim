@@ -9,7 +9,6 @@ import com.webobjects.foundation.NSArray;
 
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.foundation.ERXValueUtilities;
-import er.extensions.localization.ERXLocalizer;
 
 /**
  * ERXComponent provides a common base class for WOComponents along with a bunch of miscellaneous handy features.
@@ -262,13 +261,6 @@ public abstract class ERXComponent extends WOComponent {
 	@SuppressWarnings("unchecked")
 	protected <T> NSArray<T> arrayValueForBinding(String binding, NSArray<T> defaultValue) {
 		return ERXValueUtilities.arrayValueWithDefault(valueForBinding(binding), defaultValue);
-	}
-
-	/**
-	 * @return The current localizer
-	 */
-	public ERXLocalizer localizer() {
-		return ERXLocalizer.currentLocalizer();
 	}
 
 	/**
