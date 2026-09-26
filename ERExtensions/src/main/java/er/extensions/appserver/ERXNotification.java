@@ -1,7 +1,7 @@
 package er.extensions.appserver;
 
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import com.webobjects.appserver.WOApplication;
@@ -86,21 +86,51 @@ public enum ERXNotification {
 	}
 
 	/**
-	 * Keeps references to observers added using lambda-style syntax (so they don't get garbage collected)
-	 * 
-	 * FIXME: Experimental. Primitive. Ooga Booga Booga // Hugi 2025-10-18
+	 * The observers registered as lambdas. NSNotificationCenter holds its observers weakly, and an observer wrapping a
+	 * lambda has no other owner, so without this reference it would be garbage collected and silently stop firing. An
+	 * entry lives until its {@link Registration} is removed.
 	 */
-	private static final Set<Object> _retainedObservers = new CopyOnWriteArraySet<>();
+	private static final Set<GenericObserver> _retainedObservers = ConcurrentHashMap.newKeySet();
 
 	/**
-	 * Register the given Consumer to be invoked when the notification is posted
-	 * 
-	 * FIXME: Don't think NSNotificationCenter retains observers so we're explicitly retaining them ourselves _forever_ at the moment // Hugi 2025-10-18
+	 * Registers the given Consumer to be invoked when the notification is posted.
+	 *
+	 * The observer lives until the returned registration is removed: an observer registered once for the application's
+	 * lifetime can ignore it, but anything shorter-lived (a session, a component, a handler) must remove it when done, or
+	 * the observer stays registered, and keeps firing, forever.
+	 *
+	 * @return The registration, for removing the observer again
 	 */
-	public void addObserver( final Consumer<NSNotification> notificationConsumer ) {
+	public Registration addObserver( final Consumer<NSNotification> notificationConsumer ) {
 		final GenericObserver observer = new GenericObserver( notificationConsumer );
 		_retainedObservers.add( observer );
-		NSNotificationCenter.defaultCenter().addObserver(observer, ERXUtilities.notificationSelector("consume"), id(), null);
+		NSNotificationCenter.defaultCenter().addObserver( observer, ERXUtilities.notificationSelector( "consume" ), id(), null );
+		return new Registration( this, observer );
+	}
+
+	/**
+	 * An observer registered with {@link #addObserver(Consumer)}. {@link #remove()} (or {@link #close()}) unregisters it
+	 * from the notification center and releases it; removing it again does nothing.
+	 */
+	public static final class Registration implements AutoCloseable {
+
+		private final ERXNotification _notification;
+		private final GenericObserver _observer;
+
+		private Registration( final ERXNotification notification, final GenericObserver observer ) {
+			_notification = notification;
+			_observer = observer;
+		}
+
+		public void remove() {
+			NSNotificationCenter.defaultCenter().removeObserver( _observer, _notification.id(), null );
+			_retainedObservers.remove( _observer );
+		}
+
+		@Override
+		public void close() {
+			remove();
+		}
 	}
 
 	/**
@@ -111,12 +141,20 @@ public enum ERXNotification {
 	}
 	
 	/**
-	 * Wraps a Notification Consumer so we can register observers using lambda syntax
+	 * Wraps a Notification Consumer so observers can be registered using lambda syntax. Compared by identity, so the same
+	 * lambda registered twice is two observers, each removed by its own registration. Public only because the notification
+	 * center invokes {@link #consume(NSNotification)} reflectively; created only by {@link ERXNotification#addObserver(Consumer)}.
 	 */
-	public record GenericObserver( Consumer<NSNotification> consumer ) {
-		
-		public void consume( NSNotification n ) {
-			consumer.accept(n);
+	public static final class GenericObserver {
+
+		private final Consumer<NSNotification> _consumer;
+
+		private GenericObserver( final Consumer<NSNotification> consumer ) {
+			_consumer = consumer;
+		}
+
+		public void consume( final NSNotification n ) {
+			_consumer.accept( n );
 		}
 	}
 }
