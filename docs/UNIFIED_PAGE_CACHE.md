@@ -76,7 +76,7 @@ Mechanics (active mode only):
 - Each entry stored for a **plain component action** records the *provenance* of the request that
   produced it: the request's contextID, senderID and a fingerprint of its form values (sorted keys,
   verbatim values — no hashing, because a hash collision would silently *skip* an action).
-- `ERXComponentRequestHandler` asks `ERXAjaxSession.contextIDForRepeatedRequest(context)` where
+- `ERXComponentActionRequestHandler` asks `ERXAjaxSession.contextIDForRepeatedRequest(context)` where
   stock WO consulted `_contextIDMatchingIDs`.
 - Only a genuinely un-re-rendered repeat can match: every response re-renders its links under a
   fresh contextID, so two *distinct* clicks of "the same" link carry different contextIDs and both

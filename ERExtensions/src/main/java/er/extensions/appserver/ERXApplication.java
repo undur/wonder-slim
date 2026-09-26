@@ -212,16 +212,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		final ERXAppBasedResourceRequestHandler resourceRequestHandler = new ERXAppBasedResourceRequestHandler();
 
-		// The rewritten component-action handler is the default; the patched-stock handler remains
-		// available as an opt-out escape hatch while the rewrite earns trust in production. See
-		// ERXComponentActionRequestHandler's javadoc.
-		if( ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXComponentActionRequestHandler.enabled", true ) ) {
-			registerRequestHandler(new ERXComponentActionRequestHandler(), componentRequestHandlerKey());
-		}
-		else {
-			log.info( "Using the legacy ERXComponentRequestHandler for component actions (er.extensions.ERXComponentActionRequestHandler.enabled=false)" );
-			registerRequestHandler(new ERXComponentRequestHandler(), componentRequestHandlerKey());
-		}
+		registerRequestHandler(new ERXComponentActionRequestHandler(), componentRequestHandlerKey());
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
 		registerRequestHandler( resourceRequestHandler, ERXAppBasedResourceRequestHandler.KEY );
 

@@ -17,11 +17,8 @@ import com.webobjects.foundation.NSArray;
 import er.extensions.appserver.ajax.ERXAjaxSession;
 
 /**
- * Component-action dispatch (the /wo/ handler), written from requirements as owned code, replacing
- * {@link ERXComponentRequestHandler} - a patched copy of the stock handler, carrying that code's
- * idiom and vestiges. This handler is the DEFAULT; registration is decided in ERXApplication, and
- * {@code er.extensions.ERXComponentActionRequestHandler.enabled=false} is the escape hatch back to
- * the old handler while this one earns trust in production.
+ * Component-action dispatch (the /wo/ handler), written from requirements as owned code. It replaced
+ * ERXComponentRequestHandler, a patched copy of the stock handler, which has since been removed.
  * <p>
  * The job, in order: parse the action URL ({@code /wo/[sessionID/]contextID.senderID}), restore the
  * session (NEVER create one - session-creating access to this handler is what allowed session-less
@@ -29,8 +26,8 @@ import er.extensions.appserver.ajax.ERXAjaxSession;
  * the request phases (takeValues / invokeAction / appendToResponse), save the page, and check the
  * session back in - exactly once, on every path, including exception paths.
  * <p>
- * Deliberate divergences from the old handler, beyond style - the complete list, from a line-by-line
- * differential audit:
+ * Deliberate divergences from the old handler, beyond style - the complete list, from the line-by-line
+ * differential audit made when this handler replaced it:
  * <ul>
  * <li>A malformed action URL (no contextID) is answered with the page-restoration error instead of
  * being fed to {@code pageWithName(null)} - which in the old handler produced an exception page, a

@@ -1,13 +1,9 @@
-// Differential probe for the component-action dispatch rewrite: drives the SAME matrix of
-// happy-path and edge-case requests against a running app and prints one normalized line per case
-// (status + page title + canary values). Run it twice - once against an app on the NEW handler
-// (the default) and once with -Der.extensions.ERXComponentActionRequestHandler.enabled=false (the
-// legacy handler) - and diff the outputs. Expected diffs are exactly the deliberate divergences
-// documented in ERXComponentActionRequestHandler's javadoc (currently: the malformed-URL case).
+// Probe for component-action dispatch: drives a matrix of happy-path and edge-case requests
+// against a running app and prints one normalized line per case (status + page title + canary
+// values). It was the differential between ERXComponentActionRequestHandler and the legacy handler
+// it replaced; with that one gone, compare the output against a previous run to catch changes.
 //
-//   BASE=http://localhost:<port> node dispatch-differential.mjs > new.txt   (default)
-//   BASE=http://localhost:<port> node dispatch-differential.mjs > old.txt   (...enabled=false)
-//   diff old.txt new.txt
+//   BASE=http://localhost:<port> node dispatch-differential.mjs > now.txt
 
 const BASE = process.env.BASE || 'http://localhost:55432';
 const APP = `${BASE}/cgi-bin/WebObjects/AjaxPlayground.woa`;

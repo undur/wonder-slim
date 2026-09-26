@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **The legacy component request handler is gone**
+  `ERXComponentActionRequestHandler`, the default since July, is now the only component-action
+  handler. `ERXComponentRequestHandler`, the patched copy of WebObjects' stock handler, and the
+  `er.extensions.ERXComponentActionRequestHandler.enabled` property that switched back to it are
+  removed. (#75)
+
 ## 2026-09-26 (8.0.8)
 
 - **URL handling as its own layer**
