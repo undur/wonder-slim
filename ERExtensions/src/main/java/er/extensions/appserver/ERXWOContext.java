@@ -16,7 +16,6 @@ import er.extensions.foundation.ERXThreadStorage;
 
 public class ERXWOContext extends ERXAjaxContext {
 
-	private boolean _generateCompleteURLs;
 	private boolean _generateCompleteResourceURLs;
 	
 	private static final String CONTEXT_KEY = "wocontext";
@@ -77,23 +76,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		return _generateCompleteResourceURLs;
 	}
 	
-	@Override
-	public void generateCompleteURLs() {
-		super.generateCompleteURLs();
-		_generateCompleteURLs = true; 
-	}
-
-	@Override
-	public void generateRelativeURLs() {
-		super.generateRelativeURLs();
-		_generateCompleteURLs = false;
-	}
-	
-	@Override
-	public boolean doesGenerateCompleteURLs() {
-		return _generateCompleteURLs;
-	}
-
 	public String safeElementID() {
 		return safeIdentifierName(elementID());
 	}
