@@ -24,11 +24,6 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.foundation.ERXProperties;
-import er.extensions.statistics.store.ERXDumbStatisticsStoreListener;
-import er.extensions.statistics.store.ERXEmptyRequestDescription;
-import er.extensions.statistics.store.ERXNormalRequestDescription;
-import er.extensions.statistics.store.IERXRequestDescription;
-import er.extensions.statistics.store.IERXStatisticsStoreListener;
 
 /**
  * Enhances the normal stats store with a bunch of useful things which get
@@ -71,21 +66,58 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 		return _timer;
 	}
 
-    private final IERXStatisticsStoreListener _listener;
+	/**
+	 * Told about slow requests and deadlocks, for example to notify an external system. Both methods do nothing by default;
+	 * override the ones of interest.
+	 */
+	public interface Listener {
 
-    public ERXStatisticsStore() {
-        this( new ERXDumbStatisticsStoreListener() );
-    }
+		/**
+		 * A request took longer than the warn threshold
+		 */
+		default void slowRequest( long requestTime, RequestDescription description ) {}
 
-    /**
-     * Create a statistics store with a custom listener. For example this listener might
-     * notify an external system when a response is very slow in coming.
-     * 
-     * @param listener a customer listener to do something 'special' when requests are slow
-     */
-    public ERXStatisticsStore(IERXStatisticsStoreListener listener) {
-    	_listener = listener;
-    }
+		/**
+		 * The deadlock check found the given number of deadlocked threads
+		 */
+		default void deadlock( int deadlockCount ) {}
+	}
+
+	/**
+	 * What a slow request was doing: its page's component name, request handler key and extra information - or, when
+	 * those couldn't be read off the context, only a text.
+	 */
+	public record RequestDescription( String componentName, String requestHandler, String additionalInfo, String text ) {
+
+		private static final String UNAVAILABLE = "Error-during-context-description";
+
+		static RequestDescription of( final String componentName, final String requestHandler, final String additionalInfo ) {
+			return new RequestDescription( componentName, requestHandler, additionalInfo, null );
+		}
+
+		static RequestDescription unavailable( final String text ) {
+			return new RequestDescription( null, null, null, text != null ? text : UNAVAILABLE );
+		}
+
+		@Override
+		public String toString() {
+			return text != null ? text : componentName + "-" + requestHandler + additionalInfo;
+		}
+	}
+
+	private final Listener _listener;
+
+	public ERXStatisticsStore() {
+		this( new Listener() {} );
+	}
+
+	/**
+	 * Create a statistics store with a custom listener. For example this listener might notify an external system when a
+	 * response is very slow in coming.
+	 */
+	public ERXStatisticsStore( final Listener listener ) {
+		_listener = listener;
+	}
 
     /**
 	 * Thread that checks each second for running requests and makes a snapshot
@@ -168,8 +200,8 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 					_lastLog = currentTime;
 				}
 			
-                IERXRequestDescription requestDescription = descriptionObjectForContext(aContext, aString);
-                _listener.log(requestTime, requestDescription);
+                RequestDescription requestDescription = descriptionObjectForContext(aContext, aString);
+                _listener.slowRequest(requestTime, requestDescription);
 				if (requestTime > _maximumRequestFatalTime) {
 					log.error("Request did take too long : {}ms request was: {}{}", requestTime, requestDescription, trace);
 				}
@@ -250,7 +282,7 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 			return descriptionObjectForContext(aContext, string).toString();
 		}
 
-        public IERXRequestDescription descriptionObjectForContext(WOContext aContext, String string) {
+        public RequestDescription descriptionObjectForContext(WOContext aContext, String string) {
             if (aContext != null) {
                 try {
                     WOComponent component = aContext.page();
@@ -261,13 +293,13 @@ public class ERXStatisticsStore extends WOStatisticsStore {
                     if (!requestHandler.equals("wo")) {
                         additionalInfo = additionalInfo + aContext.request().uri();
                     }
-                    return new ERXNormalRequestDescription(componentName, requestHandler, additionalInfo);
+                    return RequestDescription.of(componentName, requestHandler, additionalInfo);
                 }
                 catch (RuntimeException e) {
                     log.error("Cannot get context description since received exception.", e);
                 }
             }
-            return new ERXEmptyRequestDescription(string);
+            return RequestDescription.unavailable(string);
         }
 
 		public void run() {
