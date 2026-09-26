@@ -111,7 +111,7 @@ public  class ERXRequest extends WORequest {
 
 		if(serverName == null || serverName.length() == 0) {
 			if (isUsingWebServer()) {
-				serverName = remoteHostName(); // Checks host name keys in our preferred order instead of Apple WO 5.4.3's default header check logic
+				serverName = requestedHostFromHeaders(); // Checks host name keys in our preferred order instead of Apple WO 5.4.3's default header check logic
 
 				if ((serverName == null) || (serverName.length() == 0) || serverName.equals(UNKNOWN_HOST)) {
 					throw new NSForwardException(new WOURLFormatException("<" + super.getClass().getName() + ">: Unable to build complete url as no server name was provided in the headers of the request."));
@@ -148,9 +148,9 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
-     * @return The remote client host name. If no host name is found, returns "UNKNOWN".
+     * @return The host the request was addressed to, from the first of {@link #HOST_NAME_HEADERS} present; "UNKNOWN" when none is
      */
-    public String remoteHostName() {
+    private String requestedHostFromHeaders() {
 
     	for (final String headerName : HOST_NAME_HEADERS) {
 			final String headerValue = headerForKey(headerName);
