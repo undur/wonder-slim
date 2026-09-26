@@ -1,14 +1,56 @@
 # Changelog
 
-## Unreleased
+## 2026-09-26 (8.0.8)
+
+- **URL handling as its own layer**
+  The request canonicalisation, short URLs and the route request handler moved out of
+  `ERXApplication` and `ERXWOContext` into two classes in the inheritance chain,
+  `ERXRoutingApplication` and `ERXRoutingContext` (`WOApplication <- ERXRoutingApplication <-
+  ERXAjaxApplication <- ERXApplication`, and likewise for the context). `ERXShortURLs` moved to
+  `er.extensions.routes` with them. `createRequest()` is now final on the routing layer: an
+  application that constructs a request class of its own overrides `newRequest()` instead.
+
+- **Removed, unused or superseded**
+  - `ERXRequest.remoteHostName()`: it returned the host the request was addressed to, not the
+    client's; the lookup lives on privately behind `_serverName()`.
+  - `ERXRequest`'s `wodata` override, the receiving half of a path-style resource URL form nothing
+    generates any more. Dynamic data (`<wo:img data="..." />`) is unaffected: it uses the query
+    form, which WebObjects reads itself.
+  - `ERXSession.didBacktrack()` and `lastActionWasDA`, a context-ID heuristic that nothing called
+    and that misreported under Ajax traffic. The repeated-request guard of the page cache is
+    unaffected.
+  - `ERXWOContext`'s static `directActionUrl(...)` helpers and its three-argument
+    `directActionURLForActionNamed(name, query, includeSessionID)`; use WebObjects' own
+    `directActionURLForActionNamed(name, query, secure, port, includeSessionID)`.
+  - `WOAdaptorPlain`, an experimental adaptor, and the deprecated
+    `WOExceptionPage.reportException()` (the page is used automatically).
+
+- **Smaller changes**
+  - `ERXWOContext` no longer keeps its own flag for complete-URL generation: `WOContext` tracks
+    the mode itself, including through the internal `_generateCompleteURLs()`, which the flag
+    missed and then misreported.
+  - `ERXNotification.addObserver(Consumer)` returns a `Registration` whose `remove()` unregisters
+    the observer. Lambda observers used to stay registered, and retained, forever.
+  - `ERXStatisticsStore`'s listener and request description types are nested in the class
+    (`ERXStatisticsStore.Listener`, `ERXStatisticsStore.RequestDescription`);
+    `er.extensions.statistics.store` is gone. A custom listener implements `slowRequest` instead
+    of `log`.
+  - The session cookie settings (`er.extensions.ERXSession.useSecureSessionCookies`,
+    `useHttpOnlySessionCookies`) are read once, like the SameSite setting;
+    `useHttpOnlySessionCookies()` is no longer static, so both can be overridden as documented.
+  - `ERXExceptionManager` records the component hierarchy itself; `ERXWOContext.componentPath()`
+    moved there.
+  - Dependencies: ng-core 0.1.3, wo-adaptor-jetty 0.12.1, slf4j 2.0.20.
 
 - **WebObjects' own `browserLanguages()`**
   `ERXRequest` no longer overrides `browserLanguages()`; WebObjects' implementation is used. It
   takes the `Accept-Language` languages in the order the header lists them (current browsers list
   them by weight, so the first language is the same), maps regional tags to the base language
   (`en-US` is `English`, not `English_US`), and no longer appends `Nonlocalized` and a default
-  language. That matters only to an application with language-specific `.lproj` folders, which
-  searched those last; such an application sets the session's languages itself. (#64)
+  language to the list. Components and resources in `Nonlocalized.lproj` (or outside any `.lproj`)
+  are found as before, whatever the list says: WebObjects always falls back to them. It matters
+  only to an application with language-specific `.lproj` folders, where the default language was
+  searched last; such an application sets the session's languages itself. (#64)
 
 - **User-agent detection reduced to what still holds**
   `ERXUserAgent.of(request)` (or `ERXUserAgent.parse(header)`) tells you the browser family
