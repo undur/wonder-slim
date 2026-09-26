@@ -14,16 +14,13 @@ import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOCookie;
 import com.webobjects.appserver.WOCookie.SameSite;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOSession;
-import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSNotificationCenter;
-import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSTimestamp;
 
 import er.extensions.appserver.ajax.ERXAjaxSession;
@@ -110,8 +107,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 		NSNotificationCenter.defaultCenter().postNotification(SessionWillSleepNotification, this);
 		super.sleep();
 		ERXSession.setSession(null);
-		// reset backtracking
-		_didBacktrack = null;
 		Thread.currentThread().setName(_originalThreadName);
 		removeObjectForKey("ERXActionLogging");
 	}
@@ -127,76 +122,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 */
 	public String threadName() {
 		return Thread.currentThread().getName();
-	}
-
-	/*
-	 * Backtrack detection - Pulled from David Neumann's wonderful security
-	 * framework.
-	 */
-
-	/**
-	 * flag to indicate if the user is currently backtracking, meaning they hit
-	 * the back button and then clicked on a link.
-	 */
-	private Boolean _didBacktrack = null;
-
-	/**
-	 * flag to indicate if the last action was a direct action
-	 */
-	public boolean lastActionWasDA = false;
-
-	/**
-	 * Utility method that gets the context ID string from the passed in request.
-	 * 
-	 * @param aRequest request to get the context id from
-	 * @return the context id as a string
-	 */
-	private String requestsContextID(WORequest aRequest) {
-		String uri = aRequest.uri();
-		int idx = uri.indexOf('?');
-		if (idx != -1)
-			uri = uri.substring(0, idx);
-		String eID = NSPathUtilities.lastPathComponent(uri);
-		NSArray eIDs = NSArray.componentsSeparatedByString(eID, ".");
-		String reqCID = "1";
-		if (eIDs.count() > 0) {
-			reqCID = (String) eIDs.objectAtIndex(0);
-		}
-		return reqCID;
-	}
-
-	/**
-	 * Method inspects the passed in request to see if the user backtracked. If
-	 * the context ID for the request is 2 clicks less than the context ID for
-	 * the current WOContext, we know the backtracked.
-	 * 
-	 * @return if the user has backtracked or not.
-	 */
-	public boolean didBacktrack() {
-		if (_didBacktrack == null) {
-			_didBacktrack = Boolean.FALSE;
-			// If the current request is a direct action, no way the user could have backtracked.
-			if (!context().request().requestHandlerKey().equals(WOApplication.application().directActionRequestHandlerKey())) {
-				int reqCID = Integer.parseInt(requestsContextID(context().request()));
-				int cid = Integer.parseInt(context().contextID());
-				int delta = cid - reqCID;
-				if (delta > 2) {
-					_didBacktrack = Boolean.TRUE;
-				}
-				else if (delta > 1) {
-					// Might not have backtracked if their last action was a direct action.
-					// ERXDirectActionRequestHandler, which is the framework
-					// built-in default direct action handler, sets this variable
-					// to true at the end of its handleRequest method.
-					if (!lastActionWasDA) {
-						_didBacktrack = Boolean.TRUE;
-					}
-				}
-			}
-			lastActionWasDA = false;
-		}
-
-		return _didBacktrack.booleanValue();
 	}
 
 	/**
