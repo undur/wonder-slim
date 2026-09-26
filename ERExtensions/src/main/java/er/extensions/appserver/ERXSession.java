@@ -9,6 +9,7 @@ package er.extensions.appserver;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -45,6 +46,16 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * SameSite for session and instance cookies
 	 */
 	private static final SameSite _sameSite = ERXProperties.enumValueForKey(SameSite.class, "er.extensions.ERXSession.cookies.SameSite");
+
+	/**
+	 * er.extensions.ERXSession.useSecureSessionCookies, see {@link #useSecureSessionCookies()}
+	 */
+	private static final boolean _useSecureSessionCookies = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXSession.useSecureSessionCookies", false);
+
+	/**
+	 * er.extensions.ERXSession.useHttpOnlySessionCookies, see {@link #useHttpOnlySessionCookies()}
+	 */
+	private static final boolean _useHttpOnlySessionCookies = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXSession.useHttpOnlySessionCookies", false);
 
 	/**
 	 * The locale this session formats numbers and dates in, when set explicitly. See {@link ERXLocale}.
@@ -278,7 +289,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * @return whether or not secure cookies are enabled
 	 */
 	public boolean useSecureSessionCookies() {
-		return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXSession.useSecureSessionCookies", false);
+		return _useSecureSessionCookies;
 	}
 
 	/**
@@ -290,47 +301,39 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	 * 
 	 * @return whether or not http-only cookies are enabled
 	 */
-	public static boolean useHttpOnlySessionCookies() {
-		return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXSession.useHttpOnlySessionCookies", false);
+	public boolean useHttpOnlySessionCookies() {
+		return _useHttpOnlySessionCookies;
 	}
 
 	protected void _setCookieSameSite(WOResponse response) {
 		if (storesIDsInCookies() && _sameSite != null) {
-			for (WOCookie cookie : response.cookies()) {
-				String sessionIdKey = application().sessionIdKey();
-				String instanceIdKey = application().instanceIdKey();
-				String cookieName = cookie.name();
-				if (sessionIdKey.equals(cookieName) || instanceIdKey.equals(cookieName)) {
-					cookie.setSameSite(_sameSite);
-				}
-			}
+			sessionCookies(response).forEach(cookie -> cookie.setSameSite(_sameSite));
 		}
 	}
 
 	protected void _convertSessionCookiesToSecure(WOResponse response) {
 		if (storesIDsInCookies() && !ERXRequest._isSecureDisabled()) {
-			for (WOCookie cookie : response.cookies()) {
-				String sessionIdKey = application().sessionIdKey();
-				String instanceIdKey = application().instanceIdKey();
-				String cookieName = cookie.name();
-				if (sessionIdKey.equals(cookieName) || instanceIdKey.equals(cookieName)) {
-					cookie.setIsSecure(true);
-				}
-			}
+			sessionCookies(response).forEach(cookie -> cookie.setIsSecure(true));
 		}
 	}
 
 	protected void _convertSessionCookiesToHttpOnly(final WOResponse response) {
 		if (storesIDsInCookies()) {
-			for (WOCookie cookie : response.cookies()) {
-				String sessionIdKey = application().sessionIdKey();
-				String instanceIdKey = application().instanceIdKey();
-				String cookieName = cookie.name();
-				if (sessionIdKey.equals(cookieName) || instanceIdKey.equals(cookieName)) {
-					cookie.setIsHttpOnly(true);
-				}
-			}
+			sessionCookies(response).forEach(cookie -> cookie.setIsHttpOnly(true));
 		}
+	}
+
+	/**
+	 * @return The response's session ID and instance ID cookies
+	 */
+	private List<WOCookie> sessionCookies(final WOResponse response) {
+		final String sessionIdKey = application().sessionIdKey();
+		final String instanceIdKey = application().instanceIdKey();
+
+		return response.cookies()
+				.stream()
+				.filter(cookie -> sessionIdKey.equals(cookie.name()) || instanceIdKey.equals(cookie.name()))
+				.toList();
 	}
 
 	@Override
