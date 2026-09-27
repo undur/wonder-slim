@@ -40,9 +40,17 @@ public class ERXDevAccessTest {
 	}
 
 	@Test
-	public void headersAreIgnored() throws Exception {
+	public void headersDontGrantAccess() throws Exception {
 		final Map<String, List<String>> headers = Map.of( "remote_host", List.of( "127.0.0.1" ), "x-webobjects-remote-addr", List.of( "127.0.0.1" ), "x-forwarded-for", List.of( "127.0.0.1" ) );
 		assertFalse( ERXDevAccess.isFromThisMachine( request( "172.16.1.111", headers ) ) );
 		assertFalse( ERXDevAccess.isFromThisMachine( request( null, headers ) ) );
+	}
+
+	@Test
+	public void forwardedRequestsAreRefused() throws Exception {
+		assertFalse( ERXDevAccess.isFromThisMachine( request( "127.0.0.1", Map.of( "x-forwarded-for", List.of( "203.0.113.4" ) ) ) ) );
+		assertFalse( ERXDevAccess.isFromThisMachine( request( "127.0.0.1", Map.of( "remote_addr", List.of( "203.0.113.4" ) ) ) ) );
+		assertFalse( ERXDevAccess.isFromThisMachine( request( "127.0.0.1", Map.of( "x-webobjects-remote-addr", List.of( "127.0.0.1" ) ) ) ) );
+		assertFalse( ERXDevAccess.isFromThisMachine( request( "::1", Map.of( "forwarded", List.of( "for=203.0.113.4" ) ) ) ) );
 	}
 }

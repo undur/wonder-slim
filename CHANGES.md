@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The development endpoints refuse forwarded requests**
+  A proxy or web server adaptor on the same machine makes every request it forwards come in on a
+  loopback connection. `/eval`, `/log` and `/problems` now also refuse requests carrying the headers
+  such forwarders add (`x-forwarded-for`, `forwarded`, `x-real-ip`, `x-webobjects-remote-addr`,
+  `remote_addr`, `remote_host`). (#110)
+
 - **Cookie expiry dates as WebObjects writes them, without the overflow**
   A cookie with a timeout gets an `expires` date along with `max-age` again. An explicitly set
   expiry date is kept rather than replaced by one computed from the timeout, and timeouts over 24
