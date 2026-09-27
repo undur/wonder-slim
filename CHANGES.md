@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A null `dateformat` uses the default date format**
+  When `ERXWOString`'s `dateformat` is bound but evaluates to null, a timestamp is now rendered with
+  the default format, the full timestamp (`2026-09-27 12:00:00 Etc/GMT`) in the default time zone,
+  as `numberformat` already did for numbers. A typo had kept this from ever happening, so these
+  values were rendered with `toString()`. Unbound and constant formats are unaffected. (#85)
+
 - **`bindingNamed()` removed**
   `ERXComponentUtilities.bindingNamed(name, associations)` and `ERXDynamicElement.bindingNamed(name)`
   were second names for a dictionary lookup. Use `associations.objectForKey(name)`, or

@@ -102,7 +102,7 @@ public class ERXWOString extends WODynamicElement {
 					final String formatString = (String) _dateFormat.valueInComponent(component);
 
 					if (formatString == null) {
-						format = ERXTimestampFormatter.defaultDateFormatterForObject(formatString); // FIXME: Uh... Shouldn't this be obtaining a formatter for valueInComponent instead of the formatString? // Hugi 2025-06-14
+						format = ERXTimestampFormatter.defaultDateFormatterForObject(valueInComponent);
 					}
 					else {
 						format = ERXTimestampFormatter.dateFormatterForPattern(formatString);

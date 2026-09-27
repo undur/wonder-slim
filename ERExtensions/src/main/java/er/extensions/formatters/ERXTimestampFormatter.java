@@ -34,13 +34,14 @@ public class ERXTimestampFormatter extends NSTimestampFormatter {
 	}
 
 	/**
-	 * The default pattern used by WOString and friends when no pattern is set.
-	 * Looks like this only for compatibility's sake.
+	 * @return The formatter ERXWOString uses for a value when its {@code dateformat} binding evaluates to null: the full
+	 *         timestamp ({@code 2026-09-27 12:00:00 Etc/GMT}) for an NSTimestamp, in the formatter's default time zone.
+	 *         Null for anything else, which is then rendered unformatted.
 	 */
 	public static Format defaultDateFormatterForObject(Object object) {
 
 		if (object instanceof NSTimestamp) {
-			return dateFormatterForPattern("%Y/%m/%d");
+			return dateFormatterForPattern("%Y-%m-%d %H:%M:%S %Z");
 		}
 
 		return null;
