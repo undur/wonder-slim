@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **`ERXKeepAliveResponse` delivers what's pushed, intact**
+  The stream behind Ajax's push handler returned bytes signed, corrupting non-ASCII content (and
+  ending the stream at a 0xFF byte). It held back data queued while the previous item was being
+  written, so the message part of every push waited for the next push. A spurious wakeup also ended
+  the stream. `reset()`, used when a push response is stopped, now ends the stream. (#105)
+
 ## 2026-09-27 (8.0.9)
 
 - **`dateformat` formats java.time values and takes `DateTimeFormatter` patterns**

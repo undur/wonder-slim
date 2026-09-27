@@ -38,8 +38,12 @@ public class ERXKeepAliveResponse extends WOResponse {
 	 */
 	protected int _currentIndex = 0;
 
+	/**
+	 * Set by {@link #reset()}: the stream ends once it's read.
+	 */
+	private boolean _ended = false;
+
 	public ERXKeepAliveResponse() {
-		//setHeader("keep-alive", "connection");
 		setContentStream(new InputStream() {
 			@Override
 			public int read() throws IOException {
@@ -48,26 +52,26 @@ public class ERXKeepAliveResponse extends WOResponse {
 						_current = null;
 						_currentIndex = 0;
 					}
-					if (_current == null) {
-						try {
-							if (log.isDebugEnabled()) {
-								log.debug("waiting: {}", _queue.hashCode());
-							}
-							_queue.wait();
-							if (log.isDebugEnabled()) {
-								log.debug("got data: {}", _queue.hashCode());
-							}
-						}
-						catch (InterruptedException e) {
-							return -1;
-						}
+					// Wait only while there's nothing queued: data pushed while the previous item was being written is
+					// already waiting, and wait() can also return without a notify.
+					while (_current == null && !_ended) {
 						_current = _queue.poll();
+
+						if (_current == null) {
+							try {
+								log.debug("waiting: {}", _queue.hashCode());
+								_queue.wait();
+							}
+							catch (InterruptedException e) {
+								return -1;
+							}
+						}
 					}
-					if (_current == null) {
+					if (_ended) {
 						return -1;
 					}
 					log.debug("writing: {}", _currentIndex);
-					return _current[_currentIndex++];
+					return _current[_currentIndex++] & 0xFF;
 				}
 			}
 
@@ -102,12 +106,14 @@ public class ERXKeepAliveResponse extends WOResponse {
 	}
 
 	/**
-	 * Resets the response by clearing out the current item and notifying the queue.
+	 * Ends the response: data not yet written is dropped, and the stream ends.
 	 */
 	public void reset() {
 		synchronized (_queue) {
 			_current = null;
 			_currentIndex = 0;
+			_queue.clear();
+			_ended = true;
 			_queue.notify();
 		}
 	}
