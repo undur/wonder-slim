@@ -138,14 +138,17 @@ public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandlin
 			if (_timeout >= 0) {
 				header.append("; max-age=");
 				header.append(_timeout);
-				if (_timeout == 0) {
-					localExpires = new NSTimestamp(0L);
-				}
-				else {
-					localExpires = new NSTimestamp(System.currentTimeMillis() + (_timeout * 1000));
+				// An expires date for clients without max-age support, unless one was set explicitly
+				if (localExpires == null) {
+					if (_timeout == 0) {
+						localExpires = new NSTimestamp(0L);
+					}
+					else {
+						localExpires = new NSTimestamp(System.currentTimeMillis() + (_timeout * 1000L));
+					}
 				}
 			}
-			if (_expires != null) {
+			if (localExpires != null) {
 				header.append("; expires=");
 				header.append(TIMESTAMP_FORMATTER.get().format(localExpires));
 			}

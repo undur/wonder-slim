@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Cookie expiry dates as WebObjects writes them, without the overflow**
+  A cookie with a timeout gets an `expires` date along with `max-age` again. An explicitly set
+  expiry date is kept rather than replaced by one computed from the timeout, and timeouts over 24
+  days no longer overflow into a date in the past. (#109)
+
 - **`SessionDidRestoreNotification` is posted once, and only on restore**
   `ERXSession.awake()` no longer posts it in addition to WebObjects, which already does when it
   restores a session. A new session gets WebObjects' `SessionDidCreateNotification` only.
