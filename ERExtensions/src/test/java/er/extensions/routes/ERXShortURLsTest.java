@@ -3,7 +3,6 @@ package er.extensions.routes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
-import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,10 +11,9 @@ public class ERXShortURLsTest {
 	private static final String PREFIX = "/cgi-bin/WebObjects/App.woa";
 	private static final String ADAPTOR = "/cgi-bin/WebObjects";
 	private static final Set<String> KEYS = Set.of( "wa", "wo", "res", "ajax" );
-	private static final Predicate<String> NO_ROUTES = path -> false;
 
 	private static String canonical( final String url ) {
-		return ERXShortURLs.canonicalize( url, ADAPTOR, "App", ".woa", KEYS, NO_ROUTES );
+		return ERXShortURLs.canonicalize( url, ADAPTOR, "App", ".woa", KEYS );
 	}
 
 	@Test
@@ -104,13 +102,6 @@ public class ERXShortURLsTest {
 		assertEquals( "", canonical( "" ) );
 		assertEquals( null, canonical( null ) );
 		assertEquals( "http://h/wa/x", canonical( "http://h/wa/x" ) );
-	}
-
-	@Test
-	public void anExplicitRouteWins() {
-		final Predicate<String> waIsARoute = path -> path.startsWith( "/wa/" );
-		assertEquals( PREFIX + "/route/wa/page", ERXShortURLs.canonicalize( "/wa/page", ADAPTOR, "App", ".woa", KEYS, waIsARoute ) );
-		assertEquals( PREFIX + "/res/app/x.css", ERXShortURLs.canonicalize( "/res/app/x.css", ADAPTOR, "App", ".woa", KEYS, waIsARoute ) );
 	}
 
 	@Test

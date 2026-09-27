@@ -65,7 +65,7 @@ public abstract class ERXRoutingApplication extends WOApplication {
 		@SuppressWarnings("unchecked")
 		final Collection<String> handlerKeys = registeredRequestHandlerKeys();
 
-		final String canonicalURL = ERXShortURLs.canonicalize( url, adaptorPath(), name(), applicationExtension(), handlerKeys, RouteTable.defaultRouteTable()::hasRouteFor );
+		final String canonicalURL = ERXShortURLs.canonicalize( url, adaptorPath(), name(), applicationExtension(), handlerKeys );
 		return newRequest( method, canonicalURL, httpVersion, headers, content, info );
 	}
 

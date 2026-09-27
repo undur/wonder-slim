@@ -1,7 +1,6 @@
 package er.extensions.routes;
 
 import java.util.Collection;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -11,7 +10,7 @@ import java.util.regex.Pattern;
  * one of its registered request handlers — as if the adaptor prefix
  * ({@code /cgi-bin/WebObjects/App.woa}) were present, and generates its URLs
  * without that prefix. The long form keeps working: expansion only happens
- * when the prefix is absent, and only when no explicit route claims the path.
+ * when the prefix is absent.
  *
  * Both directions are pure functions of the application's URL prefix (an
  * exact string the app computes — no patterns) and its handler keys; the
@@ -25,9 +24,10 @@ import java.util.regex.Pattern;
  *
  * Design notes. Only the first path segment is consulted, and only against
  * the handler keys actually registered, so an application's own routes
- * ({@code /about}, {@code /i/…}) are never mistaken for handler URLs; where
- * a route and a handler key do collide, the route wins because the app
- * chose it explicitly. Expansion is skipped for anything already inside the
+ * ({@code /about}, {@code /i/…}) are never mistaken for handler URLs. A
+ * handler URL always goes to its handler: mapping a route whose first segment
+ * is a handler key is refused (see {@code RouteTable.map}), and a wildcard
+ * route such as a catch-all {@code /*} doesn't take handler URLs. Expansion is skipped for anything already inside the
  * adaptor path so long-form URLs — and other applications' URLs behind the
  * same front end — pass through untouched. The prefix is an exact string,
  * never a pattern, which is what makes the shortening safe to apply to
@@ -66,9 +66,8 @@ public final class ERXShortURLs {
 	 * @param applicationName The application's name
 	 * @param applicationExtension The application's extension ({@code .woa}), optional in WO URLs
 	 * @param handlerKeys The application's registered request handler keys
-	 * @param routeClaims Whether an explicit route claims the given path
 	 */
-	public static String canonicalize( final String url, final String adaptorPath, final String applicationName, final String applicationExtension, final Collection<String> handlerKeys, final Predicate<String> routeClaims ) {
+	public static String canonicalize( final String url, final String adaptorPath, final String applicationName, final String applicationExtension, final Collection<String> handlerKeys ) {
 
 		if( url == null || !url.startsWith( "/" ) ) {
 			return url;
@@ -112,7 +111,7 @@ public final class ERXShortURLs {
 		}
 
 		final String segment = firstSegment( rest );
-		final boolean handlerURL = !segment.isEmpty() && handlerKeys.contains( segment ) && !routeClaims.test( rest );
+		final boolean handlerURL = !segment.isEmpty() && handlerKeys.contains( segment );
 		final String prefix = carriedPrefix != null ? carriedPrefix : applicationPrefix( adaptorPath, applicationName, applicationExtension );
 
 		return prefix + ( handlerURL ? rest : "/" + ROUTE_KEY + rest ) + query;

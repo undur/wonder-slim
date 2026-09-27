@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Handler URLs always reach their handler**
+  A wildcard route matching a handler key's URLs, such as a catch-all `/*`, took over component
+  actions, direct actions and resources. Now a URL whose first segment is a registered request
+  handler key always goes to that handler, as `RouteTable` already required of mapped routes.
+  `ERXShortURLs.canonicalize()` no longer takes a route predicate. (#112)
+
 - **`ERXNumberFormatter` factor patterns parse at full precision**
   Parsing with a multiplying pattern and no explicit scale, like `(*1000=)0`, now divides at full
   precision, so a displayed value parses back to what it was (`"12"` → 0.012, where it gave 0). (#111)
