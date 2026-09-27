@@ -41,12 +41,17 @@ public enum ERXNotification {
 	ApplicationDidFinishInitializationNotification ( "NSApplicationDidFinishInitializationNotification" ),
 	
 	/**
-	 * FIXME: Docs?	// Hugi 2025-10-14
+	 * Posted by WOApplication.run() once the application has been constructed, before the adaptors start listening, so
+	 * before any request can arrive. The place to finish initializing: ERXApplication calls finishInitialization() here
+	 * (and then posts {@link #ApplicationDidFinishInitializationNotification}), and frameworks initialize on it.
+	 * Notification object is the application.
 	 */
 	ApplicationWillFinishLaunchingNotification( WOApplication.ApplicationWillFinishLaunchingNotification ),
 	
 	/**
-	 * FIXME: Docs?	// Hugi 2025-10-14
+	 * Posted by WOApplication.run() once the adaptors are listening, so requests may already be arriving. Only posted
+	 * when the application was launched through main(). ERXApplication calls didFinishLaunching() here, which prints
+	 * the startup banner. Notification object is the application.
 	 */
 	ApplicationDidFinishLaunchingNotification( WOApplication.ApplicationDidFinishLaunchingNotification ),
 	
