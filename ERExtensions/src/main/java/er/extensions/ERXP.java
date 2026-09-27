@@ -182,11 +182,15 @@ public enum ERXP {
 	// ERXResponseCompression
 	/**
 	 * If true, responses are gzip-compressed for clients that accept it. Defaults to false.
+	 *
+	 * FIXME: Rename the property to reflect ERXResponseCompression, the class that reads it // Hugi 2021-05-24
 	 */
 	RESPONSE_COMPRESSION_ENABLED( "er.extensions.ERXApplication.responseCompressionEnabled" ),
 
 	/**
 	 * The content types compressed, as an array. Defaults to {@code (text/javascript)}.
+	 *
+	 * FIXME: Rename the property to reflect ERXResponseCompression, the class that reads it // Hugi 2021-05-24
 	 */
 	RESPONSE_COMPRESSION_TYPES( "er.extensions.ERXApplication.responseCompressionTypes" ),
 

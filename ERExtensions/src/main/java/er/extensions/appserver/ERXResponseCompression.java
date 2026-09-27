@@ -38,8 +38,6 @@ public class ERXResponseCompression {
 	 * The default is ("text/javascript")
 	 * 
 	 * @return an array of mime type strings
-	 * 
-	 * FIXME: Rename the properties to reflect the class name change
 	 */
 	public static Set<String> responseCompressionTypes() {
 		if (_responseCompressionTypes == null) {
@@ -53,8 +51,6 @@ public class ERXResponseCompression {
 	 * checks the value of
 	 * <code>er.extensions.ERXApplication.responseCompressionEnabled</code> and
 	 * if true turns on response compression by gzip
-	 * 
-	 * FIXME: Rename the properties to reflect the class name change
 	 */
 	public static boolean responseCompressionEnabled() {
 		if (_responseCompressionEnabled == null) {
