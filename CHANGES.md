@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **`ERXWOHyperlink` passes on only actions inside it**
+  A link hands an action to its children only when the sender's element ID is inside the link's
+  (`1.2.…`), no longer when it merely starts with the same characters (`1.21.0`). (#106)
+
 - **`ERXKeepAliveResponse` delivers what's pushed, intact**
   The stream behind Ajax's push handler returned bytes signed, corrupting non-ASCII content (and
   ending the stream at a 0xFF byte). It held back data queued while the previous item was being

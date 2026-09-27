@@ -24,8 +24,8 @@ import er.extensions.foundation.ERXProperties;
  * <li>When you have action targets inside of the hyperlink, then their invokeAction() 
  * method is normally never called. This is probably an optimization, but breaks the case when you have
  * - say - onClick elements inside of the hyperlink. This subclass will instead propagate the
- * invokeAction to the children if the senderID() starts with the elementID() (which should indicate an
- * action inside of a hyperlink).  
+ * invokeAction to the children if the senderID() is inside the elementID() (starts with it, followed by a
+ * dot), which indicates an action inside of the hyperlink.
  * </ul>
  * @author david Logging
  * @author ak WONoContentElement fix, senderID fix, double-quote fix
@@ -58,7 +58,7 @@ public class ERXWOHyperlink extends WOHyperlink {
             final String senderID = context.senderID();
             final String elementID = context.elementID();
 
-            if(senderID.startsWith(elementID) && !elementID.equals(senderID)) {
+            if(senderID.startsWith(elementID + ".")) {
                 result = invokeChildrenAction(request, context);
             }
         }
