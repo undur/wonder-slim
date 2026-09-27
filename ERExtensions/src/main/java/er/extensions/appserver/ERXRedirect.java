@@ -210,22 +210,10 @@ public class ERXRedirect extends WOComponent {
 				String aContextId = context.contextID();
 				StringBuilder requestHandlerPath = new StringBuilder();
 				if (WOApplication.application().pageCacheSize() == 0) {
-					if (aSession.storesIDsInURLs()) {
-						requestHandlerPath.append(component.name());
-						requestHandlerPath.append('/');
-						requestHandlerPath.append(aSession.sessionID());
-						requestHandlerPath.append('/');
-						requestHandlerPath.append(aContextId);
-						requestHandlerPath.append(".0");
-					}
-					else {
-						requestHandlerPath.append(component.name());
-						requestHandlerPath.append('/');
-						requestHandlerPath.append(aContextId);
-						requestHandlerPath.append(".0");
-					}
+					throw new IllegalStateException("Can't redirect to a component instance: the page cache is disabled (WOPageCacheSize=0), so the instance can't be restored by the request the redirect leads to. Redirect to a direct action or a URL instead.");
 				}
-				else if (aSession.storesIDsInURLs()) {
+
+				if (aSession.storesIDsInURLs()) {
 					requestHandlerPath.append(aSession.sessionID());
 					requestHandlerPath.append('/');
 					requestHandlerPath.append(aContextId);

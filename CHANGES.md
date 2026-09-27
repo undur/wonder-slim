@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A component redirect without a page cache fails with an explanation**
+  With `WOPageCacheSize=0`, `ERXRedirect` redirected to a component instance with the page's name
+  in the URL, WebObjects' form for recreating a page without a cache. Those URLs aren't served, and
+  a recreated page wouldn't be the instance redirected to, so the redirect now throws, naming the
+  alternatives: a direct action or a URL. (#122)
+
 - **`ERXWOForm` no longer publishes its `enctype`**
   The form put its `enctype` into `ERXWOContext.contextDictionary()` while it rendered, for a file
   upload element that has since been removed. Nothing reads it. The `enctype` attribute is rendered
