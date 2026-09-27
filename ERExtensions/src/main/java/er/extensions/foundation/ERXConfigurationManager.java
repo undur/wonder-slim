@@ -87,7 +87,6 @@ public class ERXConfigurationManager {
 	private NSArray<String> _monitoredProperties;
 	private Properties _defaultProperties;
 	private Properties _commandLineArgumentProperties;
-	private boolean _isInitialized = false;
 	private boolean _isRapidTurnAroundInitialized = false;
 
 	/**
@@ -164,17 +163,6 @@ public class ERXConfigurationManager {
 		_commandLineArguments = newCommandLineArguments;
 		_defaultProperties = (Properties) NSProperties._getProperties().clone();
 		_commandLineArgumentProperties = ERXProperties.propertiesFromArgv(_commandLineArguments);
-	}
-
-	/**
-	 * Initializes the configuration manager. The framework principal
-	 * Invoked when the ER Extensions framework is loaded.
-	 */
-	public void initialize() {
-		if (!_isInitialized) {
-			_isInitialized = true;
-			loadConfiguration();
-		}
 	}
 
 	private NSArray<String> monitoredProperties() {

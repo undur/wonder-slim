@@ -24,13 +24,6 @@ public enum ERXNotification {
 	ApplicationWillTerminateNotification( "ApplicationWillTerminateNotification" ),
 
 	/**
-	 * Posted when all bundles were loaded but before their principal was called
-	 * 
-	 * FIXME: This notification was posted by the (ERX)Loader. We need to implement at least that part again if we want to keep it // Hugi 2025-06-22 
-	 */
-	AllBundlesLoadedNotification( "NSBundleAllBundlesLoaded" ),
-
-	/**
 	 * Posted at the very end of the ERXApplication constructor
 	 */
 	ApplicationDidCreateNotification( "NSApplicationDidCreateNotification" ),

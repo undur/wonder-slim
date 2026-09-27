@@ -27,7 +27,6 @@ public class XXNotificationListener {
 
 		// Lifecycle events, ca. in the order they get posted
 		List.of(
-				ERXNotification.AllBundlesLoadedNotification.id(), // Not currently posted, but should probably be here in the lifecycle
 				ERXNotification.ApplicationDidCreateNotification.id(),
 				ERXNotification.ApplicationDidFinishInitializationNotification.id(),
 				ERXNotification.ApplicationWillFinishLaunchingNotification.id(),

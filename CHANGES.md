@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The dead "all bundles loaded" startup path is gone**
+  `ERXExtensions` observed `NSBundleAllBundlesLoaded` to load the configuration, a notification
+  nothing posts any more, so that code never ran. The configuration is loaded, as it has been all
+  along, when the application has been created (`ERXExtensions.finishInitialization()`).
+  `ERXNotification.AllBundlesLoadedNotification` and `ERXConfigurationManager.initialize()` are
+  removed. (#118)
+
 - **`ERXActionLogging` removed, and with it the `WOActiveImage` and `WOSubmitButton` patches**
   `ERXWOHyperlink`, `ERXWOActiveImage` and `ERXWOSubmitButton` wrote the invoked element into the
   session under `ERXActionLogging`, which nothing read. `ERXWOActiveImage` and `ERXWOSubmitButton`
