@@ -325,8 +325,11 @@ public  class ERXRequest extends WORequest {
 	        String httpsMode = request.headerForKey("https");
 	
 	        // If either the https header is 'on' or the server port is 443 then we
-	        // consider this to be an HTTP request.
+	        // consider this to be an HTTPS request (as WO's own isSecure() does).
 	        if (httpsMode != null && httpsMode.equalsIgnoreCase("on")) {
+	        	isRequestSecure = true;
+	        }
+	        else if ("443".equals(serverPort)) {
 	        	isRequestSecure = true;
 	        }
 	        

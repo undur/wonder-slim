@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **A request on port 443 is secure**
+  `ERXRequest.isRequestSecure()` (and so `isSecure()`) again treats a request whose server port
+  header is `443` as secure, as WebObjects' own `isSecure()` does, alongside the `https: on` and
+  `x-forwarded-proto` headers. (#107)
+
 - **`ERXWOHyperlink` passes on only actions inside it**
   A link hands an action to its children only when the sender's element ID is inside the link's
   (`1.2.…`), no longer when it merely starts with the same characters (`1.21.0`). (#106)
