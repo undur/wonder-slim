@@ -32,30 +32,23 @@ import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXProperties;
 
 /**
- * Transparent replacement for WOForm. You don't really need to do anything to
- * use it, because it will get used instead of WOForm elements automagically. In
- * addition, it has a few new features:
+ * Replacement for WOForm, installed in its place (see parsley-tag-aliases.properties). Like WO's, it omits the tags of
+ * a form nested in another, can add an off-screen default submit button, and defaults the method to post. Differences
+ * from WO's:
  * <ul>
- * <li> it adds the FORM's name to ERXWOContext's contextDictionary() as as
- * "formName" key, which makes writing JavaScript elements a bit easier.
- * <li> it warns you when you have one FORM embedded inside another and omits
- * the tags for the nested FORM.
- * <li> it pushes the <code>enctype</code> into the userInfo, so that
- * {@link ERXWOFileUpload} can check if it is set correctly. ERXFileUpload will
- * throw an exception if the enctype is not set.
- * <li> it has a "fragmentIdentifier" binding, which appends "#" + the value of
- * the binding to the action. The obvious case comes when you have a form at the
- * bottom of the page and want to jump to the error messages if there are any.
- * <li> it adds the <code>secure</code> boolean binding that rewrites the URL
- * to use <code>https</code>.
- * <li> it adds the <code>disabled</code> boolean binding allows you to omit
- * the form tag.
- * <li> it adds a default submit button at the start of the form, so that your
- * user can simply press return without any javascript gimmicks.
- * <li> the <code>id</code> binding can override the <code>name</code> binding.
+ * <li>Every form has a name: an unbound {@code name} gets "f" + the element ID, so elements inside can address the
+ * form. WO renders a name only when one is bound. The name is published in ERXWOContext's contextDictionary() as
+ * "formName" (WO publishes a bound one in the context's userInfo), see {@link #formName(WOContext, String)}, which
+ * makes writing JavaScript elements a bit easier.</li>
+ * <li>A nested form is omitted with a logged warning, unless it's bound {@code embedded} (a form in an Ajax modal
+ * container, say, that's nested in the page's structure but independent to the user).</li>
+ * <li>{@code disabled} omits the form tags.</li>
+ * <li>{@code fragmentIdentifier} appends "#" + its value to the action. The obvious case comes when you have a form
+ * at the bottom of the page and want to jump to the error messages if there are any.</li>
+ * <li>The defaults of {@code multipleSubmit} and {@code addDefaultSubmitButton} come from properties, and the form's
+ * id can be rendered in place of its name (see below).</li>
  * </ul>
- * This subclass is installed when the frameworks loads.
- * 
+ *
  * @property er.extensions.ERXWOForm.multipleSubmitDefault the default value of
  *           multipleSubmit for all forms, defaults to false
  * @property er.extensions.ERXWOForm.addDefaultSubmitButtonDefault whether or
@@ -77,9 +70,8 @@ import er.extensions.foundation.ERXProperties;
  * @binding disabled Disabling a form omits the form element's tags from the
  * generated html. ERXWOForm will automatically disable any nested forms and post
  * a warning to the console if this value is not set.
- * @binding enctype The encoding type of the form. If a form has a file upload
- * and this is not set to <code>multipart/form-data</code> then an exception is 
- * thrown.
+ * @binding enctype The encoding type of the form, <code>multipart/form-data</code>
+ * for a form with a file upload.
  * @binding fragmentIdentifier appends "#" + the value of the binding to the 
  * action.
  * @binding href The HTML <code>href</code> attribute
@@ -446,8 +438,8 @@ public class ERXWOForm extends com.webobjects.appserver._private.WOHTMLDynamicEl
 
 	/**
 	 * Retrieves the current FORM's name in the supplied context. If none is set
-	 * (either the FORM is not a ERXWOForm or the context is not
-	 * ERXMutableUserInfo) the supplied default value is used.
+	 * (there's no form around the current element, or it isn't an ERXWOForm)
+	 * the supplied default value is used.
 	 * 
 	 * @param context
 	 *            current context

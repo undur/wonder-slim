@@ -2,11 +2,11 @@
 <wodefinitions>
 	<wo class="ERXWOForm" content="expected" unknownAttributes="passthrough">
 
-		<doc><![CDATA[Renders a `<form>`. Installed in place of `WOForm`, so it's what `<wo:form>` and `WOForm` render. Submits to its `action`, a direct action (`directActionName`/`actionClass`) or an `href`; without any of them, to the page's component action URL, where the submitted buttons decide the action. The method is `post` unless bound. Differences from WO's:
+		<doc><![CDATA[Renders a `<form>`. Installed in place of `WOForm`, so it's what `<wo:form>` and `WOForm` render. Submits to its `action`, a direct action (`directActionName`/`actionClass`) or an `href`; without any of them, to the page's component action URL, where the submitted buttons decide the action. The method is `post` unless bound. As in WO's, a form inside another form is left out (browsers don't support nested forms), and an off-screen default submit button can be added (`addDefaultSubmitButton`), so pressing return submits. Differences from WO's:
 
-- A form inside another form is left out, with a warning, unless it's `embedded`, since browsers don't support nested forms.
-- It can add an off-screen default submit button (`addDefaultSubmitButton`), so pressing return submits.
-- It publishes its name to the context, for elements that need to refer to their form.
+- A nested form is left out with a logged warning, and not at all when it's `embedded`.
+- Every form has a name, generated when `name` isn't bound (WO names only forms with a bound `name`), and publishes it to the context, for elements that need to refer to their form.
+- `disabled` leaves the form's tags out, and `fragmentIdentifier` appends `#` + its value to the action.
 
 Attributes prefixed with `?` become query parameters. Every other attribute is rendered on the tag.]]></doc>
 

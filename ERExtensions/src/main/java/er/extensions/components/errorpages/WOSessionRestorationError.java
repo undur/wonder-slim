@@ -11,6 +11,11 @@ import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 
+/**
+ * Found by name: WOApplication.handleSessionRestorationErrorInContext() renders the page named "WOSessionRestorationError". WO's own lives in
+ * JavaWOExtensions, which wonder-slim doesn't use, so this is the one it finds. Like the original, it's excluded from
+ * event logging and not cached by the browser.
+ */
 public class WOSessionRestorationError extends WOComponent {
 
 	public WOSessionRestorationError(WOContext aContext) {

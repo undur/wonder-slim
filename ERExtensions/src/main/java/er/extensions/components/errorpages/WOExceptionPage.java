@@ -34,9 +34,10 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 
 /**
- * A nicer version of WOExceptionPage.
- * 
- * When in development mode, it will show java code where exception occurred (highlighting the exact line)  
+ * A nicer version of WOExceptionPage. Found by name: WOApplication.handleException() renders the page named
+ * "WOExceptionPage", and this is the one it finds (WO's own lives in JavaWOExtensions, which wonder-slim doesn't use).
+ *
+ * When in development mode, it will show java code where exception occurred (highlighting the exact line)
  */
 
 public class WOExceptionPage extends ERXComponent {
@@ -62,7 +63,7 @@ public class WOExceptionPage extends ERXComponent {
 	public int currentSourceLineIndex;
 
 	/**
-	 * WO class that parses the stack trace for us.
+	 * Parses the stack trace for us (see {@link WOExceptionParser}).
 	 */
 	public WOExceptionParser exceptionParser;
 

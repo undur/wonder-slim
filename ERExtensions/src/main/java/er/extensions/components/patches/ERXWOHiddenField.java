@@ -11,6 +11,11 @@ import com.webobjects.foundation.NSDictionary;
 /**
  * Patch of WOHiddenField, installed in its place. Adds a {@code readonly} binding: when true, the {@code readonly}
  * attribute is rendered and the submitted value isn't taken.
+ *
+ * WO has no such binding and passes {@code readonly} through as an attribute with its value, so a false value
+ * still renders {@code readonly="false"}, which browsers treat as read-only, and the submitted value is taken
+ * regardless, so read-only is never enforced on the server. (Browsers ignore {@code readonly} on hidden inputs; what matters there is that
+ * the submitted value isn't taken.)
  */
 
 public class ERXWOHiddenField extends WOHiddenField {

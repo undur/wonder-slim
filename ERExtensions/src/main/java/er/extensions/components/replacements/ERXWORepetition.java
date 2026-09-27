@@ -23,12 +23,11 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXValueUtilities;
 
 /**
- * Replacement for WORepetition. It is installed via ERXPatcher.setClassForName(ERXWORepetition.class, "WORepetition") 
- * into the runtime system, so you don't need to reference it explicitly.
+ * Replacement for WORepetition, installed in its place (see parsley-tag-aliases.properties), so you don't need to
+ * reference it explicitly.
  * <ul>
- * <li>adds support for {@link java.util.List} and arrays (e.g. String[]), in addition to
- * {@link com.webobjects.foundation.NSArray} and {@link java.util.Vector} (which is a {@link java.util.List} in 1.4). This
- * is listed as Radar #3325342 since June 2003.</li>
+ * <li>adds support for object arrays (e.g. String[]), in addition to {@link java.util.List} (and so NSArray), which WO's
+ * accepts too. Anything else in {@code list} throws.</li>
  * <li>help with backtracking issues by adding not only the current index, but also the current object's hash code to
  * the element id, so it looks like "x.y.12345.z".<br>
  * If they don't match when invokeAction is called, the list is searched for a matching object. If none is found, then:
@@ -40,27 +39,23 @@ import er.extensions.foundation.ERXValueUtilities;
  * <li>otherwise, the action is ignored</li>
  * </ul>
  * This feature is turned on globally if <code>er.extensions.ERXWORepetition.checkHashCodes=true</code> or on a
- * per-component basis by setting the <code>checkHashCodes</code> binding to true or false.<br>
+ * per-component basis by setting the <code>checkHashCodes</code> binding to true or false. Without it, an index past
+ * the end of the list (the list shrank since the page was rendered) is handled the same way: an exception with
+ * raiseOnUnmatchedObject, otherwise the action is ignored.<br>
  * <em>Known issues:</em>
  * <ul>
  * <li>you can't re-generate your list by creating new objects between the appendToReponse and the next
  * takeValuesFromRequest unless you use <code>uniqueKey</code> and the value for that key is consistent across
- * the object instances<br>
- * When doing this by fetching EOs, this is should not a be problem, as the EO most probably has the same hashCode if
- * the EC stays the same. </li>
+ * the object instances</li>
  * <li>Your moved object should still be in the list.</li>
  * <li>Form values are currently not fixed, which may lead to NullpointerExceptions or other failures. However, if they
  * happen, by default you would have used the wrong values, so it may be arguable that having an error is better...</li>
  * </ul>
  * </li>
  * </ul>
- * Note that this implementation adds a small amount of overhead due to the creation of the Context for each RR phase,
- * but this is preferable to having to give so many parameters.
- * 
  * As an alternative to the default use of System.identityHashCode to unique your items, you can set the binding "uniqueKey" 
- * to be a string keypath on your items that can return a unique key for the item.  For instance, if you are using 
- * ERXGenericRecord, you can set uniqueKey = "rawPrimaryKey"; if your EO has an integer primary key, and this will make
- * the uniquing value be the primary key instead of the hash code.  While this reveals the primary keys of your items,
+ * to be a string keypath on your items that can return a unique key for the item.  For instance, a keypath to the
+ * item's primary key makes the uniquing value be the primary key instead of the hash code.  While this reveals the primary keys of your items,
  * the set of possible valid matches is still restricted to only those that were in the list to begin with, so no 
  * additional capabilities are available to users.  <code>uniqueKey</code> does <b>not</b> have to return an integer.
  * 
@@ -76,7 +71,7 @@ import er.extensions.foundation.ERXValueUtilities;
  * @binding notFoundMarker used for the item in the repetition if checkHashCodes is true, don't bind directly to null as that will be translated to false
  * 
  * @property er.extensions.ERXWORepetition.checkHashCodes add hash codes to element IDs so backtracking can be controlled
- * @property er.extensions.ERXWORepetition.raiseOnUnmatchedObject if an object wasn't found, raise an exception (if unset, the wrong object is used)
+ * @property er.extensions.ERXWORepetition.raiseOnUnmatchedObject if an object wasn't found, raise an exception (if unset, the action is ignored)
  * 
  * @author ak
  */

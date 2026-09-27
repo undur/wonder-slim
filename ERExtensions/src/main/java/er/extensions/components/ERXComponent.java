@@ -113,7 +113,7 @@ public abstract class ERXComponent extends WOComponent {
 	}
 
 	/**
-	 * Calls _checkAccess prior to super.appendToResponse and adds support for ClickToOpen (TM).
+	 * Calls _checkAccess prior to super.appendToResponse.
 	 * 
 	 * @param response the HTTP response that an application returns to a Web server to complete a cycle of the request-response loop
 	 * @param context context of a transaction
@@ -175,14 +175,11 @@ public abstract class ERXComponent extends WOComponent {
 
 	/**
 	 * Resolves a given binding as an object in the normal fashion of calling
-	 * <code>valueForBinding</code>. This has the one advantage of being able to
-	 * resolve the resulting object as a {link ERXUtilities$Operation} if it is
-	 * an Operation and then returning the result as the evaluation of that
-	 * operation.
-	 * 
+	 * <code>valueForBinding</code>.
+	 *
 	 * @param binding name of the component binding.
-	 * 
-	 * @return the object for the given binding and in the case that it is an instance of an Operation the value of that operation.
+	 *
+	 * @return the object for the given binding
 	 */
 	protected Object objectValueForBinding(String binding) {
 		return objectValueForBinding(binding, null);
@@ -190,16 +187,12 @@ public abstract class ERXComponent extends WOComponent {
 
 	/**
 	 * Resolves a given binding as an object in the normal fashion of calling
-	 * <code>valueForBinding</code>. This has the one advantage of being able to
-	 * resolve the resulting object as a {link ERXUtilities$Operation} if it is
-	 * an Operation and then returning the result as the evaluation of that
-	 * operation.
-	 * 
-	 * 
+	 * <code>valueForBinding</code>.
+	 *
 	 * @param binding name of the component binding.
-	 * @param defaultValue value to be used if <code>valueForBinding</code> returns null.
-	 * 
-	 * @return the object for the given binding and in the case that it is an instance of an Operation the value of that operation.
+	 * @param defaultValue value to be used if the binding is missing or <code>valueForBinding</code> returns null.
+	 *
+	 * @return the object for the given binding
 	 */
 	protected Object objectValueForBinding(String binding, Object defaultValue) {
 		Object result = null;

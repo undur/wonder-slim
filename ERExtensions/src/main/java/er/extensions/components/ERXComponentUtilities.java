@@ -381,7 +381,14 @@ public class ERXComponentUtilities {
 
 	/**
 	 * The {@code list} and {@code selections} handling of the list elements (the popup button, browser and checkbox
-	 * list patches), in place of WO's.
+	 * list patches), in place of WO's. WO's fails silently in two ways:
+	 * <ul>
+	 * <li>A {@code list} value that isn't an NSArray or a java.util.List (a Java array, say) renders as an empty list.</li>
+	 * <li>For {@code selections} WO creates a new instance of the {@code list} value's class, which fails for lists that
+	 * can't be instantiated that way ({@code List.of()}, {@code Arrays.asList()}, unmodifiable lists). That exception,
+	 * like any exception thrown by the {@code selections} setter, is swallowed, and the selections are never set.</li>
+	 * </ul>
+	 * Here arrays are accepted, anything else throws, and the selections are always pushed as an NSMutableArray.
 	 */
 	public static class InputLists {
 

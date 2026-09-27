@@ -2,7 +2,7 @@
 <wodefinitions>
 	<wo class="ERXWOPopUpButton" content="forbidden" unknownAttributes="passthrough">
 
-		<doc><![CDATA[Renders a `<select>` with one option per item of `list`, and sets `selection` from the chosen option. Patch of `WOPopUpButton`, installed in its place, so it's what `WOPopUpButton` renders. Differences from WO's: `list` accepts any `java.util.List` or array (null renders no options) and throws for anything else, instead of swallowing errors.
+		<doc><![CDATA[Renders a `<select>` with one option per item of `list`, and sets `selection` from the chosen option. Patch of `WOPopUpButton`, installed in its place, so it's what `WOPopUpButton` renders. Differences from WO's: `list` accepts any `java.util.List` or array (null renders no options), and anything else throws, where WO silently renders no options.
 
 Every other attribute is rendered on the tag.]]></doc>
 

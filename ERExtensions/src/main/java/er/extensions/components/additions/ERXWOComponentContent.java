@@ -104,10 +104,10 @@ ComponentContent3: ERXWOComponentContent {
  * 
  * <pre><code>
 &lt;webobject name=IfThenElse&gt;
-    &lt;webobject name=TrueBlock&gt;
+    &lt;webobject name=Template1&gt;
         This is true block
     &lt;/webobject&gt;
-    &lt;webobject name=FalseBlock&gt;
+    &lt;webobject name=Template2&gt;
         This is false block
     &lt;/webobject&gt;
 &lt;/webobject&gt;
@@ -154,6 +154,8 @@ public class ERXWOComponentContent extends WODynamicElement {
     	final WOElement content =  component._childTemplate();
     	final String templateName = (_templateName == null) ? null : (String) _templateName.valueInComponent(component);
 
+    	// Exactly WODynamicGroup: the group the template parser makes of several sibling elements. Our conditionals and
+    	// repetitions subclass WODynamicGroup too, and a single one of them as the whole content isn't a list of templates.
     	if (content != null && content.getClass() == WODynamicGroup.class) {
 			final WODynamicGroup group = (WODynamicGroup) content;
 
@@ -205,6 +207,9 @@ public class ERXWOComponentContent extends WODynamicElement {
 
     	return result;
     }
+
+    // In all three phases, the wrapped content belongs to the parent's template, so it's evaluated with the parent as
+    // the current component (its bindings resolve against the parent), as WOComponentContent does.
 
     @Override
     public void takeValuesFromRequest(WORequest worequest, WOContext wocontext) {

@@ -9,7 +9,7 @@
 <wo:loop count="3" index="$i">…</wo:loop>
 ```
 
-Unlike WO's, it accepts any `java.util.List` or array, and can put each item's hash code (or `uniqueKey`) in element IDs (`checkHashCodes`). An action then finds its own item even if the list changed between rendering the page and following the link, instead of acting on whatever item now sits at that position.]]></doc>
+Unlike WO's, it also accepts object arrays (such as `String[]`), in addition to any `java.util.List`, and can put each item's hash code (or `uniqueKey`) in element IDs (`checkHashCodes`). An action then finds its own item even if the list changed between rendering the page and following the link, instead of acting on whatever item now sits at that position.]]></doc>
 
 		<binding name="list">
 			<pull><type>java.util.List</type><type>java.lang.Object[]</type></pull>

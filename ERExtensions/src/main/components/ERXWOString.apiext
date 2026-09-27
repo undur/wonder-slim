@@ -2,7 +2,7 @@
 <wodefinitions>
 	<wo class="ERXWOString" content="forbidden" unknownAttributes="forbidden">
 
-		<doc><![CDATA[Renders a value as text, HTML-escaped by default, optionally formatted. Installed in place of `WOString`, so it's what `<wo:str>` and `WOString` render.
+		<doc><![CDATA[Renders a value as text, HTML-escaped by default, optionally formatted. Installed in place of `WOString`, so it's what `<wo:str>` and `WOString` render. Unlike WO's, it formats in the current locale (`ERXLocale.current()`), and formats java.time values, with `dateformat` or a `DateTimeFormatter` as `formatter`.
 
 ```html
 <wo:str value="$order.total" numberformat="#,##0.00" />

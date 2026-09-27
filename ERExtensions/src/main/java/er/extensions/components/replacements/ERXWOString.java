@@ -22,7 +22,16 @@ import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 
 /**
- * Reimplementation of WOString. Automatically patched in by ERXPatcher.
+ * Reimplementation of WOString, installed in its place (see parsley-tag-aliases.properties). Differences from WO's:
+ * <ul>
+ * <li>{@code dateformat} and {@code numberformat} formatters are created for the current locale ({@link er.extensions.appserver.ERXLocale}, when
+ * the application or session sets one), where WO takes them from its shared formatter cache, in the JVM's default
+ * locale.</li>
+ * <li>java.time values are formatted, with {@code dateformat} (in either pattern syntax, see
+ * {@link ERXDateTimeFormatters}) or a DateTimeFormatter bound to {@code formatter}. WO's formatters can't format
+ * them.</li>
+ * <li>NSKeyValueCoding.NullValue counts as null, and a null value isn't handed to the formatter.</li>
+ * </ul>
  */
 
 public class ERXWOString extends WODynamicElement {

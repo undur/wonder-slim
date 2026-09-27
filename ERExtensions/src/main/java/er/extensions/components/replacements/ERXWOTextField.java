@@ -20,13 +20,21 @@ import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 
 /**
- * Replacement for WOTextField. Provides for localized formatters. Never use
- * this directly, rather use WOTextField and let the ERXPatcher handle the
- * replacement of WOTextField in all cases.
- * 
+ * Replacement for WOTextField, installed in its place (see parsley-tag-aliases.properties). Differences from WO's:
+ * <ul>
+ * <li>{@code dateformat} and {@code numberformat} formatters are created for the current locale ({@link er.extensions.appserver.ERXLocale}, when
+ * the application or session sets one), where WO takes them from its shared formatter cache, in the JVM's default
+ * locale. The locale governs parsing as well as display: "12.50" is 1250 where the comma is the decimal separator.</li>
+ * <li>A {@code type} binding sets the input's type ({@code number}, {@code email}, ...). WO has no such binding: it
+ * would pass {@code type} through as an attribute next to its own {@code type="text"}.</li>
+ * <li>{@code readonly} is rendered as a boolean attribute and, when true, the submitted value isn't taken (see
+ * ERXWOText for why WO's pass-through isn't enough).</li>
+ * <li>{@code blankIsNull=false} keeps an empty string instead of turning it into null.</li>
+ * </ul>
+ *
  * @binding blankIsNull if false, "" will not be converted to null; if true, ""
  *          will be converted to null. Default is true.
- * 
+ *
  * @author ak
  */
 
@@ -139,6 +147,8 @@ public class ERXWOTextField extends WOInput {
 
 					if (format != null) {
 						try {
+							// Parse, format and parse again, as WO's WOTextField does, so what the formatter can't show
+							// (digits beyond the pattern, say) is dropped from the value as it is from the field
 							Object parsedObject = format.parseObject(stringValue);
 							String reformatedObject = format.format(parsedObject);
 							result = format.parseObject(reformatedObject);

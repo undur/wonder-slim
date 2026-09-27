@@ -16,8 +16,11 @@ import com.webobjects.foundation.NSMutableDictionary;
 /**
  * Variant of WOSwitchComponent that replaces the plain-text component names in
  * the element ID with a number, in case you don't like advertising your
- * component names or just like shorter URLs.<br>
- * Gets installed automatically by ERXPatcher.
+ * component names or just like shorter URLs. (WO's appends the component's name
+ * to the element ID.) Each element numbers the names in the order it first
+ * renders them, so a number means the same component only within one application
+ * instance.<br>
+ * Installed in place of WOSwitchComponent (see parsley-tag-aliases.properties).
  * @author ak
  */
 public class ERXWOSwitchComponent extends WODynamicElement {

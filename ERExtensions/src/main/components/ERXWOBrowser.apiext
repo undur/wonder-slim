@@ -2,7 +2,7 @@
 <wodefinitions>
 	<wo class="ERXWOBrowser" content="forbidden" unknownAttributes="passthrough">
 
-		<doc><![CDATA[Renders a `<select>` list (multiple choice with `multiple`), one option per item of `list`, and sets `selections` from the chosen options. Patch of `WOBrowser`, installed in its place, so it's what `WOBrowser` renders. Differences from WO's: `list` accepts any `java.util.List` or array (null renders no options) and throws for anything else, instead of swallowing errors. `selections` receives a mutable array.
+		<doc><![CDATA[Renders a `<select>` list (multiple choice with `multiple`), one option per item of `list`, and sets `selections` from the chosen options. Patch of `WOBrowser`, installed in its place, so it's what `WOBrowser` renders. Differences from WO's: `list` accepts any `java.util.List` or array (null renders no options), and anything else throws, where WO silently renders no options. `selections` receives a mutable array, and is always set: WO fails to set it, silently, when `list` is an immutable list such as `List.of()`.
 
 Every other attribute is rendered on the tag.]]></doc>
 

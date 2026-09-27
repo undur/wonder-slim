@@ -22,7 +22,7 @@ import com.webobjects.foundation.NSMutableDictionary;
  * WO's own way of embedding a component (WOComponentReference, what &lt;wo:MyComponent&gt; compiles to) constructs the
  * instance itself, by name, on first render. That leaves bindings as the only way to initialize it, and no handle to
  * call methods on. This element is WOComponentReference with the construction step handed to you: the parent
- * constructs the instance (see {@link ERXComponentUtilities#instantiate(Class, WOContext)}), configures it, keeps a
+ * constructs the instance (see {@link er.extensions.components.ERXComponentUtilities#instantiate(Class, WOContext)}), configures it, keeps a
  * reference to it, and binds it to [instance]. Everything else - bindings passed alongside, wrapped content, the
  * per-phase push/pull, awake/sleep, page caching - works exactly as for a normally embedded component. The
  * per-phase dance below mirrors WOComponentReference._pushComponentInContext / _popComponentFromContext.
@@ -52,7 +52,7 @@ import com.webobjects.foundation.NSMutableDictionary;
  * </ul>
  *
  * <h3>Constructing the instance</h3>
- * Use {@link ERXComponentUtilities#instantiate(Class, WOContext)}, not pageWithName(): pageWithName awakens the
+ * Use {@link er.extensions.components.ERXComponentUtilities#instantiate(Class, WOContext)}, not pageWithName(): pageWithName awakens the
  * instance and flags it as a page, and this element awakens it again on adoption - a double awake() in the same
  * request. instantiate() constructs without awakening, which is the state a freshly constructed subcomponent is in
  * when WOComponentReference adopts it. (ensureAwakeInContext() would not help here: it compares context identity and
