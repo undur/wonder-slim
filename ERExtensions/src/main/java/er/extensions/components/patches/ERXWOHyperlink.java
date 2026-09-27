@@ -1,4 +1,4 @@
-package er.extensions.components;
+package er.extensions.components.patches;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
@@ -14,8 +14,7 @@ import er.extensions.appserver.ERXSession;
 import er.extensions.foundation.ERXProperties;
 
 /**
- * Enhancement to WOHyperlink. Don't use this class directly, it is patched 
- * automatically into the runtime system on application startup. Just use WOHyperlink.
+ * Patch of WOHyperlink, installed in its place:
  * <ul>
  * <li>Puts a description of the action into the session under the key <code>ERXActionLogging</code>
  * <li>When the <code>disabled</code> is true, then returns <code>context().page()</code>

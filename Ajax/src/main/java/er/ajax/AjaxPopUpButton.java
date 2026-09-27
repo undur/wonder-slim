@@ -6,7 +6,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXMarkerClassAssociation;
-import er.extensions.foundation.ERXDynamicElementsPatches;
+import er.extensions.components.patches.ERXWOPopUpButton;
 
 /**
  * A plain WOPopUpButton that renders a searchable, morph-native dropdown (wonder-select) instead of
@@ -27,7 +27,7 @@ import er.extensions.foundation.ERXDynamicElementsPatches;
  * is merged into any author-supplied (possibly dynamic) "class" binding by
  * {@link ERXMarkerClassAssociation}.
  */
-public class AjaxPopUpButton extends ERXDynamicElementsPatches.PopUpButton {
+public class AjaxPopUpButton extends ERXWOPopUpButton {
 
 	public static final String MARKER_CLASS = "ajax-popup-button";
 

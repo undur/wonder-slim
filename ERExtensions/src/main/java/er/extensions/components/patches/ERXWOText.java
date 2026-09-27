@@ -1,0 +1,50 @@
+package er.extensions.components.patches;
+
+import com.webobjects.appserver.WOAssociation;
+import com.webobjects.appserver.WOContext;
+import com.webobjects.appserver.WOElement;
+import com.webobjects.appserver.WORequest;
+import com.webobjects.appserver.WOResponse;
+import com.webobjects.appserver._private.WOText;
+import com.webobjects.foundation.NSDictionary;
+
+/**
+ * Patch of WOText, installed in its place. Adds a {@code readonly} binding: when true, the {@code readonly}
+ * attribute is rendered and the submitted value isn't taken.
+ */
+
+public class ERXWOText extends WOText {
+
+	protected WOAssociation _readonly;
+
+	public ERXWOText(String name, NSDictionary associations, WOElement element) {
+		super(name, associations, element);
+		_readonly = _associations.removeObjectForKey("readonly");
+	}
+
+	@Override
+	protected void _appendNameAttributeToResponse(WOResponse response, WOContext context) {
+		super._appendNameAttributeToResponse(response, context);
+
+		if (_readonly != null && _readonly.booleanValueInComponent(context.component())) {
+			response._appendTagAttributeAndValue("readonly", "readonly", false);
+		}
+	}
+
+	/**
+	 * If readonly attribute is set to <code>true</code> prevent the
+	 * takeValuesFromRequest.
+	 */
+	@Override
+	public void takeValuesFromRequest(WORequest request, WOContext context) {
+		boolean readOnly = false;
+
+		if (_readonly != null) {
+			readOnly = _readonly.booleanValueInComponent(context.component());
+		}
+
+		if (!readOnly) {
+			super.takeValuesFromRequest(request, context);
+		}
+	}
+}

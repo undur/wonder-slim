@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Patch elements in `er.extensions.components.patches`**
+  The elements that extend the WO element they replace, patch elements, now live in one package
+  as top-level classes: `ERXWOHyperlink`, and the former nested classes of `ERXDynamicElementsPatches`
+  as `ERXWOSubmitButton`, `ERXWOActiveImage`, `ERXWOText`, `ERXWOHiddenField`, `ERXWOPasswordField`,
+  `ERXWOPopUpButton`, `ERXWOBrowser` and `ERXWOCheckBoxList`. Templates are unaffected, since the
+  elements are installed through the tag aliases. A class extending one of them updates its import. (#97)
+
 - **`WOBatchNavigationBar` deleted**
   Its Java class went in 2021 along with the other `WODisplayGroup` code, but the template and `.api`
   stayed behind. The template relied on the deleted class and on `WODisplayGroup`, so the component
