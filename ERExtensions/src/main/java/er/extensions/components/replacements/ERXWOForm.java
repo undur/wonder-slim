@@ -5,7 +5,7 @@
 // Created by ak on Mon Apr 01 2002
 //
 
-package er.extensions.components;
+package er.extensions.components.replacements;
 
 import java.util.Enumeration;
 

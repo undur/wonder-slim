@@ -1,4 +1,4 @@
-package er.extensions.components;
+package er.extensions.components.replacements;
 
 import java.math.BigDecimal;
 import java.text.Format;

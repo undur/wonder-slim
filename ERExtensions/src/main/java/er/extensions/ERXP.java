@@ -259,7 +259,7 @@ public enum ERXP {
 	REPETITION_CHECK_HASH_CODES( "er.extensions.ERXWORepetition.checkHashCodes" ),
 
 	/**
-	 * The same setting under the class's full name, read when {@link #REPETITION_CHECK_HASH_CODES} isn't set. Defaults to false.
+	 * The same setting under the class's former full name (from before it moved to {@code er.extensions.components.replacements}), read when {@link #REPETITION_CHECK_HASH_CODES} isn't set. Defaults to false.
 	 */
 	REPETITION_CHECK_HASH_CODES_BY_CLASS_NAME( "er.extensions.components.ERXWORepetition.checkHashCodes" ),
 
@@ -269,7 +269,7 @@ public enum ERXP {
 	REPETITION_RAISE_ON_UNMATCHED_OBJECT( "er.extensions.ERXWORepetition.raiseOnUnmatchedObject" ),
 
 	/**
-	 * The same setting under the class's full name, read when {@link #REPETITION_RAISE_ON_UNMATCHED_OBJECT} isn't set. Defaults to false.
+	 * The same setting under the class's former full name (from before it moved to {@code er.extensions.components.replacements}), read when {@link #REPETITION_RAISE_ON_UNMATCHED_OBJECT} isn't set. Defaults to false.
 	 */
 	REPETITION_RAISE_ON_UNMATCHED_OBJECT_BY_CLASS_NAME( "er.extensions.components.ERXWORepetition.raiseOnUnmatchedObject" ),
 

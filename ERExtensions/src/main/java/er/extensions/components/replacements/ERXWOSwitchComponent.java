@@ -1,4 +1,4 @@
-package er.extensions.components;
+package er.extensions.components.replacements;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;

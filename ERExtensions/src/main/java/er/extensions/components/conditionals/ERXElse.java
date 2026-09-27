@@ -8,6 +8,8 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODynamicGroup;
 import com.webobjects.foundation.NSDictionary;
 
+import er.extensions.components.replacements.ERXWOConditional;
+
 /**
  * ERXElse can be used like a Java "else" after a preceding conditional.
  * 

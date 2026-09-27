@@ -8,12 +8,20 @@
   wonder-slim's own elements, and the components carried over from JavaWOExtensions. Several
   existing `.api` files were corrected along the way. (#96)
 
-- **Patch elements in `er.extensions.components.patches`**
-  The elements that extend the WO element they replace, patch elements, now live in one package
-  as top-level classes: `ERXWOHyperlink`, and the former nested classes of `ERXDynamicElementsPatches`
-  as `ERXWOSubmitButton`, `ERXWOActiveImage`, `ERXWOText`, `ERXWOHiddenField`, `ERXWOPasswordField`,
-  `ERXWOPopUpButton`, `ERXWOBrowser` and `ERXWOCheckBoxList`. Templates are unaffected, since the
-  elements are installed through the tag aliases. A class extending one of them updates its import. (#97)
+- **The element packages, reorganized**
+  Every element the framework installs in place of WO's now lives in a package that says how it
+  relates to WO's element:
+  - `er.extensions.components.patches`: elements that extend the WO element they replace.
+    `ERXWOHyperlink`, and the former nested classes of `ERXDynamicElementsPatches`, now
+    top-level classes: `ERXWOSubmitButton`, `ERXWOActiveImage`, `ERXWOText`, `ERXWOHiddenField`,
+    `ERXWOPasswordField`, `ERXWOPopUpButton`, `ERXWOBrowser` and `ERXWOCheckBoxList`. (#97)
+  - `er.extensions.components.replacements`: our own implementations, installed in place of a WO
+    element. `ERXWOConditional`, `ERXWOForm`, `ERXWORepetition`, `ERXWOString`,
+    `ERXWOSwitchComponent` and `ERXWOTextField`. (#98)
+
+  Elements with names of their own stay in `er.extensions.components`. Templates are unaffected,
+  since the elements are installed through the tag aliases. A class referring to one of the moved
+  classes updates its import. Property names that included a class's name are unchanged.
 
 - **`WOBatchNavigationBar` deleted**
   Its Java class went in 2021 along with the other `WODisplayGroup` code, but the template and `.api`

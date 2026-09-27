@@ -14,7 +14,7 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.components.ERXWOForm;
+import er.extensions.components.replacements.ERXWOForm;
 import er.extensions.foundation.ERXProperties;
 
 /**

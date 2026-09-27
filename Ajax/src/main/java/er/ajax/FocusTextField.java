@@ -8,7 +8,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.components.ERXWOTextField;
+import er.extensions.components.replacements.ERXWOTextField;
 
 /**
  * Focus text field is a convenience version of ERXWOTextField that provides

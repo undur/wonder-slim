@@ -10,7 +10,7 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.components.ERXComponentUtilities;
-import er.extensions.components.ERXWOForm;
+import er.extensions.components.replacements.ERXWOForm;
 
 /**
  * 
