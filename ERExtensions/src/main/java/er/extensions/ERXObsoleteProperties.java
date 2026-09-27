@@ -140,7 +140,6 @@ public class ERXObsoleteProperties {
 		new ObsoleteProperty( "er.extensions.ERXNavigationManager.includeLabelSpanTag", "The navigation manager has been removed." ),
 		new ObsoleteProperty( "er.extensions.ERXNavigationManager.localizeDisplayKeys", "The navigation manager has been removed." ),
 		new ObsoleteProperty( "er.extensions.ERXNavigationManager.NavigationMenuFileName", "The navigation manager has been removed." ),
-		new ObsoleteProperty( "er.extensions.ERXResponseRewriter.resource.*", "Replacing framework resources by property has been removed." ),
 		new ObsoleteProperty( "er.extensions.ERXSession.autoAdjustTimeZone", "Automatic time zone adjustment has been removed." ),
 		new ObsoleteProperty( "er.extensions.ERXStyleSheet.xhtml", "XHTML output has been removed; ERXStyleSheet renders HTML." ),
 		new ObsoleteProperty( "er.extensions.ERXWOContext.forceRemoveApplicationNumber", "Removing the instance number from generated URLs has been removed. Short URLs (er.extensions.ERXApplication.shortURLs, on by default) handle the adaptor prefix and instance number." ),
