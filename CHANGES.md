@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The monitor server answers with a status**
+  `ERXMonitorServer` now answers a missing or wrong `monitor-service-password` with 401 and an
+  unknown operation with 404, where it dropped the connection (after a `NullPointerException` when
+  the header was missing). The password is compared in constant time. (#114)
+
 - **The resource URL prefix properties are reported as obsolete**
   `er.extensions.ERXResourceManager.resourceUrlPrefix` and `secureResourceUrlPrefix` (a CDN host
   for resource URLs, in Project Wonder) are no longer applied. Setting one only kept resource URLs

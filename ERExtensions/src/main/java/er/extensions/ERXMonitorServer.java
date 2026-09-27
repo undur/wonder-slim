@@ -6,8 +6,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Objects;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
@@ -69,30 +69,33 @@ public class ERXMonitorServer {
 		@Override
 		public void handle( HttpExchange exchange ) throws IOException {
 
-			final List<String> providedPassword = exchange.getRequestHeaders().get( "monitor-service-password" );
+			final String providedPassword = exchange.getRequestHeaders().getFirst( "monitor-service-password" );
 
-			if( providedPassword.isEmpty() ) {
-				throw new IllegalStateException( "No password provided" );
+			if( providedPassword == null || !passwordMatches( providedPassword ) ) {
+				respond( exchange, 401, "Missing or wrong monitor-service-password" );
+				return;
 			}
 
-			if( !Objects.equals( password(), providedPassword.getFirst() ) ) {
-				throw new IllegalStateException( "Wrong password" );
-			}
-
-
-			if( exchange.getRequestURI().toString().equals( "/monitor/jstack" ) ) {
-				final String responseString = threadDumpAsString( true, true );
-				final byte[] responseBytes = responseString.getBytes();
-				exchange.sendResponseHeaders( 200, responseBytes.length );
-
-				try( final OutputStream os = exchange.getResponseBody()) {
-					os.write( responseBytes );
-				}
+			if( exchange.getRequestURI().getPath().equals( "/monitor/jstack" ) ) {
+				respond( exchange, 200, threadDumpAsString( true, true ) );
 			}
 			else {
-				try( final OutputStream os = exchange.getResponseBody()) {
-					os.write( "Unknown operation".getBytes() );
-				}
+				respond( exchange, 404, "Unknown operation" );
+			}
+		}
+
+		private static boolean passwordMatches( final String providedPassword ) {
+			final String password = password();
+			return password != null && MessageDigest.isEqual( password.getBytes( StandardCharsets.UTF_8 ), providedPassword.getBytes( StandardCharsets.UTF_8 ) );
+		}
+
+		private static void respond( final HttpExchange exchange, final int status, final String body ) throws IOException {
+			final byte[] bytes = body.getBytes( StandardCharsets.UTF_8 );
+			exchange.getResponseHeaders().set( "content-type", "text/plain; charset=utf-8" );
+			exchange.sendResponseHeaders( status, bytes.length );
+
+			try( final OutputStream os = exchange.getResponseBody() ) {
+				os.write( bytes );
 			}
 		}
 	}
