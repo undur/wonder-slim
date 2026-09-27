@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Sticky sessions behind mod_proxy_balancer work again**
+  The route cookie (`routeid_<app>`) has its leading dot again: `.app_2001`. mod_proxy_balancer reads
+  the route after the first dot of the sticky value, so without it, requests weren't kept on the
+  instance holding their session. This had been broken since 8.0.0. The setup the cookie pairs with
+  is documented in `ERXProxyBalancerConfig`. (#40)
+
 - **A component redirect without a page cache fails with an explanation**
   With `WOPageCacheSize=0`, `ERXRedirect` redirected to a component instance with the page's name
   in the URL, WebObjects' form for recreating a page without a cache. Those URLs aren't served, and
