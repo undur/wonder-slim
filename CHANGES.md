@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **`ERXWOForm` no longer publishes its `enctype`**
+  The form put its `enctype` into `ERXWOContext.contextDictionary()` while it rendered, for a file
+  upload element that has since been removed. Nothing reads it. The `enctype` attribute is rendered
+  as before. (#121)
+
 - **`WOTextField` ignores content, as WebObjects' does**
   Anything written inside a text field element was rendered after the `<input>`. It's now ignored,
   as in WebObjects' own `WOTextField`. (#120)
