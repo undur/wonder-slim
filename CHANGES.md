@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Every element ERExtensions exposes has an `.api` and an `.apiext`**
+  Bindings with types, documentation, constraints between bindings, content and attribute policy,
+  and deprecated older names, for the elements installed in place of WO's (and what they change),
+  wonder-slim's own elements, and the components carried over from JavaWOExtensions. Several
+  existing `.api` files were corrected along the way. (#96)
+
 - **Patch elements in `er.extensions.components.patches`**
   The elements that extend the WO element they replace, patch elements, now live in one package
   as top-level classes: `ERXWOHyperlink`, and the former nested classes of `ERXDynamicElementsPatches`

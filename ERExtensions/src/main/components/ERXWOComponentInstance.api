@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWOComponentInstance" wocomponentcontent="true">
+		<binding name="instance"/>
+		<validation message="'instance' is a required binding">
+			<unbound name="instance"/>
+		</validation>
+	</wo>
+</wodefinitions>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWOActiveImage" wocomponentcontent="false">
+		<binding name="filename" defaults="Resources"/>
+		<binding name="framework" defaults="Frameworks"/>
+		<binding name="src"/>
+		<binding name="data"/>
+		<binding name="mimeType"/>
+		<binding name="key"/>
+		<binding name="value"/>
+		<binding name="action" defaults="Actions"/>
+		<binding name="directActionName" defaults="Direct Actions"/>
+		<binding name="actionClass" defaults="Direct Action Classes"/>
+		<binding name="href"/>
+		<binding name="imageMapFile"/>
+		<binding name="x"/>
+		<binding name="y"/>
+		<binding name="target"/>
+		<binding name="secure" defaults="Boolean"/>
+		<binding name="name"/>
+		<binding name="disabled" defaults="Boolean"/>
+		<binding name="otherTagString"/>
+	</wo>
+</wodefinitions>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWOHiddenField" wocomponentcontent="false">
+		<binding name="value"/>
+		<binding name="readonly" defaults="Boolean"/>
+		<binding name="name"/>
+		<binding name="disabled" defaults="Boolean"/>
+		<binding name="otherTagString"/>
+		<validation message="'value' is a required binding">
+			<unbound name="value"/>
+		</validation>
+	</wo>
+</wodefinitions>

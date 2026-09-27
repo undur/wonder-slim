@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOActiveImage" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a clickable image (an image input inside a form, a linked image otherwise) that invokes an action, a direct action or a URL when clicked. The image comes from `filename`, `src`, `data` or `value`. Patch of `WOActiveImage`, installed in its place, so it's what `WOActiveImage` renders. Differences from WO's: Records the invoked action in the session (under `ERXActionLogging`) for logging.
+
+Every other attribute is rendered on the tag.]]></doc>
+
+		<binding name="filename">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Name of the image resource.]]></doc>
+		</binding>
+
+		<binding name="framework">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Framework containing the image resource.]]></doc>
+		</binding>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[URL of the image.]]></doc>
+		</binding>
+
+		<binding name="data">
+			<pull><type>com.webobjects.foundation.NSData</type></pull>
+			<doc><![CDATA[The image's bytes, served through a resource URL.]]></doc>
+		</binding>
+
+		<binding name="mimeType">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[MIME type of `data`.]]></doc>
+		</binding>
+
+		<binding name="key">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Cache key for `data`.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[An action returning the image to show.]]></doc>
+		</binding>
+
+		<binding name="action">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[Component action invoked on click.]]></doc>
+		</binding>
+
+		<binding name="directActionName">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Direct action invoked on click (in `actionClass`, or `DirectAction`).]]></doc>
+		</binding>
+
+		<binding name="actionClass">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Direct action class.]]></doc>
+		</binding>
+
+		<binding name="href">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[URL to go to on click.]]></doc>
+		</binding>
+
+		<binding name="imageMapFile">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Name of an image map file whose regions select actions.]]></doc>
+		</binding>
+
+		<binding name="x">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[Receives the x coordinate of the click.]]></doc>
+		</binding>
+
+		<binding name="y">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[Receives the y coordinate of the click.]]></doc>
+		</binding>
+
+		<binding name="target">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The link's `target`.]]></doc>
+		</binding>
+
+		<binding name="secure">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc><![CDATA[Generate an https URL for the action.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The field's name. Generated from the element ID if not bound.]]></doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If true, the field is rendered disabled and its value isn't taken.]]></doc>
+		</binding>
+
+		<binding name="otherTagString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Raw text added inside the tag. Prefer passing attributes directly.]]></doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="data"/>
+			<binding name="filename"/>
+			<binding name="src"/>
+			<binding name="value"/>
+		</choose>
+		<choose max="1">
+			<binding name="action"/>
+			<binding name="href"/>
+			<any-of><binding name="directActionName"/><binding name="actionClass"/></any-of>
+		</choose>
+		<requires binding="filename" when="framework"/>
+		<requires binding="mimeType" when="data"/>
+		<requires binding="x" when="y"/>
+		<requires binding="y" when="x"/>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOHiddenField" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an `<input type="hidden">` and sets `value` from what's submitted. Patch of `WOHiddenField`, installed in its place, so it's what `WOHiddenField` renders. Differences from WO's: Adds a `readonly` binding: when true, the `readonly` attribute is rendered and the submitted value isn't taken.
+
+Every other attribute is rendered on the tag.]]></doc>
+
+		<binding name="value" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The field's value: rendered, and set from the submitted text.]]></doc>
+		</binding>
+
+		<binding name="readonly">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[**Not in WO's.** If true, the `readonly` attribute is rendered and the submitted value isn't taken.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The field's name. Generated from the element ID if not bound.]]></doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If true, the field is rendered disabled and its value isn't taken.]]></doc>
+		</binding>
+
+		<binding name="otherTagString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Raw text added inside the tag. Prefer passing attributes directly.]]></doc>
+		</binding>
+
+		<requires binding="value" must="settable"/>
+
+	</wo>
+</wodefinitions>

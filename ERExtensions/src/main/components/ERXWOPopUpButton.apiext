@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOPopUpButton" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a `<select>` with one option per item of `list`, and sets `selection` from the chosen option. Patch of `WOPopUpButton`, installed in its place, so it's what `WOPopUpButton` renders. Differences from WO's: `list` accepts any `java.util.List` or array (null renders no options) and throws for anything else, instead of swallowing errors. The `<select>` gets no `value` attribute.
+
+Every other attribute is rendered on the tag.]]></doc>
+
+		<binding name="list" required="true">
+			<pull><type>java.util.List</type><type>java.lang.Object[]</type></pull>
+			<doc><![CDATA[The items to choose from.]]></doc>
+		</binding>
+
+		<binding name="item">
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[Receives each item while its option renders.]]></doc>
+		</binding>
+
+		<binding name="displayString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Text of each option. The item's `toString()` if not bound.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Value attribute of each option.]]></doc>
+		</binding>
+
+		<binding name="selection">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The chosen item: selects its option, and receives the chosen item when submitted.]]></doc>
+		</binding>
+
+		<binding name="selectedValue">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Value of the option to select, instead of `selection`.]]></doc>
+		</binding>
+
+		<binding name="noSelectionString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Text of an extra first option that means "no selection".]]></doc>
+		</binding>
+
+		<binding name="escapeHTML">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc><![CDATA[Whether to HTML-escape the option texts. Defaults to true.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The field's name. Generated from the element ID if not bound.]]></doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If true, the field is rendered disabled and its value isn't taken.]]></doc>
+		</binding>
+
+		<binding name="otherTagString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Raw text added inside the tag. Prefer passing attributes directly.]]></doc>
+		</binding>
+
+		<requires binding="list" must="gettable"/>
+		<requires binding="item">
+			<any-of><binding name="displayString"/><binding name="value"/></any-of>
+		</requires>
+		<requires binding="item" must="settable"/>
+		<choose max="1">
+			<binding name="selection"/>
+			<binding name="selectedValue"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

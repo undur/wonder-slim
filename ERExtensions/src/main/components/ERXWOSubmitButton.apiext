@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOSubmitButton" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a submit button. When it submits the form, its `action` (or direct action) is invoked. Patch of `WOSubmitButton`, installed in its place, so it's what `WOSubmitButton` renders. Differences from WO's: Records the invoked action in the session (under `ERXActionLogging`) for logging.
+
+Every other attribute is rendered on the tag.]]></doc>
+
+		<binding name="action">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[Component action invoked when this button submits the form.]]></doc>
+		</binding>
+
+		<binding name="directActionName">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Direct action invoked when this button submits the form (in `actionClass`, or `DirectAction`).]]></doc>
+		</binding>
+
+		<binding name="actionClass">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Direct action class.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The button's label.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The field's name. Generated from the element ID if not bound.]]></doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If true, the field is rendered disabled and its value isn't taken.]]></doc>
+		</binding>
+
+		<binding name="otherTagString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Raw text added inside the tag. Prefer passing attributes directly.]]></doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="action"/>
+			<any-of><binding name="directActionName"/><binding name="actionClass"/></any-of>
+		</choose>
+
+	</wo>
+</wodefinitions>

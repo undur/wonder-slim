@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOCheckBoxList" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a checkbox for each item of `list`, and sets `selections` from the checked ones. Patch of `WOCheckBoxList`, installed in its place, so it's what `WOCheckBoxList` renders. Differences from WO's: `list` accepts any `java.util.List` or array (null renders no options) and throws for anything else, instead of swallowing errors. `selections` receives a mutable array.
+
+Every other attribute is rendered on the tag.]]></doc>
+
+		<binding name="list" required="true">
+			<pull><type>java.util.List</type><type>java.lang.Object[]</type></pull>
+			<doc><![CDATA[The items to choose from.]]></doc>
+		</binding>
+
+		<binding name="item">
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[Receives each item while its checkbox renders.]]></doc>
+		</binding>
+
+		<binding name="index">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[Receives the index of each item.]]></doc>
+		</binding>
+
+		<binding name="displayString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Label of each checkbox. The item's `toString()` if not bound.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Value attribute of each checkbox.]]></doc>
+		</binding>
+
+		<binding name="selections">
+			<pull><type>java.util.List</type></pull>
+			<push><type>java.util.List</type></push>
+			<doc><![CDATA[The checked items: checks their boxes, and receives the checked items when submitted.]]></doc>
+		</binding>
+
+		<binding name="prefix">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Text rendered before each checkbox.]]></doc>
+		</binding>
+
+		<binding name="suffix">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Text rendered after each checkbox.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The field's name. Generated from the element ID if not bound.]]></doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If true, the field is rendered disabled and its value isn't taken.]]></doc>
+		</binding>
+
+		<binding name="otherTagString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Raw text added inside the tag. Prefer passing attributes directly.]]></doc>
+		</binding>
+
+		<requires binding="list" must="gettable"/>
+		<requires binding="item" when="displayString"/>
+		<requires binding="item" must="settable"/>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWOBrowser" wocomponentcontent="false">
+		<binding name="list"/>
+		<binding name="item"/>
+		<binding name="displayString"/>
+		<binding name="value"/>
+		<binding name="selections"/>
+		<binding name="selectedValues"/>
+		<binding name="multiple" defaults="Boolean"/>
+		<binding name="escapeHTML" defaults="Boolean"/>
+		<binding name="name"/>
+		<binding name="disabled" defaults="Boolean"/>
+		<binding name="otherTagString"/>
+		<validation message="'list' is a required binding">
+			<unbound name="list"/>
+		</validation>
+	</wo>
+</wodefinitions>
