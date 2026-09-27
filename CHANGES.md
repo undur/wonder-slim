@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The monitor server's thread dump has complete stacks**
+  `/monitor/jstack` wrote each thread with `ThreadInfo.toString()`, which stops after eight frames.
+  Every thread is now written with its complete stack, the lock it's waiting on and the monitors it
+  holds. (#115)
+
 - **The monitor server answers with a status**
   `ERXMonitorServer` now answers a missing or wrong `monitor-service-password` with 401 and an
   unknown operation with 404, where it dropped the connection (after a `NullPointerException` when
