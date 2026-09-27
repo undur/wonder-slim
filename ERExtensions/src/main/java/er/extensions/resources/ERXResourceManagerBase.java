@@ -14,7 +14,6 @@ import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSPathUtilities;
 import com.webobjects.foundation.NSPropertyListSerialization;
 
-import er.extensions.ERXP;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
 
@@ -112,16 +111,11 @@ public class ERXResourceManagerBase extends WOResourceManager {
 		final boolean requestIsSecure = ERXRequest.isRequestSecure(context.request());
 		final boolean resourceIsSecure = (secure == null) ? requestIsSecure : secure.booleanValue();
 	
-		// FIXME: Figure out the exact purpose of this longest written condition on Earth // Hugi 2025-10-05
-		if ((resourceIsSecure && ERXP.SECURE_RESOURCE_URL_PREFIX.stringValue() == null) || (!resourceIsSecure && ERXP.RESOURCE_URL_PREFIX.stringValue() == null)) {
-			final StringBuffer sb = new StringBuffer();
-			final String serverPortStr = context.request()._serverPort();
-			final int serverPort = (serverPortStr == null) ? 0 : Integer.parseInt(serverPortStr);
-			context.request()._completeURLPrefix(sb, resourceIsSecure, serverPort);
-			sb.append(url);
-			return sb.toString();
-		}
-
-		return url;
+		final StringBuffer sb = new StringBuffer();
+		final String serverPortStr = context.request()._serverPort();
+		final int serverPort = (serverPortStr == null) ? 0 : Integer.parseInt(serverPortStr);
+		context.request()._completeURLPrefix(sb, resourceIsSecure, serverPort);
+		sb.append(url);
+		return sb.toString();
 	}
 }

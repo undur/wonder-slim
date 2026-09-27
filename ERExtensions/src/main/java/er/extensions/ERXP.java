@@ -225,17 +225,6 @@ public enum ERXP {
 	 */
 	RESOURCE_REPLACEMENT( "er.extensions.ERXResponseRewriter.resource." ),
 
-	// ERXResourceManagerBase
-	/**
-	 * Read only by {@code ERXResourceManagerBase._completeURLForResource()}: when set, non-secure resource URLs are left as generated instead of being completed with scheme and host. In Project Wonder, a prefix for resource URLs, such as a CDN host; wonder-slim doesn't prepend it.
-	 */
-	RESOURCE_URL_PREFIX( "er.extensions.ERXResourceManager.resourceUrlPrefix" ),
-
-	/**
-	 * As {@link #RESOURCE_URL_PREFIX}, for secure resource URLs.
-	 */
-	SECURE_RESOURCE_URL_PREFIX( "er.extensions.ERXResourceManager.secureResourceUrlPrefix" ),
-
 	// ERXWOForm
 	/**
 	 * The default of the {@code multipleSubmit} binding for all forms. Defaults to false.

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The resource URL prefix properties are reported as obsolete**
+  `er.extensions.ERXResourceManager.resourceUrlPrefix` and `secureResourceUrlPrefix` (a CDN host
+  for resource URLs, in Project Wonder) are no longer applied. Setting one only kept resource URLs
+  from being completed. They're now listed in the startup report of obsolete properties. (#113)
+
 - **Handler URLs always reach their handler**
   A wildcard route matching a handler key's URLs, such as a catch-all `/*`, took over component
   actions, direct actions and resources. Now a URL whose first segment is a registered request

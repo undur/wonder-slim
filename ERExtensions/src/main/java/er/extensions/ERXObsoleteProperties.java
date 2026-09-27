@@ -172,6 +172,8 @@ public class ERXObsoleteProperties {
 		new ObsoleteProperty( "er.extensions.ERXJobLoadBalancer.RootLocation", WONDER_FEATURE ),
 		new ObsoleteProperty( "er.extensions.ERXProperties.RetainDefaultsEnabled", WONDER_FEATURE ),
 		new ObsoleteProperty( "er.extensions.ERXRequest.BrowserFormValueEncodingOverrideEnabled", WONDER_FEATURE ),
+		new ObsoleteProperty( "er.extensions.ERXResourceManager.resourceUrlPrefix", "Resource URLs are no longer prefixed (with a CDN host, say). Serve resources through the front end instead." ),
+		new ObsoleteProperty( "er.extensions.ERXResourceManager.secureResourceUrlPrefix", "Resource URLs are no longer prefixed (with a CDN host, say). Serve resources through the front end instead." ),
 		new ObsoleteProperty( "er.extensions.ERXResourceManager.versionManager", WONDER_FEATURE ),
 		new ObsoleteProperty( "er.extensions.ERXResourceManager.versionManager.*", WONDER_FEATURE ),
 		new ObsoleteProperty( "er.extensions.ERXThreadStorage.logUsageOfProblematicInheritedValues", WONDER_FEATURE ),
