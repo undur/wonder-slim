@@ -4,7 +4,7 @@
 
 		<doc><![CDATA[Renders an `<iframe>`. Its source is a URL (`src`), or a component action URL whose response is the page named by `pageName`, the element bound to `value`, or the element returned by the parent's binding named by `actionName`. The element's content renders inside the iframe tag, as fallback content.
 
-Carried over from JavaWOExtensions (see #38).]]></doc>
+Carried over from JavaWOExtensions.]]></doc>
 
 		<binding name="src">
 			<pull><type>java.lang.String</type></pull>

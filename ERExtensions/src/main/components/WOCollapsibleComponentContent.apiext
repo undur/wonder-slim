@@ -4,7 +4,7 @@
 
 		<doc><![CDATA[Content that can be collapsed and expanded with a clickable arrow and label. Each click is a component action that toggles visibility.
 
-Carried over from JavaWOExtensions (see #38).]]></doc>
+Carried over from JavaWOExtensions.]]></doc>
 
 		<binding name="condition">
 			<pull><type>java.lang.Object</type></pull>

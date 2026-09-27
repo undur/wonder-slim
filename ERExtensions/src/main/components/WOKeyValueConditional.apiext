@@ -4,7 +4,7 @@
 
 		<doc><![CDATA[Renders its content when the parent component's value for `key` equals `value` (compared with `equals()`; two nulls are equal). `negate` flips it.
 
-Carried over from JavaWOExtensions (see #38).]]></doc>
+Carried over from JavaWOExtensions.]]></doc>
 
 		<binding name="key" required="true">
 			<pull><type>java.lang.String</type></pull>

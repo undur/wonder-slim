@@ -4,7 +4,7 @@
 
 		<doc><![CDATA[Renders a `<meta http-equiv="refresh">` tag that, after `seconds`, requests a component action URL. That action returns the page named by `pageName`, or the result of `action`.
 
-Carried over from JavaWOExtensions (see #38).]]></doc>
+Carried over from JavaWOExtensions.]]></doc>
 
 		<binding name="seconds" required="true">
 			<pull><type>java.lang.Object</type></pull>
