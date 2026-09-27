@@ -37,7 +37,6 @@ public abstract class ERXRoutingApplication extends WOApplication {
 	public ERXRoutingApplication() {
 		super();
 
-		refuseObsoleteURLRewriterProperties();
 		_shortURLs = booleanProperty( SHORT_URLS_PROPERTY, true );
 
 		// RouteAction is a very generic name for a direct action class, so we register it explicitly to prevent problems
@@ -136,21 +135,6 @@ public abstract class ERXRoutingApplication extends WOApplication {
 	 */
 	public String applicationURLPrefix() {
 		return adaptorPath() + "/" + name() + applicationExtension();
-	}
-
-	/**
-	 * ERXURLRewriter (a regular expression applied to every generated URL) is gone. It rewrote in one direction only and
-	 * never saw the long form it was written to match once short URLs were on. Configuration that still asks for it
-	 * stops the launch, rather than being silently ignored.
-	 */
-	private static void refuseObsoleteURLRewriterProperties() {
-		for( final String key : List.of( "er.extensions.ERXApplication.replaceApplicationPath.pattern", "er.extensions.ERXApplication.replaceApplicationPath.replace" ) ) {
-			final String value = System.getProperty( key );
-
-			if( value != null && !value.isEmpty() ) {
-				throw new IllegalStateException( "The property '" + key + "' is set, but URL rewriting by pattern has been removed. Short URLs (" + SHORT_URLS_PROPERTY + ", on by default) remove the adaptor prefix from generated URLs and accept them inbound; remove the replaceApplicationPath properties. Serving an application beneath a path of its own is not supported at present." );
-			}
-		}
 	}
 
 	private static boolean booleanProperty( final String key, final boolean defaultValue ) {

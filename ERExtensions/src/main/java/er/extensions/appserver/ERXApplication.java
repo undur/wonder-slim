@@ -246,7 +246,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		refuseObsoleteLocalizerProperties();
+		refuseObsoleteProperties();
 
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
@@ -363,16 +363,38 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * ERXLocalizer is gone: string lookup from .strings files and the per-session localizer were removed, and
-	 * locale-aware formatting moved to {@link ERXLocale}. Configuration that still addresses the localizer stops the
-	 * launch rather than being silently ignored.
+	 * A property that configured a removed feature, and why it's gone. A key ending in {@code .} matches every property beneath it.
 	 */
-	private static void refuseObsoleteLocalizerProperties() {
-		final String prefix = "er.extensions.ERXLocalizer.";
+	private record ObsoleteProperty( String key, String message ) {
 
-		for( final String key : System.getProperties().stringPropertyNames() ) {
-			if( key.startsWith( prefix ) ) {
-				throw new IllegalStateException( "The property '" + key + "' is set, but ERXLocalizer has been removed. Remove the er.extensions.ERXLocalizer.* properties. Locale-aware formatting is configured with ERXLocale.setApplicationLocale() or ERXSession.setLocale(). See er.extensions.appserver.ERXLocale." );
+		boolean matches( final String propertyName ) {
+			return key.endsWith( "." ) ? propertyName.startsWith( key ) : propertyName.equals( key );
+		}
+	}
+
+	/**
+	 * Properties that configured removed features. Add a line when a feature with configuration is removed.
+	 */
+	private static final List<ObsoleteProperty> OBSOLETE_PROPERTIES = List.of(
+			new ObsoleteProperty( "er.extensions.ERXApplication.replaceApplicationPath.pattern", "URL rewriting by pattern has been removed. Short URLs (er.extensions.ERXApplication.shortURLs, on by default) remove the adaptor prefix from generated URLs and accept them inbound. Serving an application beneath a path of its own is not supported at present." ),
+			new ObsoleteProperty( "er.extensions.ERXApplication.replaceApplicationPath.replace", "URL rewriting by pattern has been removed. Short URLs (er.extensions.ERXApplication.shortURLs, on by default) remove the adaptor prefix from generated URLs and accept them inbound. Serving an application beneath a path of its own is not supported at present." ),
+			new ObsoleteProperty( "er.extensions.ERXLocalizer.", "ERXLocalizer has been removed. Locale-aware formatting is configured with ERXLocale.setApplicationLocale() or ERXSession.setLocale(); see er.extensions.appserver.ERXLocale." ) );
+
+	/**
+	 * Configuration that still addresses a removed feature stops the launch rather than being silently ignored.
+	 */
+	private static void refuseObsoleteProperties() {
+		for( final String propertyName : System.getProperties().stringPropertyNames() ) {
+			final String value = System.getProperty( propertyName );
+
+			if( value == null || value.isEmpty() ) {
+				continue;
+			}
+
+			for( final ObsoleteProperty obsolete : OBSOLETE_PROPERTIES ) {
+				if( obsolete.matches( propertyName ) ) {
+					throw new IllegalStateException( "The property '" + propertyName + "' is set, for a feature that no longer exists: " + obsolete.message() + " Remove the property." );
+				}
 			}
 		}
 	}
