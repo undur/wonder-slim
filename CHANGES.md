@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **`SessionDidRestoreNotification` is posted once, and only on restore**
+  `ERXSession.awake()` no longer posts it in addition to WebObjects, which already does when it
+  restores a session. A new session gets WebObjects' `SessionDidCreateNotification` only.
+  Observers of new sessions should observe that one. (#108)
+
 - **A request on port 443 is secure**
   `ERXRequest.isRequestSecure()` (and so `isSecure()`) again treats a request whose server port
   header is `443` as secure, as WebObjects' own `isSecure()` does, alongside the `https: on` and

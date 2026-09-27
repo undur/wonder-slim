@@ -92,13 +92,13 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * Overridden to provide a few checks to see if javascript is enabled.
+	 * Makes this the current session ({@link #anySession()}) and names the thread after it. WO posts
+	 * SessionDidCreateNotification or SessionDidRestoreNotification itself, right after waking the session.
 	 */
 	@Override
 	public void awake() {
 		super.awake();
 		ERXSession.setSession(this);
-		NSNotificationCenter.defaultCenter().postNotification(SessionDidRestoreNotification, this);
 
 		WORequest request = context() != null ? context().request() : null;
 
