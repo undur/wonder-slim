@@ -1,8 +1,7 @@
 # AjaxPlayground configuration.
 #
-# wolips.host/port point at the Parslips dev server so this app announces its port at startup and
-# shows up in http://localhost:9485/apps - that's how the dev loop discovers where it is running.
-wolips.host=localhost
+# wolips.port points at the Parslips dev server on localhost so this app announces its port at startup
+# and shows up in http://localhost:9485/apps - that's how the dev loop discovers where it is running.
 wolips.port=9485
 
 # Log the unified page cache size + page->container structure on every store - so you can watch

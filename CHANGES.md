@@ -14,6 +14,12 @@
   replacement exists, the message names it. The table and the report live in a class of their own,
   `ERXObsoleteProperties`. (#79)
 
+- **The frameworks' own Properties files carry only active properties**
+  Entries nothing reads any more (`hasLocalization`, the `load.Properties.framework` markers, and
+  commented-out documentation for removed features) are gone, so a stock application starts
+  without an obsolete-properties report, and the files document only what can actually be
+  configured. (#80)
+
 - **The legacy component request handler is gone**
   `ERXComponentActionRequestHandler`, the default since July, is now the only component-action
   handler. `ERXComponentRequestHandler`, the patched copy of WebObjects' stock handler, and the
