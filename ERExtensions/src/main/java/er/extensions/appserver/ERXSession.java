@@ -120,7 +120,6 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 		super.sleep();
 		ERXSession.setSession(null);
 		Thread.currentThread().setName(_originalThreadName);
-		removeObjectForKey("ERXActionLogging");
 	}
 
 	/**

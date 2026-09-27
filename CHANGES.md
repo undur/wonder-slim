@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **`ERXActionLogging` removed, and with it the `WOActiveImage` and `WOSubmitButton` patches**
+  `ERXWOHyperlink`, `ERXWOActiveImage` and `ERXWOSubmitButton` wrote the invoked element into the
+  session under `ERXActionLogging`, which nothing read. `ERXWOActiveImage` and `ERXWOSubmitButton`
+  existed only for that, so `WOActiveImage` and `WOSubmitButton` are now WebObjects' own again.
+  (#117)
+
 - **The monitor server's thread dump has complete stacks**
   `/monitor/jstack` wrote each thread with `ThreadInfo.toString()`, which stops after eight frames.
   Every thread is now written with its complete stack, the lock it's waiting on and the monitors it

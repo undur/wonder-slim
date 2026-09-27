@@ -10,13 +10,11 @@ import com.webobjects.appserver._private.WONoContentElement;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.ERXP;
-import er.extensions.appserver.ERXSession;
 import er.extensions.foundation.ERXProperties;
 
 /**
  * Patch of WOHyperlink, installed in its place:
  * <ul>
- * <li>Puts a description of the action into the session under the key <code>ERXActionLogging</code>
  * <li>When the <code>disabled</code> is true, then returns <code>context().page()</code>
  * instead of the normal WONoContentElement. The rationale is that in almost all cases 
  * you don't want your users to see an empty page, especially not in the typical case when
@@ -29,7 +27,6 @@ import er.extensions.foundation.ERXProperties;
  * <li>With er.extensions.ERXHyperlink.defaultNoFollow, a link bound to an action gets {@code rel="nofollow"},
  * keeping crawlers off component action URLs.
  * </ul>
- * @author david Logging
  * @author ak WONoContentElement fix, senderID fix
  */
 
@@ -45,8 +42,8 @@ public class ERXWOHyperlink extends WOHyperlink {
     }
 
     /**
-     * Overridden to perform the logging, propagating the action to subelements and returning the
-     * current page if an empty page is returned from super.
+     * Overridden to propagate the action to subelements and to return the current page if an empty page is
+     * returned from super.
      */
     @Override
     public WOActionResults invokeAction(WORequest request, WOContext context) {
@@ -63,10 +60,6 @@ public class ERXWOHyperlink extends WOHyperlink {
             if(senderID.startsWith(elementID + ".")) {
                 result = invokeChildrenAction(request, context);
             }
-        }
-
-        if (result != null && ERXSession.anySession() != null) {
-        	ERXSession.anySession().setObjectForKey(toString(), "ERXActionLogging");
         }
 
         return result;
