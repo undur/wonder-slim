@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Obsolete properties are reported, not refused**
+  Properties that configure removed features (`er.extensions.ERXLocalizer.*`, the
+  `replaceApplicationPath` pair) no longer stop the launch. They're listed with the reason they're
+  no longer read in an `OBSOLETE PROPERTIES` section of the startup banner, with a warning in the
+  log, so an older application can be tried on the framework as it is and cleaned up afterwards. (#77)
+
 - **The legacy component request handler is gone**
   `ERXComponentActionRequestHandler`, the default since July, is now the only component-action
   handler. `ERXComponentRequestHandler`, the patched copy of WebObjects' stock handler, and the

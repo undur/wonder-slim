@@ -13,10 +13,12 @@ import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -246,7 +248,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Configure the WOStatistics CLFF logging since it can't be controlled by a property, grrr.
 		configureStatisticsLogging();
 
-		refuseObsoleteProperties();
 
 
 		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
@@ -373,7 +374,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Properties that configured removed features. Add a line when a feature with configuration is removed.
+	 * Properties that configured removed features, reported at startup (see {@link #printObsoleteProperties()}). Add a
+	 * line when a feature with configuration is removed.
 	 */
 	private static final List<ObsoleteProperty> OBSOLETE_PROPERTIES = List.of(
 			new ObsoleteProperty( "er.extensions.ERXApplication.replaceApplicationPath.pattern", "URL rewriting by pattern has been removed. Short URLs (er.extensions.ERXApplication.shortURLs, on by default) remove the adaptor prefix from generated URLs and accept them inbound. Serving an application beneath a path of its own is not supported at present." ),
@@ -381,10 +383,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			new ObsoleteProperty( "er.extensions.ERXLocalizer.", "ERXLocalizer has been removed. Locale-aware formatting is configured with ERXLocale.setApplicationLocale() or ERXSession.setLocale(); see er.extensions.appserver.ERXLocale." ) );
 
 	/**
-	 * Configuration that still addresses a removed feature stops the launch rather than being silently ignored.
+	 * Lists every property that is set and addresses a removed feature, with the reason, as a section of the startup
+	 * banner. Obsolete properties are harmless - they're simply no longer read - so they don't stop the launch: an
+	 * application carrying years of configuration can be tried on the framework as it is, and this list is its to-do
+	 * list for cleaning up. Prints nothing when there are none.
 	 */
-	private static void refuseObsoleteProperties() {
-		for( final String propertyName : System.getProperties().stringPropertyNames() ) {
+	private static void printObsoleteProperties() {
+		final List<String> lines = new ArrayList<>();
+
+		for( final String propertyName : new TreeSet<>( System.getProperties().stringPropertyNames() ) ) {
 			final String value = System.getProperty( propertyName );
 
 			if( value == null || value.isEmpty() ) {
@@ -393,9 +400,17 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 			for( final ObsoleteProperty obsolete : OBSOLETE_PROPERTIES ) {
 				if( obsolete.matches( propertyName ) ) {
-					throw new IllegalStateException( "The property '" + propertyName + "' is set, for a feature that no longer exists: " + obsolete.message() + " Remove the property." );
+					lines.add( String.format( "%s%n    %s", propertyName, obsolete.message() ) );
+					break;
 				}
 			}
+		}
+
+		if( !lines.isEmpty() ) {
+			log.warn( "{} obsolete propert{} set, for features that no longer exist. See OBSOLETE PROPERTIES below.", lines.size(), lines.size() == 1 ? "y is" : "ies are" );
+			System.out.println( "============= OBSOLETE PROPERTIES ==============" );
+			lines.forEach( System.out::println );
+			System.out.println();
 		}
 	}
 
@@ -467,6 +482,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		final long elapsedMSSinceJVMStartup = System.currentTimeMillis() - java.lang.management.ManagementFactory.getRuntimeMXBean().getStartTime();
 
 		log.info( String.format( "Startup time: %s ms", elapsedMSSinceJVMStartup ) );
+
+		printObsoleteProperties();
 
 		System.out.println( "================ LOADED BUNDLES ================" );
 		System.out.println( String.format( "%-22s : %-65s : %s", "-- Name --", "-- Bundle class --", "-- isJar --" ) );
