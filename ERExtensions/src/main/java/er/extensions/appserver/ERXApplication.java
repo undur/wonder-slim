@@ -199,7 +199,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		parsleyConfiguration.register();
 
-		// FIXME: Figure out why this is getting initialized here and document it // Hugi 2025-06-07
+		// With er.extensions.erxStats.enabled, collect ERXStats for the main thread during startup. The collected
+		// statistics are logged in didFinishLaunching() (statsLog at debug level), the same way dispatchRequest()
+		// collects and logs them per request. Only useful if something records statistics during startup: nothing
+		// in the framework does, so this is up to the application. See #55.
 		ERXStats.initStatisticsIfNecessary();
 
 		fixBaseURLs();
@@ -418,6 +421,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			ERXDevServerRegistration.registerAtStartup();
 		}
 
+		// Log the ERXStats collected on the main thread during startup (see the constructor)
 		ERXStats.logStatisticsForOperation(statsLog, "sum");
 
 		printStartupInfo();
