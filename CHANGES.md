@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **`WOBatchNavigationBar` deleted**
+  Its Java class went in 2021 along with the other `WODisplayGroup` code, but the template and `.api`
+  stayed behind. The template relied on the deleted class and on `WODisplayGroup`, so the component
+  couldn't render. (#96)
+
 - **`ERXExpiringCache` deleted**
   Its only users were the session caches of `ERXStyleSheet`'s and `ERXJavaScript`'s content modes,
   which are gone. The `er.extensions.ERXExpiringCache.reaperFrequency` property is reported as
