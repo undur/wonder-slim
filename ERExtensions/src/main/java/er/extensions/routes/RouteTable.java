@@ -12,7 +12,7 @@ import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
-import er.extensions.foundation.ERXHTTPUtilities;
+import er.extensions.appserver.ERXRequest;
 
 /**
  * Route handling.
@@ -86,7 +86,7 @@ public class RouteTable {
 	 * the routes see it. See {@link RouteRequestHandler#routePath(WORequest)}.
 	 */
 	public WOActionResults handle( final WORequest request, final String routeURL ) {
-		final String ipAddress = ERXHTTPUtilities.ipAddressFromRequest(request);
+		final String ipAddress = ERXRequest.remoteAddress( request );
 		final String userAgent = request.headerForKey( "user-agent" );
 
 		logger.info( "Handling URL: {};{};{}", routeURL, ipAddress, userAgent );

@@ -1,6 +1,7 @@
 package er.extensions.appserver;
 
 import java.net.HttpCookie;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Date;
@@ -37,9 +38,9 @@ public  class ERXRequest extends WORequest {
     private static final String X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL = ERXProperties.stringForKeyWithDefault(ERXP.X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL.id(), "x-forwarded-proto");
     
     /**
-     * Headers to check for the client IP-address 
+     * Headers carrying the client's address as set by a WO adaptor, in the order they're checked
      */
-    private static final String[] HOST_ADDRESS_HEADERS = {"x-forwarded-for", "pc-remote-addr", "remote_host", "remote_addr", "remote_user", "x-webobjects-remote-addr"};
+    private static final String[] ADAPTOR_ADDRESS_HEADERS = {"x-webobjects-remote-addr", "remote_addr", "remote_host", "pc-remote-addr"};
 
     /**
      * 'Host' is the official HTTP 1.1 header for the host name in the request URL, so this should be checked first. @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
@@ -127,27 +128,56 @@ public  class ERXRequest extends WORequest {
 	}
 
     /**
-     * @return The remote client host address. Works in various setups, like direct connect, deployed etc. If no host address is found, returns "UNKNOWN".
+     * @return The remote client host address, see {@link #remoteAddress(WORequest)}. Returns "UNKNOWN" if no address is found.
      */
     public String remoteHostAddress() {
-        
-    	if (WOApplication.application().isDirectConnectEnabled()) {
-            if (_originatingAddress() != null) {
-                return _originatingAddress().getHostAddress();
-            }
-        }
+    	final String address = remoteAddress(this);
+    	return address != null ? address : UNKNOWN_HOST;
+    }
 
-        for (final String headerName : HOST_ADDRESS_HEADERS) {
-        	final String headerValue = headerForKey(headerName);
+	/**
+	 * The address of the client that sent the request, for logging and display. In order:
+	 *
+	 * <ol>
+	 * <li>The address a WO adaptor passes on (the <code>x-webobjects-remote-addr</code>, <code>remote_addr</code>, <code>remote_host</code> or <code>pc-remote-addr</code> header)</li>
+	 * <li>The first address in <code>x-forwarded-for</code>, the client as a reverse proxy saw it</li>
+	 * <li>The address of the connection the request came in on (when the application is reached directly)</li>
+	 * </ol>
+	 *
+	 * Headers come from whoever sends the request, so when the application can be reached without passing through the adaptor or proxy
+	 * that sets them, the client can put any address there. Don't base access decisions on this.
+	 *
+	 * @return The client's address, or null if none is found
+	 */
+	public static String remoteAddress( final WORequest request ) {
 
-			if (headerValue != null) {
-				return headerValue;
+		for( final String headerName : ADAPTOR_ADDRESS_HEADERS ) {
+			final String headerValue = request.headerForKey( headerName );
+
+			if( headerValue != null && !headerValue.isBlank() ) {
+				return headerValue.strip();
 			}
 		}
 
-        return UNKNOWN_HOST;
-    }
-    
+		final String forwardedFor = request.headerForKey( "x-forwarded-for" );
+
+		if( forwardedFor != null ) {
+			final String firstAddress = forwardedFor.split( "," )[0].strip();
+
+			if( !firstAddress.isEmpty() ) {
+				return firstAddress;
+			}
+		}
+
+		final InetAddress originatingAddress = request._originatingAddress();
+
+		if( originatingAddress != null ) {
+			return originatingAddress.getHostAddress();
+		}
+
+		return null;
+	}
+
     /**
      * @return The host the request was addressed to, from the first of {@link #HOST_NAME_HEADERS} present; "UNKNOWN" when none is
      */

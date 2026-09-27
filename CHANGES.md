@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **`ERXRequest.remoteAddress(WORequest)`, one way to get the client's address**
+  Checks the address a WO adaptor passes on (`x-webobjects-remote-addr`, `remote_addr`,
+  `remote_host`, `pc-remote-addr`), then the first address in `x-forwarded-for`, then the
+  connection's address, else null. `remoteHostAddress()` returns the same, or `"UNKNOWN"`. It
+  no longer prefers the connection's address under direct connect (behind a proxy that's the
+  proxy's) or returns the whole `x-forwarded-for` list, and no longer reads `remote_user`, which is
+  a user name. `ERXHTTPUtilities` is removed: use `ERXRequest.remoteAddress(request)` in place of
+  `ERXHTTPUtilities.ipAddressFromRequest(request)`. (#102)
+
 - **The development endpoints only answer requests from this machine**
   `/eval`, `/log` and `/problems` (development mode only) check the address of the connection the
   request came in on and refuse anything but a loopback address with a 403. Request headers aren't
