@@ -3,10 +3,16 @@
 ## Unreleased
 
 - **Obsolete properties are reported, not refused**
-  Properties that configure removed features (`er.extensions.ERXLocalizer.*`, the
-  `replaceApplicationPath` pair) no longer stop the launch. They're listed with the reason they're
-  no longer read in an `OBSOLETE PROPERTIES` section of the startup banner, with a warning in the
-  log, so an older application can be tried on the framework as it is and cleaned up afterwards. (#77)
+  Properties that configure removed features no longer stop the launch. They're listed with the
+  reason they're no longer read in an `OBSOLETE PROPERTIES` section of the startup banner, with a
+  warning in the log, so an older application can be tried on the framework as it is and cleaned up
+  afterwards. (#77)
+  The list covers the properties Project Wonder's ERExtensions, JavaWOExtensions, WOOgnl and Ajax
+  read that wonder-slim no longer does, each key listed explicitly, about 260 entries: `ERXLocalizer`,
+  the `replaceApplicationPath` pair, EOF, JDBC, model and synchronizer settings, the SSL adaptor,
+  crypto, the administrative direct-action passwords, ERXPatcher, WOOgnl and more. Where a
+  replacement exists, the message names it. The table and the report live in a class of their own,
+  `ERXObsoleteProperties`. (#79)
 
 - **The legacy component request handler is gone**
   `ERXComponentActionRequestHandler`, the default since July, is now the only component-action

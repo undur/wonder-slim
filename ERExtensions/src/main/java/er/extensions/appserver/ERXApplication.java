@@ -13,12 +13,10 @@ import java.net.BindException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +52,7 @@ import er.extensions.ERXExtensions;
 import er.extensions.ERXFrameworkPrincipal;
 import er.extensions.ERXKVCReflectionHack;
 import er.extensions.ERXLoggingSupport;
+import er.extensions.ERXObsoleteProperties;
 import er.extensions.ERXMonitorServer;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.dev.ERXConsoleCapture;
@@ -364,57 +363,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * A property that configured a removed feature, and why it's gone. A key ending in {@code .} matches every property beneath it.
-	 */
-	private record ObsoleteProperty( String key, String message ) {
-
-		boolean matches( final String propertyName ) {
-			return key.endsWith( "." ) ? propertyName.startsWith( key ) : propertyName.equals( key );
-		}
-	}
-
-	/**
-	 * Properties that configured removed features, reported at startup (see {@link #printObsoleteProperties()}). Add a
-	 * line when a feature with configuration is removed.
-	 */
-	private static final List<ObsoleteProperty> OBSOLETE_PROPERTIES = List.of(
-			new ObsoleteProperty( "er.extensions.ERXApplication.replaceApplicationPath.pattern", "URL rewriting by pattern has been removed. Short URLs (er.extensions.ERXApplication.shortURLs, on by default) remove the adaptor prefix from generated URLs and accept them inbound. Serving an application beneath a path of its own is not supported at present." ),
-			new ObsoleteProperty( "er.extensions.ERXApplication.replaceApplicationPath.replace", "URL rewriting by pattern has been removed. Short URLs (er.extensions.ERXApplication.shortURLs, on by default) remove the adaptor prefix from generated URLs and accept them inbound. Serving an application beneath a path of its own is not supported at present." ),
-			new ObsoleteProperty( "er.extensions.ERXLocalizer.", "ERXLocalizer has been removed. Locale-aware formatting is configured with ERXLocale.setApplicationLocale() or ERXSession.setLocale(); see er.extensions.appserver.ERXLocale." ) );
-
-	/**
-	 * Lists every property that is set and addresses a removed feature, with the reason, as a section of the startup
-	 * banner. Obsolete properties are harmless - they're simply no longer read - so they don't stop the launch: an
-	 * application carrying years of configuration can be tried on the framework as it is, and this list is its to-do
-	 * list for cleaning up. Prints nothing when there are none.
-	 */
-	private static void printObsoleteProperties() {
-		final List<String> lines = new ArrayList<>();
-
-		for( final String propertyName : new TreeSet<>( System.getProperties().stringPropertyNames() ) ) {
-			final String value = System.getProperty( propertyName );
-
-			if( value == null || value.isEmpty() ) {
-				continue;
-			}
-
-			for( final ObsoleteProperty obsolete : OBSOLETE_PROPERTIES ) {
-				if( obsolete.matches( propertyName ) ) {
-					lines.add( String.format( "%s%n    %s", propertyName, obsolete.message() ) );
-					break;
-				}
-			}
-		}
-
-		if( !lines.isEmpty() ) {
-			log.warn( "{} obsolete propert{} set, for features that no longer exist. See OBSOLETE PROPERTIES below.", lines.size(), lines.size() == 1 ? "y is" : "ies are" );
-			System.out.println( "============= OBSOLETE PROPERTIES ==============" );
-			lines.forEach( System.out::println );
-			System.out.println();
-		}
-	}
-
-	/**
 	 * Configures the statistics logging for a given application.
 	 * By default will log to a file &lt;base log directory&gt;/&lt;WOApp Name&gt;-&lt;host&gt;-&lt;port&gt;.log if the base log path is defined.
 	 * The base log path is defined by the property <code>er.extensions.ERXApplication.StatisticsBaseLogPath</code>.
@@ -483,7 +431,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		log.info( String.format( "Startup time: %s ms", elapsedMSSinceJVMStartup ) );
 
-		printObsoleteProperties();
+		ERXObsoleteProperties.printObsoleteProperties();
 
 		System.out.println( "================ LOADED BUNDLES ================" );
 		System.out.println( String.format( "%-22s : %-65s : %s", "-- Name --", "-- Bundle class --", "-- isJar --" ) );
