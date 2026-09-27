@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOSwitchComponent" content="allowed" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders the component (or dynamic element) named by `WOComponentName`, which can change from one render to the next. Installed in place of `WOSwitchComponent`. Unlike WO's, it identifies the chosen component in element IDs by a number instead of its name, which keeps component names out of URLs and makes them shorter.
+
+Every other attribute is passed to the chosen component as a binding, and the content becomes its component content.]]></doc>
+
+		<binding name="WOComponentName">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the component or dynamic element to render. It must not evaluate to null or an empty string.</doc>
+		</binding>
+
+		<binding name="_componentName">
+			<pull><type>java.lang.String</type></pull>
+			<deprecated>Use `WOComponentName` instead.</deprecated>
+			<doc>Older name for `WOComponentName`, used only when `WOComponentName` isn't bound.</doc>
+		</binding>
+
+		<choose min="1">
+			<binding name="WOComponentName"/>
+			<binding name="_componentName"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

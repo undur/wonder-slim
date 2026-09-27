@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOConditional" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders its content when `condition` is true (`negate` flips it). Installed in place of `WOConditional`, so it's what `<wo:if>`, `<wo:conditional>` and `WOConditional` render. Unlike WO's, it records whether it rendered, so an `ERXElse` that follows it can render the alternative:
+
+```html
+<wo:if condition="$hasItems">…</wo:if>
+<wo:else>No items</wo:else>
+```]]></doc>
+
+		<binding name="condition" required="true">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc>Whether the content renders. Read with `WOAssociation.booleanValueInComponent()`: null, `false`, zero, and the string `"false"` are false.</doc>
+		</binding>
+
+		<binding name="negate">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc>If true, the content renders when `condition` is *false*.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXElse" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders its content when the conditional just before it didn't: the "else" of an `ERXWOConditional` (`<wo:if>`). Written as `<wo:else>`.
+
+```html
+<wo:if condition="$hasItems">…</wo:if>
+<wo:else>No items</wo:else>
+```
+
+It must follow a conditional; used without one it throws.]]></doc>
+
+	</wo>
+</wodefinitions>

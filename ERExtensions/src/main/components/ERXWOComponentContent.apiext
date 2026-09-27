@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOComponentContent" content="allowed" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders the content a component was given, like `WOComponentContent`, but can pick one named part of it. For wrapper components that take more than one piece of content: the parent passes named `ERXWOTemplate`s, and each `ERXWOComponentContent` in the wrapper renders the one whose `templateName` matches.
+
+```html
+<!-- in the wrapper -->
+<header><wo:ERXWOComponentContent templateName="header">Default header</wo:ERXWOComponentContent></header>
+<main><wo:ERXWOComponentContent /></main>
+```
+
+Without `templateName` it renders all of the given content except the `ERXWOTemplate`s, so named parts aren't rendered twice. Its own content renders when the given content has no part with that name.]]></doc>
+
+		<binding name="templateName">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the `ERXWOTemplate` to render. When not bound: everything that isn't an `ERXWOTemplate`.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

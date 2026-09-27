@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWOImage" wocomponentcontent="false">
+		<binding name="src"/>
+		<binding name="filename" defaults="Resources"/>
+		<binding name="framework" defaults="Frameworks"/>
+		<validation message="Either 'src' or 'filename' must be bound">
+			<and>
+				<unbound name="src"/>
+				<unbound name="filename"/>
+			</and>
+		</validation>
+	</wo>
+</wodefinitions>

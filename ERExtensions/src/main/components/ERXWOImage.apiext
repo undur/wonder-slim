@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOImage" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an `<img>` tag for an image resource (`filename`, optionally in a `framework`) or a URL (`src`). Written as `<wo:svg>` for now. It's meant to become the one image element, for ng-objects as well.
+
+```html
+<wo:svg filename="logo.svg" alt="Logo" />
+```
+
+Every other attribute is rendered on the tag (`alt`, `width`, `height`, `loading`, `srcset`, …). Unlike `WOImage`, it doesn't read the image to work out its dimensions: bind `width`/`height` if you want them.]]></doc>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc>URL of the image. Used instead of `filename` if both are bound.</doc>
+		</binding>
+
+		<binding name="filename">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the image resource.</doc>
+		</binding>
+
+		<binding name="framework">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the framework containing the image resource. The application if not bound.</doc>
+		</binding>
+
+		<choose min="1">
+			<binding name="src"/>
+			<binding name="filename"/>
+		</choose>
+
+	</wo>
+</wodefinitions>
