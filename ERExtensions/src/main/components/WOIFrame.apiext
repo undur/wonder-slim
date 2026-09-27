@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOIFrame" content="allowed" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders an `<iframe>`. Its source is a URL (`src`), or a component action URL whose response is the page named by `pageName`, the element bound to `value`, or the element returned by the parent's binding named by `actionName`. The element's content renders inside the iframe tag, as fallback content.
+
+Carried over from JavaWOExtensions (see #38).]]></doc>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc>URL of the frame's content.</doc>
+		</binding>
+
+		<binding name="pageName">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the page to render in the frame.</doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>com.webobjects.appserver.WOElement</type></pull>
+			<doc>A component or element to render in the frame. Used if `pageName` isn't bound.</doc>
+		</binding>
+
+		<binding name="actionName">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of a binding of the parent component whose value, a component or element, renders in the frame. Used if neither `pageName` nor `value` is bound.</doc>
+		</binding>
+
+		<binding name="name"><pull><type>java.lang.String</type></pull><doc>The iframe's `name` attribute.</doc></binding>
+		<binding name="width"><pull><type>java.lang.Object</type></pull><doc>The iframe's `width` attribute.</doc></binding>
+		<binding name="height"><pull><type>java.lang.Object</type></pull><doc>The iframe's `height` attribute.</doc></binding>
+		<binding name="style"><pull><type>java.lang.String</type></pull><doc>The iframe's `style` attribute.</doc></binding>
+		<binding name="align"><pull><type>java.lang.String</type></pull><doc>The iframe's `align` attribute (obsolete in HTML5; use CSS).</doc></binding>
+		<binding name="border"><pull><type>java.lang.Object</type></pull><doc>The iframe's `border` attribute (obsolete in HTML5; use CSS).</doc></binding>
+		<binding name="frameborder"><pull><type>java.lang.Object</type></pull><doc>The iframe's `frameborder` attribute (obsolete in HTML5; use CSS).</doc></binding>
+		<binding name="marginheight"><pull><type>java.lang.Object</type></pull><doc>The iframe's `marginheight` attribute (obsolete in HTML5).</doc></binding>
+		<binding name="marginwidth"><pull><type>java.lang.Object</type></pull><doc>The iframe's `marginwidth` attribute (obsolete in HTML5).</doc></binding>
+		<binding name="scrolling"><pull><type>java.lang.Object</type></pull><doc>The iframe's `scrolling` attribute (obsolete in HTML5; use CSS).</doc></binding>
+		<binding name="longdesc"><pull><type>java.lang.String</type></pull><doc>The iframe's `longdesc` attribute (obsolete in HTML5).</doc></binding>
+
+		<choose min="1">
+			<binding name="src"/>
+			<binding name="pageName"/>
+			<binding name="value"/>
+			<binding name="actionName"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

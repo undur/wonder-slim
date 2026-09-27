@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wodefinitions>
-  <wo class="ERXWOCase.java" wocomponentcontent="false">
+  <wo class="ERXWOCase" wocomponentcontent="true">
 	  <binding name="case"/>
 	  <validation message="'case' is a required binding.">
 	      <unbound name="case"/>

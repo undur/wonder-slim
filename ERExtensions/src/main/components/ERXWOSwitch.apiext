@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOSwitch" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders the one `ERXWOCase` among its children whose `case` equals the value of `case`, a "multiple if".
+
+```html
+<wo:ERXWOSwitch case="$status">
+  <wo:ERXWOCase case="open">Open</wo:ERXWOCase>
+  <wo:ERXWOCase case="closed">Closed</wo:ERXWOCase>
+  <wo:ERXWOCase case="default">Unknown</wo:ERXWOCase>
+</wo:ERXWOSwitch>
+```
+
+Its direct children must be `ERXWOCase` elements (whitespace between them is allowed). If no case matches, the case whose `case` is `"default"` renders, or nothing if there's none.]]></doc>
+
+		<binding name="case" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<doc>The value to switch on, compared with each case's `case` using `equals()`. A null value selects the `"default"` case.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

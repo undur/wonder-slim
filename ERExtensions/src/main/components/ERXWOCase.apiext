@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOCase" content="allowed" unknownAttributes="forbidden">
+
+		<doc><![CDATA[One case of an `ERXWOSwitch`: its content renders when the switch's value equals this case's `case`. Only valid as a direct child of `ERXWOSwitch`.]]></doc>
+
+		<binding name="case" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The value this case matches. Must be a **constant** (`case="open"`, `case=2`): the switch reads every case's value once, when the template is parsed. `"default"` marks the case that renders when no other case matches, or when the switch's value is null.]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

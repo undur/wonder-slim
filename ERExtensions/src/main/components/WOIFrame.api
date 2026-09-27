@@ -15,8 +15,10 @@
 		<binding name="value"/>
 		<binding name="width"/>
 		<binding name="actionName"/>
+		<binding name="style"/>
+		<binding name="border"/>
 
-		<validation message="One of 'pageName'. 'src' or 'value' is required">
+		<validation message="One of 'src', 'pageName', 'value' or 'actionName' is required">
 			<and>
 					<unbound name="pageName"/>
 					<unbound name="src"/>

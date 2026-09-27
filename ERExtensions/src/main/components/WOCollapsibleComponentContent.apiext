@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOCollapsibleComponentContent" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Content that can be collapsed and expanded with a clickable arrow and label. Each click is a component action that toggles visibility.
+
+Carried over from JavaWOExtensions (see #38).]]></doc>
+
+		<binding name="condition">
+			<pull><type>java.lang.Object</type></pull>
+			<doc>Whether the content starts out visible: a `Boolean`, a non-zero `Number`, or any other non-null value. Hidden if not bound.</doc>
+		</binding>
+
+		<binding name="visibility">
+			<push><type>java.lang.Integer</type></push>
+			<doc>Receives the visibility after each toggle: 1 for visible, 0 for hidden.</doc>
+		</binding>
+
+		<binding name="openedLabel">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Label shown while the content is visible.</doc>
+		</binding>
+
+		<binding name="closedLabel">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Label shown while the content is hidden.</doc>
+		</binding>
+
+		<binding name="openedImageFileName">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Image resource for the arrow while visible. Defaults to the framework's own.</doc>
+		</binding>
+
+		<binding name="closedImageFileName">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Image resource for the arrow while hidden. Defaults to the framework's own.</doc>
+		</binding>
+
+		<binding name="framework">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Framework containing the arrow images. Defaults to `ERExtensions`.</doc>
+		</binding>
+
+		<binding name="submitActionName">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of an action of the parent component, performed after each toggle.</doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>If true, the arrow and label can't be clicked.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

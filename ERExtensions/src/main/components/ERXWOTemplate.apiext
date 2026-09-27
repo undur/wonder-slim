@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOTemplate" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[A named piece of content passed to a wrapper component, for wrappers that take more than one piece of content. Inside the wrapper, an `ERXWOComponentContent` with the same `templateName` renders it.
+
+```html
+<wo:MyWrapper>
+  <wo:ERXWOTemplate templateName="header">Title</wo:ERXWOTemplate>
+  <wo:ERXWOTemplate templateName="body">…</wo:ERXWOTemplate>
+</wo:MyWrapper>
+```
+
+A plain `WOComponentContent` in the wrapper renders all of the content, the templates included.]]></doc>
+
+		<binding name="templateName" required="true">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The name an `ERXWOComponentContent` in the wrapper refers to, to render this content.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

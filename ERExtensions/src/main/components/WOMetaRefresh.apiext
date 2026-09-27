@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOMetaRefresh" content="forbidden" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders a `<meta http-equiv="refresh">` tag that, after `seconds`, requests a component action URL. That action returns the page named by `pageName`, or the result of `action`.
+
+Carried over from JavaWOExtensions (see #38).]]></doc>
+
+		<binding name="seconds" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<doc>Seconds before the refresh, rendered with `toString()`.</doc>
+		</binding>
+
+		<binding name="pageName">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the page to go to. Used instead of `action` if both are bound.</doc>
+		</binding>
+
+		<binding name="action">
+			<pull><type>com.webobjects.appserver.WOComponent</type></pull>
+			<doc>The action whose result is shown after the refresh.</doc>
+		</binding>
+
+		<choose min="1">
+			<binding name="pageName"/>
+			<binding name="action"/>
+		</choose>
+
+	</wo>
+</wodefinitions>
