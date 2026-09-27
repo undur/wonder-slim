@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **`ERXNumberFormatter` factor patterns parse at full precision**
+  Parsing with a multiplying pattern and no explicit scale, like `(*1000=)0`, now divides at full
+  precision, so a displayed value parses back to what it was (`"12"` → 0.012, where it gave 0). (#111)
+
 - **The development endpoints refuse forwarded requests**
   A proxy or web server adaptor on the same machine makes every request it forwards come in on a
   loopback connection. `/eval`, `/log` and `/problems` now also refuse requests carrying the headers

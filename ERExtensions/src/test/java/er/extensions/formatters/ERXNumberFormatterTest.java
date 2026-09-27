@@ -44,4 +44,33 @@ public class ERXNumberFormatterTest {
 		assertEquals( "1,500.50", format( "#,##0.00", new BigDecimal( "1500.5" ) ) );
 		assertEquals( "1500", format( "0", 1500 ) );
 	}
+
+	private static Object parse( final String pattern, final String string ) throws Exception {
+		return new ERXNumberFormatter( pattern ).parseObject( string );
+	}
+
+	@Test
+	public void parsingDividesAtFullPrecision() throws Exception {
+		assertEquals( 0, new BigDecimal( "0.012" ).compareTo( (BigDecimal)parse( "(*1000=)0", "12" ) ) );
+		assertEquals( 0, new BigDecimal( "12345678.901" ).compareTo( (BigDecimal)parse( "(*1000=)0", "12345678901" ) ) );
+		assertEquals( 0, new BigDecimal( "0.0165" ).compareTo( (BigDecimal)parse( "(*60=)0.00", "0.99" ) ) );
+	}
+
+	@Test
+	public void parsingWithExplicitScale() throws Exception {
+		assertEquals( new BigDecimal( "0.0165" ), parse( "(*60;4=)0.00", "0.99" ) );
+	}
+
+	@Test
+	public void parsingMultipliesForDivisionPatterns() throws Exception {
+		assertEquals( 0, new BigDecimal( "12500" ).compareTo( (BigDecimal)parse( "(/1000=)0", "12.5" ) ) );
+	}
+
+	@Test
+	public void formatAndParseRoundTrip() throws Exception {
+		final ERXNumberFormatter formatter = new ERXNumberFormatter( "(*1000=)0.000" );
+		final BigDecimal value = new BigDecimal( "0.012345" );
+		assertEquals( "12.345", formatter.format( value ) );
+		assertEquals( 0, value.compareTo( (BigDecimal)formatter.parseObject( "12.345" ) ) );
+	}
 }

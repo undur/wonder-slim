@@ -7,7 +7,6 @@
 package er.extensions.formatters;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.FieldPosition;
@@ -157,8 +156,12 @@ public class ERXNumberFormatter extends NSNumberFormatter {
 	 */
 	protected BigDecimal performParse(BigDecimal value) {
 		if("*".equals(_operator)) {
-		    int scale = _scale == null ? value.scale() : _scale.intValue();
-			value = value.divide(_factor, scale, RoundingMode.HALF_EVEN);
+			// Without an explicit scale, divide at full precision: the parsed value's own scale would round 12 / 1000 to 0
+			if(_scale == null) {
+				value = value.divide(_factor, MathContext.DECIMAL128);
+			} else {
+				value = value.divide(_factor, _scale.intValue(), RoundingMode.HALF_EVEN);
+			}
 		} else if("/".equals(_operator)) {
 			value = value.multiply(_factor);
 		}
@@ -193,13 +196,7 @@ public class ERXNumberFormatter extends NSNumberFormatter {
         	} else {
         		newValue = new BigDecimal(((Number)result).doubleValue());
         	}
-        	newValue = performParse(newValue);
-        	
-        	if(result instanceof BigInteger && !(result instanceof BigDecimal)) {
-        		result = new BigInteger("" + newValue.intValue());
-        	} else {
-        		result = newValue;
-        	}
+        	result = performParse(newValue);
         }
         return result;
     }
