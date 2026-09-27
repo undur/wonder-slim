@@ -1,6 +1,8 @@
 package er.extensions.components;
 
 import java.text.Format;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import com.webobjects.appserver._private.WODynamicElementCreationException;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCoding;
 
+import er.extensions.formatters.ERXDateTimeFormatters;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 
@@ -32,9 +35,9 @@ public class ERXWOString extends WODynamicElement {
 	private final WOAssociation _value;
 
 	/**
-	 * Format string to use for formatting NSTimestamp dates.
-	 * 
-	 * FIXME: This binding is essentially obsolete since it's only meant for use with NSTimestamp, which sucks and is dead // Hugi 2022-03-12
+	 * Date format pattern. For an NSTimestamp, an NSTimestampFormatter (strftime-style) pattern, as always. For a java.time
+	 * value, either that syntax ({@code %d.%m.%Y}, told apart by its {@code %}) or a DateTimeFormatter pattern
+	 * ({@code dd.MM.yyyy}). See {@link ERXDateTimeFormatters}.
 	 */
 	private final WOAssociation _dateFormat;
 	
@@ -44,7 +47,7 @@ public class ERXWOString extends WODynamicElement {
 	private final WOAssociation _numberFormat;
 	
 	/**
-	 * An instance of java.util.format to use to format the passed {value]
+	 * A java.text.Format to format the value with, or a java.time.format.DateTimeFormatter for java.time values
 	 */
 	private final WOAssociation _formatter;
 	
@@ -91,53 +94,68 @@ public class ERXWOString extends WODynamicElement {
 		Object valueInComponent = _value.valueInComponent(component);
 
 		if (_shouldFormat) {
-			Format format = null;
-
-			if (_formatter != null) {
-				format = (Format) _formatter.valueInComponent(component);
-			}
-
-			if (format == null) {
-				if (_dateFormat != null) {
-					final String formatString = (String) _dateFormat.valueInComponent(component);
-
-					if (formatString == null) {
-						format = ERXTimestampFormatter.defaultDateFormatterForObject(valueInComponent);
-					}
-					else {
-						format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
-					}
-				}
-				else if (_numberFormat != null) {
-					final String formatString = (String) _numberFormat.valueInComponent(component);
-
-					if (formatString == null) {
-						format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
-					}
-					else {
-						format = ERXNumberFormatter.numberFormatterForPattern(formatString);
-					}
-				}
-			}
+			final Object formatter = _formatter != null ? _formatter.valueInComponent(component) : null;
 
 			if (valueInComponent == NSKeyValueCoding.NullValue) {
 				valueInComponent = null;
 			}
 
-			if (format != null) {
+			if (formatter instanceof DateTimeFormatter dateTimeFormatter) {
+				// A java.time formatter, for java.time values. Anything else throws.
 				if (valueInComponent != null) {
-					try {
-						valueInComponent = format.format(valueInComponent);
-					}
-					catch (IllegalArgumentException ex) {
-						log.info("Exception while formatting", ex);
-						valueInComponent = null;
-					}
+					valueInComponent = ERXDateTimeFormatters.format(valueInComponent, dateTimeFormatter);
+				}
+			}
+			else if (formatter == null && _dateFormat != null && valueInComponent instanceof TemporalAccessor) {
+				// A java.time value with a dateformat pattern, in either syntax (see ERXDateTimeFormatters). A null pattern
+				// leaves the value unformatted (its ISO toString()), since no single pattern suits every java.time type.
+				final String pattern = (String) _dateFormat.valueInComponent(component);
+
+				if (pattern != null) {
+					valueInComponent = ERXDateTimeFormatters.format(valueInComponent, pattern);
 				}
 			}
 			else {
-				if (valueInComponent != null) {
-					log.debug("no formatter found! {}", valueInComponent);
+				Format format = (Format) formatter;
+
+				if (format == null) {
+					if (_dateFormat != null) {
+						final String formatString = (String) _dateFormat.valueInComponent(component);
+
+						if (formatString == null) {
+							format = ERXTimestampFormatter.defaultDateFormatterForObject(valueInComponent);
+						}
+						else {
+							format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
+						}
+					}
+					else if (_numberFormat != null) {
+						final String formatString = (String) _numberFormat.valueInComponent(component);
+
+						if (formatString == null) {
+							format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
+						}
+						else {
+							format = ERXNumberFormatter.numberFormatterForPattern(formatString);
+						}
+					}
+				}
+
+				if (format != null) {
+					if (valueInComponent != null) {
+						try {
+							valueInComponent = format.format(valueInComponent);
+						}
+						catch (IllegalArgumentException ex) {
+							log.info("Exception while formatting", ex);
+							valueInComponent = null;
+						}
+					}
+				}
+				else {
+					if (valueInComponent != null) {
+						log.debug("no formatter found! {}", valueInComponent);
+					}
 				}
 			}
 		}

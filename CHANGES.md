@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **`dateformat` formats java.time values**
+  `ERXWOString`'s `dateformat` now formats `LocalDate`, `LocalDateTime`, `ZonedDateTime`, `Instant`
+  and every other java.time value. The binding takes either syntax: an `NSTimestampFormatter` pattern
+  (`%d.%m.%Y`, recognised by a `%` outside quoted text) is translated to its `DateTimeFormatter`
+  equivalent, covering all of `NSTimestampFormatter`'s conversions including the locale's `%x`, `%X`
+  and `%c`, and renders exactly as `NSTimestampFormatter` would, so templates keep their patterns when
+  a model moves to java.time. A `DateTimeFormatter` pattern (`dd.MM.yyyy`) is used as is. `formatter` also accepts a
+  `DateTimeFormatter`. The formatters are cached and shared, since they're thread-safe. A pattern that
+  doesn't fit the value (a time on a `LocalDate`) throws, as does an unknown conversion, which
+  `NSTimestampFormatter` silently renders as `%`. `NSTimestamp` values format exactly as before.
+  The logic lives in `ERXDateTimeFormatters`. (#86)
+
 - **A null `dateformat` uses the default date format**
   When `ERXWOString`'s `dateformat` is bound but evaluates to null, a timestamp is now rendered with
   the default format, the full timestamp (`2026-09-27 12:00:00 Etc/GMT`) in the default time zone,
