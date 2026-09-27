@@ -17,6 +17,7 @@ import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSRange;
 import com.webobjects.foundation.NSSet;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -42,7 +43,7 @@ public class ERXResponseCompression {
 	 */
 	public static Set<String> responseCompressionTypes() {
 		if (_responseCompressionTypes == null) {
-			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault("er.extensions.ERXApplication.responseCompressionTypes", new NSArray<>("text/javascript")));
+			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault(ERXP.RESPONSE_COMPRESSION_TYPES.id(), new NSArray<>("text/javascript")));
 		}
 
 		return _responseCompressionTypes;
@@ -57,7 +58,7 @@ public class ERXResponseCompression {
 	 */
 	public static boolean responseCompressionEnabled() {
 		if (_responseCompressionEnabled == null) {
-			_responseCompressionEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.responseCompressionEnabled", false) ? Boolean.TRUE : Boolean.FALSE;
+			_responseCompressionEnabled = ERXProperties.booleanForKeyWithDefault(ERXP.RESPONSE_COMPRESSION_ENABLED.id(), false) ? Boolean.TRUE : Boolean.FALSE;
 		}
 
 		return _responseCompressionEnabled;

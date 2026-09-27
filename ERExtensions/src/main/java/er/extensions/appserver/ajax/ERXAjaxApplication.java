@@ -8,6 +8,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.routes.ERXRoutingApplication;
@@ -124,7 +125,7 @@ public abstract class ERXAjaxApplication extends ERXRoutingApplication {
 	private Boolean _allowContextPageResponse;
 	private boolean allowContextPageResponse() {
 		if(_allowContextPageResponse == null) {
-			_allowContextPageResponse = ERXProperties.booleanForKey("er.extensions.ERXAjaxApplication.allowContextPageResponse");
+			_allowContextPageResponse = ERXProperties.booleanForKey(ERXP.ALLOW_CONTEXT_PAGE_RESPONSE.id());
 		}
 		return _allowContextPageResponse;
 	}

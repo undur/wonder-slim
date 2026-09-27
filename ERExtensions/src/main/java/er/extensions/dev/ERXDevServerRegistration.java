@@ -10,6 +10,7 @@ import java.time.Duration;
 import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -56,7 +57,7 @@ public final class ERXDevServerRegistration {
 		}
 
 		final String appName = app.name();
-		final int devServerPort = ERXProperties.intForKeyWithDefault("wolips.port", 9485);
+		final int devServerPort = ERXProperties.intForKeyWithDefault(ERXP.WOLIPS_PORT.id(), 9485);
 		final String pid = String.valueOf(ProcessHandle.current().pid());
 
 		final String url = "http://localhost:" + devServerPort

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
 
 public class ERXLowMemoryHandler {
@@ -70,9 +71,9 @@ public class ERXLowMemoryHandler {
 	private boolean _isMemoryStarved = false;
 
 	public ERXLowMemoryHandler() {
-		_memoryStarvedThreshold = ERXProperties.bigDecimalForKeyWithDefault("er.extensions.ERXApplication.memoryStarvedThreshold", _memoryStarvedThreshold);
-		_memoryLowThreshold = ERXProperties.bigDecimalForKeyWithDefault("er.extensions.ERXApplication.memoryLowThreshold", _memoryLowThreshold);
-		lowMemBufferSize = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.lowMemBufferSize", 0);
+		_memoryStarvedThreshold = ERXProperties.bigDecimalForKeyWithDefault(ERXP.MEMORY_STARVED_THRESHOLD.id(), _memoryStarvedThreshold);
+		_memoryLowThreshold = ERXProperties.bigDecimalForKeyWithDefault(ERXP.MEMORY_LOW_THRESHOLD.id(), _memoryLowThreshold);
+		lowMemBufferSize = ERXProperties.intForKeyWithDefault(ERXP.LOW_MEMORY_BUFFER_SIZE.id(), 0);
 
 		if (lowMemBufferSize > 0) {
 			lowMemBuffer = new byte[lowMemBufferSize];
@@ -93,7 +94,7 @@ public class ERXLowMemoryHandler {
 
 		if (throwable instanceof Error) {
 			if (throwable instanceof OutOfMemoryError) {
-				boolean shouldExitOnOOMError = ERXProperties.booleanForKeyWithDefault("er.extensions.AppShouldExitOnOutOfMemoryError", true);
+				boolean shouldExitOnOOMError = ERXProperties.booleanForKeyWithDefault(ERXP.EXIT_ON_OUT_OF_MEMORY_ERROR.id(), true);
 				shouldQuit = shouldExitOnOOMError;
 				// AK: I'm not sure this actually works, in particular when the
 				// buffer is in the long-running generational mem, but it's

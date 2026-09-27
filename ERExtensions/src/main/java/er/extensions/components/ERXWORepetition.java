@@ -17,6 +17,7 @@ import com.webobjects.appserver._private.WODynamicGroup;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCodingAdditions;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXValueUtilities;
@@ -94,8 +95,8 @@ public class ERXWORepetition extends WODynamicGroup {
 	private final WOAssociation _debugHashCodes;
 	private final WOAssociation _notFoundMarker;
 
-	private static final boolean _checkHashCodesDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.checkHashCodes", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".checkHashCodes"));
-	private static final boolean _raiseOnUnmatchedObjectDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWORepetition.raiseOnUnmatchedObject", ERXProperties.booleanForKey(ERXWORepetition.class.getName() + ".raiseOnUnmatchedObject"));
+	private static final boolean _checkHashCodesDefault = ERXProperties.booleanForKeyWithDefault(ERXP.REPETITION_CHECK_HASH_CODES.id(), ERXProperties.booleanForKey(ERXP.REPETITION_CHECK_HASH_CODES_BY_CLASS_NAME.id()));
+	private static final boolean _raiseOnUnmatchedObjectDefault = ERXProperties.booleanForKeyWithDefault(ERXP.REPETITION_RAISE_ON_UNMATCHED_OBJECT.id(), ERXProperties.booleanForKey(ERXP.REPETITION_RAISE_ON_UNMATCHED_OBJECT_BY_CLASS_NAME.id()));
 	
 	private static class UnmatchedObjectException extends RuntimeException {}
 

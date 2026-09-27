@@ -16,6 +16,7 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSMutableArray;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -49,8 +50,6 @@ import er.extensions.foundation.ERXProperties;
 
 public class WOHostUtilities
 {
-	private static final String LOCALHOST_IPS_PROPERTY_KEY = "er.extensions.WOHostUtilities.localhostips";
-	
 	static volatile NSArray _localHosts = null;
 	private static final Logger log = LoggerFactory.getLogger(WOHostUtilities.class);
 	
@@ -82,7 +81,7 @@ public class WOHostUtilities
 		}
 		
 		// First we check if the list of localhost IPs is set by a system property
-		List<String> ips = ERXProperties.arrayForKey( LOCALHOST_IPS_PROPERTY_KEY );
+		List<String> ips = ERXProperties.arrayForKey( ERXP.LOCALHOST_IPS.id() );
 		
 		// If not set, add all configured IPv4 addresses on the server
 		if( ips == null ) {

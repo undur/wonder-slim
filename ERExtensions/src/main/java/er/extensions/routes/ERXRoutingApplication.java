@@ -11,6 +11,8 @@ import com.webobjects.foundation.NSData;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation._NSUtilities;
 
+import er.extensions.ERXP;
+
 /**
  * The application's URL handling, as one layer of the inheritance chain:
  *
@@ -27,8 +29,6 @@ import com.webobjects.foundation._NSUtilities;
  */
 public abstract class ERXRoutingApplication extends WOApplication {
 
-	private static final String SHORT_URLS_PROPERTY = "er.extensions.ERXApplication.shortURLs";
-
 	/**
 	 * Short URLs: request handler keys as top-level routes. See {@link #shortURLs()}.
 	 */
@@ -37,7 +37,7 @@ public abstract class ERXRoutingApplication extends WOApplication {
 	public ERXRoutingApplication() {
 		super();
 
-		_shortURLs = booleanProperty( SHORT_URLS_PROPERTY, true );
+		_shortURLs = booleanProperty( ERXP.SHORT_URLS.id(), true );
 
 		// RouteAction is a very generic name for a direct action class, so we register it explicitly to prevent problems
 		_NSUtilities.setClassForName( RouteAction.class, "RouteAction" );

@@ -9,6 +9,7 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
@@ -29,7 +30,7 @@ public class ERXDevelopmentInstanceStopper {
 			return false;
 		}
 
-		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.allowMultipleDevInstances", false)) {
+		if (ERXProperties.booleanForKeyWithDefault(ERXP.ALLOW_MULTIPLE_DEV_INSTANCES.id(), false)) {
 			return false;
 		}
 

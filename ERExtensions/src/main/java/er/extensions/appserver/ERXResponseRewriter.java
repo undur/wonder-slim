@@ -20,6 +20,7 @@ import com.webobjects.foundation.NSMutableSet;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
@@ -43,7 +44,6 @@ public class ERXResponseRewriter {
 
 	private static final String ADDED_RESOURCES_KEY = "ERXResponseRewriter.addedResources";
 
-	private static final String SECURE_RESOURCES_KEY = "er.ajax.secureResources";
 
 	private static final String ORIGINAL_CONTEXT_ID_KEY = "_originalContextID";
 
@@ -268,7 +268,7 @@ public class ERXResponseRewriter {
 	 * @return string that closes the part where resources are inserted into
 	 */
 	public static String _htmlCloseHeadTag() {
-		String closeHeadTag = ERXProperties.stringForKeyWithDefault("er.ajax.AJComponent.htmlCloseHead", "</head>");
+		String closeHeadTag = ERXProperties.stringForKeyWithDefault(ERXP.HTML_CLOSE_HEAD.id(), "</head>");
 		return closeHeadTag;
 	}
 
@@ -441,7 +441,7 @@ public class ERXResponseRewriter {
 	 *            the name of the javascript file to add
 	 */
 	public static void addScriptResourceInHead(WOResponse response, WOContext context, String framework, String fileName) {
-		boolean appendTypeAttribute = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXResponseRewriter.javascriptTypeAttribute", false);
+		boolean appendTypeAttribute = ERXProperties.booleanForKeyWithDefault(ERXP.JAVASCRIPT_TYPE_ATTRIBUTE.id(), false);
 		String scriptStartTag;
 		if (appendTypeAttribute) {
 			scriptStartTag = "<script type=\"text/javascript\" src=\"";
@@ -452,8 +452,8 @@ public class ERXResponseRewriter {
 		String scriptEndTag = "\"></script>";
 		String fallbackStartTag;
 		String fallbackEndTag;
-		if (ERXAjaxApplication.isAjaxRequest(context.request()) && ERXProperties.booleanForKeyWithDefault("er.extensions.loadOnDemand", true)) {
-			if (!ERXAjaxApplication.isAjaxReplacement(context.request()) || ERXProperties.booleanForKeyWithDefault("er.extensions.loadOnDemandDuringReplace", false)) {
+		if (ERXAjaxApplication.isAjaxRequest(context.request()) && ERXProperties.booleanForKeyWithDefault(ERXP.LOAD_ON_DEMAND.id(), true)) {
+			if (!ERXAjaxApplication.isAjaxReplacement(context.request()) || ERXProperties.booleanForKeyWithDefault(ERXP.LOAD_ON_DEMAND_DURING_REPLACE.id(), false)) {
 				if (appendTypeAttribute) {
 					fallbackStartTag = "<script type=\"text/javascript\">AOD.loadScript('";
 				}
@@ -520,9 +520,9 @@ public class ERXResponseRewriter {
 		String fallbackStartTag = null;
 		String fallbackEndTag = null;
 
-		if (ERXAjaxApplication.isAjaxRequest(context.request()) && ERXProperties.booleanForKeyWithDefault("er.extensions.loadOnDemand", true)) {
-			if (ERXProperties.booleanForKeyWithDefault("er.extensions.loadOnDemandDuringReplace", false)) {
-				boolean appendTypeAttribute = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXResponseRewriter.javascriptTypeAttribute", false);
+		if (ERXAjaxApplication.isAjaxRequest(context.request()) && ERXProperties.booleanForKeyWithDefault(ERXP.LOAD_ON_DEMAND.id(), true)) {
+			if (ERXProperties.booleanForKeyWithDefault(ERXP.LOAD_ON_DEMAND_DURING_REPLACE.id(), false)) {
+				boolean appendTypeAttribute = ERXProperties.booleanForKeyWithDefault(ERXP.JAVASCRIPT_TYPE_ATTRIBUTE.id(), false);
 				fallbackStartTag = (appendTypeAttribute ? "<script type=\"text/javascript\">AOD.loadCSS('" : "<script>AOD.loadCSS('");
 				fallbackEndTag = "')</script>";
 			}
@@ -700,7 +700,7 @@ public class ERXResponseRewriter {
 	public static boolean addResourceInHead(WOResponse response, WOContext context, String framework, String fileName, String startTag, String endTag, String fallbackStartTag, String fallbackEndTag, TagMissingBehavior tagMissingBehavior) {
 		boolean inserted = true;
 		
-		String replacementResourceStr = ERXProperties.stringForKey("er.extensions.ERXResponseRewriter.resource." + framework + "." + fileName);
+		String replacementResourceStr = ERXProperties.stringForKey(ERXP.RESOURCE_REPLACEMENT.id() + framework + "." + fileName);
 		if (replacementResourceStr != null) {
 			int dotIndex = replacementResourceStr.indexOf('.');
 			framework = replacementResourceStr.substring(0, dotIndex);
@@ -736,7 +736,7 @@ public class ERXResponseRewriter {
 					}
 					url = rm.urlForResourceNamed(fileName, framework, languages, context.request());
 					boolean generateCompleteResourceURLs = ERXResourceManagerBase._shouldGenerateCompleteResourceURL(context);
-					boolean secureAllResources = ERXProperties.booleanForKey(ERXResponseRewriter.SECURE_RESOURCES_KEY) && !ERXRequest.isRequestSecure(context.request());
+					boolean secureAllResources = ERXProperties.booleanForKey(ERXP.SECURE_RESOURCES.id()) && !ERXRequest.isRequestSecure(context.request());
 					if (generateCompleteResourceURLs || secureAllResources) {
 						url = ERXResourceManagerBase._completeURLForResource(url, secureAllResources ? Boolean.TRUE : null, context);
 					}
@@ -767,7 +767,7 @@ public class ERXResponseRewriter {
 	 * @param response response object to add opening script tag to
 	 */
 	public static void appendScriptTagOpener(WOResponse response) {
-		boolean appendTypeAttribute = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXResponseRewriter.javascriptTypeAttribute", false);
+		boolean appendTypeAttribute = ERXProperties.booleanForKeyWithDefault(ERXP.JAVASCRIPT_TYPE_ATTRIBUTE.id(), false);
 		if (appendTypeAttribute) {
 			response.appendContentString("<script type=\"text/javascript\">");
 		} else {

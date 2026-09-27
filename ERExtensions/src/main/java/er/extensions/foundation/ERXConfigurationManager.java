@@ -16,6 +16,7 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
 
+import er.extensions.ERXP;
 import er.extensions.ERXLoggingSupport;
 
 /**
@@ -103,7 +104,7 @@ public class ERXConfigurationManager {
 	 * If set, touching this path will be used to signal a change to properties files.
 	 */
 	private static String propertiesTouchFile() {
-		return ERXProperties.stringForKey("er.extensions.ERXConfigurationManager.PropertiesTouchFile");
+		return ERXProperties.stringForKey(ERXP.PROPERTIES_TOUCH_FILE.id());
 	}
 
 	/**

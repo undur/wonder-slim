@@ -15,6 +15,7 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.appserver.cachemonitor.PageCacheReuseStats;
 import er.extensions.appserver.cachemonitor.SessionCacheReporter;
@@ -79,7 +80,7 @@ public class ERXPageCachePressureValve {
 	 * ERXLowMemoryHandler notifications would ever trigger it, so we still install for those.
 	 */
 	public static ERXPageCachePressureValve installIfEnabled() {
-		if( !ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXPageCachePressureValve.enabled", true ) ) {
+		if( !ERXProperties.booleanForKeyWithDefault( ERXP.PAGE_CACHE_PRESSURE_VALVE_ENABLED.id(), true ) ) {
 			log.info( "Page cache pressure valve disabled by property" );
 			return null;
 		}
@@ -87,10 +88,10 @@ public class ERXPageCachePressureValve {
 	}
 
 	private ERXPageCachePressureValve() {
-		_threshold = ERXProperties.bigDecimalForKeyWithDefault( "er.extensions.ERXPageCachePressureValve.threshold", new java.math.BigDecimal( "0.85" ) ).doubleValue();
-		_aggressiveThreshold = ERXProperties.bigDecimalForKeyWithDefault( "er.extensions.ERXPageCachePressureValve.aggressiveThreshold", new java.math.BigDecimal( "0.90" ) ).doubleValue();
-		_trimToFraction = ERXProperties.bigDecimalForKeyWithDefault( "er.extensions.ERXPageCachePressureValve.trimToFraction", new java.math.BigDecimal( "0.50" ) ).doubleValue();
-		_aggressiveTrimToFraction = ERXProperties.bigDecimalForKeyWithDefault( "er.extensions.ERXPageCachePressureValve.aggressiveTrimToFraction", new java.math.BigDecimal( "0.25" ) ).doubleValue();
+		_threshold = ERXProperties.bigDecimalForKeyWithDefault( ERXP.PAGE_CACHE_PRESSURE_VALVE_THRESHOLD.id(), new java.math.BigDecimal( "0.85" ) ).doubleValue();
+		_aggressiveThreshold = ERXProperties.bigDecimalForKeyWithDefault( ERXP.PAGE_CACHE_PRESSURE_VALVE_AGGRESSIVE_THRESHOLD.id(), new java.math.BigDecimal( "0.90" ) ).doubleValue();
+		_trimToFraction = ERXProperties.bigDecimalForKeyWithDefault( ERXP.PAGE_CACHE_PRESSURE_VALVE_TRIM_TO_FRACTION.id(), new java.math.BigDecimal( "0.50" ) ).doubleValue();
+		_aggressiveTrimToFraction = ERXProperties.bigDecimalForKeyWithDefault( ERXP.PAGE_CACHE_PRESSURE_VALVE_AGGRESSIVE_TRIM_TO_FRACTION.id(), new java.math.BigDecimal( "0.25" ) ).doubleValue();
 
 		_oldGenPool = findOldGenPool();
 

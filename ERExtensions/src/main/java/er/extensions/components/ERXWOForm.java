@@ -26,6 +26,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCoding.UnknownKeyException;
 import com.webobjects.foundation._NSDictionaryUtilities;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.foundation.ERXProperties;
@@ -117,9 +118,9 @@ public class ERXWOForm extends com.webobjects.appserver._private.WOHTMLDynamicEl
 	protected WOAssociation _addDefaultSubmitButton;
 	protected WOAssociation _embedded;
 
-	public static boolean multipleSubmitDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWOForm.multipleSubmitDefault", false);
-	public static boolean addDefaultSubmitButtonDefault = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWOForm.addDefaultSubmitButtonDefault", false);
-	public static boolean useIdInsteadOfNameTag = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXWOForm.useIdInsteadOfNameTag", false);
+	public static boolean multipleSubmitDefault = ERXProperties.booleanForKeyWithDefault(ERXP.FORM_MULTIPLE_SUBMIT_DEFAULT.id(), false);
+	public static boolean addDefaultSubmitButtonDefault = ERXProperties.booleanForKeyWithDefault(ERXP.FORM_ADD_DEFAULT_SUBMIT_BUTTON_DEFAULT.id(), false);
+	public static boolean useIdInsteadOfNameTag = ERXProperties.booleanForKeyWithDefault(ERXP.FORM_USE_ID_INSTEAD_OF_NAME_TAG.id(), false);
 
 	@SuppressWarnings("unchecked")
 	public ERXWOForm(String name, NSDictionary<String, WOAssociation> associations, WOElement element) {

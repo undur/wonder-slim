@@ -24,6 +24,7 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSTimestamp;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ajax.ERXAjaxSession;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
@@ -45,17 +46,17 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	/**
 	 * SameSite for session and instance cookies
 	 */
-	private static final SameSite _sameSite = ERXProperties.enumValueForKey(SameSite.class, "er.extensions.ERXSession.cookies.SameSite");
+	private static final SameSite _sameSite = ERXProperties.enumValueForKey(SameSite.class, ERXP.SESSION_COOKIES_SAME_SITE.id());
 
 	/**
 	 * er.extensions.ERXSession.useSecureSessionCookies, see {@link #useSecureSessionCookies()}
 	 */
-	private static final boolean _useSecureSessionCookies = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXSession.useSecureSessionCookies", false);
+	private static final boolean _useSecureSessionCookies = ERXProperties.booleanForKeyWithDefault(ERXP.USE_SECURE_SESSION_COOKIES.id(), false);
 
 	/**
 	 * er.extensions.ERXSession.useHttpOnlySessionCookies, see {@link #useHttpOnlySessionCookies()}
 	 */
-	private static final boolean _useHttpOnlySessionCookies = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXSession.useHttpOnlySessionCookies", false);
+	private static final boolean _useHttpOnlySessionCookies = ERXProperties.booleanForKeyWithDefault(ERXP.USE_HTTP_ONLY_SESSION_COOKIES.id(), false);
 
 	/**
 	 * The locale this session formats numbers and dates in, when set explicitly. See {@link ERXLocale}.

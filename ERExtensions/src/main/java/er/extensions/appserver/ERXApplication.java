@@ -46,6 +46,7 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
+import er.extensions.ERXP;
 import er.extensions.components.errorpages.WOExceptionPage;
 
 import er.extensions.ERXExtensions;
@@ -172,7 +173,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// clamped level over to the log4j bridge when logging is configured. er.extensions.NSLog.debugLevel
 		// (0-3, the NSLog.DebugLevel* values; a -D system property, since this runs before WO reads its
 		// own arguments) raises the cap when WO's debug output is wanted.
-		final int nsLogDebugCap = Integer.getInteger("er.extensions.NSLog.debugLevel", NSLog.DebugLevelCritical);
+		final int nsLogDebugCap = Integer.getInteger(ERXP.NSLOG_DEBUG_LEVEL.id(), NSLog.DebugLevelCritical);
 
 		NSLog.setDebug(new NSLog.PrintStreamLogger(System.out) {
 			@Override
@@ -238,7 +239,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 
-		final String defaultEncoding = System.getProperty("er.extensions.ERXApplication.DefaultEncoding");
+		final String defaultEncoding = System.getProperty(ERXP.DEFAULT_ENCODING.id());
 
 		if (defaultEncoding != null) {
 			setDefaultEncoding(defaultEncoding);
@@ -249,7 +250,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 
 
-		_publicHost = ERXProperties.stringForKeyWithDefault("er.extensions.ERXApplication.publicHost", host());
+		_publicHost = ERXProperties.stringForKeyWithDefault(ERXP.PUBLIC_HOST.id(), host());
 
 		ERXMonitorServer.start();
 
@@ -297,7 +298,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * In this case when the application starts to refuse new sessions it will also register a kill timer that will terminate the application between 0 minutes and 1:00 minutes.
 	 */
 	public void activateScheduleOfLifeAndDeath() {
-		int timeToLive = ERXProperties.intForKey("ERTimeToLive");
+		int timeToLive = ERXProperties.intForKey(ERXP.TIME_TO_LIVE.id());
 
 		if (timeToLive > 0) {
 			log.info("Instance will live " + timeToLive + " seconds.");
@@ -308,7 +309,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			CompletableFuture.delayedExecutor(timeToLive, TimeUnit.SECONDS ).execute(this::killInstance);
 		}
 
-		int timeToDie = ERXProperties.intForKey("ERTimeToDie");
+		int timeToDie = ERXProperties.intForKey(ERXP.TIME_TO_DIE.id());
 
 		if (timeToDie > 0) {
 			log.info("Instance will not live past " + timeToDie + ":00.");
@@ -369,11 +370,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * The default log rotation frequency is 24 hours, but can be changed by setting in milliseconds the property <code>er.extensions.ERXApplication.StatisticsLogRotationFrequency</code>
 	 */
 	public void configureStatisticsLogging() {
-		final String statisticsBasePath = System.getProperty("er.extensions.ERXApplication.StatisticsBaseLogPath");
+		final String statisticsBasePath = System.getProperty(ERXP.STATISTICS_BASE_LOG_PATH.id());
 
 		if (statisticsBasePath != null) {
 			// Defaults to a single day
-			final int rotationFrequency = ERXProperties.intForKeyWithDefault("er.extensions.ERXApplication.StatisticsLogRotationFrequency", 24 * 60 * 60 * 1000);
+			final int rotationFrequency = ERXProperties.intForKeyWithDefault(ERXP.STATISTICS_LOG_ROTATION_FREQUENCY.id(), 24 * 60 * 60 * 1000);
 			final String logPath = statisticsBasePath + File.separator + name() + "-" + ERXConfigurationManager.defaultManager().hostName() + "-" + port() + ".log";
 
 			if (log.isDebugEnabled()) {
@@ -626,7 +627,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		if (isRefusingNewSessions) {
-			int timeToKill = ERXProperties.intForKey("ERTimeToKill");
+			int timeToKill = ERXProperties.intForKey(ERXP.TIME_TO_KILL.id());
 			if (timeToKill > 0) {
 				log.warn("Registering kill timer in " + timeToKill + "seconds");
 				NSTimestamp exitDate = (new NSTimestamp()).timestampByAddingGregorianUnits(0, 0, 0, 0, 0, timeToKill);
@@ -672,7 +673,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	@Override
 	public WOComponentDefinition _componentDefinition(final String componentName, NSArray languages) {
 
-		final boolean fixCachingEnabled = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.fixCachingEnabled", true);
+		final boolean fixCachingEnabled = ERXProperties.booleanForKeyWithDefault(ERXP.FIX_CACHING_ENABLED.id(), true);
 
 		if (fixCachingEnabled) {
 			// _expectedLanguages already contains all the languages in all projects, so there is no need to check for the ones that come in...

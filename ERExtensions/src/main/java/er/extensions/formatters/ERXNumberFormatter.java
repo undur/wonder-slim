@@ -15,6 +15,7 @@ import java.util.Locale;
 
 import com.webobjects.foundation.NSNumberFormatter;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.appserver.ERXLocale;
 
@@ -30,7 +31,7 @@ import er.extensions.appserver.ERXLocale;
  */
 public class ERXNumberFormatter extends NSNumberFormatter {
 
-	private String _ignoredChars = ERXProperties.stringForKeyWithDefault("er.extensions.ERXNumberFormatter.ignoredChars", "%$");
+	private String _ignoredChars = ERXProperties.stringForKeyWithDefault(ERXP.NUMBER_FORMATTER_IGNORED_CHARS.id(), "%$");
     private Integer _scale;
     private BigDecimal _factor;
 	private String _operator;

@@ -10,6 +10,8 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.ERXP;
+
 /**
  * Cache that expires its entries based on time or version changes. Version can
  * be any object that represents the current state of a cached value. When
@@ -332,7 +334,7 @@ public class ERXExpiringCache<K, V> {
 	 */
 	protected static synchronized ERXExpiringCache.GrimReaper reaper() {
 		if (_reaper == null) {
-			_reaper = new GrimReaper(ERXProperties.intForKeyWithDefault("er.extensions.ERXExpiringCache.reaperFrequency", 5000));
+			_reaper = new GrimReaper(ERXProperties.intForKeyWithDefault(ERXP.EXPIRING_CACHE_REAPER_FREQUENCY.id(), 5000));
 		}
 		return ERXExpiringCache._reaper;
 	}

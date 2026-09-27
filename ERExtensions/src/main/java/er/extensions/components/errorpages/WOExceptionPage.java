@@ -26,6 +26,7 @@ import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.development.NSMavenProjectBundle;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.components.ERXComponent;
 import er.extensions.components.errorpages.WOExceptionPage.WOExceptionParser.WOParsedErrorLine;
@@ -878,7 +879,7 @@ public class WOExceptionPage extends ERXComponent {
 			return null;
 		}
 
-		final int wolipsPortnumber = ERXProperties.intForKeyWithDefault( "wolips.port", 9485 );
+		final int wolipsPortnumber = ERXProperties.intForKeyWithDefault( ERXP.WOLIPS_PORT.id(), 9485 );
 		final String applicationName = application().name();
 
 		final StringBuilder url = new StringBuilder( "http://localhost:" )
@@ -894,7 +895,7 @@ public class WOExceptionPage extends ERXComponent {
 
 		// Classic-WOLips compatibility: include the password only if configured.
 		// The Parsley dev server ignores it.
-		final String wolipsPassword = ERXProperties.stringForKey( "wolips.password" );
+		final String wolipsPassword = ERXProperties.stringForKey( ERXP.WOLIPS_PASSWORD.id() );
 		if( wolipsPassword != null ) {
 			url.append( "&pw=" ).append( wolipsPassword );
 		}
@@ -1223,7 +1224,7 @@ public class WOExceptionPage extends ERXComponent {
 			return null;
 		}
 
-		final int wolipsPortnumber = ERXProperties.intForKeyWithDefault( "wolips.port", 9485 );
+		final int wolipsPortnumber = ERXProperties.intForKeyWithDefault( ERXP.WOLIPS_PORT.id(), 9485 );
 		final String applicationName = application().name();
 		final String className = frame.packageName() + "." + frame.className();
 
@@ -1233,7 +1234,7 @@ public class WOExceptionPage extends ERXComponent {
 				.append( "&className=" ).append( className )
 				.append( "&lineNumber=" ).append( lineNumber );
 
-		final String wolipsPassword = ERXProperties.stringForKey( "wolips.password" );
+		final String wolipsPassword = ERXProperties.stringForKey( ERXP.WOLIPS_PASSWORD.id() );
 		if( wolipsPassword != null ) {
 			url.append( "&pw=" ).append( wolipsPassword );
 		}
@@ -1425,7 +1426,7 @@ public class WOExceptionPage extends ERXComponent {
 			return null;
 		}
 
-		final int wolipsPortnumber = ERXProperties.intForKeyWithDefault( "wolips.port", 9485 );
+		final int wolipsPortnumber = ERXProperties.intForKeyWithDefault( ERXP.WOLIPS_PORT.id(), 9485 );
 		final String applicationName = application().name();
 		final String className = currentErrorLine.packageName() + "." + currentErrorLine.className();
 		final int lineNumber = currentErrorLine.line();
@@ -1438,7 +1439,7 @@ public class WOExceptionPage extends ERXComponent {
 
 		// Include the password only if one is configured — for classic WOLips
 		// compatibility. The Parsley dev server ignores it.
-		final String wolipsPassword = ERXProperties.stringForKey( "wolips.password" );
+		final String wolipsPassword = ERXProperties.stringForKey( ERXP.WOLIPS_PASSWORD.id() );
 		if( wolipsPassword != null ) {
 			url.append( "&pw=" ).append( wolipsPassword );
 		}

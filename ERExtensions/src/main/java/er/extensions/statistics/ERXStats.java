@@ -17,6 +17,7 @@ import com.webobjects.foundation.NSMutableSet;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSet;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
@@ -61,11 +62,7 @@ public class ERXStats {
 	private static final String STATS_INITIALIZED_KEY = "er.extensions.erxStats.initialized";
 	private static final String STATS_START_TIME_KEY = "er.extensions.erxStats.startTime";
 	private static final String STATS_LAST_TIME_KEY = "er.extensions.erxStats.lastTime";
-	private static final String STATS_MAX_KEY = "er.extensions.erxStats.max";
 	private static final String STATS_KEY = "er.extensions.erxStats.statistics";
-
-    public static final String STATS_ENABLED_KEY = "er.extensions.erxStats.enabled";
-    public static final String STATS_TRACE_COLLECTING_ENABLED_KEY = "er.extensions.erxStats.traceCollectingEnabled";
 
     public static final Logger log = LoggerFactory.getLogger(ERXStats.class);
 
@@ -91,11 +88,11 @@ public class ERXStats {
 	}
 
 	private static boolean areStatisticsEnabled() {
-		return ERXProperties.booleanForKey(ERXStats.STATS_ENABLED_KEY);
+		return ERXProperties.booleanForKey(ERXP.STATS_ENABLED.id());
 	}
 
 	public static boolean traceCollectingEnabled() {
-		return ERXProperties.booleanForKeyWithDefault(ERXStats.STATS_TRACE_COLLECTING_ENABLED_KEY, false);
+		return ERXProperties.booleanForKeyWithDefault(ERXP.STATS_TRACE_COLLECTING_ENABLED.id(), false);
 	}
 
 	/**
@@ -129,7 +126,7 @@ public class ERXStats {
 			synchronized (_allStatistics) {
 				ERXStats._allStatistics.addObject(statistics);
 
-				int maxStatistics = ERXProperties.intForKeyWithDefault(ERXStats.STATS_MAX_KEY, 1000);
+				int maxStatistics = ERXProperties.intForKeyWithDefault(ERXP.STATS_MAX.id(), 1000);
 				if (ERXStats._allStatistics.count() > maxStatistics) {
 					ERXStats._allStatistics.removeObjectAtIndex(0);
 				}

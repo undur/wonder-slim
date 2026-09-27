@@ -9,6 +9,7 @@ import com.webobjects.appserver._private.WOHyperlink;
 import com.webobjects.appserver._private.WONoContentElement;
 import com.webobjects.foundation.NSDictionary;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXSession;
 import er.extensions.foundation.ERXProperties;
 
@@ -36,7 +37,7 @@ public class ERXWOHyperlink extends WOHyperlink {
 	/**
      * Defines if the hyperlink adds a default <code>rel="nofollow"</code> if an action is bound.
      */
-    private static final boolean defaultNoFollow = ERXProperties.booleanForKey("er.extensions.ERXHyperlink.defaultNoFollow");
+    private static final boolean defaultNoFollow = ERXProperties.booleanForKey(ERXP.HYPERLINK_DEFAULT_NO_FOLLOW.id());
 
     public ERXWOHyperlink(String name, NSDictionary associations, WOElement template) {
         super(name, associations, template);

@@ -30,6 +30,7 @@ import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
 
 public class ERXProperties {
@@ -584,7 +585,7 @@ public class ERXProperties {
      * @param projectsInfo Project Info {@link ERXProperties#pathsForUserAndBundleProperties}
      */
     private static void optionalPropertiesLoader(String userName, NSMutableArray<String> propertiesPaths, NSMutableArray<String> projectsInfo) {
-    	if(!ERXProperties.booleanForKeyWithDefault("er.extensions.ERXProperties.loadOptionalProperties", false)){
+    	if(!ERXProperties.booleanForKeyWithDefault(ERXP.LOAD_OPTIONAL_PROPERTIES.id(), false)){
     		return;
     	}
     	
@@ -733,7 +734,7 @@ public class ERXProperties {
 	private static String applicationDeveloperProperties() {
     	String applicationDeveloperPropertiesPath = null;
     	if (ERXApplication.isDevelopmentModeSafe()) {
-	        String devName = NSProperties.getProperty("er.extensions.ERXProperties.devPropertiesName", "dev");
+	        String devName = NSProperties.getProperty(ERXP.DEV_PROPERTIES_NAME.id(), "dev");
 	        applicationDeveloperPropertiesPath = variantPropertiesInBundle(devName, "app");
     	}
         return applicationDeveloperPropertiesPath;
@@ -774,7 +775,7 @@ public class ERXProperties {
      */
 	private static String applicationMachinePropertiesPath(String fileName) {
     	String applicationMachinePropertiesPath = null;
-    	String machinePropertiesPath = NSProperties.getProperty("er.extensions.ERXProperties.machinePropertiesPath", "/etc/WebObjects");
+    	String machinePropertiesPath = NSProperties.getProperty(ERXP.MACHINE_PROPERTIES_PATH.id(), "/etc/WebObjects");
     	WOApplication application = WOApplication.application();
     	String applicationName;
     	if (application != null) {
@@ -815,7 +816,7 @@ public class ERXProperties {
      * @return array of configuration file names
      */
 	private static NSArray optionalConfigurationFiles() {
-    	NSArray immutableOptionalConfigurationFiles = arrayForKey("er.extensions.ERXProperties.OptionalConfigurationFiles");
+    	NSArray immutableOptionalConfigurationFiles = arrayForKey(ERXP.OPTIONAL_CONFIGURATION_FILES.id());
     	NSMutableArray optionalConfigurationFiles = null;
     	if (immutableOptionalConfigurationFiles != null) {
     		optionalConfigurationFiles = immutableOptionalConfigurationFiles.mutableClone();

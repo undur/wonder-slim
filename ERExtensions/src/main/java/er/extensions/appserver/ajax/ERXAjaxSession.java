@@ -30,6 +30,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.cachemonitor.PageCacheReuseStats;
 import er.extensions.foundation.ERXProperties;
 
@@ -90,9 +91,9 @@ public class ERXAjaxSession extends WOSession {
 
 	/** When true, log the cache size + page-&gt;container structure each time a page is stored
 	 *  (see {@link #pageCacheSummary()}). Off by default. */
-	private static boolean logPageCache = ERXProperties.booleanForKey("er.extensions.appserver.ajax.ERXAjaxSession.logPageCache");
+	private static boolean logPageCache = ERXProperties.booleanForKey(ERXP.LOG_PAGE_CACHE.id());
 
-	private static boolean storesPageInfo = ERXProperties.booleanForKeyWithDefault("er.extensions.appserver.ajax.ERXAjaxSession.storesPageInfo", false);
+	private static boolean storesPageInfo = ERXProperties.booleanForKeyWithDefault(ERXP.STORES_PAGE_INFO.id(), false);
 
 	private NSMutableDictionary<WOComponent, NSMutableDictionary<String, Object>> pageInfoDictionary;
 

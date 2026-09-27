@@ -6,6 +6,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ajax.ERXAjaxContext;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
@@ -144,7 +145,7 @@ public class ERXWOContext extends ERXAjaxContext {
 		// the path to a direct action or component action URL will give an incorrect result.
 		final WORequest dummyRequest = app.createRequest("GET", app.applicationURLPrefix(), "HTTP/1.1", null, null, null);
 
-		if (ERXProperties.booleanForKeyWithDefault("er.extensions.ERXApplication.publicHostIsSecure", false)) {
+		if (ERXProperties.booleanForKeyWithDefault(ERXP.PUBLIC_HOST_IS_SECURE.id(), false)) {
 			dummyRequest.setHeader("on", "https");
 		}
 

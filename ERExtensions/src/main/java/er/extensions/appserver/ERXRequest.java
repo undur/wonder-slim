@@ -21,6 +21,7 @@ import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -32,8 +33,8 @@ public  class ERXRequest extends WORequest {
     private static final Logger log = LoggerFactory.getLogger(ERXRequest.class);
 
     private static final String UNKNOWN_HOST = "UNKNOWN";
-    private static final String X_FORWARDED_PROTO_FOR_SSL = ERXProperties.stringForKeyWithDefault("er.extensions.appserver.ERXRequest.xForwardedProtoForSsl", "https");
-    private static final String X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL = ERXProperties.stringForKeyWithDefault("er.extensions.appserver.ERXRequest.xForwardedProtoHeaderKeyForSsl", "x-forwarded-proto");
+    private static final String X_FORWARDED_PROTO_FOR_SSL = ERXProperties.stringForKeyWithDefault(ERXP.X_FORWARDED_PROTO_FOR_SSL.id(), "https");
+    private static final String X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL = ERXProperties.stringForKeyWithDefault(ERXP.X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL.id(), "x-forwarded-proto");
     
     /**
      * Headers to check for the client IP-address 
@@ -167,7 +168,7 @@ public  class ERXRequest extends WORequest {
      * @return true if er.extensions.ERXRequest.secureDisabled is true. Defaults to false.
      */
     public static boolean _isSecureDisabled() {
-        return ERXProperties.booleanForKeyWithDefault("er.extensions.ERXRequest.secureDisabled", false);
+        return ERXProperties.booleanForKeyWithDefault(ERXP.SECURE_DISABLED.id(), false);
     }
     
     /**

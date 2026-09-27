@@ -19,6 +19,7 @@ import com.webobjects.appserver._private.WOStaticURLUtilities;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation._NSStringUtilities;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.foundation.ERXExpiringCache;
@@ -187,7 +188,7 @@ public class ERXJavaScript extends WOHTMLDynamicElement {
 	@Override
 	public void appendChildrenToResponse(WOResponse woresponse, WOContext wocontext) {
 			String script = "";
-			boolean hideInComment = ERXProperties.booleanForKeyWithDefault("er.extensions.ERXJavaScript.hideInComment", true);
+			boolean hideInComment = ERXProperties.booleanForKeyWithDefault(ERXP.JAVASCRIPT_HIDE_IN_COMMENT.id(), true);
 			WOComponent wocomponent = wocontext.component();
 			if(_hideInComment != null) {
 				hideInComment = _hideInComment.booleanValueInComponent(wocomponent);

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **ERXP lists every configuration parameter ERExtensions reads**
+  Each property key ERExtensions reads is a constant in the `ERXP` enum, documented with what
+  the property does and its default, and grouped by the class that reads it. Code references
+  the constant instead of a key written out as a string, so the enum is the one place to find out
+  what can be configured. Nothing is read differently. The public `ERXStats.STATS_ENABLED_KEY` and
+  `STATS_TRACE_COLLECTING_ENABLED_KEY` constants are replaced by `ERXP.STATS_ENABLED` and
+  `ERXP.STATS_TRACE_COLLECTING_ENABLED`. (#81)
+
 - **Obsolete properties are reported, not refused**
   Properties that configure removed features no longer stop the launch. They're listed with the
   reason they're no longer read in an `OBSOLETE PROPERTIES` section of the startup banner, with a

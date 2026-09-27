@@ -21,6 +21,7 @@ import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSSelector;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
 
 /**
@@ -92,7 +93,7 @@ public class ERXFileNotificationCenter {
 		}
 
 		// MS: In case we are touching properties before they're fully materialized or messed up from a failed reload, lets use System.props here
-		_symlinkSupport = Boolean.valueOf(System.getProperty("ERXFileNotificationCenter.symlinkSupport", "true"));
+		_symlinkSupport = Boolean.valueOf(System.getProperty(ERXP.FILE_NOTIFICATION_SYMLINK_SUPPORT.id(), "true"));
 	}
 
 	/**
@@ -106,7 +107,7 @@ public class ERXFileNotificationCenter {
 	 * In seconds. 0 means we will not regularly check files.
 	 */
 	private static int checkFilesPeriod() {
-		return ERXProperties.intForKeyWithDefault("er.extensions.ERXFileNotificationCenter.CheckFilesPeriod", 0);
+		return ERXProperties.intForKeyWithDefault(ERXP.FILE_NOTIFICATION_CHECK_FILES_PERIOD.id(), 0);
 	}
 
 	/**

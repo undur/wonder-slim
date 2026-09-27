@@ -8,6 +8,7 @@ import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSNotification;
 import com.webobjects.foundation.NSNotificationCenter;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
 
 
@@ -51,7 +52,7 @@ public abstract class ERXShutdownHook extends Thread {
 	static final Set<ERXShutdownHook> ALL_HOOKS = new HashSet<>();
 
 	public static void initERXShutdownHookIfEnabled() {
-		if( ERXProperties.booleanForKeyWithDefault( "er.extensions.ERXApplication.enableERXShutdownHook", true ) ) {
+		if( ERXProperties.booleanForKeyWithDefault( ERXP.ENABLE_SHUTDOWN_HOOK.id(), true ) ) {
 			ERXShutdownHook.useMe();
 			ERXShutdownHook.initERXShutdownHook();
 		}

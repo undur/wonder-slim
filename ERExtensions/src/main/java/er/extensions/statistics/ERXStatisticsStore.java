@@ -23,6 +23,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -144,9 +145,9 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 			Thread timerThread = new Thread(this);
 			timerThread.setDaemon(true);
 			timerThread.start();
-			_maximumRequestWarnTime = ERXProperties.longForKeyWithDefault("er.extensions.ERXStatisticsStore.milliSeconds.warn", 2000L);
-			_maximumRequestErrorTime = ERXProperties.longForKeyWithDefault("er.extensions.ERXStatisticsStore.milliSeconds.error", 10000L);
-			_maximumRequestFatalTime = ERXProperties.longForKeyWithDefault("er.extensions.ERXStatisticsStore.milliSeconds.fatal", 5 * 60 * 1000L);
+			_maximumRequestWarnTime = ERXProperties.longForKeyWithDefault(ERXP.STATISTICS_STORE_WARN_MILLIS.id(), 2000L);
+			_maximumRequestErrorTime = ERXProperties.longForKeyWithDefault(ERXP.STATISTICS_STORE_ERROR_MILLIS.id(), 10000L);
+			_maximumRequestFatalTime = ERXProperties.longForKeyWithDefault(ERXP.STATISTICS_STORE_FATAL_MILLIS.id(), 5 * 60 * 1000L);
 		}
 
 		private long time() {

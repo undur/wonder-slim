@@ -192,5 +192,5 @@ public abstract class ERXFrameworkPrincipal {
     	}
     }
 
-    private static final boolean LOG_LIFECYCLE = Boolean.parseBoolean( System.getProperty( "er.extensions.ERXFrameworkPrincipal.logLifecycle", "false" ) );
+    private static final boolean LOG_LIFECYCLE = Boolean.parseBoolean( System.getProperty( ERXP.FRAMEWORK_PRINCIPAL_LOG_LIFECYCLE.id(), "false" ) );
 }
