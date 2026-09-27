@@ -317,12 +317,6 @@ public enum ERXP {
 	 */
 	STATISTICS_STORE_FATAL_MILLIS( "er.extensions.ERXStatisticsStore.milliSeconds.fatal" ),
 
-	// ERXExpiringCache
-	/**
-	 * How often expired entries are removed from ERXExpiringCaches, in milliseconds. Defaults to 5000.
-	 */
-	EXPIRING_CACHE_REAPER_FREQUENCY( "er.extensions.ERXExpiringCache.reaperFrequency" ),
-
 	// ERXFileNotificationCenter
 	/**
 	 * Seconds between checks of watched files for changes, outside development mode (which always checks). Defaults to 0: no checks outside development mode.

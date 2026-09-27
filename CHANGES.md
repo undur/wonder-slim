@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **`ERXExpiringCache` deleted**
+  Its only users were the session caches of `ERXStyleSheet`'s and `ERXJavaScript`'s content modes,
+  which are gone. The `er.extensions.ERXExpiringCache.reaperFrequency` property is reported as
+  obsolete. (#94)
+
 - **`ERXJavaScript` references one script, like `ERXStyleSheet`**
   `filename` (a resource, or a complete URL) and `framework` work as before, rendered in place, and
   other bindings are still passed through as attributes. A bound `type` (such as `module`) now

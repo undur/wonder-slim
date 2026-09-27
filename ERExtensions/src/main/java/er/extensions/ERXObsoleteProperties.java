@@ -131,6 +131,7 @@ public class ERXObsoleteProperties {
 		new ObsoleteProperty( "ognl.webobjects.WOAssociation.shouldThrowExceptions", OGNL ),
 
 		// Other removed features
+		new ObsoleteProperty( "er.extensions.ERXExpiringCache.reaperFrequency", "ERXExpiringCache has been removed." ),
 		new ObsoleteProperty( "er.extensions.ERXJavaScript.hideInComment", "ERXJavaScript no longer renders script content, so there is nothing to hide in a comment." ),
 		new ObsoleteProperty( "er.extensions.appserver.ajax.ERXAjaxSession.logPageReplacementCache", "Renamed to er.extensions.appserver.ajax.ERXAjaxSession.logPageCache." ),
 		new ObsoleteProperty( "er.extensions.maxPageReplacementCacheSize", "The page cache is bounded by WOPageCacheSize (default 30) instead." ),
