@@ -279,12 +279,6 @@ public enum ERXP {
 	 */
 	HYPERLINK_DEFAULT_NO_FOLLOW( "er.extensions.ERXHyperlink.defaultNoFollow" ),
 
-	// ERXJavaScript
-	/**
-	 * The default of ERXJavaScript's {@code hideInComment} binding: wrap inline script content in an HTML comment. Defaults to true.
-	 */
-	JAVASCRIPT_HIDE_IN_COMMENT( "er.extensions.ERXJavaScript.hideInComment" ),
-
 	// ERXNumberFormatter
 	/**
 	 * Characters removed from input before a number is parsed. Defaults to {@code %$}.

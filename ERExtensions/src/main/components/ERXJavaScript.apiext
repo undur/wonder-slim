@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXJavaScript" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Adds a script to the page: a `<script>` tag for a script resource (`filename`, optionally in a `framework`) or a URL (a `filename` that's a complete URL), rendered where the element is.
+
+```html
+<wo:ERXJavaScript filename="app.js" defer />
+<wo:ERXJavaScript filename="https://cdn.example/lib.js" integrity="sha384-…" crossorigin="anonymous" />
+```
+
+Every other attribute is rendered on the `<script>` tag. A bound `type` (such as `module`) replaces the default `text/javascript`. The element has no content: put inline script in a `<script>` tag.]]></doc>
+
+		<binding name="filename">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the script resource, or the script's complete URL.</doc>
+		</binding>
+
+		<binding name="framework">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the framework containing the script resource. The application if not bound.</doc>
+		</binding>
+
+		<binding name="scriptSource">
+			<pull><type>java.lang.String</type></pull>
+			<deprecated>Use `filename` instead.</deprecated>
+			<doc>Older name for `filename`, used only when `filename` isn't bound.</doc>
+		</binding>
+
+		<binding name="scriptFramework">
+			<pull><type>java.lang.String</type></pull>
+			<deprecated>Use `framework` instead.</deprecated>
+			<doc>Older name for `framework`, used only when `framework` isn't bound.</doc>
+		</binding>
+
+		<choose min="1">
+			<binding name="filename"/>
+			<binding name="scriptSource"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

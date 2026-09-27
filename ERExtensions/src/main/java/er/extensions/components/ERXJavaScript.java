@@ -3,270 +3,153 @@ package er.extensions.components;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.appserver.WOActionResults;
-import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.appserver.WODirectAction;
 import com.webobjects.appserver.WOElement;
-import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.appserver.WOSession;
 import com.webobjects.appserver._private.WODynamicElementCreationException;
+import com.webobjects.appserver._private.WODynamicGroup;
 import com.webobjects.appserver._private.WOHTMLDynamicElement;
 import com.webobjects.appserver._private.WOStaticURLUtilities;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation._NSStringUtilities;
 
-import er.extensions.ERXP;
-import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXResponseRewriter;
-import er.extensions.foundation.ERXExpiringCache;
-import er.extensions.foundation.ERXProperties;
 import er.extensions.resources.ERXResourceManagerBase;
 
 /**
- * Modern version of a javascript component. 
- * <ul>
- *   <li> HTML 4 compliant ("script" and attributes lowercased)
- *   <li> hideInComment is ON by default if there is content
- *   <li> can contain script text
- *   <li> can have the script render to an external DA url that is cached in the session
- *   <li> you can specify which framework the script comes from.
- * </ul>
- * @binding scriptSource SRC attribute, either a full URL or the filename of the script 
- * @binding filename (same as scriptSource, but matches ERXStyleSheet)
- * @binding scriptFile the filename of the script when it should be 
- *    included in the page (only for compatibility, simply use the content)
- * @binding scriptFramework name of the framework for the script
- * @binding framework (same as scriptFramework, but matches ERXStyleSheet)
- * @binding scriptString the script text when it should be 
- *    included in the page (only for compatibility, simply use the content)
- * @binding scriptKey if set, the content will get rendered into an external script src
- * @binding hideInComment boolean that specifies if the script content should
- *   be included in HTML comments, true by default of the script tag contains a script
- *   
- * @property er.extensions.ERXJavaScript.hideInComment sets globally if the script
- *   content should be included within HTML comments, defaults to <code>true</code>
+ * Adds a script to the page: a {@code <script>} tag for a script resource ({@code filename}, optionally in a
+ * {@code framework}) or a URL (a {@code filename} that's a complete URL), rendered where the element is.
+ *
+ * @binding filename name of the script resource, or the script's complete URL
+ * @binding framework name of the framework containing the script resource
+ *
+ *          Any other binding is rendered as an attribute of the tag, such as {@code defer}, {@code async},
+ *          {@code integrity} and {@code crossorigin}. A {@code type} binding (such as {@code module}) replaces the
+ *          default {@code text/javascript}.
+ *
+ *          Deprecated binding names, still accepted so older templates keep working, each used only when its
+ *          replacement isn't bound: {@code scriptSource} (use {@code filename}) and {@code scriptFramework} (use
+ *          {@code framework}).
  */
+
 public class ERXJavaScript extends WOHTMLDynamicElement {
 
-    @SuppressWarnings("unchecked")
-	private static ERXExpiringCache<Object, WOResponse> cache(WOSession session) {
-    	ERXExpiringCache<Object, WOResponse> cache = (ERXExpiringCache<Object, WOResponse>) session.objectForKey("ERXJavaScript.cache");
-    	if(cache == null) {
-    		cache = new ERXExpiringCache<>(60);
-    		session.setObjectForKey(cache, "ERXJavaScript.cache");
-    	}
-    	return cache;
-    }
+	private static final Logger log = LoggerFactory.getLogger( ERXJavaScript.class );
 
-    public static class Script extends WODirectAction {
+	private final WOAssociation _filename;
+	private final WOAssociation _framework;
+	private final boolean _typeBound;
 
-    	public Script(WORequest worequest) {
-			super(worequest);
-    	}
+	public ERXJavaScript( final String name, final NSDictionary<String, WOAssociation> associations, final WOElement template ) {
+		super( "script", associations, null );
 
-    	@Override
-		public WOActionResults performActionNamed(String name) {
-    		WOResponse response = ERXJavaScript.cache(session()).objectForKey(name);
-    		return response;
-    	}
-    }
-    
-	private static final Logger log = LoggerFactory.getLogger(ERXJavaScript.class);
-
-	WOAssociation _framework;
-	WOAssociation _scriptFramework;
-	WOAssociation _filename;
-	WOAssociation _scriptFile;
-	WOAssociation _scriptString;
-	WOAssociation _scriptSource;
-	WOAssociation _scriptKey;
-	WOAssociation _hideInComment;
-	WOAssociation _language;
-
-	public ERXJavaScript(String s, NSDictionary<String, WOAssociation> nsdictionary, WOElement woelement) {
-		super("script", nsdictionary, woelement);
-		_scriptFile = _associations.removeObjectForKey("scriptFile");
-		_scriptString = _associations.removeObjectForKey("scriptString");
-		_scriptSource = _associations.removeObjectForKey("scriptSource");
-		_filename = _associations.removeObjectForKey("filename");
-		_language = _associations.removeObjectForKey("language");
-		_scriptKey = _associations.removeObjectForKey("scriptKey");
-		_hideInComment = _associations.removeObjectForKey("hideInComment");
-		_scriptFramework = _associations.removeObjectForKey("scriptFramework");
-		_framework = _associations.removeObjectForKey("framework");
-		if((_scriptFile != null && _scriptString != null) 
-				|| (_scriptFile != null && (_scriptSource != null || _filename != null)) 
-				|| (_scriptString != null && (_scriptSource != null || _filename != null))) {
-			throw new WODynamicElementCreationException("<" + getClass().getName() + "> Only one of 'scriptFile' or 'scriptString' or 'scriptSource/filename' attributes can be specified.");
+		if( hasContent( template ) ) {
+			throw new WODynamicElementCreationException( "<" + getClass().getName() + "> no longer renders its content as a script. Put the script in a file (filename/framework) or in a <script> tag." );
 		}
-		if (_scriptFramework != null && _framework != null) {
-			throw new WODynamicElementCreationException("<" + getClass().getName() + "> Only one of 'scriptFramework' or 'framework' can be specified.");
+
+		refuse( "scriptKey", "Rendering the element's content as a script cached in the session has been removed. Put the script in a file (filename/framework) or in a <script> tag." );
+		refuse( "scriptString", "Put the script in a <script> tag." );
+		refuse( "scriptFile", "Reference the file with filename/framework, or put the script in a <script> tag." );
+		refuse( "hideInComment", "Script content is no longer rendered." );
+
+		// Each binding with its deprecated older name, used only when the current one isn't bound
+		_filename = removeBinding( "filename", "scriptSource" );
+		_framework = removeBinding( "framework", "scriptFramework" );
+
+		// Obsolete in HTML since 4.01, and never rendered by this element
+		_associations.removeObjectForKey( "language" );
+
+		if( _filename == null ) {
+			throw new WODynamicElementCreationException( "<" + getClass().getName() + "> 'filename' must be bound." );
 		}
-		if (_scriptSource != null && _filename != null) {
-			throw new WODynamicElementCreationException("<" + getClass().getName() + "> Only one of 'scriptFile' or 'filename' can be specified.");
+
+		_typeBound = _associations.objectForKey( "type" ) != null;
+	}
+
+	/**
+	 * @return true if the element has content. A template parser may pass an empty group for an element without any
+	 *         (Parsley does, where WO's own parser passes null).
+	 */
+	private static boolean hasContent( final WOElement template ) {
+		if( template == null ) {
+			return false;
+		}
+
+		return !(template instanceof WODynamicGroup group) || group.hasChildrenElements();
+	}
+
+	/**
+	 * @return The association for the binding, or for its deprecated older name if the binding isn't bound. Both are removed, so neither is rendered as an attribute.
+	 */
+	private WOAssociation removeBinding( final String name, final String deprecatedName ) {
+		final WOAssociation association = _associations.removeObjectForKey( name );
+		final WOAssociation deprecatedAssociation = _associations.removeObjectForKey( deprecatedName );
+		return association != null ? association : deprecatedAssociation;
+	}
+
+	/**
+	 * Throws if the named binding, which no longer exists, is bound
+	 */
+	private void refuse( final String bindingName, final String explanation ) {
+		if( _associations.objectForKey( bindingName ) != null ) {
+			throw new WODynamicElementCreationException( "<" + getClass().getName() + "> The '" + bindingName + "' binding has been removed. " + explanation );
 		}
 	}
 
 	@Override
-	public void appendAttributesToResponse(WOResponse woresponse, WOContext wocontext) {
-		WOComponent wocomponent = wocontext.component();
-		woresponse._appendContentAsciiString(" type=\"text/javascript\"");
-		
+	public void appendToResponse( final WOResponse response, final WOContext context ) {
+		_appendOpenTagToResponse( response, context );
+		_appendCloseTagToResponse( response, context );
+	}
+
+	@Override
+	public void appendAttributesToResponse( final WOResponse response, final WOContext context ) {
+		final WOComponent component = context.component();
+
+		if( !_typeBound ) {
+			response._appendContentAsciiString( " type=\"text/javascript\"" );
+		}
+
+		final String filename = (String)_filename.valueInComponent( component );
 		String framework = null;
-		String scriptName = null;
-		
 		String src = null;
-		if(_scriptSource != null || _filename != null) {
-			String srcFromBindings;
-			if (_scriptSource != null) {
-				srcFromBindings = (String)_scriptSource.valueInComponent(wocomponent);
+
+		if( filename != null ) {
+			if( !WOStaticURLUtilities.isRelativeURL( filename ) ) {
+				src = filename;
+			}
+			else if( WOStaticURLUtilities.isFragmentURL( filename ) ) {
+				log.warn( "relative fragment URL {}", filename );
 			}
 			else {
-				srcFromBindings = (String) _filename.valueInComponent(wocomponent);
-			}
-			if(srcFromBindings != null) {
-				if(!WOStaticURLUtilities.isRelativeURL(srcFromBindings)) {
-					src = srcFromBindings;
-				} else {
-					if(!WOStaticURLUtilities.isFragmentURL(srcFromBindings)) {
-						if(_scriptFramework != null) {
-							framework = (String) _scriptFramework.valueInComponent(wocomponent);
-						}
-						else if (_framework != null) {
-							framework = (String) _framework.valueInComponent(wocomponent);
-						}
-						scriptName = srcFromBindings;
-						src = wocontext._urlForResourceNamed(srcFromBindings, framework, true);
-						if(src == null) {
-							src = wocomponent.baseURL() + "/" + srcFromBindings;
-						}
-						else if (ERXResourceManagerBase._shouldGenerateCompleteResourceURL(wocontext)) {
-							src = ERXResourceManagerBase._completeURLForResource(src, null, wocontext);
-						}
-					} else {
-						log.warn("relative fragment URL {}", srcFromBindings);
-					}
+				framework = _framework != null ? (String)_framework.valueInComponent( component ) : null;
+				src = context._urlForResourceNamed( filename, framework, true );
+
+				if( src == null ) {
+					src = component.baseURL() + "/" + filename;
+				}
+				else if( ERXResourceManagerBase._shouldGenerateCompleteResourceURL( context ) ) {
+					src = ERXResourceManagerBase._completeURLForResource( src, null, context );
 				}
 			}
 		}
-		
-		Object key = null;
-		if(src == null && _scriptKey != null) {
-			key = _scriptKey.valueInComponent(wocomponent);
-			if(key != null) {
-				ERXExpiringCache<Object, WOResponse> cache = ERXJavaScript.cache(wocontext.session());
-				boolean render = cache.isStale(key);
-				render |= ERXApplication.isDevelopmentModeSafe();
-				if(render) {
-					WOResponse newresponse = new WOResponse();
-					super.appendChildrenToResponse(newresponse, wocontext);
-					newresponse.setHeader("text/javascript", "content-type");
-					cache.setObjectForKey(newresponse, key);
-				}
-				src = wocontext.directActionURLForActionNamed(Script.class.getName() + "/" + key, null);
-			}
+
+		if( src != null ) {
+			response._appendContentAsciiString( " src=\"" );
+			response.appendContentString( src );
+			response.appendContentCharacter( '"' );
 		}
-		
-		if(src != null) {
-			woresponse._appendContentAsciiString(" src=\"");
-			woresponse.appendContentString(src);
-			woresponse.appendContentCharacter('"');
-		}
-		
-		super.appendAttributesToResponse(woresponse, wocontext);
-		
-		if (scriptName != null) {
-			ERXResponseRewriter.resourceAddedToHead(wocontext, framework, scriptName);
+
+		super.appendAttributesToResponse( response, context );
+
+		if( src != null && WOStaticURLUtilities.isRelativeURL( filename ) ) {
+			ERXResponseRewriter.resourceAddedToHead( context, framework, filename );
 		}
 	}
 
-
-	@Override
-	public void appendChildrenToResponse(WOResponse woresponse, WOContext wocontext) {
-			String script = "";
-			boolean hideInComment = ERXProperties.booleanForKeyWithDefault(ERXP.JAVASCRIPT_HIDE_IN_COMMENT.id(), true);
-			WOComponent wocomponent = wocontext.component();
-			if(_hideInComment != null) {
-				hideInComment = _hideInComment.booleanValueInComponent(wocomponent);
-			}
-			if(hideInComment) {
-				woresponse._appendContentAsciiString("<!--");
-			}
-			woresponse.appendContentCharacter('\n');
-			if(_scriptFile != null) {
-				String filename = (String) _scriptFile.valueInComponent(wocomponent);
-				if(filename != null) {
-					String framework = null;
-					if(_scriptFramework != null) {
-						framework = (String) _scriptFramework.valueInComponent(wocomponent);
-					}
-					else if (_framework != null) {
-						framework = (String) _framework.valueInComponent(wocomponent);
-					}
-					java.net.URL url = WOApplication.application().resourceManager().pathURLForResourceNamed(filename, framework, wocontext._languages());
-					if(url == null) {
-						url = wocontext.component()._componentDefinition().pathURLForResourceNamed(filename, framework, wocontext._languages());
-					}
-					if(url == null) {
-						throw new WODynamicElementCreationException("<" + getClass().getName() + "> : cannot find script file '" + filename + "'");
-					}
-					script = _NSStringUtilities.stringFromPathURL(url);
-					if (ERXResourceManagerBase._shouldGenerateCompleteResourceURL(wocontext)) {
-						script = ERXResourceManagerBase._completeURLForResource(script, null, wocontext);
-					}
-				}
-				woresponse.appendContentString(script);
-			} else if(_scriptString != null) {
-				Object obj1 = _scriptString.valueInComponent(wocomponent);
-				if(obj1 != null) {
-					script = obj1.toString();
-				}
-				woresponse.appendContentString(script);
-			} else {
-				super.appendChildrenToResponse(woresponse, wocontext);
-			}
-			woresponse.appendContentCharacter('\n');
-			if(hideInComment) {
-				woresponse._appendContentAsciiString("//-->");
-			}
-	}
-
-	@Override
-	public void appendToResponse(WOResponse woresponse, WOContext wocontext) {
-		if(wocontext == null || woresponse == null) {
-			return;
-		}
-		String s = elementName();
-		if(s != null) {
-			_appendOpenTagToResponse(woresponse, wocontext);
-		}
-		if(_scriptSource == null && _filename == null && ( hasChildrenElements() || _scriptString != null)
-				&& _scriptKey == null) {
-			appendChildrenToResponse(woresponse, wocontext);
-		}
-		if(s != null) {
-			_appendCloseTagToResponse(woresponse, wocontext);
-		}
-	}
-    
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append('<');
-		sb.append(getClass().getName());
-		sb.append(" scriptFile=" + _scriptFile);
-		sb.append(" scriptString=" + _scriptString);
-		sb.append(" scriptFramework=" + _scriptFramework);
-		sb.append(" framework=" + _framework);
-		sb.append(" scriptSource=" + _scriptSource);
-		sb.append(" filename=" + _filename);
-		sb.append(" hideInComment=" + _hideInComment);
-		sb.append(" language=" + _language);
-		sb.append('>');
-		return sb.toString();
+		return "<" + getClass().getName() + " filename=" + _filename + " framework=" + _framework + ">";
 	}
 }

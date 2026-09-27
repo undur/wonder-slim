@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **`ERXJavaScript` references one script, like `ERXStyleSheet`**
+  `filename` (a resource, or a complete URL) and `framework` work as before, rendered in place, and
+  other bindings are still passed through as attributes. A bound `type` (such as `module`) now
+  replaces the default `text/javascript` instead of adding a second `type`. The content modes are
+  gone: inline content, `scriptString`, `scriptFile`, `hideInComment` and the session-cached
+  `scriptKey` (with its direct action). A template using them throws when parsed, with a message
+  naming the replacement: a script file or a `<script>` tag. The
+  `er.extensions.ERXJavaScript.hideInComment` property is reported as obsolete. The older names
+  `scriptSource` and `scriptFramework` still work, deprecated, each used only when `filename` or
+  `framework` isn't bound. The bindings are documented in a new `ERXJavaScript.apiext`. (#93)
+
 - **`ERXStyleSheet` is a dynamic element**
   Templates are unchanged: `filename`/`framework` or `href`, and `media` and `inline`, work as before,
   and the `<link>` still goes in the head (or inline in Ajax responses), once per page. Other
