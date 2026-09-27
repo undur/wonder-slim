@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2026-09-27 (8.0.9)
 
 - **`ERXStats.logStatisticsForOperation()` sorts by its operation again**
   The logged entries are ordered by the given operation ("sum", "count", "min", "max", "avg" or
