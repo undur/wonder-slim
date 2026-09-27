@@ -157,20 +157,6 @@ public class ERXComponentUtilities {
 	}
 	
 	/**
-	 * Returns the association for a binding with the given name. If there is
-	 * no such association <code>null</code> will be returned.
-	 * 
-	 * @param name binding name
-	 * @param associations array of associations
-	 * @return association for given binding or <code>null</code>
-	 * 
-	 * FIXME: Uh… This is just associations.get(name) // Hugi 2022-03-12
-	 */
-	public static WOAssociation bindingNamed(String name, NSDictionary<String, WOAssociation> associations) {
-		return associations.objectForKey(name);
-	}
-	
-	/**
 	 * Checks if the association for a binding with the given name can assign
 	 * values at runtime.
 	 * 
@@ -180,7 +166,7 @@ public class ERXComponentUtilities {
 	 */
 	public static boolean bindingIsSettable(String name, NSDictionary<String, WOAssociation> associations) {
 		boolean isSettable = false;
-		WOAssociation association = bindingNamed(name, associations);
+		WOAssociation association = associations.objectForKey(name);
 		if (association != null) {
 			isSettable = association.isValueSettable();
 		}
@@ -196,7 +182,7 @@ public class ERXComponentUtilities {
 	 * @param component component to set the value in
 	 */
 	public static void setValueForBinding(Object value, String name, NSDictionary<String, WOAssociation> associations, WOComponent component) {
-		WOAssociation association = bindingNamed(name, associations);
+		WOAssociation association = associations.objectForKey(name);
 		if (association != null) {
 			association.setValue(value, component);
 		}
@@ -231,7 +217,7 @@ public class ERXComponentUtilities {
 	 * @return retrieved value or <code>null</code>
 	 */
 	public static Object valueForBinding(String name, NSDictionary<String, WOAssociation> associations, WOComponent component) {
-		WOAssociation association = bindingNamed(name, associations);
+		WOAssociation association = associations.objectForKey(name);
 		if (association != null) {
 			return association.valueInComponent(component);
 		}
@@ -267,7 +253,7 @@ public class ERXComponentUtilities {
 	 * @return retrieved string value or <code>null</code>
 	 */
 	public static String stringValueForBinding(String name, NSDictionary<String, WOAssociation> associations, WOComponent component) {
-		WOAssociation association = bindingNamed(name, associations);
+		WOAssociation association = associations.objectForKey(name);
 		if (association != null) {
 			return (String) association.valueInComponent(component);
 		}
@@ -285,7 +271,7 @@ public class ERXComponentUtilities {
 	 * @return retrieved boolean value or default value
 	 */
 	public static boolean booleanValueForBinding(String name, boolean defaultValue, NSDictionary<String, WOAssociation> associations, WOComponent component) {
-		WOAssociation association = bindingNamed(name, associations);
+		WOAssociation association = associations.objectForKey(name);
 		if (association != null) {
 			return association.booleanValueInComponent(component);
 		}
@@ -316,7 +302,7 @@ public class ERXComponentUtilities {
 	 * @return retrieved int value or default value
 	 */
 	public static int integerValueForBinding(String name, int defaultValue, NSDictionary<String, WOAssociation> associations, WOComponent component) {
-		WOAssociation association = bindingNamed(name, associations);
+		WOAssociation association = associations.objectForKey(name);
 		if (association != null) {
 			Object value = association.valueInComponent(component);
 			return ERXValueUtilities.intValueWithDefault(value, defaultValue);
@@ -337,7 +323,7 @@ public class ERXComponentUtilities {
 	 * @return retrieved array value or default value
 	 */
 	public static <T> NSArray<T> arrayValueForBinding(String name, NSArray<T> defaultValue, NSDictionary<String, WOAssociation> associations, WOComponent component) {
-		WOAssociation association = bindingNamed(name, associations);
+		WOAssociation association = associations.objectForKey(name);
 		if (association != null) {
 			Object value = association.valueInComponent(component);
 			return ERXValueUtilities.arrayValueWithDefault(value, defaultValue);

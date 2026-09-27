@@ -104,17 +104,6 @@ public abstract class ERXDynamicElement extends WODynamicGroup {
 	}
 
 	/**
-	 * Returns the association for a binding with the given name. If there is
-	 * no such association <code>null</code> will be returned.
-	 * 
-	 * @param name binding name
-	 * @return association for given binding or <code>null</code>
-	 */
-	public WOAssociation bindingNamed(String name) {
-		return ERXComponentUtilities.bindingNamed(name, associations());
-	}
-	
-	/**
 	 * Checks if the association for a binding with the given name can assign
 	 * values at runtime.
 	 * 

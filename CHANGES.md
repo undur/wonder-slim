@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **`bindingNamed()` removed**
+  `ERXComponentUtilities.bindingNamed(name, associations)` and `ERXDynamicElement.bindingNamed(name)`
+  were second names for a dictionary lookup. Use `associations.objectForKey(name)`, or
+  `associations().objectForKey(name)` in a dynamic element. (#84)
+
 - **Response compression fixes**
   Responses worth compressing now carry `Vary: Accept-Encoding`, so caches don't hand gzipped
   content to clients that can't read it. Responses already encoded in any coding are left alone. A
