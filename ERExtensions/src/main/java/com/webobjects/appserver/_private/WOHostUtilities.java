@@ -45,7 +45,8 @@ import er.extensions.foundation.ERXProperties;
  * 
  * Addition by hugi, 2025-04-26:
  * If the '...localhostips' property is not set, we now attempt to automatically add all the server's configured ipv4 addresses as local IPs.
- * This means admin actions should work by default when invoked from any of the server's IPs - but you can choose to _restrict_ allowed IPs by providing the property.
+ * This means admin actions should work by default when invoked from any of the server's IPs - but you can choose to limit the automatic additions by providing the property.
+ * (The local host's own addresses, localhost and 127.0.0.1 are always included.)
  */
 
 public class WOHostUtilities

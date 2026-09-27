@@ -59,6 +59,10 @@ public abstract class ERXFrameworkPrincipal {
 
     private static final List<ERXFrameworkPrincipal> launchingFrameworks = new ArrayList<>();
 
+    /**
+     * NSNotificationCenter holds its observers weakly, so this reference is what keeps the observer alive until the
+     * notifications it waits for are posted
+     */
     private static Observer observer;
 
     public static class Observer {
@@ -70,7 +74,7 @@ public abstract class ERXFrameworkPrincipal {
 
         /**
          * Invoked when WOApplication posts 'ApplicationDidCreateNotification' (after the WOApplication has been constructed, but before the application is ready for accepting requests).
-         * Handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
+         * Stops observing that notification.
          */
         public final void finishInitialization(NSNotification n) {
             NSNotificationCenter.defaultCenter().removeObserver(this, ERXNotification.ApplicationDidCreateNotification.id(), null);
@@ -85,7 +89,7 @@ public abstract class ERXFrameworkPrincipal {
         
         /**
          * Invoked when WOApplication posts 'ApplicationDidFinishInitializationNotification'.
-         * Handles de-registering for notifications and releasing any references to observer so that it can be released for garbage collection.
+         * Stops observing notifications.
          */
         public final void didFinishInitialization(NSNotification n) {
             NSNotificationCenter.defaultCenter().removeObserver(this);

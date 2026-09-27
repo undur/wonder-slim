@@ -3,7 +3,8 @@ package er.extensions;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * Interfaces with the logging implementation. Currently we just delegate
+ * Interfaces with the logging implementation. Currently we just delegate to a bridge class in the ERLoggingReload4j
+ * module, looked up by name, since ERExtensions doesn't depend on that module.
  */
 
 public class ERXLoggingSupport {

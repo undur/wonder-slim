@@ -23,7 +23,13 @@ import com.webobjects.appserver.WOApplication;
 import er.extensions.foundation.ERXProperties;
 
 /**
- * Access point for Monitor operations that get info and/or perform admin operations
+ * Access point for Monitor operations that get info and/or perform admin operations. Currently one: a thread dump,
+ * {@code /monitor/jstack}.
+ *
+ * Served by the JDK's HTTP server on a port of its own (the application's port + 10000), on virtual threads, rather
+ * than by a request handler: it doesn't go through WO's request dispatch, so it still answers when every request
+ * thread is stuck, which is when a thread dump is needed. It starts only when WOMonitorServicePassword is set, and every
+ * request must carry that password in the monitor-service-password header.
  */
 
 public class ERXMonitorServer {

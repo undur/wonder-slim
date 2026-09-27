@@ -32,8 +32,9 @@ import er.extensions.foundation.ERXProperties;
  * <ul>
  * <li>will dump warning and error messages when a request takes too long, complete with stack traces of all threads.</li>
  * <li>logs fatal messages that occurred before a request finished processing.</li>
- * <li>fixes an incompatibility with 5.4.</li>
- * <li>fixes wrong computation of average session memory</li>
+ * <li>fixes an incompatibility with 5.4: the statistics contain java.util collections where NS ones are expected (see
+ * {@link #statistics()}).</li>
+ * <li>fixes wrong computation of average session memory (see {@link #getAverageSessionMemory()}).</li>
  * </ul>
  *
  * <p>In order to turn on this functionality, you must make this call in your Application null constructor:
@@ -376,6 +377,13 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 
 	}
 
+	/**
+	 * Since 5.4, WOStatisticsStore also serves JMX (WOStatisticsStoreMBean), with getters such as getMemoryUsage(),
+	 * getPagesStatistics() and getLastSessionStatistics() that return HashMap and ArrayList. KVC prefers a get&lt;Key&gt;()
+	 * method to &lt;key&gt;(), so valueForKey("memoryUsage"), and with it the statistics dictionary, hands out java.util
+	 * collections where the statistics pages expect NSDictionary and NSArray. We convert them back (top level only), here
+	 * and in {@link #valueForKey(String)}.
+	 */
 	@Override
 	public NSDictionary statistics() {
 		NSDictionary stats = super.statistics();
@@ -389,6 +397,10 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 		return stats;
 	}
 
+	/**
+	 * The live sessions, which WOStatisticsStore doesn't keep: added when a session is created, removed when it
+	 * terminates. Read by the statistics pages and {@link #getAverageSessionMemory()}.
+	 */
 	protected NSMutableArray<WOSession> sessions = new NSMutableArray<>();
 
 	@Override
@@ -473,6 +485,12 @@ public class ERXStatisticsStore extends WOStatisticsStore {
 		return fix(result);
 	}
 
+	/**
+	 * WO's version reported wrong and even negative per-session figures: it averages the change since startup of every
+	 * memory figure, free memory included. We take the memory used by sessions to be the drop in free memory since
+	 * startup, divided by the number of live sessions. The startup figures are private to WOStatisticsStore, hence the
+	 * reflection on _initializationMemory.
+	 */
 	@Override
 	public HashMap getAverageSessionMemory() {
 		NSMutableDictionary<String, Long> avg = new NSMutableDictionary<>();

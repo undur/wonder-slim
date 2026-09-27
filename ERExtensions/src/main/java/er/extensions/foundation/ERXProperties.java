@@ -855,6 +855,8 @@ public class ERXProperties {
 
     private static void systemPropertiesChanged() {
         _cache.clear();
+        // NSProperties (ERFoundation's) caches property values and clears the cache on this notification; without it,
+        // properties read through NSProperties would keep their old values
         NSNotificationCenter.defaultCenter().postNotification(NSProperties.PropertiesDidChange, null, null);
     }
 

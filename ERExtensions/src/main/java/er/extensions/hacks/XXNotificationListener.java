@@ -39,6 +39,7 @@ public class XXNotificationListener {
 	}
 	
 	public static class LifeCycleObserver {
+		// NSNotificationCenter holds its observers weakly: without a reference of our own they're collected, and stop observing
 		private static final Set<LifeCycleObserver> OBSERVERS = new HashSet<>();
 		
 		public LifeCycleObserver() {

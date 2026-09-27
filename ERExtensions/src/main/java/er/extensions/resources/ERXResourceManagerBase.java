@@ -81,6 +81,10 @@ public class ERXResourceManagerBase extends WOResourceManager {
 	
 	/**
 	 * @return Dictionary mapping file extensions to mimeTypes. Overridden to include our added mimeTypes
+	 *
+	 * Beyond content types, WO uses this dictionary in WOApplication.handlerForRequest(): a URL without a registered
+	 * request handler key whose extension is in it is taken for a static resource. So our added types must be here too,
+	 * not only in contentTypeForResourceNamed() (see ERXRoutingApplication.handlerForRequest()).
 	 */
 	@Override
 	public NSDictionary _contentTypesDictionary() {
@@ -111,6 +115,7 @@ public class ERXResourceManagerBase extends WOResourceManager {
 		final boolean requestIsSecure = ERXRequest.isRequestSecure(context.request());
 		final boolean resourceIsSecure = (secure == null) ? requestIsSecure : secure.booleanValue();
 	
+		// scheme://host[:port] as ERXRequest builds it for complete URLs (see ERXRequest._completeURLPrefix())
 		final StringBuffer sb = new StringBuffer();
 		final String serverPortStr = context.request()._serverPort();
 		final int serverPort = (serverPortStr == null) ? 0 : Integer.parseInt(serverPortStr);

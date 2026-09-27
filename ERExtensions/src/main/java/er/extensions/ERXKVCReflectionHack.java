@@ -11,6 +11,13 @@ import sun.misc.Unsafe;
 /**
  * Hack that allows KVC to access methods on private classes that implement public interfaces,
  * examples being the List implementations returned by methods like List.of() and Stream.toList().
+ *
+ * WO's KVC invokes the Method it finds on the object's runtime class. When that class isn't public, the invocation
+ * fails with IllegalAccessException, even for a public method of a public interface ({@code valueForKey("size")} on a
+ * {@code List.of()}). Our accessor retries after setAccessible(true). For the JDK's own classes that only succeeds when
+ * their package is opened to the application (--add-opens java.base/java.util=ALL-UNNAMED; without it, setAccessible
+ * throws InaccessibleObjectException). The launch configuration vermilingua generates opens java.util, java.time and
+ * java.lang. Without the flags, the hack only helps with non-public classes outside the JDK.
  */
 
 public class ERXKVCReflectionHack {
@@ -74,7 +81,8 @@ public class ERXKVCReflectionHack {
 
 	/**
 	 * A pretty horrifying way to to set NSKeyValueCoding's default value accessor (which is final and static, so needs workarounds to be set).
-	 * We can assume that this way of hacking in the value accessor will stop working sometime soon after JDK 25, but by then we'll hopefully have a better solution.
+	 * Unsafe's memory access methods are deprecated for removal (JEP 471): the JVM already warns when they're used, and a
+	 * future JDK will refuse them, so this needs a replacement before then.
 	 * 
 	 * @see https://stackoverflow.com/questions/61141836/change-static-final-field-in-java-12
 	 * @see https://openjdk.org/jeps/471

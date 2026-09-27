@@ -21,7 +21,7 @@ import er.extensions.appserver.ERXLocale;
 
 /**
  * An extension to the number formatter. It
- * will strip out the characters '%$,' when parsing
+ * will strip out the characters '%$' (er.extensions.ERXNumberFormatter.ignoredChars) when parsing
  * a string and can scale values by setting a pattern like 
  * <code>(/1024=)0.00 KB</code> which will divide the actual value by 1024 or
  * <code>(*60;4=)0.00</code> which will multiply the actual value by 60. 
@@ -186,6 +186,9 @@ public class ERXNumberFormatter extends NSNumberFormatter {
         }
         String filteredString = new String(filteredChars, 0, count);
         Object result = super.parseObject(filteredString);
+        // NSNumberFormatter parses a zero with decimals ("0.00000000") as a zero with that scale (0E-8), and formatting
+        // such a value never returns. A parse followed by a format (an in-place editor, a text field's round trip)
+        // would hang the request, so a parsed zero is always plain BigDecimal.ZERO.
         if (result instanceof BigDecimal && ((BigDecimal) result).signum() == 0) {
         	result = BigDecimal.ZERO;
         }
@@ -218,7 +221,7 @@ public class ERXNumberFormatter extends NSNumberFormatter {
      		newValue = performFormat(newValue);
      		value = newValue;
     	}
-    	// handling for NaN and Infinity
+    	// NaN and the infinities: NSNumberFormatter throws NumberFormatException on them, so they get strings of their own
     	if (value instanceof Double) {
     		Double doubleValue = (Double) value;
     		if (doubleValue.isNaN()) {
