@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **`ERXErrorPage` documented, and its session-expiry helper fixed**
+  `ERXErrorPage` is a general-purpose error page for applications:
+  `ERXErrorPage.errorWithMessageAndStatusCode(message, context, status)` shows a message (HTML) on
+  the framework's error page layout, with a button back to the application.
+  `handleSessionRestorationErrorInContext(context)`, for an application's own override, no longer
+  links to a hardcoded `/Apps` path; the page's button leads back instead. The layout,
+  `ERXErrorLayout`, is documented for error pages of your own, with a new `.api` and `.apiext`. (#119)
+
 - **The dead "all bundles loaded" startup path is gone**
   `ERXExtensions` observed `NSBundleAllBundlesLoaded` to load the configuration, a notification
   nothing posts any more, so that code never ran. The configuration is loaded, as it has been all

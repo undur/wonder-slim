@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXErrorLayout" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[The layout of the framework's error pages, for error pages of your own: a whole HTML page with a centered card, an icon, a heading, the content, and the application's name. `ERXErrorPage`, and the pages WebObjects shows when a session has expired, a page can't be restored or a session can't be created, are built on it.
+
+```html
+<wo:ERXErrorLayout title="Not found" heading="That page doesn't exist">
+	<p>The link may be old, or mistyped.</p>
+	<p class="actions"><wo:link directActionName="default" class="button">Return to the front page</wo:link></p>
+</wo:ERXErrorLayout>
+```
+
+It's self-contained (inline CSS and icon, no resources or scripts), so it renders even when what went wrong is the resources. Inside the content, `class="muted"` gives secondary text, `class="actions"` a paragraph of actions and `class="button"` a button.]]></doc>
+
+		<binding name="title">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The document's title. The heading, if not bound.</doc>
+		</binding>
+
+		<binding name="heading">
+			<pull><type>java.lang.String</type></pull>
+			<default>Something went wrong</default>
+			<doc>The card's heading.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>
