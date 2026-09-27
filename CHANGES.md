@@ -4,24 +4,46 @@
 
 ## 2026-09-27 (8.0.9)
 
-- **`ERXStats.logStatisticsForOperation()` sorts by its operation again**
-  The logged entries are ordered by the given operation ("sum", "count", "min", "max", "avg" or
-  "key"), ascending. An unknown operation throws. (#104)
+- **`dateformat` formats java.time values and takes `DateTimeFormatter` patterns**
+  `ERXWOString`'s `dateformat` now formats `LocalDate`, `LocalDateTime`, `ZonedDateTime`, `Instant`
+  and every other java.time value. The binding takes either syntax: an `NSTimestampFormatter` pattern
+  (`%d.%m.%Y`, recognised by a `%` outside quoted text) is translated to its `DateTimeFormatter`
+  equivalent, covering all of `NSTimestampFormatter`'s conversions including the locale's `%x`, `%X`
+  and `%c`, and renders exactly as `NSTimestampFormatter` would, so templates keep their patterns when
+  a model moves to java.time. A `DateTimeFormatter` pattern (`dd.MM.yyyy`) is used as is. `formatter` also accepts a
+  `DateTimeFormatter`. The formatters are cached and shared, since they're thread-safe. A pattern that
+  doesn't fit the value (a time on a `LocalDate`) throws, as does an unknown conversion, which
+  `NSTimestampFormatter` silently renders as `%`. `NSTimestamp` values format exactly as before.
+  The logic lives in `ERXDateTimeFormatters`. (#86)
 
-- **`ERXNumberFormatter` factor patterns round only as the pattern says**
-  A pattern dividing by a factor without an explicit scale, like `(/1024=)0.00 KB`, now divides at
-  full precision and leaves the rounding to the pattern. Previously the division rounded to the
-  value's own scale (or 4 digits for whole numbers), so 1500.5 displayed as `1.50 KB` rather than
-  `1.47 KB`. (#103)
+- **Concurrent request handling is on by default**
+  ERExtensions' Properties now set `WOAllowsConcurrentRequestHandling=true`. With WebObjects' own
+  default (`false`) and a multithreaded adaptor such as Jetty, an instance handles one component,
+  direct action or route request at a time, for all users. An application that relies on requests
+  being serialised sets the property to `false` at launch or in its Properties. Requests for the
+  same session are still serialised while their session is checked out. (#91)
 
-- **`ERXRequest.remoteAddress(WORequest)`, one way to get the client's address**
-  Checks the address a WO adaptor passes on (`x-webobjects-remote-addr`, `remote_addr`,
-  `remote_host`, `pc-remote-addr`), then the first address in `x-forwarded-for`, then the
-  connection's address, else null. `remoteHostAddress()` returns the same, or `"UNKNOWN"`. It
-  no longer prefers the connection's address under direct connect (behind a proxy that's the
-  proxy's) or returns the whole `x-forwarded-for` list, and no longer reads `remote_user`, which is
-  a user name. `ERXHTTPUtilities` is removed: use `ERXRequest.remoteAddress(request)` in place of
-  `ERXHTTPUtilities.ipAddressFromRequest(request)`. (#102)
+- **`ERXStyleSheet` is a dynamic element**
+  Templates are unchanged: `filename`/`framework` or `href`, and `media` and `inline`, work as before,
+  and the `<link>` still goes in the head (or inline in Ajax responses), once per page. Other
+  bindings are now passed through as attributes of the tag, such as `integrity` and `crossorigin`
+  for a CDN `href`. The rarely used mode that rendered the element's content into a stylesheet
+  cached in the session (the `key` binding) is gone. A template using it throws when parsed, with a
+  message naming the replacement: a stylesheet file or a `<style>` tag. The older binding names
+  `styleSheetName`, `styleSheetFrameworkName` and `styleSheetUrl` still work, deprecated, each used
+  only when `filename`, `framework` or `href` isn't bound. The element's bindings are documented in
+  a new `ERXStyleSheet.apiext`. (#92)
+
+- **`ERXJavaScript` references one script, like `ERXStyleSheet`**
+  `filename` (a resource, or a complete URL) and `framework` work as before, rendered in place, and
+  other bindings are still passed through as attributes. A bound `type` (such as `module`) now
+  replaces the default `text/javascript` instead of adding a second `type`. The content modes are
+  gone: inline content, `scriptString`, `scriptFile`, `hideInComment` and the session-cached
+  `scriptKey` (with its direct action). A template using them throws when parsed, with a message
+  naming the replacement: a script file or a `<script>` tag. The
+  `er.extensions.ERXJavaScript.hideInComment` property is reported as obsolete. The older names
+  `scriptSource` and `scriptFramework` still work, deprecated, each used only when `filename` or
+  `framework` isn't bound. The bindings are documented in a new `ERXJavaScript.apiext`. (#93)
 
 - **The development endpoints only answer requests from this machine**
   `/eval`, `/log` and `/problems` (development mode only) check the address of the connection the
@@ -30,11 +52,17 @@
   `/eval` previously decided from headers the adaptor in use doesn't set, and `/log` and `/problems`
   had no check.
 
-- **Every element ERExtensions exposes has an `.api` and an `.apiext`**
-  Bindings with types, documentation, constraints between bindings, content and attribute policy,
-  and deprecated older names, for the elements installed in place of WO's (and what they change),
-  wonder-slim's own elements, and the components carried over from JavaWOExtensions. Several
-  existing `.api` files were corrected along the way. (#96)
+- **Obsolete properties are reported, not refused**
+  Properties that configure removed features no longer stop the launch. They're listed with the
+  reason they're no longer read in an `OBSOLETE PROPERTIES` section of the startup banner, with a
+  warning in the log, so an older application can be tried on the framework as it is and cleaned up
+  afterwards. (#77)
+  The list covers the properties Project Wonder's ERExtensions, JavaWOExtensions, WOOgnl and Ajax
+  read that wonder-slim no longer does, each key listed explicitly, about 260 entries: `ERXLocalizer`,
+  the `replaceApplicationPath` pair, EOF, JDBC, model and synchronizer settings, the SSL adaptor,
+  crypto, the administrative direct-action passwords, ERXPatcher, WOOgnl and more. Where a
+  replacement exists, the message names it. The table and the report live in a class of their own,
+  `ERXObsoleteProperties`. (#79)
 
 - **The element packages, reorganized**
   Every element the framework offers now lives in a package that says how it relates to WO's
@@ -57,67 +85,11 @@
   the tag aliases and by their simple names. A class referring to one of the moved classes updates
   its import. Property names that included a class's name are unchanged.
 
-- **`WOBatchNavigationBar` deleted**
-  Its Java class went in 2021 along with the other `WODisplayGroup` code, but the template and `.api`
-  stayed behind. The template relied on the deleted class and on `WODisplayGroup`, so the component
-  couldn't render. (#96)
-
-- **`ERXExpiringCache` deleted**
-  Its only users were the session caches of `ERXStyleSheet`'s and `ERXJavaScript`'s content modes,
-  which are gone. The `er.extensions.ERXExpiringCache.reaperFrequency` property is reported as
-  obsolete. (#94)
-
-- **`ERXJavaScript` references one script, like `ERXStyleSheet`**
-  `filename` (a resource, or a complete URL) and `framework` work as before, rendered in place, and
-  other bindings are still passed through as attributes. A bound `type` (such as `module`) now
-  replaces the default `text/javascript` instead of adding a second `type`. The content modes are
-  gone: inline content, `scriptString`, `scriptFile`, `hideInComment` and the session-cached
-  `scriptKey` (with its direct action). A template using them throws when parsed, with a message
-  naming the replacement: a script file or a `<script>` tag. The
-  `er.extensions.ERXJavaScript.hideInComment` property is reported as obsolete. The older names
-  `scriptSource` and `scriptFramework` still work, deprecated, each used only when `filename` or
-  `framework` isn't bound. The bindings are documented in a new `ERXJavaScript.apiext`. (#93)
-
-- **`ERXStyleSheet` is a dynamic element**
-  Templates are unchanged: `filename`/`framework` or `href`, and `media` and `inline`, work as before,
-  and the `<link>` still goes in the head (or inline in Ajax responses), once per page. Other
-  bindings are now passed through as attributes of the tag, such as `integrity` and `crossorigin`
-  for a CDN `href`. The rarely used mode that rendered the element's content into a stylesheet
-  cached in the session (the `key` binding) is gone. A template using it throws when parsed, with a
-  message naming the replacement: a stylesheet file or a `<style>` tag. The older binding names
-  `styleSheetName`, `styleSheetFrameworkName` and `styleSheetUrl` still work, deprecated, each used
-  only when `filename`, `framework` or `href` isn't bound. The element's bindings are documented in
-  a new `ERXStyleSheet.apiext`. (#92)
-
-- **Concurrent request handling is on by default**
-  ERExtensions' Properties now set `WOAllowsConcurrentRequestHandling=true`. With WebObjects' own
-  default (`false`) and a multithreaded adaptor such as Jetty, an instance handles one component,
-  direct action or route request at a time, for all users. An application that relies on requests
-  being serialised sets the property to `false` at launch or in its Properties. Requests for the
-  same session are still serialised while their session is checked out. (#91)
-
-- **`dateformat` formats java.time values**
-  `ERXWOString`'s `dateformat` now formats `LocalDate`, `LocalDateTime`, `ZonedDateTime`, `Instant`
-  and every other java.time value. The binding takes either syntax: an `NSTimestampFormatter` pattern
-  (`%d.%m.%Y`, recognised by a `%` outside quoted text) is translated to its `DateTimeFormatter`
-  equivalent, covering all of `NSTimestampFormatter`'s conversions including the locale's `%x`, `%X`
-  and `%c`, and renders exactly as `NSTimestampFormatter` would, so templates keep their patterns when
-  a model moves to java.time. A `DateTimeFormatter` pattern (`dd.MM.yyyy`) is used as is. `formatter` also accepts a
-  `DateTimeFormatter`. The formatters are cached and shared, since they're thread-safe. A pattern that
-  doesn't fit the value (a time on a `LocalDate`) throws, as does an unknown conversion, which
-  `NSTimestampFormatter` silently renders as `%`. `NSTimestamp` values format exactly as before.
-  The logic lives in `ERXDateTimeFormatters`. (#86)
-
-- **A null `dateformat` uses the default date format**
-  When `ERXWOString`'s `dateformat` is bound but evaluates to null, a timestamp is now rendered with
-  the default format, the full timestamp (`2026-09-27 12:00:00 Etc/GMT`) in the default time zone,
-  as `numberformat` already did for numbers. A typo had kept this from ever happening, so these
-  values were rendered with `toString()`. Unbound and constant formats are unaffected. (#85)
-
-- **`bindingNamed()` removed**
-  `ERXComponentUtilities.bindingNamed(name, associations)` and `ERXDynamicElement.bindingNamed(name)`
-  were second names for a dictionary lookup. Use `associations.objectForKey(name)`, or
-  `associations().objectForKey(name)` in a dynamic element. (#84)
+- **Every element ERExtensions exposes has an `.api` and an `.apiext`**
+  Bindings with types, documentation, constraints between bindings, content and attribute policy,
+  and deprecated older names, for the elements installed in place of WO's (and what they change),
+  wonder-slim's own elements, and the components carried over from JavaWOExtensions. Several
+  existing `.api` files were corrected along the way. (#96)
 
 - **Response compression fixes**
   Responses worth compressing now carry `Vary: Accept-Encoding`, so caches don't hand gzipped
@@ -139,17 +111,26 @@
   `STATS_TRACE_COLLECTING_ENABLED_KEY` constants are replaced by `ERXP.STATS_ENABLED` and
   `ERXP.STATS_TRACE_COLLECTING_ENABLED`. (#81)
 
-- **Obsolete properties are reported, not refused**
-  Properties that configure removed features no longer stop the launch. They're listed with the
-  reason they're no longer read in an `OBSOLETE PROPERTIES` section of the startup banner, with a
-  warning in the log, so an older application can be tried on the framework as it is and cleaned up
-  afterwards. (#77)
-  The list covers the properties Project Wonder's ERExtensions, JavaWOExtensions, WOOgnl and Ajax
-  read that wonder-slim no longer does, each key listed explicitly, about 260 entries: `ERXLocalizer`,
-  the `replaceApplicationPath` pair, EOF, JDBC, model and synchronizer settings, the SSL adaptor,
-  crypto, the administrative direct-action passwords, ERXPatcher, WOOgnl and more. Where a
-  replacement exists, the message names it. The table and the report live in a class of their own,
-  `ERXObsoleteProperties`. (#79)
+- **`ERXRequest.remoteAddress(WORequest)`, one way to get the client's address**
+  Checks the address a WO adaptor passes on (`x-webobjects-remote-addr`, `remote_addr`,
+  `remote_host`, `pc-remote-addr`), then the first address in `x-forwarded-for`, then the
+  connection's address, else null. `remoteHostAddress()` returns the same, or `"UNKNOWN"`. It
+  no longer prefers the connection's address under direct connect (behind a proxy that's the
+  proxy's) or returns the whole `x-forwarded-for` list, and no longer reads `remote_user`, which is
+  a user name. `ERXHTTPUtilities` is removed: use `ERXRequest.remoteAddress(request)` in place of
+  `ERXHTTPUtilities.ipAddressFromRequest(request)`. (#102)
+
+- **A null `dateformat` uses the default date format**
+  When `ERXWOString`'s `dateformat` is bound but evaluates to null, a timestamp is now rendered with
+  the default format, the full timestamp (`2026-09-27 12:00:00 Etc/GMT`) in the default time zone,
+  as `numberformat` already did for numbers. A typo had kept this from ever happening, so these
+  values were rendered with `toString()`. Unbound and constant formats are unaffected. (#85)
+
+- **The legacy component request handler is gone**
+  `ERXComponentActionRequestHandler`, the default since July, is now the only component-action
+  handler. `ERXComponentRequestHandler`, the patched copy of WebObjects' stock handler, and the
+  `er.extensions.ERXComponentActionRequestHandler.enabled` property that switched back to it are
+  removed. (#75)
 
 - **The frameworks' own Properties files carry only active properties**
   Entries nothing reads any more (`hasLocalization`, the `load.Properties.framework` markers, and
@@ -157,11 +138,30 @@
   without an obsolete-properties report, and the files document only what can actually be
   configured. (#80)
 
-- **The legacy component request handler is gone**
-  `ERXComponentActionRequestHandler`, the default since July, is now the only component-action
-  handler. `ERXComponentRequestHandler`, the patched copy of WebObjects' stock handler, and the
-  `er.extensions.ERXComponentActionRequestHandler.enabled` property that switched back to it are
-  removed. (#75)
+- **`ERXNumberFormatter` factor patterns round only as the pattern says**
+  A pattern dividing by a factor without an explicit scale, like `(/1024=)0.00 KB`, now divides at
+  full precision and leaves the rounding to the pattern. Previously the division rounded to the
+  value's own scale (or 4 digits for whole numbers), so 1500.5 displayed as `1.50 KB` rather than
+  `1.47 KB`. (#103)
+
+- **`bindingNamed()` removed**
+  `ERXComponentUtilities.bindingNamed(name, associations)` and `ERXDynamicElement.bindingNamed(name)`
+  were second names for a dictionary lookup. Use `associations.objectForKey(name)`, or
+  `associations().objectForKey(name)` in a dynamic element. (#84)
+
+- **`ERXExpiringCache` deleted**
+  Its only users were the session caches of `ERXStyleSheet`'s and `ERXJavaScript`'s content modes,
+  which are gone. The `er.extensions.ERXExpiringCache.reaperFrequency` property is reported as
+  obsolete. (#94)
+
+- **`WOBatchNavigationBar` deleted**
+  Its Java class went in 2021 along with the other `WODisplayGroup` code, but the template and `.api`
+  stayed behind. The template relied on the deleted class and on `WODisplayGroup`, so the component
+  couldn't render. (#96)
+
+- **`ERXStats.logStatisticsForOperation()` sorts by its operation again**
+  The logged entries are ordered by the given operation ("sum", "count", "min", "max", "avg" or
+  "key"), ascending. An unknown operation throws. (#104)
 
 ## 2026-09-26 (8.0.8)
 
