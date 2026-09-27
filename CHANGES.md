@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **`ERXStyleSheet` is a dynamic element**
+  Templates are unchanged: `filename`/`framework` or `href`, and `media` and `inline`, work as before,
+  and the `<link>` still goes in the head (or inline in Ajax responses), once per page. Other
+  bindings are now passed through as attributes of the tag, such as `integrity` and `crossorigin`
+  for a CDN `href`. The rarely used mode that rendered the element's content into a stylesheet
+  cached in the session (the `key` binding) is gone, along with the undocumented aliases
+  `styleSheetUrl`, `styleSheetName` and `styleSheetFrameworkName`. A template using them throws when
+  parsed, with a message naming the replacement: a stylesheet file or a `<style>` tag. (#92)
+
 - **Concurrent request handling is on by default**
   ERExtensions' Properties now set `WOAllowsConcurrentRequestHandling=true`. With WebObjects' own
   default (`false`) and a multithreaded adaptor such as Jetty, an instance handles one component,

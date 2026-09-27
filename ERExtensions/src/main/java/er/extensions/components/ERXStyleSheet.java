@@ -1,249 +1,135 @@
 package er.extensions.components;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.HexFormat;
-import java.util.Objects;
-
-import com.webobjects.appserver.WOActionResults;
+import com.webobjects.appserver.WOAssociation;
+import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import com.webobjects.appserver.WODirectAction;
-import com.webobjects.appserver.WORequest;
+import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.appserver.WOSession;
-import com.webobjects.foundation.NSArray;
+import com.webobjects.appserver._private.WODynamicElementCreationException;
+import com.webobjects.appserver._private.WODynamicGroup;
+import com.webobjects.appserver._private.WOHTMLDynamicElement;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 
-import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXResponseRewriter;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.foundation.ERXExpiringCache;
 import er.extensions.resources.ERXResourceManagerBase;
 
 /**
- * Adds a style sheet to a page. You can either supply a complete URL, a file
- * and framework name or put something in the component content. The content of
- * the component is cached under a "key" binding and then delivered via a direct
- * action, so it doesn't need to get re-rendered too often.
- * 
- * @binding filename name of the style sheet
- * @binding framework name of the framework for the style sheet
- * @binding href url to the style sheet
- * @binding key key to cache the style sheet under when using the component
- *          content. Default is the sessionID. That means, you should *really*
- *          explicitly set a key, when you use more than one ERXStyleSheet using
- *          the component content method within one session
- * @binding inline when <code>true</code>, the generated link tag will be appended inline,
- *          when <code>false</code> it'll be placed in the head of the page, when unset it
- *          will be placed inline for ajax requests and in the head for regular
- *          requests
- * @binding media media name this style sheet is for
+ * Adds a stylesheet to the page: a {@code <link>} tag for a stylesheet resource ({@code filename}, optionally in a
+ * {@code framework}) or a URL ({@code href}). The tag goes before the page's {@code </head>}, or where the element is,
+ * and a stylesheet already added to the page isn't added again.
+ *
+ * @binding filename name of the stylesheet resource
+ * @binding framework name of the framework containing the stylesheet resource
+ * @binding href URL of the stylesheet, instead of filename/framework
+ * @binding media the stylesheet's media query
+ * @binding inline when <code>true</code>, the tag is rendered where the element is; when <code>false</code>, before
+ *          the page's head end tag. When unset, inline for Ajax requests and in the head otherwise.
+ *
+ *          Any other binding is rendered as an attribute of the tag, such as {@code integrity} and {@code crossorigin}.
  */
 
-// FIXME: cache should be able to cache on values of bindings, not a single key
-// FIXME: Shouldn't this be a dynamic element rather than a component? // Hugi 2022-03-12
+public class ERXStyleSheet extends WOHTMLDynamicElement {
 
-public class ERXStyleSheet extends ERXStatelessComponent {
+	private final WOAssociation _filename;
+	private final WOAssociation _framework;
+	private final WOAssociation _href;
+	private final WOAssociation _media;
+	private final WOAssociation _inline;
 
-	public ERXStyleSheet( WOContext aContext ) {
-		super( aContext );
-	}
+	public ERXStyleSheet( final String name, final NSDictionary<String, WOAssociation> associations, final WOElement template ) {
+		super( "link", associations, null );
 
-	private static ERXExpiringCache<String, WOResponse> cache( WOSession session ) {
-		ERXExpiringCache<String, WOResponse> cache = (ERXExpiringCache<String, WOResponse>)session.objectForKey( "ERXStylesheet.cache" );
-
-		if( cache == null ) {
-			cache = new ERXExpiringCache<>( 60 );
-			cache.startBackgroundExpiration();
-			session.setObjectForKey( cache, "ERXStylesheet.cache" );
+		if( hasContent( template ) ) {
+			throw new WODynamicElementCreationException( "<" + getClass().getName() + "> no longer renders its content as a stylesheet. Put the CSS in a stylesheet file (filename/framework or href) or in a <style> tag." );
 		}
 
-		return cache;
-	}
+		refuse( "key", "Rendering the element's content as a cached stylesheet has been removed. Put the CSS in a stylesheet file (filename/framework or href) or in a <style> tag." );
+		refuse( "styleSheetUrl", "Use href." );
+		refuse( "styleSheetName", "Use filename." );
+		refuse( "styleSheetFrameworkName", "Use framework." );
 
-	public static class Sheet extends WODirectAction {
+		_filename = _associations.removeObjectForKey( "filename" );
+		_framework = _associations.removeObjectForKey( "framework" );
+		_href = _associations.removeObjectForKey( "href" );
+		_media = _associations.removeObjectForKey( "media" );
+		_inline = _associations.removeObjectForKey( "inline" );
 
-		public Sheet( WORequest worequest ) {
-			super( worequest );
-		}
-
-		@Override
-		public WOActionResults performActionNamed( String name ) {
-			return ERXStyleSheet.cache( session() ).objectForKey( name );
+		if( (_filename == null) == (_href == null) ) {
+			throw new WODynamicElementCreationException( "<" + getClass().getName() + "> Exactly one of 'filename' or 'href' must be bound." );
 		}
 	}
 
 	/**
-	 * @return Returns the complete url to the style sheet.
+	 * @return true if the element has content. A template parser may pass an empty group for an element without any
+	 *         (Parsley does, where WO's own parser passes null).
 	 */
-	private String styleSheetUrl() {
-		String url = stringValueForBinding("styleSheetUrl");
-		
-		if( url == null ) {
-			url = stringValueForBinding("href");
+	private static boolean hasContent( final WOElement template ) {
+		if( template == null ) {
+			return false;
 		}
 
-		if( url == null ) {
-			String name = styleSheetName();
-			if( name != null ) {
-				url = application().resourceManager().urlForResourceNamed( name, styleSheetFrameworkName(), languages(), context().request() );
-				if( ERXResourceManagerBase._shouldGenerateCompleteResourceURL( context() ) ) {
-					url = ERXResourceManagerBase._completeURLForResource( url, null, context() );
-				}
+		return !(template instanceof WODynamicGroup group) || group.hasChildrenElements();
+	}
+
+	/**
+	 * Throws if the named binding, which no longer exists, is bound
+	 */
+	private void refuse( final String bindingName, final String explanation ) {
+		if( _associations.objectForKey( bindingName ) != null ) {
+			throw new WODynamicElementCreationException( "<" + getClass().getName() + "> The '" + bindingName + "' binding has been removed. " + explanation );
+		}
+	}
+
+	@Override
+	public void appendToResponse( final WOResponse response, final WOContext context ) {
+		final WOComponent component = context.component();
+		final String filename = _filename != null ? (String)_filename.valueInComponent( component ) : null;
+		final String framework = _framework != null ? (String)_framework.valueInComponent( component ) : null;
+
+		if( filename != null && ERXResponseRewriter.isResourceAddedToHead( context, framework, filename ) ) {
+			return;
+		}
+
+		final String href = filename != null ? urlForResource( filename, framework, context ) : (String)_href.valueInComponent( component );
+
+		if( href == null ) {
+			return;
+		}
+
+		final boolean inline = _inline != null ? _inline.booleanValueInComponent( component ) : ERXAjaxApplication.isAjaxRequest( context.request() );
+		final WOResponse tagResponse = inline ? response : new WOResponse();
+
+		tagResponse._appendContentAsciiString( "<link" );
+		tagResponse._appendTagAttributeAndValue( "rel", filename != null && filename.toLowerCase().endsWith( ".less" ) ? "stylesheet/less" : "stylesheet", false );
+		tagResponse._appendTagAttributeAndValue( "type", "text/css", false );
+		tagResponse._appendTagAttributeAndValue( "href", href, false );
+		tagResponse._appendTagAttributeAndValue( "media", _media != null ? (String)_media.valueInComponent( component ) : null, false );
+		appendAttributesToResponse( tagResponse, context );
+		tagResponse._appendContentAsciiString( "/>" );
+
+		final boolean added = inline || ERXResponseRewriter.insertInResponseBeforeHead( response, context, tagResponse.contentString(), ERXResponseRewriter.TagMissingBehavior.Inline );
+
+		if( added ) {
+			if( filename != null ) {
+				ERXResponseRewriter.resourceAddedToHead( context, framework, filename );
 			}
+			else {
+				ERXResponseRewriter.resourceAddedToHead( context, null, href );
+			}
+		}
+	}
+
+	/**
+	 * @return The URL of the stylesheet resource, complete if complete resource URLs are being generated
+	 */
+	private static String urlForResource( final String filename, final String framework, final WOContext context ) {
+		final String url = context._urlForResourceNamed( filename, framework, true );
+
+		if( url != null && ERXResourceManagerBase._shouldGenerateCompleteResourceURL( context ) ) {
+			return ERXResourceManagerBase._completeURLForResource( url, null, context );
 		}
 
 		return url;
-	}
-
-	/**
-	 * @return The style sheet framework name either resolved via the binding <b>framework</b>.
-	 */
-	private String styleSheetFrameworkName() {
-		String result = stringValueForBinding("styleSheetFrameworkName");
-		result = (result == null ? stringValueForBinding("framework") : result);
-		return result;
-	}
-
-	/**
-	 * @return The style sheet name either resolved via the binding <b>filename</b>.
-	 */
-	private String styleSheetName() {
-		String result = stringValueForBinding("styleSheetName");
-		result = (result == null ? stringValueForBinding("filename") : result);
-		return result;
-	}
-
-	/**
-	 * @return key under which the stylesheet should be placed in the cache. If no key is given, the session id is used.
-	 */
-	private String styleSheetKey() {
-		String result = stringValueForBinding("key");
-
-		if( result == null ) {
-			result = session().sessionID();
-		}
-
-		return result;
-	}
-
-	/**
-	 * @return value of the [media] binding
-	 */
-	private String mediaType() {
-		return stringValueForBinding( "media" );
-	}
-
-	/**
-	 * @return The languages for the request.
-	 */
-	private NSArray<String> languages() {
-
-		if( hasSession() ) {
-			return session().languages();
-		}
-
-		WORequest request = context().request();
-
-		if( request != null ) {
-			return request.browserLanguages();
-		}
-
-		return null;
-	}
-
-	/**
-	 * Appends the &lt;link&gt; tag, either by using the style sheet name and framework or by using the component content and then generating a link to it.
-	 */
-	@Override
-	public void appendToResponse( WOResponse originalResponse, WOContext wocontext ) {
-		String styleSheetFrameworkName = styleSheetFrameworkName();
-		String styleSheetName = styleSheetName();
-		boolean isResourceStyleSheet = styleSheetName != null;
-		if( isResourceStyleSheet && ERXResponseRewriter.isResourceAddedToHead( wocontext, styleSheetFrameworkName, styleSheetName ) ) {
-			// Skip, because this has already been added ... 
-			return;
-		}
-		// default to inline for ajax requests
-		boolean inline = booleanValueForBinding( "inline", ERXAjaxApplication.isAjaxRequest( wocontext.request() ) );
-		WOResponse response = inline ? originalResponse : new WOResponse();
-
-		String href = styleSheetUrl();
-		if( href == null ) {
-			String key = styleSheetKey();
-			ERXExpiringCache<String, WOResponse> cache = cache( session() );
-			String md5;
-			WOResponse cachedResponse = cache.objectForKey( key );
-			if( cache.isStale( key ) || ERXApplication.isDevelopmentModeSafe() ) {
-				cachedResponse = new WOResponse();
-				super.appendToResponse( cachedResponse, wocontext );
-				// appendToResponse above will change the response of
-				// "wocontext" to "newresponse". When this happens during an
-				// Ajax request, it will lead to backtracking errors on
-				// subsequent requests, so restore the original response "r"
-				wocontext._setResponse( originalResponse );
-				cachedResponse.setHeader( "text/css", "content-type" );
-				cache.setObjectForKey( cachedResponse, key );
-				md5 = md5Hex( cachedResponse.contentString() );
-				cachedResponse.setHeader( md5, "checksum" );
-			}
-			md5 = cachedResponse.headerForKey( "checksum" );
-			NSDictionary<String, Object> query = new NSDictionary<>( md5, "checksum" );
-			href = wocontext.directActionURLForActionNamed( Sheet.class.getName() + "/" + key, query, wocontext.request().isSecure(), 0, false );
-		}
-
-		response._appendContentAsciiString( "<link" );
-
-		if (styleSheetName != null && styleSheetName.toLowerCase().endsWith(".less")) {
-			response._appendTagAttributeAndValue( "rel", "stylesheet/less", false );
-		} else {
-			response._appendTagAttributeAndValue( "rel", "stylesheet", false );
-		}
-		response._appendTagAttributeAndValue( "type", "text/css", false );
-		response._appendTagAttributeAndValue( "href", href, false );
-		response._appendTagAttributeAndValue( "media", mediaType(), false );
-		response._appendContentAsciiString( "/>" );
-//		response.appendContentString("\n"); // FIXME: Disabling this experimentally. In a propertly formatted HTML document, this stylesheet will be in it's own line anyway // Hugi 2025-06-23
-		boolean inserted = true;
-		if( !inline ) {
-			String stylesheetLink = response.contentString();
-			inserted = ERXResponseRewriter.insertInResponseBeforeHead( originalResponse, wocontext, stylesheetLink, ERXResponseRewriter.TagMissingBehavior.Inline );
-		}
-		if( inserted ) {
-			if( isResourceStyleSheet ) {
-				ERXResponseRewriter.resourceAddedToHead( wocontext, styleSheetFrameworkName, styleSheetName );
-			}
-			else if( href != null ) {
-				ERXResponseRewriter.resourceAddedToHead( wocontext, null, href );
-			}
-		}
-	}
-
-	/**
-	 * Partial rip from ERX StringUtilities
-	 */
-	@Deprecated
-	private static String md5Hex(String str) {
-		Objects.requireNonNull(str);
-
-		try {
-			MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");
-			byte[] buf = new byte[50 * 1024];
-			int numRead;
-
-			final ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
-
-			while ((numRead = in.read(buf)) != -1) {
-				md5.update(buf, 0, numRead);
-			}
-
-			return HexFormat.of().formatHex(md5.digest() );
-		}
-		catch (java.security.NoSuchAlgorithmException | IOException e) {
-			throw new NSForwardException(e);
-		}
 	}
 }
