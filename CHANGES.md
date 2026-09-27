@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Concurrent request handling is on by default**
+  ERExtensions' Properties now set `WOAllowsConcurrentRequestHandling=true`. With WebObjects' own
+  default (`false`) and a multithreaded adaptor such as Jetty, an instance handles one component,
+  direct action or route request at a time, for all users. An application that relies on requests
+  being serialised sets the property to `false` at launch or in its Properties. Requests for the
+  same session are still serialised while their session is checked out. (#91)
+
 - **`dateformat` formats java.time values**
   `ERXWOString`'s `dateformat` now formats `LocalDate`, `LocalDateTime`, `ZonedDateTime`, `Instant`
   and every other java.time value. The binding takes either syntax: an `NSTimestampFormatter` pattern

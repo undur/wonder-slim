@@ -2,6 +2,13 @@
 ## You can override them from the application's Properties file or  command-line arguments.
 
 #########################################################################
+# WebObjects
+#########################################################################
+## Handle requests concurrently. WebObjects' own default is false, which makes an instance handle one component,
+## direct action or route request at a time, for all users. Set to false for an application that isn't thread-safe.
+WOAllowsConcurrentRequestHandling=true
+
+#########################################################################
 # ERXProperties
 #########################################################################
 ## Enables support for custom properties file lookup. 
