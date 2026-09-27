@@ -72,10 +72,6 @@ public class ERXWOContext extends ERXAjaxContext {
 		return _generateCompleteResourceURLs;
 	}
 	
-	public String safeElementID() {
-		return safeIdentifierName(elementID());
-	}
-
 	/**
 	 * In development mode with direct connect disabled - a development instance behind a local web server and
 	 * WebObjects adaptor - inserts the instance number {@code -<port>} after {@code App.woa} in relative URLs. The
@@ -153,6 +149,13 @@ public class ERXWOContext extends ERXAjaxContext {
 		}
 
 		return (ERXWOContext) app.createContextForRequest(dummyRequest);
+	}
+
+	/**
+	 * @return The elementID() suitable for use as an identifier in JavaScript.
+	 */
+	public String safeElementID() {
+		return safeIdentifierName(elementID());
 	}
 
 	private static final String SAFE_IDENTIFIER_NAME_KEY = "ERXWOContext.safeIdentifierName";
