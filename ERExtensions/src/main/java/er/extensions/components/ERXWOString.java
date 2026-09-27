@@ -94,55 +94,54 @@ public class ERXWOString extends WODynamicElement {
 		Object valueInComponent = _value.valueInComponent(component);
 
 		if (_shouldFormat) {
-			final Object formatter = _formatter != null ? _formatter.valueInComponent(component) : null;
-
 			if (valueInComponent == NSKeyValueCoding.NullValue) {
 				valueInComponent = null;
 			}
 
-			if (formatter instanceof DateTimeFormatter dateTimeFormatter) {
-				// A java.time formatter, for java.time values. Anything else throws.
-				if (valueInComponent != null) {
+			// Nothing to format for a null value: it renders nothing, or valueWhenEmpty
+			if (valueInComponent != null) {
+				final Object formatter = _formatter != null ? _formatter.valueInComponent(component) : null;
+
+				if (formatter instanceof DateTimeFormatter dateTimeFormatter) {
+					// A java.time formatter, for java.time values. Anything else throws.
 					valueInComponent = ERXDateTimeFormatters.format(valueInComponent, dateTimeFormatter);
 				}
-			}
-			else if (formatter == null && _dateFormat != null && valueInComponent instanceof TemporalAccessor) {
-				// A java.time value with a dateformat pattern, in either syntax (see ERXDateTimeFormatters). A null pattern
-				// leaves the value unformatted (its ISO toString()), since no single pattern suits every java.time type.
-				final String pattern = (String) _dateFormat.valueInComponent(component);
+				else if (formatter == null && _dateFormat != null && valueInComponent instanceof TemporalAccessor) {
+					// A java.time value with a dateformat pattern, in either syntax (see ERXDateTimeFormatters). A null pattern
+					// leaves the value unformatted (its ISO toString()), since no single pattern suits every java.time type.
+					final String pattern = (String) _dateFormat.valueInComponent(component);
 
-				if (pattern != null) {
-					valueInComponent = ERXDateTimeFormatters.format(valueInComponent, pattern);
-				}
-			}
-			else {
-				Format format = (Format) formatter;
-
-				if (format == null) {
-					if (_dateFormat != null) {
-						final String formatString = (String) _dateFormat.valueInComponent(component);
-
-						if (formatString == null) {
-							format = ERXTimestampFormatter.defaultDateFormatterForObject(valueInComponent);
-						}
-						else {
-							format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
-						}
-					}
-					else if (_numberFormat != null) {
-						final String formatString = (String) _numberFormat.valueInComponent(component);
-
-						if (formatString == null) {
-							format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
-						}
-						else {
-							format = ERXNumberFormatter.numberFormatterForPattern(formatString);
-						}
+					if (pattern != null) {
+						valueInComponent = ERXDateTimeFormatters.format(valueInComponent, pattern);
 					}
 				}
+				else {
+					Format format = (Format) formatter;
 
-				if (format != null) {
-					if (valueInComponent != null) {
+					if (format == null) {
+						if (_dateFormat != null) {
+							final String formatString = (String) _dateFormat.valueInComponent(component);
+
+							if (formatString == null) {
+								format = ERXTimestampFormatter.defaultDateFormatterForObject(valueInComponent);
+							}
+							else {
+								format = ERXTimestampFormatter.dateFormatterForPattern(formatString);
+							}
+						}
+						else if (_numberFormat != null) {
+							final String formatString = (String) _numberFormat.valueInComponent(component);
+
+							if (formatString == null) {
+								format = ERXNumberFormatter.defaultNumberFormatterForObject(valueInComponent);
+							}
+							else {
+								format = ERXNumberFormatter.numberFormatterForPattern(formatString);
+							}
+						}
+					}
+
+					if (format != null) {
 						try {
 							valueInComponent = format.format(valueInComponent);
 						}
@@ -151,9 +150,7 @@ public class ERXWOString extends WODynamicElement {
 							valueInComponent = null;
 						}
 					}
-				}
-				else {
-					if (valueInComponent != null) {
+					else {
 						log.debug("no formatter found! {}", valueInComponent);
 					}
 				}
