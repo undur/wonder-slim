@@ -131,6 +131,9 @@ public class ERXObsoleteProperties {
 		new ObsoleteProperty( "ognl.webobjects.WOAssociation.shouldThrowExceptions", OGNL ),
 
 		// Other removed features
+		new ObsoleteProperty( "er.extensions.appserver.ajax.ERXAjaxSession.logPageReplacementCache", "Renamed to er.extensions.appserver.ajax.ERXAjaxSession.logPageCache." ),
+		new ObsoleteProperty( "er.extensions.maxPageReplacementCacheSize", "The page cache is bounded by WOPageCacheSize (default 30) instead." ),
+		new ObsoleteProperty( "er.extensions.overridePrivateCache", "The unified page cache always replaces WO's private caches." ),
 		new ObsoleteProperty( "er.extensions.ERXApplication.developmentMode", "Development mode is no longer set by property. It's detected from how the application is launched (from a project in the IDE)." ),
 		new ObsoleteProperty( "er.extensions.ERXApplication.memoryThreshold", "Replaced by er.extensions.ERXApplication.memoryStarvedThreshold." ),
 		new ObsoleteProperty( "er.extensions.ERXApplication.rewriteDirectConnect", "Direct connect URL rewriting has been removed." ),

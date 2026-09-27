@@ -99,18 +99,6 @@ public class ERXAjaxSession extends WOSession {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXAjaxSession.class);
 
-	static {
-		if (ERXProperties.stringForKey("er.extensions.maxPageReplacementCacheSize") != null) {
-			log.warn("er.extensions.maxPageReplacementCacheSize is no longer used. The page cache is bounded by WOApplication.pageCacheSize() (WOPageCacheSize, default 30) - remove the old property.");
-		}
-		if (ERXProperties.stringForKey("er.extensions.appserver.ajax.ERXAjaxSession.logPageReplacementCache") != null) {
-			log.warn("er.extensions.appserver.ajax.ERXAjaxSession.logPageReplacementCache was renamed to er.extensions.appserver.ajax.ERXAjaxSession.logPageCache - update the property.");
-		}
-		if (ERXProperties.stringForKey("er.extensions.overridePrivateCache") != null) {
-			log.warn("er.extensions.overridePrivateCache is no longer used - the unified page cache always replaces WO's private caches. Remove the property.");
-		}
-	}
-
 	/**
 	 * The unified page cache: render contextID -> record holding the live page instance. Insertion
 	 * order doubles as LRU order over instances (see {@link #touchInstanceInPageCache}). Access is safe
