@@ -50,8 +50,15 @@ public class ERXStyleSheetTest {
 	@Test
 	public void removedBindingsThrow() {
 		assertThrows( WODynamicElementCreationException.class, () -> styleSheet( null, "href", "/a.css", "key", "k" ) );
-		assertThrows( WODynamicElementCreationException.class, () -> styleSheet( null, "styleSheetUrl", "/a.css" ) );
-		assertThrows( WODynamicElementCreationException.class, () -> styleSheet( null, "styleSheetName", "a.css" ) );
-		assertThrows( WODynamicElementCreationException.class, () -> styleSheet( null, "filename", "a.css", "styleSheetFrameworkName", "AjaxSlim" ) );
+	}
+
+	@Test
+	public void deprecatedNamesAreAccepted() {
+		assertDoesNotThrow( () -> styleSheet( null, "styleSheetUrl", "/a.css" ) );
+		assertDoesNotThrow( () -> styleSheet( null, "styleSheetName", "a.css", "styleSheetFrameworkName", "AjaxSlim" ) );
+
+		// Each counts as its replacement: still exactly one of filename or href
+		assertThrows( WODynamicElementCreationException.class, () -> styleSheet( null, "styleSheetName", "a.css", "href", "/a.css" ) );
+		assertThrows( WODynamicElementCreationException.class, () -> styleSheet( null, "styleSheetFrameworkName", "AjaxSlim" ) );
 	}
 }

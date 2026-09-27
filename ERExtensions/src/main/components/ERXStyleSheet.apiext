@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXStyleSheet" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Adds a stylesheet to the page: a `<link>` tag for a stylesheet resource (`filename`, optionally in a `framework`) or a URL (`href`). The tag goes before the page's `</head>`, or where the element is (see `inline`), and a stylesheet already added to the page isn't added again.
+
+```html
+<wo:ERXStyleSheet filename="wonder-select.css" framework="AjaxSlim" />
+<wo:ERXStyleSheet href="https://cdn.example/lib.css" integrity="sha384-…" crossorigin="anonymous" />
+```
+
+Every other attribute is rendered on the `<link>` tag. The element has no content: put inline CSS in a `<style>` tag.]]></doc>
+
+		<binding name="filename">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the stylesheet resource.</doc>
+		</binding>
+
+		<binding name="framework">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Name of the framework containing the stylesheet resource. The application if not bound.</doc>
+		</binding>
+
+		<binding name="href">
+			<pull><type>java.lang.String</type></pull>
+			<doc>URL of the stylesheet, instead of `filename`/`framework`.</doc>
+		</binding>
+
+		<binding name="media">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The stylesheet's media query.</doc>
+		</binding>
+
+		<binding name="inline">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc><![CDATA[`true` renders the tag where the element is, `false` before the page's `</head>`. When not bound: inline for Ajax requests, in the head otherwise.]]></doc>
+		</binding>
+
+		<binding name="styleSheetName">
+			<pull><type>java.lang.String</type></pull>
+			<deprecated>Use `filename` instead.</deprecated>
+			<doc>Older name for `filename`, used only when `filename` isn't bound.</doc>
+		</binding>
+
+		<binding name="styleSheetFrameworkName">
+			<pull><type>java.lang.String</type></pull>
+			<deprecated>Use `framework` instead.</deprecated>
+			<doc>Older name for `framework`, used only when `framework` isn't bound.</doc>
+		</binding>
+
+		<binding name="styleSheetUrl">
+			<pull><type>java.lang.String</type></pull>
+			<deprecated>Use `href` instead.</deprecated>
+			<doc>Older name for `href`, used only when `href` isn't bound.</doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<any-of><binding name="filename"/><binding name="styleSheetName"/></any-of>
+			<any-of><binding name="href"/><binding name="styleSheetUrl"/></any-of>
+		</choose>
+
+	</wo>
+</wodefinitions>

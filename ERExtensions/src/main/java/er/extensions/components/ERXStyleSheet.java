@@ -27,6 +27,10 @@ import er.extensions.resources.ERXResourceManagerBase;
  *          the page's head end tag. When unset, inline for Ajax requests and in the head otherwise.
  *
  *          Any other binding is rendered as an attribute of the tag, such as {@code integrity} and {@code crossorigin}.
+ *
+ *          Deprecated binding names, still accepted so older templates keep working, each used only when its
+ *          replacement isn't bound: {@code styleSheetName} (use {@code filename}), {@code styleSheetFrameworkName}
+ *          (use {@code framework}) and {@code styleSheetUrl} (use {@code href}).
  */
 
 public class ERXStyleSheet extends WOHTMLDynamicElement {
@@ -45,13 +49,11 @@ public class ERXStyleSheet extends WOHTMLDynamicElement {
 		}
 
 		refuse( "key", "Rendering the element's content as a cached stylesheet has been removed. Put the CSS in a stylesheet file (filename/framework or href) or in a <style> tag." );
-		refuse( "styleSheetUrl", "Use href." );
-		refuse( "styleSheetName", "Use filename." );
-		refuse( "styleSheetFrameworkName", "Use framework." );
 
-		_filename = _associations.removeObjectForKey( "filename" );
-		_framework = _associations.removeObjectForKey( "framework" );
-		_href = _associations.removeObjectForKey( "href" );
+		// Each binding with its deprecated older name, used only when the current one isn't bound
+		_filename = removeBinding( "filename", "styleSheetName" );
+		_framework = removeBinding( "framework", "styleSheetFrameworkName" );
+		_href = removeBinding( "href", "styleSheetUrl" );
 		_media = _associations.removeObjectForKey( "media" );
 		_inline = _associations.removeObjectForKey( "inline" );
 
@@ -70,6 +72,15 @@ public class ERXStyleSheet extends WOHTMLDynamicElement {
 		}
 
 		return !(template instanceof WODynamicGroup group) || group.hasChildrenElements();
+	}
+
+	/**
+	 * @return The association for the binding, or for its deprecated older name if the binding isn't bound. Both are removed, so neither is rendered as an attribute.
+	 */
+	private WOAssociation removeBinding( final String name, final String deprecatedName ) {
+		final WOAssociation association = _associations.removeObjectForKey( name );
+		final WOAssociation deprecatedAssociation = _associations.removeObjectForKey( deprecatedName );
+		return association != null ? association : deprecatedAssociation;
 	}
 
 	/**

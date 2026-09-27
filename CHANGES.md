@@ -7,9 +7,11 @@
   and the `<link>` still goes in the head (or inline in Ajax responses), once per page. Other
   bindings are now passed through as attributes of the tag, such as `integrity` and `crossorigin`
   for a CDN `href`. The rarely used mode that rendered the element's content into a stylesheet
-  cached in the session (the `key` binding) is gone, along with the undocumented aliases
-  `styleSheetUrl`, `styleSheetName` and `styleSheetFrameworkName`. A template using them throws when
-  parsed, with a message naming the replacement: a stylesheet file or a `<style>` tag. (#92)
+  cached in the session (the `key` binding) is gone. A template using it throws when parsed, with a
+  message naming the replacement: a stylesheet file or a `<style>` tag. The older binding names
+  `styleSheetName`, `styleSheetFrameworkName` and `styleSheetUrl` still work, deprecated, each used
+  only when `filename`, `framework` or `href` isn't bound. The element's bindings are documented in
+  a new `ERXStyleSheet.apiext`. (#92)
 
 - **Concurrent request handling is on by default**
   ERExtensions' Properties now set `WOAllowsConcurrentRequestHandling=true`. With WebObjects' own
