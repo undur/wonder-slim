@@ -1,4 +1,4 @@
-package er.extensions.components;
+package er.extensions.components.additions;
 
 import java.util.Enumeration;
 
@@ -15,7 +15,7 @@ import com.webobjects.appserver._private.WOHTMLBareString;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 
-import er.extensions.components.conditionals.ERXWOTemplate;
+import er.extensions.components.additions.ERXWOTemplate;
 
 /**
  * Allows for multiple Component Contents.

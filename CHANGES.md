@@ -9,8 +9,8 @@
   existing `.api` files were corrected along the way. (#96)
 
 - **The element packages, reorganized**
-  Every element the framework installs in place of WO's now lives in a package that says how it
-  relates to WO's element:
+  Every element the framework offers now lives in a package that says how it relates to WO's
+  elements:
   - `er.extensions.components.patches`: elements that extend the WO element they replace.
     `ERXWOHyperlink`, and the former nested classes of `ERXDynamicElementsPatches`, now
     top-level classes: `ERXWOSubmitButton`, `ERXWOActiveImage`, `ERXWOText`, `ERXWOHiddenField`,
@@ -18,10 +18,16 @@
   - `er.extensions.components.replacements`: our own implementations, installed in place of a WO
     element. `ERXWOConditional`, `ERXWOForm`, `ERXWORepetition`, `ERXWOString`,
     `ERXWOSwitchComponent` and `ERXWOTextField`. (#98)
+  - `er.extensions.components.additions`: our own elements, ones WO doesn't have. `ERXStyleSheet`,
+    `ERXJavaScript`, `ERXWOImage`, `ERXWOComponentContent`, `ERXWOComponentInstance`, and from the
+    former `er.extensions.components.conditionals`: `ERXElse`, `ERXWOSwitch`, `ERXWOCase` and
+    `ERXWOTemplate`. (#99)
 
-  Elements with names of their own stay in `er.extensions.components`. Templates are unaffected,
-  since the elements are installed through the tag aliases. A class referring to one of the moved
-  classes updates its import. Property names that included a class's name are unchanged.
+  `er.extensions.components` keeps the Java-only classes: the component and element base classes and
+  `ERXComponentUtilities`, which now also holds the list elements' `list`/`selections` handling as
+  `ERXComponentUtilities.InputLists`. Templates are unaffected, since elements are found through
+  the tag aliases and by their simple names. A class referring to one of the moved classes updates
+  its import. Property names that included a class's name are unchanged.
 
 - **`WOBatchNavigationBar` deleted**
   Its Java class went in 2021 along with the other `WODisplayGroup` code, but the template and `.api`

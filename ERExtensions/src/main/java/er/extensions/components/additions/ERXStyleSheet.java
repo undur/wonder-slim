@@ -1,4 +1,4 @@
-package er.extensions.components;
+package er.extensions.components.additions;
 
 import com.webobjects.appserver.WOAssociation;
 import com.webobjects.appserver.WOComponent;

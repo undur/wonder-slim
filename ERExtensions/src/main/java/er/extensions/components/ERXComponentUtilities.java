@@ -1,6 +1,10 @@
 package er.extensions.components;
 
+import java.lang.reflect.Array;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOAssociation;
@@ -9,6 +13,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver._private.WOComponentDefinition;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
+import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.foundation.ERXValueUtilities;
@@ -372,5 +377,53 @@ public class ERXComponentUtilities {
 		}
 
 		return definition.componentInstanceInContext( context );
+	}
+
+	/**
+	 * The {@code list} and {@code selections} handling of the list elements (the popup button, browser and checkbox
+	 * list patches), in place of WO's.
+	 */
+	public static class InputLists {
+
+		private InputLists() {}
+
+		/**
+		 * Pushes the selections to the {@code selections} binding as a mutable array, if it's bound and settable.
+		 * Unlike WO's, errors aren't swallowed.
+		 */
+		public static void setSelectionListInContext( final WOContext context, final List selections, final WOAssociation selectionsAssociation ) {
+
+			if( selectionsAssociation != null && selectionsAssociation.isValueSettable() ) {
+				final List wrappedSelections = new NSMutableArray( selections );
+				selectionsAssociation.setValue( wrappedSelections, context.component() );
+			}
+		}
+
+		/**
+		 * @return The value of the {@code list} binding as a List: any {@code java.util.List}, or a Java array of any
+		 *         type. Null is an empty list.
+		 * @throws IllegalArgumentException if the binding evaluates to anything else
+		 */
+		public static List listInContext( final WOContext context, final WOAssociation listAssociation ) {
+
+			final Object bindingValue = listAssociation.valueInComponent( context.component() );
+
+			if( bindingValue == null ) {
+				return Collections.emptyList();
+			}
+
+			if( bindingValue instanceof List list ) {
+				return list;
+			}
+
+			if( bindingValue.getClass().isArray() ) {
+				// A little lengthy, but we need to go this way to ensure we're
+				// handling arrays of any primitive type (not just Object[])
+				final int length = Array.getLength( bindingValue );
+				return IntStream.range( 0, length ).mapToObj( i -> Array.get( bindingValue, i ) ).toList();
+			}
+
+			throw new IllegalArgumentException( "[list] binding returned an object of class '%s'. We only support java.util.List and java arrays".formatted( bindingValue.getClass() ) );
+		}
 	}
 }

@@ -1,4 +1,4 @@
-package er.extensions.components.conditionals;
+package er.extensions.components.additions;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
@@ -11,7 +11,7 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WONoContentElement;
 import com.webobjects.foundation.NSDictionary;
 
-import er.extensions.components.ERXWOComponentContent;
+import er.extensions.components.additions.ERXWOComponentContent;
 
 /**
  * Allows for multiple contents in a component. For every of one of these, when 

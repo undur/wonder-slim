@@ -1,4 +1,4 @@
-package er.extensions.components.conditionals;
+package er.extensions.components.additions;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;

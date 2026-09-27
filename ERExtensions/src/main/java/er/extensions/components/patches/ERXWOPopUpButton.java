@@ -8,6 +8,8 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOPopUpButton;
 import com.webobjects.foundation.NSDictionary;
 
+import er.extensions.components.ERXComponentUtilities.InputLists;
+
 /**
  * Patch of WOPopUpButton, installed in its place. {@code list} accepts any {@code java.util.List} or array, and
  * the {@code <select>} gets no {@code value} attribute.
@@ -31,6 +33,6 @@ public class ERXWOPopUpButton extends WOPopUpButton {
 
 	@Override
 	protected List listInContext(WOContext context) {
-		return ERXWOInputListSupport.listInContext(context, _list);
+		return InputLists.listInContext(context, _list);
 	}
 }

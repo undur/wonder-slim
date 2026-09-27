@@ -1,4 +1,4 @@
-package er.extensions.components;
+package er.extensions.components.additions;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
