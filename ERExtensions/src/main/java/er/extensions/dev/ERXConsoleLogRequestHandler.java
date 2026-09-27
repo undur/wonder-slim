@@ -50,6 +50,12 @@ public class ERXConsoleLogRequestHandler extends WORequestHandler {
 			return response;
 		}
 
+		if (!ERXDevAccess.isFromThisMachine(request)) {
+			response.setStatus(403);
+			response.setContent("The console log is only available to requests from this machine.");
+			return response;
+		}
+
 		final String contains = request.stringFormValueForKey("contains");
 		final int tail = parseInt(request.stringFormValueForKey("tail"), 0);
 

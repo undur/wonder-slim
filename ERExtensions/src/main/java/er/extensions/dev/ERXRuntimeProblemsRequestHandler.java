@@ -42,6 +42,12 @@ public class ERXRuntimeProblemsRequestHandler extends WORequestHandler {
 			return response;
 		}
 
+		if (!ERXDevAccess.isFromThisMachine(request)) {
+			response.setStatus(403);
+			response.setContent("{\"problems\":[],\"count\":0,\"error\":\"only available to requests from this machine\"}");
+			return response;
+		}
+
 		final String contains = request.stringFormValueForKey("contains");
 		final int tail = parseInt(request.stringFormValueForKey("tail"), 0);
 

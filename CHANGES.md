@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The development endpoints only answer requests from this machine**
+  `/eval`, `/log` and `/problems` (development mode only) check the address of the connection the
+  request came in on and refuse anything but a loopback address with a 403. Request headers aren't
+  consulted, since the client sets them, and when the address isn't known the request is refused.
+  `/eval` previously decided from headers the adaptor in use doesn't set, and `/log` and `/problems`
+  had no check.
+
 - **Every element ERExtensions exposes has an `.api` and an `.apiext`**
   Bindings with types, documentation, constraints between bindings, content and attribute policy,
   and deprecated older names, for the elements installed in place of WO's (and what they change),

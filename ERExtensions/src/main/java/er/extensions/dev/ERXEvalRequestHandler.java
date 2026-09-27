@@ -5,9 +5,7 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.foundation.ERXHTTPUtilities;
 import ng.dev.NGDevJson;
-import ng.dev.NGDevLoopback;
 import ng.dev.NGEvalSession;
 
 /**
@@ -51,7 +49,7 @@ public class ERXEvalRequestHandler extends WORequestHandler {
 			return response;
 		}
 
-		if (!NGDevLoopback.isLoopback(ERXHTTPUtilities.ipAddressFromRequest(request))) {
+		if (!ERXDevAccess.isFromThisMachine(request)) {
 			response.setStatus(403);
 			response.setContent("{\"status\":\"error\",\"diagnostics\":[\"/eval is restricted to loopback clients\"]}");
 			return response;
