@@ -101,9 +101,12 @@ public class ERXWORepetition extends WODynamicGroup {
 	private static class UnmatchedObjectException extends RuntimeException {}
 
 	/**
-	 * Wraps the list passed to us 
-	 * 
-	 * FIXME: Do we _actually_ want null safety here? // Hugi 2025-06-14
+	 * Wraps the list passed to us: a java.util.List (NSArray included) or an Object[].
+	 *
+	 * Null is deliberately allowed, and wraps as an empty list. A repetition with only a {@code count} binding has
+	 * no list at all, and a {@code list} binding that evaluates to null renders nothing, as with WO's WORepetition.
+	 * Templates rely on the latter everywhere (an optional relationship, a method returning null for "none"). A
+	 * non-null value of any other type throws.
 	 */
 	private static class ListWrapper {
 
