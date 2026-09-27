@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **`ERXNumberFormatter` factor patterns round only as the pattern says**
+  A pattern dividing by a factor without an explicit scale, like `(/1024=)0.00 KB`, now divides at
+  full precision and leaves the rounding to the pattern. Previously the division rounded to the
+  value's own scale (or 4 digits for whole numbers), so 1500.5 displayed as `1.50 KB` rather than
+  `1.47 KB`. (#103)
+
 - **`ERXRequest.remoteAddress(WORequest)`, one way to get the client's address**
   Checks the address a WO adaptor passes on (`x-webobjects-remote-addr`, `remote_addr`,
   `remote_host`, `pc-remote-addr`), then the first address in `x-forwarded-for`, then the
