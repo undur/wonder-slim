@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWOHyperlink" wocomponentcontent="true">
+		<binding name="href"/>
+		<binding name="action" defaults="Actions"/>
+		<binding name="pageName" defaults="Page Names"/>
+		<binding name="directActionName" defaults="Direct Actions"/>
+		<binding name="actionClass" defaults="Direct Action Classes"/>
+		<binding name="queryDictionary"/>
+		<binding name="fragmentIdentifier"/>
+		<binding name="secure" defaults="Boolean"/>
+		<binding name="string"/>
+		<binding name="target"/>
+		<binding name="disabled" defaults="Boolean"/>
+		<validation message="One of 'href', 'action', 'pageName' or 'directActionName'/'actionClass' must be bound">
+			<and>
+				<unbound name="href"/>
+				<unbound name="action"/>
+				<unbound name="pageName"/>
+				<unbound name="directActionName"/>
+				<unbound name="actionClass"/>
+			</and>
+		</validation>
+	</wo>
+</wodefinitions>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWORepetition" wocomponentcontent="true">
+		<binding name="list"/>
+		<binding name="item"/>
+		<binding name="count"/>
+		<binding name="index"/>
+		<binding name="checkHashCodes" defaults="Boolean"/>
+		<binding name="uniqueKey"/>
+		<binding name="raiseOnUnmatchedObject" defaults="Boolean"/>
+		<binding name="notFoundMarker"/>
+		<binding name="debugHashCodes" defaults="Boolean"/>
+		<validation message="Either 'list' or 'count' must be bound">
+			<and>
+				<unbound name="list"/>
+				<unbound name="count"/>
+			</and>
+		</validation>
+		<validation message="'item' is required with 'list'">
+			<and>
+				<bound name="list"/>
+				<unbound name="item"/>
+			</and>
+		</validation>
+	</wo>
+</wodefinitions>

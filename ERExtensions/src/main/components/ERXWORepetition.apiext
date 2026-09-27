@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWORepetition" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders its content once for every item of `list`, or `count` times. Installed in place of `WORepetition`, so it's what `<wo:loop>`, `<wo:repetition>` and `WORepetition` render.
+
+```html
+<wo:loop list="$orders" item="$order" index="$i">…</wo:loop>
+<wo:loop count="3" index="$i">…</wo:loop>
+```
+
+Unlike WO's, it accepts any `java.util.List` or array, and can put each item's hash code (or `uniqueKey`) in element IDs (`checkHashCodes`). An action then finds its own item even if the list changed between rendering the page and following the link, instead of acting on whatever item now sits at that position.]]></doc>
+
+		<binding name="list">
+			<pull><type>java.util.List</type><type>java.lang.Object[]</type></pull>
+			<doc>The items to iterate over. Null renders nothing.</doc>
+		</binding>
+
+		<binding name="item">
+			<push><type>java.lang.Object</type></push>
+			<doc>Receives the current item.</doc>
+		</binding>
+
+		<binding name="count">
+			<pull><type>java.lang.Number</type></pull>
+			<doc>Number of iterations, instead of a `list`.</doc>
+		</binding>
+
+		<binding name="index">
+			<push><type>java.lang.Integer</type></push>
+			<doc>Receives the current index, from 0.</doc>
+		</binding>
+
+		<binding name="checkHashCodes">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>Put each item's hash code (or `uniqueKey`) in element IDs, so an action finds its item even if the list changed. Defaults to `er.extensions.ERXWORepetition.checkHashCodes`.</doc>
+		</binding>
+
+		<binding name="uniqueKey">
+			<pull><type>java.lang.String</type></pull>
+			<doc>A key path on each item whose value identifies it, used instead of its hash code with `checkHashCodes`.</doc>
+		</binding>
+
+		<binding name="raiseOnUnmatchedObject">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>With `checkHashCodes`: throw when an action's item is no longer in the list, rather than using `notFoundMarker`. Defaults to `er.extensions.ERXWORepetition.raiseOnUnmatchedObject`.</doc>
+		</binding>
+
+		<binding name="notFoundMarker">
+			<pull><type>java.lang.Object</type></pull>
+			<doc>With `checkHashCodes`: the item used when an action's item is no longer in the list. Don't bind it to null, which is read as `false`.</doc>
+		</binding>
+
+		<binding name="debugHashCodes">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>Log each item's hash code as the repetition is traversed.</doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="list"/>
+			<binding name="count"/>
+		</choose>
+		<choose max="1">
+			<binding name="count"/>
+			<binding name="item"/>
+		</choose>
+		<requires binding="item" when="list"/>
+		<requires binding="item" must="settable"/>
+		<requires binding="index" must="settable"/>
+
+	</wo>
+</wodefinitions>

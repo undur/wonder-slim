@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOForm" content="expected" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a `<form>`. Installed in place of `WOForm`, so it's what `<wo:form>` and `WOForm` render. Submits to its `action`, a direct action (`directActionName`/`actionClass`) or an `href`; without any of them, to the page's component action URL, where the submitted buttons decide the action. The method is `post` unless bound. Differences from WO's:
+
+- A form inside another form is left out, with a warning, unless it's `embedded`, since browsers don't support nested forms.
+- It can add an off-screen default submit button (`addDefaultSubmitButton`), so pressing return submits.
+- It publishes its name to the context, for elements that need to refer to their form.
+
+Attributes prefixed with `?` become query parameters. Every other attribute is rendered on the tag.]]></doc>
+
+		<binding name="action"><pull><type>com.webobjects.appserver.WOActionResults</type></pull><doc>Component action invoked on submit. Must not be a constant.</doc></binding>
+		<binding name="directActionName"><pull><type>java.lang.String</type></pull><doc>Direct action to submit to (in `actionClass`, or `DirectAction`).</doc></binding>
+		<binding name="actionClass"><pull><type>java.lang.String</type></pull><doc>Direct action class.</doc></binding>
+		<binding name="href"><pull><type>java.lang.String</type></pull><doc>URL to submit to.</doc></binding>
+		<binding name="queryDictionary"><pull><type>java.util.Map</type></pull><doc>Query parameters added to the form's URL.</doc></binding>
+		<binding name="fragmentIdentifier"><pull><type>java.lang.String</type></pull><doc>Fragment (`#…`) appended to the form's URL, for example to scroll to error messages after submitting.</doc></binding>
+		<binding name="secure"><pull><type>java.lang.Boolean</type></pull><doc>Submit to an https URL.</doc></binding>
+		<binding name="method"><pull><type>java.lang.String</type></pull><doc>The HTTP method. Defaults to `post`.</doc></binding>
+		<binding name="enctype"><pull><type>java.lang.String</type></pull><doc>The form's encoding. A file upload inside the form requires `multipart/form-data`.</doc></binding>
+		<binding name="name"><pull><type>java.lang.String</type></pull><doc>The form's name, also published to the context for elements inside it.</doc></binding>
+		<binding name="id"><pull><type>java.lang.String</type></pull><doc>The form's `id`. With `er.extensions.ERXWOForm.useIdInsteadOfNameTag`, used as the form's name, rendered as `id`.</doc></binding>
+		<binding name="multipleSubmit"><pull><type>java.lang.Boolean</type></pull><doc>Whether the form has several submit buttons, each with its own action. Defaults to `er.extensions.ERXWOForm.multipleSubmitDefault`.</doc></binding>
+		<binding name="addDefaultSubmitButton"><pull><type>java.lang.Boolean</type></pull><doc>Add an off-screen submit button at the start of the form, so pressing return submits it. Defaults to `er.extensions.ERXWOForm.addDefaultSubmitButtonDefault`.</doc></binding>
+		<binding name="disabled"><pull><type>java.lang.Boolean</type></pull><doc>If true, the form's tags are left out and only its content renders.</doc></binding>
+		<binding name="embedded"><pull><type>java.lang.Boolean</type></pull><doc>Render the form even inside another form, for forms that are nested in the markup but independent for the user, such as in a modal container.</doc></binding>
+
+		<choose max="1">
+			<binding name="action"/>
+			<binding name="href"/>
+			<any-of><binding name="directActionName"/><binding name="actionClass"/></any-of>
+		</choose>
+		<requires binding="action" must="gettable"/>
+
+	</wo>
+</wodefinitions>

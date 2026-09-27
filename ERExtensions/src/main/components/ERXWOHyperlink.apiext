@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOHyperlink" content="allowed" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a link, `<a>`: to a URL (`href`), a component action (`action`), a page (`pageName`), or a direct action (`directActionName`/`actionClass`). Installed in place of `WOHyperlink`, so it's what `<wo:link>` and `WOHyperlink` render. Differences from WO's:
+
+- A disabled link's action returns the current page, not an empty response.
+- Actions of elements inside the link (such as an `onclick` element) are invoked.
+- The invoked action is recorded for logging.
+- With `er.extensions.ERXHyperlink.defaultNoFollow`, links with an `action` get `rel="nofollow"`.
+
+Attributes prefixed with `?` become query parameters (`?id="$item.id"`). Every other attribute is rendered on the tag.]]></doc>
+
+		<binding name="href"><pull><type>java.lang.String</type></pull><doc>URL to link to.</doc></binding>
+		<binding name="action"><pull><type>com.webobjects.appserver.WOActionResults</type></pull><doc>Component action invoked when the link is followed.</doc></binding>
+		<binding name="pageName"><pull><type>java.lang.String</type></pull><doc>Name of the page to go to.</doc></binding>
+		<binding name="directActionName"><pull><type>java.lang.String</type></pull><doc>Direct action to link to (in `actionClass`, or `DirectAction`).</doc></binding>
+		<binding name="actionClass"><pull><type>java.lang.String</type></pull><doc>Direct action class. Without `directActionName`, its default action.</doc></binding>
+		<binding name="queryDictionary"><pull><type>java.util.Map</type></pull><doc>Query parameters added to the URL.</doc></binding>
+		<binding name="fragmentIdentifier"><pull><type>java.lang.String</type></pull><doc>Fragment (`#…`) appended to the URL.</doc></binding>
+		<binding name="secure"><pull><type>java.lang.Boolean</type></pull><doc>Generate an https URL.</doc></binding>
+		<binding name="string"><pull><type>java.lang.String</type></pull><doc>Text of the link.</doc></binding>
+		<binding name="target"><pull><type>java.lang.String</type></pull><doc>The link's `target` attribute.</doc></binding>
+		<binding name="disabled"><pull><type interpretation="truthy">java.lang.Object</type></pull><doc>If true, renders the content without a link.</doc></binding>
+
+		<choose min="1" max="1">
+			<binding name="href"/>
+			<binding name="action"/>
+			<binding name="pageName"/>
+			<any-of><binding name="directActionName"/><binding name="actionClass"/></any-of>
+		</choose>
+
+	</wo>
+</wodefinitions>

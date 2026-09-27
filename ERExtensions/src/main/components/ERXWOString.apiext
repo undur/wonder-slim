@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOString" content="forbidden" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders a value as text, HTML-escaped by default, optionally formatted. Installed in place of `WOString`, so it's what `<wo:str>` and `WOString` render.
+
+```html
+<wo:str value="$order.total" numberformat="#,##0.00" />
+<wo:str value="$order.date" dateformat="%d.%m.%Y" />
+<wo:str value="$order.shippedOn" dateformat="dd.MM.yyyy" valueWhenEmpty="Not shipped" />
+```
+
+At most one of `dateformat`, `numberformat` and `formatter`.]]></doc>
+
+		<binding name="value" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<doc>The value to render, with `toString()` unless it's formatted.</doc>
+		</binding>
+
+		<binding name="valueWhenEmpty">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Rendered instead when the value is null or renders as an empty string. Currently rendered unescaped (see #89).</doc>
+		</binding>
+
+		<binding name="escapeHTML">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>Whether to HTML-escape the rendered value. Defaults to true.</doc>
+		</binding>
+
+		<binding name="dateformat">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Date format pattern. For an `NSTimestamp`: an `NSTimestampFormatter` (strftime-style) pattern such as `%d.%m.%Y`. For a java.time value (`LocalDate`, `LocalDateTime`, `ZonedDateTime`, `Instant`, …): either that syntax, recognised by a `%` outside quoted text and rendered exactly as `NSTimestampFormatter` would, or a `DateTimeFormatter` pattern such as `dd.MM.yyyy`. A pattern that doesn't fit the value (a time on a `LocalDate`) throws. When bound but null: the full timestamp for an `NSTimestamp`, ISO `toString()` for a java.time value.]]></doc>
+		</binding>
+
+		<binding name="numberformat">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Number format pattern, such as `#,##0.00`, in the current locale. When bound but null: a default for the value's type.</doc>
+		</binding>
+
+		<binding name="formatter">
+			<pull><type>java.text.Format</type><type>java.time.format.DateTimeFormatter</type></pull>
+			<doc>A formatter to use instead of a pattern: a `java.text.Format`, or a `DateTimeFormatter` for java.time values.</doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="dateformat"/>
+			<binding name="numberformat"/>
+			<binding name="formatter"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

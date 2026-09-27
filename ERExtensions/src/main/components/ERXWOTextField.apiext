@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXWOTextField" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an `<input>` field and, when the form is submitted, parses its text back into `value`, optionally through a formatter. Installed in place of `WOTextField`.
+
+```html
+<wo:WOTextField value="$price" numberformat="#,##0.00" />
+<wo:WOTextField value="$email" type="email" blankIsNull="true" />
+```
+
+Numbers and dates are formatted **and parsed** in the current locale (`ERXLocale.current()`). With an Icelandic locale, for instance, `12.50` parses as 1250, so apps must only set a locale they mean. Every other attribute is rendered on the tag. At most one of `dateformat`, `numberformat` and `formatter`.]]></doc>
+
+		<binding name="value" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
+			<doc>The field's value: rendered, and set from the submitted text.</doc>
+		</binding>
+
+		<binding name="type">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The input's `type` attribute, such as `email`, `number` or `date`. Defaults to `text`.</doc>
+		</binding>
+
+		<binding name="numberformat">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Number format pattern, such as `#,##0.00`, for rendering and parsing.</doc>
+		</binding>
+
+		<binding name="dateformat">
+			<pull><type>java.lang.String</type></pull>
+			<doc>`NSTimestampFormatter` date format pattern, such as `%d.%m.%Y`, for rendering and parsing `NSTimestamp` values.</doc>
+		</binding>
+
+		<binding name="formatter">
+			<pull><type>java.text.Format</type></pull>
+			<doc>A formatter to use instead of a pattern.</doc>
+		</binding>
+
+		<binding name="useDecimalNumber">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>With a number format: set the parsed value as a `BigDecimal`.</doc>
+		</binding>
+
+		<binding name="blankIsNull">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>Set an empty submission as null rather than `""`. Defaults to true.</doc>
+		</binding>
+
+		<binding name="readonly">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>If true, the field is rendered but its submitted value isn't taken.</doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type>java.lang.Boolean</type></pull>
+			<doc>If true, the field is rendered disabled and its value isn't taken.</doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The input's name. Generated from the element ID if not bound.</doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="dateformat"/>
+			<binding name="numberformat"/>
+			<binding name="formatter"/>
+		</choose>
+		<requires binding="value" must="settable"/>
+
+	</wo>
+</wodefinitions>

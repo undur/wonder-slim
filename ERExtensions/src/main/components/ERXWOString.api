@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWOString" wocomponentcontent="false">
+		<binding name="value"/>
+		<binding name="valueWhenEmpty"/>
+		<binding name="escapeHTML" defaults="Boolean"/>
+		<binding name="dateformat" defaults="Date Format Strings"/>
+		<binding name="numberformat" defaults="Number Format Strings"/>
+		<binding name="formatter"/>
+		<validation message="'value' is a required binding">
+			<unbound name="value"/>
+		</validation>
+	</wo>
+</wodefinitions>

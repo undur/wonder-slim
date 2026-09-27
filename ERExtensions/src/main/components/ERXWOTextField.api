@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXWOTextField" wocomponentcontent="false">
+		<binding name="value"/>
+		<binding name="type"/>
+		<binding name="numberformat" defaults="Number Format Strings"/>
+		<binding name="dateformat" defaults="Date Format Strings"/>
+		<binding name="formatter"/>
+		<binding name="useDecimalNumber" defaults="Boolean"/>
+		<binding name="blankIsNull" defaults="Boolean"/>
+		<binding name="readonly" defaults="Boolean"/>
+		<binding name="disabled" defaults="Boolean"/>
+		<binding name="name"/>
+		<validation message="'value' is a required binding">
+			<unbound name="value"/>
+		</validation>
+		<validation message="'value' must be settable">
+			<unsettable name="value"/>
+		</validation>
+	</wo>
+</wodefinitions>
