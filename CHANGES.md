@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Response compression fixes**
+  Responses worth compressing now carry `Vary: Accept-Encoding`, so caches don't hand gzipped
+  content to clients that can't read it. Responses already encoded in any coding are left alone. A
+  content stream that fails to compress becomes a logged 500 instead of an empty 200. Content types
+  are matched without their parameters, so `application/json; charset=utf-8` is compressed. The
+  default extra types are now `application/javascript`, `application/json`, `application/xml` and
+  `image/svg+xml`. `Accept-Encoding` quality values are honoured, and responses under 1 KB aren't
+  compressed. The copied-in byte buffer class and compression helpers are replaced with a single
+  method built on the JDK's streams, which no longer holds a buffer the size of the uncompressed
+  response, and reads content in place and within its range (content that's a slice of a larger
+  array was compressed from the start of the array). Compression is still off by default (`er.extensions.ERXApplication.responseCompressionEnabled`). (#83)
+
 - **ERXP lists every configuration parameter ERExtensions reads**
   Each property key ERExtensions reads is a constant in the `ERXP` enum, documented with what
   the property does and its default, and grouped by the class that reads it. Code references

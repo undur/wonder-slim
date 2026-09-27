@@ -848,9 +848,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		if( ERXResponseCompression.responseCompressionEnabled() ) {
-			if( ERXResponseCompression.shouldCompress( request, response ) ) {
-				ERXResponseCompression.compressResponse( response );
-			}
+			ERXResponseCompression.applyCompression( request, response );
 		}
 
 		return response;

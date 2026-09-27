@@ -188,7 +188,7 @@ public enum ERXP {
 	RESPONSE_COMPRESSION_ENABLED( "er.extensions.ERXApplication.responseCompressionEnabled" ),
 
 	/**
-	 * The content types compressed, as an array. Defaults to {@code (text/javascript)}.
+	 * The content types compressed in addition to every {@code text/*} type, as an array. Parameters such as {@code charset} and case are ignored when matching. Defaults to {@code (application/javascript, application/json, application/xml, image/svg+xml)}.
 	 *
 	 * FIXME: Rename the property to reflect ERXResponseCompression, the class that reads it // Hugi 2021-05-24
 	 */

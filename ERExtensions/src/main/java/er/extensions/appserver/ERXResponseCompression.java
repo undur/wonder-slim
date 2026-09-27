@@ -1,9 +1,11 @@
 package er.extensions.appserver;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
@@ -14,8 +16,8 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSData;
+import com.webobjects.foundation.NSMutableRange;
 import com.webobjects.foundation.NSRange;
-import com.webobjects.foundation.NSSet;
 
 import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
@@ -32,355 +34,243 @@ public class ERXResponseCompression {
 	private static Boolean _responseCompressionEnabled;
 
 	/**
-	 * checks the value of
-	 * <code>er.extensions.ERXApplication.responseCompressionTypes</code> for
-	 * mime types that allow response compression in addition to text/* types.
-	 * The default is ("text/javascript")
-	 * 
-	 * @return an array of mime type strings
+	 * Responses smaller than this aren't worth compressing: the gzip header and the work outweigh the savings, and the
+	 * result can be larger than the original.
+	 */
+	private static final int MINIMUM_SIZE = 1024;
+
+	/**
+	 * Content types compressed by default, in addition to every {@code text/*} type
+	 */
+	private static final NSArray<String> DEFAULT_COMPRESSION_TYPES = new NSArray<>( new String[] { "application/javascript", "application/json", "application/xml", "image/svg+xml" } );
+
+	/**
+	 * @return The content types compressed in addition to every {@code text/*} type, lowercase. See {@link ERXP#RESPONSE_COMPRESSION_TYPES}.
 	 */
 	public static Set<String> responseCompressionTypes() {
-		if (_responseCompressionTypes == null) {
-			_responseCompressionTypes = new NSSet<>(ERXProperties.arrayForKeyWithDefault(ERXP.RESPONSE_COMPRESSION_TYPES.id(), new NSArray<>("text/javascript")));
+		if( _responseCompressionTypes == null ) {
+			final Set<String> types = new HashSet<>();
+
+			for( final String type : ERXProperties.arrayForKeyWithDefault( ERXP.RESPONSE_COMPRESSION_TYPES.id(), DEFAULT_COMPRESSION_TYPES ) ) {
+				types.add( type.trim().toLowerCase( Locale.ROOT ) );
+			}
+
+			_responseCompressionTypes = Set.copyOf( types );
 		}
 
 		return _responseCompressionTypes;
 	}
 
 	/**
-	 * checks the value of
-	 * <code>er.extensions.ERXApplication.responseCompressionEnabled</code> and
-	 * if true turns on response compression by gzip
+	 * @return true if response compression is turned on. See {@link ERXP#RESPONSE_COMPRESSION_ENABLED}.
 	 */
 	public static boolean responseCompressionEnabled() {
-		if (_responseCompressionEnabled == null) {
-			_responseCompressionEnabled = ERXProperties.booleanForKeyWithDefault(ERXP.RESPONSE_COMPRESSION_ENABLED.id(), false) ? Boolean.TRUE : Boolean.FALSE;
+		if( _responseCompressionEnabled == null ) {
+			_responseCompressionEnabled = ERXProperties.booleanForKeyWithDefault( ERXP.RESPONSE_COMPRESSION_ENABLED.id(), false );
 		}
 
 		return _responseCompressionEnabled;
 	}
 
 	/**
-	 * Checks headers on the request and response
-	 * 
-	 * FIXME: clean up those checks a bit to make it easier to see what's happening.
+	 * Compresses the response if it's worth compressing and the client accepts gzip. A response that's worth
+	 * compressing also gets {@code Vary: Accept-Encoding}, whether or not this client accepts gzip, since the
+	 * response differs by that header and a cache in between must know.
+	 */
+	public static void applyCompression( final WORequest request, final WOResponse response ) {
+		if( isCompressible( response ) ) {
+			response.setHeader( varyIncludingAcceptEncoding( response.headerForKey( "vary" ) ), "vary" );
+
+			if( acceptsGzip( request.headerForKey( "accept-encoding" ) ) ) {
+				compressResponse( response );
+			}
+		}
+	}
+
+	/**
+	 * @return true if the response is worth compressing and the client accepts gzip
 	 */
 	public static boolean shouldCompress( final WORequest request, final WOResponse response ) {
+		return isCompressible( response ) && acceptsGzip( request.headerForKey( "accept-encoding" ) );
+	}
+
+	/**
+	 * @return true if the response is worth compressing, regardless of what the client accepts
+	 */
+	private static boolean isCompressible( final WOResponse response ) {
+
 		// A content stream of unknown length (length 0 with a stream present) is open-ended - server-sent events, for
 		// instance. Compressing would mean reading it to its end first, which never comes. Leave such responses alone.
 		if( response.contentInputStream() != null && response.contentInputStreamLength() <= 0 ) {
 			return false;
 		}
 
-		final String responseContentType = response.headerForKey("content-type");
-		final String responseContentEncoding = response.headerForKey("content-encoding");
-		final String requestAcceptEncoding = request.headerForKey("accept-encoding");
+		// Already encoded, gzip or otherwise
+		if( isEncoded( response.headerForKey( "content-encoding" ) ) ) {
+			return false;
+		}
 
-		final boolean contentTypeCheck = !"gzip".equals(responseContentEncoding) && (responseContentType != null) && (responseContentType.startsWith("text/") || responseCompressionTypes().contains(responseContentType));
-		final boolean acceptEncodingCheck = (requestAcceptEncoding != null) && (requestAcceptEncoding.toLowerCase().indexOf("gzip") != -1);
-		
-		return contentTypeCheck && acceptEncodingCheck;
+		if( !isCompressibleType( response.headerForKey( "content-type" ) ) ) {
+			return false;
+		}
+
+		final long length = response.contentInputStream() != null ? response.contentInputStreamLength() : response.content().length();
+		return length >= MINIMUM_SIZE;
 	}
 
+	/**
+	 * @return true if the given Content-Encoding header value says the content is encoded
+	 */
+	static boolean isEncoded( final String contentEncoding ) {
+		return contentEncoding != null && !contentEncoding.isBlank() && !contentEncoding.trim().equalsIgnoreCase( "identity" );
+	}
+
+	/**
+	 * @return true if the given Content-Type header value is a {@code text/*} type or one of {@link #responseCompressionTypes()}. Parameters (such as {@code charset}) and case are ignored.
+	 */
+	static boolean isCompressibleType( final String contentType ) {
+		if( contentType == null ) {
+			return false;
+		}
+
+		final int semicolon = contentType.indexOf( ';' );
+		final String mimeType = (semicolon == -1 ? contentType : contentType.substring( 0, semicolon )).trim().toLowerCase( Locale.ROOT );
+		return mimeType.startsWith( "text/" ) || responseCompressionTypes().contains( mimeType );
+	}
+
+	/**
+	 * @return true if the given Accept-Encoding header value accepts gzip: {@code gzip}, {@code x-gzip} or {@code *} with a nonzero quality, and gzip not explicitly refused with {@code q=0}
+	 */
+	static boolean acceptsGzip( final String acceptEncoding ) {
+		if( acceptEncoding == null ) {
+			return false;
+		}
+
+		Boolean gzip = null;
+		boolean wildcard = false;
+
+		for( final String element : acceptEncoding.split( "," ) ) {
+			final String[] parts = element.split( ";" );
+			final String coding = parts[0].trim().toLowerCase( Locale.ROOT );
+			final boolean accepted = quality( parts ) > 0;
+
+			if( coding.equals( "gzip" ) || coding.equals( "x-gzip" ) ) {
+				gzip = accepted;
+			}
+			else if( coding.equals( "*" ) ) {
+				wildcard = accepted;
+			}
+		}
+
+		return gzip != null ? gzip : wildcard;
+	}
+
+	/**
+	 * @return The quality ({@code q=}) of an Accept-Encoding element split at its semicolons: 1 if unspecified, 0 if unparseable
+	 */
+	private static double quality( final String[] parts ) {
+		for( int i = 1; i < parts.length; i++ ) {
+			final String parameter = parts[i].trim();
+
+			if( parameter.toLowerCase( Locale.ROOT ).startsWith( "q=" ) ) {
+				try {
+					return Double.parseDouble( parameter.substring( 2 ).trim() );
+				}
+				catch( NumberFormatException e ) {
+					return 0;
+				}
+			}
+		}
+
+		return 1;
+	}
+
+	/**
+	 * @return The given Vary header value with {@code Accept-Encoding} added, unless it's already there (or the value is {@code *})
+	 */
+	static String varyIncludingAcceptEncoding( final String vary ) {
+		if( vary == null || vary.isBlank() ) {
+			return "Accept-Encoding";
+		}
+
+		for( final String header : vary.split( "," ) ) {
+			final String name = header.trim();
+
+			if( name.equals( "*" ) || name.equalsIgnoreCase( "accept-encoding" ) ) {
+				return vary;
+			}
+		}
+
+		return vary + ", Accept-Encoding";
+	}
+
+	/**
+	 * Replaces the response's content with its gzipped version. The response is only modified once compression has
+	 * succeeded. If compressing byte content fails, the response goes out uncompressed. If compressing a content
+	 * stream fails, the stream has already been read, so the response becomes an empty 500.
+	 */
 	public static void compressResponse( final WOResponse response ) {
-	
 		final long start = System.currentTimeMillis();
-		final long inputBytesLength;
 		final InputStream contentInputStream = response.contentInputStream();
+		final long inputBytesLength;
 		final NSData compressedData;
 
-		if (contentInputStream != null) {
+		if( contentInputStream != null ) {
 			inputBytesLength = response.contentInputStreamLength();
-			compressedData = ERXCompressionUtilities.gzipInputStreamAsNSData(contentInputStream, (int) inputBytesLength);
-			response.setContentStream(null, 0, 0);
+
+			try {
+				compressedData = gzip( contentInputStream );
+			}
+			catch( IOException e ) {
+				log.error( "Failed to compress a content stream of {} bytes. The stream has been read, so the response can't be sent; answering 500.", inputBytesLength, e );
+				response.setContentStream( null, 0, 0 );
+				response.setContent( NSData.EmptyData );
+				response.setStatus( 500 );
+				return;
+			}
+
+			response.setContentStream( null, 0, 0 );
 		}
 		else {
 			final NSData input = response.content();
 			inputBytesLength = input.length();
 
-			if (inputBytesLength > 0) {
-				compressedData = ERXCompressionUtilities.gzipByteArrayAsNSData(input._bytesNoCopy(), 0, (int) inputBytesLength);
+			if( inputBytesLength == 0 ) {
+				return;
 			}
-			else {
-				compressedData = NSData.EmptyData;
+
+			// bytesNoCopy() with a range reads the content in place. NSData.stream() would copy content set with
+			// setContent(), and _bytesNoCopy() without a range ignores where the bytes start in the backing array.
+			final NSMutableRange range = new NSMutableRange();
+			final byte[] bytes = input.bytesNoCopy( range );
+
+			try {
+				compressedData = gzip( new ByteArrayInputStream( bytes, range.location(), range.length() ) );
+			}
+			catch( IOException e ) {
+				log.error( "Failed to compress {} bytes of content. Sending it uncompressed.", inputBytesLength, e );
+				return;
 			}
 		}
 
-		if (inputBytesLength > 0) {
-			if (compressedData == null) {
-				// something went wrong
-			}
-			else {
-				response.setContent(compressedData);
-				response.setHeader(String.valueOf(compressedData.length()), "content-length");
-				response.setHeader("gzip", "content-encoding");
+		response.setContent( compressedData );
+		response.setHeader( String.valueOf( compressedData.length() ), "content-length" );
+		response.setHeader( "gzip", "content-encoding" );
 
-				if (log.isDebugEnabled()) {
-					log.debug("before: " + inputBytesLength + ", after " + compressedData.length() + ", time: " + (System.currentTimeMillis() - start));
-				}
-			}
-		}
+		log.debug( "before: {}, after {}, time: {}", inputBytesLength, compressedData.length(), System.currentTimeMillis() - start );
 	}
-	
-	private static class ERXCompressionUtilities {
 
-		/**
-		 * Returns an NSData containing the gzipped version of the given input stream.
-		 * 
-		 * @param input the input stream to compress
-		 * @param length the length of the input stream
-		 * @return gzipped NSData
-		 */
-		private static NSData gzipInputStreamAsNSData(InputStream input, int length) {
-			try( ERXRefByteArrayOutputStream bos = new ERXRefByteArrayOutputStream(length)) {
-				if (input != null) {
-					try( GZIPOutputStream out = new GZIPOutputStream(bos)) {
-						input.transferTo(out);
-					}
-					finally {
-						input.close();
-					}
-				}
-				return bos.toNSData();
-			}
-			catch (IOException e) {
-				log.error("Failed to gzip byte array.", e);
-				return null;
-			}
+	/**
+	 * @return The input's content, gzipped. The input is closed.
+	 */
+	private static NSData gzip( final InputStream input ) throws IOException {
+		final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+		try( input; GZIPOutputStream gzip = new GZIPOutputStream( bytes ) ) {
+			input.transferTo( gzip );
 		}
 
-		private static NSData gzipByteArrayAsNSData(byte[] input, int offset, int length) {
-			try( ERXRefByteArrayOutputStream bos = new ERXRefByteArrayOutputStream(length)) {
-				if (input != null) {
-					try( GZIPOutputStream out = new GZIPOutputStream(bos)) {
-						out.write(input, offset, length);
-						out.finish();
-					}
-				}
-				return bos.toNSData();
-			}
-			catch (IOException e) {
-				log.error("Failed to gzip byte array.", e);
-				return null;
-			}
-		}
-
-		/**
-		 * This class is uh ... inspired ... by ByteArrayOutputStream, except
-		 * that it gives direct access to the underlying byte buffer for 
-		 * performing operations on the buffer without a byte array copying
-		 * penalty.
-		 *
-		 * @author  Arthur van Hoff
-		 * @author mschrag
-		 */
-		private static class ERXRefByteArrayOutputStream extends OutputStream {
-
-		  /** 
-		   * The buffer where data is stored. 
-		   */
-		  protected byte buf[];
-
-		  /**
-		   * The number of valid bytes in the buffer. 
-		   */
-		  protected int count;
-
-		  /**
-		   * Creates a new byte array output stream. The buffer capacity is 
-		   * initially 32 bytes, though its size increases if necessary. 
-		   */
-		  public ERXRefByteArrayOutputStream() {
-		    this(32);
-		  }
-
-		  /**
-		   * Creates a new byte array output stream, with a buffer capacity of 
-		   * the specified size, in bytes. 
-		   *
-		   * @param   size   the initial size.
-		   * @exception  IllegalArgumentException if size is negative.
-		   */
-		  public ERXRefByteArrayOutputStream(int size) {
-		    if (size < 0) {
-		      throw new IllegalArgumentException("Negative initial size: " + size);
-		    }
-		    buf = new byte[size];
-		  }
-
-		  /**
-		   * Writes the specified byte to this byte array output stream. 
-		   *
-		   * @param   b   the byte to be written.
-		   */
-		  @Override
-		  public synchronized void write(int b) {
-		    int newcount = count + 1;
-		    if (newcount > buf.length) {
-		      byte newbuf[] = new byte[Math.max(buf.length << 1, newcount)];
-		      System.arraycopy(buf, 0, newbuf, 0, count);
-		      buf = newbuf;
-		    }
-		    buf[count] = (byte) b;
-		    count = newcount;
-		  }
-
-		  /**
-		   * Writes <code>len</code> bytes from the specified byte array 
-		   * starting at offset <code>off</code> to this byte array output stream.
-		   *
-		   * @param   b     the data.
-		   * @param   off   the start offset in the data.
-		   * @param   len   the number of bytes to write.
-		   */
-		  @Override
-		  public synchronized void write(byte b[], int off, int len) {
-		    if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
-		      throw new IndexOutOfBoundsException();
-		    }
-		    else if (len == 0) {
-		      return;
-		    }
-		    int newcount = count + len;
-		    if (newcount > buf.length) {
-		      byte newbuf[] = new byte[Math.max(buf.length << 1, newcount)];
-		      System.arraycopy(buf, 0, newbuf, 0, count);
-		      buf = newbuf;
-		    }
-		    System.arraycopy(b, off, buf, count, len);
-		    count = newcount;
-		  }
-
-		  /**
-		   * Writes the complete contents of this byte array output stream to 
-		   * the specified output stream argument, as if by calling the output 
-		   * stream's write method using <code>out.write(buf, 0, count)</code>.
-		   *
-		   * @param      out   the output stream to which to write the data.
-		   * @exception  IOException  if an I/O error occurs.
-		   */
-		  public synchronized void writeTo(OutputStream out) throws IOException {
-		    out.write(buf, 0, count);
-		  }
-
-		  /**
-		   * Resets the <code>count</code> field of this byte array output 
-		   * stream to zero, so that all currently accumulated output in the 
-		   * ouput stream is discarded. The output stream can be used again, 
-		   * reusing the already allocated buffer space. 
-		   *
-		   * @see     java.io.ByteArrayInputStream#count
-		   */
-		  public synchronized void reset() {
-		    count = 0;
-		  }
-
-		  /**
-		   * Creates a newly allocated byte array. Its size is the current 
-		   * size of this output stream and the valid contents of the buffer 
-		   * have been copied into it. 
-		   *
-		   * @return  the current contents of this output stream, as a byte array.
-		   * @see     java.io.ByteArrayOutputStream#size()
-		   */
-		  public synchronized byte toByteArray()[] {
-		    byte newbuf[] = new byte[count];
-		    System.arraycopy(buf, 0, newbuf, 0, count);
-		    return newbuf;
-		  }
-
-		  /**
-		   * Returns the current size of the buffer.
-		   *
-		   * @return  the value of the <code>count</code> field, which is the number
-		   *          of valid bytes in this output stream.
-		   * @see     java.io.ByteArrayOutputStream#count
-		   */
-		  public int size() {
-		    return count;
-		  }
-
-		  /**
-		   * Converts the buffer's contents into a string, translating bytes into
-		   * characters according to the platform's default character encoding.
-		   *
-		   * @return String translated from the buffer's contents.
-		   * @since   JDK1.1
-		   */
-		  @Override
-		  public String toString() {
-		    return new String(buf, 0, count);
-		  }
-
-		  /**
-		   * Converts the buffer's contents into a string, translating bytes into
-		   * characters according to the specified character encoding.
-		   *
-		   * @param   enc  a character-encoding name.
-		   * @return String translated from the buffer's contents.
-		   * @throws UnsupportedEncodingException
-		   *         If the named encoding is not supported.
-		   * @since   JDK1.1
-		   */
-		  public String toString(String enc) throws UnsupportedEncodingException {
-		    return new String(buf, 0, count, enc);
-		  }
-
-		  /**
-		   * Creates a newly allocated string. Its size is the current size of 
-		   * the output stream and the valid contents of the buffer have been 
-		   * copied into it. Each character <i>c</i> in the resulting string is 
-		   * constructed from the corresponding element <i>b</i> in the byte 
-		   * array such that:
-		   * <blockquote><pre>
-		   *     c == (char)(((hibyte &amp; 0xff) &lt;&lt; 8) | (b &amp; 0xff))
-		   * </pre></blockquote>
-		   *
-		   * @deprecated This method does not properly convert bytes into characters.
-		   * As of JDK&nbsp;1.1, the preferred way to do this is via the
-		   * <code>toString(String enc)</code> method, which takes an encoding-name
-		   * argument, or the <code>toString()</code> method, which uses the
-		   * platform's default character encoding.
-		   *
-		   * @param      hibyte    the high byte of each resulting Unicode character.
-		   * @return     the current contents of the output stream, as a string.
-		   * @see        java.io.ByteArrayOutputStream#size()
-		   * @see        java.io.ByteArrayOutputStream#toString(String)
-		   * @see        java.io.ByteArrayOutputStream#toString()
-		   */
-		  @Deprecated
-		  public String toString(int hibyte) {
-		    return new String(buf, hibyte, 0, count);
-		  }
-
-		  /**
-		   * Closing a <tt>ByteArrayOutputStream</tt> has no effect. The methods in
-		   * this class can be called after the stream has been closed without
-		   * generating an <tt>IOException</tt>.
-		   * <p>
-		   *
-		   */
-		  @Override
-		  public void close() {
-		  }
-
-		  /**
-		   * Returns the underlying byte buffer for this stream.
-		   * 
-		   * @return the underlying byte buffer for this stream
-		   */
-		  public synchronized byte[] getBuffer() {
-		    return buf;
-		  }
-
-		  /**
-		   * Returns a no-copy NSData of the byte buffer for this stream.
-		   * 
-		   * @return a no-copy NSData of the byte buffer for this stream
-		   */
-		  public synchronized NSData toNSData() {
-		    return new NSData(buf, new NSRange(0, count), true);
-		  }
-		}
+		final byte[] compressed = bytes.toByteArray();
+		return new NSData( compressed, new NSRange( 0, compressed.length ), true );
 	}
 }
