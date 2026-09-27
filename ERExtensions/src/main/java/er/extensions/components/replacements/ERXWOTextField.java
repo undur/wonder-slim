@@ -49,7 +49,8 @@ public class ERXWOTextField extends WOInput {
 	protected WOAssociation _typeAss;
 
 	public ERXWOTextField(String tagname, NSDictionary nsdictionary, WOElement woelement) {
-		super("input", nsdictionary, woelement);
+		// An input has no content: like WO's WOTextField, the template (anything written inside the element) is ignored
+		super("input", nsdictionary, null);
 
 		if (_value == null || !_value.isValueSettable()) {
 			throw new WODynamicElementCreationException("<" + getClass().getName() + "> 'value' attribute not present or is a constant");
@@ -230,10 +231,6 @@ public class ERXWOTextField extends WOInput {
 		if (isReadonlyInContext(wocontext)) {
 			woresponse._appendTagAttributeAndValue("readonly", "readonly", false);
 		}
-	}
-
-	@Override
-	protected void _appendCloseTagToResponse(WOResponse woresponse, WOContext wocontext) {
 	}
 
 	@Override

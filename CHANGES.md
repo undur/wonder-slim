@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **`WOTextField` ignores content, as WebObjects' does**
+  Anything written inside a text field element was rendered after the `<input>`. It's now ignored,
+  as in WebObjects' own `WOTextField`. (#120)
+
 - **`ERXErrorPage` documented, and its session-expiry helper fixed**
   `ERXErrorPage` is a general-purpose error page for applications:
   `ERXErrorPage.errorWithMessageAndStatusCode(message, context, status)` shows a message (HTML) on
