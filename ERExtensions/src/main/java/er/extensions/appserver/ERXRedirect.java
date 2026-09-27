@@ -200,7 +200,11 @@ public class ERXRedirect extends WOComponent {
 		try {
 			WOComponent component = _component;
 			if (component != null) {
-				
+				// Redirecting to a component instance: we make it this context's page (_setPageComponent below) and force
+				// the page to be stored (even for an Ajax request, see the end of this method), so the request handler
+				// saves it under the current context ID. The redirect URL, <contextID>.0, then restores exactly this
+				// instance, and since the sender ID ".0" names no element, the follow-up request just renders it.
+
 				// Build request handler path with session ID if needed
 		        WOSession aSession = session();
 				String aContextId = context.contextID();

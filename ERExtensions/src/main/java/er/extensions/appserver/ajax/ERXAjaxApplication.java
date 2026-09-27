@@ -15,9 +15,6 @@ import er.extensions.routes.ERXRoutingApplication;
 
 /**
  * ERXAjaxApplication is the part of ERXApplication that handles Ajax requests.
- * If you want to use the Ajax framework without using other parts of Project
- * Wonder (i.e. ERXSession or ERXApplication), you should steal all of the code
- * in ERXAjaxSession, ERXAjaxApplication, and ERXAjaxContext.
  * 
  * @property er.extensions.ERXAjaxApplication.allowContextPageResponse
  *
@@ -87,7 +84,11 @@ public abstract class ERXAjaxApplication extends ERXRoutingApplication {
 	
 	
 	/**
-	 * Overridden to allow for redirected responses.
+	 * For an Ajax request (one whose page isn't stored, see {@link #shouldNotStorePage(WOContext)}), a null action
+	 * result or the context's page itself would make the component request handler render the whole page, as for any
+	 * component action, into what should be a fragment response. We return context.response() instead (or what the
+	 * response delegate makes of it), which the handler hands back as it is. An Ajax replacement request, which does
+	 * want the page, is left alone, as is a context page result when allowContextPageResponse is set.
 	 */
 	@Override
 	public WOActionResults invokeAction(WORequest request, WOContext context) {
@@ -121,7 +122,6 @@ public abstract class ERXAjaxApplication extends ERXRoutingApplication {
 	/**
 	 * Allow for context.page() as a result to an ajax call. Currently for debugging.
 	 */
-	// AK: REMOVEME if WOGWT doesn't work out...
 	private Boolean _allowContextPageResponse;
 	private boolean allowContextPageResponse() {
 		if(_allowContextPageResponse == null) {
@@ -135,7 +135,8 @@ public abstract class ERXAjaxApplication extends ERXRoutingApplication {
 	}
 	
 	/**
-	 * Checks if the page should not be stored in the cache
+	 * Checks if the page should be stored in the cache even though the request says otherwise (an Ajax request), see
+	 * {@link #setForceStorePage(WOMessage)}
 	 */
 	public static boolean forceStorePage(WOMessage message) {
 		NSDictionary userInfo = NSDictionary.EmptyDictionary;

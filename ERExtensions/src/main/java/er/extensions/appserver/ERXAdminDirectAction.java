@@ -55,8 +55,10 @@ public class ERXAdminDirectAction extends WODirectAction {
 
 	/**
 	 * @return WOStatsPage page using password in the "pw" query parameter
-	 * 
-	 * FIXME: Why?
+	 *
+	 * WO's statistics and event pages are component pages behind a password form. These actions fill in the form and
+	 * submit it on the caller's behalf, which gives each page a URL that can be bookmarked or requested by a monitoring
+	 * script. The page itself checks the password.
 	 */
     public WOActionResults statsAction() {
         // The page lives in ERControl, which need not be present: reached by name, not by class
@@ -67,8 +69,8 @@ public class ERXAdminDirectAction extends WODirectAction {
 
 	/**
 	 * @return WOEventDisplay page using password in the "pw" query parameter
-	 * 
-	 * FIXME: Why?
+	 *
+	 * See {@link #statsAction()}.
 	 */
 	public WOActionResults eventsAction() {
 		final WOComponent nextPage = pageWithName("WOEventDisplayPage");
@@ -78,8 +80,8 @@ public class ERXAdminDirectAction extends WODirectAction {
 
 	/**
 	 * @return WOEventSetup page using password in the "pw" query parameter
-	 * 
-	 * FIXME: Why?
+	 *
+	 * See {@link #statsAction()}. Turns on logging for every event type, then shows the event display.
 	 */
 	public WOActionResults eventsSetupAction() {
 		final WOComponent nextPage = pageWithName("WOEventSetupPage");
@@ -155,10 +157,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 
 	/**
 	 * @return true if the request parameter "pw" matches the password set on the application's WOStatisticsStore
-	 *
-	 * The store offers no way to read its password back: WOStatisticsStore.validateLogin() needs a session to mark,
-	 * and the field is private. Applications commonly set the password in code rather than through the
-	 * WOStatisticsPassword property, so comparing against the property is not an option. Hence reflection.
+	 * (see {@link #statisticsStorePassword()})
 	 *
 	 * FIXME: This is a temporary placeholder until we have a nicer access control implementation // Hugi 2022-03-21
 	 */

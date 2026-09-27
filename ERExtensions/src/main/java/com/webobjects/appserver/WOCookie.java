@@ -13,6 +13,16 @@ import com.webobjects.foundation.NSKeyValueCodingAdditions;
 import com.webobjects.foundation.NSTimeZone;
 import com.webobjects.foundation.NSTimestamp;
 
+/**
+ * Replaces WebObjects' WOCookie: it has the same name, and ERExtensions precedes JavaWebObjects on the classpath (which
+ * ERXApplication checks at startup). Differences from WO's:
+ * <ul>
+ * <li>The HttpOnly and SameSite attributes, which WO's cookie can't express. ERXSession applies them to the session and
+ * instance ID cookies.</li>
+ * <li>"expires" is formatted with a formatter per thread. WO's shares one SimpleDateFormat between all threads, and
+ * SimpleDateFormat isn't thread-safe.</li>
+ * </ul>
+ */
 public class WOCookie implements NSKeyValueCoding, NSKeyValueCoding.ErrorHandling, NSKeyValueCodingAdditions, Serializable {
 
 	String _name;

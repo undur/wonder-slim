@@ -79,7 +79,12 @@ public abstract class ERXRoutingApplication extends WOApplication {
 	/**
 	 * @return The handler registered for the request's key, the default request handler (the route handler) otherwise.
 	 *
-	 * Overridden to disable WOStaticResourceRequestHandler being returned for URLs ending with resource suffixes.
+	 * Overridden to disable WOStaticResourceRequestHandler being returned for URLs ending with resource suffixes. When no
+	 * handler is registered for a request's key, WO checks the URL's extension against the resource manager's content
+	 * types and, if it's known, hands the request to its static resource handler (which exists under direct connect).
+	 * A route such as /sitemap.xml would then be looked up as a file in development and reach the route table only in
+	 * deployment. createRequest() canonicalizes such URLs to the route key already; this keeps it that way for a request
+	 * that arrives uncanonicalized.
 	 */
 	@Override
 	public WORequestHandler handlerForRequest( final WORequest request ) {

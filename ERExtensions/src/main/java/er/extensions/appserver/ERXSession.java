@@ -144,8 +144,7 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 	}
 
 	/**
-	 * Overrides terminate to free up resources and unregister for
-	 * notifications.
+	 * Overridden to log the termination (debug).
 	 */
 	@Override
 	public void terminate() {
@@ -337,6 +336,12 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 				.toList();
 	}
 
+	/**
+	 * WO creates the session and instance ID cookies itself, marking them secure only when secureIDCookies() says so,
+	 * and has no way to request HttpOnly or SameSite (WO's own WOCookie can't express either; ours, which replaces it,
+	 * can). We post-process the cookies WO just added to apply the useSecureSessionCookies, useHttpOnlySessionCookies
+	 * and SameSite settings.
+	 */
 	@Override
 	public void _appendCookieToResponse(WOResponse response) {
 		super._appendCookieToResponse(response);
@@ -349,6 +354,9 @@ public class ERXSession extends ERXAjaxSession implements Serializable {
 		_setCookieSameSite(response);
 	}
 
+	/**
+	 * As {@link #_appendCookieToResponse(WOResponse)}, for the cookies WO adds to clear the IDs when the session ends.
+	 */
 	@Override
 	public void _clearCookieFromResponse(WOResponse response) {
 		super._clearCookieFromResponse(response);

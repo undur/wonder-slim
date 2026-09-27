@@ -34,8 +34,8 @@ public class ERXWOContext extends ERXAjaxContext {
 
 	/**
 	 * @return The existing session if any is given in the form values or URL, or else <code>null</code>
-	 * 
-	 * Overridden to include a check for the request's session ID
+	 *
+	 * Restores (checks out) the session the request names, if it isn't restored yet. Not a WO method.
 	 */
 	public WOSession existingSession() {
 		final String requestSessionID = _requestSessionID();
@@ -49,8 +49,12 @@ public class ERXWOContext extends ERXAjaxContext {
 
 	/**
 	 * @return true if there is an existing session.
-	 * 
-	 * Overridden to check existingSession() (the request's session ID) as well as our stored session 
+	 *
+	 * WO's hasSession() only reports a session already restored into this context. In a direct action the session isn't
+	 * restored until something asks for session(), so WO answers false even when the request carries the ID of a live
+	 * session. We restore it here (see {@link #existingSession()}), which checks it out, and the request handler checks
+	 * it back in at the end of the request as it does any session the request used. So asking hasSession() isn't free,
+	 * and it keeps the session alive.
 	 */
 	@Override
 	public boolean hasSession() {
@@ -146,6 +150,7 @@ public class ERXWOContext extends ERXAjaxContext {
 		final WORequest dummyRequest = app.createRequest("GET", app.applicationURLPrefix(), "HTTP/1.1", null, null, null);
 
 		if (ERXProperties.booleanForKeyWithDefault(ERXP.PUBLIC_HOST_IS_SECURE.id(), false)) {
+			// setHeader(value, key): the "https: on" header that marks a request secure, see ERXRequest.isRequestSecure()
 			dummyRequest.setHeader("on", "https");
 		}
 

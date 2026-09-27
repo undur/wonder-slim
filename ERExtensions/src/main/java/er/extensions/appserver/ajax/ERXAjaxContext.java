@@ -5,11 +5,8 @@ import com.webobjects.appserver.WORequest;
 import er.extensions.routes.ERXRoutingContext;
 
 /**
- * ERXAjaxContext provides the overrides necessary methods for partial form
- * submits to work. If you want to use the Ajax framework without using other
- * parts of Project Wonder (i.e. ERXSession or ERXApplication), you should steal
- * all of the code in ERXAjaxSession, ERXAjaxApplication, and ERXAjaxContext.
- * 
+ * Makes partial form submits work (see {@link #_wasFormSubmitted()}).
+ *
  * @author mschrag
  */
 public class ERXAjaxContext extends ERXRoutingContext {
@@ -18,11 +15,22 @@ public class ERXAjaxContext extends ERXRoutingContext {
 		super(request);
 	}
 
+	/**
+	 * WO's input elements ask this public method, which in WO reads the form-submitted flag directly rather than going
+	 * through {@link #_wasFormSubmitted()}, so both answer the same.
+	 */
 	@Override
 	public boolean wasFormSubmitted() {
 		return _wasFormSubmitted();
 	}
-	
+
+	/**
+	 * WO decides per form, not per element, whether submitted values are taken: once the form was submitted, every
+	 * input in it pushes its form value into its binding, and an input the client didn't send pushes null. A partial
+	 * submit sends only some of the form's fields (their element IDs are listed in the request, see
+	 * {@link ERXAjaxApplication#partialFormSenderID(WORequest)}), so for every other element in the form we answer
+	 * false, and its binding keeps its value. The Ajax submit button that sent the request counts as submitted too.
+	 */
 	@Override
 	@Deprecated
 	public boolean _wasFormSubmitted() {

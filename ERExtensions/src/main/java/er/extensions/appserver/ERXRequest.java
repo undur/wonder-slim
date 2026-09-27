@@ -80,9 +80,13 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
-     * FIXME: No idea why is here, figure out and document. Essentially prevents the request from automatically constructing a context if none is present // Hugi 2025-10-22 
-     * 
-     * Added in this commit: https://github.com/wocommunity/wonder/commit/51106ce8b93372d88d0df2520003225b93f39f5a
+     * WO's context() creates a context for the request (WOApplication.createContextForRequest) when it has none. We
+     * return only the context already attached, or null: a caller probing for a context, such as
+     * ERXAppBasedResourceManager (which then falls back to ERXWOContext.currentContext()), must not create a stray
+     * context as a side effect, which would also become the thread's current context.
+     *
+     * Added in Project Wonder when WO had no public accessor for the attached context:
+     * https://github.com/wocommunity/wonder/commit/51106ce8b93372d88d0df2520003225b93f39f5a
      */
     @Override
     public WOContext context() {
@@ -234,7 +238,8 @@ public  class ERXRequest extends WORequest {
 
     
     /**
-     * Overridden to properly parse into a java.util.Date and then convert to an NSTimestamp
+     * WO's version casts the result of SimpleDateFormat.parseObject() to NSTimestamp. That result is always a plain
+     * java.util.Date, so every successful parse throws ClassCastException. We parse to a Date and wrap it.
      */
     @Override
     public NSTimestamp dateFormValueForKey(String key, SimpleDateFormat dateFormatter) {
@@ -265,9 +270,19 @@ public  class ERXRequest extends WORequest {
     /**
      * Add the protocol, server and port parts to a StringBuffer to build an URL to this app.
      * if port is set to 0, this request port will be used.
-     * 
+     *
+     * Differs from WO's, which always appends ":port", including :80 and :443:
+     * <ul>
+     * <li>The default port of the scheme is omitted. A complete URL that spells it out has a different origin, as far as
+     * browsers are concerned, from the page it's used on (http://host vs. http://host:80), which broke Ajax form
+     * submits.</li>
+     * <li>Without direct connect no port is appended at all: the request came through a web server, and the port the
+     * application instance listens on isn't the public one.</li>
+     * <li>er.extensions.ERXRequest.secureDisabled turns https URLs into http ones, for development without TLS.</li>
+     * </ul>
+     *
      * @param secure generate a https url
-     * @param port the port number to use, 0 this request port  
+     * @param port the port number to use, 0 this request port
      */
 	@Override
 	public void _completeURLPrefix(StringBuffer stringbuffer, boolean secure, int port) {
@@ -409,7 +424,10 @@ public  class ERXRequest extends WORequest {
      * content even if the request is supposed to be streaming and thus 
      * very large. Will now return <code>false</code> if the request
      * handler is streaming.
-     * 
+     *
+     * WO only asks this while the application is refusing new sessions (the action request handlers' check), so a
+     * streaming request that carries a session cookie is treated as new there.
+     *
      * @return <code>true</code> if the session ID can be obtained from the form values or a cookie.
      */
 	@Override
@@ -426,8 +444,10 @@ public  class ERXRequest extends WORequest {
     /**
      * Overridden because the super implementation would pull in all 
      * content even if the request is supposed to be streaming and thus 
-     * very large. Will now look for the session ID only in the cookie values.
-     * 
+     * very large. For a streaming request handler key (WO's own, or one registered with
+     * ERXApplication.registerStreamingRequestHandlerKey) the session ID is looked up in the cookies only: reading a
+     * form value would read the whole request body into memory. WO applies this to its own streaming key only.
+     *
      * @param inCookiesFirst define if session ID should be searched first in cookie
      */
     @Override

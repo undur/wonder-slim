@@ -155,7 +155,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// A console appender from the very first line, so nothing logged during WO's and our own
 		// initialization is dropped (log4j's "No appenders could be found" - and, worse, silently lost
 		// constructor-time output). The real configuration from the Properties cascade replaces it
-		// once the bundles have loaded (ERXExtensions.bundleDidLoad -> configureLoggingWithSystemProperties).
+		// once the application has been created (ERXExtensions.finishInitialization ->
+		// ERXConfigurationManager.loadConfiguration -> configureLoggingWithSystemProperties).
 		ERXLoggingSupport.configureDefaultLogging();
 
 		ERXKVCReflectionHack.enable();
@@ -274,9 +275,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * Workaround for broken 'WOFrameworksBaseURL' and 'WOApplicationBaseURL' properties in 5.4.
 	 * Discussion of the fix can be seen in a webobjects-dev thread from Ricardo on 2009-03-14:
 	 * https://lists.apple.com/archives/webobjects-dev/2009/Mar/msg00477.html
-	 * 
-	 * As of 2025-08-30 I haven't validated whether this is still required.
-	 * But since the mail is written after WO's last release, I assume it is // Hugi
+	 *
+	 * The first call to frameworksBaseURL(), applicationBaseURL() or cgiAdaptorURL() parses the adaptor URL, once, and
+	 * that parse sets both base URLs from the adaptor path, overwriting what the properties configured. We trigger the
+	 * parse here, then apply the properties again.
 	 */
 	private void fixBaseURLs() {
 		frameworksBaseURL();
@@ -589,7 +591,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Overridden to fix that direct connect apps can't refuse new sessions.
+	 * WO throws IllegalStateException when asked to refuse new sessions while direct connect is enabled, so an instance
+	 * with direct connect couldn't be wound down (by the kill timer, or on starved memory), nor could that be tested in
+	 * development. We set WO's private flag directly instead, then do the rest of what WO does: terminate at once if
+	 * no more than minimumActiveSessionsCount() sessions are active.
 	 */
 	@Override
 	public synchronized void refuseNewSessions(boolean shouldRefuseNewSessions) {
@@ -602,7 +607,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			success = true;
 		}
 		catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			log.error("Failed to do some stupid reflection shit", e);
+			log.error("Failed to set WOApplication._refusingNewClients reflectively, falling back to WO's refuseNewSessions()", e);
 		}
 
 		if (!success) {
@@ -830,6 +835,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		return _exceptionManager;
 	}
 
+	/**
+	 * Adds per-request statistics (ERXStats), the low-memory check and response compression around WO's dispatch. ERXThreadStorage is reset in
+	 * finally because request threads are pooled: anything left bound to the thread (the current context and session,
+	 * the context dictionary) would carry over into the next request that thread serves.
+	 */
+	@Override
 	public WOResponse dispatchRequest(WORequest request) {
 		final WOResponse response;
 
@@ -932,7 +943,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	private static final String[] EMPTY_STRING_ARRAY = {};
 
 	/**
-	 * Override default implementation WHICH returns {".dll", ".exe"} and therefore prohibits IIS as WebServer.
+	 * WO's default is {".dll", ".exe"}: when it parses a request URL whose adaptor prefix ends in one of them, it drops
+	 * the extension from the prefix, so URLs generated behind the IIS adaptor (/scripts/WebObjects.dll/...) no longer
+	 * reach the adaptor. With no extensions the prefix is kept as it came.
 	 */
 	@Override
 	public String[] adaptorExtensions() {

@@ -44,6 +44,8 @@ public class ERXKeepAliveResponse extends WOResponse {
 	private boolean _ended = false;
 
 	public ERXKeepAliveResponse() {
+		// A buffer size of one byte, so each byte is passed on as soon as it's read rather than when a buffer fills, and
+		// a content length the client will keep reading for (the last two arguments).
 		setContentStream(new InputStream() {
 			@Override
 			public int read() throws IOException {
