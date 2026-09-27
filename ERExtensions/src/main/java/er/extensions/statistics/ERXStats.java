@@ -3,8 +3,12 @@ package er.extensions.statistics;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -301,7 +305,7 @@ public class ERXStats {
 	/**
 	 * Logs the messages since the last call to initStatistics() ordered by some key.
 	 * 
-	 * @param operation operation to sort on ("sum", "count", "min", "max", "avg")
+	 * @param operation operation to sort on ("sum", "count", "min", "max", "avg", "key")
 	 */
 	public static void logStatisticsForOperation(String operation) {
 		logStatisticsForOperation(log, operation);
@@ -314,12 +318,15 @@ public class ERXStats {
 	 * @param operation operation to sort on ("sum", "count", "min", "max", "avg", "key")
 	 */
 	public static void logStatisticsForOperation(Logger statsLog, String operation) {
+		final Comparator<LogEntry> order = orderForOperation(operation);
+
 		if(statsLog.isDebugEnabled()) {
 			NSMutableDictionary statistics = ERXStats.statistics();
 			if (statistics != null) {
 				synchronized (statistics) {
-//					NSArray values = ERXArrayUtilities.sortedArraySortedWithKey(statistics.allValues(), operation);
-					NSArray values = statistics.allValues(); // FIXME: This used to be sorted. Does it matter? Do I care?
+					final List<LogEntry> sortedEntries = new ArrayList<>((Collection<LogEntry>)statistics.allValues());
+					sortedEntries.sort(order);
+					NSArray values = new NSArray<>(sortedEntries);
 					if (values.count() > 0) {
 						Long startTime = (Long) ERXThreadStorage.valueForKey(ERXStats.STATS_START_TIME_KEY);
 						Long lastTime = (Long) ERXThreadStorage.valueForKey(ERXStats.STATS_LAST_TIME_KEY);
@@ -337,6 +344,22 @@ public class ERXStats {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @return The (ascending) order of log entries for the given operation
+	 * @throws IllegalArgumentException if the operation isn't one of "sum", "count", "min", "max", "avg" or "key"
+	 */
+	static Comparator<LogEntry> orderForOperation(final String operation) {
+		return switch (operation) {
+			case "sum" -> Comparator.comparingLong(LogEntry::sum);
+			case "count" -> Comparator.comparingLong(LogEntry::count);
+			case "min" -> Comparator.comparingLong(LogEntry::min);
+			case "max" -> Comparator.comparingLong(LogEntry::max);
+			case "avg" -> Comparator.comparingDouble(LogEntry::avg);
+			case "key" -> Comparator.comparing(LogEntry::key, String.CASE_INSENSITIVE_ORDER);
+			case null, default -> throw new IllegalArgumentException("Unknown statistics operation '" + operation + "'. Use one of sum, count, min, max, avg or key");
+		};
 	}
 
 	/**

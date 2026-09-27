@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **`ERXStats.logStatisticsForOperation()` sorts by its operation again**
+  The logged entries are ordered by the given operation ("sum", "count", "min", "max", "avg" or
+  "key"), ascending. An unknown operation throws. (#104)
+
 - **`ERXNumberFormatter` factor patterns round only as the pattern says**
   A pattern dividing by a factor without an explicit scale, like `(/1024=)0.00 KB`, now divides at
   full precision and leaves the rounding to the pattern. Previously the division rounded to the
