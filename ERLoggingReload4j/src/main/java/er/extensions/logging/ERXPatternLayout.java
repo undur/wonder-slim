@@ -8,7 +8,10 @@ package er.extensions.logging;
 
 import java.text.NumberFormat;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.helpers.FormattingInfo;
@@ -19,14 +22,11 @@ import org.apache.log4j.spi.LoggingEvent;
 import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
-import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.formatters.ERXUnitAwareDecimalFormat;
 import er.extensions.foundation.ERXExceptionUtilities;
-import er.extensions.foundation.ERXSimpleTemplateParser;
 import er.extensions.foundation.ERXThreadStorage;
 
 /**
@@ -353,30 +353,14 @@ class ERXPatternParser extends PatternParser {
 	 */
 	private class AppInfoPatternConverter extends PatternConverter {
 
-		/** Template parser to format logging events */
-		private ERXSimpleTemplateParser _templateParser;
-
-		/** Template used by _templateParser */
+		/** The output's template, with @@key@@ placeholders (see {@link ERXPatternParser#fillTemplate}) */
 		private String _template;
 
 		/**
-		 * Flag to indicate if the constant values are set. The constant values
-		 * are the part of application info that shouldn't change during the
-		 * application's life span.
+		 * The values that don't change during the application's life span (name, pid, port), collected on the first
+		 * event after the application exists
 		 */
-		private boolean _constantsInitialized = false;
-
-		/**
-		 * Holds the values for the application info. Used by the template
-		 * parser
-		 */
-		private NSMutableDictionary _appInfo;
-
-		/**
-		 * Holds the default labels for the values. Note that the template
-		 * parser will put "-" for undefined values by defauilt.
-		 */
-		private final Map<String,String> _defaultLabels = Map.of( "sessionCount", "@@sessionCount@@" );
+		private Map<String, String> _constants;
 
 		/**
 		 * Default package level constructor
@@ -390,11 +374,6 @@ class ERXPatternParser extends PatternParser {
 		// ignored for now.
 		AppInfoPatternConverter(FormattingInfo formattingInfo, String format) {
 			super(formattingInfo);
-			_templateParser = new ERXSimpleTemplateParser("-");
-			// This will prevent the convert method to get into an infinite loop
-			// when debug level logging is enabled for the perser.
-			_templateParser.isLoggingDisabled = true;
-			_appInfo = new NSMutableDictionary();
 			_template = "@@appName@@[@@pid@@:@@portNumber@@ @@sessionCount@@]";
 			if(format != null && format.length() > 0) {
 				format = format.replaceFirst("(^|\\W)s(\\W|$)", "$1@@sessionCount@@$2");
@@ -418,42 +397,46 @@ class ERXPatternParser extends PatternParser {
 		 */
 		@Override
 		public String convert(LoggingEvent event) {
-			WOApplication app = WOApplication.application();
+			final WOApplication app = WOApplication.application();
+			final Map<String, String> values = new HashMap<>();
+
 			if (app != null) {
-
-				if (!_constantsInitialized) {
-					String pid = System.getProperty("com.webobjects.pid");
-					if (pid != null) {
-						_appInfo.setObjectForKey(pid, "pid");
-					}
-
-					String appName = app.name();
-					if (appName != null) {
-						_appInfo.setObjectForKey(appName, "appName");
-					}
-
-					if (app.port() != null && app.port().intValue() > 0) {
-						_appInfo.setObjectForKey(app.port().toString(), "portNumber");
-					}
-					else {
-						// WO 5.1.x -- Apple Ref# 2260519
-						NSArray adaptors = app.adaptors();
-						if (adaptors != null && adaptors.count() > 0) {
-							WOAdaptor primaryAdaptor = (WOAdaptor) adaptors.objectAtIndex(0);
-							String portNumber = String.valueOf(primaryAdaptor.port());
-							if (portNumber != null) {
-								_appInfo.setObjectForKey(portNumber, "portNumber");
-							}
-						}
-					}
-
-					_template = _templateParser.parseTemplateWithObject(_template, "@@", _appInfo, _defaultLabels);
-					_constantsInitialized = true;
+				if (_constants == null) {
+					_constants = applicationConstants(app);
 				}
 
-				_appInfo.setObjectForKey(String.valueOf(app.activeSessionsCount()), "sessionCount");
+				values.putAll(_constants);
+				values.put("sessionCount", String.valueOf(app.activeSessionsCount()));
 			}
-			return _templateParser.parseTemplateWithObject(_template, "@@", _appInfo);
+
+			return fillTemplate(_template, values);
+		}
+
+		private static Map<String, String> applicationConstants(final WOApplication app) {
+			final Map<String, String> constants = new HashMap<>();
+			final String pid = System.getProperty("com.webobjects.pid");
+
+			if (pid != null) {
+				constants.put("pid", pid);
+			}
+
+			if (app.name() != null) {
+				constants.put("appName", app.name());
+			}
+
+			if (app.port() != null && app.port().intValue() > 0) {
+				constants.put("portNumber", app.port().toString());
+			}
+			else {
+				// WO 5.1.x -- Apple Ref# 2260519
+				final NSArray adaptors = app.adaptors();
+
+				if (adaptors != null && adaptors.count() > 0) {
+					constants.put("portNumber", String.valueOf(((WOAdaptor) adaptors.objectAtIndex(0)).port()));
+				}
+			}
+
+			return constants;
 		}
 	}
 
@@ -471,27 +454,8 @@ class ERXPatternParser extends PatternParser {
 		/** */
 		private NumberFormat _decimalFormatter;
 
-		/** Template parser to format logging events */
-		private ERXSimpleTemplateParser _templateParser;
-
-		/** Template used by _templateParser */
+		/** The output's template, with @@key@@ placeholders (see {@link ERXPatternParser#fillTemplate}) */
 		private String _template;
-
-		/**
-		 * Flag to indicate if the constant values are set. The constant values
-		 * are the part of application info that shouldn't change during the
-		 * application's life span.
-		 */
-		private boolean _constantsInitialized = false;
-
-		/** Holds the values for the JavaVM info. Used by the template parser */
-		private NSMutableDictionary _jvmInfo;
-
-		/**
-		 * Holds the default labels for the values. Note that the template
-		 * parser will put "-" for undefined values by default.
-		 */
-		private final NSDictionary _defaultLabels = null;
 
 		/**
 		 * Default package level constructor
@@ -507,11 +471,6 @@ class ERXPatternParser extends PatternParser {
 			_runtime = Runtime.getRuntime();
 			_decimalFormatter = new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE);
 			_decimalFormatter.setMaximumFractionDigits(2);
-			_templateParser = new ERXSimpleTemplateParser("-");
-			// This will prevent the convert method to get into an infinite loop
-			// when debug level logging is enabled for the parser.
-			_templateParser.isLoggingDisabled = true;
-			_jvmInfo = new NSMutableDictionary();
 			format = format.replaceFirst("(^|\\W)u(\\W|$)", "$1@@usedMemory@@$2");
 			format = format.replaceFirst("(^|\\W)f(\\W|$)", "$1@@freeMemory@@$2");
 			format = format.replaceFirst("(^|\\W)t(\\W|$)", "$1@@totalMemory@@$2");
@@ -531,22 +490,40 @@ class ERXPatternParser extends PatternParser {
 		 */
 		@Override
 		public String convert(LoggingEvent event) {
-			if (!_constantsInitialized) {
-				// Initialize constants here
-				_constantsInitialized = true;
-			}
-
 			long totalMemory = _runtime.totalMemory();
 			long freeMemory = _runtime.freeMemory();
 			long maxMemory = _runtime.maxMemory();
 			long usedMemory = totalMemory - freeMemory;
-			_jvmInfo.setObjectForKey(_decimalFormatter.format(totalMemory), "totalMemory");
-			_jvmInfo.setObjectForKey(_decimalFormatter.format(freeMemory), "freeMemory");
-			_jvmInfo.setObjectForKey(_decimalFormatter.format(usedMemory), "usedMemory");
-			_jvmInfo.setObjectForKey(_decimalFormatter.format(maxMemory), "maxMemory");
 
-			return _templateParser.parseTemplateWithObject(_template, "@@", _jvmInfo);
+			final Map<String, String> values = new HashMap<>();
+			values.put("totalMemory", _decimalFormatter.format(totalMemory));
+			values.put("freeMemory", _decimalFormatter.format(freeMemory));
+			values.put("usedMemory", _decimalFormatter.format(usedMemory));
+			values.put("maxMemory", _decimalFormatter.format(maxMemory));
+
+			return fillTemplate(_template, values);
 		}
 	}
 
+
+	/**
+	 * Placeholders in the templates of the %W and %V conversions: a key between double at-signs
+	 */
+	private static final Pattern PLACEHOLDER = Pattern.compile("@@(\\w+)@@");
+
+	/**
+	 * @return The template with each @@key@@ replaced by the key's value, or by "-" when there's none
+	 */
+	static String fillTemplate(final String template, final Map<String, String> values) {
+		final Matcher matcher = PLACEHOLDER.matcher(template);
+		final StringBuilder result = new StringBuilder();
+
+		while (matcher.find()) {
+			final String value = values.get(matcher.group(1));
+			matcher.appendReplacement(result, Matcher.quoteReplacement(value != null ? value : "-"));
+		}
+
+		matcher.appendTail(result);
+		return result.toString();
+	}
 }

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **`ERXSimpleTemplateParser` removed**
+  Its only use was formatting `ERXPatternLayout`'s `%W` (application info) and `%V` (JVM memory)
+  conversions, which now fill their few placeholders themselves. Their output is unchanged.
+  (#125)
+
 - **Sticky sessions behind mod_proxy_balancer work again**
   The route cookie (`routeid_<app>`) has its leading dot again: `.app_2001`. mod_proxy_balancer reads
   the route after the first dot of the sticky value, so without it, requests weren't kept on the
