@@ -68,6 +68,8 @@ import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
+import er.extensions.resources.ERXPublicResources;
+import er.extensions.routes.RouteTable;
 import er.extensions.statistics.ERXStats;
 import parsley.ParsleyConfiguration;
 
@@ -862,6 +864,15 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		return response;
+	}
+
+	/**
+	 * Serves the application's public resources, the files in the {@code public} folder of its web server resources, at
+	 * the root of its URL space ({@code public/robots.txt} at {@code /robots.txt}), after every route has declined. Off by
+	 * default; turn it on in the application's constructor. See {@link ERXPublicResources}.
+	 */
+	public void setServesPublicResources( final boolean servesPublicResources ) {
+		RouteTable.defaultRouteTable().setFallbackRouteHandler( servesPublicResources ? new ERXPublicResources() : RouteTable.notFoundRouteHandler() );
 	}
 
 	/**

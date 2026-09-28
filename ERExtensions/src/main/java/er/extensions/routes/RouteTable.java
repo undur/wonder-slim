@@ -30,6 +30,11 @@ public class RouteTable {
 	private static final NotFoundRouteHandler NOT_FOUND_ROUTE_HANDLER = new NotFoundRouteHandler();
 
 	/**
+	 * Handles a URL no route claims, see {@link #setFallbackRouteHandler(RouteHandler)}
+	 */
+	private RouteHandler _fallbackRouteHandler = NOT_FOUND_ROUTE_HANDLER;
+
+	/**
 	 * A list of all routes mapped by this table
 	 */
 	private List<Route> _routes = new ArrayList<>();
@@ -41,6 +46,22 @@ public class RouteTable {
 
 	public static RouteTable defaultRouteTable() {
 		return _defaultRouteTable;
+	}
+
+	/**
+	 * Sets the handler for URLs no route claims, in place of the default 404 (see {@link #notFoundRouteHandler()}). The
+	 * application's public resources are served this way (see ERXPublicResources), after every route has declined.
+	 */
+	public void setFallbackRouteHandler( final RouteHandler routeHandler ) {
+		_fallbackRouteHandler = routeHandler;
+	}
+
+	/**
+	 * @return The handler answering 404 for a URL nothing claims (marked unhandled, for an adaptor that can pass the
+	 *         request on, see {@link #UNHANDLED_RESPONSE_KEY})
+	 */
+	public static RouteHandler notFoundRouteHandler() {
+		return NOT_FOUND_ROUTE_HANDLER;
 	}
 
 	private List<Route> routes() {
@@ -94,7 +115,7 @@ public class RouteTable {
 		RouteHandler routeHandler = handlerForURL( routeURL );
 
 		if( routeHandler == null ) {
-			routeHandler = NOT_FOUND_ROUTE_HANDLER;
+			routeHandler = _fallbackRouteHandler;
 		}
 
 		return routeHandler.handle( new RouteInvocation( routeURL, request ) );

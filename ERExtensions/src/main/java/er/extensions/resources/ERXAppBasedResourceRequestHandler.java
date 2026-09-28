@@ -53,20 +53,27 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 
 	@Override
 	public WOResponse handleRequest(WORequest request) {
-		
-		final String path = request.requestHandlerPath();
+		return responseForPath(request.requestHandlerPath());
+	}
+
+	/**
+	 * @return A response for the resource at the given path, {@code <frameworkName>/<resourceName>} ({@code app} for the
+	 *         application's own resources), as this handler serves it at its URLs. Also used for the application's public
+	 *         resources (see {@link ERXPublicResources}).
+	 */
+	public WOResponse responseForPath(final String path) {
 
 		if( _useCache ) {
-			return _cache.computeIfAbsent(path, _ -> new CachedResourceResponse( responseForPath(path) )).streamingResponse();
+			return _cache.computeIfAbsent(path, _ -> new CachedResourceResponse( uncachedResponseForPath(path) )).streamingResponse();
 		}
 
-		return responseForPath(path);
+		return uncachedResponseForPath(path);
 	}
 
 	/**
 	 * @return A response for the given request handler path
 	 */
-	private WOResponse responseForPath(final String path) {
+	private WOResponse uncachedResponseForPath(final String path) {
 		final int firstSlashIndex = path.indexOf('/');
 		final String frameworkName = path.substring( 0, firstSlashIndex );
 		final String resourceName = path.substring(firstSlashIndex+1, path.length());

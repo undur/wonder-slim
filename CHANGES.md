@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Public resources: files served at the root of the application's URL space**
+  An application that calls `setServesPublicResources(true)` in its constructor serves the files in
+  the `public` folder of its web server resources (`src/main/webserver-resources/public`) at the
+  root, by path: `public/robots.txt` answers `/robots.txt`, `public/.well-known/security.txt`
+  answers that path. For `favicon.ico`, `robots.txt`, `sitemap.xml` and other files asked for at a
+  site's root. A URL is looked up only once no request handler or route has claimed it, so a route
+  always wins over a file. The folder is indexed on first use, so a URL that isn't one of its files
+  costs one set lookup; in development it's indexed again on a miss, so new files are served
+  without a restart. The files are served by the resource request handler, as at their resource
+  URLs. Off by default. (#32)
+
 - **`ERXWOImage` renamed `ERXSVGImage`**
   The element behind `<wo:svg>` is named for what it's for: an `<img>` for an image resource or URL
   that doesn't read the image to work out its size, so it suits SVG images. Templates using

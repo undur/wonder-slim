@@ -39,6 +39,9 @@ public class Application extends ERXApplication {
 		// Clean, flat URLs for page-to-page navigation (see Routes).
 		Routes.register();
 
+		// The files in webserver-resources/public (robots.txt, ...) at the root of the URL space
+		setServesPublicResources( true );
+
 		// WebSocket test endpoint (served by WOAdaptorJetty — the app must
 		// run with -WOAdaptor WOAdaptorJetty for this to be live). Exercised
 		// by the /websocket page, and by modulo's WebSocket tunnel testing.
