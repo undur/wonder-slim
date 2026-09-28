@@ -40,7 +40,7 @@ async function main() {
       const r = await fetch(dead + '?_u=linesContainer;totalsPanel;renderedInvoice',
         { headers: { 'x-requested-with': 'XMLHttpRequest' }, credentials: 'same-origin' });
       const t = await r.text();
-      return { status: r.status, ok: r.ok, isBacktrack: /backtrack|Missing Page/i.test(t) };
+      return { status: r.status, ok: r.ok, isBacktrack: /backtrack|Missing Page|Page no longer available/i.test(t) };
     }, DEAD_AJAX);
     ok('L1 server returns non-2xx for a dead ajax context', http.status >= 400, `status=${http.status}`);
     ok('L1 it is the backtrack/restoration error', http.isBacktrack, JSON.stringify(http));
