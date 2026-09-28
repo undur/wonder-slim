@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Resources are served in ranges, so video and audio play and seek properly**
+  The resource request handler answers a request for part of a resource (`Range: bytes=…`, as
+  browsers send for media) with `206 Partial Content` and just that part, a range past the end with
+  `416`, and says `Accept-Ranges: bytes` on every resource. Before, a `<video>` got the whole file
+  for every request, seeking was degraded, and browsers tended not to cache it. Public resources
+  are served the same way. (#137)
+
 - **Resource URLs carry a stamp of the resource's content, and are cached for good**
   In production, resource URLs the framework generates carry a stamp of the resource's content in
   the file name: `/res/AjaxSlim/ajaxslim.0dc9602958.js`. A deploy that changes a resource changes

@@ -78,7 +78,7 @@ public class ERXPublicResources implements RouteHandler {
 
 		if( path != null && isPublicResource( path ) ) {
 			final ERXAppBasedResourceRequestHandler handler = (ERXAppBasedResourceRequestHandler)WOApplication.application().requestHandlerForKey( ERXAppBasedResourceRequestHandler.KEY );
-			return handler.responseForPath( "app/" + FOLDER + "/" + path );
+			return handler.responseForPath( "app/" + FOLDER + "/" + path, invocation.request() );
 		}
 
 		return RouteTable.notFoundRouteHandler().handle( invocation );

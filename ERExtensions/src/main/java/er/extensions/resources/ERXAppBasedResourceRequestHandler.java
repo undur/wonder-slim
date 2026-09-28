@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequest;
@@ -27,7 +29,6 @@ import er.extensions.appserver.ERXApplication;
  * Work to do before labeling this "totally ready":
  * 
  * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
- * FIXME: Support range requests (Range / 206 Partial Content / Accept-Ranges). We currently always serve a full 200 with the whole resource, ignoring Range headers. This breaks media: a <video> element streams via range requests, and browsers tend not to cache range-incapable media — so e.g. an autoplay marketing video re-downloads in full on every refresh, and seeking is degraded. // Hugi 2026-06-04
  * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
  * TODO: Along the lines of versioning, we should see if serving ETag headers is worth the effort // Hugi 2025-11-16
  * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05
@@ -68,15 +69,17 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 
 	@Override
 	public WOResponse handleRequest(WORequest request) {
-		return responseForPath(request.requestHandlerPath());
+		return responseForPath(request.requestHandlerPath(), request);
 	}
 
 	/**
+	 * @param request The request, for a range it asks for (media players ask for parts of a file); null to serve the
+	 *        whole resource
 	 * @return A response for the resource at the given path, {@code <frameworkName>/<resourceName>} ({@code app} for the
 	 *         application's own resources), as this handler serves it at its URLs. Also used for the application's public
 	 *         resources (see {@link ERXPublicResources}).
 	 */
-	public WOResponse responseForPath(final String path) {
+	public WOResponse responseForPath(final String path, final WORequest request) {
 
 		// A path that doesn't name a framework and a resource names nothing; not cached, as it isn't a resource
 		if( path == null || path.indexOf('/') < 1 || path.endsWith("/") ) {
@@ -89,19 +92,24 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse(path);
 
 		if( stamped != null ) {
-			final WOResponse response = find(stamped.unstampedPath());
+			final CachedResourceResponse resource = find(stamped.unstampedPath());
 
-			if( response != null ) {
+			if( resource != null ) {
 				final boolean current = _useCache && stamped.stamp().equals(currentStamp(stamped.unstampedPath()));
-				response.setHeader(current ? STAMPED_CACHE_CONTROL : "no-cache", "cache-control");
+				final WOResponse response = resource.response(request);
+
+				if( response.status() != 416 ) {
+					response.setHeader(current ? STAMPED_CACHE_CONTROL : "no-cache", "cache-control");
+				}
+
 				return response;
 			}
 
 			// Nothing by the name without the stamp: the name may be a file's own, look it up as it is
 		}
 
-		final WOResponse response = find(path);
-		return response != null ? response : notFoundResponse(path);
+		final CachedResourceResponse resource = find(path);
+		return resource != null ? resource.response(request) : notFoundResponse(path);
 	}
 
 	/**
@@ -120,13 +128,13 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	private static final String STAMPED_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 	/**
-	 * @return A response for the resource at the given path, cached in production; null if there's none
+	 * @return The resource at the given path, cached in production; null if there's none
 	 */
-	private WOResponse find(final String path) {
+	private CachedResourceResponse find(final String path) {
 
 		if( !_useCache ) {
 			final WOResponse response = uncachedResponseForPath(path);
-			return response.status() == 200 ? response : null;
+			return response.status() == 200 ? new CachedResourceResponse( response ) : null;
 		}
 
 		if( _missingPaths.contains(path) ) {
@@ -144,7 +152,7 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 			return null;
 		}
 
-		return cached.streamingResponse();
+		return cached;
 	}
 
 	/**
@@ -178,6 +186,7 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		response.setContent(bytes);
 		response.setHeader(contentLength, "content-length");
 		response.setHeader(contentType, "content-type");
+		response.setHeader("bytes", "accept-ranges");
 
 		// FIXME: Temporarily setting one hour client-side caching (in production). This should be user controllable // Hugi 2025-10-04
 		if( _useCache ) {
@@ -248,12 +257,92 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 			_length = _content.length;
 		}
 
-		public WOResponse streamingResponse() {
+		/**
+		 * @return A response to the given request for the resource: the whole of it, or the range the request asks for
+		 *         ({@code Range: bytes=…}, one range) as 206 Partial Content, or 416 when that range lies past its end. A
+		 *         request with {@code If-Range} (the range only if the resource hasn't changed) gets the whole resource, as
+		 *         we have nothing to tell whether it has.
+		 */
+		public WOResponse response( final WORequest request ) {
+			final String rangeHeader = request == null || request.headerForKey( "if-range" ) != null ? null : request.headerForKey( "range" );
+			final long[] range = range( rangeHeader, _length );
+
 			final WOResponse response = new WOResponse();
-			response.setStatus( _status );
-			response.setHeaders(_headers);
-			response.setContentStream(new ByteArrayInputStream( _content ), 32000, _length);
+			response.setHeaders( _headers );
+
+			if( range == null ) {
+				response.setStatus( _status );
+				response.setContentStream( new ByteArrayInputStream( _content ), 32000, _length );
+				return response;
+			}
+
+			// Not to be kept by any cache, which could otherwise answer a request for the whole resource with it
+			if( range.length == 0 ) {
+				response.setStatus( 416 );
+				response.setHeader( "no-store", "cache-control" );
+				response.setHeader( "bytes */" + _length, "content-range" );
+				response.setHeader( "0", "content-length" );
+				return response;
+			}
+
+			final long start = range[0];
+			final long length = range[1] - start + 1;
+			response.setStatus( 206 );
+			response.setHeader( "bytes " + start + "-" + range[1] + "/" + _length, "content-range" );
+			response.setHeader( String.valueOf( length ), "content-length" );
+			response.setContentStream( new ByteArrayInputStream( _content, (int)start, (int)length ), 32000, length );
 			return response;
+		}
+	}
+
+	/**
+	 * A single byte range, {@code bytes=start-end}, {@code bytes=start-} or {@code bytes=-suffixLength}
+	 */
+	private static final Pattern BYTE_RANGE = Pattern.compile( "bytes=(\\d*)-(\\d*)" );
+
+	/**
+	 * @param header A {@code Range} header, may be null
+	 * @param length The length of the resource
+	 * @return The first and last byte (inclusive) of the range the header asks for; an empty array if the range lies
+	 *         past the resource's end (unsatisfiable); null to serve the whole resource: no header, one we don't
+	 *         understand, or several ranges (which the whole resource answers, as the specification allows)
+	 */
+	static long[] range( final String header, final long length ) {
+
+		if( header == null ) {
+			return null;
+		}
+
+		final Matcher matcher = BYTE_RANGE.matcher( header.trim() );
+
+		if( !matcher.matches() || (matcher.group(1).isEmpty() && matcher.group(2).isEmpty()) ) {
+			return null;
+		}
+
+		try {
+			// A suffix: the last N bytes
+			if( matcher.group(1).isEmpty() ) {
+				final long suffixLength = Long.parseLong( matcher.group(2) );
+				return suffixLength == 0 || length == 0 ? new long[0] : new long[] { Math.max( 0, length - suffixLength ), length - 1 };
+			}
+
+			final long start = Long.parseLong( matcher.group(1) );
+
+			if( start >= length ) {
+				return new long[0];
+			}
+
+			if( matcher.group(2).isEmpty() ) {
+				return new long[] { start, length - 1 };
+			}
+
+			final long end = Long.parseLong( matcher.group(2) );
+
+			// A last byte before the first is an invalid range, which is ignored
+			return end < start ? null : new long[] { start, Math.min( end, length - 1 ) };
+		}
+		catch( NumberFormatException e ) {
+			return null; // a number too large to be a position in the resource
 		}
 	}
 }
