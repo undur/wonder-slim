@@ -75,7 +75,9 @@ public class ERXResourceManagerBase extends WOResourceManager {
 	         }
 	      }
 
-	      // FIXME; I find it highly dubious to return "text/plain" for an unknown mimeType. However this is WO's default and perhaps not worth changing // Hugi 2025-10-06
+	      // An extension the table doesn't know gets WO's default. Neither text/plain nor application/octet-stream is right
+	      // for every unknown type, and nothing depends on another value; a type that matters belongs in the table
+	      // (AdditionalMimeTypes.plist, or the application's own).
 	      return "text/plain";
 	}
 	

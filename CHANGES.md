@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **Correct content types for icons, JSON and current web formats**
+  Resources are served with `image/x-icon` for `.ico` (WebObjects says `text/plain`, so a
+  `favicon.ico` went out as text), `application/json` for `.json` and `.map`, `audio/mpeg` for
+  `.mp3`, and the types WebObjects' table doesn't know: `application/wasm`, `text/javascript` for
+  `.mjs`, `application/manifest+json` for `.webmanifest`, `image/webp`, `image/avif` and
+  `video/webm`. Also added: the Office Open XML and OpenDocument formats (`docx`, `xlsx`, `pptx`,
+  `odt`, `ods`, `odp`), audio and video (`m4a`, `m4v`, `aac`, `flac`, `oga`, `opus`, `ogv`, with
+  `ogg` as `audio/ogg`), `heic`, `md`, `vcf`, `rss`, `jsonld`, `epub`, `7z`, and `gz` as
+  `application/gzip`. An unknown extension still gets `text/plain`. (#136)
+
 - **The resource cache no longer grows with every missing resource requested**
   In production, the resource request handler cached every response by path, a 404 included, so
   each new URL requested under `/res/` stayed in memory for good. Now only resources found are
