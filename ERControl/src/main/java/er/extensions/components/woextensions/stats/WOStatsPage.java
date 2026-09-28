@@ -8,7 +8,9 @@
 package er.extensions.components.woextensions.stats;
 
 import java.net.UnknownHostException;
+import java.text.FieldPosition;
 import java.text.Format;
+import java.text.ParsePosition;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -22,9 +24,9 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
 
-import er.extensions.formatters.ERXUnitAwareDecimalFormat;
 import er.extensions.statistics.ERXStats;
 import er.extensions.statistics.ERXStats.LogEntry;
+import er.extensions.foundation.ERXUtilities;
 
 public class WOStatsPage extends WOComponent {
 
@@ -267,8 +269,21 @@ public class WOStatsPage extends WOComponent {
 	private ERXStats.LogEntry _aggregateLogEntry;
 
 
+	/**
+	 * @return A format for byte counts, for the template's formatter bindings (see {@link ERXUtilities#formatByteCount(long)})
+	 */
 	public Format byteFormat() {
-		return new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE);
+		return new Format() {
+			@Override
+			public StringBuffer format( Object value, StringBuffer buffer, FieldPosition position ) {
+				return buffer.append( ERXUtilities.formatByteCount( ((Number)value).longValue() ) );
+			}
+
+			@Override
+			public Object parseObject( String source, ParsePosition position ) {
+				throw new UnsupportedOperationException( "Byte counts are only displayed" );
+			}
+		};
 	}
 
 	public NSArray<LogEntry> aggregateLogEntries() {

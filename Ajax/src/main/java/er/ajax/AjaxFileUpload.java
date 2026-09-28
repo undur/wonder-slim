@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
-import java.text.NumberFormat;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
@@ -19,7 +18,7 @@ import com.webobjects.foundation.NSData;
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.components.ERXComponentUtilities;
-import er.extensions.formatters.ERXUnitAwareDecimalFormat;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * AjaxFileUpload provides an Ajax wrapper around the file upload process. This works pretty differently than
@@ -176,9 +175,7 @@ public class AjaxFileUpload extends WOComponent {
 		String bytesReadSize = null;
 		AjaxUploadProgress progress = uploadProgress();
 		if (progress != null) {
-			NumberFormat formatter = new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE);
-			formatter.setMaximumFractionDigits(2);
-			bytesReadSize = formatter.format(progress.value());
+			bytesReadSize = ERXUtilities.formatByteCount(progress.value());
 		}
 		return bytesReadSize;
 	}
@@ -187,9 +184,7 @@ public class AjaxFileUpload extends WOComponent {
 		String streamLengthSize = null;
 		AjaxUploadProgress progress = uploadProgress();
 		if (progress != null) {
-			NumberFormat formatter = new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE);
-			formatter.setMaximumFractionDigits(2);
-			streamLengthSize = formatter.format(progress.maximum());
+			streamLengthSize = ERXUtilities.formatByteCount(progress.maximum());
 		}
 		return streamLengthSize;
 	}

@@ -324,7 +324,7 @@
 <h3>AjaxProgress <span class="badge s-niche">Niche</span> <span class="badge m-modern">Modern</span></h3>
 <p class="role">Server-side Java model object (no template) that holds the state of a long-running operation (value, maximum, done/canceled/failed/status) and is driven by an AjaxProgressBar; a dev reaches for it to track an upload or batch job&#x27;s progress in the session.</p>
 <p class="usage"><strong>Usage.</strong> Pure POJO, no bindings. Instantiate `new AjaxProgress(id, maximum)`, register with `AjaxProgress.registerProgress(session, p)`, then `p.incrementValue(n)` / `p.setDone(true)` from the worker (or use `copyAndTrack(in,out,maxSize)` for streams). An AjaxProgressBar bound to the same id/registry polls and renders it.</p>
-<p class="deps"><strong>Client deps.</strong> None — server-side only, ships no client JS/CSS. Depends only on er.extensions (ERXUnitAwareDecimalFormat).</p>
+<p class="deps"><strong>Client deps.</strong> None — server-side only, ships no client JS/CSS. Depends only on er.extensions (ERXUtilities.formatByteCount).</p>
 </div>
 <div class="el">
 <h3>AjaxProgressBar <span class="badge s-niche">Niche</span> <span class="badge m-rewrite">Needs rewrite</span></h3>
@@ -394,7 +394,7 @@
 <h3>AjaxFileUploadRequestHandler <span class="badge s-core">Core</span> <span class="badge m-modern">Modern</span></h3>
 <p class="role">A WORequestHandler registered under the &#x27;upload&#x27; key that consumes the multipart upload request out-of-band, streams the body to a temp file while tracking progress (AjaxUploadProgress), enforces a max-upload-size, and restores the session by id so the upload can run without blocking the session lock.</p>
 <p class="usage"><strong>Usage.</strong> Not a component; auto-registered by AjaxFileUpload&#x27;s constructor. Configured via properties er.ajax.AjaxFileRequestHandler.tempFileFolder and .maxUploadSize. Reads the multipart iterator, pulls sessionId/id/file form-data, registers an AjaxUploadProgress, and copyAndTrack()s the stream to a temp file; subclasses can override downloadFinished(progress).</p>
-<p class="deps"><strong>Client deps.</strong> Pure server-side Java (WOMultipartIterator, ERXUnitAwareDecimalFormat, ERXProperties, AjaxUploadProgress). No client JS, no Prototype/Scriptaculous. The only coupling is that it is driven by the iframe upload from the two components above.</p>
+<p class="deps"><strong>Client deps.</strong> Pure server-side Java (WOMultipartIterator, ERXUtilities.formatByteCount, ERXProperties, AjaxUploadProgress). No client JS, no Prototype/Scriptaculous. The only coupling is that it is driven by the iframe upload from the two components above.</p>
 </div>
 </section>
 <section id="sec9"><h2>Visual effects</h2><p class="lead">Highlight, hover, rounded corners, behaviour binding.</p>

@@ -17,8 +17,8 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSArray;
 
-import er.extensions.formatters.ERXUnitAwareDecimalFormat;
 import er.extensions.foundation.ERXProperties;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Provides the backend for Ajax uploads. This has to be implemented differently than a normal file upload because we
@@ -116,7 +116,7 @@ public class AjaxFileUploadRequestHandler extends WORequestHandler {
 					
 					try {
 						if (_maxUploadSize >= 0L && streamLength > _maxUploadSize) {
-							IOException e = new IOException("You attempted to upload a file larger than the maximum allowed size of " + new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE).format(_maxUploadSize) + ".");
+							IOException e = new IOException("You attempted to upload a file larger than the maximum allowed size of " + ERXUtilities.formatByteCount(_maxUploadSize) + ".");
 							progress.setFailure(e);
 							progress.dispose();
 							throw e;

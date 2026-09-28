@@ -12,13 +12,17 @@ import java.io.UncheckedIOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
+
+import er.extensions.appserver.ERXLocale;
 
 public class ERXUtilities {
 
@@ -140,5 +144,31 @@ public class ERXUtilities {
 			sb.append( '=' );
 			sb.append( URLEncoder.encode( value, StandardCharsets.UTF_8 ) );
 		}
+	}
+
+	/**
+	 * Units for {@link #formatByteCount(long)}, each 1000 times the previous
+	 */
+	private static final String[] BYTE_UNITS = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+
+	/**
+	 * @return A byte count for people to read: "123 B", "1.5 KB", "1.2 GB", in steps of 1000, with one decimal. The
+	 *         number is formatted in the current locale ({@link ERXLocale#current()}, or the JVM's default where none is
+	 *         set), so it's "1,2 GB" in Icelandic.
+	 */
+	public static String formatByteCount( final long bytes ) {
+		double value = bytes;
+		int unit = 0;
+
+		// Move up a unit while the value, as displayed (one decimal), would be 1000 or more
+		while( unit < BYTE_UNITS.length - 1 && Math.abs( Math.round( value * 10 ) / 10.0 ) >= 1000 ) {
+			value = value / 1000;
+			unit++;
+		}
+
+		final Locale locale = ERXLocale.current() != null ? ERXLocale.current() : Locale.getDefault();
+		final NumberFormat format = NumberFormat.getNumberInstance( locale );
+		format.setMaximumFractionDigits( unit == 0 ? 0 : 1 );
+		return format.format( value ) + " " + BYTE_UNITS[unit];
 	}
 }

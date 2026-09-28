@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **`ERXUnitAwareDecimalFormat` removed, `ERXUtilities.formatByteCount(long)` added**
+  Byte counts are formatted by one method: "123 B", "1.5 KB", "1.2 GB", in steps of 1000, with one
+  decimal, the number formatted in the current locale. Log patterns using `%V` (JVM memory) and the
+  statistics pages show sizes this way now, where they were in steps of 1024 with two decimals. An
+  application using `new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE).format(n)` calls
+  `ERXUtilities.formatByteCount(n)` instead. (#127)
+
 - **`ERXMutableURL` removed**
   The framework's few uses of it (building the development stop URL, encoding a redirect's query
   parameters, appending a parameter to an Ajax URL) are handled by two small helpers,

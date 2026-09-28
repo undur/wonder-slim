@@ -7,8 +7,8 @@ import java.io.OutputStream;
 import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
+import er.extensions.foundation.ERXUtilities;
 
-import er.extensions.formatters.ERXUnitAwareDecimalFormat;
 
 /**
  * AjaxProgress is the model for an AjaxProgressBar.  By holding
@@ -289,7 +289,7 @@ public class AjaxProgress {
 				else {
 					incrementValue(bytesRead);
 					if (maxSize > 0 && _value > maxSize) {
-						throw new IOException("The provided stream exceeded the maximum length of " + new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE).format(maxSize) + " bytes.");
+						throw new IOException("The provided stream exceeded the maximum length of " + ERXUtilities.formatByteCount(maxSize) + ".");
 					}
 					outputStream.write(buffer, 0, bytesRead);
 				}

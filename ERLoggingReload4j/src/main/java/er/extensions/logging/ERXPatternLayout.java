@@ -6,7 +6,6 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.logging;
 
-import java.text.NumberFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,9 +24,9 @@ import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCoding;
 import com.webobjects.foundation.NSMutableArray;
 
-import er.extensions.formatters.ERXUnitAwareDecimalFormat;
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXThreadStorage;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * The ERXPatternLayout adds some additional (and needed) layout options. The
@@ -451,8 +450,6 @@ class ERXPatternParser extends PatternParser {
 		/** */
 		private Runtime _runtime;
 
-		/** */
-		private NumberFormat _decimalFormatter;
 
 		/** The output's template, with @@key@@ placeholders (see {@link ERXPatternParser#fillTemplate}) */
 		private String _template;
@@ -469,8 +466,6 @@ class ERXPatternParser extends PatternParser {
 		JavaVMInfoPatternConverter(FormattingInfo formattingInfo, String format) {
 			super(formattingInfo);
 			_runtime = Runtime.getRuntime();
-			_decimalFormatter = new ERXUnitAwareDecimalFormat(ERXUnitAwareDecimalFormat.BYTE);
-			_decimalFormatter.setMaximumFractionDigits(2);
 			format = format.replaceFirst("(^|\\W)u(\\W|$)", "$1@@usedMemory@@$2");
 			format = format.replaceFirst("(^|\\W)f(\\W|$)", "$1@@freeMemory@@$2");
 			format = format.replaceFirst("(^|\\W)t(\\W|$)", "$1@@totalMemory@@$2");
@@ -496,10 +491,10 @@ class ERXPatternParser extends PatternParser {
 			long usedMemory = totalMemory - freeMemory;
 
 			final Map<String, String> values = new HashMap<>();
-			values.put("totalMemory", _decimalFormatter.format(totalMemory));
-			values.put("freeMemory", _decimalFormatter.format(freeMemory));
-			values.put("usedMemory", _decimalFormatter.format(usedMemory));
-			values.put("maxMemory", _decimalFormatter.format(maxMemory));
+			values.put("totalMemory", ERXUtilities.formatByteCount(totalMemory));
+			values.put("freeMemory", ERXUtilities.formatByteCount(freeMemory));
+			values.put("usedMemory", ERXUtilities.formatByteCount(usedMemory));
+			values.put("maxMemory", ERXUtilities.formatByteCount(maxMemory));
 
 			return fillTemplate(_template, values);
 		}
