@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **A locale for one request: `ERXWOContext.setLocale(Locale)`**
+  A page or route that knows its locale without a session to carry it (a stateless page rendering
+  a customer's document in the customer's locale, say) sets it on the context. It comes before the
+  session's and the application's locale, and lives only as long as the request. (#63)
+
 - **Complete URLs from `completeURLWithRequestHandlerKey` are short**
   With short URLs on, `WOContext.completeURLWithRequestHandlerKey(…)` returned the long form, the only
   way of generating a URL that did. An absolute link built with it (in an email, say) is now short

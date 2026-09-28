@@ -1,5 +1,7 @@
 package er.extensions.appserver;
 
+import java.util.Locale;
+
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
@@ -14,6 +16,11 @@ import er.extensions.foundation.ERXThreadStorage;
 public class ERXWOContext extends ERXAjaxContext {
 
 	private boolean _generateCompleteResourceURLs;
+
+	/**
+	 * The locale set for this request, see {@link #setLocale(Locale)}
+	 */
+	private Locale _locale;
 	
 	private static final String CONTEXT_KEY = "wocontext";
 	private static final String CONTEXT_DICTIONARY_KEY = "ERXWOContext.dict";
@@ -62,6 +69,24 @@ public class ERXWOContext extends ERXAjaxContext {
 	}
 
 	/**
+	 * @return The locale set for this request with {@link #setLocale(Locale)}, null when none was
+	 */
+	public Locale locale() {
+		return _locale;
+	}
+
+	/**
+	 * Sets the locale numbers and dates are formatted and parsed in for this request, ahead of the session's and the
+	 * application's (see {@link ERXLocale}). For a page or route that knows its locale without a session to carry it:
+	 * a stateless page rendering a customer's document in the customer's locale, say. A request that sets one never
+	 * looks up its session for a locale. Lives and dies with the request; null reverts to the session's or the
+	 * application's locale.
+	 */
+	public void setLocale(Locale locale) {
+		_locale = locale;
+	}
+
+	/**
 	 * Turn on complete resource URL generation.
 	 * 
 	 * @param generateCompleteResourceURLs if true, resources will generate complete URLs.
@@ -107,6 +132,7 @@ public class ERXWOContext extends ERXAjaxContext {
 	public Object clone() {
 		ERXWOContext context = (ERXWOContext)super.clone();
 		context._setGenerateCompleteResourceURLs(_generateCompleteResourceURLs);
+		context.setLocale(_locale);
 		return context;
 	}
 

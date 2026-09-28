@@ -12,6 +12,7 @@ import com.webobjects.appserver.WOContext;
  * The locale is always the application's decision. Resolved per request, first match wins:
  *
  * <ol>
+ * <li>a locale the application gave the request ({@link ERXWOContext#setLocale(Locale)})</li>
  * <li>a locale the application gave the session ({@link ERXSession#setLocale(Locale)})</li>
  * <li>the application's locale, when set ({@link #setApplicationLocale(Locale)})</li>
  * </ol>
@@ -38,7 +39,13 @@ public final class ERXLocale {
 	 *         configured none (see the class documentation)
 	 */
 	public static Locale current() {
-		final ERXSession session = session( ERXWOContext.currentContext() );
+		final WOContext context = ERXWOContext.currentContext();
+
+		if( context instanceof ERXWOContext erxContext && erxContext.locale() != null ) {
+			return erxContext.locale();
+		}
+
+		final ERXSession session = session( context );
 
 		if( session != null && session.locale() != null ) {
 			return session.locale();
