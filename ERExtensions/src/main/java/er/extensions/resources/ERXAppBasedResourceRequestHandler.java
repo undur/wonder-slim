@@ -29,11 +29,6 @@ import er.extensions.appserver.ERXApplication;
  *
  * Localized resources aren't supported: resources are looked up without languages, so one that only exists in a
  * language's .lproj folder isn't found.
- *
- * Work to do before labeling this "totally ready":
- * 
- * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
- * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05
  */
 
 public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
