@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The admin actions for the event pages work**
+  `/wa/ERXAdminDirectAction/events` and `/eventsSetup` answered with a 500: they returned what the
+  page's password form action returns, which for the event pages is null (show the same page
+  again). They now return the page. Their password is `EOEventLoggingPassword`, not the statistics
+  password. (#135)
+
 - **`_WOJExtensionsUtil` removed, and `WOCollapsibleComponentContent`'s arrow has alt text**
   The components inherited from JavaWOExtensions read their bindings with the stock
   `valueForBinding()`. `_WOJExtensionsUtil.valueForBindingOrNull()` only differed for a binding

@@ -58,24 +58,23 @@ public class ERXAdminDirectAction extends WODirectAction {
 	 *
 	 * WO's statistics and event pages are component pages behind a password form. These actions fill in the form and
 	 * submit it on the caller's behalf, which gives each page a URL that can be bookmarked or requested by a monitoring
-	 * script. The page itself checks the password.
+	 * script. The page itself checks the password. The page is returned, not what its submit action returns: that's a form
+	 * action, and the event pages' returns null to show the same page again, which as a direct action's result is an
+	 * error.
 	 */
     public WOActionResults statsAction() {
         // The page lives in ERControl, which need not be present: reached by name, not by class
-        final WOComponent nextPage = pageWithName("WOStatsPage");
-        nextPage.takeValueForKey(context().request().stringFormValueForKey("pw"), "password");
-        return (WOActionResults)nextPage.valueForKey("submit");
+        return submittedPage("WOStatsPage");
     }
 
 	/**
 	 * @return WOEventDisplay page using password in the "pw" query parameter
 	 *
-	 * See {@link #statsAction()}.
+	 * See {@link #statsAction()}. The event pages' password is {@code EOEventLoggingPassword}, not the statistics
+	 * password; with none set, nobody can log in.
 	 */
 	public WOActionResults eventsAction() {
-		final WOComponent nextPage = pageWithName("WOEventDisplayPage");
-		nextPage.takeValueForKey(context().request().stringFormValueForKey("pw"), "password");
-		return (WOActionResults)nextPage.valueForKey("submit");
+		return submittedPage("WOEventDisplayPage");
 	}
 
 	/**
@@ -84,11 +83,19 @@ public class ERXAdminDirectAction extends WODirectAction {
 	 * See {@link #statsAction()}. Turns on logging for every event type, then shows the event display.
 	 */
 	public WOActionResults eventsSetupAction() {
-		final WOComponent nextPage = pageWithName("WOEventSetupPage");
-		nextPage.takeValueForKey(context().request().stringFormValueForKey("pw"), "password");
-		nextPage.valueForKey("submit");
-		nextPage.valueForKey("selectAll");
+		final WOComponent setupPage = submittedPage("WOEventSetupPage");
+		setupPage.valueForKey("selectAll");
 		return eventsAction();
+	}
+
+	/**
+	 * @return The named page, its password form filled in with the "pw" query parameter and submitted
+	 */
+	private WOComponent submittedPage(final String pageName) {
+		final WOComponent page = pageWithName(pageName);
+		page.takeValueForKey(context().request().stringFormValueForKey("pw"), "password");
+		page.valueForKey("submit");
+		return page;
 	}
 
 	/**
