@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **AjaxSlim's Ajax requests are handled like component actions**
+  `AjaxRequestHandler` (the `ajax` key) now extends `ERXComponentActionRequestHandler` instead of
+  WebObjects' own component request handler, so Ajax requests follow the same rules as component
+  actions. A request without a session no longer creates one, the session is checked back in
+  exactly once however the request ends, and the page is restored through the session's page
+  cache. (#130)
+
 - **An Ajax request tells the client when the session has expired**
   WebObjects answered it with the session expiry page and status 200, or with whatever an
   application's `handleSessionRestorationErrorInContext` returns, often a redirect the browser
