@@ -41,10 +41,10 @@ public class WOMetaRefresh extends WOComponent
     public WOComponent invokeAction()  {
         WOComponent aComponent = null;
         if (hasBinding("pageName")) {
-            String aPageName = (String)_WOJExtensionsUtil.valueForBindingOrNull("pageName",this);
+            String aPageName = (String)valueForBinding("pageName");
             aComponent = pageWithName(aPageName);
         } else {
-            aComponent = (WOComponent)_WOJExtensionsUtil.valueForBindingOrNull("action",this);
+            aComponent = (WOComponent)valueForBinding("action");
         }
         return aComponent;
     }  

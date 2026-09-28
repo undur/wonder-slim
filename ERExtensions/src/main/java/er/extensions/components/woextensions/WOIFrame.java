@@ -24,7 +24,7 @@ public class WOIFrame extends WOComponent
 
     public String srcUrl()  {
         if (hasBinding("src")) {
-            return (String)_WOJExtensionsUtil.valueForBindingOrNull("src",this);
+            return (String)valueForBinding("src");
         }
         if (hasBinding("pageName") || hasBinding("value") || hasBinding("actionName")) {
             return context().componentActionURL();
@@ -35,10 +35,10 @@ public class WOIFrame extends WOComponent
     public WOElement frameContent()  {
         WOElement aContentElement = null;
         if (hasBinding("pageName")) {
-            String  aPageName = (String)_WOJExtensionsUtil.valueForBindingOrNull("pageName",this);
+            String  aPageName = (String)valueForBinding("pageName");
             aContentElement = pageWithName(aPageName);
         } else if(hasBinding("value")) {
-            aContentElement = (WOElement)_WOJExtensionsUtil.valueForBindingOrNull("value",this);
+            aContentElement = (WOElement)valueForBinding("value");
         } else if(hasBinding("actionName")) {
             aContentElement = (WOElement)parent().valueForBinding((String)valueForBinding("actionName"));
         }

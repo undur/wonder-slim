@@ -9,7 +9,6 @@ package er.extensions.components.woextensions.events;
 
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
-import er.extensions.components.woextensions._WOJExtensionsUtil;
 
 public class WXBar extends WOComponent {
 
@@ -25,8 +24,8 @@ public class WXBar extends WOComponent {
 	public String middleWidth() {
 		int aFullWidth = 0;
 		double aPercentage = 0.0;
-		Object aFullWidthString = _WOJExtensionsUtil.valueForBindingOrNull("fullWidth", this);
-		Object aPercentageString = _WOJExtensionsUtil.valueForBindingOrNull("percentage", this);
+		Object aFullWidthString = valueForBinding("fullWidth");
+		Object aPercentageString = valueForBinding("percentage");
 
 		if (aFullWidthString instanceof Number) {
 			aFullWidth = ((Number) aFullWidthString).intValue();

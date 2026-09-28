@@ -14,7 +14,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSRange;
-import er.extensions.components.woextensions._WOJExtensionsUtil;
 
 public class WXOutlineEntry extends WOComponent {
 
@@ -32,7 +31,7 @@ public class WXOutlineEntry extends WOComponent {
 	@Override
 	public void awake() {
 		super.awake();
-		Object nestLevelBinding = _WOJExtensionsUtil.valueForBindingOrNull("nestingLevel", this);
+		Object nestLevelBinding = valueForBinding("nestingLevel");
 		if (nestLevelBinding instanceof Number) {
 			_nestingLevel = ((Number) nestLevelBinding).intValue();
 			return;
@@ -56,7 +55,7 @@ public class WXOutlineEntry extends WOComponent {
 
 	public boolean isExpanded() {
 		Object currentItem = valueForBinding("item");
-		NSArray selectionPath = (NSArray) _WOJExtensionsUtil.valueForBindingOrNull("selectionPath", this);
+		NSArray selectionPath = (NSArray) valueForBinding("selectionPath");
 		return (_nestingLevel < selectionPath.count()) && selectionPath.objectAtIndex(_nestingLevel).equals(currentItem);
 	}
 
@@ -66,7 +65,7 @@ public class WXOutlineEntry extends WOComponent {
 
 	public WOComponent toggleExpansion() {
 		@SuppressWarnings("unchecked")
-		NSArray<Object> selectionPath = (NSArray<Object>) _WOJExtensionsUtil.valueForBindingOrNull("selectionPath", this);
+		NSArray<Object> selectionPath = (NSArray<Object>) valueForBinding("selectionPath");
 
 		selectionPath = selectionPath.subarrayWithRange(new NSRange(0, _nestingLevel));
 

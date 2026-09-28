@@ -27,7 +27,7 @@ public class WOKeyValueConditional extends WOComponent {
 
     public String key() {
         if (_key == null) {
-            _key = (String)_WOJExtensionsUtil.valueForBindingOrNull("key",this);
+            _key = (String)valueForBinding("key");
         }
         return _key;
     }

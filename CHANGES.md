@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **`_WOJExtensionsUtil` removed, and `WOCollapsibleComponentContent`'s arrow has alt text**
+  The components inherited from JavaWOExtensions read their bindings with the stock
+  `valueForBinding()`. `_WOJExtensionsUtil.valueForBindingOrNull()` only differed for a binding
+  written as the literal `$null`, which arrives as `false`. `WOCollapsibleComponentContent`'s arrow
+  image now has the alt text it was always meant to have ("Click to collapse" / "Click to expand"),
+  which was looked up as a binding name and so was always empty. (#134)
+
 - **A resource URL that names no resource is a 404**
   `/res/foo` or `/res/` (no framework and resource name) answered with a 500. It's now a 404, and,
   not being a resource, isn't kept in the resource cache. (#133)

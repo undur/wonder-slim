@@ -76,7 +76,7 @@ public class WOCollapsibleComponentContent extends WOComponent
     public String openedImageFileName()  {
         if (_openedImageFileName==null) {
             if (hasBinding("openedImageFileName")) {
-                _openedImageFileName = (String) _WOJExtensionsUtil.valueForBindingOrNull("openedImageFileName",this);
+                _openedImageFileName = (String) valueForBinding("openedImageFileName");
             } else {
                 _openedImageFileName = "DownTriangle.gif";
             }
@@ -87,7 +87,7 @@ public class WOCollapsibleComponentContent extends WOComponent
     public String closedImageFileName()  {
         if (_closedImageFileName==null) {
             if (hasBinding("closedImageFileName")) {
-                _closedImageFileName = (String) _WOJExtensionsUtil.valueForBindingOrNull("closedImageFileName",this);
+                _closedImageFileName = (String) valueForBinding("closedImageFileName");
             } else {
                 _closedImageFileName = "RightTriangle.gif";
             }
@@ -108,9 +108,9 @@ public class WOCollapsibleComponentContent extends WOComponent
     public String label()  {
         String aLabel = null;
         if (isVisible()) {
-            aLabel = (String)_WOJExtensionsUtil.valueForBindingOrNull("openedLabel",this);
+            aLabel = (String)valueForBinding("openedLabel");
         } else {
-            aLabel = (String)_WOJExtensionsUtil.valueForBindingOrNull("closedLabel",this);
+            aLabel = (String)valueForBinding("closedLabel");
         }
 
         return aLabel;
@@ -119,9 +119,9 @@ public class WOCollapsibleComponentContent extends WOComponent
     public String helpString()  {
         String aHelpString = null;
         if (isVisible()) {
-            aHelpString = (String)_WOJExtensionsUtil.valueForBindingOrNull("Click to collapse",this);
+            aHelpString = "Click to collapse";
         } else {
-            aHelpString = (String)_WOJExtensionsUtil.valueForBindingOrNull("Click to expand",this);
+            aHelpString = "Click to expand";
         }
         return aHelpString;
     }
@@ -129,7 +129,7 @@ public class WOCollapsibleComponentContent extends WOComponent
     public String framework() {
         if (!_isFrameworkSet) {
             _isFrameworkSet = true;
-            _framework = hasBinding("framework") ? (String) _WOJExtensionsUtil.valueForBindingOrNull("framework",this) : "ERExtensions";
+            _framework = hasBinding("framework") ? (String) valueForBinding("framework") : "ERExtensions";
             if ((_framework!=null) && _framework.equalsIgnoreCase("app"))
                 _framework=null;
         }

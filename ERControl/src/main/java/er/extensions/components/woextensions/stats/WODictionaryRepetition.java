@@ -12,7 +12,6 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.eocontrol.EOSortOrdering;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-import er.extensions.components.woextensions._WOJExtensionsUtil;
 
 public class WODictionaryRepetition extends WOComponent {
 
@@ -41,7 +40,7 @@ public class WODictionaryRepetition extends WOComponent {
 
     public NSDictionary dictionary()  {
         if (_dictionary==null) {
-            _dictionary = (NSDictionary)_WOJExtensionsUtil.valueForBindingOrNull("dictionary",this);
+            _dictionary = (NSDictionary)valueForBinding("dictionary");
             if (_dictionary == null) {
                 _dictionary = NSDictionary.EmptyDictionary;
                 _keyList = NSArray.EmptyArray;

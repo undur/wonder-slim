@@ -10,7 +10,6 @@ package er.extensions.components.woextensions.events;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.eocontrol.EOAggregateEvent;
 import com.webobjects.eocontrol.EOEvent;
-import er.extensions.components.woextensions._WOJExtensionsUtil;
 
 public class WOAggregateEventRow extends WOEventRow {
 
@@ -25,11 +24,11 @@ public class WOAggregateEventRow extends WOEventRow {
 	}
 
 	public EOAggregateEvent object() {
-		return (EOAggregateEvent) _WOJExtensionsUtil.valueForBindingOrNull("object", this);
+		return (EOAggregateEvent) valueForBinding("object");
 	}
 
 	public WOEventDisplayPage controller() {
-		return (WOEventDisplayPage) _WOJExtensionsUtil.valueForBindingOrNull("controller", this);
+		return (WOEventDisplayPage) valueForBinding("controller");
 	}
 
 	public int displayMode() {

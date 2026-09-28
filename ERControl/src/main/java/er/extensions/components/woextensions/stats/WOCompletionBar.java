@@ -10,7 +10,6 @@ package er.extensions.components.woextensions.stats;
 import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
-import er.extensions.components.woextensions._WOJExtensionsUtil;
 
 // This component should be made stateless
 
@@ -55,10 +54,10 @@ public class WOCompletionBar extends WOComponent {
         Object v = valueForBinding("value");
         valueMin = _intValue("valueMin",0);
         valueMax = _intValue("valueMax",100);
-        backgroundColor = (String)_WOJExtensionsUtil.valueForBindingOrNull("backgroundColor",this);
-        barColor = (String)_WOJExtensionsUtil.valueForBindingOrNull("barColor",this);
-        width = (String)_WOJExtensionsUtil.valueForBindingOrNull("width",this);
-        align = (String)_WOJExtensionsUtil.valueForBindingOrNull("align",this);
+        backgroundColor = (String)valueForBinding("backgroundColor");
+        barColor = (String)valueForBinding("barColor");
+        width = (String)valueForBinding("width");
+        align = (String)valueForBinding("align");
 
         if (backgroundColor==null) backgroundColor="#2020af";
         if (barColor==null) barColor="#22aaff";
