@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2026-09-28 (8.0.11)
 
 - **Resource URLs carry a stamp of the resource's content, and are cached for good**
