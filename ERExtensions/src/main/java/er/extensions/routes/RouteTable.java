@@ -16,8 +16,6 @@ import er.extensions.appserver.ERXRequest;
 
 /**
  * Route handling.
- * 
- * TODO: Having some docs here would be nice // Hugi 2025-10-09
  */
 
 public class RouteTable {
