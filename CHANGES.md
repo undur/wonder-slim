@@ -1,19 +1,15 @@
 # Changelog
 
-## Unreleased
+## 2026-09-28 (8.0.11)
 
-- **A partial submit takes the value of a field whose name is bound explicitly**
-  An `AjaxObserveField` submitting only the changed field dropped its value when the field had a
-  `name` binding (`<wo:textfield name="email" …/>`): the client named the field by its `name`, the
-  server compared element IDs. Such a field now also renders its element ID (`data-element-id`),
-  which the client sends instead. Text fields, text areas, password and hidden fields, and pop-up
-  buttons. (#142)
-
-- **The resource cache is bounded, and large resources are streamed**
-  In production, the resource request handler kept every resource it had served in memory, for
-  good. Resources over 1 MB (media, large documents) are now streamed from their bundle for each
-  request, ranges included, rather than held in memory, and the rest are cached up to 64 MB in
-  total, forgetting the least recently requested past it. (#139)
+- **Resource URLs carry a stamp of the resource's content, and are cached for good**
+  In production, resource URLs the framework generates carry a stamp of the resource's content in
+  the file name: `/res/AjaxSlim/ajaxslim.0dc9602958.js`. A deploy that changes a resource changes
+  its URL, so a stamped URL is served with `Cache-Control: public, max-age=31536000, immutable` and
+  browsers never ask for it again. A request whose stamp isn't the resource's current one (from a
+  page an instance not yet updated served during a deploy, say) is served with `no-cache`. The
+  plain URL, `/res/AjaxSlim/ajaxslim.js`, keeps working as before. Not in development, where files
+  change while the application runs. (#30)
 
 - **Resources are validated with ETags instead of kept for a fixed hour**
   Every resource is served with an `ETag`, its content stamp. A resource requested by an unstamped
@@ -31,52 +27,11 @@
   for every request, seeking was degraded, and browsers tended not to cache it. Public resources
   are served the same way. (#137)
 
-- **Resource URLs carry a stamp of the resource's content, and are cached for good**
-  In production, resource URLs the framework generates carry a stamp of the resource's content in
-  the file name: `/res/AjaxSlim/ajaxslim.0dc9602958.js`. A deploy that changes a resource changes
-  its URL, so a stamped URL is served with `Cache-Control: public, max-age=31536000, immutable` and
-  browsers never ask for it again. A request whose stamp isn't the resource's current one (from a
-  page an instance not yet updated served during a deploy, say) is served with `no-cache`. The
-  plain URL, `/res/AjaxSlim/ajaxslim.js`, keeps working as before. Not in development, where files
-  change while the application runs. (#30)
-
-- **Regular resources in a folder named `WebServerResources` aren't served as web server resources**
-  A resource counts as a web server resource only when it lies in its bundle's web server
-  resources folder. (#133)
-
-- **Correct content types for icons, JSON and current web formats**
-  Resources are served with `image/x-icon` for `.ico` (WebObjects says `text/plain`, so a
-  `favicon.ico` went out as text), `application/json` for `.json` and `.map`, `audio/mpeg` for
-  `.mp3`, and the types WebObjects' table doesn't know: `application/wasm`, `text/javascript` for
-  `.mjs`, `application/manifest+json` for `.webmanifest`, `image/webp`, `image/avif` and
-  `video/webm`. Also added: the Office Open XML and OpenDocument formats (`docx`, `xlsx`, `pptx`,
-  `odt`, `ods`, `odp`), audio and video (`m4a`, `m4v`, `aac`, `flac`, `oga`, `opus`, `ogv`, with
-  `ogg` as `audio/ogg`), `heic`, `md`, `vcf`, `rss`, `jsonld`, `epub`, `7z`, and `gz` as
-  `application/gzip`. An unknown extension still gets `text/plain`. (#136)
-
-- **The resource cache no longer grows with every missing resource requested**
-  In production, the resource request handler cached every response by path, a 404 included, so
-  each new URL requested under `/res/` stayed in memory for good. Now only resources found are
-  cached, and paths known to be missing go into a set of at most 10,000, forgetting the least
-  recently requested. A repeated request for a missing resource still skips the lookup, which
-  searches every bundle. (#133)
-
-- **The admin actions for the event pages work**
-  `/wa/ERXAdminDirectAction/events` and `/eventsSetup` answered with a 500: they returned what the
-  page's password form action returns, which for the event pages is null (show the same page
-  again). They now return the page. Their password is `EOEventLoggingPassword`, not the statistics
-  password. (#135)
-
-- **`_WOJExtensionsUtil` removed, and `WOCollapsibleComponentContent`'s arrow has alt text**
-  The components inherited from JavaWOExtensions read their bindings with the stock
-  `valueForBinding()`. `_WOJExtensionsUtil.valueForBindingOrNull()` only differed for a binding
-  written as the literal `$null`, which arrives as `false`. `WOCollapsibleComponentContent`'s arrow
-  image now has the alt text it was always meant to have ("Click to collapse" / "Click to expand"),
-  which was looked up as a binding name and so was always empty. (#134)
-
-- **A resource URL that names no resource is a 404**
-  `/res/foo` or `/res/` (no framework and resource name) answered with a 500. It's now a 404, and,
-  not being a resource, isn't kept in the resource cache. (#133)
+- **The resource cache is bounded, and large resources are streamed**
+  In production, the resource request handler kept every resource it had served in memory, for
+  good. Resources over 1 MB (media, large documents) are now streamed from their bundle for each
+  request, ranges included, rather than held in memory, and the rest are cached up to 64 MB in
+  total, forgetting the least recently requested past it. (#139)
 
 - **Public resources: files served at the root of the application's URL space**
   An application that calls `setServesPublicResources(true)` in its constructor serves the files in
@@ -89,18 +44,6 @@
   without a restart. The files are served by the resource request handler, as at their resource
   URLs. Off by default. (#32)
 
-- **`ERXWOImage` renamed `ERXSVGImage`**
-  The element behind `<wo:svg>` is named for what it's for: an `<img>` for an image resource or URL
-  that doesn't read the image to work out its size, so it suits SVG images. Templates using
-  `<wo:svg>` are unaffected; a template naming the class directly uses the new name.
-
-- **AjaxSlim's Ajax requests are handled like component actions**
-  `AjaxRequestHandler` (the `ajax` key) now extends `ERXComponentActionRequestHandler` instead of
-  WebObjects' own component request handler, so Ajax requests follow the same rules as component
-  actions. A request without a session no longer creates one, the session is checked back in
-  exactly once however the request ends, and the page is restored through the session's page
-  cache. (#130)
-
 - **An Ajax request tells the client when the session has expired**
   WebObjects answered it with the session expiry page and status 200, or with whatever an
   application's `handleSessionRestorationErrorInContext` returns, often a redirect the browser
@@ -111,10 +54,35 @@
   expired" with a Continue button that goes where the application sent the user, or reloads the
   page. Requests that aren't Ajax requests are answered as before. (#123)
 
-- **`AjaxFileUpload` no longer loads an error into its hidden iframe**
-  The iframe's initial document was a direct action removed years ago, so every page with an upload
-  loaded a 500 into it and logged an exception. It now starts as `about:blank`. Uploads work as
-  before. (#124)
+- **AjaxSlim's Ajax requests are handled like component actions**
+  `AjaxRequestHandler` (the `ajax` key) now extends `ERXComponentActionRequestHandler` instead of
+  WebObjects' own component request handler, so Ajax requests follow the same rules as component
+  actions. A request without a session no longer creates one, the session is checked back in
+  exactly once however the request ends, and the page is restored through the session's page
+  cache. (#130)
+
+- **A partial submit takes the value of a field whose name is bound explicitly**
+  An `AjaxObserveField` submitting only the changed field dropped its value when the field had a
+  `name` binding (`<wo:textfield name="email" …/>`): the client named the field by its `name`, the
+  server compared element IDs. Such a field now also renders its element ID (`data-element-id`),
+  which the client sends instead. Text fields, text areas, password and hidden fields, and pop-up
+  buttons. (#142)
+
+- **Correct content types for icons, JSON and current web formats**
+  Resources are served with `image/x-icon` for `.ico` (WebObjects says `text/plain`, so a
+  `favicon.ico` went out as text), `application/json` for `.json` and `.map`, `audio/mpeg` for
+  `.mp3`, and the types WebObjects' table doesn't know: `application/wasm`, `text/javascript` for
+  `.mjs`, `application/manifest+json` for `.webmanifest`, `image/webp`, `image/avif` and
+  `video/webm`. Also added: the Office Open XML and OpenDocument formats (`docx`, `xlsx`, `pptx`,
+  `odt`, `ods`, `odp`), audio and video (`m4a`, `m4v`, `aac`, `flac`, `oga`, `opus`, `ogv`, with
+  `ogg` as `audio/ogg`), `heic`, `md`, `vcf`, `rss`, `jsonld`, `epub`, `7z`, and `gz` as
+  `application/gzip`. An unknown extension still gets `text/plain`. (#136)
+
+- **The admin actions for the event pages work**
+  `/wa/ERXAdminDirectAction/events` and `/eventsSetup` answered with a 500: they returned what the
+  page's password form action returns, which for the event pages is null (show the same page
+  again). They now return the page. Their password is `EOEventLoggingPassword`, not the statistics
+  password. (#135)
 
 - **A locale for one request: `ERXWOContext.setLocale(Locale)`**
   A page or route that knows its locale without a session to carry it (a stateless page rendering
@@ -126,6 +94,38 @@
   way of generating a URL that did. An absolute link built with it (in an email, say) is now short
   like every other URL. A URL asked for with an instance number keeps the long form, since a short
   URL can't carry one. (#128)
+
+- **Regular resources in a folder named `WebServerResources` aren't served as web server resources**
+  A resource counts as a web server resource only when it lies in its bundle's web server
+  resources folder. (#133)
+
+- **The resource cache no longer grows with every missing resource requested**
+  In production, the resource request handler cached every response by path, a 404 included, so
+  each new URL requested under `/res/` stayed in memory for good. Now only resources found are
+  cached, and paths known to be missing go into a set of at most 10,000, forgetting the least
+  recently requested. A repeated request for a missing resource still skips the lookup, which
+  searches every bundle. (#133)
+
+- **A resource URL that names no resource is a 404**
+  `/res/foo` or `/res/` (no framework and resource name) answered with a 500. It's now a 404, and,
+  not being a resource, isn't kept in the resource cache. (#133)
+
+- **`AjaxFileUpload` no longer loads an error into its hidden iframe**
+  The iframe's initial document was a direct action removed years ago, so every page with an upload
+  loaded a 500 into it and logged an exception. It now starts as `about:blank`. Uploads work as
+  before. (#124)
+
+- **`ERXWOImage` renamed `ERXSVGImage`**
+  The element behind `<wo:svg>` is named for what it's for: an `<img>` for an image resource or URL
+  that doesn't read the image to work out its size, so it suits SVG images. Templates using
+  `<wo:svg>` are unaffected; a template naming the class directly uses the new name.
+
+- **`_WOJExtensionsUtil` removed, and `WOCollapsibleComponentContent`'s arrow has alt text**
+  The components inherited from JavaWOExtensions read their bindings with the stock
+  `valueForBinding()`. `_WOJExtensionsUtil.valueForBindingOrNull()` only differed for a binding
+  written as the literal `$null`, which arrives as `false`. `WOCollapsibleComponentContent`'s arrow
+  image now has the alt text it was always meant to have ("Click to collapse" / "Click to expand"),
+  which was looked up as a binding name and so was always empty. (#134)
 
 ## 2026-09-28 (8.0.10)
 
