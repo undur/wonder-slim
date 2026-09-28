@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Regular resources in a folder named `WebServerResources` aren't served as web server resources**
+  A resource counts as a web server resource only when it lies in its bundle's web server
+  resources folder. (#133)
+
 - **Correct content types for icons, JSON and current web formats**
   Resources are served with `image/x-icon` for `.ico` (WebObjects says `text/plain`, so a
   `favicon.ico` went out as text), `application/json` for `.json` and `.map`, `audio/mpeg` for
