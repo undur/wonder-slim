@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wodefinitions>
-	<wo class="ERXWOImage" content="forbidden" unknownAttributes="passthrough">
+	<wo class="ERXSVGImage" content="forbidden" unknownAttributes="passthrough">
 
-		<doc><![CDATA[Renders an `<img>` tag for an image resource (`filename`, optionally in a `framework`) or a URL (`src`). Written as `<wo:svg>` for now. It's meant to become the one image element, for ng-objects as well.
+		<doc><![CDATA[Renders an `<img>` tag for an image resource (`filename`, optionally in a `framework`) or a URL (`src`). Written as `<wo:svg>`. Unlike `WOImage`, it doesn't read the image to work out its size, so it suits SVG images, which `WOImage` logs errors for.
 
 ```html
 <wo:svg filename="logo.svg" alt="Logo" />

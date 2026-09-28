@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **`ERXWOImage` renamed `ERXSVGImage`**
+  The element behind `<wo:svg>` is named for what it's for: an `<img>` for an image resource or URL
+  that doesn't read the image to work out its size, so it suits SVG images. Templates using
+  `<wo:svg>` are unaffected; a template naming the class directly uses the new name.
+
 - **AjaxSlim's Ajax requests are handled like component actions**
   `AjaxRequestHandler` (the `ajax` key) now extends `ERXComponentActionRequestHandler` instead of
   WebObjects' own component request handler, so Ajax requests follow the same rules as component

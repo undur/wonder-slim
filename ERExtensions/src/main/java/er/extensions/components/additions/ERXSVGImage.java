@@ -11,9 +11,9 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
 /**
- * A clean-room {@code <img>} element, written from scratch on {@link WODynamicElement} with no
- * dependence on the stock WOImage (or its ancient image-dimension probing) and no ERExtensions
- * base-class lineage. It renders a single self-closing {@code <img>} tag.
+ * The element behind {@code <wo:svg>}: an {@code <img>} tag for an image resource or URL, written from scratch on
+ * {@link WODynamicElement} with no dependence on the stock WOImage (or its ancient image-dimension probing), so it
+ * suits SVG images, which WOImage logs errors for. It renders a single self-closing {@code <img>} tag.
  *
  * <h2>Bindings</h2>
  * <ul>
@@ -40,16 +40,11 @@ import com.webobjects.foundation.NSMutableDictionary;
  * through like any other attribute.
  *
  * <p>
- * Registered as {@code <wo:svg>} for now (see parsley-tag-aliases.properties); intended to become
- * the single image element for the whole framework, and eventually the shared image element for
- * ng-objects.
- *
- * <p>
  * WODynamicElements must be thread-safe: instances are shared across requests, so this class holds
  * only the (immutable, thread-safe) associations and never per-request state.
  */
 
-public class ERXWOImage extends WODynamicElement {
+public class ERXSVGImage extends WODynamicElement {
 
 	/**
 	 * Bindings this element consumes itself; everything else is rendered as a passthrough attribute.
@@ -63,7 +58,7 @@ public class ERXWOImage extends WODynamicElement {
 	 */
 	private final NSDictionary<String, WOAssociation> _passthroughAssociations;
 
-	public ERXWOImage( String name, NSDictionary<String, WOAssociation> associations, WOElement template ) {
+	public ERXSVGImage( String name, NSDictionary<String, WOAssociation> associations, WOElement template ) {
 		super( name, associations, template );
 
 		_src = associations.objectForKey( "src" );
