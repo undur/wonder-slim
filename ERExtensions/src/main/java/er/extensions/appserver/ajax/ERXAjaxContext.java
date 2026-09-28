@@ -1,6 +1,8 @@
 package er.extensions.appserver.ajax;
 
+import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
+import com.webobjects.appserver.WOResponse;
 
 import er.extensions.routes.ERXRoutingContext;
 
@@ -31,6 +33,17 @@ public class ERXAjaxContext extends ERXRoutingContext {
 	 * {@link ERXAjaxApplication#partialFormSenderID(WORequest)}), so for every other element in the form we answer
 	 * false, and its binding keeps its value. The Ajax submit button that sent the request counts as submitted too.
 	 */
+	/**
+	 * Renders the element's ID as {@code data-element-id} on an input whose name is bound explicitly. A partial submit
+	 * tells the server which field changed by the field's element ID (see {@link #_wasFormSubmitted()}); the client sends
+	 * the name, which is the element ID unless a name is bound, and this attribute when there is one.
+	 */
+	public static void appendElementIDForPartialSubmit( final WOResponse response, final WOContext context, final boolean nameIsBound ) {
+		if( nameIsBound ) {
+			response._appendTagAttributeAndValue( "data-element-id", context.elementID(), false );
+		}
+	}
+
 	@Override
 	@Deprecated
 	public boolean _wasFormSubmitted() {
@@ -39,8 +52,6 @@ public class ERXAjaxContext extends ERXRoutingContext {
 			WORequest request = request();
 			String partialSubmitSenderID = ERXAjaxApplication.partialFormSenderID(request);
 			if (partialSubmitSenderID != null) {
-				// TODO When explicitly setting the "name" binding on an input, 
-				// the following will fail in the takeValuesFromRequest phase.
 				String elementID = elementID();
 				if (!partialSubmitSenderID.equals(elementID) 
 						&& !partialSubmitSenderID.startsWith(elementID + ",") 

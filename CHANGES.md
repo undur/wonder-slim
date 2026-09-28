@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **A partial submit takes the value of a field whose name is bound explicitly**
+  An `AjaxObserveField` submitting only the changed field dropped its value when the field had a
+  `name` binding (`<wo:textfield name="email" …/>`): the client named the field by its `name`, the
+  server compared element IDs. Such a field now also renders its element ID (`data-element-id`),
+  which the client sends instead. Text fields, text areas, password and hidden fields, and pop-up
+  buttons. (#142)
+
 - **The resource cache is bounded, and large resources are streamed**
   In production, the resource request handler kept every resource it had served in memory, for
   good. Resources over 1 MB (media, large documents) are now streamed from their bundle for each

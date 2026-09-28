@@ -23,6 +23,7 @@ import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioInvoice;
 import ajaxplayground.components.scenario.ScenarioMultiObserve;
 import ajaxplayground.components.scenario.ScenarioMultiUpdate;
+import ajaxplayground.components.scenario.ScenarioNamedField;
 import ajaxplayground.components.scenario.ScenarioNested;
 import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioServerUpdate;
@@ -105,6 +106,7 @@ public class Routes {
 		routes.map( "/server-update", ScenarioServerUpdate.class );
 		routes.map( "/server-update-fragments", ScenarioServerUpdateFragments.class );
 		routes.map( "/checkbox", ScenarioCheckbox.class );
+		routes.map( "/named-field", ScenarioNamedField.class );
 		routes.map( "/tabs", ScenarioTabs.class );
 		routes.map( "/component-instance", ScenarioComponentInstance.class );
 		routes.map( "/locale-formatting", ScenarioLocaleFormatting.class );

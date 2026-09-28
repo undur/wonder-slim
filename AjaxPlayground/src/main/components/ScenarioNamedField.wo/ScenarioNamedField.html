@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: partial submit of explicitly named fields</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 44rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		label { display: block; margin: .6rem 0; }
+		.state { font-weight: 700; color: #2b6cb0; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>Partial submit of explicitly named fields</h1>
+	<p class="lead">Each field is watched by an <code>AjaxObserveField</code> doing a <strong>partial</strong> submit of just that field. The first three have their <code>name</code> bound explicitly, the last has WebObjects' default name. The server's values echo below.</p>
+
+	<wo:form>
+		<label>Email (name="email") <wo:textfield name="email" value="$email" id="emailField" /></label>
+		<wo:AjaxObserveField observeFieldID="emailField" updateContainerID="values" />
+
+		<label>Comment (name="comment") <wo:text name="comment" value="$comment" id="commentField" /></label>
+		<wo:AjaxObserveField observeFieldID="commentField" updateContainerID="values" />
+
+		<label>Color (name="color") <wo:popUpButton name="color" list="$colors" item="$currentColor" selection="$color" id="colorField" /></label>
+		<wo:AjaxObserveField observeFieldID="colorField" updateContainerID="values" />
+
+		<label>Nickname (default name) <wo:textfield value="$nickname" id="nicknameField" /></label>
+		<wo:AjaxObserveField observeFieldID="nicknameField" updateContainerID="values" />
+	</wo:form>
+
+	<wo:AjaxUpdateContainer id="values" elementName="div">
+		<p>email: <span class="state" id="emailValue"><wo:str value="$email" /></span></p>
+		<p>comment: <span class="state" id="commentValue"><wo:str value="$comment" /></span></p>
+		<p>color: <span class="state" id="colorValue"><wo:str value="$color" /></span></p>
+		<p>nickname: <span class="state" id="nicknameValue"><wo:str value="$nickname" /></span></p>
+	</wo:AjaxUpdateContainer>
+</body>
+</html>

@@ -16,6 +16,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSValidation;
 
+import er.extensions.appserver.ajax.ERXAjaxContext;
 import er.extensions.formatters.ERXNumberFormatter;
 import er.extensions.formatters.ERXTimestampFormatter;
 
@@ -248,5 +249,11 @@ public class ERXWOTextField extends WOInput {
 		stringbuffer.append(_useDecimalNumber);
 		stringbuffer.append('>');
 		return stringbuffer.toString();
+	}
+
+	@Override
+	protected void _appendNameAttributeToResponse(WOResponse response, WOContext context) {
+		super._appendNameAttributeToResponse(response, context);
+		ERXAjaxContext.appendElementIDForPartialSubmit(response, context, _name != null);
 	}
 }

@@ -983,7 +983,9 @@
 			var body = new URLSearchParams();
 			if (field.name) {
 				appendFieldValues(body, field);
-				body.append(PartialFormSenderIDKey, field.name);
+				// The server identifies the field by its element ID, which is its name unless a name is bound
+				// explicitly; such a field carries its element ID in data-element-id (ERXAjaxContext).
+				body.append(PartialFormSenderIDKey, field.getAttribute('data-element-id') || field.name);
 			}
 			ASB._submitBody(targetId, field.form, options, body);
 		},

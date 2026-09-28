@@ -7,6 +7,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WOHiddenField;
 import com.webobjects.foundation.NSDictionary;
+import er.extensions.appserver.ajax.ERXAjaxContext;
 
 /**
  * Patch of WOHiddenField, installed in its place. Adds a {@code readonly} binding: when true, the {@code readonly}
@@ -30,6 +31,7 @@ public class ERXWOHiddenField extends WOHiddenField {
 	@Override
 	protected void _appendNameAttributeToResponse(WOResponse response, WOContext context) {
 		super._appendNameAttributeToResponse(response, context);
+		ERXAjaxContext.appendElementIDForPartialSubmit(response, context, _name != null);
 
 		if (_readonly != null && _readonly.booleanValueInComponent(context.component())) {
 			response._appendTagAttributeAndValue("readonly", "readonly", false);

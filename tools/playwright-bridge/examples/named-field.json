@@ -1,0 +1,32 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=ScenarioNamedField",
+  "comment": "Partial submits of fields whose name is bound explicitly (name=\"email\"). A partial submit sends only the changed field and tells the server which one it was; the server takes values only for that element. The client used to identify the field by its name while the server compared element IDs, so a field with an explicit name had its own value dropped. Each field's change must reach the server, and a partial submit of one must not clear the others.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#emailField" },
+    { "do": "fill", "selector": "#emailField", "text": "hugi@example.com" },
+    { "do": "press", "selector": "#emailField", "key": "Tab" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "email", "selector": "#emailValue", "what": "text" },
+    { "do": "assert", "name": "a text field with an explicit name reaches the server", "that": "email", "equals": "hugi@example.com" },
+
+    { "do": "fill", "selector": "#commentField", "text": "hello" },
+    { "do": "press", "selector": "#commentField", "key": "Tab" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "comment", "selector": "#commentValue", "what": "text" },
+    { "do": "assert", "name": "a text area with an explicit name reaches the server", "that": "comment", "equals": "hello" },
+
+    { "do": "read", "name": "colorChanged", "what": "jsExpression", "expression": "(function(){var s=document.getElementById('colorField');s.selectedIndex=2;s.dispatchEvent(new Event('change',{bubbles:true}));return 'changed';})()" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "color", "selector": "#colorValue", "what": "text" },
+    { "do": "assert", "name": "a pop-up button with an explicit name reaches the server", "that": "color", "equals": "blue" },
+
+    { "do": "fill", "selector": "#nicknameField", "text": "slim" },
+    { "do": "press", "selector": "#nicknameField", "key": "Tab" },
+    { "do": "wait", "ms": 700 },
+    { "do": "read", "name": "nickname", "selector": "#nicknameValue", "what": "text" },
+    { "do": "assert", "name": "a field with the default name still reaches the server", "that": "nickname", "equals": "slim" },
+    { "do": "read", "name": "emailAfter", "selector": "#emailValue", "what": "text" },
+    { "do": "assert", "name": "a partial submit of one field doesn't clear another", "that": "emailAfter", "equals": "hugi@example.com" }
+  ]
+}
