@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Resources are validated with ETags instead of kept for a fixed hour**
+  Every resource is served with an `ETag`, its content stamp. A resource requested by an unstamped
+  URL (a public resource such as `/robots.txt`, or a `/res/…` URL written by hand) is served with
+  `Cache-Control: no-cache` instead of `max-age=3600`: the browser keeps it but asks first, and a
+  request naming the current `ETag` (`If-None-Match`) gets `304 Not Modified` without a body. So a
+  deploy is picked up immediately, and an unchanged resource costs a small request. `If-Range` is
+  answered with the range when it names the current `ETag`. Stamped URLs are still cached for
+  good. (#138)
+
 - **Resources are served in ranges, so video and audio play and seek properly**
   The resource request handler answers a request for part of a resource (`Range: bytes=…`, as
   browsers send for media) with `206 Partial Content` and just that part, a range past the end with

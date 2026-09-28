@@ -68,26 +68,40 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 	}
 
 	/**
-	 * @return The content stamp of the given resource, null if it isn't a web server resource. Computed on first use and
-	 *         remembered, for the URLs generated for it and for the stamps requested for it alike.
+	 * @return The content stamp of the given resource, null if it isn't a web server resource. In production, computed on
+	 *         first use and remembered, for the URLs generated for it and the requests made for it alike; in development,
+	 *         computed each time, as files change while the application runs.
 	 */
 	String stamp( final String resourceName, final String frameworkName ) {
+
+		if( !_stampsURLs ) {
+			return computeStamp( resourceName, frameworkName );
+		}
+
 		final String stamp = _stamps.computeIfAbsent( frameworkName + "/" + resourceName, _ -> {
-
-			// Checked first, so a resource that isn't one is never read
-			if( !isWebServerResource( resourceName, frameworkName ) ) {
-				return "";
-			}
-
-			try( InputStream content = inputStreamForResourceNamed( resourceName, frameworkName, null ) ) {
-				return content == null ? "" : ERXResourceStamps.stamp( content );
-			}
-			catch( IOException e ) {
-				throw new UncheckedIOException( e );
-			}
+			final String computed = computeStamp( resourceName, frameworkName );
+			return computed == null ? "" : computed;
 		} );
 
 		return stamp.isEmpty() ? null : stamp;
+	}
+
+	/**
+	 * @return The content stamp of the given resource, read through it; null if it isn't a web server resource
+	 */
+	private String computeStamp( final String resourceName, final String frameworkName ) {
+
+		// Checked first, so a resource that isn't one is never read
+		if( !isWebServerResource( resourceName, frameworkName ) ) {
+			return null;
+		}
+
+		try( InputStream content = inputStreamForResourceNamed( resourceName, frameworkName, null ) ) {
+			return content == null ? null : ERXResourceStamps.stamp( content );
+		}
+		catch( IOException e ) {
+			throw new UncheckedIOException( e );
+		}
 	}
 
 	/**

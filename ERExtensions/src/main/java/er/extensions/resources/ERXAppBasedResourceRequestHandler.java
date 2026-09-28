@@ -30,7 +30,6 @@ import er.extensions.appserver.ERXApplication;
  * 
  * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
  * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
- * TODO: Along the lines of versioning, we should see if serving ETag headers is worth the effort // Hugi 2025-11-16
  * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05
  */
 
@@ -87,29 +86,77 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		}
 
 		// A stamped name (css/site.3f9c1e07ab.css, as the resource manager generates it) names the resource without the
-		// stamp. Cached for good when the stamp is the resource's own; not at all when it isn't, as when an instance that
-		// hasn't been updated yet gets a request for a newer version during a deploy.
+		// stamp. If there's nothing by that name, the name may be a file's own, and is looked up as it is.
 		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse(path);
+		String resourcePath = stamped != null ? stamped.unstampedPath() : path;
+		String requestedStamp = stamped != null ? stamped.stamp() : null;
+		CachedResourceResponse resource = find(resourcePath);
 
-		if( stamped != null ) {
-			final CachedResourceResponse resource = find(stamped.unstampedPath());
-
-			if( resource != null ) {
-				final boolean current = _useCache && stamped.stamp().equals(currentStamp(stamped.unstampedPath()));
-				final WOResponse response = resource.response(request);
-
-				if( response.status() != 416 ) {
-					response.setHeader(current ? STAMPED_CACHE_CONTROL : "no-cache", "cache-control");
-				}
-
-				return response;
-			}
-
-			// Nothing by the name without the stamp: the name may be a file's own, look it up as it is
+		if( resource == null && stamped != null ) {
+			resourcePath = path;
+			requestedStamp = null;
+			resource = find(path);
 		}
 
-		final CachedResourceResponse resource = find(path);
-		return resource != null ? resource.response(request) : notFoundResponse(path);
+		if( resource == null ) {
+			return notFoundResponse(path);
+		}
+
+		// The resource's stamp is its ETag: the same content always has the same one
+		final String stamp = currentStamp(resourcePath);
+		final String etag = stamp == null ? null : "\"" + stamp + "\"";
+
+		// Cached for good when requested by its current stamp, as the URL changes whenever the content does. Otherwise
+		// the browser may keep it, but must ask again before using it (and gets a 304 if it hasn't changed): an unstamped
+		// URL, or a stamp that isn't the resource's own, as when an instance that hasn't been updated yet gets a request
+		// for a newer version during a deploy.
+		final boolean current = _useCache && requestedStamp != null && requestedStamp.equals(stamp);
+		final String cacheControl = current ? STAMPED_CACHE_CONTROL : "no-cache";
+
+		if( etag != null && request != null && matchesAny(request.headerForKey("if-none-match"), etag) ) {
+			final WOResponse notModified = new WOResponse();
+			notModified.setStatus(304);
+			notModified.setHeader(etag, "etag");
+			notModified.setHeader(cacheControl, "cache-control");
+			return notModified;
+		}
+
+		final WOResponse response = resource.response(request, etag);
+
+		if( response.status() != 416 ) {
+			response.setHeader(cacheControl, "cache-control");
+
+			if( etag != null ) {
+				response.setHeader(etag, "etag");
+			}
+		}
+
+		return response;
+	}
+
+	/**
+	 * @return true if an {@code If-None-Match} header names the given entity tag, or is {@code *}. Compared weakly, as the
+	 *         header's semantics require: a {@code W/} prefix doesn't matter.
+	 */
+	static boolean matchesAny(final String ifNoneMatch, final String etag) {
+
+		if( ifNoneMatch == null ) {
+			return false;
+		}
+
+		for( String candidate : ifNoneMatch.split(",") ) {
+			candidate = candidate.trim();
+
+			if( candidate.startsWith("W/") ) {
+				candidate = candidate.substring(2);
+			}
+
+			if( candidate.equals("*") || candidate.equals(etag) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -188,11 +235,6 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		response.setHeader(contentType, "content-type");
 		response.setHeader("bytes", "accept-ranges");
 
-		// FIXME: Temporarily setting one hour client-side caching (in production). This should be user controllable // Hugi 2025-10-04
-		if( _useCache ) {
-			response.setHeader("public, max-age=3600", "cache-control" );
-		}
-
 		return response;
 	}
 
@@ -258,13 +300,17 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		}
 
 		/**
+		 * @param etag The resource's entity tag, for {@code If-Range}; may be null
 		 * @return A response to the given request for the resource: the whole of it, or the range the request asks for
 		 *         ({@code Range: bytes=…}, one range) as 206 Partial Content, or 416 when that range lies past its end. A
-		 *         request with {@code If-Range} (the range only if the resource hasn't changed) gets the whole resource, as
-		 *         we have nothing to tell whether it has.
+		 *         request with {@code If-Range} (the range only if the resource hasn't changed) gets the range only if it
+		 *         names the resource's current entity tag, and the whole resource otherwise (a date included, as we don't
+		 *         keep modification dates).
 		 */
-		public WOResponse response( final WORequest request ) {
-			final String rangeHeader = request == null || request.headerForKey( "if-range" ) != null ? null : request.headerForKey( "range" );
+		public WOResponse response( final WORequest request, final String etag ) {
+			final String ifRange = request == null ? null : request.headerForKey( "if-range" );
+			final boolean rangeApplies = ifRange == null || ( etag != null && ifRange.trim().equals( etag ) );
+			final String rangeHeader = request == null || !rangeApplies ? null : request.headerForKey( "range" );
 			final long[] range = range( rangeHeader, _length );
 
 			final WOResponse response = new WOResponse();

@@ -58,6 +58,18 @@ public class ERXAppBasedResourceRequestHandlerTest {
 	}
 
 	@Test
+	public void ifNoneMatchNamesTheCurrentEntityTag() {
+		final String etag = "\"3f9c1e07ab\"";
+		assertTrue( ERXAppBasedResourceRequestHandler.matchesAny( "\"3f9c1e07ab\"", etag ) );
+		assertTrue( ERXAppBasedResourceRequestHandler.matchesAny( "W/\"3f9c1e07ab\"", etag ) ); // compared weakly
+		assertTrue( ERXAppBasedResourceRequestHandler.matchesAny( "\"0000000000\", \"3f9c1e07ab\"", etag ) );
+		assertTrue( ERXAppBasedResourceRequestHandler.matchesAny( "*", etag ) );
+		assertFalse( ERXAppBasedResourceRequestHandler.matchesAny( "\"0000000000\"", etag ) );
+		assertFalse( ERXAppBasedResourceRequestHandler.matchesAny( "3f9c1e07ab", etag ) ); // unquoted isn't the tag
+		assertFalse( ERXAppBasedResourceRequestHandler.matchesAny( null, etag ) );
+	}
+
+	@Test
 	public void theMissingPathsAreBounded() {
 		final BoundedPathSet paths = new BoundedPathSet( 3 );
 
