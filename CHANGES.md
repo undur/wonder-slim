@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Complete URLs from `completeURLWithRequestHandlerKey` are short**
+  With short URLs on, `WOContext.completeURLWithRequestHandlerKey(…)` returned the long form, the only
+  way of generating a URL that did. An absolute link built with it (in an email, say) is now short
+  like every other URL. A URL asked for with an instance number keeps the long form, since a short
+  URL can't carry one. (#128)
+
 ## 2026-09-28 (8.0.10)
 
 - **Sticky sessions behind mod_proxy_balancer work again**

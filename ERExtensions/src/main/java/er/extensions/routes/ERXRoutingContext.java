@@ -58,9 +58,10 @@ public class ERXRoutingContext extends WOContext {
 	}
 
 	/**
-	 * Every URL WOContext generates — component actions, direct actions, resources, routes — is assembled by this method,
-	 * so shortening here covers them all: an exact removal of the prefix the URL was built from. Redirect locations take
-	 * the same path in {@link ERXRoutingApplication#_newLocationForRequest(WORequest)}.
+	 * Every URL WOContext generates for its elements — component actions, direct actions, resources, routes — is
+	 * assembled by this method, so shortening here covers them all: an exact removal of the prefix the URL was built
+	 * from. The public complete URL methods are shortened in their overrides below, and redirect locations in
+	 * {@link ERXRoutingApplication#_newLocationForRequest(WORequest)}.
 	 *
 	 * The prefix removed is the one WOContext just composed the URL from — this context's parsed request URL — not the
 	 * application's adaptorPath(): behind a front end that rewrites into {@code /Apps/WebObjects/App.woa/…} the two
@@ -69,7 +70,32 @@ public class ERXRoutingContext extends WOContext {
 	 */
 	@Override
 	public String _urlWithRequestHandlerKey( final String requestHandlerKey, final String requestHandlerPath, final String queryString, final boolean isSecure, final int somePort ) {
-		final String url = super._urlWithRequestHandlerKey( requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort );
+		return shortened( super._urlWithRequestHandlerKey( requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort ) );
+	}
+
+	/**
+	 * Composed without {@link #_urlWithRequestHandlerKey}, so shortened here: an absolute link to the application (in an
+	 * email, say) must be one a front end that only routes short URLs can serve.
+	 */
+	@Override
+	public String completeURLWithRequestHandlerKey( final String requestHandlerKey, final String requestHandlerPath, final String queryString, final boolean isSecure, final int somePort ) {
+		return shortened( super.completeURLWithRequestHandlerKey( requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort ) );
+	}
+
+	/**
+	 * Shortened like {@link #completeURLWithRequestHandlerKey(String, String, String, boolean, int)}, unless an instance
+	 * number is asked for: a short URL can't carry one, so that URL keeps the long form.
+	 */
+	@Override
+	public String completeURLWithRequestHandlerKey( final String instanceNumber, final String requestHandlerKey, final String requestHandlerPath, final String queryString, final boolean isSecure, final int somePort ) {
+		final String url = super.completeURLWithRequestHandlerKey( instanceNumber, requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort );
+		return instanceNumber == null || instanceNumber.isEmpty() || "-1".equals( instanceNumber ) ? shortened( url ) : url;
+	}
+
+	/**
+	 * @return The URL with the prefix it was composed from removed, if short URLs are on
+	 */
+	private String shortened( final String url ) {
 		final ERXRoutingApplication application = (ERXRoutingApplication)WOApplication.application();
 		return application.shortURLs() ? ERXShortURLs.shorten( url, generatedApplicationPrefix( application ) ) : url;
 	}

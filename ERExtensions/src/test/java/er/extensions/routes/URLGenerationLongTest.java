@@ -1,5 +1,7 @@
 package er.extensions.routes;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -75,8 +77,18 @@ public class URLGenerationLongTest extends URLGenerationMatrix {
 
 	@Test
 	public void completeURLs() {
-		assertCompleteURLs( "/wa/x", "https://host" + PREFIX + "/wa/act", "http://host" + PREFIX + "/wa/act" );
-		assertCompleteURLs( "/cgi-bin/WebObjects/App.woa/3/wa/x", "https://host" + PREFIX + "/wa/act", "http://host" + PREFIX + "/wa/act" );
-		assertCompleteURLs( "/Apps/WebObjects/App.woa/wa/x", "https://host/Apps/WebObjects/App.woa/wa/act", "http://host/Apps/WebObjects/App.woa/wa/act" );
+		assertCompleteURLs( "/wa/x", "https://host" + PREFIX + "/wa/act", "http://host" + PREFIX + "/wa/act", "http://host" + PREFIX + "/wa/act" );
+		assertCompleteURLs( "/cgi-bin/WebObjects/App.woa/3/wa/x", "https://host" + PREFIX + "/wa/act", "http://host" + PREFIX + "/wa/act", "http://host" + PREFIX + "/wa/act" );
+		assertCompleteURLs( "/Apps/WebObjects/App.woa/wa/x", "https://host/Apps/WebObjects/App.woa/wa/act", "http://host/Apps/WebObjects/App.woa/wa/act", "http://host/Apps/WebObjects/App.woa/wa/act" );
+	}
+
+	/**
+	 * As in WebObjects, the instance number asked for is added unless the request's prefix already carries one
+	 */
+	@Test
+	public void completeURLForAnInstance() {
+		assertEquals( "http://host" + PREFIX + "/wa/act?x=1", completeURLForInstance( "/wa/x", null ) );
+		assertEquals( "http://host" + PREFIX + "/7/wa/act?x=1", completeURLForInstance( "/wa/x", "7" ) );
+		assertEquals( "http://host" + PREFIX + "/3/wa/act?x=1", completeURLForInstance( "/cgi-bin/WebObjects/App.woa/3/wa/x", "7" ) );
 	}
 }

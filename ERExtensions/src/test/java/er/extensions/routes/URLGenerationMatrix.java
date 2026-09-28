@@ -67,12 +67,14 @@ abstract class URLGenerationMatrix {
 	}
 
 	/**
-	 * Asserts the complete URLs generated in answer to a request: a secure direct action, and a direct action with the
-	 * context generating complete URLs (as a redirect between schemes does). The host is shown as {@code host}: in a
-	 * test it's the machine's own.
+	 * Asserts the complete URLs generated in answer to a request: a secure direct action, a direct action with the
+	 * context generating complete URLs (as a redirect between schemes does), and one asked for with
+	 * {@code completeURLWithRequestHandlerKey} (as an absolute link in an email is). The host is shown as {@code host}:
+	 * in a test it's the machine's own.
 	 */
-	void assertCompleteURLs( final String requestURL, final String secureDirectAction, final String completeDirectAction ) {
+	void assertCompleteURLs( final String requestURL, final String secureDirectAction, final String completeDirectAction, final String completeURL ) {
 		assertAll( requestURL,
+				() -> assertEquals( completeURL, withoutHost( context( requestURL ).completeURLWithRequestHandlerKey( "wa", "act", null, false, 0 ) ), "complete URL" ),
 				() -> assertEquals( secureDirectAction, withoutHost( context( requestURL ).directActionURLForActionNamed( "act", null, true, 0, false ) ), "secure direct action" ),
 				() -> {
 					final WOContext context = context( requestURL );
@@ -87,7 +89,14 @@ abstract class URLGenerationMatrix {
 		return url.replace( context.session().sessionID(), "SID" );
 	}
 
-	private static String withoutHost( final String url ) {
+	/**
+	 * @return A complete direct action URL asked for with an instance number, the host shown as {@code host}
+	 */
+	String completeURLForInstance( final String requestURL, final String instanceNumber ) {
+		return withoutHost( context( requestURL ).completeURLWithRequestHandlerKey( instanceNumber, "wa", "act", "x=1", false, 0 ) );
+	}
+
+	static String withoutHost( final String url ) {
 		return url.replaceFirst( "://[^/]+", "://host" );
 	}
 }

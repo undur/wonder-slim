@@ -1,5 +1,7 @@
 package er.extensions.routes;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -64,8 +66,18 @@ public class URLGenerationShortTest extends URLGenerationMatrix {
 
 	@Test
 	public void completeURLs() {
-		assertCompleteURLs( "/wa/x", "https://host/wa/act", "http://host/wa/act" );
-		assertCompleteURLs( "/cgi-bin/WebObjects/App.woa/3/wa/x", "https://host/wa/act", "http://host/wa/act" );
-		assertCompleteURLs( "/Apps/WebObjects/App.woa/wa/x", "https://host/wa/act", "http://host/wa/act" );
+		assertCompleteURLs( "/wa/x", "https://host/wa/act", "http://host/wa/act", "http://host/wa/act" );
+		assertCompleteURLs( "/cgi-bin/WebObjects/App.woa/3/wa/x", "https://host/wa/act", "http://host/wa/act", "http://host/wa/act" );
+		assertCompleteURLs( "/Apps/WebObjects/App.woa/wa/x", "https://host/wa/act", "http://host/wa/act", "http://host/wa/act" );
+	}
+
+	/**
+	 * A short URL can't carry an instance number, so a URL asked for with one keeps the long form
+	 */
+	@Test
+	public void completeURLForAnInstance() {
+		assertEquals( "http://host/wa/act?x=1", completeURLForInstance( "/wa/x", null ) );
+		assertEquals( "http://host/wa/act?x=1", completeURLForInstance( "/wa/x", "-1" ) );
+		assertEquals( "http://host/cgi-bin/WebObjects/App.woa/7/wa/act?x=1", completeURLForInstance( "/wa/x", "7" ) );
 	}
 }
