@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The resource cache no longer grows with every missing resource requested**
+  In production, the resource request handler cached every response by path, a 404 included, so
+  each new URL requested under `/res/` stayed in memory for good. Now only resources found are
+  cached, and paths known to be missing go into a set of at most 10,000, forgetting the least
+  recently requested. A repeated request for a missing resource still skips the lookup, which
+  searches every bundle. (#133)
+
 - **The admin actions for the event pages work**
   `/wa/ERXAdminDirectAction/events` and `/eventsSetup` answered with a 500: they returned what the
   page's password form action returns, which for the event pages is null (show the same page

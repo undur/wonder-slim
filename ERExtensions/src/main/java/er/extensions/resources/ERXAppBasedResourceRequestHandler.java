@@ -1,6 +1,8 @@
 package er.extensions.resources;
 
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,9 +45,21 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	private final boolean _useCache;
 	
 	/**
-	 * In-memory resource cache. Stores everything! Forever! Which isn't great. FIXME: Needs work // Hugi 2025-10-04
+	 * In-memory resource cache, of the resources found (production), keyed by the one path that names each. Stores everything! Forever! Which isn't great. FIXME: Needs work // Hugi 2025-10-04
 	 */
 	private final Map<String,CachedResourceResponse> _cache = new ConcurrentHashMap<>();
+
+	/**
+	 * How many paths known to name no resource are remembered, see {@link #_missingPaths}
+	 */
+	static final int MISSING_PATHS_LIMIT = 10_000;
+
+	/**
+	 * Paths known to name no resource (production), so a repeated request for one is answered without the lookup, which
+	 * searches every bundle and takes most of a millisecond. Bounded, as any URL can name a missing resource: past the
+	 * limit, the path requested least recently is forgotten.
+	 */
+	private final BoundedPathSet _missingPaths = new BoundedPathSet( MISSING_PATHS_LIMIT );
 
 	public ERXAppBasedResourceRequestHandler() {
 		_useCache = !ERXApplication.isDevelopmentModeSafe();
@@ -68,11 +82,26 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 			return notFoundResponse(path);
 		}
 
-		if( _useCache ) {
-			return _cache.computeIfAbsent(path, _ -> new CachedResourceResponse( uncachedResponseForPath(path) )).streamingResponse();
+		if( !_useCache ) {
+			return uncachedResponseForPath(path);
 		}
 
-		return uncachedResponseForPath(path);
+		if( _missingPaths.contains(path) ) {
+			return notFoundResponse(path);
+		}
+
+		// Only a resource that was found is cached (a null from the mapping function stores nothing)
+		final CachedResourceResponse cached = _cache.computeIfAbsent(path, _ -> {
+			final WOResponse response = uncachedResponseForPath(path);
+			return response.status() == 200 ? new CachedResourceResponse( response ) : null;
+		});
+
+		if( cached != null ) {
+			return cached.streamingResponse();
+		}
+
+		_missingPaths.add(path);
+		return notFoundResponse(path);
 	}
 
 	/**
@@ -123,6 +152,38 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		response.setStatus(404);
 		response.setContent("Resource '%s' not found".formatted(path) );
 		return response;
+	}
+
+	/**
+	 * A set of paths holding at most a given number, forgetting the one used least recently past it
+	 */
+	static class BoundedPathSet {
+
+		private final Map<String,Boolean> _paths;
+
+		BoundedPathSet( final int limit ) {
+			_paths = Collections.synchronizedMap( new LinkedHashMap<>( 16, 0.75f, true ) {
+				@Override
+				protected boolean removeEldestEntry( final Map.Entry<String,Boolean> eldest ) {
+					return size() > limit;
+				}
+			} );
+		}
+
+		/**
+		 * @return true if the set holds the path (which counts as a use of it)
+		 */
+		boolean contains( final String path ) {
+			return _paths.get( path ) != null;
+		}
+
+		void add( final String path ) {
+			_paths.put( path, Boolean.TRUE );
+		}
+
+		int size() {
+			return _paths.size();
+		}
 	}
 
 	/**
