@@ -2,9 +2,21 @@ package er.extensions.resources;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+
+import com.webobjects.appserver.WORequest;
+import com.webobjects.appserver.WOResponse;
 
 import er.extensions.resources.ERXAppBasedResourceRequestHandler.BoundedPathSet;
 
@@ -67,6 +79,63 @@ public class ERXAppBasedResourceRequestHandlerTest {
 		assertFalse( ERXAppBasedResourceRequestHandler.matchesAny( "\"0000000000\"", etag ) );
 		assertFalse( ERXAppBasedResourceRequestHandler.matchesAny( "3f9c1e07ab", etag ) ); // unquoted isn't the tag
 		assertFalse( ERXAppBasedResourceRequestHandler.matchesAny( null, etag ) );
+	}
+
+	private static ERXAppBasedResourceRequestHandler.InMemoryResource resourceOf( final int size ) {
+		return new ERXAppBasedResourceRequestHandler.InMemoryResource( "text/plain", new byte[size] );
+	}
+
+	@Test
+	public void theCacheHoldsAtMostItsByteLimitForgettingTheLeastRecentlyUsed() {
+		final ERXAppBasedResourceRequestHandler.ResourceCache cache = new ERXAppBasedResourceRequestHandler.ResourceCache( 300 );
+		cache.put( "a", resourceOf( 100 ) );
+		cache.put( "b", resourceOf( 100 ) );
+		cache.put( "c", resourceOf( 100 ) );
+		cache.get( "a" ); // a use of "a", so "b" is now the least recently used
+		cache.put( "d", resourceOf( 100 ) );
+
+		assertEquals( 300, cache.bytes() );
+		assertNotNull( cache.get( "a" ) );
+		assertNull( cache.get( "b" ) );
+		assertNotNull( cache.get( "c" ) );
+		assertNotNull( cache.get( "d" ) );
+	}
+
+	@Test
+	public void replacingAResourceCountsOnlyTheNewOne() {
+		final ERXAppBasedResourceRequestHandler.ResourceCache cache = new ERXAppBasedResourceRequestHandler.ResourceCache( 1000 );
+		cache.put( "a", resourceOf( 100 ) );
+		cache.put( "a", resourceOf( 50 ) );
+		assertEquals( 50, cache.bytes() );
+		assertEquals( 1, cache.size() );
+	}
+
+	@Test
+	public void theBoundedStreamEndsWhereTheRangeDoes() throws IOException {
+		final byte[] content = "0123456789".getBytes( StandardCharsets.US_ASCII );
+		final InputStream in = new ByteArrayInputStream( content );
+		in.skipNBytes( 3 );
+		assertEquals( "3456", new String( new ERXAppBasedResourceRequestHandler.BoundedInputStream( in, 4 ).readAllBytes(), StandardCharsets.US_ASCII ) );
+	}
+
+	@Test
+	public void aResourceIsServedWholeOrInRanges() {
+		final ERXAppBasedResourceRequestHandler.InMemoryResource resource = new ERXAppBasedResourceRequestHandler.InMemoryResource( "text/plain", "0123456789".getBytes( StandardCharsets.US_ASCII ) );
+
+		final WOResponse whole = resource.response( null, null );
+		assertEquals( 200, whole.status() );
+		assertEquals( "10", whole.headerForKey( "content-length" ) );
+
+		final WOResponse part = resource.response( requestWithRange( "bytes=2-4" ), null );
+		assertEquals( 206, part.status() );
+		assertEquals( "bytes 2-4/10", part.headerForKey( "content-range" ) );
+		assertEquals( "3", part.headerForKey( "content-length" ) );
+
+		assertEquals( 416, resource.response( requestWithRange( "bytes=20-" ), null ).status() );
+	}
+
+	private static WORequest requestWithRange( final String range ) {
+		return new WORequest( "GET", "/", "HTTP/1.1", Map.of( "range", List.of( range ) ), null, null );
 	}
 
 	@Test

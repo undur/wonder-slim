@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The resource cache is bounded, and large resources are streamed**
+  In production, the resource request handler kept every resource it had served in memory, for
+  good. Resources over 1 MB (media, large documents) are now streamed from their bundle for each
+  request, ranges included, rather than held in memory, and the rest are cached up to 64 MB in
+  total, forgetting the least recently requested past it. (#139)
+
 - **Resources are validated with ETags instead of kept for a fixed hour**
   Every resource is served with an `ETag`, its content stamp. A resource requested by an unstamped
   URL (a public resource such as `/robots.txt`, or a `/res/…` URL written by hand) is served with

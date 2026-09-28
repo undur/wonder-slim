@@ -1,10 +1,15 @@
 package er.extensions.resources;
 
 import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.URL;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +17,6 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
-import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.appserver.ERXApplication;
 
@@ -28,7 +32,6 @@ import er.extensions.appserver.ERXApplication;
  *
  * Work to do before labeling this "totally ready":
  * 
- * FIXME: Resource cache needs work (currently stores all resources in-memory indefinitely in production) // Hugi 2025-10-04
  * TODO: Add some nice way to control client-side caching (i.e. set caching headers on the response) // Hugi 2025-10-04
  * TODO: Look into "resource processing". E.g. for templating in resources // Hugi 2025-10-05
  */
@@ -46,9 +49,19 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	private final boolean _useCache;
 	
 	/**
-	 * In-memory resource cache, of the resources found (production), keyed by the one path that names each. Stores everything! Forever! Which isn't great. FIXME: Needs work // Hugi 2025-10-04
+	 * Resources larger than this (in bytes) are streamed from their bundle for each request rather than held in memory
 	 */
-	private final Map<String,CachedResourceResponse> _cache = new ConcurrentHashMap<>();
+	static final long LARGE_RESOURCE_SIZE = 1024 * 1024;
+
+	/**
+	 * How many bytes of resource content the cache holds in memory at most, see {@link ResourceCache}
+	 */
+	static final long CACHE_BYTE_LIMIT = 64 * 1024 * 1024;
+
+	/**
+	 * The resources found (production), bounded, see {@link ResourceCache}
+	 */
+	private final ResourceCache _cache = new ResourceCache( CACHE_BYTE_LIMIT );
 
 	/**
 	 * How many paths known to name no resource are remembered, see {@link #_missingPaths}
@@ -90,7 +103,7 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse(path);
 		String resourcePath = stamped != null ? stamped.unstampedPath() : path;
 		String requestedStamp = stamped != null ? stamped.stamp() : null;
-		CachedResourceResponse resource = find(resourcePath);
+		Resource resource = find(resourcePath);
 
 		if( resource == null && stamped != null ) {
 			resourcePath = path;
@@ -177,65 +190,77 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	/**
 	 * @return The resource at the given path, cached in production; null if there's none
 	 */
-	private CachedResourceResponse find(final String path) {
+	private Resource find(final String path) {
 
-		if( !_useCache ) {
-			final WOResponse response = uncachedResponseForPath(path);
-			return response.status() == 200 ? new CachedResourceResponse( response ) : null;
+		if( _useCache ) {
+			if( _missingPaths.contains(path) ) {
+				return null;
+			}
+
+			final Resource cached = _cache.get(path);
+
+			if( cached != null ) {
+				return cached;
+			}
 		}
 
-		if( _missingPaths.contains(path) ) {
-			return null;
+		final Resource resource = load(path);
+
+		if( _useCache ) {
+			if( resource == null ) {
+				_missingPaths.add(path);
+			}
+			else {
+				_cache.put(path, resource);
+			}
 		}
 
-		// Only a resource that was found is cached (a null from the mapping function stores nothing)
-		final CachedResourceResponse cached = _cache.computeIfAbsent(path, _ -> {
-			final WOResponse response = uncachedResponseForPath(path);
-			return response.status() == 200 ? new CachedResourceResponse( response ) : null;
-		});
-
-		if( cached == null ) {
-			_missingPaths.add(path);
-			return null;
-		}
-
-		return cached;
+		return resource;
 	}
 
 	/**
-	 * @return A response for the given request handler path
+	 * @return The web server resource at the given path, {@code <frameworkName>/<resourceName>}; null if there's none. A
+	 *         large one (over {@link #LARGE_RESOURCE_SIZE}) is streamed from its bundle for each request, the rest are held
+	 *         in memory.
 	 */
-	private WOResponse uncachedResponseForPath(final String path) {
+	private static Resource load(final String path) {
 		final int firstSlashIndex = path.indexOf('/');
 		final String frameworkName = path.substring( 0, firstSlashIndex );
-		final String resourceName = path.substring(firstSlashIndex+1, path.length());
-		return responseForResource(frameworkName, resourceName);
+		final String resourceName = path.substring( firstSlashIndex + 1 );
+		final ERXAppBasedResourceManager resourceManager = (ERXAppBasedResourceManager) WOApplication.application().resourceManager();
+
+		// Checked first, so a resource that isn't one is never read
+		if( !resourceManager.isWebServerResource( resourceName, frameworkName ) ) {
+			return null;
+		}
+
+		final String contentType = resourceManager.contentTypeForResourceNamed( resourceName );
+		final long length = lengthOf( resourceManager.pathURLForResourceNamed( resourceName, frameworkName, null ) );
+
+		if( length > LARGE_RESOURCE_SIZE ) {
+			return new StreamedResource( contentType, length, resourceManager, resourceName, frameworkName );
+		}
+
+		final byte[] bytes = resourceManager.bytesForResourceNamed( resourceName, frameworkName, null );
+		return bytes == null ? null : new InMemoryResource( contentType, bytes );
 	}
 
 	/**
-	 * @return A response for the given resource
+	 * @return The length of the resource at the given URL (a file, or an entry in a jar), read without reading the
+	 *         resource; -1 if unknown
 	 */
-	private WOResponse responseForResource(final String frameworkName, final String resourceName) {
-		final ERXAppBasedResourceManager resourceManager = (ERXAppBasedResourceManager) WOApplication.application().resourceManager();
+	private static long lengthOf(final URL url) {
 
-		final byte[] bytes = resourceManager.bytesForResourceNamed(resourceName, frameworkName, null);
-		
-		// Resource not found or isn't a webserver resource -> 404
-		if( bytes == null || !resourceManager.isWebServerResource( resourceName, frameworkName ) ) {
-			return notFoundResponse(frameworkName + "/" + resourceName);
+		if( url == null ) {
+			return -1;
 		}
 
-		// Resource found, return that thing
-		final String contentType = resourceManager.contentTypeForResourceNamed(resourceName);
-		final String contentLength = String.valueOf( bytes.length );
-
-		final WOResponse response = new WOResponse();
-		response.setContent(bytes);
-		response.setHeader(contentLength, "content-length");
-		response.setHeader(contentType, "content-type");
-		response.setHeader("bytes", "accept-ranges");
-
-		return response;
+		try {
+			return url.openConnection().getContentLengthLong();
+		}
+		catch( IOException e ) {
+			return -1;
+		}
 	}
 
 	/**
@@ -281,23 +306,75 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	}
 
 	/**
-	 * Entry for our resource cache
-	 * 
-	 * TODO: A little silly caching strategy (constructing the streaming response from a non-streaming one). Also; we're not streaming in dev mode // Hugi 2025-10-04 
+	 * The resources found (production), by the one path that names each, holding at most a given number of bytes of
+	 * content in memory: past it, the resource requested least recently is forgotten. A streamed resource holds no content,
+	 * only its name and size.
 	 */
-	private static class CachedResourceResponse {
-		
-		private final int _status;
-		private final NSDictionary _headers;
-		private final byte[] _content;
+	static class ResourceCache {
+
+		private final long _byteLimit;
+		private final LinkedHashMap<String,Resource> _resources = new LinkedHashMap<>( 16, 0.75f, true );
+		private long _bytes;
+
+		ResourceCache( final long byteLimit ) {
+			_byteLimit = byteLimit;
+		}
+
+		/**
+		 * @return The resource cached for the path (which counts as a use of it), null if none is
+		 */
+		synchronized Resource get( final String path ) {
+			return _resources.get( path );
+		}
+
+		synchronized void put( final String path, final Resource resource ) {
+			final Resource replaced = _resources.put( path, resource );
+
+			if( replaced != null ) {
+				_bytes -= replaced.bytesInMemory();
+			}
+
+			_bytes += resource.bytesInMemory();
+
+			final Iterator<Resource> leastRecentlyUsedFirst = _resources.values().iterator();
+
+			while( _bytes > _byteLimit && leastRecentlyUsedFirst.hasNext() ) {
+				_bytes -= leastRecentlyUsedFirst.next().bytesInMemory();
+				leastRecentlyUsedFirst.remove();
+			}
+		}
+
+		synchronized long bytes() {
+			return _bytes;
+		}
+
+		synchronized int size() {
+			return _resources.size();
+		}
+	}
+
+	/**
+	 * A resource found: its content type and length, and its content, see {@link #content(long, long)}
+	 */
+	abstract static class Resource {
+
+		private final String _contentType;
 		private final long _length;
 
-		public CachedResourceResponse( final WOResponse response ) {
-			_status = response.status();
-			_headers = response.headers();
-			_content = response.content().bytes();
-			_length = _content.length;
+		Resource( final String contentType, final long length ) {
+			_contentType = contentType;
+			_length = length;
 		}
+
+		/**
+		 * @return A stream of the given part of the content, ending at its end
+		 */
+		abstract InputStream content( long start, long length ) throws IOException;
+
+		/**
+		 * @return How many bytes of content this holds in memory
+		 */
+		abstract long bytesInMemory();
 
 		/**
 		 * @param etag The resource's entity tag, for {@code If-Range}; may be null
@@ -307,23 +384,18 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		 *         names the resource's current entity tag, and the whole resource otherwise (a date included, as we don't
 		 *         keep modification dates).
 		 */
-		public WOResponse response( final WORequest request, final String etag ) {
+		WOResponse response( final WORequest request, final String etag ) {
 			final String ifRange = request == null ? null : request.headerForKey( "if-range" );
 			final boolean rangeApplies = ifRange == null || ( etag != null && ifRange.trim().equals( etag ) );
 			final String rangeHeader = request == null || !rangeApplies ? null : request.headerForKey( "range" );
 			final long[] range = range( rangeHeader, _length );
 
 			final WOResponse response = new WOResponse();
-			response.setHeaders( _headers );
-
-			if( range == null ) {
-				response.setStatus( _status );
-				response.setContentStream( new ByteArrayInputStream( _content ), 32000, _length );
-				return response;
-			}
+			response.setHeader( _contentType, "content-type" );
+			response.setHeader( "bytes", "accept-ranges" );
 
 			// Not to be kept by any cache, which could otherwise answer a request for the whole resource with it
-			if( range.length == 0 ) {
+			if( range != null && range.length == 0 ) {
 				response.setStatus( 416 );
 				response.setHeader( "no-store", "cache-control" );
 				response.setHeader( "bytes */" + _length, "content-range" );
@@ -331,13 +403,139 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 				return response;
 			}
 
-			final long start = range[0];
-			final long length = range[1] - start + 1;
-			response.setStatus( 206 );
-			response.setHeader( "bytes " + start + "-" + range[1] + "/" + _length, "content-range" );
+			final long start = range == null ? 0 : range[0];
+			final long length = range == null ? _length : range[1] - start + 1;
+
+			if( range != null ) {
+				response.setStatus( 206 );
+				response.setHeader( "bytes " + start + "-" + range[1] + "/" + _length, "content-range" );
+			}
+
 			response.setHeader( String.valueOf( length ), "content-length" );
-			response.setContentStream( new ByteArrayInputStream( _content, (int)start, (int)length ), 32000, length );
+
+			try {
+				response.setContentStream( content( start, length ), 32000, length );
+			}
+			catch( IOException e ) {
+				throw new UncheckedIOException( e );
+			}
+
 			return response;
+		}
+	}
+
+	/**
+	 * A resource held in memory
+	 */
+	static final class InMemoryResource extends Resource {
+
+		private final byte[] _bytes;
+
+		InMemoryResource( final String contentType, final byte[] bytes ) {
+			super( contentType, bytes.length );
+			_bytes = bytes;
+		}
+
+		@Override
+		InputStream content( final long start, final long length ) {
+			return new ByteArrayInputStream( _bytes, (int)start, (int)length );
+		}
+
+		@Override
+		long bytesInMemory() {
+			return _bytes.length;
+		}
+	}
+
+	/**
+	 * A large resource, read from its bundle for each request rather than held in memory
+	 */
+	static final class StreamedResource extends Resource {
+
+		private final ERXAppBasedResourceManager _resourceManager;
+		private final String _resourceName;
+		private final String _frameworkName;
+
+		StreamedResource( final String contentType, final long length, final ERXAppBasedResourceManager resourceManager, final String resourceName, final String frameworkName ) {
+			super( contentType, length );
+			_resourceManager = resourceManager;
+			_resourceName = resourceName;
+			_frameworkName = frameworkName;
+		}
+
+		@Override
+		InputStream content( final long start, final long length ) throws IOException {
+			final InputStream stream = _resourceManager.inputStreamForResourceNamed( _resourceName, _frameworkName, null );
+
+			if( stream == null ) {
+				throw new IOException( "Resource %s/%s is no longer there".formatted( _frameworkName, _resourceName ) );
+			}
+
+			stream.skipNBytes( start );
+			return new BoundedInputStream( stream, length );
+		}
+
+		@Override
+		long bytesInMemory() {
+			return 0;
+		}
+	}
+
+	/**
+	 * A stream that ends after a given number of bytes of another, which it closes when closed. The adaptor reads a
+	 * response's content stream until it ends, so a range from the middle of a file must end where the range does.
+	 */
+	static final class BoundedInputStream extends FilterInputStream {
+
+		private long _remaining;
+
+		BoundedInputStream( final InputStream in, final long length ) {
+			super( in );
+			_remaining = length;
+		}
+
+		@Override
+		public int read() throws IOException {
+
+			if( _remaining <= 0 ) {
+				return -1;
+			}
+
+			final int b = super.read();
+
+			if( b != -1 ) {
+				_remaining--;
+			}
+
+			return b;
+		}
+
+		@Override
+		public int read( final byte[] buffer, final int offset, final int length ) throws IOException {
+
+			if( _remaining <= 0 ) {
+				return -1;
+			}
+
+			final int read = super.read( buffer, offset, (int)Math.min( length, _remaining ) );
+
+			if( read > 0 ) {
+				_remaining -= read;
+			}
+
+			return read;
+		}
+
+		@Override
+		public long skip( final long n ) throws IOException {
+			final long skipped = super.skip( Math.min( n, _remaining ) );
+			_remaining -= skipped;
+			return skipped;
+		}
+
+		@Override
+		public int available() throws IOException {
+			return (int)Math.min( super.available(), _remaining );
 		}
 	}
 
