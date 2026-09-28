@@ -1,0 +1,24 @@
+{
+  "url": "http://localhost:<PORT>/cgi-bin/WebObjects/AjaxPlayground.woa/wa/page?name=GalleryUpdateContainer",
+  "comment": "An ajax update whose session has EXPIRED (the session ID no longer resolves) is marked by the server - status 403 and the x-session-expired header, whatever the application's handleSessionRestorationErrorInContext answered - so the client knows for certain rather than guessing from the response's shape. Points a container's data-updateUrl at component-action and ajax-handler URLs naming a session that doesn't exist, fires an update, and asserts the error detail says sessionExpired, the banner shows the expired-session message with a Continue button, and the container is untouched.",
+  "steps": [
+    { "do": "goto" },
+    { "do": "wait", "selector": "#morphContainer" },
+    { "do": "read", "name": "fired", "what": "jsExpression", "expression": "(function(){window.__err=null;document.addEventListener('ajaxslim:error',function(e){window.__err=e.detail;});var el=document.getElementById('morphContainer');window.__beforeHtml=el.innerHTML;el.setAttribute('data-updateUrl','/cgi-bin/WebObjects/AjaxPlayground.woa/wo/expiredSessionID/0.1');AjaxSlim.AUC.update('morphContainer');return 'fired';})()" },
+    { "do": "wait", "selector": "#ajaxslim-error-banner" },
+    { "do": "read", "name": "detail", "what": "jsExpression", "expression": "JSON.stringify({status: window.__err && window.__err.status, sessionExpired: window.__err && window.__err.sessionExpired, document: !!(window.__err && window.__err.document)})" },
+    { "do": "assert", "name": "the server marked the session as expired (403, not a guess)", "that": "detail", "equals": "{\"status\":403,\"sessionExpired\":true,\"document\":false}" },
+    { "do": "read", "name": "bannerText", "selector": "#ajaxslim-error-banner", "what": "text" },
+    { "do": "assert", "name": "banner says the session has expired", "that": "bannerText", "contains": "Your session has expired" },
+    { "do": "read", "name": "continueShown", "what": "jsExpression", "expression": "String(document.getElementById('ajaxslim-error-banner')._action.style.display !== 'none')" },
+    { "do": "assert", "name": "banner offers Continue", "that": "continueShown", "equals": "true" },
+    { "do": "read", "name": "contentUntouched", "what": "jsExpression", "expression": "String(document.getElementById('morphContainer').innerHTML === window.__beforeHtml)" },
+    { "do": "assert", "name": "nothing was morphed into the container", "that": "contentUntouched", "equals": "true" },
+
+    { "do": "comment", "text": "The same through AjaxSlim's own ajax request handler." },
+    { "do": "read", "name": "firedAjax", "what": "jsExpression", "expression": "(function(){window.__err=null;var b=document.getElementById('ajaxslim-error-banner');if(b)b.remove();var el=document.getElementById('morphContainer');el.setAttribute('data-updateUrl','/cgi-bin/WebObjects/AjaxPlayground.woa/ajax/expiredSessionID/0.1');AjaxSlim.AUC.update('morphContainer');return 'fired';})()" },
+    { "do": "wait", "selector": "#ajaxslim-error-banner" },
+    { "do": "read", "name": "detailAjax", "what": "jsExpression", "expression": "JSON.stringify({status: window.__err && window.__err.status, sessionExpired: window.__err && window.__err.sessionExpired})" },
+    { "do": "assert", "name": "the ajax handler's expired session is marked too", "that": "detailAjax", "equals": "{\"status\":403,\"sessionExpired\":true}" }
+  ]
+}

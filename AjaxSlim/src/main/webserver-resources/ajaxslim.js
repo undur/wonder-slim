@@ -246,7 +246,10 @@
 	// banner shows - so a failure is NEVER invisible, even in an app that wires up nothing.
 	//
 	// detail = { targetId, url, status (HTTP status or 0 for a network error), statusText, body,
-	//            document (true when the body was a full HTML page - the expired-session shape), error }
+	//            sessionExpired (true when the server says the session has expired - see readAjaxResponse),
+	//            location (where the application sends the user after an expired session, if it said),
+	//            document (true when the body was a full HTML page - an expired session the server
+	//            didn't mark, see readAjaxResponse), error }
 	function reportError(detail) {
 		if (window.console) {
 			console.error('AjaxSlim: ajax request failed', detail);
@@ -260,6 +263,14 @@
 		if (!cancelled) {
 			AjaxSlim.Notify.error(detail);
 		}
+	}
+
+	// The detail reportError takes, for a request to targetId at url that failed with e (a typed
+	// readAjaxResponse error, or a network failure without e.ajaxslim)
+	function failureDetail(targetId, url, e) {
+		var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
+		return { targetId: targetId, url: url, status: info.status, statusText: info.statusText, body: info.body,
+			sessionExpired: info.sessionExpired, location: info.location, document: info.document, error: e };
 	}
 
 	// The built-in error presenter: a single dismissible banner pinned to the top of the viewport. It is
@@ -295,6 +306,12 @@
 						+ 'border:1px solid rgba(255,255,255,.6);color:#fff;font:inherit;'
 						+ 'padding:3px 10px;border-radius:4px;cursor:pointer;';
 					bar.appendChild(bar._details);
+					// "Continue" - shown for an expired session, leading where the application sends the user.
+					bar._action = document.createElement('button');
+					bar._action.type = 'button';
+					bar._action.textContent = 'Continue';
+					bar._action.style.cssText = bar._details.style.cssText;
+					bar.appendChild(bar._action);
 					var close = document.createElement('button');
 					close.type = 'button';
 					close.setAttribute('aria-label', 'Dismiss');
@@ -306,7 +323,10 @@
 					document.body.appendChild(bar);
 				}
 				var msg;
-				if (detail && detail.document) {
+				if (detail && detail.sessionExpired) {
+					msg = 'Your session has expired, so the page could not be updated.';
+				}
+				else if (detail && detail.document) {
 					msg = 'The server sent back a full page instead of an update - your session has '
 						+ 'probably expired. Please reload the page and continue from there.';
 				}
@@ -319,6 +339,21 @@
 						+ 'Please check your connection and try again.';
 				}
 				bar._msg.textContent = msg;
+				if (detail && detail.sessionExpired) {
+					bar._action.style.display = '';
+					bar._action.onclick = function () {
+						if (detail.location) {
+							window.location.href = detail.location;
+						}
+						else {
+							window.location.reload();
+						}
+					};
+				}
+				else {
+					bar._action.style.display = 'none';
+					bar._action.onclick = null;
+				}
 				// Offer the full server response only when there actually is one (HTTP errors carry the
 				// exception page; a bare network failure - status 0 - has no body).
 				var body = detail && detail.body;
@@ -403,18 +438,28 @@
 		}
 	};
 
-	// Read an ajax response's body, converting the two failure shapes into typed errors that divert
+	// Read an ajax response's body, converting the failure shapes into typed errors that divert
 	// to the callers' .catch -> reportError path (never into a morph):
+	//   - an EXPIRED SESSION, which the server marks with the x-session-expired header (and a 403)
+	//     whatever the application's own expiry handling answered; x-session-expired-location says
+	//     where the application sends the user, if it redirected (ERXAjaxApplication.dispatchRequest).
 	//   - an HTTP error status. fetch() only rejects on a NETWORK error - a 500/404 resolves
 	//     normally - so response.ok must be checked here, or the server's error page (e.g.
 	//     "backtracked too far") would be morphed straight into the target container.
 	//   - a FULL HTML DOCUMENT where a fragment/script body was expected. The server only answers an
 	//     ajax request with a whole page when the request never reached the ajax machinery - the
-	//     classic case is an EXPIRED SESSION, whose login/expired page arrives with status 200
-	//     (possibly via a redirect fetch follows silently). The old behavior - handing the page to
+	//     classic case is an expired session the server didn't mark (a server without the header),
+	//     whose login/expired page arrives with status 200 (possibly via a redirect fetch follows
+	//     silently). The old behavior - handing the page to
 	//     runResponseScripts - made the user's click silently do nothing. A failure must never be
 	//     invisible, so it is surfaced like any other request failure (detail.document marks it).
 	function readAjaxResponse(response) {
+		if (response.headers.get('x-session-expired')) {
+			var expired = new Error('AjaxSlim: the session has expired');
+			expired.ajaxslim = { status: response.status, statusText: response.statusText, body: '',
+				sessionExpired: true, location: response.headers.get('x-session-expired-location') };
+			return Promise.reject(expired);
+		}
 		if (!response.ok) {
 			return response.text().catch(function () { return ''; }).then(function (body) {
 				var err = new Error('AjaxSlim HTTP ' + response.status);
@@ -609,9 +654,7 @@
 			// A network failure (no e.ajaxslim) or a typed readAjaxResponse error (HTTP error status,
 			// or a full-document/expired-session body). Surface it to the user; never morph an error
 			// response into the container.
-			var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
-			reportError({ targetId: targetId, url: url, status: info.status, statusText: info.statusText,
-				body: info.body, document: info.document, error: e });
+			reportError(failureDetail(targetId, url, e));
 		}).then(activityEnd, activityEnd); // finally: always settle the activity counter
 	}
 
@@ -767,9 +810,7 @@
 					restoreTabFocus();
 				}, 0);
 			}).catch(function (e) {
-				var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
-				reportError({ targetId: ids.join(';'), url: url, status: info.status,
-					statusText: info.statusText, body: info.body, document: info.document, error: e });
+				reportError(failureDetail(ids.join(';'), url, e));
 			}).then(activityEnd, activityEnd);
 		},
 
@@ -996,9 +1037,7 @@
 						restoreTabFocus();
 					}, 0);
 				}).catch(function (e) {
-					var info = e && e.ajaxslim ? e.ajaxslim : { status: 0, statusText: '', body: '' };
-					reportError({ targetId: targetId, url: url, status: info.status,
-						statusText: info.statusText, body: info.body, document: info.document, error: e });
+					reportError(failureDetail(targetId, url, e));
 				}).then(activityEnd, activityEnd);
 			}
 			fetchAndMorph(targetId, url, body, function () {

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **An Ajax request tells the client when the session has expired**
+  WebObjects answered it with the session expiry page and status 200, or with whatever an
+  application's `handleSessionRestorationErrorInContext` returns, often a redirect the browser
+  follows without the client knowing. Now the response to an Ajax request whose session couldn't
+  be restored gets status 403 and an `x-session-expired` header, whatever the application answered.
+  A redirect's location moves to `x-session-expired-location`, and the application's cookies are
+  kept, so a session it created to log the user back in survives. AjaxSlim shows "Your session has
+  expired" with a Continue button that goes where the application sent the user, or reloads the
+  page. Requests that aren't Ajax requests are answered as before. (#123)
+
 - **`AjaxFileUpload` no longer loads an error into its hidden iframe**
   The iframe's initial document was a direct action removed years ago, so every page with an upload
   loaded a 500 into it and logged an exception. It now starts as `about:blank`. Uploads work as

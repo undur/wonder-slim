@@ -6,6 +6,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.appserver.WOSession;
 import com.webobjects.foundation.NSDictionary;
 
 import er.extensions.ERXP;
@@ -27,6 +28,21 @@ public abstract class ERXAjaxApplication extends ERXRoutingApplication {
 	public static final String KEY_UPDATE_CONTAINER_ID = "_u";
 	public static final String KEY_REPLACED = "_r";
 
+	/**
+	 * The header on the response to an Ajax request whose session had expired, see {@link #dispatchRequest(WORequest)}
+	 */
+	public static final String SESSION_EXPIRED_HEADER = "x-session-expired";
+
+	/**
+	 * Where the application sent the user when their session had expired, see {@link #dispatchRequest(WORequest)}
+	 */
+	public static final String SESSION_EXPIRED_LOCATION_HEADER = "x-session-expired-location";
+
+	/**
+	 * The request userInfo key flagging that the session a page-restoring request named couldn't be restored
+	 */
+	private static final String SESSION_RESTORATION_FAILED_KEY = "ERXAjaxApplication.sessionRestorationFailed";
+
 	private ERXAjaxResponseDelegate _responseDelegate;
 
 	/**
@@ -36,6 +52,69 @@ public abstract class ERXAjaxApplication extends ERXRoutingApplication {
 	 */
 	public void setResponseDelegate(ERXAjaxResponseDelegate responseDelegate) {
 		_responseDelegate = responseDelegate;
+	}
+
+	/**
+	 * Flags a request whose session couldn't be restored, when it's one that restores a page (a component action or an
+	 * Ajax request): that is the moment the session is known to have expired, whatever the application's
+	 * {@code handleSessionRestorationErrorInContext} then answers. See {@link #dispatchRequest(WORequest)}.
+	 */
+	@Override
+	public WOSession restoreSessionWithID(String sessionID, WOContext context) {
+		final WOSession session = super.restoreSessionWithID(sessionID, context);
+
+		if (session == null && sessionID != null && context != null && context.request() != null && restoresPage(context.request())) {
+			context.request().setUserInfoForKey(Boolean.TRUE, SESSION_RESTORATION_FAILED_KEY);
+		}
+
+		return session;
+	}
+
+	/**
+	 * @return true if the request restores a page from its session: a component action, or an Ajax request to AjaxSlim's
+	 *         handler ("ajax", referenced literally since the dependency points the other way). A direct action arriving
+	 *         with an expired session's cookie restores no page, and carries on without the session.
+	 */
+	public static boolean restoresPage(WORequest request) {
+		final String handlerKey = request.requestHandlerKey();
+		return WOApplication.application().componentRequestHandlerKey().equals(handlerKey) || "ajax".equals(handlerKey);
+	}
+
+	/**
+	 * Answers an Ajax request whose session had expired so that the client knows, whatever the application's
+	 * {@code handleSessionRestorationErrorInContext} answered. Applications commonly override that method with their own
+	 * expiry handling, often a redirect (to a login page, or back to where the user was after logging them back in), and
+	 * that is right for a page request. For an Ajax request, a redirect is followed silently by the browser and the page
+	 * at its end would arrive as the update, and a page answered directly (WebObjects' own expiry page) arrives with
+	 * status 200, as if it were one.
+	 *
+	 * So the response the application built is kept, cookies and all (a session it created to log the user back in
+	 * survives), but it gets status 403 and the {@value #SESSION_EXPIRED_HEADER} header; a redirect's location moves to
+	 * the {@value #SESSION_EXPIRED_LOCATION_HEADER} header, for the client to offer the user. Requests that aren't Ajax
+	 * requests are answered as the application decided.
+	 */
+	@Override
+	public WOResponse dispatchRequest(WORequest request) {
+		final WOResponse response = super.dispatchRequest(request);
+
+		if (response != null && isAjaxRequest(request) && Boolean.TRUE.equals(request.userInfoForKey(SESSION_RESTORATION_FAILED_KEY))) {
+			answerSessionExpired(response);
+		}
+
+		return response;
+	}
+
+	private static void answerSessionExpired(WOResponse response) {
+		final boolean redirect = response.status() >= 300 && response.status() < 400;
+		final String location = redirect ? response.headerForKey("location") : null;
+
+		response.setStatus(WOMessage.HTTP_STATUS_FORBIDDEN);
+		response.removeHeadersForKey("location");
+		response.setHeader("true", SESSION_EXPIRED_HEADER);
+
+		if (location != null) {
+			response.setHeader(location, SESSION_EXPIRED_LOCATION_HEADER);
+		}
 	}
 
 	public static boolean shouldIgnoreResults(WORequest request, WOContext context, WOActionResults results) {

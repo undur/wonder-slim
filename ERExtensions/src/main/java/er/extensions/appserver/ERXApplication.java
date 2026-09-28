@@ -529,19 +529,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	 * method for their own expiry UX (and rarely call super); the failed restore itself is the
 	 * semantic event, and this is its single choke point. Only page-restoring request handlers
 	 * count: a direct action arriving with a dead cookie session recovers invisibly and loses no
-	 * page. ("ajax" is AjaxSlim's handler key - referenced literally since the dependency points
-	 * the other way; it is the de-facto constant of the wonder lineage.)
+	 * page (see {@link #restoresPage(WORequest)}).
 	 */
 	@Override
 	public WOSession restoreSessionWithID( String sessionID, WOContext context ) {
 		final WOSession session = super.restoreSessionWithID( sessionID, context );
 
-		if( session == null && sessionID != null && context != null && context.request() != null ) {
-			final String handlerKey = context.request().requestHandlerKey();
-
-			if( componentRequestHandlerKey().equals( handlerKey ) || "ajax".equals( handlerKey ) ) {
-				er.extensions.appserver.cachemonitor.PageCacheReuseStats.recordExpiredSessionAttempt();
-			}
+		if( session == null && sessionID != null && context != null && context.request() != null && restoresPage( context.request() ) ) {
+			er.extensions.appserver.cachemonitor.PageCacheReuseStats.recordExpiredSessionAttempt();
 		}
 
 		return session;
