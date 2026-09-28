@@ -1,6 +1,54 @@
 # Changelog
 
-## Unreleased
+## 2026-09-28 (8.0.10)
+
+- **Sticky sessions behind mod_proxy_balancer work again**
+  The route cookie (`routeid_<app>`) has its leading dot again: `.app_2001`. mod_proxy_balancer reads
+  the route after the first dot of the sticky value, so without it, requests weren't kept on the
+  instance holding their session. This had been broken since 8.0.0. The setup the cookie pairs with
+  is documented in `ERXProxyBalancerConfig`. (#40)
+
+- **Handler URLs always reach their handler**
+  A wildcard route matching a handler key's URLs, such as a catch-all `/*`, took over component
+  actions, direct actions and resources. Now a URL whose first segment is a registered request
+  handler key always goes to that handler, as `RouteTable` already required of mapped routes.
+  `ERXShortURLs.canonicalize()` no longer takes a route predicate. (#112)
+
+- **The development endpoints refuse forwarded requests**
+  A proxy or web server adaptor on the same machine makes every request it forwards come in on a
+  loopback connection. `/eval`, `/log` and `/problems` now also refuse requests carrying the headers
+  such forwarders add (`x-forwarded-for`, `forwarded`, `x-real-ip`, `x-webobjects-remote-addr`,
+  `remote_addr`, `remote_host`). (#110)
+
+- **A request on port 443 is secure**
+  `ERXRequest.isRequestSecure()` (and so `isSecure()`) again treats a request whose server port
+  header is `443` as secure, as WebObjects' own `isSecure()` does, alongside the `https: on` and
+  `x-forwarded-proto` headers. (#107)
+
+- **Cookie expiry dates as WebObjects writes them, without the overflow**
+  A cookie with a timeout gets an `expires` date along with `max-age` again. An explicitly set
+  expiry date is kept rather than replaced by one computed from the timeout, and timeouts over 24
+  days no longer overflow into a date in the past. (#109)
+
+- **`SessionDidRestoreNotification` is posted once, and only on restore**
+  `ERXSession.awake()` no longer posts it in addition to WebObjects, which already does when it
+  restores a session. A new session gets WebObjects' `SessionDidCreateNotification` only.
+  Observers of new sessions should observe that one. (#108)
+
+- **`ERXNumberFormatter` factor patterns parse at full precision**
+  Parsing with a multiplying pattern and no explicit scale, like `(*1000=)0`, now divides at full
+  precision, so a displayed value parses back to what it was (`"12"` → 0.012, where it gave 0). (#111)
+
+- **Every patch to WebObjects is explained**
+  Each class that patches or replaces a part of WebObjects (the app server, the elements, and the
+  rest) now says in its documentation what it changes and why, so it's clear what an application
+  gets that plain WebObjects wouldn't do. (#116)
+
+- **`ERXActionLogging` removed, and with it the `WOActiveImage` and `WOSubmitButton` patches**
+  `ERXWOHyperlink`, `ERXWOActiveImage` and `ERXWOSubmitButton` wrote the invoked element into the
+  session under `ERXActionLogging`, which nothing read. `ERXWOActiveImage` and `ERXWOSubmitButton`
+  existed only for that, so `WOActiveImage` and `WOSubmitButton` are now WebObjects' own again.
+  (#117)
 
 - **`ERXUnitAwareDecimalFormat` removed, `ERXUtilities.formatByteCount(long)` added**
   Byte counts are formatted by one method: "123 B", "1.5 KB", "1.2 GB", in steps of 1000, with one
@@ -20,11 +68,29 @@
   conversions, which now fill their few placeholders themselves. Their output is unchanged.
   (#125)
 
-- **Sticky sessions behind mod_proxy_balancer work again**
-  The route cookie (`routeid_<app>`) has its leading dot again: `.app_2001`. mod_proxy_balancer reads
-  the route after the first dot of the sticky value, so without it, requests weren't kept on the
-  instance holding their session. This had been broken since 8.0.0. The setup the cookie pairs with
-  is documented in `ERXProxyBalancerConfig`. (#40)
+- **`ERXKeepAliveResponse` delivers what's pushed, intact**
+  The stream behind Ajax's push handler returned bytes signed, corrupting non-ASCII content (and
+  ending the stream at a 0xFF byte). It held back data queued while the previous item was being
+  written, so the message part of every push waited for the next push. A spurious wakeup also ended
+  the stream. `reset()`, used when a push response is stopped, now ends the stream. (#105)
+
+- **`ERXWOHyperlink` passes on only actions inside it**
+  A link hands an action to its children only when the sender's element ID is inside the link's
+  (`1.2.…`), no longer when it merely starts with the same characters (`1.21.0`). (#106)
+
+- **The monitor server answers with a status**
+  `ERXMonitorServer` now answers a missing or wrong `monitor-service-password` with 401 and an
+  unknown operation with 404, where it dropped the connection (after a `NullPointerException` when
+  the header was missing). The password is compared in constant time. (#114)
+
+- **The monitor server's thread dump has complete stacks**
+  `/monitor/jstack` wrote each thread with `ThreadInfo.toString()`, which stops after eight frames.
+  Every thread is now written with its complete stack, the lock it's waiting on and the monitors it
+  holds. (#115)
+
+- **`WOTextField` ignores content, as WebObjects' does**
+  Anything written inside a text field element was rendered after the `<input>`. It's now ignored,
+  as in WebObjects' own `WOTextField`. (#120)
 
 - **A component redirect without a page cache fails with an explanation**
   With `WOPageCacheSize=0`, `ERXRedirect` redirected to a component instance with the page's name
@@ -32,14 +98,10 @@
   a recreated page wouldn't be the instance redirected to, so the redirect now throws, naming the
   alternatives: a direct action or a URL. (#122)
 
-- **`ERXWOForm` no longer publishes its `enctype`**
-  The form put its `enctype` into `ERXWOContext.contextDictionary()` while it rendered, for a file
-  upload element that has since been removed. Nothing reads it. The `enctype` attribute is rendered
-  as before. (#121)
-
-- **`WOTextField` ignores content, as WebObjects' does**
-  Anything written inside a text field element was rendered after the `<input>`. It's now ignored,
-  as in WebObjects' own `WOTextField`. (#120)
+- **The resource URL prefix properties are reported as obsolete**
+  `er.extensions.ERXResourceManager.resourceUrlPrefix` and `secureResourceUrlPrefix` (a CDN host
+  for resource URLs, in Project Wonder) are no longer applied. Setting one only kept resource URLs
+  from being completed. They're now listed in the startup report of obsolete properties. (#113)
 
 - **`ERXErrorPage` documented, and its session-expiry helper fixed**
   `ERXErrorPage` is a general-purpose error page for applications:
@@ -56,67 +118,10 @@
   `ERXNotification.AllBundlesLoadedNotification` and `ERXConfigurationManager.initialize()` are
   removed. (#118)
 
-- **`ERXActionLogging` removed, and with it the `WOActiveImage` and `WOSubmitButton` patches**
-  `ERXWOHyperlink`, `ERXWOActiveImage` and `ERXWOSubmitButton` wrote the invoked element into the
-  session under `ERXActionLogging`, which nothing read. `ERXWOActiveImage` and `ERXWOSubmitButton`
-  existed only for that, so `WOActiveImage` and `WOSubmitButton` are now WebObjects' own again.
-  (#117)
-
-- **The monitor server's thread dump has complete stacks**
-  `/monitor/jstack` wrote each thread with `ThreadInfo.toString()`, which stops after eight frames.
-  Every thread is now written with its complete stack, the lock it's waiting on and the monitors it
-  holds. (#115)
-
-- **The monitor server answers with a status**
-  `ERXMonitorServer` now answers a missing or wrong `monitor-service-password` with 401 and an
-  unknown operation with 404, where it dropped the connection (after a `NullPointerException` when
-  the header was missing). The password is compared in constant time. (#114)
-
-- **The resource URL prefix properties are reported as obsolete**
-  `er.extensions.ERXResourceManager.resourceUrlPrefix` and `secureResourceUrlPrefix` (a CDN host
-  for resource URLs, in Project Wonder) are no longer applied. Setting one only kept resource URLs
-  from being completed. They're now listed in the startup report of obsolete properties. (#113)
-
-- **Handler URLs always reach their handler**
-  A wildcard route matching a handler key's URLs, such as a catch-all `/*`, took over component
-  actions, direct actions and resources. Now a URL whose first segment is a registered request
-  handler key always goes to that handler, as `RouteTable` already required of mapped routes.
-  `ERXShortURLs.canonicalize()` no longer takes a route predicate. (#112)
-
-- **`ERXNumberFormatter` factor patterns parse at full precision**
-  Parsing with a multiplying pattern and no explicit scale, like `(*1000=)0`, now divides at full
-  precision, so a displayed value parses back to what it was (`"12"` → 0.012, where it gave 0). (#111)
-
-- **The development endpoints refuse forwarded requests**
-  A proxy or web server adaptor on the same machine makes every request it forwards come in on a
-  loopback connection. `/eval`, `/log` and `/problems` now also refuse requests carrying the headers
-  such forwarders add (`x-forwarded-for`, `forwarded`, `x-real-ip`, `x-webobjects-remote-addr`,
-  `remote_addr`, `remote_host`). (#110)
-
-- **Cookie expiry dates as WebObjects writes them, without the overflow**
-  A cookie with a timeout gets an `expires` date along with `max-age` again. An explicitly set
-  expiry date is kept rather than replaced by one computed from the timeout, and timeouts over 24
-  days no longer overflow into a date in the past. (#109)
-
-- **`SessionDidRestoreNotification` is posted once, and only on restore**
-  `ERXSession.awake()` no longer posts it in addition to WebObjects, which already does when it
-  restores a session. A new session gets WebObjects' `SessionDidCreateNotification` only.
-  Observers of new sessions should observe that one. (#108)
-
-- **A request on port 443 is secure**
-  `ERXRequest.isRequestSecure()` (and so `isSecure()`) again treats a request whose server port
-  header is `443` as secure, as WebObjects' own `isSecure()` does, alongside the `https: on` and
-  `x-forwarded-proto` headers. (#107)
-
-- **`ERXWOHyperlink` passes on only actions inside it**
-  A link hands an action to its children only when the sender's element ID is inside the link's
-  (`1.2.…`), no longer when it merely starts with the same characters (`1.21.0`). (#106)
-
-- **`ERXKeepAliveResponse` delivers what's pushed, intact**
-  The stream behind Ajax's push handler returned bytes signed, corrupting non-ASCII content (and
-  ending the stream at a 0xFF byte). It held back data queued while the previous item was being
-  written, so the message part of every push waited for the next push. A spurious wakeup also ended
-  the stream. `reset()`, used when a push response is stopped, now ends the stream. (#105)
+- **`ERXWOForm` no longer publishes its `enctype`**
+  The form put its `enctype` into `ERXWOContext.contextDictionary()` while it rendered, for a file
+  upload element that has since been removed. Nothing reads it. The `enctype` attribute is rendered
+  as before. (#121)
 
 ## 2026-09-27 (8.0.9)
 
