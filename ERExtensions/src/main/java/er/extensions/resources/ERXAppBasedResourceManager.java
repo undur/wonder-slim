@@ -1,5 +1,8 @@
 package er.extensions.resources;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,8 +72,18 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 	 */
 	String stamp( final String resourceName, final String frameworkName ) {
 		final String stamp = _stamps.computeIfAbsent( frameworkName + "/" + resourceName, _ -> {
-			final byte[] bytes = bytesForResourceNamed( resourceName, frameworkName, null );
-			return bytes != null && isWebServerResource( resourceName, frameworkName ) ? ERXResourceStamps.stamp( bytes ) : "";
+
+			// Checked first, so a resource that isn't one is never read
+			if( !isWebServerResource( resourceName, frameworkName ) ) {
+				return "";
+			}
+
+			try( InputStream content = inputStreamForResourceNamed( resourceName, frameworkName, null ) ) {
+				return content == null ? "" : ERXResourceStamps.stamp( content );
+			}
+			catch( IOException e ) {
+				throw new UncheckedIOException( e );
+			}
 		} );
 
 		return stamp.isEmpty() ? null : stamp;

@@ -1,5 +1,9 @@
 package er.extensions.resources;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
@@ -40,9 +44,28 @@ public final class ERXResourceStamps {
 	 * @return The stamp of the given content: the first {@value #LENGTH} hex digits of its SHA-256
 	 */
 	public static String stamp( final byte[] content ) {
+		return stampFromDigest( sha256().digest( content ) );
+	}
+
+	/**
+	 * @return The stamp of the content read from the given stream, read through in chunks rather than held in memory
+	 */
+	public static String stamp( final InputStream content ) throws IOException {
+		final MessageDigest digest = sha256();
+		content.transferTo( new DigestOutputStream( OutputStream.nullOutputStream(), digest ) );
+		return stampFromDigest( digest.digest() );
+	}
+
+	/**
+	 * @return The stamp for a SHA-256 digest: its first {@value #LENGTH} hex digits
+	 */
+	private static String stampFromDigest( final byte[] digest ) {
+		return HexFormat.of().formatHex( digest ).substring( 0, LENGTH );
+	}
+
+	private static MessageDigest sha256() {
 		try {
-			final byte[] digest = MessageDigest.getInstance( "SHA-256" ).digest( content );
-			return HexFormat.of().formatHex( digest ).substring( 0, LENGTH );
+			return MessageDigest.getInstance( "SHA-256" );
 		}
 		catch( NoSuchAlgorithmException e ) {
 			throw new IllegalStateException( "Every Java platform has SHA-256", e );

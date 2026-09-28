@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +21,13 @@ public class ERXResourceStampsTest {
 		assertEquals( 10, stamp.length() );
 		assertEquals( stamp, ERXResourceStamps.stamp( "body {}".getBytes( StandardCharsets.UTF_8 ) ) );
 		assertNotEquals( stamp, ERXResourceStamps.stamp( "body { }".getBytes( StandardCharsets.UTF_8 ) ) );
+	}
+
+	@Test
+	public void aStreamIsStampedAsItsContentIs() throws IOException {
+		final byte[] content = new byte[1_000_000]; // larger than a stream transfer's buffer, so digested in chunks
+		new Random( 1 ).nextBytes( content );
+		assertEquals( ERXResourceStamps.stamp( content ), ERXResourceStamps.stamp( new ByteArrayInputStream( content ) ) );
 	}
 
 	@Test
