@@ -122,9 +122,19 @@ public class ElementReference extends PlaygroundPage {
 
 	public List<ApiextElement> elements() {
 		if ( _elements == null ) {
-			_elements = source._elements.get();
+			_elements = elementsFor( source );
 		}
 		return _elements;
+	}
+
+	/** The elements of a source, in reference order - shared by this page and the JSON endpoint. */
+	public static List<ApiextElement> elementsFor( Source source ) {
+		return source._elements.get();
+	}
+
+	/** A source's editorial category tags for an element (only AjaxSlim has any) - shared with the JSON endpoint. */
+	public static List<String> tagsFor( Source source, ApiextElement element ) {
+		return source == Source.AjaxSlim ? AJAXSLIM_TAGS.getOrDefault( element.className(), List.of() ) : List.of();
 	}
 
 	public List<Source> sources() {

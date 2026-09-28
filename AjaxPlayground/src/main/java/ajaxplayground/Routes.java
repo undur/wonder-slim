@@ -69,7 +69,9 @@ public class Routes {
 		routes.map( "/reference", AjaxSlimGuide.class );
 		for( final ElementReference.Source source : ElementReference.Source.values() ) {
 			routes.map( source.path(), ri -> ElementReference.page( ri.request().context(), source ) );
+			routes.map( source.path() + ".json", ri -> ElementReferenceJSON.source( source ) );
 		}
+		routes.map( "/element-reference/sources.json", ri -> ElementReferenceJSON.index() );
 		routes.map( "/apiext-guide", ApiextGuide.class );
 		routes.map( "/overview", AjaxOverview.class );
 
