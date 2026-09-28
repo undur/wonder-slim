@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **`AjaxFileUpload` no longer loads an error into its hidden iframe**
+  The iframe's initial document was a direct action removed years ago, so every page with an upload
+  loaded a 500 into it and logged an exception. It now starts as `about:blank`. Uploads work as
+  before. (#124)
+
 - **A locale for one request: `ERXWOContext.setLocale(Locale)`**
   A page or route that knows its locale without a session to carry it (a stateless page rendering
   a customer's document in the customer's locale, say) sets it on the context. It comes before the

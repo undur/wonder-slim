@@ -15,7 +15,6 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSData;
 
-import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
 import er.extensions.components.ERXComponentUtilities;
 import er.extensions.foundation.ERXUtilities;
@@ -391,8 +390,13 @@ public class AjaxFileUpload extends WOComponent {
 		return results;
 	}
 
+	/**
+	 * The hidden iframe's initial document. It needs none from the application: the upload form is submitted into the
+	 * iframe, which then shows the upload's response. {@code about:blank} takes the embedding page's origin, so it raises
+	 * no mixed-content warning on an https page, the reason an application URL was once used here.
+	 */
 	public String srcUrl() {
-		return context()._directActionURL("ERXDirectAction/empty", null, ERXRequest.isRequestSecure(context().request()), 0, false);
+		return "about:blank";
 	}
 	
 	/**
