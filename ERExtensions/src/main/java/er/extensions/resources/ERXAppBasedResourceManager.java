@@ -1,6 +1,8 @@
 package er.extensions.resources;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,6 +10,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.foundation.NSArray;
 
+import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXWOContext;
 
 /**
@@ -21,8 +24,23 @@ import er.extensions.appserver.ERXWOContext;
 public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 
 	/**
-	 * Generates a URL for the given resource. Format: .../App.woa/res/[framework]/[resourceName]?languages=[lang1,lang2,lang3]
-	 * 
+	 * Stamp resource URLs with their content (production), see {@link #urlForResourceNamed}
+	 */
+	private final boolean _stampsURLs = !ERXApplication.isDevelopmentModeSafe();
+
+	/**
+	 * The content stamp of each resource a URL has been generated for, by {@code <frameworkName>/<resourceName>}, empty for
+	 * one that isn't a web server resource. Computed on first use; resources don't change while a deployed application runs.
+	 */
+	private final Map<String,String> _stamps = new ConcurrentHashMap<>();
+
+	/**
+	 * Generates a URL for the given resource. Format: .../App.woa/res/[framework]/[resourceName]
+	 *
+	 * In production, the resource name carries a stamp of the resource's content ({@code css/site.3f9c1e07ab.css}, see
+	 * {@link ERXResourceStamps}), so the URL changes whenever the content does and the resource request handler can let
+	 * browsers cache it for good. Not in development, where files change while the application runs.
+	 *
 	 * FIXME: Handle localized resources // Hugi 2025-10-04
 	 */
 	@Override
@@ -32,7 +50,30 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 			frameworkName = "app";
 		}
 
-		return context( request ).urlWithRequestHandlerKey(ERXAppBasedResourceRequestHandler.KEY, frameworkName + "/" + resourceName, null);
+		String path = frameworkName + "/" + resourceName;
+
+		if( _stampsURLs ) {
+			final String stamp = stamp( resourceName, frameworkName );
+
+			if( stamp != null ) {
+				path = frameworkName + "/" + ERXResourceStamps.stampedPath( resourceName, stamp );
+			}
+		}
+
+		return context( request ).urlWithRequestHandlerKey(ERXAppBasedResourceRequestHandler.KEY, path, null);
+	}
+
+	/**
+	 * @return The content stamp of the given resource, null if it isn't a web server resource. Computed on first use and
+	 *         remembered, for the URLs generated for it and for the stamps requested for it alike.
+	 */
+	String stamp( final String resourceName, final String frameworkName ) {
+		final String stamp = _stamps.computeIfAbsent( frameworkName + "/" + resourceName, _ -> {
+			final byte[] bytes = bytesForResourceNamed( resourceName, frameworkName, null );
+			return bytes != null && isWebServerResource( resourceName, frameworkName ) ? ERXResourceStamps.stamp( bytes ) : "";
+		} );
+
+		return stamp.isEmpty() ? null : stamp;
 	}
 
 	/**

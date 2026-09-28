@@ -82,12 +82,54 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 			return notFoundResponse(path);
 		}
 
+		// A stamped name (css/site.3f9c1e07ab.css, as the resource manager generates it) names the resource without the
+		// stamp. Cached for good when the stamp is the resource's own; not at all when it isn't, as when an instance that
+		// hasn't been updated yet gets a request for a newer version during a deploy.
+		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse(path);
+
+		if( stamped != null ) {
+			final WOResponse response = find(stamped.unstampedPath());
+
+			if( response != null ) {
+				final boolean current = _useCache && stamped.stamp().equals(currentStamp(stamped.unstampedPath()));
+				response.setHeader(current ? STAMPED_CACHE_CONTROL : "no-cache", "cache-control");
+				return response;
+			}
+
+			// Nothing by the name without the stamp: the name may be a file's own, look it up as it is
+		}
+
+		final WOResponse response = find(path);
+		return response != null ? response : notFoundResponse(path);
+	}
+
+	/**
+	 * @return The stamp of the content of the resource at the given (unstamped) path, the one its generated URLs carry
+	 */
+	private static String currentStamp(final String path) {
+		final int firstSlashIndex = path.indexOf('/');
+		final ERXAppBasedResourceManager resourceManager = (ERXAppBasedResourceManager) WOApplication.application().resourceManager();
+		return resourceManager.stamp(path.substring(firstSlashIndex + 1), path.substring(0, firstSlashIndex));
+	}
+
+	/**
+	 * The cache lifetime of a resource requested by a URL with its current stamp: a year, and never revalidated, as the
+	 * URL changes whenever the content does
+	 */
+	private static final String STAMPED_CACHE_CONTROL = "public, max-age=31536000, immutable";
+
+	/**
+	 * @return A response for the resource at the given path, cached in production; null if there's none
+	 */
+	private WOResponse find(final String path) {
+
 		if( !_useCache ) {
-			return uncachedResponseForPath(path);
+			final WOResponse response = uncachedResponseForPath(path);
+			return response.status() == 200 ? response : null;
 		}
 
 		if( _missingPaths.contains(path) ) {
-			return notFoundResponse(path);
+			return null;
 		}
 
 		// Only a resource that was found is cached (a null from the mapping function stores nothing)
@@ -96,12 +138,12 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 			return response.status() == 200 ? new CachedResourceResponse( response ) : null;
 		});
 
-		if( cached != null ) {
-			return cached.streamingResponse();
+		if( cached == null ) {
+			_missingPaths.add(path);
+			return null;
 		}
 
-		_missingPaths.add(path);
-		return notFoundResponse(path);
+		return cached.streamingResponse();
 	}
 
 	/**

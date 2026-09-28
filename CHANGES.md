@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Resource URLs carry a stamp of the resource's content, and are cached for good**
+  In production, resource URLs the framework generates carry a stamp of the resource's content in
+  the file name: `/res/AjaxSlim/ajaxslim.0dc9602958.js`. A deploy that changes a resource changes
+  its URL, so a stamped URL is served with `Cache-Control: public, max-age=31536000, immutable` and
+  browsers never ask for it again. A request whose stamp isn't the resource's current one (from a
+  page an instance not yet updated served during a deploy, say) is served with `no-cache`. The
+  plain URL, `/res/AjaxSlim/ajaxslim.js`, keeps working as before. Not in development, where files
+  change while the application runs. (#30)
+
 - **Regular resources in a folder named `WebServerResources` aren't served as web server resources**
   A resource counts as a web server resource only when it lies in its bundle's web server
   resources folder. (#133)
