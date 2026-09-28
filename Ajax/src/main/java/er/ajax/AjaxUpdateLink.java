@@ -1,6 +1,5 @@
 package er.ajax;
 
-import java.net.MalformedURLException;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
@@ -11,14 +10,13 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WODynamicElementCreationException;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.components.ERXComponentUtilities;
-import er.extensions.foundation.ERXMutableURL;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Updates a region on the screen by creating a request to an action, then returning a script that in turn creates an
@@ -178,14 +176,7 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 			}
 			
 			if (replaceID != null) {
-				try {
-					ERXMutableURL tempActionUrl = new ERXMutableURL(actionUrl);
-					tempActionUrl.addQueryParameter(ERXAjaxApplication.KEY_REPLACED, "true");
-					actionUrl = tempActionUrl.toExternalForm();
-				}
-				catch (MalformedURLException e) {
-					throw NSForwardException._runtimeExceptionForThrowable(e);
-				}
+				actionUrl = ERXUtilities.appendQueryParameter(actionUrl, ERXAjaxApplication.KEY_REPLACED, "true");
 			}
 
 			actionUrl = "'" + actionUrl + "'";

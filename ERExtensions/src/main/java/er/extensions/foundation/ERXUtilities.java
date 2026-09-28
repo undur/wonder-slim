@@ -9,10 +9,14 @@ package er.extensions.foundation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
+import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSSelector;
 
@@ -71,5 +75,70 @@ public class ERXUtilities {
 	 */
 	public static boolean stringIsNullOrEmpty( String string ) {
 		return string == null || string.isEmpty();
+	}
+
+	/**
+	 * @return The URL with a query parameter appended, after a '?' or '&amp;' as the URL requires, and before a fragment
+	 *         (#...). The key and value are URL-encoded; a null value appends the key alone. An "&amp;amp;" in the URL (an
+	 *         HTML-escaped separator) becomes "&amp;".
+	 */
+	public static String appendQueryParameter( final String url, final String key, final String value ) {
+		String result = url.replace( "&amp;", "&" );
+		String fragment = "";
+		final int fragmentStart = result.indexOf( '#' );
+
+		if( fragmentStart != -1 ) {
+			fragment = result.substring( fragmentStart );
+			result = result.substring( 0, fragmentStart );
+		}
+
+		final StringBuilder sb = new StringBuilder( result );
+
+		if( result.indexOf( '?' ) == -1 ) {
+			sb.append( '?' );
+		}
+		else if( !result.endsWith( "?" ) && !result.endsWith( "&" ) ) {
+			sb.append( '&' );
+		}
+
+		appendQueryParameter( sb, key, value );
+		sb.append( fragment );
+		return sb.toString();
+	}
+
+	/**
+	 * @return The dictionary as a URL query string (a=1&amp;b=2, without a leading '?'), keys and values URL-encoded, in the
+	 *         dictionary's key order. An NSArray value gives the key once per element. Null for no parameters.
+	 */
+	public static String queryString( final NSDictionary<String, ? extends Object> parameters ) {
+		if( parameters == null || parameters.isEmpty() ) {
+			return null;
+		}
+
+		final StringBuilder sb = new StringBuilder();
+
+		for( final String key : parameters.allKeys() ) {
+			final Object value = parameters.objectForKey( key );
+			final List<?> values = value instanceof NSArray<?> array ? array : List.of( value );
+
+			for( final Object element : values ) {
+				if( sb.length() > 0 ) {
+					sb.append( '&' );
+				}
+
+				appendQueryParameter( sb, key, element.toString() );
+			}
+		}
+
+		return sb.toString();
+	}
+
+	private static void appendQueryParameter( final StringBuilder sb, final String key, final String value ) {
+		sb.append( URLEncoder.encode( key, StandardCharsets.UTF_8 ) );
+
+		if( value != null ) {
+			sb.append( '=' );
+			sb.append( URLEncoder.encode( value, StandardCharsets.UTF_8 ) );
+		}
 	}
 }

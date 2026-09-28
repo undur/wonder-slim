@@ -2,7 +2,6 @@ package er.ajax.elements;
 
 import er.ajax.*;
 
-import java.net.MalformedURLException;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOAssociation;
@@ -13,12 +12,11 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.components.ERXComponentUtilities;
-import er.extensions.foundation.ERXMutableURL;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Updates a region of the page by firing a server action and morphing the result into a target
@@ -139,14 +137,7 @@ public class AjaxUpdateLink extends AjaxDynamicElement {
 		}
 
 		if (replaceID != null) {
-			try {
-				ERXMutableURL tempActionUrl = new ERXMutableURL(actionUrl);
-				tempActionUrl.addQueryParameter(ERXAjaxApplication.KEY_REPLACED, "true");
-				actionUrl = tempActionUrl.toExternalForm();
-			}
-			catch (MalformedURLException e) {
-				throw NSForwardException._runtimeExceptionForThrowable(e);
-			}
+			actionUrl = ERXUtilities.appendQueryParameter(actionUrl, ERXAjaxApplication.KEY_REPLACED, "true");
 		}
 
 		String actionUrlExpression = AjaxUtils.quote(actionUrl);

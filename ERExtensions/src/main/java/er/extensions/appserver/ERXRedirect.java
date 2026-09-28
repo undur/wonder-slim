@@ -9,7 +9,7 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ajax.ERXAjaxApplication;
-import er.extensions.foundation.ERXMutableURL;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * ERXRedirect is like a WORedirect except that you can give it a
@@ -159,13 +159,7 @@ public class ERXRedirect extends WOComponent {
 	 * @return the query parameters as a string
 	 */
 	protected String queryParametersString() {
-		String queryParametersString = null;
-		if (_queryParameters != null && _queryParameters.count() > 0) {
-			ERXMutableURL u = new ERXMutableURL();
-			u.setQueryParameters(_queryParameters);
-			queryParametersString = u.toExternalForm();
-		}
-		return queryParametersString;
+		return ERXUtilities.queryString(_queryParameters);
 	}
 	
 	protected NSDictionary<String, Object> directActionQueryParameters() {

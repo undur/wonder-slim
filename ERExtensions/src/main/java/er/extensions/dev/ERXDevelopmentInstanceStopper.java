@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
-import er.extensions.foundation.ERXMutableURL;
 import er.extensions.foundation.ERXProperties;
 
 public class ERXDevelopmentInstanceStopper {
@@ -73,25 +72,35 @@ public class ERXDevelopmentInstanceStopper {
 	 * @return The URL we can invoke to kill a WO application running on the given port
 	 */
 	private static URL urlForKillingWOApplicationOnPort( int port ) throws MalformedURLException {
-		ERXMutableURL adapterUrl = new ERXMutableURL(ERXApplication.application().cgiAdaptorURL());
-
-		if (ERXApplication.application().host() == null) {
-			adapterUrl.setHost("localhost");
-		}
-
-		adapterUrl.appendPath(ERXApplication.application().name() + ERXApplication.application().applicationExtension());
-
-		if (ERXApplication.application().isDirectConnectEnabled()) {
-			adapterUrl.setPort(port);
-		}
-		else {
-			adapterUrl.appendPath("-" + port);
-		}
-
-		adapterUrl.appendPath(ERXApplication.application().directActionRequestHandlerKey() + "/stop");
-
-		return adapterUrl.toURL();
+		final ERXApplication application = ERXApplication.erxApplication();
+		return stopURL( application.cgiAdaptorURL(), application.host() == null, application.isDirectConnectEnabled(), port, application.name() + application.applicationExtension(), application.directActionRequestHandlerKey() );
 	}
+
+	/**
+	 * @return The stop action's URL for an instance on the given port: the adaptor URL plus the application's name and
+	 *         the stop direct action. Under direct connect the port is the URL's port, behind an adaptor it's the instance
+	 *         number in the path.
+	 */
+	static URL stopURL( final String adaptorURL, final boolean onLocalhost, final boolean directConnect, final int port, final String applicationNameWithExtension, final String directActionKey ) throws MalformedURLException {
+		try {
+			final URI adaptor = new URI( adaptorURL );
+			final String host = onLocalhost ? "localhost" : adaptor.getHost();
+			final int urlPort = directConnect ? port : adaptor.getPort();
+
+			String path = adaptor.getPath() == null ? "" : adaptor.getPath();
+
+			if( !path.endsWith( "/" ) ) {
+				path = path + "/";
+			}
+
+			path = path + applicationNameWithExtension + (directConnect ? "" : "/-" + port) + "/" + directActionKey + "/stop";
+			return new URI( adaptor.getScheme(), null, host, urlPort, path, null, null ).toURL();
+		}
+		catch( URISyntaxException e ) {
+			throw new MalformedURLException( e.getMessage() );
+		}
+	}
+
 	
 	/**
 	 * @return The URL we can invoke to kill an NG application running on the given port

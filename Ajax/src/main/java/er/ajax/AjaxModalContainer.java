@@ -2,7 +2,6 @@ package er.ajax;
 
 //http://jquery.com/demo/thickbox/
 
-import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 
@@ -15,12 +14,11 @@ import com.webobjects.appserver.WOMessage;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSMutableDictionary;
 
 import er.extensions.appserver.ERXRequest;
 import er.extensions.appserver.ERXWOContext;
-import er.extensions.foundation.ERXMutableURL;
+import er.extensions.foundation.ERXUtilities;
 
 /**
  * Shows a link and wraps an area that is later presented as a modal window. Alternately, when you bind <b>action</b> then the content is used as the link.
@@ -92,12 +90,7 @@ public class AjaxModalContainer extends AjaxDynamicElement {
         			}
               try {
           			href = context._directActionURL(directActionName, queryDictionary, secure, 0, false);
-          			ERXMutableURL u = new ERXMutableURL(href);
-          			u.addQueryParameter(String.valueOf(System.currentTimeMillis()), null);
-          			href = u.toExternalForm();
-              }
-              catch (MalformedURLException e) {
-                throw new NSForwardException(e);
+          			href = ERXUtilities.appendQueryParameter(href, String.valueOf(System.currentTimeMillis()), null);
               }
               finally {
           			if (!generatingCompleteURLs) {

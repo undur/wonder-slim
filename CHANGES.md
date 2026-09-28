@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **`ERXMutableURL` removed**
+  The framework's few uses of it (building the development stop URL, encoding a redirect's query
+  parameters, appending a parameter to an Ajax URL) are handled by two small helpers,
+  `ERXUtilities.appendQueryParameter(url, key, value)` and `ERXUtilities.queryString(dictionary)`,
+  and `java.net.URI`. The URLs they produce are unchanged. (#126)
+
 - **`ERXSimpleTemplateParser` removed**
   Its only use was formatting `ERXPatternLayout`'s `%W` (application info) and `%V` (JVM memory)
   conversions, which now fill their few placeholders themselves. Their output is unchanged.
