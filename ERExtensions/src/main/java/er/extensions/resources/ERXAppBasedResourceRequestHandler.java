@@ -63,6 +63,11 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	 */
 	public WOResponse responseForPath(final String path) {
 
+		// A path that doesn't name a framework and a resource names nothing; not cached, as it isn't a resource
+		if( path == null || path.indexOf('/') < 1 || path.endsWith("/") ) {
+			return notFoundResponse(path);
+		}
+
 		if( _useCache ) {
 			return _cache.computeIfAbsent(path, _ -> new CachedResourceResponse( uncachedResponseForPath(path) )).streamingResponse();
 		}
@@ -90,10 +95,7 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 		
 		// Resource not found or isn't a webserver resource -> 404
 		if( bytes == null || !resourceManager.isWebServerResource( resourceName, frameworkName ) ) {
-			final WOResponse response = new WOResponse();
-			response.setStatus(404);
-			response.setContent("Resource '[%s]/[%s]' not found".formatted(frameworkName, resourceName) );
-			return response;
+			return notFoundResponse(frameworkName + "/" + resourceName);
 		}
 
 		// Resource found, return that thing
@@ -110,6 +112,16 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 			response.setHeader("public, max-age=3600", "cache-control" );
 		}
 
+		return response;
+	}
+
+	/**
+	 * @return A 404 response for the given path
+	 */
+	private static WOResponse notFoundResponse(final String path) {
+		final WOResponse response = new WOResponse();
+		response.setStatus(404);
+		response.setContent("Resource '%s' not found".formatted(path) );
 		return response;
 	}
 

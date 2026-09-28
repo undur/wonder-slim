@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **A resource URL that names no resource is a 404**
+  `/res/foo` or `/res/` (no framework and resource name) answered with a 500. It's now a 404, and,
+  not being a resource, isn't kept in the resource cache. (#133)
+
 - **Public resources: files served at the root of the application's URL space**
   An application that calls `setServesPublicResources(true)` in its constructor serves the files in
   the `public` folder of its web server resources (`src/main/webserver-resources/public`) at the
