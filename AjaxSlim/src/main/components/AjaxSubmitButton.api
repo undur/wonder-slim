@@ -24,13 +24,7 @@
 		<binding name="functionName"/>
 		<binding name="showUI"/>
 		<binding name="updateContainerID"/>
-		<binding name="replaceID"/>
 		<binding name="elementName"/>
 		<binding defaults="Boolean" name="disabled"/>
-
-		<validation message="Only one of 'replaceID' or 'updateContainerID' can be bound.">
-			<bound name="replaceID"/>
-			<bound name="updateContainerID"/>
-		</validation>
 	</wo>
 </wodefinitions>

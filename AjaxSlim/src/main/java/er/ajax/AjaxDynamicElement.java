@@ -49,7 +49,7 @@ public abstract class AjaxDynamicElement extends ERXDynamicElement implements IA
 			// walk reach the sibling targets too (each appends to the same shared response). The single
 			// case is unchanged: it returns the response and stops, exactly as before.
 			boolean multi = AjaxUpdateProtocol.isMultiUpdate(request);
-			if (result == null && !ERXAjaxApplication.isAjaxReplacement(request) && !multi) {
+			if (result == null && !multi) {
 				result = AjaxUtils.createResponse(request, context);
 			}
 			else if (multi && hasChildrenElements()) {

@@ -2,7 +2,7 @@
 <wodefinitions>
 	<wo class="AjaxUpdateLink" content="allowed" unknownAttributes="passthrough">
 
-		<doc><![CDATA[A link (or button, or named JS function) that fires a server action and morphs the result into a target container (`updateContainerID`) or replaces a region (`replaceID`). The standard "click to update part of the page".
+		<doc><![CDATA[A link (or button, or named JS function) that fires a server action and morphs the result into a target container (`updateContainerID`). The standard "click to update part of the page".
 
 `updateContainerID` may name several containers separated by `;` to refresh them all in one round-trip.
 
@@ -16,19 +16,9 @@
 			<doc>The action to call when the link executes.</doc>
 		</binding>
 
-		<binding name="directActionName">
-			<pull><type>java.lang.String</type></pull>
-			<doc><![CDATA[The direct action to call when the link executes (requires `replaceID`).]]></doc>
-		</binding>
-
 		<binding name="updateContainerID">
 			<pull><type>java.lang.String</type><type>java.util.List</type></pull>
 			<doc><![CDATA[The update container(s) to morph after the action — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.]]></doc>
-		</binding>
-
-		<binding name="replaceID">
-			<pull><type>java.lang.String</type></pull>
-			<doc>The id of the element whose contents are replaced with the action's result.</doc>
 		</binding>
 
 		<binding name="string">
@@ -119,21 +109,10 @@
 
 		<choose min="1">
 			<binding name="action"/>
-			<binding name="directActionName"/>
 			<binding name="updateContainerID"/>
 		</choose>
 		<choose max="1">
-			<binding name="action"/>
-			<binding name="directActionName"/>
-		</choose>
-		<choose max="1">
 			<binding name="updateContainerID"/>
-			<binding name="replaceID"/>
-			<binding name="ignoreActionResponse"/>
-		</choose>
-		<requires binding="replaceID" when="directActionName"/>
-		<choose max="1">
-			<binding name="directActionName"/>
 			<binding name="ignoreActionResponse"/>
 		</choose>
 

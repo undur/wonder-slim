@@ -35,7 +35,6 @@ import com.webobjects.foundation.NSDictionary;
  * @binding onComplete JavaScript to run after the update/morph completes
  * @binding onSuccess JavaScript to run after a successful update/morph completes
  * @binding formName the name of the form to submit (defaults to the containing form)
- * @binding replaceID the id of an element to replace with the action's response (alternative to updateContainerID)
  * @binding updateContainerID the update container(s) to morph after the action - a single id, a {@code ";"}-joined set, or a {@code List} of ids; {@code "_parent"} targets the nearest enclosing container (see {@link AjaxUpdateContainer#updateContainerID(Object)})
  */
 public class AjaxDefaultSubmitButton extends AjaxSubmitButton {

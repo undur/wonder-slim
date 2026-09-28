@@ -92,7 +92,7 @@ public abstract class AjaxComponent extends WOComponent implements IAjaxElement 
 		if (shouldHandleRequest(request, context)) {
 			result = handleRequest(request, context);
 			ERXAjaxApplication.enableShouldNotStorePage();
-			if (result == null && !ERXAjaxApplication.isAjaxReplacement(request)) {
+			if (result == null) {
 				result = AjaxUtils.createResponse(request, context);
 			}
 		} else {

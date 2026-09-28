@@ -2,7 +2,7 @@
 <wodefinitions>
 	<wo class="AjaxSubmitButton" content="allowed" unknownAttributes="passthrough">
 
-		<doc><![CDATA[Like a `WOSubmitButton`, but submits its form in the background via Ajax and morphs the result into a target container (`updateContainerID`) or replaces a region (`replaceID`). Honours the `AJAX_SUBMIT_BUTTON_NAME` partial-submit contract, so it works correctly in multiple-submit forms.
+		<doc><![CDATA[Like a `WOSubmitButton`, but submits its form in the background via Ajax and morphs the result into a target container (`updateContainerID`). Honours the `AJAX_SUBMIT_BUTTON_NAME` partial-submit contract, so it works correctly in multiple-submit forms.
 
 ```html
 <wo:AjaxSubmitButton action="$save" updateContainerID="result" value="Save"/>
@@ -16,11 +16,6 @@
 		<binding name="updateContainerID">
 			<pull><type>java.lang.String</type><type>java.util.List</type></pull>
 			<doc><![CDATA[The update container(s) to morph after submitting — a single id, a `;`-separated set, or a `List` of ids. `"_parent"` targets the nearest enclosing container.]]></doc>
-		</binding>
-
-		<binding name="replaceID">
-			<pull><type>java.lang.String</type></pull>
-			<doc><![CDATA[The id of the region to replace (mutually exclusive with `updateContainerID`).]]></doc>
 		</binding>
 
 		<binding name="value">
@@ -106,7 +101,6 @@
 
 		<choose max="1">
 			<binding name="updateContainerID"/>
-			<binding name="replaceID"/>
 			<binding name="ignoreActionResponse"/>
 		</choose>
 

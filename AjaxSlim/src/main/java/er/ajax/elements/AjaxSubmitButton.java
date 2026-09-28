@@ -19,8 +19,7 @@ import er.extensions.foundation.ERXProperties;
 
 /**
  * AjaxSubmitButton behaves like a WOSubmitButton except that it submits its form in the background
- * via Ajax, then morphs the result into a target container (<code>updateContainerID</code>) or
- * replaces a region (<code>replaceID</code>).
+ * via Ajax, then morphs the result into a target container (<code>updateContainerID</code>).
  * <p>
  * This is the AjaxSlim rewrite. The legacy element emitted <code>ASB.update</code> /
  * <code>ASB.request</code> backed by Prototype's <code>Ajax.Request</code> +
@@ -36,7 +35,7 @@ import er.extensions.foundation.ERXProperties;
  * <b>Kept bindings:</b> action, name, value, id, class, style, title, tabindex, accesskey, onClick
  * (client hook after the request), onClickBefore (gate), onClickServer (server-returned JS),
  * onComplete / onSuccess (post-update hooks), button, useButtonTag, formName, formSerializer,
- * functionName, showUI, updateContainerID, replaceID, disabled, elementName.
+ * functionName, showUI, updateContainerID, disabled, elementName.
  * <p>
  * <b>Dropped (vs legacy):</b> all Scriptaculous effect / insertion bindings, and the Prototype
  * transport options onLoading/onFailure/evalScripts/asynchronous (the transport is gone).
@@ -56,7 +55,6 @@ import er.extensions.foundation.ERXProperties;
  * @binding functionName if set, the button becomes a named JavaScript function instead
  * @binding showUI if functionName is set, the UI defaults to hidden; showUI re-enables it
  * @binding updateContainerID the update container(s) to morph after the action - a single id, a {@code ";"}-joined set, or a {@code List} of ids; {@code "_parent"} targets the nearest enclosing container (see {@link AjaxUpdateContainer#updateContainerID(Object)})
- * @binding replaceID the id of the element whose contents are replaced with the results of this action
  * @binding elementName the element name to use when rendering a link (defaults to "a")
  * @binding disabled if true, the button is disabled (defaults to false)
  * @binding ignoreActionResponse if true, the action's result is ignored and an empty/onClickServer response is returned instead
@@ -92,7 +90,7 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 	 */
 	private static final NSArray<String> HANDLED_BINDINGS = new NSArray<>(new String[] {
 		"action", "name", "value", "disabled", "accesskey", "elementName", "button", "useButtonTag",
-		"showUI", "functionName", "formName", "formSerializer", "updateContainerID", "replaceID",
+		"showUI", "functionName", "formName", "formSerializer", "updateContainerID",
 		"ignoreActionResponse", "onClick", "onClickBefore", "onClickServer", "onComplete", "onSuccess"
 	});
 
@@ -132,18 +130,15 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 
 	/**
 	 * Builds the options object literal passed to ASB.update/request: the ajax submit button name
-	 * (so the server invokes this button's action in a multiple-submit form), the replace flag, and
-	 * the onSuccess / onComplete post-update hooks.
+	 * (so the server invokes this button's action in a multiple-submit form) and the onSuccess /
+	 * onComplete post-update hooks.
 	 */
-	protected String optionsLiteral(WOContext context, WOComponent component, boolean replace) {
+	protected String optionsLiteral(WOContext context, WOComponent component) {
 		String submitButtonName = nameInContext(context, component);
 		String onSuccess = (String) valueForBinding("onSuccess", component);
 		String onComplete = (String) valueForBinding("onComplete", component);
 		StringBuilder options = new StringBuilder("{");
 		options.append("submitButtonName: " + AjaxUtils.quote(submitButtonName));
-		if (replace) {
-			options.append(", replace: true");
-		}
 		if (onSuccess != null) {
 			options.append(", onSuccess: function() { " + onSuccess + " }");
 		}
@@ -170,17 +165,14 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 		}
 
 		String updateContainerID = AjaxUpdateProtocol.updateContainerID(this, component);
-		String replaceID = (String) valueForBinding("replaceID", component);
-		String target = (updateContainerID == null) ? replaceID : updateContainerID;
-		boolean replace = replaceID != null && updateContainerID == null;
 
-		if (target != null) {
-			buffer.append("AjaxSlim.ASB.update(" + AjaxUtils.quote(target) + ", " + formReference + ", ");
+		if (updateContainerID != null) {
+			buffer.append("AjaxSlim.ASB.update(" + AjaxUtils.quote(updateContainerID) + ", " + formReference + ", ");
 		}
 		else {
 			buffer.append("AjaxSlim.ASB.request(" + formReference + ", ");
 		}
-		buffer.append(optionsLiteral(context, component, replace));
+		buffer.append(optionsLiteral(context, component));
 		buffer.append(')');
 
 		String onClick = (String) valueForBinding("onClick", component);
@@ -313,10 +305,7 @@ public class AjaxSubmitButton extends AjaxDynamicElement {
 		WOComponent component = context.component();
 		WOActionResults result = (WOActionResults) valueForBinding("action", component);
 
-		if (ERXAjaxApplication.isAjaxReplacement(request)) {
-			AjaxUtils.setPageReplacementCacheKey(context, (String) valueForBinding("replaceID", component));
-		}
-		else if (result == null || booleanValueForBinding("ignoreActionResponse", false, component)) {
+		if (result == null || booleanValueForBinding("ignoreActionResponse", false, component)) {
 			WOResponse response = AjaxUtils.createResponse(request, context);
 			String onClickServer = (String) valueForBinding("onClickServer", component);
 			if (onClickServer != null) {

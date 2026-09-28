@@ -79,9 +79,9 @@ paired decision — see note).
 | Binding | Real-app usage | wonder / playground | Proposal | Note | Decision |
 |---|---|---|---|---|---|
 | `action` | 271× / 16 apps: Hugi, MrBlinken, SoloWeb, Tatu, USWebObjects, asi, concept, helium, helium5, husvordurinn, lidamot, nb, ng-objects, ng-testapp2, rebbi, strimillinn | wonder, wonder-slim | keep |  | |
-| `directActionName` | — | wonder | **drop** | 1 use ever, in er.ajax's own examples; conceptually odd (a direct action is a sessionless page-creator, the opposite of an ajax update). Dropping also removes the ?query-param path | |
+| `directActionName` | — | wonder | **drop** | 1 use ever, in er.ajax's own examples; conceptually odd (a direct action is a sessionless page-creator, the opposite of an ajax update). Dropping also removes the ?query-param path | dropped with `replaceID` (#28); stateless updates through direct actions are #132 |
 | `updateContainerID` | 258× / 15 apps: Hugi, SoloWeb, Tatu, USWebObjects, asi, concept, helium, helium5, husvordurinn, lidamot, nb, ng-objects, ng-testapp2, rebbi, strimillinn | wonder, wonder-slim | keep |  | |
-| `replaceID` | — | wonder, wonder-slim | **drop** | already agreed — #28 | |
+| `replaceID` | — | wonder, wonder-slim | **drop** | already agreed — #28 | dropped (#28) |
 | `string` | — | wonder | **drop** | label-as-binding, er.ajax examples only; children are the label | |
 | `onClick` | — | wonder, wonder-slim | keep | zero real use BUT the element owns the onclick attribute (merges with the generated handler) — a passthrough onclick would double-attribute, so the binding must exist | |
 | `onClickBefore` | 12× / 2 apps: asi, nb | wonder, wonder-slim | keep | real use in 2 apps (the confirm() gate) | |
@@ -119,7 +119,7 @@ paired decision — see note).
 |---|---|---|---|---|---|
 | `action` | 75× / 16 apps: SWAPP, SoloWeb, Tatu, USWebObjects, asi, helium, helium5, husvordurinn, lidamot, nb, ng-hafnium, ng-objects, ng-testapp2, strimillinn, undur-deployment, x-ng-hafnium-2026-05-23-pre-rewrite | wonder, wonder-slim | keep |  | |
 | `updateContainerID` | 68× / 16 apps: SWAPP, SoloWeb, Tatu, USWebObjects, asi, helium, helium5, husvordurinn, lidamot, nb, ng-hafnium, ng-objects, ng-testapp2, strimillinn, undur-deployment, x-ng-hafnium-2026-05-23-pre-rewrite | wonder, wonder-slim | keep |  | |
-| `replaceID` | — | — | **drop** | #28 | |
+| `replaceID` | — | — | **drop** | #28 | dropped (#28) |
 | `value` | 61× / 16 apps: SWAPP, SoloWeb, Tatu, USWebObjects, asi, helium, helium5, husvordurinn, lidamot, nb, ng-hafnium, ng-objects, ng-testapp2, strimillinn, undur-deployment, x-ng-hafnium-2026-05-23-pre-rewrite | wonder, wonder-slim | keep |  | |
 | `name` | — | — | **drop** | zero; the element computes its own name | |
 | `button` | 14× / 1 apps: lidamot | wonder, wonder-slim | keep | real use (1 production app): renders input-button instead of link | |
@@ -156,7 +156,7 @@ paired decision — see note).
 |---|---|---|---|---|---|
 | `action` | — | wonder-slim | keep | rides with AjaxSubmitButton — same surface, decisions inherit | |
 | `updateContainerID` | — | wonder-slim | keep | rides with AjaxSubmitButton — same surface, decisions inherit | |
-| `replaceID` | — | — | keep | rides with AjaxSubmitButton — same surface, decisions inherit | |
+| `replaceID` | — | — | keep | rides with AjaxSubmitButton — same surface, decisions inherit | dropped (#28) |
 | `formName` | — | — | keep | rides with AjaxSubmitButton — same surface, decisions inherit | |
 | `name` | — | — | keep | rides with AjaxSubmitButton — same surface, decisions inherit | |
 | `value` | — | — | keep | rides with AjaxSubmitButton — same surface, decisions inherit | |

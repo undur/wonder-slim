@@ -8,7 +8,7 @@
 //
 // Public surface:
 //   AjaxSlim.AUC.register(id, options)               - remember a container's options
-//   AjaxSlim.AUC.update(id [, options])              - fetch + morph (or replace) a container
+//   AjaxSlim.AUC.update(id [, options])              - fetch + morph a container
 //   AjaxSlim.AUC.registerPeriodic(id, canStop, stopped, frequencySeconds)
 //   AjaxSlim.AUC.observeField(id, fieldId, fullSubmit)
 //   AjaxSlim.AUL.update(targetId, actionUrl, options)  - update-link: fetch an action URL + morph
@@ -101,14 +101,6 @@
 			Morph.runScripts(html);
 		},
 
-		// Replace the element ITSELF with html (outerHTML semantics) - the ajax-replacement (_r /
-		// replaceID) contract, where the response body IS the new markup for the target element rather
-		// than new children for it. Scripts run explicitly, as in replace().
-		replaceElement: function (receiver, html) {
-			receiver.outerHTML = Morph.stripScripts(html);
-			Morph.runScripts(html);
-		},
-
 		// Remove <script>...</script> blocks from an HTML string.
 		stripScripts: function (html) {
 			return html.replace(/<script[^>]*>([\s\S]*?)<\/script\s*>/gi, '');
@@ -172,13 +164,11 @@
 	// Append _u=<id> (the ajax-update-pass marker the server keys on) plus a cache-buster to the
 	// container's data-updateUrl, using URLSearchParams so existing query params are preserved.
 	function buildUpdateUrl(element, id) {
-		return addUpdateParams(element.getAttribute('data-updateUrl'), id, false);
+		return addUpdateParams(element.getAttribute('data-updateUrl'), id);
 	}
 
-	// Add the update/replace marker for a target id plus a neutral cache-buster to an action URL.
-	// When replace is true the '_r' (ajax-replacement) marker is used instead of '_u' (ajax-update
-	// pass) - this mirrors ERXAjaxApplication's two ways of targeting a region.
-	function addUpdateParams(raw, id, replace) {
+	// Add the update marker ('_u') for a target id plus a neutral cache-buster to an action URL.
+	function addUpdateParams(raw, id) {
 		// Params may be joined with '?' OR, if a caller appended additional params to a URL that had no
 		// query yet (AjaxUpdateLink functionName + AjaxSlim.queryString returns '&key=val'), with a
 		// leading '&' before any '?'. Treat the FIRST '?' or '&' as the start of the query so those
@@ -188,7 +178,7 @@
 		var base = sepIndex === -1 ? raw : raw.substring(0, sepIndex);
 		var params = new URLSearchParams(sepIndex === -1 ? '' : raw.substring(sepIndex + 1));
 		if (id != null) {
-			params.set(replace ? '_r' : '_u', id);
+			params.set('_u', id);
 		}
 		// Cache-buster under a neutral key. Do NOT use '_r' here for the buster: ERXAjaxApplication
 		// treats '_r' as the "ajax replacement" marker (isAjaxReplacement), which changes behavior.
@@ -197,7 +187,7 @@
 	}
 
 	// The shared fetch + morph core used by every update path (AUC / AUL / ASB / observeField).
-	// Fetches url (optionally POSTing body) and morphs (or replaces) the response into the element
+	// Fetches url (optionally POSTing body) and morphs the response into the element
 	// with id targetId, then runs onDone(). The x-requested-with header is REQUIRED:
 	// ERXAjaxApplication.isAjaxRequest keys on it, so without it the server won't return a fragment.
 	//
@@ -601,7 +591,7 @@
 		return (window.performance && window.performance.now) ? window.performance.now() : Date.now();
 	}
 
-	function fetchAndMorph(targetId, url, body, onDone, replace) {
+	function fetchAndMorph(targetId, url, body, onDone) {
 		var init = {
 			credentials: 'same-origin',
 			headers: postHeaders(body)
@@ -624,18 +614,12 @@
 			//     comes back framed, so there is no single-vs-multi special case here. applyFragments
 			//     handles one fragment or many, skips containers no longer on the page, and honours each
 			//     one's data-morph.
-			//   - a REPLACEMENT (_r / replaceID) response arrives UNFRAMED by design: the server renders
-			//     the action's result page and the body is the new markup for the target element itself
-			//     (outerHTML semantics). Only the replace flag distinguishes this from the script case.
 			//   - otherwise it's JS to run globally (a text/javascript body, or <script> tags) - e.g. the
 			//     the AjaxUpdater.triggerUpdate JS-command path, or an action returning arbitrary JS.
 			// For updates, targetId is only a hint (for logging / a fire-and-forget caller); the body
 			// decides.
 			if (/<ajaxslim-fragment\b/i.test(text)) {
 				applyFragments(text);
-			}
-			else if (replace && targetId != null && elementFor(targetId) != null) {
-				Morph.replaceElement(elementFor(targetId), text);
 			}
 			else {
 				Morph.runResponseScripts(text, responseContentType);
@@ -745,7 +729,7 @@
 			registry.set(id, options || {});
 		},
 
-		// Fetch the container's update URL and morph (or replace) the response into the element.
+		// Fetch the container's update URL and morph the response into the element.
 		// The x-requested-with header is REQUIRED: ERXAjaxApplication.isAjaxRequest keys on it, so
 		// without it the server won't treat this as an ajax request and won't return a fragment.
 		// The container's onRefreshComplete hook is NOT fired from here: the server frames it as a
@@ -778,18 +762,17 @@
 				return;
 			}
 			if (ids.length === 1) {
-				// Degenerate case: not actually multi - fire the SAME action once with a single _u/_r
-				// marker. Routing through AUC.update(id) here would be wrong twice over: it fetches the
-				// container's own update URL (so the trigger's ACTION would silently never fire), and it
-				// drops the caller's replace flag.
-				var singleUrl = addUpdateParams(actionUrl, ids[0], !!options.replace);
+				// Degenerate case: not actually multi - fire the SAME action once with a single _u marker.
+				// Routing through AUC.update(id) here would be wrong: it fetches the container's own
+				// update URL, so the trigger's ACTION would silently never fire.
+				var singleUrl = addUpdateParams(actionUrl, ids[0]);
 				return fetchAndMorph(ids[0], singleUrl, null, function () {
 					runHook(options.onSuccess);
 					runHook(options.onComplete);
-				}, !!options.replace);
+				});
 			}
 			var joined = ids.join(';');
-			var url = addUpdateParams(actionUrl, joined, !!options.replace);
+			var url = addUpdateParams(actionUrl, joined);
 			activityStart();
 			return fetch(url, {
 				credentials: 'same-origin',
@@ -880,8 +863,7 @@
 	// -----------------------------------------------------------------------
 	// AjaxUpdateLink runtime (AUL) - "fetch this action URL and morph the result into targetId".
 	// Replaces the legacy AjaxUpdateLink / Ajax.Updater client object, fetch-based, no Prototype.
-	// options: { replace: bool, onClick: fn, onComplete: fn, onSuccess: fn }
-	//   replace    - target via '_r' (ajax replacement) instead of '_u' (update pass)
+	// options: { onClick: fn, onComplete: fn, onSuccess: fn }
 	//   onClick    - run before the request (a client hook; AUL.update is only reached if it ran)
 	//   onComplete - run after the morph completes (also runs onSuccess if present)
 	// -----------------------------------------------------------------------
@@ -895,18 +877,18 @@
 			if (targetId != null && targetId.indexOf(';') !== -1) {
 				return AUC.updateMany(splitIds(targetId), actionUrl, options);
 			}
-			var url = addUpdateParams(actionUrl, targetId, !!options.replace);
+			var url = addUpdateParams(actionUrl, targetId);
 			fetchAndMorph(targetId, url, null, function () {
 				runHook(options.onSuccess);
 				runHook(options.onComplete);
-			}, !!options.replace);
+			});
 		},
 
 		// Fire an action with no container to update (e.g. the action returns scripts to run, or the
 		// page is updated by an AjaxUpdateTrigger in the response). Runs any returned <script>s.
 		request: function (actionUrl, options) {
 			options = options || {};
-			var url = addUpdateParams(actionUrl, null, false);
+			var url = addUpdateParams(actionUrl, null);
 			fetchAndMorph(null, url, null, function () {
 				runHook(options.onSuccess);
 				runHook(options.onComplete);
@@ -969,11 +951,11 @@
 	// componentRequestHandlerKey must expose both via window.AjaxSlimHandlerKeys =
 	// { component: '...', ajax: '...' } (the form's action URL is server-rendered, so the client
 	// cannot derive the key on its own).
-	function submitUrl(form, targetId, replace) {
+	function submitUrl(form, targetId) {
 		var action = form.getAttribute('action') || form.action || '';
 		var keys = window.AjaxSlimHandlerKeys || {};
 		action = action.replace('/' + (keys.component || 'wo') + '/', '/' + (keys.ajax || 'ajax') + '/');
-		return addUpdateParams(action, targetId, replace);
+		return addUpdateParams(action, targetId);
 	}
 
 	var ASB = {
@@ -1011,7 +993,7 @@
 			if (options.submitButtonName != null) {
 				body.append(AjaxSubmitButtonNameKey, options.submitButtonName);
 			}
-			var url = submitUrl(form, targetId, !!options.replace);
+			var url = submitUrl(form, targetId);
 			// A ";"-joined targetId ("a;b;c") is a multi-container update: one POST, framed fragments,
 			// morph each. A single container id never contains ';', so single submits are unaffected.
 			if (targetId != null && targetId.indexOf(';') !== -1) {
@@ -1043,7 +1025,7 @@
 			fetchAndMorph(targetId, url, body, function () {
 				runHook(options.onSuccess);
 				runHook(options.onComplete);
-			}, !!options.replace);
+			});
 		},
 
 		// AjaxObserveField: watch a single field. partial=true => partial submit (just this field);

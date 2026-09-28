@@ -134,12 +134,12 @@ script) that calls into the `ajaxslim.js` runtime, instead of the legacy `new Aj
 ### `AjaxUpdateLink`
 
 Renders an anchor (or `button`) whose click fires a server action and morphs the result into
-`updateContainerID` (via `_u`) or `replaceID` (via `_r`). Emits
+`updateContainerID` (via `_u`). Emits
 `AjaxSlim.AUL.update('target', 'actionUrl', {...})`, or `AjaxSlim.AUL.request('actionUrl', {...})`
 when there is no target. `functionName` renders a named `function(additionalParams){…}` instead of an
 inline handler (the params are appended via `AjaxSlim.queryString`).
 
-- **Kept:** `action`, `directActionName`, `updateContainerID`, `replaceID`, `elementName`, `button`,
+- **Kept:** `action`, `updateContainerID`, `elementName`, `button`,
   `string`, `class`, `style`, `id`, `title`, `accesskey`, `disabled`, `function`, `functionName`,
   `onClick` (client hook, runs after the request is issued), `onClickBefore` (gate), `onClickServer`
   (server-returned JS), `ignoreActionResponse`, and **`onComplete` / `onSuccess` kept as post-update
@@ -187,7 +187,7 @@ form is serialized in the runtime with `URLSearchParams` (submits/images/files e
   appended to the body, and `invokeAction` keeps the multiple-submit-form matching on it.
 - **Kept:** `action`, `name`, `value`, `id`, `class`, `style`, `title`, `tabindex`, `accesskey`,
   `onClick`, `onClickBefore`, `onClickServer`, `onComplete`/`onSuccess` (post-update hooks), `button`,
-  `useButtonTag`, `formName`, `functionName`, `showUI`, `updateContainerID`, `replaceID`,
+  `useButtonTag`, `formName`, `functionName`, `showUI`, `updateContainerID`,
   `elementName`, `disabled`. `formSerializer` is still *accepted* in the `.api` but is a **no-op** —
   custom JS form serializers were a Prototype-era escape hatch; the runtime always serializes itself.
 - **Dropped:** all effect/insertion bindings + the Prototype option dictionary
