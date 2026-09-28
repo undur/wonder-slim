@@ -44,7 +44,8 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 	 * {@link ERXResourceStamps}), so the URL changes whenever the content does and the resource request handler can let
 	 * browsers cache it for good. Not in development, where files change while the application runs.
 	 *
-	 * FIXME: Handle localized resources // Hugi 2025-10-04
+	 * Localized resources aren't supported: {@code languages} is ignored and resources are resolved without languages, so a
+	 * resource that only exists in a language's {@code .lproj} folder isn't found.
 	 */
 	@Override
 	public String urlForResourceNamed(String resourceName, String frameworkName, NSArray<String> languages, WORequest request) {
