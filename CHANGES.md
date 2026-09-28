@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2026-09-28 (8.0.10)
 
 - **Sticky sessions behind mod_proxy_balancer work again**
