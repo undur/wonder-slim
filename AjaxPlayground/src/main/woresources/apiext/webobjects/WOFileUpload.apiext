@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOFileUpload" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[A file-upload field (`<input type="file">`). Must live inside a `WOForm` whose `enctype` is `multipart/form-data`. On submit it receives the uploaded bytes and delivers them to your component through exactly one of four sinks: `data` (all bytes in memory), `inputStream` (a stream you read), `outputStream` (a stream WO writes into), or `streamToFilePath` (WO streams straight to a file on disk). It also **pushes** the original filename and MIME type back when you bind `filePath` and `mimeType`. WOFileUpload never renders a value into the tag.]]></doc>
+
+		<binding name="data">
+			<push><type>com.webobjects.foundation.NSData</type></push>
+			<doc><![CDATA[The in-memory sink: on submit the entire uploaded file is **pushed** here as an `NSData`. Cannot be a constant (it must be settable). Mutually exclusive with `inputStream`, `outputStream` and `streamToFilePath`.]]></doc>
+		</binding>
+
+		<binding name="inputStream">
+			<push><type>java.io.InputStream</type></push>
+			<doc><![CDATA[The stream sink you read from: on submit an `InputStream` over the uploaded bytes is **pushed** here (or `null` for an empty upload). Cannot be a constant. Mutually exclusive with `data`, `outputStream` and `streamToFilePath`. Not usable inside a `WOForm` with `multipleSubmit=true`.]]></doc>
+		</binding>
+
+		<binding name="outputStream">
+			<pull><type>java.io.OutputStream</type></pull>
+			<doc><![CDATA[The stream sink WO writes into: WOFileUpload **pulls** this `OutputStream` and copies the uploaded bytes to it. Cannot be a constant. Mutually exclusive with `data`, `inputStream` and `streamToFilePath`.]]></doc>
+		</binding>
+
+		<binding name="streamToFilePath">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The file-path sink: WOFileUpload **pulls** this path and streams the upload straight to that file on disk. Mutually exclusive with `data`, `inputStream` and `outputStream`. Enables the `overwrite` and `finalFilePath` bindings.]]></doc>
+		</binding>
+
+		<binding name="filePath">
+			<push><type>java.lang.String</type></push>
+			<doc>Receives the uploaded file's original client filename, **pushed** on submit when a non-empty file was chosen. Cannot be a constant.</doc>
+		</binding>
+
+		<binding name="mimeType">
+			<push><type>java.lang.String</type></push>
+			<doc>Receives the uploaded file's declared content type, **pushed** on submit. Cannot be a constant.</doc>
+		</binding>
+
+		<binding name="copyData">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<default>true</default>
+			<doc><![CDATA[Used only with `data`. When truthy (the default), the bytes are deep-copied out of the request buffer before being pushed, so the `NSData` stays valid beyond the current request; set falsy when you consume the data within the same request and want to skip the copy.]]></doc>
+		</binding>
+
+		<binding name="bufferSize">
+			<pull><type>java.lang.Object</type></pull>
+			<default>524288</default>
+			<doc><![CDATA[The copy buffer size in bytes, used with `outputStream` or `streamToFilePath`. **Pulled** and coerced to an integer via `toString()`; defaults to 512 KB. Must be used together with `outputStream` or `streamToFilePath`.]]></doc>
+		</binding>
+
+		<binding name="overwrite">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<default>false</default>
+			<doc><![CDATA[Used only with `streamToFilePath`. When truthy, an existing file at the target path is overwritten; otherwise the upload is written to a temp file and the rename is skipped. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="finalFilePath">
+			<push><type>java.lang.String</type></push>
+			<doc><![CDATA[Used only with `streamToFilePath`. Receives the actual path the upload ended up at, **pushed** after the write — the target path on a successful rename, or the temp-file path if the rename failed. Cannot be a constant.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The HTML form-field name. Pulled; auto-assigned from the element ID when unbound.</doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="data"/>
+			<binding name="inputStream"/>
+			<binding name="outputStream"/>
+			<binding name="streamToFilePath"/>
+		</choose>
+		<choose max="1">
+			<binding name="bufferSize"/>
+			<any-of><binding name="data"/><binding name="inputStream"/></any-of>
+		</choose>
+		<requires binding="outputStream" must="settable"/>
+		<requires binding="streamToFilePath">
+			<any-of><binding name="overwrite"/><binding name="finalFilePath"/></any-of>
+		</requires>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOComponentContent" content="forbidden" unknownAttributes="forbidden">
+
+		<doc><![CDATA[The placeholder inside a reusable component's template that marks where the **enclosing** (parent) component's content is rendered.
+
+When a parent uses this component as a container — `<wo:MyPanel>…children…</wo:MyPanel>` — the children are passed through to wherever the component's own template writes a `WOComponentContent`. During request handling, action invocation, and rendering, this element switches the active component back to the parent and forwards the phase to the parent's child template, so the wrapped content evaluates in the parent's context, not the component's.
+
+It has **no bindings**: it is a pure slot. Write it self-closing (`<wo:WOComponentContent/>`); it takes no template content of its own.]]></doc>
+
+	</wo>
+</wodefinitions>

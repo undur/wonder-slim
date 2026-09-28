@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOVBScript" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a `<script>` block (by default `language="VBScript" type="text/vbscript"`). The script body comes from **exactly one** of `scriptString`, `scriptFile`, or `scriptSource`: `scriptString` supplies the script inline, `scriptFile` names a resource whose contents are inlined, and `scriptSource` emits a `src` reference instead of a body.
+
+VBScript ran only in legacy Internet Explorer and no current browser executes it — this element exists for backward compatibility only.]]></doc>
+
+		<deprecated>VBScript is obsolete.</deprecated>
+
+		<binding name="scriptString">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The script source, supplied inline. **Pulled** and rendered (via `toString()`) as the body of the `<script>` tag. Mutually exclusive with `scriptFile` and `scriptSource`.]]></doc>
+		</binding>
+
+		<binding name="scriptFile">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a resource file whose contents are inlined as the script body. **Pulled**, resolved against the application's resources (then the component's), and read into the `<script>` tag. Mutually exclusive with `scriptString` and `scriptSource`.]]></doc>
+		</binding>
+
+		<binding name="scriptSource">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A URL emitted as the `src` attribute of the `<script>` tag. **Pulled**; relative names are resolved against the component's resources. When bound, no inline body is rendered. Mutually exclusive with `scriptString` and `scriptFile`.]]></doc>
+		</binding>
+
+		<binding name="hideInComment">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, wraps the inline script in an HTML comment (`<!-- ... //-->`) so pre-scripting browsers ignore it. **Pulled** by truthiness. Has no effect when `scriptSource` is used.]]></doc>
+		</binding>
+
+		<binding name="language">
+			<pull><type>java.lang.String</type></pull>
+			<default>VBScript</default>
+			<doc><![CDATA[The `language` attribute of the `<script>` tag. **Pulled**; defaults to `VBScript`.]]></doc>
+		</binding>
+
+		<binding name="type">
+			<pull><type>java.lang.String</type></pull>
+			<default>text/vbscript</default>
+			<doc><![CDATA[The `type` attribute of the `<script>` tag. **Pulled**; defaults to `text/vbscript`.]]></doc>
+		</binding>
+
+		<binding name="protectInCDATA" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc>If truthy, the inline script is wrapped in CDATA comment markers. **Pulled** by truthiness.</doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="scriptFile"/>
+			<binding name="scriptSource"/>
+			<binding name="scriptString"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

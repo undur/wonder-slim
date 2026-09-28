@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOSwitchComponent" content="allowed" unknownAttributes="allowed">
+
+		<doc><![CDATA[Renders a component chosen **at runtime** by name. The bound `WOComponentName` is pulled, converted to a string, and used to look up the real component (or dynamic element) via `WOApplication.dynamicElementWithName`; the request/response phases are then forwarded to that component.
+
+Any extra attributes bound on the tag are collected and handed to the resolved component as **its bindings** — they are not rendered as HTML attributes — and the tag's content is forwarded as that component's template. Because the target name is resolved at runtime, the editor cannot know which component is being rendered, so it cannot validate those forwarded bindings; that is why the unknown-attribute policy here is `allowed` (accepted, not checked) rather than passthrough.]]></doc>
+
+		<binding name="WOComponentName">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The name of the component to render. **Pulled** and read via `toString()`, so any object is accepted. If it resolves to null or empty, rendering fails with an `IllegalStateException` ("componentName not specified or componentName association evaluated to null"). This is the one binding the switch consumes itself — every other attribute on the tag is forwarded to the resolved component. Bind this or `_componentName`, not both.]]></doc>
+		</binding>
+
+		<binding name="_componentName">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[An older name for `WOComponentName`, used when `WOComponentName` isn't bound. **Pulled** and read the same way. Prefer `WOComponentName`.]]></doc>
+		</binding>
+
+		<choose min="1">
+			<binding name="WOComponentName"/>
+			<binding name="_componentName"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

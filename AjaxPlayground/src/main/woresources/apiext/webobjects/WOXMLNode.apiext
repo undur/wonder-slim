@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOXMLNode" content="expected" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a single XML element into the response, using `elementName` as the tag name. Any child content is wrapped between an open and close tag; with no content the element is written self-closing (`<name/>`).
+
+Every other binding is **forwarded** onto the rendered element as an XML attribute — the attribute name is preserved and its value is XML-escaped. This is the building block for emitting arbitrary XML markup from a component template.]]></doc>
+
+		<binding name="elementName" required="true">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The XML tag name to render. Required. **Pulled** and written verbatim as both the opening (and, when the element has content, closing) tag name. Consumed by the framework — it is not itself forwarded as an attribute.</doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

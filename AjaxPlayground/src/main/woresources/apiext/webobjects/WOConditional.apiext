@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOConditional" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Includes its child content only when a condition is true. WOConditional renders nothing of its own — it is a pure control-flow element that either appends its children to the response or skips them.
+
+The bound `condition` is **pulled** and read by *truthiness* (`null`, `0` and `false` are false; everything else is true). Bind `negate` to invert that test, and `result` to capture the evaluated boolean.]]></doc>
+
+		<binding name="condition" required="true">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[The condition that decides whether the content is rendered. Required. **Pulled** and read by truthiness — the content is included when the value is truthy (or falsy, if `negate` is set).]]></doc>
+		</binding>
+
+		<binding name="negate" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[When truthy, inverts the test: the content is rendered when `condition` is *false*. **Pulled** and read by truthiness.]]></doc>
+		</binding>
+
+		<binding name="result">
+			<push><type>java.lang.Boolean</type></push>
+			<doc><![CDATA[If bound, the final evaluated result (after `negate` is applied) is **pushed** into it as a `java.lang.Boolean` each time the condition is evaluated.]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

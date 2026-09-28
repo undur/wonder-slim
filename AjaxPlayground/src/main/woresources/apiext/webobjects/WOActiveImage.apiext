@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOActiveImage" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[A clickable image that reports the click coordinates (a server-side image map). Renders as an `<input type="image">` inside a form, or as an `<a><img></a>` (a hyperlink wrapping the image, with `ismap`) outside one.
+
+Give the image a source with exactly one of `src`, `filename`, `data`, or `value`, and give it something to do with an `action`, an `href`, or an `actionClass`/`directActionName` pair. When bound, `x` and `y` receive the clicked pixel coordinates; an `imageMapFile` can route different regions to different actions.]]></doc>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A URL for the image source, emitted as the `src` attribute. Mutually exclusive with `filename`, `data`, and `value`.]]></doc>
+		</binding>
+
+		<binding name="filename" defaults="Resources">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of an image resource, resolved through the `WOResourceManager` (optionally within `framework`). Mutually exclusive with `src`, `data`, and `value`.]]></doc>
+		</binding>
+
+		<binding name="framework" defaults="Frameworks">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The framework to resolve `filename` against. Only meaningful together with `filename`.]]></doc>
+		</binding>
+
+		<binding name="data">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Raw image data served inline through a generated URL. Requires `mimeType`. Mutually exclusive with `src`, `filename`, and `value`.]]></doc>
+		</binding>
+
+		<binding name="mimeType" defaults="MIME Types">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The MIME type of the inline `data` (e.g. `image/png`). Required when `data` is bound.]]></doc>
+		</binding>
+
+		<binding name="key">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A cache key for the inline `data`, used to build its resource URL.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[An action invoked to produce the image content, whose result URL becomes the `src`. **Pulled** as the response when the image URL is requested; must be a resolvable keypath, not a constant. Mutually exclusive with `src`, `filename`, and `data`.]]></doc>
+		</binding>
+
+		<binding name="action" defaults="Actions">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[A component action invoked when the image is clicked; its result is the next page. **Pulled** at invocation time, so it must be a resolvable keypath, not a constant. Mutually exclusive with `href`, `actionClass`, and `directActionName`.]]></doc>
+		</binding>
+
+		<binding name="href">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A plain URL to follow when the image is clicked (outside a form, and when no image-map region is hit). Mutually exclusive with `action`, `actionClass`, and `directActionName`.]]></doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class handling the click. Pairs with `directActionName`. Mutually exclusive with `action` and `href`.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action method name handling the click. Pairs with `actionClass`. Mutually exclusive with `action` and `href`.]]></doc>
+		</binding>
+
+		<binding name="imageMapFile">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of an image-map file defining clickable regions; a hit region's action is invoked in preference to the default `action`/`href`.]]></doc>
+		</binding>
+
+		<binding name="x">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[Receives the clicked x-coordinate, in pixels. **Pushed** back on click, so it must be a settable keypath. Must be bound together with `y`.]]></doc>
+		</binding>
+
+		<binding name="y">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[Receives the clicked y-coordinate, in pixels. **Pushed** back on click, so it must be a settable keypath. Must be bound together with `x`.]]></doc>
+		</binding>
+
+		<binding name="width">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The image width, rendered onto the image tag. **Pulled**.</doc>
+		</binding>
+
+		<binding name="height">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The image height, rendered onto the image tag. **Pulled**.</doc>
+		</binding>
+
+		<binding name="border">
+			<pull><type>java.lang.String</type></pull>
+			<default>0</default>
+			<doc><![CDATA[The image's `border` attribute. **Pulled**; always rendered, defaulting to `0` when unbound.]]></doc>
+		</binding>
+
+		<binding name="target">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The anchor `target` attribute, used only in the hyperlink (non-form) rendering.]]></doc>
+		</binding>
+
+		<binding name="disabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, renders a plain static `<img>` with no action wiring.]]></doc>
+		</binding>
+
+		<binding name="secure" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, generates an `https` action URL. Read by truthiness. Has no effect on `href` or on image-map (`imageMapFile`) actions.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The HTML form-field name used to submit the click coordinates (`name.x`/`name.y`). Auto-assigned from the element id if unbound.]]></doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="data"/>
+			<binding name="filename"/>
+			<binding name="src"/>
+			<binding name="value"/>
+		</choose>
+		<choose min="1" max="1">
+			<binding name="action"/>
+			<binding name="href"/>
+			<any-of><binding name="actionClass"/><binding name="directActionName"/></any-of>
+		</choose>
+		<requires binding="action" must="gettable"/>
+		<requires binding="value" must="gettable"/>
+		<requires binding="mimeType" when="data"/>
+		<requires binding="filename" when="framework"/>
+		<requires binding="x" when="y"/>
+		<requires binding="y" when="x"/>
+
+	</wo>
+</wodefinitions>

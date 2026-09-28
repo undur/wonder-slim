@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WORedirect" content="forbidden" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Redirects the browser to another URL. Renders no markup: it emits an HTTP `302` response with a `Location` header pointing at `url`.
+
+Intended to be **returned from an action method** as the page response, not embedded as a tag in a template — its only job is to send the client elsewhere.]]></doc>
+
+		<binding name="url">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The URL to redirect to. **Pulled** and written to the response's `Location` header. If it is unbound or resolves to `null`, an empty location is sent and a warning is logged.]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

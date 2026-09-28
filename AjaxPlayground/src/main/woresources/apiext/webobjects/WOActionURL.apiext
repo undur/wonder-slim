@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOActionURL" content="forbidden" unknownAttributes="allowed">
+
+		<doc><![CDATA[Renders **just the URL** for an action, with no surrounding `<a>` tag. Use it where you need the bare URL as text — inside an `href`/`src` attribute you're writing yourself, in a bit of JavaScript, or in a redirect. Because no tag is written, extra attributes are not rendered; `?`-prefixed bindings become query parameters.
+
+Pick one destination: a component `action`, a static `href`, a `pageName`, or a direct action (`actionClass` and/or `directActionName`). `actionClass` may not be combined with `action`. Query parameters come from `queryDictionary` (and `?`-prefixed bindings); `fragmentIdentifier` appends a `#fragment`, and `secure` forces an `https` URL.]]></doc>
+
+		<binding name="action" defaults="Actions">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[A component action — a method returning the next page (a `WOActionResults`). **Pulled** when the resulting URL is invoked. Must be an action method, not a constant. Mutually exclusive with `href`, `pageName` and the direct-action bindings.]]></doc>
+		</binding>
+
+		<binding name="href">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A static URL to emit. **Pulled** as a string. Mutually exclusive with `action`, `pageName` and `directActionName`.]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a page to navigate to, as an alternative to `action`. **Pulled** and resolved to its `toString()`. Mutually exclusive with `action`, `href` and `directActionName`.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a direct action to target. **Pulled** and used to build a direct-action URL. May be combined with `actionClass`; mutually exclusive with `action`, `href` and `pageName`.]]></doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class handling `directActionName` (defaults to `DirectAction` when unbound). **Pulled** and used to build a direct-action URL. May be combined with `directActionName`; mutually exclusive with `action`.]]></doc>
+		</binding>
+
+		<binding name="queryDictionary">
+			<pull><type>com.webobjects.foundation.NSDictionary</type></pull>
+			<doc><![CDATA[A dictionary of query-string parameters to append to the URL. **Pulled** and merged with any `?`-prefixed bindings.]]></doc>
+		</binding>
+
+		<binding name="fragmentIdentifier">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A fragment appended to the URL as `#value`. **Pulled** and resolved to its `toString()`.]]></doc>
+		</binding>
+
+		<binding name="secure" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, generates an `https` (secure) URL instead of `http`. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<choose min="1">
+			<binding name="action"/>
+			<binding name="href"/>
+			<binding name="pageName"/>
+			<any-of><binding name="actionClass"/><binding name="directActionName"/></any-of>
+		</choose>
+		<choose max="1">
+			<binding name="action"/>
+			<binding name="href"/>
+			<binding name="pageName"/>
+			<binding name="directActionName"/>
+		</choose>
+		<choose max="1">
+			<binding name="action"/>
+			<binding name="actionClass"/>
+		</choose>
+		<requires binding="action" must="gettable"/>
+
+	</wo>
+</wodefinitions>

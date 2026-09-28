@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOGenericContainer" content="expected" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an arbitrary **container** HTML element whose tag name is chosen at runtime. Where `WOGenericElement` produces a self-closing tag, `WOGenericContainer` wraps its children in an open/close tag pair — `<`*tag*`>`…children…`</`*tag*`>`.
+
+The tag name comes from `elementName`, any undeclared attributes are forwarded onto the rendered tag, and the element's content is the wrapped template. Use it when the tag itself must be dynamic (`div` vs. `section`, chosen in code) rather than fixed in the template.]]></doc>
+
+		<binding name="elementName">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The HTML tag name to render (e.g. `div`, `span`, `section`). **Pulled** each time — its `toString()` becomes the open and close tag name. When it evaluates to null the element renders nothing at all (no tag, though the children are still appended).]]></doc>
+		</binding>
+
+		<binding name="otherTagString">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Raw text inserted inside the opening tag. **Pulled** and written verbatim.</doc>
+		</binding>
+
+		<binding name="omitTags" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[When truthy, suppresses the surrounding tags: `elementName` is not evaluated and no open/close tag is written, so only the wrapped children render. Useful for conditionally unwrapping content.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The HTML `name` attribute, forwarded onto the rendered tag. **Required** whenever `formValue` or `formValues` is bound — it names the request form value that gets pushed back.]]></doc>
+		</binding>
+
+		<binding name="formValue">
+			<push><type>java.lang.String</type></push>
+			<doc><![CDATA[On form submission the request's string value for `name` is **pushed** here (null when absent). Requires `name` to be bound. May be bound together with `formValues`.]]></doc>
+		</binding>
+
+		<binding name="formValues">
+			<push><type>java.util.List</type></push>
+			<doc><![CDATA[On form submission all of the request's values for `name` are **pushed** here as a list (null when absent). Requires `name` to be bound. May be bound together with `formValue`.]]></doc>
+		</binding>
+
+		<binding name="invokeAction" defaults="Actions">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[An action invoked when this element is the sender of the request. **Pulled** to obtain the `WOActionResults` (typically the next page); when it returns null the current page is used.]]></doc>
+		</binding>
+
+		<binding name="elementID">
+			<push><type>java.lang.String</type></push>
+			<doc>The framework **pushes** this element's context element ID here on every phase, so the component can correlate a request back to this element.</doc>
+		</binding>
+
+		<requires binding="name">
+			<any-of><binding name="formValue"/><binding name="formValues"/></any-of>
+		</requires>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOApplet" content="allowed" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an HTML `<applet>` element for embedding a Java applet in the page. The applet's `code` (required) names the class to load; `codebase`, `archive`, and `archiveNames` locate its class files and jar archives, resolving `archiveNames` against the application's `WebServerResources/Java` resources at render time.
+
+Client-side attributes that aren't recognized as applet tag attributes are emitted as nested `<param>` child elements. **Obsolete** — browsers dropped applet support long ago; this element remains only for legacy templates.]]></doc>
+
+		<deprecated>Java applets are obsolete.</deprecated>
+
+		<binding name="code" required="true">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The applet's main class. **Required** — the element throws at construction if it is unbound. Forwarded onto the `<applet>` tag's `code` attribute.]]></doc>
+		</binding>
+
+		<binding name="codebase">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Base URL for locating the applet's class files. **Pulled** and, when non-null, emitted as the tag's `codebase` attribute.]]></doc>
+		</binding>
+
+		<binding name="archive">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A jar archive (or comma-separated list) for the applet. **Pulled** and appended to the archive list resolved from `archiveNames`, then emitted as the tag's `archive` attribute.]]></doc>
+		</binding>
+
+		<binding name="archiveNames">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A comma-separated list of archive names, each resolved to a `WebServerResources/Java/<name>.jar` resource URL at render time. **Pulled**, framework-consumed (not forwarded verbatim), and merged with `archive` into the tag's `archive` attribute.]]></doc>
+		</binding>
+
+		<binding name="width">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The applet's display width. Forwarded onto the `<applet>` tag's `width` attribute.]]></doc>
+		</binding>
+
+		<binding name="height">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The applet's display height. Forwarded onto the `<applet>` tag's `height` attribute.]]></doc>
+		</binding>
+
+		<binding name="object">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The serialized applet object attribute. Framework-consumed: excluded from the client-side `<param>` generation and handled specially rather than forwarded verbatim.]]></doc>
+		</binding>
+
+		<binding name="associationClass">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The client-side association class. Framework-consumed: when bound, the element emits it as a `<param>` child and enables generation of the standard client-side params (element id, action URL, context id). Bindings other than the applet's own attributes are then sent to the applet as `WOKey` parameters.]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

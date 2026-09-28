@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOResetButton" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[A reset button (`<input type="reset">`). Clicking it clears the enclosing HTML form's fields back to their initial values — a purely client-side action that never round-trips to the server.
+
+Because a reset performs no submission, this element reads its bindings only: it overrides `takeValuesFromRequest` as a no-op, so nothing is ever **pushed** back.]]></doc>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The button's label — the `value` attribute of the rendered `<input>`. **Pulled** and converted to a string via `toString()`. Never pushed: a reset button does not read form values on submit.]]></doc>
+		</binding>
+
+		<binding name="disabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, renders the button disabled. **Pulled** by truthiness (`null`/`0`/`false` → enabled).]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The HTML form-field name of the rendered `<input>`. **Pulled**; auto-assigned from the element ID when unbound.]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

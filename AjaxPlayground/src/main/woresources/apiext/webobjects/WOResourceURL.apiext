@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOResourceURL" content="forbidden" unknownAttributes="allowed">
+
+		<doc><![CDATA[Renders the **URL** of a resource as text into the page — not a tag, just the URL string. Use it to build `src`/`href` values by hand, or anywhere a bare resource URL is needed. Because no tag is written, extra attributes have nowhere to go: they are accepted but not rendered.
+
+Bind exactly one of `filename` (a resource in the bundle), `src` (a URL), `pageName` (a component-action callback URL), `value` (a component action whose result is served), or `data` (an inline data source). A `framework` scopes a `filename` lookup; a `mimeType` types a `data` payload.]]></doc>
+
+		<binding name="filename" defaults="Resources">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a resource in the application (or `framework`) bundle. **Pulled** and resolved to the resource's URL, which is emitted as text. Mutually exclusive with `src`, `pageName`, `value` and `data`.]]></doc>
+		</binding>
+
+		<binding name="framework" defaults="Frameworks">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The framework bundle to resolve `filename` against (`app` for the application itself). **Pulled** during the resource lookup; only meaningful alongside `filename` — ignored without it.]]></doc>
+		</binding>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A URL to emit. **Pulled** as a string; a relative URL is resolved as a resource, an absolute one is emitted verbatim. Mutually exclusive with `filename`, `pageName`, `value` and `data`.]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a page component. **Pulled** (and read via `toString`) to emit a component-action callback URL that, when requested, returns that page. Mutually exclusive with `filename`, `src`, `value` and `data`.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[A component action. The emitted URL invokes it when requested, and the `WOActionResults` it returns is served as the response. Mutually exclusive with `filename`, `src`, `pageName` and `data`.]]></doc>
+		</binding>
+
+		<binding name="data">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[An inline data payload to expose at a generated URL. **Pulled** and, together with `mimeType`, encoded into a data URL. Mutually exclusive with `filename`, `src`, `pageName` and `value`; requires `mimeType`.]]></doc>
+		</binding>
+
+		<binding name="mimeType" defaults="MIME Types">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The MIME type of the `data` payload. **Pulled** when building the data URL. Required when `data` is bound.]]></doc>
+		</binding>
+
+		<binding name="key">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A cache key for the `data` payload, letting the same bytes be reused across requests instead of re-encoded. **Pulled** during data-URL construction.]]></doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="filename"/>
+			<binding name="data"/>
+			<binding name="src"/>
+			<binding name="pageName"/>
+			<binding name="value"/>
+		</choose>
+		<requires binding="mimeType" when="data"/>
+
+	</wo>
+</wodefinitions>

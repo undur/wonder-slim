@@ -2,8 +2,8 @@ package ajaxplayground;
 
 import ajaxplayground.components.AjaxOverview;
 import ajaxplayground.components.AjaxSlimGuide;
-import ajaxplayground.components.AjaxSlimElementReference;
 import ajaxplayground.components.ApiextGuide;
+import ajaxplayground.components.ElementReference;
 import ajaxplayground.components.Main;
 import ajaxplayground.components.gallery.GalleryAjaxBrowser;
 import ajaxplayground.components.gallery.GalleryAjaxPopUpButton;
@@ -67,7 +67,9 @@ public class Routes {
 
 		// Reference
 		routes.map( "/reference", AjaxSlimGuide.class );
-		routes.map( "/element-reference", AjaxSlimElementReference.class );
+		for( final ElementReference.Source source : ElementReference.Source.values() ) {
+			routes.map( source.path(), ri -> ElementReference.page( ri.request().context(), source ) );
+		}
 		routes.map( "/apiext-guide", ApiextGuide.class );
 		routes.map( "/overview", AjaxOverview.class );
 

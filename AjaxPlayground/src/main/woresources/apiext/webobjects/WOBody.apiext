@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOBody" content="expected" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an HTML `<body>` tag whose `background` attribute is resolved dynamically. The background image can come from a framework resource (`filename` + `framework`), a static URL (`background`), inline `data` (with a `mimeType`), a component action (`backgroundValue`), a `pageName`, or a direct action (`actionClass`/`directActionName`). The element wraps the page body content.
+
+At most one of `filename`, `data`, `background`, `pageName` and `backgroundValue` may be bound; none is required. All bindings are **pulled** — WOBody never pushes anything back.]]></doc>
+
+		<binding name="filename" defaults="Resources">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a resource (an image) to use as the `background`, looked up in `framework`. **Pulled** and resolved to a resource URL. Mutually exclusive with the other background sources.]]></doc>
+		</binding>
+
+		<binding name="framework" defaults="Frameworks">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The framework that owns `filename`, used to resolve the resource URL. **Pulled**. Only meaningful together with `filename` — ignored without it.]]></doc>
+		</binding>
+
+		<binding name="background">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A URL used directly as the `background`. **Pulled**; relative URLs are resolved against the application's resource base. Mutually exclusive with the other background sources.]]></doc>
+		</binding>
+
+		<binding name="backgroundValue">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[The action form of `background`: a component action whose returned `WOActionResults` is served as the background image when the browser requests it. Mutually exclusive with the other background sources.]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The name of a page component whose response is the background image. **Pulled** and rendered as a component-action URL. Mutually exclusive with the other background sources.</doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class serving the background image. **Pulled** and combined with `directActionName` to build a direct-action URL.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct action serving the background image. **Pulled** and combined with `actionClass` to build a direct-action URL.]]></doc>
+		</binding>
+
+		<binding name="queryDictionary">
+			<pull><type>com.webobjects.foundation.NSDictionary</type></pull>
+			<doc>Query parameters appended to a direct-action URL. **Pulled**.</doc>
+		</binding>
+
+		<binding name="data">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Inline background data, served through a generated URL. **Pulled**; requires `mimeType`. Mutually exclusive with the other background sources.]]></doc>
+		</binding>
+
+		<binding name="mimeType" defaults="MIME Types">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The MIME type of the inline `data`. **Pulled**; required whenever `data` is bound.]]></doc>
+		</binding>
+
+		<binding name="key">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The cache key under which the inline `data` is stored, so it can be served from the generated URL. **Pulled**.]]></doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="filename"/>
+			<binding name="data"/>
+			<binding name="background"/>
+			<binding name="pageName"/>
+			<binding name="backgroundValue"/>
+		</choose>
+		<requires binding="mimeType" when="data"/>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOIFrame" content="forbidden" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders an `<iframe>` whose source is produced by the component itself. Bind **`src`** for an explicit URL, or bind **`pageName`**, **`value`**, or **`actionName`** to have the frame's `src` point at a component action that renders the target page/element on demand.
+
+The content bindings are all **pulled** — WOIFrame never pushes anything back. It renders a self-closing frame, so it takes no template content.]]></doc>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[An explicit URL for the frame's `src`. **Pulled** as a `String`. When bound it takes precedence over `pageName`, `value` and `actionName`.]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a component page to render inside the frame. **Pulled** as a `String`; the frame's `src` becomes a component-action URL that renders `pageWithName(pageName)`.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>com.webobjects.appserver.WOElement</type></pull>
+			<doc><![CDATA[A `WOElement` to render inside the frame. **Pulled**; the frame's `src` becomes a component-action URL that renders this element directly.]]></doc>
+		</binding>
+
+		<binding name="actionName">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of an action **on the parent component** whose returned `WOElement` is rendered inside the frame. **Pulled** as a `String`, then resolved against `parent()` to produce the frame's content.]]></doc>
+		</binding>
+
+		<binding name="width">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The frame's `width`, forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<binding name="height">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The frame's `height`, forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<binding name="frameborder" defaults="Boolean">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `frameborder` attribute, forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<binding name="scrolling" defaults="Boolean">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `scrolling` attribute (`yes`/`no`/`auto`), forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<binding name="align">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `align` attribute, forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<binding name="longdesc">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `longdesc` attribute (a URL describing the frame's contents), forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<binding name="marginwidth">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `marginwidth` attribute, forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<binding name="marginheight">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `marginheight` attribute, forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The frame's `name` attribute, forwarded onto the rendered `<iframe>` (a link target can point at it).]]></doc>
+		</binding>
+
+		<binding name="style">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `style` attribute forwarded onto the rendered `<iframe>` tag.]]></doc>
+		</binding>
+
+		<binding name="border">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `border` attribute, forwarded onto the rendered `<iframe>`.]]></doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="pageName"/>
+			<any-of><binding name="src"/><binding name="value"/></any-of>
+		</choose>
+
+	</wo>
+</wodefinitions>

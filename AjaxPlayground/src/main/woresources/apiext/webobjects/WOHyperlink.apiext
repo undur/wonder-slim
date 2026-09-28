@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOHyperlink" content="expected" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an HTML anchor (`<a>`). The destination is chosen by binding **one** of `action`, `href`, `pageName`, or a direct action (`directActionName`, optionally with `actionClass`); `actionClass` may not be combined with `action`. Its label comes from the tag's content and/or the `string` binding.
+
+When `disabled` is truthy (or `rendered` is falsy) the `<a>` tags are dropped entirely — only the content and `string` are rendered, so the link becomes inert text.]]></doc>
+
+		<binding name="action" defaults="Actions">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[A component action invoked when the link is clicked; its return value becomes the next page (a `WOActionResults`/`WOComponent`, or `null` to stay on the current page). **Pulled** at invoke time. Must be a resolvable keypath, not a constant. Mutually exclusive with `href`, `pageName`, `directActionName`, and `actionClass`.]]></doc>
+		</binding>
+
+		<binding name="href">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A static URL to link to. **Pulled** and rendered verbatim (relative resource names are resolved to a resource URL). Mutually exclusive with `action`, `pageName` and `directActionName`.]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a page component to navigate to when clicked. **Pulled** at invoke time and instantiated via `pageWithName`. Mutually exclusive with `action`, `href` and `directActionName`.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a direct action to target. **Pulled** to build a direct-action URL, combined with `actionClass` when present. Mutually exclusive with `action`, `href`, and `pageName`.]]></doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class handling `directActionName` (defaults to `DirectAction`). **Pulled** as a string when building the direct-action URL. Mutually exclusive with `action`.]]></doc>
+		</binding>
+
+		<binding name="string">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Text rendered between the `<a>` tags (in addition to any child content). **Pulled**, converted to a string, and HTML-escaped unless `escapeHTML` is falsy.]]></doc>
+		</binding>
+
+		<binding name="escapeHTML" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<default>true</default>
+			<doc><![CDATA[Whether `string` is HTML-escaped. **Pulled** by truthiness; defaults to true. Set falsy only when `string` is already safe markup.]]></doc>
+		</binding>
+
+		<binding name="prefix">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Text written inside the `href` attribute value, **before** the generated URL. **Pulled**.]]></doc>
+		</binding>
+
+		<binding name="suffix">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Text written inside the `href` attribute value, **after** the generated URL. **Pulled**.]]></doc>
+		</binding>
+
+		<binding name="disabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, the anchor is disabled: the `<a>...</a>` tags are omitted and only the label (content and `string`) is rendered. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="rendered" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If falsy, the `<a>...</a>` tags are omitted but the content still renders, as with `disabled`. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="secure" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Forces the generated action URL to be `https` (truthy) or `http` (falsy). **Pulled** by truthiness; defaults to the context's current mode. Has no effect on a static `href`.]]></doc>
+		</binding>
+
+		<binding name="fragmentIdentifier">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A URL fragment appended after a `#`. **Pulled** and rendered onto the generated URL.]]></doc>
+		</binding>
+
+		<binding name="queryDictionary">
+			<pull><type>com.webobjects.foundation.NSDictionary</type></pull>
+			<doc><![CDATA[A dictionary of query-string parameters to append to the URL. **Pulled** and encoded as form values. Individual parameters can also be supplied with `?`-prefixed bindings.]]></doc>
+		</binding>
+
+		<binding name="target">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The anchor's `target` attribute (e.g. `_blank`). **Pulled** and forwarded onto the rendered `<a>` tag.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The anchor's `name` attribute, for use as a same-page fragment target. **Pulled** and forwarded onto the rendered `<a>` tag.]]></doc>
+		</binding>
+
+		<choose min="1">
+			<binding name="action"/>
+			<binding name="href"/>
+			<binding name="pageName"/>
+			<any-of><binding name="actionClass"/><binding name="directActionName"/></any-of>
+		</choose>
+		<choose max="1">
+			<binding name="action"/>
+			<binding name="href"/>
+			<binding name="pageName"/>
+			<binding name="directActionName"/>
+		</choose>
+		<choose max="1">
+			<binding name="action"/>
+			<binding name="actionClass"/>
+		</choose>
+		<requires binding="action" must="gettable"/>
+
+	</wo>
+</wodefinitions>

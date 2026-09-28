@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WONestedList" content="forbidden" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders a hierarchical `list` as nested HTML `<ul>`/`<ol>` markup, walking each item's `sublist` recursively. Every rendered item is a component-action link: clicking one **pushes** the corresponding object into `selection` and fires `action`.
+
+The element renders its own list markup and takes no template content.]]></doc>
+
+		<deprecated>WONestedList is a deprecated dynamic element. Build a nested list from `WORepetition`s (or a recursive component) instead.</deprecated>
+
+		<binding name="list" required="true">
+			<pull><type>java.util.List</type></pull>
+			<doc><![CDATA[The top-level list to render. **Required.** Pulled as an `NSArray`; a non-array value is wrapped in a single-element list. Must be a resolvable keypath, not a constant.]]></doc>
+		</binding>
+
+		<binding name="item">
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The loop variable. For each element the current object is **pushed** here so `displayString`/`value` and `sublist` can read it. Must be settable (not a constant) whenever `displayString` or `value` is bound.]]></doc>
+		</binding>
+
+		<binding name="sublist">
+			<pull><type>java.util.List</type></pull>
+			<doc><![CDATA[The child list of the current `item`, **pulled** to recurse one level deeper. When it resolves to a list, its elements are rendered as a nested `<ul>`/`<ol>` under the item.]]></doc>
+		</binding>
+
+		<binding name="displayString">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The label rendered for the current `item`. **Pulled** and converted to a string; HTML-escaped by default. Takes precedence over the legacy `value` binding when both are bound.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[A backward-compatible alias for `displayString`. Used as the item's label only when `displayString` is unbound, and rendered with HTML-escaping **off** by default. Ignored when `displayString` is also bound.]]></doc>
+		</binding>
+
+		<binding name="escapeHTML">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether to HTML-escape the rendered label. Read by truthiness. Defaults to `true` when `displayString` is used and `false` when the legacy `value` binding is used.]]></doc>
+		</binding>
+
+		<binding name="selection">
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[Receives the clicked object. When a generated link is followed, the object at that index path is **pushed** here before `action` fires. Must be settable (not a constant).]]></doc>
+		</binding>
+
+		<binding name="action" defaults="Actions">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The action invoked when an item's link is clicked, after `selection` has been set. **Pulled** for its result, which becomes the response page; if it returns null the current page is redisplayed.]]></doc>
+		</binding>
+
+		<binding name="index">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[The current item's zero-based position within its immediate list. **Pushed** as an `Integer` on each iteration.]]></doc>
+		</binding>
+
+		<binding name="level">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[The current nesting depth, starting at `0` for the top level. **Pushed** as an `Integer` before each level is rendered and restored after each recursive descent.]]></doc>
+		</binding>
+
+		<binding name="isOrdered">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[When truthy, each level is rendered as an ordered list (`<ol>`); otherwise as an unordered list (`<ul>`). Read by truthiness.]]></doc>
+		</binding>
+
+		<binding name="prefix">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Optional markup **pulled** and emitted immediately before each item's `<li>`. Rendered via its string form, unescaped.]]></doc>
+		</binding>
+
+		<binding name="suffix">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Optional markup **pulled** and emitted immediately after each item's `<li>`. Rendered via its string form, unescaped.]]></doc>
+		</binding>
+
+		<requires binding="list" must="gettable"/>
+		<requires binding="item">
+			<any-of><binding name="displayString"/><binding name="value"/></any-of>
+		</requires>
+		<requires binding="item" must="settable">
+			<any-of><binding name="displayString"/><binding name="value"/></any-of>
+		</requires>
+
+	</wo>
+</wodefinitions>

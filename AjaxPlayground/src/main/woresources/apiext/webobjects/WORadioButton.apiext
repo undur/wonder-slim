@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WORadioButton" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[A radio button (`<input type="radio">`). Use it in one of two modes: bind `checked` for a simple truthy-in / Boolean-out toggle, or bind `value` (usually with `selection`) so a group of buttons sharing a `selection` behaves as a single-choice set (the button whose `value` equals `selection` is the one selected). A `value` without `selection` just renders the value and pushes nothing back.]]></doc>
+
+		<binding name="checked">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<push><type>java.lang.Boolean</type></push>
+			<doc><![CDATA[The checked state. **Pulled** by truthiness to decide whether the button renders selected (`null`/`0`/`false` → not selected); **pushed** back as a `java.lang.Boolean` on submit — `true` if this button was the one chosen, `false` otherwise. Mutually exclusive with `value`.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[This button's value (the `<input>`'s `value` attribute). Used with `selection`: the button renders selected when `selection` equals this `value`; without `selection` the value is rendered and nothing is pushed on submit. If unbound (and `checked` is used instead) the element falls back to the context element ID. Mutually exclusive with `checked`.]]></doc>
+		</binding>
+
+		<binding name="selection">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The group's currently selected value (used with `value`). **Pulled** to decide which button in the group is selected; on submit it is **pushed** — set to this button's `value` when this button was chosen. Bind the same `selection` to every button in a group. Accepted but ignored when `checked` is bound instead of `value`.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The HTML form-field `name`. Radio buttons in one group must share a `name` to be mutually exclusive; auto-assigned from the element ID if unbound.]]></doc>
+		</binding>
+
+		<binding name="disabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, renders the button disabled (it won't submit and won't push `selection`/`checked`).]]></doc>
+		</binding>
+
+		<binding name="escapeHTML" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the `name` and `value` attributes are HTML-escaped. **Pulled** by truthiness. WebObjects also renders it onto the tag as an `escapeHTML` attribute.]]></doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="checked"/>
+			<binding name="value"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

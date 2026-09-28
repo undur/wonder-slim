@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOTextField" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[A single-line text input (`<input type="text">`). **Pulls** `value` to render the field's initial contents and **pushes** the submitted text back on form submission.
+
+Bind a `dateformat`, `numberformat`, or `formatter` to convert between the bound object and its displayed/parsed string form. `dateformat` and `numberformat` are mutually exclusive; a `formatter` may be bound together with either.]]></doc>
+
+		<binding name="value" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The field's value. Required, and must be a settable keypath (a constant is rejected at construction). **Pulled** to render the initial contents — formatted to a string via the bound formatter, or `toString()` otherwise. On submit it is **pushed** back: the raw submitted `String` when no formatter is bound, the formatter's parsed object when one is (optionally wrapped in a `BigDecimal` if `useDecimalNumber` is set).]]></doc>
+		</binding>
+
+		<binding name="formatter">
+			<pull><type>java.text.Format</type></pull>
+			<doc><![CDATA[A `Format` instance used to render `value` on output and parse the submitted text on input. May be bound together with `dateformat` or `numberformat`.]]></doc>
+		</binding>
+
+		<binding name="dateformat" defaults="Date Format Strings">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A date format pattern used to render and parse a date `value`. Mutually exclusive with `numberformat`.]]></doc>
+		</binding>
+
+		<binding name="numberformat" defaults="Number Format Strings">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A number format pattern used to render and parse a numeric `value`. Mutually exclusive with `dateformat`.]]></doc>
+		</binding>
+
+		<binding name="useDecimalNumber" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, a value parsed by the formatter is converted to a `java.math.BigDecimal` before being **pushed** to `value`. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="disabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, renders the field disabled and skips reading its submitted value (so nothing is pushed to `value`). **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The HTML form-field name. Pulled; auto-assigned from the element ID when unbound.</doc>
+		</binding>
+
+		<binding name="escapeHTML" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the `name` and `value` attributes are HTML-escaped. **Pulled** by truthiness. WebObjects also renders it onto the tag as an `escapeHTML` attribute.]]></doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="dateformat"/>
+			<binding name="numberformat"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

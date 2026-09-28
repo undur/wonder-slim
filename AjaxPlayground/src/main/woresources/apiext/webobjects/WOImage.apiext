@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOImage" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an `<img>` tag. The image source is supplied by at most one of: a resource `filename` (resolved through the resource manager, optionally within a `framework`), a static or dynamic `src` URL, in-memory `data` (with a `mimeType`), a component action (`value`) or page (`pageName`) that returns the image — or, instead of any of those, a direct action (`actionClass`/`directActionName`). One source or a direct action must be given.
+
+WOImage is display-only: every binding is **pulled**, nothing is pushed back. When neither `width` nor `height` is given for a `filename` image, the element reads the image's intrinsic dimensions and writes them onto the tag.]]></doc>
+
+		<binding name="filename" defaults="Resources">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of an image resource to serve. **Pulled** and resolved through the resource manager (within `framework` if bound). Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A URL for the image's `src` attribute. **Pulled** as a string; a relative URL is resolved against the application's resource base, an absolute one is emitted verbatim. Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="data">
+			<pull><type>com.webobjects.foundation.NSData</type></pull>
+			<doc><![CDATA[In-memory image bytes served inline. **Pulled** as an `NSData`; requires `mimeType` so the data URL can declare its content type. Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[A component action that returns the image. The `src` URL invokes it when the browser requests the image, and the returned `WOActionResults` is served. Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The name of a page component whose response is the image. **Pulled** and rendered as a component-action URL. Mutually exclusive with the other sources.</doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class serving the image. **Pulled** and combined with `directActionName` to build a direct-action `src` URL.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct action serving the image. **Pulled** and combined with `actionClass` to build a direct-action `src` URL.]]></doc>
+		</binding>
+
+		<binding name="queryDictionary">
+			<pull><type>com.webobjects.foundation.NSDictionary</type></pull>
+			<doc>Query parameters appended to a direct-action URL. **Pulled**.</doc>
+		</binding>
+
+		<binding name="mimeType" defaults="MIME Types">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The MIME type of the `data` image (e.g. `image/png`). **Pulled**; required whenever `data` is bound.]]></doc>
+		</binding>
+
+		<binding name="framework" defaults="Frameworks">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The framework to resolve `filename` against. **Pulled** as a string; `app` targets the application wrapper. Only meaningful together with `filename` — ignored without it.]]></doc>
+		</binding>
+
+		<binding name="key">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A cache key under which the `data` image is registered, so the generated data URL stays stable across requests. **Pulled**; used only with `data`.]]></doc>
+		</binding>
+
+		<binding name="width">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The image width, written onto the tag. **Pulled** and rendered via `toString()`; bind it to `"*"` to force the element to compute the intrinsic width instead. Applies only to a `filename` image. When both `width` and `height` are unbound, the element computes both from the image itself.]]></doc>
+		</binding>
+
+		<binding name="height">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The image height, written onto the tag. **Pulled** and rendered via `toString()`; bind it to `"*"` to force the element to compute the intrinsic height instead. Applies only to a `filename` image. When both `width` and `height` are unbound, the element computes both from the image itself.]]></doc>
+		</binding>
+
+		<binding name="alt">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `alt` text forwarded onto the rendered `<img>` tag. **Pulled** and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="border">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `border` attribute forwarded onto the rendered `<img>` tag. **Pulled** and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="filename"/>
+			<binding name="data"/>
+			<binding name="src"/>
+			<binding name="pageName"/>
+			<binding name="value"/>
+		</choose>
+		<choose min="1">
+			<binding name="filename"/>
+			<binding name="data"/>
+			<binding name="src"/>
+			<binding name="pageName"/>
+			<binding name="value"/>
+			<any-of><binding name="actionClass"/><binding name="directActionName"/></any-of>
+		</choose>
+		<requires binding="mimeType" when="data"/>
+
+	</wo>
+</wodefinitions>

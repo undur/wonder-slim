@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOGenericElement" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an arbitrary, self-closing HTML tag whose name is chosen at runtime. The `elementName` binding supplies the tag name, and any attribute you write that isn't a recognized binding is **passed through** onto the rendered tag (its value evaluated like a binding).
+
+Because it emits no closing tag, `WOGenericElement` is for void/empty elements (`<input>`, `<br>`, `<img>`, ...); use `WOGenericContainer` when you need a tag with content. It can also participate in form submission by pushing a request value into `formValue`/`formValues`.]]></doc>
+
+		<binding name="elementName">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The HTML tag name to render (e.g. `input`, `br`, `img`). **Pulled** and converted to a string. When it evaluates to null no tag is rendered. When `omitTags` is truthy the tag is suppressed entirely and nothing is rendered.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The HTML `name` attribute, forwarded onto the rendered tag. **Required** whenever `formValue` or `formValues` is bound — it names the request form value that gets pushed back.]]></doc>
+		</binding>
+
+		<binding name="otherTagString">
+			<pull><type>java.lang.String</type></pull>
+			<doc>Raw text inserted inside the rendered tag. **Pulled** and written verbatim.</doc>
+		</binding>
+
+		<binding name="omitTags" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, suppresses the tag: `elementName` is not evaluated and no markup is emitted. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="invokeAction" defaults="Actions">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[An action fired when this element is the sender of the request. **Pulled** during action invocation; its result becomes the response page (a `null` result stays on the current page). Used to make a generic element behave like a link or submit control.]]></doc>
+		</binding>
+
+		<binding name="formValue">
+			<push><type>java.lang.String</type></push>
+			<doc><![CDATA[Receives this element's single request value on submit. **Pushed** as a `java.lang.String` (the raw form value for the field named by `name`, or `null` if absent). May be bound together with `formValues`. Requires `name` to be bound.]]></doc>
+		</binding>
+
+		<binding name="formValues">
+			<push><type>java.util.List</type></push>
+			<doc><![CDATA[Receives this element's multiple request values on submit. **Pushed** as a list of the form values for the field named by `name`. May be bound together with `formValue`. Requires `name` to be bound.]]></doc>
+		</binding>
+
+		<binding name="elementID">
+			<push><type>java.lang.String</type></push>
+			<doc><![CDATA[Receives this element's context element ID. **Pushed** as a `java.lang.String` each cycle so the component can capture the element's position in the page.]]></doc>
+		</binding>
+
+		<requires binding="name">
+			<any-of><binding name="formValue"/><binding name="formValues"/></any-of>
+		</requires>
+
+	</wo>
+</wodefinitions>

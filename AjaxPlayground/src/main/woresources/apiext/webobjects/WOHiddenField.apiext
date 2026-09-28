@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOHiddenField" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[A hidden form field (`<input type="hidden">`). Carries a value through a form round-trip without displaying it: the bound `value` is **pulled** to render the field, and on submit the submitted string is **pushed** back. Because `value` must be writable, it is required and may not be a constant.]]></doc>
+
+		<binding name="value" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.String</type></push>
+			<doc><![CDATA[The field's value. Required. **Pulled** and rendered as its string form into the `value` attribute; on submit the raw form string is **pushed** back as a `java.lang.String`. Must resolve to a settable keypath — a constant `value` is rejected at construction time.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The HTML form-field name. Pulled; auto-assigned from the element ID when unbound.</doc>
+		</binding>
+
+		<binding name="escapeHTML" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the `name` and `value` attributes are HTML-escaped. **Pulled** by truthiness. WebObjects also renders it onto the tag as an `escapeHTML` attribute.]]></doc>
+		</binding>
+
+		<binding name="disabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, renders the field disabled and skips reading its submitted value (so nothing is pushed back to `value`).]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

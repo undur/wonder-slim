@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOForm" content="expected" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an HTML `<form>` and establishes the form context its children submit into. Wraps the inputs, buttons and other form controls that make up a single submission.
+
+Point the form at exactly one destination: a component `action`, a plain `href`, or a direct action named by `directActionName` (optionally scoped by `actionClass`). Extra query parameters can be supplied via `queryDictionary` or `?`-prefixed bindings, which are appended as hidden fields.]]></doc>
+
+		<binding name="action">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[A component action invoked when the form is submitted; its result becomes the next page. **Pulled** during action handling. Must be a resolvable keypath, not a constant. Mutually exclusive with `href`, `directActionName` and `actionClass`.]]></doc>
+		</binding>
+
+		<binding name="href">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A literal URL to submit to, used verbatim as the form's `action` attribute. **Pulled** and rendered via `toString`. Mutually exclusive with `action`, `directActionName` and `actionClass`.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a direct action to submit to. **Pulled** and required to be a `String`. Combined with `actionClass` to build the request URL. Mutually exclusive with `action` and `href`.]]></doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class handling the submission (defaults to `DirectAction`). **Pulled** and required to be a `String`. Used together with `directActionName`. Mutually exclusive with `action` and `href`.]]></doc>
+		</binding>
+
+		<binding name="queryDictionary">
+			<pull><type>com.webobjects.foundation.NSDictionary</type></pull>
+			<doc><![CDATA[A dictionary of extra query parameters. **Pulled** and appended to the submission as hidden form fields. Individual parameters may also be supplied with `?`-prefixed bindings.]]></doc>
+		</binding>
+
+		<binding name="multipleSubmit" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc>When truthy, the form may contain more than one submit button and the button that was actually pressed drives the action. **Pulled** by truthiness.</doc>
+		</binding>
+
+		<binding name="addDefaultSubmitButton" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[With `multipleSubmit`, adds an off-screen default submit button to the form. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="secure" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, the form's action URL is generated as `https`. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="rendered" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If falsy, the `<form>` tags are omitted but the content still renders. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="enctype">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The form's `enctype` attribute (for example `multipart/form-data` for file uploads). **Pulled** and rendered as a string when non-empty.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The form's HTML `name` attribute. **Pulled** and rendered as a string when non-empty.]]></doc>
+		</binding>
+
+		<binding name="method">
+			<pull><type>java.lang.String</type></pull>
+			<default>post</default>
+			<doc><![CDATA[The HTTP method used to submit the form. Forwarded to the rendered `<form>` tag; defaults to `post` when unbound.]]></doc>
+		</binding>
+
+		<binding name="target">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The browsing context the response is loaded into (the HTML `target` attribute). Forwarded to the rendered `<form>` tag.]]></doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="action"/>
+			<binding name="href"/>
+			<any-of><binding name="actionClass"/><binding name="directActionName"/></any-of>
+		</choose>
+		<requires binding="action" must="gettable"/>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOImageButton" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[An image that acts as a submit button (`<input type="image">`). Clicking it submits the enclosing form and reports the click coordinates back to the server.
+
+The image source is chosen by binding **exactly one** of `value`, `data`, `filename`, or `src`. The click triggers exactly one of a component `action` or a direct action addressed by `actionClass`/`directActionName`. When an `imageMapFile` is supplied, the hit coordinates are matched against its regions to pick the action; the `x`/`y` bindings receive the raw click coordinates.
+
+When rendered disabled the element degrades to a plain `<img>` and no longer submits.]]></doc>
+
+		<binding name="action">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[The component action to invoke when the image is clicked. **Pulled** as an action and its result becomes the response page. Mutually exclusive with `actionClass`/`directActionName`, and must be a real method binding — a constant is rejected.]]></doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class handling the click (defaults to `DirectAction`). **Pulled**. Used with `directActionName` as an alternative to a component `action`.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of the direct action to invoke (defaults to `default`). **Pulled**. Used with `actionClass` as an alternative to a component `action`.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[A component action invoked directly through this button's own request URL, doubling as the image source. **Pulled**, and must be a real method binding — a constant is rejected. Mutually exclusive with `data`, `filename`, and `src`.]]></doc>
+		</binding>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A literal URL for the image. **Pulled** and rendered as the `src` attribute. Mutually exclusive with `value`, `data`, and `filename`.]]></doc>
+		</binding>
+
+		<binding name="filename" defaults="Resources">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of an image resource, resolved through the resource manager (optionally within `framework`). **Pulled**. Mutually exclusive with `value`, `data`, and `src`.]]></doc>
+		</binding>
+
+		<binding name="framework" defaults="Frameworks">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The framework in which `filename` is located. **Pulled**. Only meaningful together with `filename`.]]></doc>
+		</binding>
+
+		<binding name="data">
+			<pull><type>com.webobjects.foundation.NSData</type></pull>
+			<doc><![CDATA[Raw image bytes to serve inline. **Pulled**. Requires `mimeType`, and is mutually exclusive with `value`, `filename`, and `src`.]]></doc>
+		</binding>
+
+		<binding name="mimeType" defaults="MIME Types">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The MIME type of the `data` bytes. **Pulled**. Required whenever `data` is bound.]]></doc>
+		</binding>
+
+		<binding name="key">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A cache key under which the `data` image is registered so its URL can be reused across requests. **Pulled**.]]></doc>
+		</binding>
+
+		<binding name="imageMapFile">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The name of a client-side image-map resource. **Pulled**; when the button is clicked the hit coordinates are tested against its regions to select the action to invoke.</doc>
+		</binding>
+
+		<binding name="x">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[Receives the horizontal click coordinate on submit. **Pushed** as an `Integer`. Must be bound together with `y`, and neither may be a constant.]]></doc>
+		</binding>
+
+		<binding name="y">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[Receives the vertical click coordinate on submit. **Pushed** as an `Integer`. Must be bound together with `x`, and neither may be a constant.]]></doc>
+		</binding>
+
+		<binding name="width">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The image width, rendered onto the tag. **Pulled**.</doc>
+		</binding>
+
+		<binding name="height">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The image height, rendered onto the tag. **Pulled**.</doc>
+		</binding>
+
+		<binding name="disabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, the element renders as a plain `<img>` rather than a submit button and no longer participates in form submission. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The HTML form-field name. Pulled; auto-assigned from the element ID when unbound.</doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="value"/>
+			<binding name="data"/>
+			<binding name="filename"/>
+			<binding name="src"/>
+		</choose>
+		<choose min="1" max="1">
+			<binding name="action"/>
+			<any-of><binding name="actionClass"/><binding name="directActionName"/></any-of>
+		</choose>
+		<requires binding="action" must="gettable"/>
+		<requires binding="value" must="gettable"/>
+		<requires binding="filename" when="framework"/>
+		<requires binding="mimeType" when="data"/>
+		<requires binding="y" when="x"/>
+		<requires binding="x" when="y"/>
+
+	</wo>
+</wodefinitions>

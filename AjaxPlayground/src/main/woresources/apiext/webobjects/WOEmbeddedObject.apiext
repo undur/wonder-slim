@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOEmbeddedObject" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an HTML `<embed>` tag whose `src` URL points at an embedded object — a resource file, a data blob, or a component/direct action that produces the content.
+
+The source is at most one of `src`, `filename`, `data`, `value`, or `pageName`: bind a `src` for a static URL, a `filename` (with optional `framework`) for a framework resource, a `data`/`mimeType` pair for an in-memory blob served through the resource manager, a `value` action that returns the content on demand, or a `pageName`. Instead of a source, a direct action (`actionClass`/`directActionName`) can produce the content; one or the other must be given. All bindings are **pulled** — the element only reads them to build the tag's URL.]]></doc>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc>A URL for the embedded object. **Pulled** as a string; a relative URL is resolved against the application's resources, an absolute one is used as-is. Mutually exclusive with the other sources.</doc>
+		</binding>
+
+		<binding name="filename" defaults="Resources">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a resource file to embed. **Pulled**, resolved through the resource manager (optionally within `framework`) into the tag's `src` URL. Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="framework" defaults="Frameworks">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The framework that owns `filename` when it is not in the application itself. **Pulled**; use `app` (or leave unbound) for the application's own resources. Only meaningful together with `filename` — ignored without it.]]></doc>
+		</binding>
+
+		<binding name="data">
+			<pull><type>com.webobjects.foundation.NSData</type></pull>
+			<doc><![CDATA[In-memory bytes to serve as the embedded object. **Pulled** as an `NSData`, cached by the resource manager and exposed through a generated `src` URL. Requires `mimeType`, and is mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="mimeType" defaults="MIME Types">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The MIME content type of the `data` blob (e.g. `image/png`). **Pulled**; required whenever `data` is bound so the browser knows how to interpret the retrieved bytes.]]></doc>
+		</binding>
+
+		<binding name="key">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[An optional cache key for a `data` blob. **Pulled** and stringified; when supplied, the resource manager caches and reuses the data under this key instead of recomputing it on every request.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[An action that lazily produces the embedded content. **Pulled** when the browser requests the generated URL — the returned `WOActionResults` (an image, a document, etc.) is sent back as the response. Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The name of a page component whose response is the embedded content. **Pulled** and rendered as a component-action URL. Mutually exclusive with the other sources.</doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class producing the content. **Pulled** and combined with `directActionName` to build a direct-action `src` URL.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct action producing the content. **Pulled** and combined with `actionClass` to build a direct-action `src` URL.]]></doc>
+		</binding>
+
+		<binding name="queryDictionary">
+			<pull><type>com.webobjects.foundation.NSDictionary</type></pull>
+			<doc>Query parameters appended to a direct-action URL. **Pulled**.</doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="filename"/>
+			<binding name="data"/>
+			<binding name="src"/>
+			<binding name="pageName"/>
+			<binding name="value"/>
+		</choose>
+		<choose min="1">
+			<binding name="filename"/>
+			<binding name="data"/>
+			<binding name="src"/>
+			<binding name="pageName"/>
+			<binding name="value"/>
+			<any-of><binding name="actionClass"/><binding name="directActionName"/></any-of>
+		</choose>
+		<requires binding="mimeType" when="data"/>
+
+	</wo>
+</wodefinitions>

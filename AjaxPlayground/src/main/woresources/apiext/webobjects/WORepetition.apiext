@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WORepetition" content="expected" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Repeats its child content once per element of a collection (or a fixed number of times). Drive it **either** with `list`+`item` (iterate a collection, exposing each element through `item`) **or** with `count` (repeat a fixed number of times) — never both.
+
+WORepetition renders no tag of its own; it only loops over the content between its tags.]]></doc>
+
+		<binding name="list">
+			<pull><type>java.util.List</type></pull>
+			<doc><![CDATA[The collection to iterate over — an `NSArray` or a `java.util.List`. **Pulled** once per phase; each element is handed to `item` in turn. Mutually exclusive with `count`, and must be a resolvable keypath (not a constant).]]></doc>
+		</binding>
+
+		<binding name="item">
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The loop variable. On each iteration the current element of `list` is **pushed** here, so the child content can read it; it is nulled after the loop. Required whenever `list` is bound, and must be a settable keypath.]]></doc>
+		</binding>
+
+		<binding name="count">
+			<pull><type>java.lang.Number</type></pull>
+			<doc><![CDATA[A fixed repeat count. **Pulled** and read as an integer (a null count is treated as `0`). Use this for a plain N-times loop with no collection. Mutually exclusive with `list` and `item`.]]></doc>
+		</binding>
+
+		<binding name="index">
+			<push><type>java.lang.Integer</type></push>
+			<doc>The current zero-based iteration index. **Pushed** here before each iteration so the child content can read the position. Optional; must be a settable keypath when bound.</doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="list"/>
+			<binding name="count"/>
+		</choose>
+		<choose max="1">
+			<binding name="count"/>
+			<binding name="item"/>
+		</choose>
+		<requires binding="item" when="list"/>
+		<requires binding="list" must="gettable"/>
+
+	</wo>
+</wodefinitions>

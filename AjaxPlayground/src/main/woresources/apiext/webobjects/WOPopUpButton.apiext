@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOPopUpButton" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[A single-selection drop-down menu (`<select>`). It iterates `list`, binding each element to `item` in turn to render an `<option>`, and **pushes** the chosen element back through `selection` on submit.
+
+Bind `list` (required) and, in the loop, `item` (the current element) plus optionally `displayString` (the label to show). Track the chosen element with **either** `selection` (which also selects the initial value) **or** the read-only `selectedValue` — never both. Use `noSelectionString` to add a leading placeholder option.]]></doc>
+
+		<binding name="list" required="true">
+			<pull><type>java.util.List</type></pull>
+			<doc><![CDATA[The collection of objects the menu iterates, one `<option>` per element. Required, and must be a resolvable keypath (not a constant) — the element **pulls** it on every phase.]]></doc>
+		</binding>
+
+		<binding name="item">
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The loop variable: on each pass the current `list` element is **pushed** here so `displayString`/`value` can read it. Must be a settable keypath whenever `displayString` or `value` is bound.]]></doc>
+		</binding>
+
+		<binding name="index">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[The current option's zero-based position. **Pushed** as an `Integer` alongside `item` on each iteration when bound.]]></doc>
+		</binding>
+
+		<binding name="selection">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The chosen `list` element. **Pulled** to pre-select the matching option when the page renders, and **pushed** back with the newly chosen element (or null) on submit. Must not be a constant. Mutually exclusive with `selectedValue`.]]></doc>
+		</binding>
+
+		<binding name="selectedValue">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[A read-only alternative to `selection`: **pulled** to pre-select the matching option, but never pushed back. Mutually exclusive with `selection`.]]></doc>
+		</binding>
+
+		<binding name="displayString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The label rendered for the current `item`. **Pulled** each iteration and shown as the option text; when unbound the option falls back to the `value` string, and failing that to the element's own `toString()`.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The `value` attribute emitted on each `<option>`. **Pulled** each iteration (and rendered via `toString()`). Binding it is cosmetic and slows submit handling — omit it unless you need explicit option values.]]></doc>
+		</binding>
+
+		<binding name="optionDisabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the current `item`'s `<option>` renders disabled. **Pulled** per item (with `item` pushed first), by truthiness.]]></doc>
+		</binding>
+
+		<binding name="noSelectionString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[When it evaluates to a non-empty string, prepends a placeholder `<option>` with this label representing "no selection". **Pulled** at render time.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The HTML form-field name of the `<select>` (auto-assigned from the element id if unbound).]]></doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, renders the menu disabled so its `selection` is not submitted. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="escapeHTML">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether to HTML-escape the option labels. **Pulled** by truthiness; defaults to true only when `displayString` is bound. Set falsy only when the labels are already safe markup.]]></doc>
+		</binding>
+
+		<requires binding="list" must="gettable"/>
+		<requires binding="item">
+			<any-of><binding name="displayString"/><binding name="value"/></any-of>
+		</requires>
+		<requires binding="item" must="settable">
+			<any-of><binding name="displayString"/><binding name="value"/></any-of>
+		</requires>
+		<choose max="1">
+			<binding name="selection"/>
+			<binding name="selectedValue"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

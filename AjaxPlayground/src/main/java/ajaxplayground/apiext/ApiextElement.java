@@ -2,6 +2,7 @@ package ajaxplayground.apiext;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -14,6 +15,7 @@ import org.w3c.dom.NodeList;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
+import com.webobjects.foundation.NSBundle;
 
 /**
  * The parsed model of one element's {@code .apiext} file - the extended API format that carries
@@ -217,8 +219,30 @@ public class ApiextElement {
 	 * @return the parsed model, or null if the file is absent or unparseable
 	 */
 	public static ApiextElement load(String elementName, String frameworkName) {
-		byte[] bytes = WOApplication.application().resourceManager()
-				.bytesForResourceNamed(elementName + ".apiext", frameworkName, NSArray.emptyArray());
+		return parse(WOApplication.application().resourceManager()
+				.bytesForResourceNamed(elementName + ".apiext", frameworkName, NSArray.emptyArray()));
+	}
+
+	/**
+	 * Read and parse every {@code .apiext} in a bundle's resources, sorted by element name.
+	 *
+	 * @param bundle the bundle to read from
+	 * @param subdirectory the resource directory to look in, or null for all of them
+	 * @return the parsed models (a file that's unparseable is left out)
+	 */
+	public static List<ApiextElement> loadAll(NSBundle bundle, String subdirectory) {
+		List<ApiextElement> out = new ArrayList<>();
+		for (String path : bundle.resourcePathsForResources("apiext", subdirectory)) {
+			ApiextElement el = parse(bundle.bytesForResourcePath(path));
+			if (el != null) {
+				out.add(el);
+			}
+		}
+		out.sort(Comparator.comparing(ApiextElement::className));
+		return out;
+	}
+
+	private static ApiextElement parse(byte[] bytes) {
 		if (bytes == null || bytes.length == 0) {
 			return null;
 		}

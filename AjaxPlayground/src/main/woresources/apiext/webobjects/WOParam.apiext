@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOParam" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an HTML `<param>` tag, supplying a named parameter to a surrounding plugin container (`<object>`/`<applet>`). Its `value` attribute is filled either from a **pulled** `value` or from a component-action URL when an `action` is bound.
+
+Bind **exactly one** of `value` or `action`: `value` supplies a literal parameter value, while `action` turns the `value` attribute into a URL that invokes a component action when requested.]]></doc>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The parameter value. **Pulled**, then rendered into the tag's `value` attribute via its string form. Mutually exclusive with `action`.]]></doc>
+		</binding>
+
+		<binding name="action">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[A component action. When bound, the tag's `value` attribute is rendered as a component-action URL; requesting it **pulls** and invokes this action, whose `WOActionResults` becomes the response (falling back to the current page when it returns null). Mutually exclusive with `value`.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The parameter name, forwarded onto the rendered `<param>` tag as its `name` attribute.]]></doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="value"/>
+			<binding name="action"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

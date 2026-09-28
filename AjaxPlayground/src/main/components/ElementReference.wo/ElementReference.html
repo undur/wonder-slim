@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>AjaxSlim reference (rendered from .apiext)</title>
+	<title><wo:str value="$source.title" /> element reference</title>
 	<style>
 		body { font-family: -apple-system, system-ui, sans-serif; margin: 0; color: #1a1a1a; line-height: 1.5; }
 		.wrap { max-width: 64rem; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
@@ -53,20 +53,31 @@
 		.valids { margin: .5rem 0 0; padding: .5rem .8rem; background: #fffbea; border-left: 3px solid #f0c000; border-radius: 4px; font-size: .85rem; }
 		.valids .vmsg { margin: .15rem 0; color: #7a5b00; }
 		.valids code { background: #fff4cc; }
+		.sources { display: flex; gap: .3rem; margin: 1rem 0 .4rem; border-bottom: 1px solid #ddd; }
+		.sources a { padding: .35rem .8rem; border: 1px solid transparent; border-bottom: none; border-radius: 5px 5px 0 0; color: #555; margin-bottom: -1px; }
+		.sources a.current { border-color: #ddd; background: #fff; color: #1a1a1a; font-weight: 600; }
+		.sources a:hover { text-decoration: none; color: #1a1a1a; }
 	</style>
 </head>
 <body>
 <div class="wrap">
 	<p><a href="/">&larr; Playground index</a></p>
-	<h1>AjaxSlim element reference</h1>
-	<p class="lead">Every element in the AjaxSlim library: what it does and its full set of bindings. Rendered from the <code>.apiext</code> files (read via the resource manager). For migration notes and the bigger picture, see the <a href="/reference">guide</a>.</p>
+	<div class="sources">
+		<wo:repetition list="$sources" item="$currentSource">
+			<wo:container elementName="a" href="$currentSource.path" class="$currentSourceClass"><wo:str value="$currentSource.title" /></wo:container>
+		</wo:repetition>
+	</div>
+	<h1><wo:str value="$source.title" /> element reference</h1>
+	<p class="lead"><wo:str value="$source.leadHtml" escapeHTML="$false" /> Rendered from the <code>.apiext</code> files (the <a href="/apiext-guide">extended API format</a>).</p>
 
 	<div class="legend">
+		<wo:if condition="$hasCategories">
 		<span class="tag t-update">Update</span> a refreshable region / its triggers &middot;
 		<span class="tag t-widget">Widget</span> a form-input UI element &middot;
 		<span class="tag t-trigger">Activity</span> busy &amp; polling &middot;
 		<span class="tag t-server">Server</span> no UI of its own.
 		<br/>
+		</wo:if>
 		<span class="tag t-passthrough">Passthrough</span> forwards any attribute it doesn't handle itself (<code>data-*</code>, <code>aria-*</code>, <code>role</code>, <code>class</code>, …) verbatim onto the rendered tag.
 		<span class="tag t-container">Container</span> usually used as a container element, wrapping content.
 		<br/>

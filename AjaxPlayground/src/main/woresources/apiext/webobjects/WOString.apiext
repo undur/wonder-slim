@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOString" content="forbidden" unknownAttributes="forbidden">
+
+		<doc><![CDATA[Renders a dynamic string into the page. The bound `value` is converted to text and HTML-escaped by default.
+
+Use a `dateformat`, `numberformat`, or `formatter` to format non-string values, and `valueWhenEmpty` to substitute a placeholder when the value is null or empty.]]></doc>
+
+		<binding name="value" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The value to display. Required. **Pulled**, formatted to a string via `toString()`, then HTML-escaped unless `escapeHTML` is falsy. WOString is display-only — it never pushes anything back.]]></doc>
+		</binding>
+
+		<binding name="escapeHTML">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<default>true</default>
+			<doc><![CDATA[Whether to HTML-escape the rendered value. **Pulled** by truthiness; set it falsy only when `value` is already safe markup.]]></doc>
+		</binding>
+
+		<binding name="dateformat" defaults="Date Format Strings">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A date format pattern used to render a date `value`. Mutually exclusive with `numberformat` and `formatter`.]]></doc>
+		</binding>
+
+		<binding name="numberformat" defaults="Number Format Strings">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A number format pattern used to render a numeric `value`. Mutually exclusive with `dateformat` and `formatter`.]]></doc>
+		</binding>
+
+		<binding name="formatter">
+			<pull><type>java.text.Format</type></pull>
+			<doc><![CDATA[A `Format` instance used to render `value`. Mutually exclusive with `dateformat` and `numberformat`.]]></doc>
+		</binding>
+
+		<binding name="valueWhenEmpty">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Substituted when `value` is null or empty, so the element still renders something.]]></doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="formatter"/>
+			<binding name="dateformat"/>
+			<binding name="numberformat"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

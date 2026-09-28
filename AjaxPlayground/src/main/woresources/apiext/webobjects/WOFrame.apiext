@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOFrame" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders an HTML `<frame>` whose `src` points at another resource, page, or direct action. Supply the frame's URL with at most one source — a static `src`, a resource `filename` (optionally within a `framework`), inline `data` (with a `mimeType`), a component `value` action, or a `pageName` — or, instead, a direct action addressed with `actionClass` and `directActionName`. One source or a direct action must be given.]]></doc>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc>A static URL for the frame. **Pulled** as a string; a relative value is resolved against the application's resources, an absolute one is used verbatim. Mutually exclusive with the other sources.</doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[A component action backing the frame. **Pulled** and invoked when the frame's URL is requested; its result (a `WOActionResults`, typically a page) is what the frame loads. Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The name of a component to load into the frame. **Pulled** and rendered as a component-action URL; when requested, WebObjects instantiates the named page. Mutually exclusive with the other sources.</doc>
+		</binding>
+
+		<binding name="filename" defaults="Resources">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a resource to load into the frame. **Pulled** and resolved through the resource manager (within `framework` if bound). Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="framework" defaults="Frameworks">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The framework to resolve `filename` against. **Pulled**; `app` targets the application itself. Only meaningful together with `filename` — ignored without it.]]></doc>
+		</binding>
+
+		<binding name="data">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Inline content for the frame, served through a generated URL. **Pulled**; requires `mimeType`. Mutually exclusive with the other sources.]]></doc>
+		</binding>
+
+		<binding name="mimeType" defaults="MIME Types">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The MIME type of the inline `data`. **Pulled**; required whenever `data` is bound.]]></doc>
+		</binding>
+
+		<binding name="key">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A cache key under which the inline `data` is stored, so the generated URL can be reused across requests. **Pulled**; used only with `data`.]]></doc>
+		</binding>
+
+		<binding name="actionClass" defaults="Direct Action Classes">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct-action class for the frame's URL. **Pulled** and combined with `directActionName` to build a direct-action URL. Defaults to `DirectAction` when only `directActionName` is bound.]]></doc>
+		</binding>
+
+		<binding name="directActionName" defaults="Direct Actions">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The direct action to target. **Pulled** and combined with `actionClass` to build the frame's direct-action URL.]]></doc>
+		</binding>
+
+		<binding name="queryDictionary">
+			<pull><type>com.webobjects.foundation.NSDictionary</type></pull>
+			<doc>Query parameters appended to a direct-action URL. **Pulled**.</doc>
+		</binding>
+
+		<choose max="1">
+			<binding name="filename"/>
+			<binding name="data"/>
+			<binding name="src"/>
+			<binding name="pageName"/>
+			<binding name="value"/>
+		</choose>
+		<choose min="1">
+			<binding name="filename"/>
+			<binding name="data"/>
+			<binding name="src"/>
+			<binding name="pageName"/>
+			<binding name="value"/>
+			<any-of><binding name="actionClass"/><binding name="directActionName"/></any-of>
+		</choose>
+		<requires binding="mimeType" when="data"/>
+
+	</wo>
+</wodefinitions>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WORadioButtonList" content="forbidden" unknownAttributes="allowed">
+
+		<doc><![CDATA[Renders a group of radio buttons (`<input type="radio">`), one per element of `list`. Iterating over `list`, it **pushes** each element to `item` (and its position to `index`), renders a radio button for it, and on submit **pushes** the chosen element back to `selection`. `displayString` supplies each button's label; `prefix`/`suffix` wrap it.
+
+Bind either `selection` or a `selectedValue` (never both — the framework rejects that combination), and note that binding `value` selects a slower option-matching path the runtime warns against.
+
+Extra attributes with a constant value are copied onto every radio input; extra attributes with a dynamic value are ignored.]]></doc>
+
+		<deprecated>WORadioButtonList is a deprecated dynamic element. Build a radio-button group with a repetition over `WORadioButton` instead.</deprecated>
+
+		<binding name="list" required="true">
+			<pull><type>java.util.List</type></pull>
+			<doc><![CDATA[The list of options to render, one radio button each. Required. **Pulled** once per rendering; must resolve to a `List` (or `NSArray`) and must not be a constant.]]></doc>
+		</binding>
+
+		<binding name="item">
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The iteration variable. For each option the current element is **pushed** here so `displayString`/`value` can read it, exactly like a repetition's `item`. Must be bound, and settable, whenever `value` or `displayString` is bound.]]></doc>
+		</binding>
+
+		<binding name="index">
+			<push><type>java.lang.Integer</type></push>
+			<doc><![CDATA[The current option's zero-based position. **Pushed** as an `Integer` alongside `item` on each iteration; bind it only if you need the index.]]></doc>
+		</binding>
+
+		<binding name="selection">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[The selected option. **Pulled** to decide which button renders checked (the option `equals` to the selection wins); on submit the matching option is **pushed** back, or `null` when nothing was chosen. Cannot be combined with a `selectedValue`.]]></doc>
+		</binding>
+
+		<binding name="selectedValue">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[A read-only alternative to `selection`: **pulled** to decide which button renders checked, but never pushed back. Cannot be combined with `selection`.]]></doc>
+		</binding>
+
+		<binding name="displayString">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The label shown next to each button. **Pulled** for the current `item` and rendered via `toString()`; when unbound the option's value string is used, and failing that the item's own `toString()`. Binding it requires `item` to be settable.]]></doc>
+		</binding>
+
+		<binding name="value">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The HTML `value` attribute for each button, **pulled** for the current `item` and rendered via `toString()`. Binding it selects a slower option-matching submit path that the runtime warns against; prefer omitting it. Binding it requires `item` to be settable.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The shared HTML form-field name tying the radio buttons into one group. **Pulled**; auto-assigned from the element ID when unbound.</doc>
+		</binding>
+
+		<binding name="prefix">
+			<pull><type>java.lang.String</type></pull>
+			<doc>A raw string emitted **before** each button's label. **Pulled**; useful for wrapping each option in markup.</doc>
+		</binding>
+
+		<binding name="suffix">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A raw string emitted **after** each button's label. **Pulled**; the companion to `prefix`.]]></doc>
+		</binding>
+
+		<binding name="escapeHTML">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether to HTML-escape each label. **Pulled** by truthiness; defaults to escaping when `displayString` is bound. Set it falsy only when the label is already safe markup.]]></doc>
+		</binding>
+
+		<binding name="optionDisabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the current option's radio button renders disabled. **Pulled** per item (with `item` pushed first), by truthiness.]]></doc>
+		</binding>
+
+		<binding name="disabled">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, the submitted value is not taken (nothing is **pushed** to `selection`). It does not render anything disabled — use `optionDisabled` to disable individual buttons. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="class">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `class` attribute copied onto each rendered `<input type="radio">`. Only a constant value is copied; a dynamic one is ignored.]]></doc>
+		</binding>
+
+		<binding name="id">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `id` attribute copied onto each rendered `<input type="radio">`. Only a constant value is copied; a dynamic one is ignored.]]></doc>
+		</binding>
+
+		<binding name="style">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `style` attribute copied onto each rendered `<input type="radio">`. Only a constant value is copied; a dynamic one is ignored.]]></doc>
+		</binding>
+
+		<binding name="title">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The `title` attribute copied onto each rendered `<input type="radio">`. Only a constant value is copied; a dynamic one is ignored.]]></doc>
+		</binding>
+
+		<requires binding="list" must="gettable"/>
+		<requires binding="item">
+			<any-of><binding name="displayString"/><binding name="value"/></any-of>
+		</requires>
+		<requires binding="item" must="settable" when="value"/>
+		<choose max="1">
+			<binding name="selection"/>
+			<binding name="selectedValue"/>
+		</choose>
+
+	</wo>
+</wodefinitions>

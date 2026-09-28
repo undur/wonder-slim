@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOText" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[A multi-line text input (`<textarea>`). The bound `value` fills the textarea's body on render and receives whatever the user typed on submit — so it is a genuine two-way binding.
+
+Unlike single-line fields, WOText writes `value` into the tag's content rather than a `value` attribute; soft line-wrap returns (`\r\n`) are removed when the value is rendered; the submitted text is pushed back unchanged.]]></doc>
+
+		<binding name="value" required="true">
+			<pull><type>java.lang.Object</type></pull>
+			<push><type>java.lang.String</type></push>
+			<doc><![CDATA[The textarea's text. Required, and must be a settable keypath (a constant is rejected at construction). **Pulled** to fill the textarea body — rendered via `toString()`, HTML-escaped, with soft line-wrap returns removed — and **pushed** back as the submitted `java.lang.String`, unchanged, when the form is submitted.]]></doc>
+		</binding>
+
+		<binding name="disabled" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[If truthy, renders the textarea disabled and skips reading its submitted value, so nothing is **pushed** to `value`. **Pulled** by truthiness.]]></doc>
+		</binding>
+
+		<binding name="name">
+			<pull><type>java.lang.String</type></pull>
+			<doc>The HTML form-field name. Pulled; auto-assigned from the element ID when unbound.</doc>
+		</binding>
+
+		<binding name="escapeHTML" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the `name` attribute and the rendered value are HTML-escaped. **Pulled** by truthiness. WebObjects also renders it onto the tag as an `escapeHTML` attribute.]]></doc>
+		</binding>
+
+	</wo>
+</wodefinitions>

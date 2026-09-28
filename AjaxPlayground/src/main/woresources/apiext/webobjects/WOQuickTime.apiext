@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="WOQuickTime" content="forbidden" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Embeds a QuickTime object — movie, sound, or VR panorama — by rendering an `<embed>` tag. It supports QuickTime VR *hotspots*: bind `hotspotList` and `action`, and clicking a hotspot invokes `action` with the clicked hotspot set into `selection`. Should be used **outside** an HTML form.
+
+Obsolete: the QuickTime browser plugin no longer exists in any modern browser. Use a native `<video>` / `<audio>` element instead.]]></doc>
+
+		<deprecated>The QuickTime browser plugin is obsolete.</deprecated>
+
+		<binding name="filename" defaults="Resources">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a resource (looked up via the resource manager, optionally in `framework`) used as the movie source. **Pulled**. Exactly one of `filename`, `src` and `qtsrc` must be bound.]]></doc>
+		</binding>
+
+		<binding name="src">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A URL used directly as the movie source (resolved as a resource when relative). **Pulled**. Mutually exclusive with `filename` and `qtsrc`.]]></doc>
+		</binding>
+
+		<binding name="qtsrc">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[A QuickTime movie source URL (`qtsrc`), an alternative to `src`. **Pulled**. Mutually exclusive with `filename` and `src`.]]></doc>
+		</binding>
+
+		<binding name="width">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The embed width. **Pulled** and rendered via `toString()` onto the `width` attribute.]]></doc>
+		</binding>
+
+		<binding name="height">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The embed height. **Pulled** and rendered via `toString()` onto the `height` attribute.]]></doc>
+		</binding>
+
+		<binding name="framework" defaults="Frameworks">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The framework to resolve `filename` (and other resources) against. **Pulled**; the value `app` is treated as the application itself.]]></doc>
+		</binding>
+
+		<binding name="hotspotList">
+			<pull><type>java.util.List</type></pull>
+			<doc><![CDATA[A `List` of VR hotspot ids. **Pulled** and iterated; each entry becomes a `hotspot`*N* attribute wired to a component action. When a hotspot is clicked, its id is pushed into `selection` and `action` is invoked.]]></doc>
+		</binding>
+
+		<binding name="selection">
+			<push><type>java.lang.Object</type></push>
+			<doc><![CDATA[Receives the clicked VR hotspot. **Pushed** (via `setValue`) with the id of the hotspot the user clicked before `action` fires — never read.]]></doc>
+		</binding>
+
+		<binding name="action" defaults="Actions">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc><![CDATA[The parent action invoked when a VR hotspot is clicked. **Pulled** to obtain the returned `WOActionResults`.]]></doc>
+		</binding>
+
+		<binding name="href">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[A single-click target for a standalone (hotspot-free) object: either a URL string, or a page/component whose action result is returned. **Pulled**. Mutually exclusive with `pageName` (the element throws if both are bound).]]></doc>
+		</binding>
+
+		<binding name="pageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a page to return on a single click. **Pulled**. Mutually exclusive with `href`.]]></doc>
+		</binding>
+
+		<binding name="pluginsPage">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The page the browser should visit to obtain the QuickTime plugin: a URL string, or a page/component. **Pulled** and rendered onto the `pluginspage` attribute. Mutually exclusive with `pluginsPageName`.]]></doc>
+		</binding>
+
+		<binding name="pluginsPageName" defaults="Page Names">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[The name of a page component to use as the plugin page, as an alternative to `pluginsPage`. **Pulled**. Mutually exclusive with `pluginsPage`.]]></doc>
+		</binding>
+
+		<binding name="qtnextList">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[QuickTime 4 playlist: a single movie URL `String`, or a `List` of movie URLs / `{movie, target}` dictionaries. **Pulled** and rendered as `qtnext`*N* attributes.]]></doc>
+		</binding>
+
+		<binding name="qtnextAction">
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
+			<doc>Action for dynamically serving the next movie in a QuickTime 4 playlist. **Not implemented** — the element throws if this is bound.</doc>
+			<deprecated>WebObjects 5.4.3 throws a "not implemented" error when `qtnextAction` is bound. Use `qtnextList` instead.</deprecated>
+		</binding>
+
+		<binding name="volume">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The playback volume, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="bgcolor">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The background color, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="target">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The single target for VR actions, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="node">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The initial VR node, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="pan">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The initial VR pan angle, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="tilt">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The initial VR tilt angle, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="fov">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The initial VR field of view, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="correction">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[The VR image correction mode, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="prefixHost">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Whether to prefix the host on generated URLs, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="hidden">
+			<pull><type>java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the object is hidden, forwarded onto the embed tag. Pulled and rendered via `toString()`.]]></doc>
+		</binding>
+
+		<binding name="cache" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the browser may cache the object. **Pulled** by truthiness — rendered as `TRUE` unless the value is null or `"0"`.]]></doc>
+		</binding>
+
+		<binding name="autoplay" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the object plays automatically. **Pulled** by truthiness — rendered as `TRUE` unless the value is null or `"0"`.]]></doc>
+		</binding>
+
+		<binding name="controller" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether the playback controller is shown. **Pulled** by truthiness — rendered as `TRUE` unless the value is null or `"0"`.]]></doc>
+		</binding>
+
+		<binding name="playeveryframe" defaults="YES/NO">
+			<pull><type interpretation="truthy">java.lang.Object</type></pull>
+			<doc><![CDATA[Whether every frame is played (no dropping). **Pulled** by truthiness — rendered onto the `playeveryframe` attribute as `TRUE` unless the value is null or `"0"`.]]></doc>
+		</binding>
+
+		<binding name="otherTagString">
+			<pull><type>java.lang.String</type></pull>
+			<doc><![CDATA[Raw text inserted inside the rendered `<embed>` tag. **Pulled** and written verbatim.]]></doc>
+		</binding>
+
+		<choose min="1" max="1">
+			<binding name="src"/>
+			<binding name="filename"/>
+			<binding name="qtsrc"/>
+		</choose>
+		<choose max="1">
+			<binding name="href"/>
+			<binding name="pageName"/>
+		</choose>
+		<choose max="1">
+			<binding name="pluginsPage"/>
+			<binding name="pluginsPageName"/>
+		</choose>
+
+	</wo>
+</wodefinitions>
