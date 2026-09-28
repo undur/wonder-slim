@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Scenario: video (range requests)</title>
+	<style>
+		body { font-family: -apple-system, system-ui, sans-serif; margin: 2rem auto; max-width: 44rem; color: #222; }
+		h1 { border-bottom: 2px solid #333; padding-bottom: .3rem; }
+		.lead { color: #666; }
+		video { width: 100%; background: #000; }
+		code { background: #f4f4f4; padding: .05rem .3rem; border-radius: 3px; }
+		a { color: #2b6cb0; }
+	</style>
+</head>
+<body>
+	<p><a href="/">&larr; Playground index</a></p>
+	<h1>Video (range requests)</h1>
+	<p class="lead">A 20-second test pattern served by the resource request handler. Playing and seeking it takes range requests: the browser asks for parts of the file (<code>Range: bytes=…</code>) and gets <code>206 Partial Content</code>. Jump anywhere in it: the clock in the picture shows where playback landed.</p>
+	<wo:WOGenericContainer elementName="video" id="video" controls="controls" preload="metadata" src="$videoURL"></wo:WOGenericContainer>
+	<p><code><wo:str value="$videoURL" /></code></p>
+</body>
+</html>

@@ -31,6 +31,7 @@ import ajaxplayground.components.scenario.ScenarioScripts;
 import ajaxplayground.components.scenario.ScenarioSSE;
 import ajaxplayground.components.scenario.ScenarioTabs;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
+import ajaxplayground.components.scenario.ScenarioVideo;
 import ajaxplayground.components.scenario.ScenarioWebSocket;
 import er.extensions.routes.RouteTable;
 
@@ -107,6 +108,7 @@ public class Routes {
 		routes.map( "/tabs", ScenarioTabs.class );
 		routes.map( "/component-instance", ScenarioComponentInstance.class );
 		routes.map( "/locale-formatting", ScenarioLocaleFormatting.class );
+		routes.map( "/video", ScenarioVideo.class );
 
 		// Component gallery
 		routes.map( "/gallery-update-container", GalleryUpdateContainer.class );
