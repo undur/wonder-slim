@@ -42,8 +42,8 @@
 
 - **ERLoggingLogback: logback as the logging backend, and logging configuration every backend understands**
   A second logging module, ERLoggingLogback, puts logback behind slf4j, in place of
-  ERLoggingReload4j (one or the other). It brings `log4j-over-slf4j`, since WebObjects itself
-  calls the log4j API. Logging is configured in layers, lowest first: Project Wonder style
+  ERLoggingReload4j (one or the other). An application whose own code calls the log4j API adds
+  `log4j-over-slf4j` alongside it. Logging is configured in layers, lowest first: Project Wonder style
   `log4j.logger.*` and `log4j.rootLogger` levels (for logback; its appenders and layouts are named
   in a warning); `er.logging.level.<logger>` and `er.logging.pattern`, which
   every backend understands; the backend's own configuration (`log4j.*` for reload4j, as before,

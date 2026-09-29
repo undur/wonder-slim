@@ -12,10 +12,12 @@ descriptive, not aspirational.
   carries no compile dependency on a backend. Two exist:
   - **`ERLoggingReload4j`**: log4j 1.x via reload4j (`ERXReload4jLoggingBackend`). The default.
   - **`ERLoggingLogback`**: logback (`ERXLogbackLoggingBackend`).
-- **WebObjects calls the log4j API itself**: `WOCGIFormValues$Encoder` (encoding a direct action's
-  query parameters) uses `org.apache.log4j.Logger`, so some log4j API must be on the classpath.
-  Each backend module brings it: reload4j itself, or `log4j-over-slf4j` (which hands the calls to
-  slf4j) for logback. The two can't be on the classpath together.
+- **WebObjects needs no log4j API.** Its form value encoder (`WOCGIFormValues$Encoder`, encoding
+  a direct action's query parameters) calls `org.apache.log4j.Logger`, and `ERXApplication.main()`
+  rewrites it to call slf4j before WebObjects first uses it (`ERXLog4jRewrite`). An application
+  whose own code or libraries call the log4j API brings one: `log4j-over-slf4j` with logback
+  (it hands the calls to slf4j), or nothing more with reload4j, which is one. The two can't be on
+  the classpath together.
 - WebObjects' own `NSLog` output is redirected **into** slf4j, and so the backend, by
   `ERXNSLogBridge` (installed first thing in `ERXApplication.main()`), and log4j's
   `ConsoleAppender` writes back **out** to `System.out`. So `NSLog` → slf4j → log4j → `System.out`

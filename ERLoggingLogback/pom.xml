@@ -21,14 +21,15 @@
 			<version>1.5.38</version>
 		</dependency>
 		<!--
-			WebObjects calls the log4j API itself (WOCGIFormValues encodes a direct action's query parameters through it),
-			so some log4j API has to be on the classpath: this one hands the calls to slf4j, and so to logback. It can't be
-			on the classpath together with reload4j, which defines the same classes.
+			For the test of an application's own log4j calls. WebObjects needs no log4j API (see ERXLog4jRewrite); an
+			application that calls the log4j API itself adds log4j-over-slf4j, which hands the calls to slf4j and so to
+			logback.
 		-->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
 			<version>2.0.20</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

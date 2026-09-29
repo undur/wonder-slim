@@ -150,7 +150,10 @@ public class ERXLogbackLoggingBackendTest {
 	}
 
 	@Test
-	public void webObjectsCallsToTheLog4jApiReachLogback() {
+	/**
+	 * An application calling the log4j API itself adds log4j-over-slf4j, as the test does
+	 */
+	public void anApplicationsLog4jCallsReachLogbackThroughLog4jOverSlf4j() {
 		System.setProperty( "er.logging.level.test.neutral", "DEBUG" );
 		_backend.installCapture();
 		_backend.configure();
