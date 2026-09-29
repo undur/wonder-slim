@@ -1,9 +1,0 @@
-<wo:repetition list="$^list" item="$currentItem" index="$index">
-	<wo:if condition="$disabled">
-		<wo:element elementName="input" name="$uniqueID" type="radio" value="$index" otherTagString="$isCurrentItemSelected" disabled="$true" />
-	</wo:if>
-	<wo:if condition="$disabled" negate="$true">
-		<wo:element elementName="input" name="$uniqueID" type="radio" value="$index" otherTagString="$otherTagStringForRadioButton" />
-	</wo:if>
-	<wo:content />
-</wo:repetition>

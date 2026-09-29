@@ -6,11 +6,15 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +65,16 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 	 */
 	private volatile CaptureAppender _capture;
 
+	/**
+	 * Where logback's own configuration was last read from, null if none was
+	 */
+	private volatile String _nativeConfiguration;
+
+	/**
+	 * The levels logback's own configuration set when logging was last configured
+	 */
+	private volatile Map<String, String> _nativeLevels = Map.of();
+
 	private static LoggerContext context() {
 		return (LoggerContext)LoggerFactory.getILoggerFactory();
 	}
@@ -93,8 +107,12 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 
 		// 3: logback's own configuration, which wins where it names a logger
 		final URL nativeConfiguration = nativeConfiguration( properties );
+		_nativeConfiguration = nativeConfiguration == null ? null : nativeConfiguration.toString();
+		_nativeLevels = Map.of();
 
 		if( nativeConfiguration != null ) {
+			final Map<String, Level> before = levels();
+
 			final JoranConfigurator configurator = new JoranConfigurator();
 			configurator.setContext( context );
 
@@ -108,6 +126,8 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 			if( hasOutputOtherThan( root, CONSOLE_APPENDER, CAPTURE_APPENDER ) ) {
 				root.detachAppender( CONSOLE_APPENDER );
 			}
+
+			_nativeLevels = changedLevels( before, levels() );
 		}
 
 		// 4: the levels set on the running instance
@@ -121,6 +141,69 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 	 */
 	@Override
 	public void reattachConsole() {}
+
+	@Override
+	public String name() {
+		return "logback";
+	}
+
+	@Override
+	public boolean readsLog4jConfiguration() {
+		return false;
+	}
+
+	@Override
+	public String nativeConfiguration() {
+		return _nativeConfiguration;
+	}
+
+	@Override
+	public Map<String, String> nativeLevels() {
+		return _nativeLevels;
+	}
+
+	@Override
+	public List<LoggerLevel> loggers() {
+		final List<LoggerLevel> loggers = new ArrayList<>();
+
+		for( final Logger logger : context().getLoggerList() ) {
+			final String name = logger == root() ? ERXLoggingConfiguration.ROOT : logger.getName();
+			loggers.add( new LoggerLevel( name, logger.getLevel() == null ? null : logger.getLevel().toString(), logger.getEffectiveLevel().toString() ) );
+		}
+
+		loggers.sort( Comparator.comparing( ( LoggerLevel logger ) -> !logger.name().equals( ERXLoggingConfiguration.ROOT ) ).thenComparing( LoggerLevel::name ) );
+		return loggers;
+	}
+
+	/**
+	 * @return The level set on each logger that has one, by name
+	 */
+	private static Map<String, Level> levels() {
+		final Map<String, Level> levels = new HashMap<>();
+
+		for( final Logger logger : context().getLoggerList() ) {
+			if( logger.getLevel() != null ) {
+				levels.put( logger == root() ? ERXLoggingConfiguration.ROOT : logger.getName(), logger.getLevel() );
+			}
+		}
+
+		return levels;
+	}
+
+	/**
+	 * @return The levels in {@code after} that differ from those in {@code before}, as level names
+	 */
+	static Map<String, String> changedLevels( final Map<String, Level> before, final Map<String, Level> after ) {
+		final Map<String, String> changed = new TreeMap<>();
+
+		after.forEach( ( name, level ) -> {
+			if( !level.equals( before.get( name ) ) ) {
+				changed.put( name, level.toString() );
+			}
+		} );
+
+		return Collections.unmodifiableMap( changed );
+	}
 
 	@Override
 	public synchronized boolean installCapture() {

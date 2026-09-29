@@ -1,6 +1,7 @@
 package er.extensions.logging.logback;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -88,6 +89,11 @@ public class ERXLogbackLoggingBackendTest {
 		assertEquals( Level.DEBUG, logger( "test.neutral" ).getLevel(), "Not named by logback's configuration, so the neutral level stands" );
 		assertNull( logger( Logger.ROOT_LOGGER_NAME ).getAppender( "console" ), "logback's configuration gives the root logger output of its own" );
 		assertNotNull( logger( Logger.ROOT_LOGGER_NAME ).getAppender( "native" ) );
+		assertEquals( "ERROR", _backend.nativeLevels().get( "test.both" ), "The level logback's configuration changed is credited to it" );
+		assertFalse( _backend.nativeLevels().containsKey( "test.neutral" ) );
+		assertTrue( _backend.nativeConfiguration().endsWith( ".xml" ) );
+		assertTrue( _backend.loggers().stream().anyMatch( l -> l.name().equals( "test.both" ) && "ERROR".equals( l.level() ) ) );
+		assertEquals( "root", _backend.loggers().get( 0 ).name() );
 	}
 
 	@Test

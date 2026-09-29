@@ -1,7 +1,10 @@
 package er.extensions.logging;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
@@ -64,5 +67,49 @@ public class ERXReload4jLoggingBackend implements ERXLoggingBackend {
 	@Override
 	public List<String> capturedLines( final String contains, final int tail ) {
 		return ERXRingBufferAppender.snapshot( contains, tail );
+	}
+
+	@Override
+	public String name() {
+		return "reload4j";
+	}
+
+	@Override
+	public boolean readsLog4jConfiguration() {
+		return true;
+	}
+
+	/**
+	 * @return The log4j.* properties, if any are set
+	 */
+	@Override
+	public String nativeConfiguration() {
+		return System.getProperties().stringPropertyNames().stream().anyMatch( key -> key.startsWith( "log4j." ) ) ? "log4j.* properties" : null;
+	}
+
+	/**
+	 * @return The levels log4j.* sets, which reload4j reads itself
+	 */
+	@Override
+	public Map<String, String> nativeLevels() {
+		return ERXLoggingConfiguration.legacyLevels( System.getProperties() );
+	}
+
+	@Override
+	public List<LoggerLevel> loggers() {
+		final List<LoggerLevel> loggers = new ArrayList<>();
+		loggers.add( loggerLevel( ERXLoggingConfiguration.ROOT, Logger.getRootLogger() ) );
+
+		for( final Enumeration<?> e = LogManager.getCurrentLoggers(); e.hasMoreElements(); ) {
+			final Logger logger = (Logger)e.nextElement();
+			loggers.add( loggerLevel( logger.getName(), logger ) );
+		}
+
+		loggers.subList( 1, loggers.size() ).sort( Comparator.comparing( LoggerLevel::name ) );
+		return loggers;
+	}
+
+	private static LoggerLevel loggerLevel( final String name, final Logger logger ) {
+		return new LoggerLevel( name, logger.getLevel() == null ? null : logger.getLevel().toString(), logger.getEffectiveLevel().toString() );
 	}
 }

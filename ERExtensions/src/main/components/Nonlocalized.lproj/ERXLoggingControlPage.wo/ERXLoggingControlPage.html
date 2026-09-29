@@ -1,0 +1,68 @@
+<wo:if condition="$hasBackend" negate="true">
+	<div class="alert alert-warning">No logging backend is on the classpath: add ERLoggingLogback or ERLoggingReload4j.</div>
+</wo:if>
+<wo:if condition="$hasBackend">
+	<wo:if condition="$notice"><div class="alert alert-info"><wo:str value="$notice" /></div></wo:if>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-body">
+					<div class="datagrid">
+						<div class="datagrid-item"><div class="datagrid-title">Backend</div><div class="datagrid-content"><wo:str value="$backend.name" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Its own configuration</div><div class="datagrid-content font-monospace text-break small"><wo:str value="$nativeConfiguration" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Console layout</div><div class="datagrid-content font-monospace small"><wo:str value="$pattern" /></div></div>
+						<div class="datagrid-item"><div class="datagrid-title">Loggers</div><div class="datagrid-content"><wo:str value="$loggerCount" /></div></div>
+					</div>
+					<wo:if condition="$hasIgnoredKeys">
+						<div class="alert alert-warning mt-3 mb-0">
+							<wo:str value="$backend.name" /> doesn't read log4j's output configuration: the levels are used, these settings are ignored.
+							<div class="font-monospace small mt-1"><wo:repetition list="$ignoredKeys" item="$currentKey"><wo:str value="$currentKey" /> </wo:repetition></div>
+						</div>
+					</wo:if>
+				</div>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Levels</h3><div class="card-subtitle ms-3">every logger with a level set: a logger without one logs at the level of the nearest logger above it</div></div>
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table table-sm">
+						<thead><tr><th>Logger</th><th>Level</th><th>Set by</th><th>Overrides</th></tr></thead>
+						<tbody>
+							<wo:repetition list="$rows" item="$currentRow">
+								<tr>
+									<td class="font-monospace text-nowrap"><wo:str value="$currentRow.logger" /></td>
+									<td><span class="badge bg-primary-lt"><wo:str value="$currentRow.level" /></span></td>
+									<td>
+										<wo:if condition="$currentRow.isSetOnInstance">
+											<wo:form class="d-inline-flex align-items-center gap-2"><span class="badge bg-orange-lt">set on this instance</span> <wo:submit action="$unsetLevel" value="Unset" class="btn btn-sm" /></wo:form>
+										</wo:if>
+										<wo:if condition="$currentRow.isSetOnInstance" negate="true">
+											<span class="font-monospace small"><wo:str value="$currentRow.setBy.setting" /></span>
+											<wo:if condition="$currentRow.setBy.source"> <span class="badge bg-primary-lt"><wo:str value="$currentRow.setBy.source" /></span></wo:if>
+										</wo:if>
+									</td>
+									<td class="text-secondary small"><wo:str value="$currentRow.overridesDescription" /></td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Set a level on this instance</h3></div>
+				<div class="card-body">
+					<wo:form class="d-flex align-items-center gap-2">
+						<wo:textfield value="$newLogger" class="form-control font-monospace" placeholder="logger, or root" list="erx-loggers" style="max-width: 28rem" />
+						<wo:popUpButton list="$levels" item="$currentLevel" selection="$newLevel" class="form-select" style="max-width: 8rem" />
+						<wo:submit action="$setLevel" value="Set" class="btn btn-primary" />
+					</wo:form>
+					<datalist id="erx-loggers"><wo:repetition list="$loggers" item="$currentLogger"><wo:container elementName="option" value="$currentLogger.name" /></wo:repetition></datalist>
+					<div class="form-hint">Sets <span class="font-monospace">er.logging.level.&lt;logger&gt;</span> on this instance, which wins over every other layer. It shows on the Configuration page too, survives a reload of the configuration and can be unset; nothing is written to disk.</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</wo:if>
