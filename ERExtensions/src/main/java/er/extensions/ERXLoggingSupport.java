@@ -1,45 +1,88 @@
 package er.extensions;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.ServiceLoader;
 
 /**
- * Interfaces with the logging implementation. Currently we just delegate to a bridge class in the ERLoggingReload4j
- * module, looked up by name, since ERExtensions doesn't depend on that module.
+ * Drives the logging backend (see {@link ERXLoggingBackend}), found through {@link ServiceLoader} the first time it's
+ * needed: first thing in {@code ERXApplication.main()}. With none, logging goes wherever slf4j sends it without
+ * configuration, which is said once, on the console. With more than one, the launch stops, naming them.
  */
-
 public class ERXLoggingSupport {
 
-	private static final String LOGGING_BRIDGE_CLASS = "er.extensions.logging.ERXTemporaryLoggingBridge";
+	/**
+	 * The backend, or null for none, found on first use
+	 */
+	private static final class Holder {
+		private static final ERXLoggingBackend BACKEND = find();
+	}
 
-	public static void configureLoggingWithSystemProperties() {
-		runLoggingBridgeMethod("configureLoggingWithSystemProperties");
+	private static ERXLoggingBackend find() {
+		final List<ERXLoggingBackend> backends = ServiceLoader
+				.load( ERXLoggingBackend.class )
+				.stream()
+				.map( ServiceLoader.Provider::get )
+				.toList();
+
+		if( backends.size() > 1 ) {
+			throw new IllegalStateException( "More than one logging backend is on the classpath, at most one may be: " + backends.stream().map( backend -> backend.getClass().getName() ).toList() );
+		}
+
+		if( backends.isEmpty() ) {
+			System.out.println( "====== No logging backend (such as ERLoggingReload4j's) is on the classpath: logging is left unconfigured" );
+			return null;
+		}
+
+		return backends.get( 0 );
 	}
 
 	/**
-	 * Installs a plain console appender (INFO) if the root logger has none yet, so that logging works
-	 * from the first line of main() - before the Properties cascade has been read and the real
-	 * configuration applied by {@link #configureLoggingWithSystemProperties()}, which replaces it.
+	 * @return The logging backend, null if there's none
+	 */
+	public static ERXLoggingBackend backend() {
+		return Holder.BACKEND;
+	}
+
+	/**
+	 * Configures logging from the configuration, see {@link ERXLoggingBackend#configure()}
+	 */
+	public static void configureLoggingWithSystemProperties() {
+		if( backend() != null ) {
+			backend().configure();
+		}
+	}
+
+	/**
+	 * Sets up console logging for startup, see {@link ERXLoggingBackend#configureDefault()}
 	 */
 	public static void configureDefaultLogging() {
-		runLoggingBridgeMethod("configureDefaultLogging");
+		if( backend() != null ) {
+			backend().configureDefault();
+		}
 	}
 
+	/**
+	 * See {@link ERXLoggingBackend#reattachConsole()}
+	 */
 	public static void reInitConsoleAppenders() {
-		runLoggingBridgeMethod("reInitConsoleAppenders");
+		if( backend() != null ) {
+			backend().reattachConsole();
+		}
 	}
 
-	private static void runLoggingBridgeMethod(final String methodName) {
-		try {
-			final Class<?> bridge = Class.forName(LOGGING_BRIDGE_CLASS);
-			bridge.getMethod(methodName, null).invoke(null, null);
-		}
-		catch (ClassNotFoundException e ) {
-			System.out.println("====== NO LOGGING BRIDGE FOUND! WARNING! SILENT RUNNING!");
-			System.out.println("====== Failed to locate class %s or run method %s on it".formatted(LOGGING_BRIDGE_CLASS, methodName));
-			System.out.println("====== NO LOGGING BRIDGE FOUND! WARNING! SILENT RUNNING!");
-		}
-		catch( IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e ) {
-			throw new RuntimeException( "Failed to initialize logging bridge", e );
-		}
+	/**
+	 * See {@link ERXLoggingBackend#installCapture()}
+	 *
+	 * @return true if capture is active, false without a backend
+	 */
+	public static boolean installCapture() {
+		return backend() != null && backend().installCapture();
+	}
+
+	/**
+	 * See {@link ERXLoggingBackend#capturedLines(String, int)}
+	 */
+	public static List<String> capturedLines( final String contains, final int tail ) {
+		return backend() == null ? List.of() : backend().capturedLines( contains, tail );
 	}
 }

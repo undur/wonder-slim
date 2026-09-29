@@ -1,7 +1,8 @@
 package er.extensions.dev;
 
-import java.lang.reflect.Method;
 import java.util.List;
+
+import er.extensions.ERXLoggingSupport;
 
 /**
  * Development aid that makes the application's recent log output readable back over
@@ -21,11 +22,10 @@ import java.util.List;
  * bounded in-memory appender at the single point where all log events converge avoids
  * the loop and never disturbs the streams.
  *
- * <p>This class is a thin, backend-agnostic facade: it reaches the actual ring-buffer
- * appender through the same reflective logging bridge that {@link er.extensions.ERXLoggingSupport}
- * uses, so ERExtensions keeps no compile dependency on a specific logging backend. If
- * no bridge is present (or it predates this feature), install is a no-op and snapshots
- * are empty.
+ * <p>This class is a thin, backend-agnostic facade over the logging backend a plugin
+ * provides ({@link er.extensions.ERXLoggingBackend}), so ERExtensions keeps no compile
+ * dependency on a specific logging backend. Without one, install is a no-op and
+ * snapshots are empty.
  *
  * <h2>Development only</h2>
  * Install is gated by the caller on development mode. Exposing log output over HTTP is
@@ -33,23 +33,20 @@ import java.util.List;
  */
 public final class ERXConsoleCapture {
 
-	private static final String LOGGING_BRIDGE_CLASS = "er.extensions.logging.ERXTemporaryLoggingBridge";
-
 	private static volatile boolean _installed;
 
 	private ERXConsoleCapture() {
 	}
 
 	/**
-	 * Attaches the in-memory log capture appender via the logging bridge. Idempotent;
-	 * silently does nothing if no compatible logging bridge is available.
+	 * Attaches the in-memory log capture through the logging backend. Idempotent;
+	 * silently does nothing without a logging backend.
 	 */
 	public static synchronized void install() {
 		if (_installed) {
 			return;
 		}
-		final Boolean active = (Boolean) invokeBridge("installLogCapture", new Class<?>[0]);
-		_installed = Boolean.TRUE.equals(active);
+		_installed = ERXLoggingSupport.installCapture();
 	}
 
 	public static boolean isInstalled() {
@@ -62,33 +59,10 @@ public final class ERXConsoleCapture {
 	 *         when null or empty) and limited to the last {@code tail} matching lines
 	 *         (ignored when {@code <= 0}). Empty when capture isn't installed.
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<String> snapshot(final String contains, final int tail) {
 		if (!_installed) {
 			return List.of();
 		}
-		final Object result = invokeBridge("logSnapshot", new Class<?>[] { String.class, int.class }, contains, tail);
-		return result instanceof List ? (List<String>) result : List.of();
-	}
-
-	/**
-	 * Invokes a static method on the logging bridge reflectively, so ERExtensions need
-	 * not compile-depend on the logging backend. Returns null (and leaves capture
-	 * disabled) if the bridge or method isn't present.
-	 */
-	private static Object invokeBridge(final String methodName, final Class<?>[] paramTypes, final Object... args) {
-		try {
-			final Class<?> bridge = Class.forName(LOGGING_BRIDGE_CLASS);
-			final Method method = bridge.getMethod(methodName, paramTypes);
-			return method.invoke(null, args);
-		}
-		catch (final ClassNotFoundException | NoSuchMethodException e) {
-			// No logging bridge, or an older bridge without capture support: capture is
-			// simply unavailable. Not fatal — the app runs fine without the log endpoint.
-			return null;
-		}
-		catch (final ReflectiveOperationException e) {
-			throw new RuntimeException("Failed to invoke logging bridge method " + methodName, e);
-		}
+		return ERXLoggingSupport.capturedLines(contains, tail);
 	}
 }
