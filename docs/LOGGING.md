@@ -10,8 +10,16 @@ descriptive, not aspirational.
   `ServiceLoader` (`META-INF/services/er.extensions.logging.ERXLoggingBackend`); at most one may be on
   the classpath. `ERXLoggingSupport` is the framework's entry point to it, so ERExtensions
   carries no compile dependency on a backend. Two exist:
-  - **`ERLoggingReload4j`**: log4j 1.x via reload4j (`ERXReload4jLoggingBackend`). The default.
+  - **`ERLoggingReload4j`**: log4j 1.x via reload4j (`ERXReload4jLoggingBackend`).
   - **`ERLoggingLogback`**: logback (`ERXLogbackLoggingBackend`).
+- **Without a backend, logging goes to the console** (`ERXConsoleLoggingBackend`): ERExtensions'
+  own minimal slf4j provider, with the same levels as logback (`log4j.logger.*`, then
+  `er.logging.level.*`, then those set on the running instance) and the common part of
+  `er.logging.pattern` (`ERXConsoleLayout`). It isn't listed in `META-INF/services`, so it never
+  competes with another provider: `ERXApplication`'s static initializer, which the JVM runs before
+  `main()` and before any logger is created, names it as slf4j's provider (`slf4j.provider`) when
+  no backend is on the classpath and nothing else names one. A program that doesn't start
+  through `ERXApplication` gets slf4j's own behaviour, which is to discard everything.
 - **WebObjects needs no log4j API.** Its form value encoder (`WOCGIFormValues$Encoder`, encoding
   a direct action's query parameters) calls `org.apache.log4j.Logger`, and `ERXApplication.main()`
   rewrites it to call slf4j before WebObjects first uses it (`ERXLog4jRewrite`). An application

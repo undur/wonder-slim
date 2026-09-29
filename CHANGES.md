@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Logging works without a logging module**
+  Without ERLoggingLogback or ERLoggingReload4j, slf4j found no provider and discarded everything.
+  ERExtensions now logs to the console itself in that case (`ERXConsoleLoggingBackend`), with the
+  same levels as the modules (`er.logging.level.*`, Project Wonder style `log4j.logger.*`, levels
+  set on the running instance) and lines laid out by `er.logging.pattern`, and the control panel's
+  Logging page works with it. A logging module stays the way to get files, appenders and its own
+  configuration. It's named as slf4j's provider only when no logging module is on the classpath,
+  so it never competes with one. (#157)
+
 - **WebObjects needs no log4j API**
   WebObjects' form value encoder (`WOCGIFormValues$Encoder`) logs through the log4j 1.x API, so
   without one on the classpath the first URL with query parameters failed with a

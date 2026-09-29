@@ -52,6 +52,7 @@ import er.extensions.components.errorpages.WOExceptionPage;
 import er.extensions.ERXPlugin;
 import er.extensions.ERXPlugins;
 import er.extensions.ERXKVCReflectionHack;
+import er.extensions.logging.ERXConsoleLoggingBackend;
 import er.extensions.logging.ERXLog4jRewrite;
 import er.extensions.logging.ERXLoggingSupport;
 import er.extensions.logging.ERXNSLogBridge;
@@ -80,6 +81,12 @@ import parsley.ParsleyConfiguration;
  * own finishInitialization() and didFinishLaunching() come in, is described on {@link ERXPlugin}.
  */
 public abstract class ERXApplication extends ERXAjaxApplication {
+
+	// Logging to the console when there's no logging module: slf4j's provider has to be named before the first logger
+	// is created, the one on the next line. The JVM runs this before main(). See ERXConsoleLoggingBackend.
+	static {
+		ERXConsoleLoggingBackend.activateIfNoBackend();
+	}
 
 	private static final Logger log = LoggerFactory.getLogger(ERXApplication.class);
 	private static final Logger requestHandlingLog = LoggerFactory.getLogger("er.extensions.ERXApplication.RequestHandling");

@@ -7,8 +7,8 @@ import er.extensions.foundation.ERXConfigurationManager;
 
 /**
  * Drives the logging backend (see {@link ERXLoggingBackend}), found through {@link ServiceLoader} the first time it's
- * needed: first thing in {@code ERXApplication.main()}. With none, logging goes wherever slf4j sends it without
- * configuration, which is said once, on the console. With more than one, the launch stops, naming them.
+ * needed: first thing in {@code ERXApplication.main()}. With none, logging goes to the console through
+ * {@link ERXConsoleLoggingBackend}. With more than one, the launch stops, naming them.
  */
 public class ERXLoggingSupport {
 
@@ -31,7 +31,11 @@ public class ERXLoggingSupport {
 		}
 
 		if( backends.isEmpty() ) {
-			System.out.println( "====== No logging backend (such as ERLoggingReload4j's) is on the classpath: logging is left unconfigured" );
+			if( ERXConsoleLoggingBackend.isActive() ) {
+				return ERXConsoleLoggingBackend.INSTANCE;
+			}
+
+			System.out.println( "====== No logging backend (such as ERLoggingLogback's) is on the classpath: logging is left unconfigured" );
 			return null;
 		}
 
