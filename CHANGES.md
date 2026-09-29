@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **`ERXProperties` is typed reading only**
+  The loading plumbing and the handling of secrets moved to `ERXConfigurationManager`:
+  `isSecretKey()`, `maskedValue()` and `logString()` are `ERXConfigurationManager`'s now, and
+  `propertiesFromArgv()` and the reading of properties files are private to it.
+  `transferPropertiesFromSourceToDest()` and `explicitlySetKeys()` are removed.
+  `ERXProperties` keeps what applications use it for: `stringForKey()`,
+  `booleanForKeyWithDefault()` and the other typed readers. (#147)
+
 - **ERControl: a Configuration page, with the plugins, the sources and where each value came from**
   The admin console's Properties section becomes Configuration (`/wonder/admin/configuration`).
   It lists the plugins in the order they run, with what each requires and provides; the sources

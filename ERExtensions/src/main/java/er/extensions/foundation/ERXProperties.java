@@ -6,31 +6,22 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.foundation;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Enumeration;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Stack;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 
+/**
+ * Typed reading of the application's properties: a property's value as a string, boolean, number, array or enum, with
+ * or without a default, converted once and cached. The properties themselves are composed, reloaded and watched by
+ * {@link ERXConfigurationManager}, which clears this cache whenever it changes them.
+ */
 public class ERXProperties {
 
     private static String UndefinedMarker = "-undefined-";
-
-    private static final Logger log = LoggerFactory.getLogger(ERXProperties.class);
 
     /**
      * All methods on ERXProperties are static, no instances allowed.
@@ -275,216 +266,13 @@ public class ERXProperties {
     	return result;
     }
 
-    /** 
-     * Copies all properties from source to dest. 
-     * 
-     * @param source properties copied from
-     * @param dest properties copied to
-     */
-    public static void transferPropertiesFromSourceToDest(Properties source, Properties dest) {
-        if (source != null) {
-            dest.putAll(source);
-            if (dest == System.getProperties()) {
-                systemPropertiesChanged();
-            }
-        }
-    }
-    
     /**
-     * Gets the properties for a given file.
-     * 
-     * @param file the properties file
-     * @return properties from the given file
-     * @throws java.io.IOException if the file is not found or cannot be read
+     * Clears the cached values, and NSProperties', after the configuration changed the system properties
      */
-	static Properties propertiesFromFile(File file) throws java.io.IOException {
-        if (file == null)
-            throw new IllegalStateException("Attempting to get properties for a null file!");
-        ERXProperties._Properties prop = new ERXProperties._Properties();
-        prop.load(file);
-        return prop;
-    }
-    
-    /**
-     * Sets and returns properties object with the values from  the given command line arguments string array. 
-     * 
-     * @param argv string array typically provided by the command line arguments
-     * @return properties object with the values from the argv
-     */
-	public static Properties propertiesFromArgv(String[] argv) {
-    	ERXProperties._Properties properties = new ERXProperties._Properties();
-        NSDictionary argvDict = NSProperties.valuesFromArgv(argv);
-        Enumeration e = argvDict.allKeys().objectEnumerator();
-        while (e.hasMoreElements()) {
-            Object key = e.nextElement();
-            properties.put(key, argvDict.objectForKey(key));
-        }
-        return properties;
-    }
-
-
-	/**
-	 * @return The keys a properties file, a JVM option or an argument set, see {@link ERXConfigurationManager#keys()}. The rest
-	 *         of what is in effect are WebObjects and JVM defaults.
-	 */
-	public static java.util.Set<String> explicitlySetKeys() {
-		final ERXConfigurationManager configuration = ERXConfigurationManager.current();
-		return configuration == null ? java.util.Set.of() : configuration.keys();
-	}
-
-	/**
-	 * @return true if the key names something that must not be written to a log: passwords, API keys,
-	 *         tokens, secrets and credentials of any spelling
-	 */
-	public static boolean isSecretKey(String key) {
-		return key != null && SECRET_KEY_PATTERN.matcher(key).find();
-	}
-
-	/**
-	 * @return The value as it may be shown or logged: masked entirely if the key names a secret (see
-	 *         {@link #isSecretKey(String)}), otherwise with the value of every secret property masked wherever it
-	 *         appears in it. The JVM's own record of the command line ({@code sun.java.command}) carries the
-	 *         application's arguments, passwords included.
-	 */
-	public static String maskedValue(final String key, final String value) {
-		if (value == null) {
-			return null;
-		}
-
-		if (isSecretKey(key)) {
-			return MASK;
-		}
-
-		String result = value;
-
-		for (final String otherKey : System.getProperties().stringPropertyNames()) {
-			if (isSecretKey(otherKey)) {
-				final String secret = System.getProperty(otherKey);
-
-				// Very short values would mask ordinary text, and aren't worth hiding anyway
-				if (secret != null && secret.length() >= 4) {
-					result = result.replace(secret, MASK);
-				}
-			}
-		}
-
-		return result;
-	}
-
-	private static final String MASK = "********";
-
-	private static final java.util.regex.Pattern SECRET_KEY_PATTERN = java.util.regex.Pattern.compile("(?i)(password|passwd|secret|api[._-]?key|access[._-]?key|private[._-]?key|token|credential)");
-
-
-    /**
-     * Returns all of the properties in the system mapped to their evaluated values, sorted by key.
-     * 
-     * @param properties
-     * @param protectValues if <code>true</code>, keys with the word "password" in them will have their values removed 
-     * @return all of the properties in the system mapped to their evaluated values, sorted by key
-     */
-    private static Map<String, String> propertiesMap(Properties properties, boolean protectValues) {
-    	Map<String, String> props = new TreeMap<>();
-    	for (Enumeration e = properties.keys(); e.hasMoreElements();) {
-    		String key = (String) e.nextElement();
-    		final String value = String.valueOf(properties.getProperty(key));
-    		props.put(key, protectValues ? maskedValue(key, value) : value);
-    	}
-    	return props;
-    }
-    
-    /**
-     * Returns a string suitable for logging.
-     * 
-     * @param properties
-     * @return string for logging
-     */
-    public static String logString(Properties properties) {
-    	StringBuilder message = new StringBuilder();
-        for (Map.Entry<String, String> entry : propertiesMap(properties, true).entrySet()) {
-        	message.append("  " + entry.getKey() + "=" + entry.getValue() + "\n");
-        }
-        return message.toString();
-    }
-    
-
     static void systemPropertiesChanged() {
         _cache.clear();
         // NSProperties (ERFoundation's) caches property values and clears the cache on this notification; without it,
         // properties read through NSProperties would keep their old values
         NSNotificationCenter.defaultCenter().postNotification(NSProperties.PropertiesDidChange, null, null);
     }
-
-	/**
-	 * _Properties is a subclass of Properties that provides support for including other
-	 * Properties files on the fly.  If you create a property named .includeProps, the value
-	 * will be interpreted as a file to load.  If the path is absolute, it will just load it
-	 * directly.  If it's relative, the path will be loaded relative to the current user's
-	 * home directory.  Multiple .includeProps can be included in a Properties file and they
-	 * will be loaded in the order they appear within the file.
-	 */
-	private static class _Properties extends Properties {
-
-		private static final Logger log = LoggerFactory.getLogger(ERXProperties.class);
-
-		public static final String IncludePropsKey = ".includeProps";
-		
-		private Stack<File> _files = new Stack<>();
-		
-		@Override
-		public synchronized Object put(Object key, Object value) {
-			if (_Properties.IncludePropsKey.equals(key)) {
-				String propsFileName = (String)value;
-                File propsFile = new File(propsFileName);
-                if (!propsFile.isAbsolute()) {
-                    // if we don't have any context for a relative (non-absolute) props file,
-                    // we presume that it's relative to the user's home directory
-    				File cwd = null;
-    				if (_files.size() > 0) {
-    					cwd = _files.peek();
-    				}
-    				else {
-    					cwd = new File(System.getProperty("user.home"));
-                	}
-                    propsFile = new File(cwd, propsFileName);
-                }
-
-                // Detect mutually recursing props files by tracking what we've already loaded:
-                String existingIncludeProps = getProperty(_Properties.IncludePropsKey);
-                if (existingIncludeProps == null) {
-                	existingIncludeProps = "";
-                }
-                if (existingIncludeProps.indexOf(propsFile.getPath()) > -1) {
-                    log.error("_Properties.load(): recursive includeProps detected! {} in {}", propsFile, existingIncludeProps);
-                    log.error("_Properties.load() cannot proceed - QUITTING!");
-                    System.exit(1);
-                }
-                if (existingIncludeProps.length() > 0) {
-                	existingIncludeProps += ", ";
-                }
-                existingIncludeProps += propsFile;
-                super.put(_Properties.IncludePropsKey, existingIncludeProps);
-
-                try {
-                    log.info("_Properties.load(): Including props file: {}", propsFile);
-					load(propsFile);
-				} catch (IOException e) {
-					throw new RuntimeException("Failed to load the property file '" + value + "'.", e);
-				}
-				return null;
-			}
-			return super.put(key, value);
-		}
-
-		public synchronized void load(File propsFile) throws IOException {
-			_files.push(propsFile.getParentFile());
-			try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(propsFile))) {
-	            load(is);
-			}
-			finally {
-				_files.pop();
-			}
-		}
-	}
-    
 }

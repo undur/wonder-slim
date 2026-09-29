@@ -20,7 +20,6 @@ import com.webobjects.appserver.WOStatisticsStore;
 
 import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
-import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.statistics.ERXStats;
 
@@ -116,7 +115,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 				ERXConfigurationManager configuration = user != null ? ERXConfigurationManager.previewForUser(user) : ERXConfigurationManager.current();
 				Properties props = new Properties();
 				props.putAll(configuration.properties());
-				r.appendContentString(ERXProperties.logString(props));
+				r.appendContentString(ERXConfigurationManager.logString(props));
 			}
 			else {
 				String value = request().stringFormValueForKey("value");
@@ -126,7 +125,7 @@ public class ERXAdminDirectAction extends WODirectAction {
 				ERXLoggingSupport.configureLoggingWithSystemProperties();
 				for (java.util.Enumeration e = p.keys(); e.hasMoreElements();) {
 					Object k = e.nextElement();
-					final String line = WOMessage.stringByEscapingHTMLString(k + "=" + ERXProperties.maskedValue((String)k, String.valueOf(p.get(k))));
+					final String line = WOMessage.stringByEscapingHTMLString(k + "=" + ERXConfigurationManager.maskedValue((String)k, String.valueOf(p.get(k))));
 					if (k.equals(key)) {
 						r.appendContentString("<b>'" + line + "'     <= you changed this</b><br>");
 					}

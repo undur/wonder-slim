@@ -7,7 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ERXPropertiesMaskingTest {
+public class ERXConfigurationManagerMaskingTest {
 
 	@BeforeEach
 	public void setSecrets() {
@@ -23,23 +23,23 @@ public class ERXPropertiesMaskingTest {
 
 	@Test
 	public void aSecretKeysValueIsMaskedEntirely() {
-		assertEquals( "********", ERXProperties.maskedValue( "WOMonitorServicePassword", "anything" ) );
-		assertEquals( "********", ERXProperties.maskedValue( "anthropic.apiKey", "anything" ) );
+		assertEquals( "********", ERXConfigurationManager.maskedValue( "WOMonitorServicePassword", "anything" ) );
+		assertEquals( "********", ERXConfigurationManager.maskedValue( "anthropic.apiKey", "anything" ) );
 	}
 
 	@Test
 	public void aSecretInsideAnotherValueIsMasked() {
-		assertEquals( "App -WOPort 1 -er.test.masking.password ******** -X y", ERXProperties.maskedValue( "sun.java.command", "App -WOPort 1 -er.test.masking.password hunter2-and-more -X y" ) );
+		assertEquals( "App -WOPort 1 -er.test.masking.password ******** -X y", ERXConfigurationManager.maskedValue( "sun.java.command", "App -WOPort 1 -er.test.masking.password hunter2-and-more -X y" ) );
 	}
 
 	@Test
 	public void veryShortSecretsDontMaskOrdinaryText() {
-		assertEquals( "abcdef", ERXProperties.maskedValue( "some.key", "abcdef" ) );
+		assertEquals( "abcdef", ERXConfigurationManager.maskedValue( "some.key", "abcdef" ) );
 	}
 
 	@Test
 	public void anOrdinaryValueIsUnchanged() {
-		assertEquals( "47831", ERXProperties.maskedValue( "WOPort", "47831" ) );
-		assertNull( ERXProperties.maskedValue( "WOPort", null ) );
+		assertEquals( "47831", ERXConfigurationManager.maskedValue( "WOPort", "47831" ) );
+		assertNull( ERXConfigurationManager.maskedValue( "WOPort", null ) );
 	}
 }

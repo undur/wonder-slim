@@ -1,6 +1,8 @@
 package er.extensions.foundation;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSBundle;
+import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSProperties;
 
 import er.extensions.ERXLoggingSupport;
@@ -313,11 +317,11 @@ public final class ERXConfigurationManager {
 	public record PropertyChange( String propertyName, String oldValue, String newValue ) {
 
 		/**
-		 * Masks secrets, see {@link ERXProperties#maskedValue(String, String)}, so logging a change can't leak one
+		 * Masks secrets, see {@link #maskedValue(String, String)}, so logging a change can't leak one
 		 */
 		@Override
 		public String toString() {
-			return propertyName + ": " + ERXProperties.maskedValue( propertyName, oldValue ) + " -> " + ERXProperties.maskedValue( propertyName, newValue );
+			return propertyName + ": " + maskedValue( propertyName, oldValue ) + " -> " + maskedValue( propertyName, newValue );
 		}
 	}
 
@@ -836,7 +840,7 @@ public final class ERXConfigurationManager {
 		}
 
 		try {
-			sources.add( new Source( name, file.getPath(), toMap( ERXProperties.propertiesFromFile( file ) ) ) );
+			sources.add( new Source( name, file.getPath(), toMap( propertiesFromFile( file ) ) ) );
 		}
 		catch( IOException e ) {
 			log.error( "Unable to load the configuration file: {}", file, e );
@@ -903,7 +907,7 @@ public final class ERXConfigurationManager {
 	 * @return The application's arguments ({@code -Key value}, {@code -Dkey=value})
 	 */
 	private static Source argumentsSource() {
-		return new Source( "Arguments", "", toMap( ERXProperties.propertiesFromArgv( _argv ) ) );
+		return new Source( "Arguments", "", toMap( propertiesFromArgv( _argv ) ) );
 	}
 
 	private static Map<String, String> toMap( final Properties properties ) {
@@ -967,7 +971,7 @@ public final class ERXConfigurationManager {
 	 * caching flag or handler keys are as operationally relevant as anything the application set itself). Printed in
 	 * the same banner style as the rest of the startup output.
 	 *
-	 * Secrets are masked, also where they appear inside another value, see {@link ERXProperties#maskedValue(String, String)}. The classpath is
+	 * Secrets are masked, also where they appear inside another value, see {@link #maskedValue(String, String)}. The classpath is
 	 * the one value printed one entry per line: as a single line it is unreadable and dwarfs everything else.
 	 */
 	public void printStartupReport() {
@@ -1005,10 +1009,163 @@ public final class ERXConfigurationManager {
 				}
 			}
 			else {
-				out.append( String.format( "%s %-46s = %s%n", marker, key, ERXProperties.maskedValue( key, entry.getValue() ).replace( "\n", "\\n" ) ) );
+				out.append( String.format( "%s %-46s = %s%n", marker, key, maskedValue( key, entry.getValue() ).replace( "\n", "\\n" ) ) );
 			}
 		}
 
 		System.out.print( out );
+	}
+
+	/**
+	 * @return true if the key names something that must not be shown or logged: passwords, API keys, tokens, secrets and
+	 *         credentials of any spelling
+	 */
+	public static boolean isSecretKey( final String key ) {
+		return key != null && SECRET_KEY_PATTERN.matcher( key ).find();
+	}
+
+	/**
+	 * @return The value as it may be shown or logged: masked entirely if the key names a secret (see
+	 *         {@link #isSecretKey(String)}), otherwise with the value of every secret property masked wherever it appears
+	 *         in it. The JVM's own record of the command line ({@code sun.java.command}) carries the application's
+	 *         arguments, passwords included.
+	 */
+	public static String maskedValue( final String key, final String value ) {
+
+		if( value == null ) {
+			return null;
+		}
+
+		if( isSecretKey( key ) ) {
+			return MASK;
+		}
+
+		String result = value;
+
+		for( final String otherKey : System.getProperties().stringPropertyNames() ) {
+			if( isSecretKey( otherKey ) ) {
+				final String secret = System.getProperty( otherKey );
+
+				// Very short values would mask ordinary text, and aren't worth hiding anyway
+				if( secret != null && secret.length() >= 4 ) {
+					result = result.replace( secret, MASK );
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * @return The given properties as lines of {@code key=value}, sorted by key, secrets masked (see
+	 *         {@link #maskedValue(String, String)})
+	 */
+	public static String logString( final Properties properties ) {
+		final StringBuilder message = new StringBuilder();
+
+		for( final String key : new TreeSet<>( properties.stringPropertyNames() ) ) {
+			message.append( "  " + key + "=" + maskedValue( key, properties.getProperty( key ) ) + "\n" );
+		}
+
+		return message.toString();
+	}
+
+	private static final String MASK = "********";
+
+	private static final Pattern SECRET_KEY_PATTERN = Pattern.compile( "(?i)(password|passwd|secret|api[._-]?key|access[._-]?key|private[._-]?key|token|credential)" );
+
+	/**
+	 * @return The properties in the given file, its {@code .includeProps} followed (see {@link IncludingProperties})
+	 */
+	private static Properties propertiesFromFile( final File file ) throws IOException {
+		final IncludingProperties properties = new IncludingProperties();
+		properties.load( file );
+		return properties;
+	}
+
+	/**
+	 * @return The application's arguments ({@code -Key value}, {@code -Dkey=value}) as properties, as WebObjects parses them
+	 */
+	private static Properties propertiesFromArgv( final String[] argv ) {
+		final Properties properties = new Properties();
+		final NSDictionary<?, ?> values = NSProperties.valuesFromArgv( argv );
+
+		for( final Object key : values.allKeys() ) {
+			properties.put( key, values.objectForKey( key ) );
+		}
+
+		return properties;
+	}
+
+	/**
+	 * IncludingProperties is a subclass of Properties that provides support for including other
+	 * Properties files on the fly.  If you create a property named .includeProps, the value
+	 * will be interpreted as a file to load.  If the path is absolute, it will just load it
+	 * directly.  If it's relative, the path will be loaded relative to the current user's
+	 * home directory.  Multiple .includeProps can be included in a Properties file and they
+	 * will be loaded in the order they appear within the file.
+	 */
+	private static class IncludingProperties extends Properties {
+
+		private static final Logger log = LoggerFactory.getLogger(ERXConfigurationManager.class);
+
+		public static final String IncludePropsKey = ".includeProps";
+		
+		private Stack<File> _files = new Stack<>();
+		
+		@Override
+		public synchronized Object put(Object key, Object value) {
+			if (IncludingProperties.IncludePropsKey.equals(key)) {
+				String propsFileName = (String)value;
+                File propsFile = new File(propsFileName);
+                if (!propsFile.isAbsolute()) {
+                    // if we don't have any context for a relative (non-absolute) props file,
+                    // we presume that it's relative to the user's home directory
+    				File cwd = null;
+    				if (_files.size() > 0) {
+    					cwd = _files.peek();
+    				}
+    				else {
+    					cwd = new File(System.getProperty("user.home"));
+                	}
+                    propsFile = new File(cwd, propsFileName);
+                }
+
+                // Detect mutually recursing props files by tracking what we've already loaded:
+                String existingIncludeProps = getProperty(IncludingProperties.IncludePropsKey);
+                if (existingIncludeProps == null) {
+                	existingIncludeProps = "";
+                }
+                if (existingIncludeProps.indexOf(propsFile.getPath()) > -1) {
+                    log.error("_Properties.load(): recursive includeProps detected! {} in {}", propsFile, existingIncludeProps);
+                    log.error("_Properties.load() cannot proceed - QUITTING!");
+                    System.exit(1);
+                }
+                if (existingIncludeProps.length() > 0) {
+                	existingIncludeProps += ", ";
+                }
+                existingIncludeProps += propsFile;
+                super.put(IncludingProperties.IncludePropsKey, existingIncludeProps);
+
+                try {
+                    log.info("_Properties.load(): Including props file: {}", propsFile);
+					load(propsFile);
+				} catch (IOException e) {
+					throw new RuntimeException("Failed to load the property file '" + value + "'.", e);
+				}
+				return null;
+			}
+			return super.put(key, value);
+		}
+
+		public synchronized void load(File propsFile) throws IOException {
+			_files.push(propsFile.getParentFile());
+			try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(propsFile))) {
+	            load(is);
+			}
+			finally {
+				_files.pop();
+			}
+		}
 	}
 }

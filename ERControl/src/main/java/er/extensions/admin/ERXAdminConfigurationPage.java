@@ -19,7 +19,6 @@ import er.extensions.ERXPlugins;
 import er.extensions.components.ERXComponent;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXConfigurationManager.Source;
-import er.extensions.foundation.ERXProperties;
 
 /**
  * The application's configuration: the plugins in the order they run, the sources of properties in the order they're
@@ -186,8 +185,8 @@ public class ERXAdminConfigurationPage extends ERXComponent {
 
 	private void addIfMatching( final List<PropertyRow> result, final String key, final String rawValue, final String origin, final String overrides, final String overriddenBy, final boolean changedHere, final boolean setOnThisInstance ) {
 		final String needle = filter == null || filter.isBlank() ? null : filter.toLowerCase();
-		final boolean secret = ERXProperties.isSecretKey( key );
-		final String value = rawValue == null ? "" : ERXProperties.maskedValue( key, rawValue );
+		final boolean secret = ERXConfigurationManager.isSecretKey( key );
+		final String value = rawValue == null ? "" : ERXConfigurationManager.maskedValue( key, rawValue );
 
 		if( needle != null && !key.toLowerCase().contains( needle ) && !( !secret && value.toLowerCase().contains( needle ) ) ) {
 			return;

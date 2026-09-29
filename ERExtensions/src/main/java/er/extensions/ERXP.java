@@ -314,7 +314,7 @@ public enum ERXP {
 
 	// ERXProperties
 	/**
-	 * If true, the optional Properties files are loaded too: {@code Properties.log4j}, {@code .database}, {@code .multilanguage} and {@code .migration}, with their per-user variants. Defaults to false.
+	 * If true, the application's optional Properties files are read too: {@code Properties.log4j}, {@code .database}, {@code .multilanguage} and {@code .migration}, and {@code Properties.<Framework>} for every framework, each with a {@code .<user>} variant. That's two lookups per framework at every composition of the configuration. Defaults to false.
 	 */
 	LOAD_OPTIONAL_PROPERTIES( "er.extensions.ERXProperties.loadOptionalProperties" ),
 
