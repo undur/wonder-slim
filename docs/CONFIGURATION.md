@@ -41,7 +41,7 @@ sources in order, and for each property the source its value came from.
      properties that decide which files are read may be set by a file, it then finds the files again,
      and composes again if they changed (three rounds at most).
 
-3. **Each plugin's `beforeApplicationConstruction()`** runs, in plugin order. Then **the application
+3. **All plugins' `beforeApplicationConstruction()`** run, in plugin order. Then **the application
    is constructed** (`WOApplication.main()`). WO applies the application's arguments again, with the
    same values. The constructors see the composed configuration.
 
@@ -49,9 +49,9 @@ sources in order, and for each property the source its value came from.
    printed: the sources in order, and every property in effect with the source that set it. (Logging
    was configured from the configuration as soon as it was composed, in step 2; see `LOGGING.md`.)
 
-5. **Each plugin's `finishInitialization()`**, then the application's, runs once the application is
-   constructed, before its adaptors start listening; **each plugin's `didFinishLaunching()`**, then
-   the application's, once they are (see `ERXPlugin`).
+5. **All plugins' `finishInitialization()`**, in plugin order, then the application's, once, run when
+   the application is constructed, before its adaptors start listening; **all plugins'
+   `didFinishLaunching()`**, then the application's, once they are (see `ERXPlugin`).
 
 ## The sources, lowest precedence first
 
@@ -112,7 +112,7 @@ the others. `onChange()` returns the listener, to `remove()` it. A property set 
   A framework that can't depend on wonder-slim (one also meant for plain WebObjects or Project
   Wonder), and so takes part through a principal class, should do its setup on
   `ApplicationWillFinishLaunchingNotification` rather than in the principal's static initializer:
-  with wonder-slim that comes after every plugin's `finishInitialization()` and the application's,
+  with wonder-slim that comes after all plugins and the application have run `finishInitialization()`,
   with the configuration complete, and it's the same moment in plain WebObjects and Project Wonder.
   `NSNotificationCenter` holds observers weakly, so the observer goes in a static field. Reading
   the files without `NSBundle`, so principal classes run after composing, was considered and not

@@ -17,9 +17,9 @@ import er.extensions.appserver.ERXApplication;
  * <li>The configuration is composed (see {@code ERXConfigurationManager}).</li>
  * <li>{@link #beforeApplicationConstruction()}</li>
  * <li>The application is constructed.</li>
- * <li>{@link #finishInitialization(ERXApplication)}, then the application's own {@code finishInitialization()}</li>
+ * <li>{@link #finishInitialization(ERXApplication)} on all plugins, then once the application's own {@code finishInitialization()}</li>
  * <li>The adaptors start listening, and requests begin to arrive.</li>
- * <li>{@link #didFinishLaunching(ERXApplication)}, then the application's own {@code didFinishLaunching()}</li>
+ * <li>{@link #didFinishLaunching(ERXApplication)} on all plugins, then once the application's own {@code didFinishLaunching()}</li>
  * </ol>
  *
  * Each hook runs through the plugins in order, a plugin after the plugins it requires, and then on the application:
@@ -50,7 +50,7 @@ public interface ERXPlugin {
 	/**
 	 * Invoked once the application object is fully constructed, its own class's constructor included, and before its
 	 * adaptors start listening. No request has arrived or can arrive. The application's own
-	 * {@code finishInitialization()} runs after every plugin's.
+	 * {@code finishInitialization()} runs once, after all plugins have run theirs.
 	 *
 	 * <ul>
 	 * <li>The configuration's logging settings are applied.</li>
@@ -64,7 +64,8 @@ public interface ERXPlugin {
 
 	/**
 	 * Invoked once the application's adaptors are listening. Requests may already be arriving, and being handled
-	 * concurrently with this. The application's own {@code didFinishLaunching()} runs after every plugin's.
+	 * concurrently with this. The application's own {@code didFinishLaunching()} runs once, after all plugins have run
+	 * theirs.
 	 *
 	 * Invoked on {@code ApplicationDidFinishLaunchingNotification}, in no defined order relative to other observers of
 	 * that notification: WebObjects' notification center doesn't order its observers.

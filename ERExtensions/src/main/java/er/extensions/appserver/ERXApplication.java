@@ -562,7 +562,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Override to finish initializing the application. Invoked once the application is fully constructed (its own
-	 * constructor included), after every plugin's {@link ERXPlugin#finishInitialization(ERXApplication)}, and before
+	 * constructor included), once all plugins have run their {@link ERXPlugin#finishInitialization(ERXApplication)}, and before
 	 * the adaptors start listening: no request has arrived or can arrive. See {@link #run()}.
 	 */
 	public void finishInitialization() {}
