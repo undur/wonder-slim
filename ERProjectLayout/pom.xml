@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>is.rebbi.slim</groupId>
+		<artifactId>wonder-slim-reactor</artifactId>
+		<version>8.0.13-SNAPSHOT</version>
+	</parent>
+	<artifactId>ERProjectLayout</artifactId>
+	<name>ERProjectLayout</name>
+	<description>Lets a WebObjects project declare where its components and resources live, in build.properties</description>
+	<packaging>jar</packaging>
+
+	<properties>
+		<!-- Independent of ERExtensions, and usable with Project Wonder -->
+		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.testRelease>25</maven.compiler.testRelease>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>wonder.core</groupId>
+			<artifactId>ERFoundation</artifactId>
+			<version>1.2</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- The parent's JavaWebObjects is a bundle, whose principal class NSBundle loads, and that needs EOAccess -->
+		<dependency>
+			<groupId>${webobjects.group}</groupId>
+			<artifactId>JavaEOAccess</artifactId>
+			<version>${webobjects.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>6.1.3</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

@@ -20,6 +20,12 @@
 			<artifactId>ERFoundation</artifactId>
 			<version>1.2</version>
 		</dependency>
+		<!-- Lets a project declare its layout in build.properties -->
+		<dependency>
+			<groupId>${wonder.core.group}</groupId>
+			<artifactId>ERProjectLayout</artifactId>
+			<version>${wonder.version}</version>
+		</dependency>
 		<!-- Closed source fixes and patches from Apple -->
 		<dependency>
 			<groupId>wonder.core</groupId>

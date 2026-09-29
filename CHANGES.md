@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **A project can declare its layout in build.properties**
+  `dir.components`, `dir.woresources` and `dir.webserverResources` in `build.properties` tell
+  the application where to find its components and resources when it runs from its project folder,
+  so a project laid out the "Fluffy Bunny" way works under Maven without a built bundle. Every
+  project (a folder whose `build.properties` has `project.name` and `project.type`) is now found this
+  way, instead of by its Eclipse natures: undeclared keys take the Maven-layout defaults, and only
+  the declared folders are searched. A project that keeps WebObjects resources elsewhere, a model or
+  `Properties` in `src/main/resources` or a Fluffy Bunny layout relying on having no m2e nature,
+  must now move them or declare its folders. This comes from the new ERProjectLayout module, which
+  `ERXApplication` registers before NSBundle is loaded. It depends only on ERFoundation, so it
+  works with Project Wonder too. vermilingua 1.1.11 packages from the same folders. (#164)
+
 - **ERLoggingReload4j carries its own stack trace settings**
   `er.extensions.stackTrace.cleanup` and `er.extensions.stackTrace.skipPatternsFile`, with the
   `StackTraceSkipPatterns` files, moved from ERExtensions to ERLoggingReload4j: only its

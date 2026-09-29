@@ -9,6 +9,7 @@
 	<name>wonder-slim reactor</name>
 
 	<modules>
+		<module>ERProjectLayout</module>
 		<module>ERExtensions</module>
 		<module>ERLoggingReload4j</module>
 		<module>ERLoggingLogback</module>

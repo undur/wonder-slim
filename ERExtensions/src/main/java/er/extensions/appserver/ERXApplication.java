@@ -70,6 +70,7 @@ import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;
+import er.extensions.projectlayout.ERXProjectLayout;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
 import er.extensions.resources.ERXPublicResources;
@@ -86,10 +87,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	// The JVM runs this before main(). First, a copy of what's written to the console from here on, for the start of the
 	// WOOutputPath file once WebObjects redirects to it (see ERXEarlyOutput). Then logging to the console when there's
 	// no logging module: slf4j's provider has to be named before the first logger is created, the one below. See
-	// ERXConsoleLoggingBackend.
+	// ERXConsoleLoggingBackend. Last, the bundle factory for projects that declare their layout in build.properties: NSBundle
+	// reads its factories once, when main() first touches it. See ERXProjectLayout.
 	static {
 		ERXEarlyOutput.start();
 		ERXConsoleLoggingBackend.activateIfNoBackend();
+		ERXProjectLayout.register();
 	}
 
 	private static final Logger log = LoggerFactory.getLogger(ERXApplication.class);
