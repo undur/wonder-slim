@@ -55,7 +55,6 @@ public interface ERXPlugin {
 	 * <ul>
 	 * <li>The configuration's logging settings are applied.</li>
 	 * <li>The request handlers the framework and the application register in their constructors are registered.</li>
-	 * <li>An adaptor added here ({@code application.adaptorWithName(…)}) is started with the others.</li>
 	 * </ul>
 	 *
 	 * Invoked from {@code ERXApplication.run()}, before {@code WOApplication.run()} posts
@@ -67,8 +66,8 @@ public interface ERXPlugin {
 	 * Invoked once the application's adaptors are listening. Requests may already be arriving, and being handled
 	 * concurrently with this. The application's own {@code didFinishLaunching()} runs after every plugin's.
 	 *
-	 * Invoked on {@code ApplicationDidFinishLaunchingNotification}; other observers of that notification run in the
-	 * order they registered.
+	 * Invoked on {@code ApplicationDidFinishLaunchingNotification}, in no defined order relative to other observers of
+	 * that notification: WebObjects' notification center doesn't order its observers.
 	 */
 	public default void didFinishLaunching( final ERXApplication application ) {}
 }

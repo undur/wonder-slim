@@ -36,8 +36,7 @@ public enum ERXNotification {
 	/**
 	 * Posted by WOApplication.run() once the application has been constructed, before the adaptors start listening, so
 	 * before any request can arrive. The plugins' and the application's finishInitialization() have run by then (see
-	 * ERXApplication.run()). An adaptor added by an observer of this notification is never started: WOApplication.run()
-	 * has read the adaptors already. Notification object is the application.
+	 * ERXApplication.run()). Observers are called in no defined order. Notification object is the application.
 	 */
 	ApplicationWillFinishLaunchingNotification( WOApplication.ApplicationWillFinishLaunchingNotification ),
 	

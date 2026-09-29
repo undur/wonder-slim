@@ -286,9 +286,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	/**
 	 * Invoked by WOApplication.main() once the application is constructed (the application's own class's constructor
-	 * included), to launch it. The plugins' finishInitialization() and then the application's run first, rather than on
-	 * ApplicationWillFinishLaunchingNotification: WOApplication.run() reads the adaptors before it posts that
-	 * notification, so an adaptor added by one of its observers would never be started.
+	 * included), to launch it. The plugins' finishInitialization() and then the application's run here, before
+	 * WOApplication.run() posts ApplicationWillFinishLaunchingNotification, rather than as observers of it: WebObjects'
+	 * notification center calls a notification's observers in no defined order, and this order is defined, the
+	 * application's last.
 	 */
 	@Override
 	public void run() {
