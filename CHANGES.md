@@ -2,6 +2,75 @@
 
 ## Unreleased
 
+- **ERControl: a Configuration page, with the plugins, the sources and where each value came from**
+  The admin console's Properties section becomes Configuration (`/wonder/admin/configuration`).
+  It lists the plugins in the order they run, with what each requires and provides; the sources
+  in the order they're applied, with how many of each one's properties are in effect or
+  overridden; and every property with the source it came from and the sources it overrides, or
+  one source's properties with their own values. A value changed on the running instance is
+  marked. A property set in the console is a source of its own, "Set on this instance", above every
+  other source, the application's arguments included; it survives a reload of the configuration,
+  and can be unset, giving the property back the value the other sources give it
+  (`ERXConfigurationManager.setProperty()` and `unsetProperty()`). The files an application or
+  machine usually configures with are listed even when they
+  aren't there (the application's `Properties` files, `~/WebObjects.properties`,
+  `/etc/WebObjects/Properties` and `/etc/WebObjects/<App>/Properties`, each optional configuration
+  file), marked "no file present", here and in the startup report. Setting a property there now takes effect for values read through `ERXProperties`,
+  which kept the old value cached (`ERXProperties.setProperty()`). (#146)
+
+- **A password passed as an argument is masked in `sun.java.command` too**
+  The startup report masks a property whose key names a secret, but the JVM keeps the whole
+  command line in `sun.java.command`, so a password given as an argument was printed as part of
+  that value. Now the value of every secret property is masked wherever it appears
+  (`ERXProperties.maskedValue()`), in the startup report, the admin console and
+  `ERXAdminDirectAction`'s property listing, which also escapes what it writes now. (#145)
+
+- **Frameworks take part in startup as plugins, found through `ServiceLoader`**
+  A framework or application module implements `ERXPlugin` and lists it in
+  `META-INF/services/er.extensions.ERXPlugin`. Plugins are ordered by what they require
+  (`requires()`), never by classpath order, with class name breaking ties. A missing required
+  plugin or a cycle stops the launch with a message naming them. Each runs, in that order, at
+  `beforeApplicationConstruction()` (the configuration composed, no application object yet),
+  `finishInitialization()` (fully constructed, the application's own constructor included, and no
+  request can arrive yet; an adaptor added here is started with the others) and
+  `didFinishLaunching()` (the adaptors are listening, and requests may be arriving concurrently).
+  The application's own `finishInitialization()` and `didFinishLaunching()` run at the same points,
+  after every plugin's. The application's `finishInitialization()` now runs before any observer of
+  `ApplicationWillFinishLaunchingNotification`, rather than as one of them. A framework with a plugin has its
+  `Properties` applied in plugin order, so it overrides the frameworks it requires. ERExtensions'
+  principal, `ERXExtensions`, is now a plugin. (#33)
+
+- **`ERXFrameworkPrincipal` removed; Ajax, AjaxSlim and ERControl are plugins**
+  A framework joins startup by implementing `ERXPlugin` and listing it in
+  `META-INF/services/er.extensions.ERXPlugin`, instead of subclassing `ERXFrameworkPrincipal`,
+  registering itself from a static initializer and naming itself as `NSPrincipalClass`. The Ajax
+  frameworks register their request handlers and response delegate once, when the application is
+  constructed (before, on two notifications). ERControl maps its routes then too, after the
+  application's own constructor, so a route the application maps at `/wonder/admin` wins as
+  documented. `er.extensions.ERXFrameworkPrincipal.logLifecycle` is reported as obsolete. A
+  framework still subclassing `ERXFrameworkPrincipal` fails at launch with a
+  `NoClassDefFoundError`. (#33)
+
+- **The configuration is composed once, before the application is constructed**
+  `ERXApplication.main()` now composes the configuration from all its sources before the
+  application exists, so its constructor sees the properties it runs with. Before, the constructor
+  saw only WebObjects' own pass: a property read there (the port, caching, `shortURLs`,
+  `publicHost` and the like) set in `Properties.dev`, `Properties.<user>`, an optional
+  configuration file or `/etc/WebObjects` showed in the startup report but had no effect. A JVM
+  `-D` option now takes precedence over properties files throughout, where before it did in the
+  constructor and not afterwards. A reload gives a property no file sets any more its value from
+  launch back, instead of keeping it. The startup report lists every source, framework jars, JVM
+  options and arguments included. `ERXConfigurationManager` now composes the configuration and
+  holds its sources and where each value came from (`ERXConfigurationManager.current()`), and
+  checks its files for changes on a thread of its own rather than on each request, replacing
+  `ERXFileNotificationCenter`. Its old instance API (`defaultManager()`, the argument and loading
+  methods) and `ERXProperties.pathsForUserAndBundleProperties()` and `applyConfiguration()` are
+  gone. `ERXConfigurationManager.onChange()` calls a listener when a property's value changes
+  (or any of a family of properties'), whether by a reload or by setting it on the running
+  instance. A touch file (`er.extensions.ERXConfigurationManager.PropertiesTouchFile`) now works
+  without `er.extensions.ERXFileNotificationCenter.CheckFilesPeriod`, which nothing reads
+  any more. (#144)
+
 ## 2026-09-28 (8.0.11)
 
 - **Resource URLs carry a stamp of the resource's content, and are cached for good**

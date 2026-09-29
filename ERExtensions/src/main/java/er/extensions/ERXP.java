@@ -306,23 +306,6 @@ public enum ERXP {
 	 */
 	STATISTICS_STORE_FATAL_MILLIS( "er.extensions.ERXStatisticsStore.milliSeconds.fatal" ),
 
-	// ERXFileNotificationCenter
-	/**
-	 * Seconds between checks of watched files for changes, outside development mode (which always checks). Defaults to 0: no checks outside development mode.
-	 */
-	FILE_NOTIFICATION_CHECK_FILES_PERIOD( "er.extensions.ERXFileNotificationCenter.CheckFilesPeriod" ),
-
-	/**
-	 * If true, a change to a watched file is detected from the last-modified time of the file a symlink points to, rather than of the symlink. Defaults to true.
-	 */
-	FILE_NOTIFICATION_SYMLINK_SUPPORT( "ERXFileNotificationCenter.symlinkSupport" ),
-
-	// ERXFrameworkPrincipal
-	/**
-	 * If true, framework principals' initialization is printed to System.out. Must be a {@code -D} JVM argument, since it runs before logging is configured. Defaults to false.
-	 */
-	FRAMEWORK_PRINCIPAL_LOG_LIFECYCLE( "er.extensions.ERXFrameworkPrincipal.logLifecycle" ),
-
 	// ERXConfigurationManager
 	/**
 	 * A file that, when touched, makes the application reload its properties. Unset: no reloading.

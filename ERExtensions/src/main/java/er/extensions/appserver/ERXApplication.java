@@ -49,8 +49,8 @@ import com.webobjects.foundation.NSTimestamp;
 import er.extensions.ERXP;
 import er.extensions.components.errorpages.WOExceptionPage;
 
-import er.extensions.ERXExtensions;
-import er.extensions.ERXFrameworkPrincipal;
+import er.extensions.ERXPlugin;
+import er.extensions.ERXPlugins;
 import er.extensions.ERXKVCReflectionHack;
 import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXObsoleteProperties;
@@ -74,19 +74,9 @@ import er.extensions.statistics.ERXStats;
 import parsley.ParsleyConfiguration;
 
 /**
- * FIXME: Application/plugin initialization phases // Hugi 2025-10-29
- * 
- * 1. main() :: Collect all ERXPlugin classes
- * 2. main() :: Gather and read Properties from each (in .requires() order)
- * 
- * --- At this point all "raw" properties are loaded so the plugins are ready for real "initializaiton"
- * 
- * 3. main() / ERXPlugin.init() - Construct an instance of each ERXPlugin class and run initialization logic (in .requires() order)
- * 
- * 4. ERXApplication() / ERXPlugin.afterApplicationConstruction() 
- * 5. ?? / ERXApplciation.afterApplicationLaunch()
+ * The application. Startup, in order, from main() to accepting requests, and where the plugins and the application's
+ * own finishInitialization() and didFinishLaunching() come in, is described on {@link ERXPlugin}.
  */
-
 public abstract class ERXApplication extends ERXAjaxApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(ERXApplication.class);
@@ -156,14 +146,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		// A console appender from the very first line, so nothing logged during WO's and our own
 		// initialization is dropped (log4j's "No appenders could be found" - and, worse, silently lost
-		// constructor-time output). The real configuration from the Properties cascade replaces it
-		// once the application has been created (ERXExtensions.finishInitialization ->
-		// ERXConfigurationManager.loadConfiguration -> configureLoggingWithSystemProperties).
+		// constructor-time output). The configuration's logging settings replace it once the application
+		// has been constructed (see the end of the ERXApplication constructor).
 		ERXLoggingSupport.configureDefaultLogging();
 
+		// The plugins, found and ordered. See ERXPlugin.
+		ERXPlugins.load();
+
 		ERXKVCReflectionHack.enable();
-		ERXConfigurationManager.defaultManager().setCommandLineArguments(argv);
-		ERXFrameworkPrincipal.setUpFrameworkPrincipalClass(ERXExtensions.class);
 		ERXShutdownHook.initERXShutdownHookIfEnabled();
 
 		// WO's own debug chatter - WOProperties.printWODefaults() dumping every WO default as
@@ -185,6 +175,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			}
 		});
 		NSLog.debug.setAllowedDebugLevel(nsLogDebugCap);
+
+		// The configuration, composed from all its sources before the application is constructed, so the constructor
+		// sees the properties the application runs with. See ERXConfigurationManager.
+		ERXConfigurationManager.compose(argv);
+
+		ERXPlugins.forEach(ERXPlugin::beforeApplicationConstruction);
 
 		WOApplication.main(argv, applicationClass);
 	}
@@ -267,10 +263,29 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		ERXNotification.DidHandleRequestNotification.addObserver(_proxyBalancerConfig::addBalancerRouteCookieByNotification);
 
 		// Adding notification hooks for the application's launch lifecycle
-		ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver(this::finishInitialization);
 		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this::didFinishLaunching);
 		
+		// Logging from the configuration (replacing the console appender main() installs), reloading when the
+		// configuration's files change, and the startup report on the configuration
+		ERXLoggingSupport.configureLoggingWithSystemProperties();
+		ERXConfigurationManager.watchForChanges(this);
+		ERXConfigurationManager.current().printStartupReport();
+
 		ERXNotification.ApplicationDidCreateNotification.postNotification(this);
+	}
+
+	/**
+	 * Invoked by WOApplication.main() once the application is constructed (the application's own class's constructor
+	 * included), to launch it. The plugins' finishInitialization() and then the application's run first, rather than on
+	 * ApplicationWillFinishLaunchingNotification: WOApplication.run() reads the adaptors before it posts that
+	 * notification, so an adaptor added by one of its observers would never be started.
+	 */
+	@Override
+	public void run() {
+		ERXPlugins.forEach(plugin -> plugin.finishInitialization(this));
+		finishInitialization();
+		ERXNotification.ApplicationDidFinishInitializationNotification.postNotification(this);
+		super.run();
 	}
 
 	/**
@@ -382,7 +397,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		if (statisticsBasePath != null) {
 			// Defaults to a single day
 			final int rotationFrequency = ERXProperties.intForKeyWithDefault(ERXP.STATISTICS_LOG_ROTATION_FREQUENCY.id(), 24 * 60 * 60 * 1000);
-			final String logPath = statisticsBasePath + File.separator + name() + "-" + ERXConfigurationManager.defaultManager().hostName() + "-" + port() + ".log";
+			final String logPath = statisticsBasePath + File.separator + name() + "-" + hostName() + "-" + port() + ".log";
 
 			if (log.isDebugEnabled()) {
 				log.debug("Configured statistics logging to file path \"" + logPath + "\" with rotation frequency: " + rotationFrequency);
@@ -393,23 +408,13 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Notification method called when the application posts the notification {@link WOApplication#ApplicationWillFinishLaunchingNotification}.
-	 * This method calls subclasses' {@link #finishInitialization} method.
-	 * 
-	 * @param n notification posted after WOApplication has been constructed, but before the application is ready for accepting requests.
-	 */
-	public final void finishInitialization(NSNotification n) {
-		finishInitialization();
-		ERXNotification.ApplicationDidFinishInitializationNotification.postNotification(this);
-	}
-
-	/**
 	 * Notification method called when the application posts the notification {@link WOApplication#ApplicationDidFinishLaunchingNotification}.
 	 * This method calls subclasse's {@link #didFinishLaunching} method.
 	 * 
 	 * @param n notification posted after WOApplication has finished launching and is ready for accepting requests.
 	 */
 	public final void didFinishLaunching(NSNotification n) {
+		ERXPlugins.forEach(plugin -> plugin.didFinishLaunching(this));
 		didFinishLaunching();
 
 		// Logged post-launch so it lands after the configured logging is in place and near the
@@ -545,17 +550,31 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Called when the application posts {@link WOApplication#ApplicationWillFinishLaunchingNotification}.
-	 * Override this to perform application initialization.
+	 * Override to finish initializing the application. Invoked once the application is fully constructed (its own
+	 * constructor included), after every plugin's {@link ERXPlugin#finishInitialization(ERXApplication)}, and before
+	 * the adaptors start listening: no request has arrived or can arrive. See {@link #run()}.
 	 */
 	public void finishInitialization() {}
 
 	/**
-	 * Called when the application posts {@link WOApplication#ApplicationDidFinishLaunchingNotification}.
-	 * Override this to perform application specific tasks after the application has been initialized.
-	 * This is a good spot to perform batch application tasks.
+	 * Override for work once the application accepts requests. Invoked once the adaptors are listening, after every
+	 * plugin's {@link ERXPlugin#didFinishLaunching(ERXApplication)}. Requests may already be arriving, and being handled
+	 * concurrently with this.
 	 */
 	public void didFinishLaunching() {}
+
+	/**
+	 * @return This machine's host name, "UnknownHost" if it can't be resolved
+	 */
+	private static String hostName() {
+		try {
+			return java.net.InetAddress.getLocalHost().getHostName();
+		}
+		catch (java.net.UnknownHostException e) {
+			log.warn("Caught unknown host exception.", e);
+			return "UnknownHost";
+		}
+	}
 
 	/**
 	 * @return The <code>WOApplication.application()</code> cast as an ERXApplication

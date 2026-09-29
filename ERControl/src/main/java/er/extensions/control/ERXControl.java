@@ -1,24 +1,26 @@
 package er.extensions.control;
 
-import er.extensions.ERXFrameworkPrincipal;
+import java.util.List;
+
+import er.extensions.ERXExtensions;
+import er.extensions.ERXPlugin;
 import er.extensions.admin.ERXAdmin;
+import er.extensions.appserver.ERXApplication;
 
 /**
- * Framework principal for ERControl, the framework's control panel. Registers the control panel's routes from
- * finishInitialization(), which ERXFrameworkPrincipal invokes on ApplicationDidCreateNotification - posted at the end
- * of the application's constructor, after it has mapped its own routes, so a route an application maps itself wins.
- * A stand-in until the framework has proper plugin initialization.
+ * ERControl's plugin, for the framework's control panel. Registers the control panel's routes once the application is
+ * constructed, after the routes it maps in its constructor, so a route the application maps itself at the control
+ * panel's path wins.
  */
-public class ERXControl extends ERXFrameworkPrincipal {
+public class ERXControl implements ERXPlugin {
 
-	public static Class[] REQUIRES = new Class[0];
-
-	static {
-		setUpFrameworkPrincipalClass( ERXControl.class );
+	@Override
+	public List<Class<? extends ERXPlugin>> requires() {
+		return List.of( ERXExtensions.class );
 	}
 
 	@Override
-	public void finishInitialization() {
+	public void finishInitialization( final ERXApplication application ) {
 		ERXAdmin.registerRoutes();
 	}
 }

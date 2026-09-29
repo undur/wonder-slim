@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -22,23 +21,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
-import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
-import com.webobjects.foundation.NSMutableArray;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
-
-import er.extensions.ERXP;
-import er.extensions.appserver.ERXApplication;
 
 public class ERXProperties {
 
     private static String UndefinedMarker = "-undefined-";
 
     private static final Logger log = LoggerFactory.getLogger(ERXProperties.class);
-    private static final Logger configLog = LoggerFactory.getLogger(ERXConfigurationManager.class);
 
     /**
      * All methods on ERXProperties are static, no instances allowed.
@@ -305,7 +297,7 @@ public class ERXProperties {
      * @return properties from the given file
      * @throws java.io.IOException if the file is not found or cannot be read
      */
-	private static Properties propertiesFromFile(File file) throws java.io.IOException {
+	static Properties propertiesFromFile(File file) throws java.io.IOException {
         if (file == null)
             throw new IllegalStateException("Attempting to get properties for a null file!");
         ERXProperties._Properties prop = new ERXProperties._Properties();
@@ -330,233 +322,14 @@ public class ERXProperties {
         return properties;
     }
 
-    /** 
-     * Returns an array of paths to the <code>Properties</code> and 
-     * <code>WebObjects.properties</code> files contained in the 
-     * application/framework bundles and home directory. 
-     * <p>
-     * If ProjectBuilder (for Mac OS X) has the project opened, 
-     * it will attempt to get the path to the one in the project 
-     * directory instead of the one in the bundle. 
-     * <p>
-     * This opened project detection feature is pretty fragile and 
-     * will change between versions of the dev-tools.
-     * 
-     * @return paths to Properties files
-     */
-	public static NSArray pathsForUserAndBundleProperties() {
-        return pathsForUserAndBundleProperties(false);
-    }
-
-    private static void addIfPresent(String info, String path, NSMutableArray<String> propertiesPaths, NSMutableArray<String> projectsInfo) {
-    	if(path != null && path.length() > 0) {
-    		path = getActualPath(path);
-    		if(propertiesPaths.containsObject(path)) {
-    			log.error("Path was already included: {}", path);
-    		}
-    		projectsInfo.addObject(info + "\t" + path);
-    		propertiesPaths.addObject(path);
-    	}
-    }
-    
-    public static NSArray<String> pathsForUserAndBundleProperties(boolean reportLoggingEnabled) {
-        NSMutableArray<String> propertiesPaths = new NSMutableArray();
-        NSMutableArray<String> projectsInfo = new NSMutableArray();
-
-        /*  Properties for frameworks */
-        NSArray frameworkNames = (NSArray) NSBundle.frameworkBundles().valueForKey("name");
-        Enumeration e = frameworkNames.reverseObjectEnumerator();
-        while (e.hasMoreElements()) {
-        	String frameworkName = (String) e.nextElement();
-
-        	String propertyPath = pathForResourceNamed("Properties", frameworkName, null);
-        	addIfPresent(frameworkName + ".framework", propertyPath, propertiesPaths, projectsInfo);
-
-        	// A framework deployed as a jar has no file path for its Properties - the bundle loads them
-        	// itself - but the startup report should still list it and know which keys it set, so
-        	// it goes into the report (projectsInfo) by URL, and deliberately NOT into propertiesPaths,
-        	// which drives loading.
-        	if (propertyPath == null) {
-        		NSBundle bundle = NSBundle.bundleForName(frameworkName);
-        		if (bundle != null && bundle.isJar()) {
-        			String resourcePath = bundle.resourcePathForLocalizedResourceNamed("Properties", null);
-        			URL url = resourcePath != null ? bundle.pathURLForResourcePath(resourcePath) : null;
-        			if (url != null) {
-        				projectsInfo.addObject(frameworkName + ".framework\t" + url);
-        			}
-        		}
-        	}
-
-        	/** Properties.dev -- per-Framework-dev properties 
-        	 * This adds support for Properties.dev in your Frameworks new load order will be
-        	 */
-        	String devPropertiesPath = ERXApplication.isDevelopmentModeSafe() ? ERXProperties.variantPropertiesInBundle("dev", frameworkName) : null;
-        	addIfPresent(frameworkName + ".framework.dev", devPropertiesPath, propertiesPaths, projectsInfo);
-        	
-        	/** Properties.<userName> -- per-Framework-per-User properties */
-        	String userPropertiesPath = ERXProperties.variantPropertiesInBundle(NSProperties.getProperty("user.name"), frameworkName);
-        	addIfPresent(frameworkName + ".framework.user", userPropertiesPath, propertiesPaths, projectsInfo);
-        }
-
-		NSBundle mainBundle = NSBundle.mainBundle();
-		
-		if( mainBundle != null ) {
-	        String mainBundleName = mainBundle.name();
-	
-	        String appPath = pathForResourceNamed("Properties", "app", null);
-	    	addIfPresent(mainBundleName + ".app", appPath, propertiesPaths, projectsInfo);
-		}
-
-		/*  WebObjects.properties in the user home directory */
-		String userHome = NSProperties.getProperty("user.home");
-		if (userHome != null && userHome.length() > 0) {
-			File file = new File(userHome, "WebObjects.properties");
-			if (file.exists() && file.isFile() && file.canRead()) {
-				try {
-					String userHomePath = file.getCanonicalPath();
-			    	addIfPresent("{$user.home}/WebObjects.properties", userHomePath, propertiesPaths, projectsInfo);
-				}
-				catch (java.io.IOException ex) {
-					log.error("Failed to load the configuration file '{}'.", file, ex);
-				}
-			}
-        }
-
-		/*  Optional properties files */
-		if (optionalConfigurationFiles() != null && optionalConfigurationFiles().count() > 0) {
-			for (Enumeration configEnumerator = optionalConfigurationFiles().objectEnumerator(); configEnumerator.hasMoreElements();) {
-				String configFile = (String) configEnumerator.nextElement();
-				File file = new File(configFile);
-				if (file.exists() && file.isFile() && file.canRead()) {
-					try {
-						String optionalPath = file.getCanonicalPath();
-				    	addIfPresent("Optional Configuration", optionalPath, propertiesPaths, projectsInfo);
-					}
-					catch (java.io.IOException ex) {
-						log.error("Failed to load configuration file '{}'.", file, ex);
-					}
-				}
-				else {
-					log.error("The optional configuration file '{}' either does not exist or could not be read.", file);
-				}
-			}
-		}
-
-		optionalPropertiesLoader(NSProperties.getProperty("user.name"), propertiesPaths, projectsInfo);
-		
-        /** /etc/WebObjects/AppName/Properties -- per-Application-per-Machine properties */
-        String applicationMachinePropertiesPath = ERXProperties.applicationMachinePropertiesPath("Properties");
-    	addIfPresent("Application-Machine Properties", applicationMachinePropertiesPath, propertiesPaths, projectsInfo);
-
-        /** Properties.dev -- per-Application-dev properties */
-        String applicationDeveloperPropertiesPath = ERXProperties.applicationDeveloperProperties();
-    	addIfPresent("Application-Developer Properties", applicationDeveloperPropertiesPath, propertiesPaths, projectsInfo);
-
-        /** Properties.<userName> -- per-Application-per-User properties */
-        String applicationUserPropertiesPath = ERXProperties.applicationUserProperties();
-    	addIfPresent("Application-User Properties", applicationUserPropertiesPath, propertiesPaths, projectsInfo);
-
-        /*  Report the result */
-		if (reportLoggingEnabled && projectsInfo.count() > 0) {
-			printStartupReport(propertiesPaths, projectsInfo);
-		}
-
-    	return propertiesPaths.immutableClone();
-    }
 
 	/**
-	 * The startup report on configuration: the Properties files in the order they were loaded, then
-	 * every property in effect - alphabetically, with the ones a Properties file or the command line
-	 * set marked, so the application's own configuration stands out from WebObjects' and the JVM's
-	 * defaults while those stay available (the effective session timeout, worker thread count, caching
-	 * flag or handler keys are as operationally relevant as anything the application set itself).
-	 * Printed in the same banner style as the rest of the startup output.
-	 *
-	 * Values whose key looks like a secret are masked - see {@link #isSecretKey(String)}. The
-	 * classpath is the one value printed one entry per line: as a single line it is unreadable and
-	 * dwarfs everything else.
-	 */
-	private static void printStartupReport(NSArray<String> propertiesPaths, NSArray<String> projectsInfo) {
-		final StringBuilder out = new StringBuilder();
-
-		out.append("============== PROPERTIES FILES ================\n");
-		out.append("(loaded in this order - a later file overrides an earlier one)\n");
-
-		for (String entry : projectsInfo) {
-			final int tab = entry.indexOf('\t');
-			final String info = tab == -1 ? entry : entry.substring(0, tab);
-			final String path = tab == -1 ? "" : entry.substring(tab + 1);
-			out.append(String.format("%-34s : %s%n", info, path));
-		}
-
-		// The keys the files (on disk or inside a framework jar) and the command line set explicitly
-		final java.util.Set<String> explicit = new java.util.HashSet<>();
-
-		for (String entry : projectsInfo) {
-			final int tab = entry.indexOf('\t');
-			final String path = tab == -1 ? entry : entry.substring(tab + 1);
-			final Properties fileProperties = new Properties();
-
-			try (java.io.InputStream in = path.contains("!/") || path.startsWith("jar:") ? new URL(path).openStream() : new FileInputStream(path)) {
-				fileProperties.load(in);
-			}
-			catch (IOException e) {
-				log.warn("Could not read {} for the startup report", path, e);
-				continue;
-			}
-
-			explicit.addAll(fileProperties.stringPropertyNames());
-		}
-
-		explicit.addAll(ERXConfigurationManager.defaultManager().commandLineArgumentProperties().stringPropertyNames());
-		_explicitlySetKeys = java.util.Set.copyOf(explicit);
-
-		final TreeMap<String, String> effective = new TreeMap<>();
-
-		for (String key : NSProperties._getProperties().stringPropertyNames()) {
-			effective.put(key, effectiveValue(key));
-		}
-
-		out.append('\n');
-		out.append("================= PROPERTIES ===================\n");
-		out.append("(* = set by a Properties file or the command line; the rest are WebObjects and JVM defaults)\n");
-
-		for (Map.Entry<String, String> entry : effective.entrySet()) {
-			final String key = entry.getKey();
-			final String marker = explicit.contains(key) ? "*" : " ";
-
-			if (isSecretKey(key)) {
-				out.append(String.format("%s %-46s = ********%n", marker, key));
-			}
-			else if ("java.class.path".equals(key)) {
-				final String[] elements = entry.getValue().split(java.util.regex.Pattern.quote(File.pathSeparator));
-				out.append(String.format("%s %-46s = %s%n", marker, key, elements.length > 0 ? elements[0] : ""));
-
-				for (int i = 1; i < elements.length; i++) {
-					out.append(String.format("  %-46s   %s%n", "", elements[i]));
-				}
-			}
-			else {
-				out.append(String.format("%s %-46s = %s%n", marker, key, entry.getValue().replace("\n", "\\n")));
-			}
-		}
-
-		System.out.print(out);
-	}
-
-	private static volatile java.util.Set<String> _explicitlySetKeys = java.util.Set.of();
-
-	/**
-	 * @return The keys a Properties file or the command line set, as worked out for the startup report. The rest of
-	 *         what is in effect are WebObjects and JVM defaults.
+	 * @return The keys a properties file, a JVM option or an argument set, see {@link ERXConfigurationManager#keys()}. The rest
+	 *         of what is in effect are WebObjects and JVM defaults.
 	 */
 	public static java.util.Set<String> explicitlySetKeys() {
-		return _explicitlySetKeys;
-	}
-
-	private static String effectiveValue(String key) {
-		final String value = NSProperties.getProperty(key);
-		return value == null ? "" : value;
+		final ERXConfigurationManager configuration = ERXConfigurationManager.current();
+		return configuration == null ? java.util.Set.of() : configuration.keys();
 	}
 
 	/**
@@ -567,129 +340,41 @@ public class ERXProperties {
 		return key != null && SECRET_KEY_PATTERN.matcher(key).find();
 	}
 
+	/**
+	 * @return The value as it may be shown or logged: masked entirely if the key names a secret (see
+	 *         {@link #isSecretKey(String)}), otherwise with the value of every secret property masked wherever it
+	 *         appears in it. The JVM's own record of the command line ({@code sun.java.command}) carries the
+	 *         application's arguments, passwords included.
+	 */
+	public static String maskedValue(final String key, final String value) {
+		if (value == null) {
+			return null;
+		}
+
+		if (isSecretKey(key)) {
+			return MASK;
+		}
+
+		String result = value;
+
+		for (final String otherKey : System.getProperties().stringPropertyNames()) {
+			if (isSecretKey(otherKey)) {
+				final String secret = System.getProperty(otherKey);
+
+				// Very short values would mask ordinary text, and aren't worth hiding anyway
+				if (secret != null && secret.length() >= 4) {
+					result = result.replace(secret, MASK);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	private static final String MASK = "********";
+
 	private static final java.util.regex.Pattern SECRET_KEY_PATTERN = java.util.regex.Pattern.compile("(?i)(password|passwd|secret|api[._-]?key|access[._-]?key|private[._-]?key|token|credential)");
 
-    /** 
-     * 	Making it possible to use Properties File in the Application more
-     * 	powerful, specially for newcomers.
-     * 	For every Framework it will try to call also following 
-     * 		Properties.[Framework] and Properties.[Framework].[Username]
-     * 	Also there is a Propertie for
-     * 		Properties.log4j, Properties.log4j.[Username] for logging
-     * 		Properties.database, Properties.database.[Username] for database infos
-     * 		Properties.multilanguage, Properties.multilanguage.[Username] for Encoding
-     * 		Properties.migration, Properties.migration.[Username] for Migration
-     * 
-     * @param userName Username
-     * @param propertiesPaths Properites Path {@link ERXProperties#pathsForUserAndBundleProperties}
-     * @param projectsInfo Project Info {@link ERXProperties#pathsForUserAndBundleProperties}
-     */
-    private static void optionalPropertiesLoader(String userName, NSMutableArray<String> propertiesPaths, NSMutableArray<String> projectsInfo) {
-    	if(!ERXProperties.booleanForKeyWithDefault(ERXP.LOAD_OPTIONAL_PROPERTIES.id(), false)){
-    		return;
-    	}
-    	
-    	/** Properties.log4j.<userName> -- per-Application-per-User properties */
-        String logPropertiesPath;
-        logPropertiesPath = ERXProperties.variantPropertiesInBundle("log4j", "app");
-        if(logPropertiesPath != null) {
-        	addIfPresent("Application-User Log4j Properties", logPropertiesPath, propertiesPaths, projectsInfo);
-        }
-        logPropertiesPath = ERXProperties.variantPropertiesInBundle("log4j." + userName, "app");
-        if(logPropertiesPath != null) {
-        	addIfPresent("Application-User Log4j Properties", logPropertiesPath, propertiesPaths, projectsInfo);
-        }
-
-        /** Properties.database.<userName> -- per-Application-per-User properties */
-        String databasePropertiesPath;
-        databasePropertiesPath = ERXProperties.variantPropertiesInBundle("database", "app");
-        if(databasePropertiesPath != null) {
-        	addIfPresent("Application-User Database Properties", databasePropertiesPath, propertiesPaths, projectsInfo);
-        }
-        databasePropertiesPath = ERXProperties.variantPropertiesInBundle("database." + userName, "app");
-        if(databasePropertiesPath != null) {
-        	addIfPresent("Application-User Database Properties", databasePropertiesPath, propertiesPaths, projectsInfo);
-        }
-   	
-        /** Properties.multilanguage.<userName> -- per-Application-per-User properties */
-        String multilanguagePath;
-        multilanguagePath = ERXProperties.variantPropertiesInBundle("multilanguage", "app");
-        if(multilanguagePath != null) {
-        	addIfPresent("Application-User Multilanguage Properties", multilanguagePath, propertiesPaths, projectsInfo);
-        }
-        multilanguagePath = ERXProperties.variantPropertiesInBundle("multilanguage." + userName, "app");
-        if(multilanguagePath != null) {
-        	addIfPresent("Application-User Multilanguage Properties", multilanguagePath, propertiesPaths, projectsInfo);
-        }
-    	
-        /** Properties.migration -- per-Application properties */
-        String migrationPath;
-        migrationPath = ERXProperties.variantPropertiesInBundle("migration", "app");
-        if(migrationPath != null) {
-        	addIfPresent("Application-User Migration Properties", migrationPath, propertiesPaths, projectsInfo);
-        }
-        migrationPath = ERXProperties.variantPropertiesInBundle("migration." + userName, "app");
-        if(migrationPath != null) {
-        	addIfPresent("Application-User Migration Properties", migrationPath, propertiesPaths, projectsInfo);
-        }
-    	
-        /** Properties.<frameworkName>.<userName> -- per-Application-per-User properties */
-        @SuppressWarnings("unchecked")
-        NSArray<String> frameworkNames = (NSArray<String>) NSBundle.frameworkBundles().valueForKey("name");
-        Enumeration<String> e = frameworkNames.reverseObjectEnumerator();
-        while (e.hasMoreElements()) {
-          String frameworkName = e.nextElement();
-          String userPropertiesPath;
-          userPropertiesPath = ERXProperties.variantPropertiesInBundle(frameworkName, "app");
-          if(userPropertiesPath != null) {
-        	  addIfPresent(frameworkName + ".framework.common", userPropertiesPath, propertiesPaths, projectsInfo);
-          }
-          userPropertiesPath = ERXProperties.variantPropertiesInBundle(frameworkName + "." + userName, "app");
-          if(userPropertiesPath != null) {
-        	  addIfPresent(frameworkName + ".framework.user", userPropertiesPath, propertiesPaths, projectsInfo);
-          }
-        }
-    }
-
-    /**
-     * Apply the current configuration to the supplied properties.
-     * 
-     * @param source
-     * @param commandLine
-     * @return the applied properties
-     */
-    public static Properties applyConfiguration(Properties source, Properties commandLine) {
-
-    	Properties dest = source != null ? (Properties) source.clone() : new Properties();
-    	NSArray additionalConfigurationFiles = ERXProperties.pathsForUserAndBundleProperties(false);
-
-    	if (additionalConfigurationFiles.count() > 0) {
-    		for (Enumeration configEnumerator = additionalConfigurationFiles.objectEnumerator(); configEnumerator.hasMoreElements();) {
-    			String configFile = (String)configEnumerator.nextElement();
-    			File file = new File(configFile);
-    			if (file.exists() && file.isFile() && file.canRead()) {
-    				try {
-    					Properties props = ERXProperties.propertiesFromFile(file);
-    					if(log.isDebugEnabled()) {
-    						log.debug("Loaded: {}\n{}", file, ERXProperties.logString(props));
-    					}
-    					ERXProperties.transferPropertiesFromSourceToDest(props, dest);
-    				} catch (java.io.IOException ex) {
-    					log.error("Unable to load optional configuration file: {}", configFile, ex);
-    				}
-    			}
-    			else {
-    				configLog.error("The optional configuration file '{}' either does not exist or cannot be read.", file);
-    			}
-    		}
-    	}
-
-    	if(commandLine != null) {
-    		ERXProperties.transferPropertiesFromSourceToDest(commandLine, dest);
-    	}
-		return dest;
-    	
-    }
 
     /**
      * Returns all of the properties in the system mapped to their evaluated values, sorted by key.
@@ -702,12 +387,8 @@ public class ERXProperties {
     	Map<String, String> props = new TreeMap<>();
     	for (Enumeration e = properties.keys(); e.hasMoreElements();) {
     		String key = (String) e.nextElement();
-    		if (protectValues && isSecretKey(key)) {
-    			props.put(key, "********");
-    		}
-    		else {
-    			props.put(key, String.valueOf(properties.getProperty(key)));
-    		}
+    		final String value = String.valueOf(properties.getProperty(key));
+    		props.put(key, protectValues ? maskedValue(key, value) : value);
     	}
     	return props;
     }
@@ -726,134 +407,8 @@ public class ERXProperties {
         return message.toString();
     }
     
-    /**
-     * Returns the application-specific user properties.
-     * 
-     * @return application-specific user properties
-     */
-	private static String applicationDeveloperProperties() {
-    	String applicationDeveloperPropertiesPath = null;
-    	if (ERXApplication.isDevelopmentModeSafe()) {
-	        String devName = NSProperties.getProperty(ERXP.DEV_PROPERTIES_NAME.id(), "dev");
-	        applicationDeveloperPropertiesPath = variantPropertiesInBundle(devName, "app");
-    	}
-        return applicationDeveloperPropertiesPath;
-    }
-    
-    /**
-     * Returns the application-specific variant properties for the given bundle.
-     * 
-     * @param userName 
-     * @param bundleName 
-     * @return the application-specific variant properties for the given bundle.
-     */
-    private static String variantPropertiesInBundle(String userName, String bundleName) {
-    	String applicationUserPropertiesPath = null;
-        if (userName != null  &&  userName.length() > 0) { 
-        	String resourceApplicationUserPropertiesPath = pathForResourceNamed("Properties." + userName, bundleName, null);
-            if (resourceApplicationUserPropertiesPath != null) {
-            	applicationUserPropertiesPath = ERXProperties.getActualPath(resourceApplicationUserPropertiesPath);
-            }
-        }
-        return applicationUserPropertiesPath;
-    }
 
-    /**
-     * @return The application-specific user properties
-     */
-	private static String applicationUserProperties() {
-    	return variantPropertiesInBundle(NSProperties.getProperty("user.name"), "app");
-    }
-    
-    /**
-     * Returns the path to the application-specific system-wide file "fileName".  By default this path is /etc/WebObjects, 
-     * and the application name will be appended.  For instance, if you are asking for the MyApp Properties file for the
-     * system, it would go in /etc/WebObjects/MyApp/Properties.
-     * 
-     * @param fileName the Filename
-     * @return the path, or null if the path does not exist
-     */
-	private static String applicationMachinePropertiesPath(String fileName) {
-    	String applicationMachinePropertiesPath = null;
-    	String machinePropertiesPath = NSProperties.getProperty(ERXP.MACHINE_PROPERTIES_PATH.id(), "/etc/WebObjects");
-    	WOApplication application = WOApplication.application();
-    	String applicationName;
-    	if (application != null) {
-    		applicationName = application.name();
-    	}
-    	else {
-    		applicationName = NSProperties.getProperty("WOApplicationName");
-    		if (applicationName == null) {
-    			NSBundle mainBundle = NSBundle.mainBundle();
-    			if (mainBundle != null) {
-    				applicationName = mainBundle.name();
-    			}
-    			if (applicationName == null) {
-    				applicationName = "Unknown";
-    			}
-    		}
-    	}
-    	File applicationPropertiesFile = new File(machinePropertiesPath + File.separator + fileName);
-    	if (!applicationPropertiesFile.exists()) {
-    		applicationPropertiesFile = new File(machinePropertiesPath + File.separator + applicationName + File.separator + fileName);
-    	}
-    	if (applicationPropertiesFile.exists()) {
-    		try {
-    			applicationMachinePropertiesPath = applicationPropertiesFile.getCanonicalPath();
-    		}
-    		catch (IOException e) {
-    			log.error("Failed to load machine Properties file '{}'.", fileName, e);
-    		}
-    	}
-    	return applicationMachinePropertiesPath;
-    }
-
-    /**
-     * Gets an array of optionally defined configuration files.  For each file, if it does not
-     * exist as an absolute path, ERXProperties will attempt to resolve it as an application resource
-     * and use that instead.
-     * 
-     * @return array of configuration file names
-     */
-	private static NSArray optionalConfigurationFiles() {
-    	NSArray immutableOptionalConfigurationFiles = arrayForKey(ERXP.OPTIONAL_CONFIGURATION_FILES.id());
-    	NSMutableArray optionalConfigurationFiles = null;
-    	if (immutableOptionalConfigurationFiles != null) {
-    		optionalConfigurationFiles = immutableOptionalConfigurationFiles.mutableClone();
-	    	for (int i = 0; i < optionalConfigurationFiles.count(); i ++) {
-	    		String optionalConfigurationFile = (String)optionalConfigurationFiles.objectAtIndex(i);
-	    		if (!new File(optionalConfigurationFile).exists()) {
-		        	String resourcePropertiesPath = pathForResourceNamed(optionalConfigurationFile, "app", null);
-		        	if (resourcePropertiesPath != null) {
-		            	optionalConfigurationFiles.replaceObjectAtIndex(ERXProperties.getActualPath(resourcePropertiesPath), i);
-		        	}
-	    		}
-	    	}
-    	}
-    	return optionalConfigurationFiles;
-    }
-    
-    /**
-     * Returns actual full path to the given file system path  
-     * that could contain symbolic links. For example: 
-     * /Resources will be converted to /Versions/A/Resources
-     * when /Resources is a symbolic link.
-     * 
-     * @param path path string to a resource that could contain symbolic links
-     * @return actual path to the resource
-     */
-	private static String getActualPath(String path) {
-        String actualPath = null;
-        File file = new File(path);
-        try {
-            actualPath = file.getCanonicalPath();
-        } catch (Exception ex) {
-            log.warn("The file at {} does not seem to exist.", path , ex);
-        }
-        return actualPath;
-    }
-
-    private static void systemPropertiesChanged() {
+    static void systemPropertiesChanged() {
         _cache.clear();
         // NSProperties (ERFoundation's) caches property values and clears the cache on this notification; without it,
         // properties read through NSProperties would keep their old values
@@ -932,36 +487,4 @@ public class ERXProperties {
 		}
 	}
     
-	/**
-	 * Determines the path of the specified Resource. This is done to get a
-	 * single entry point due to the deprecation of pathForResourceNamed
-	 * 
-	 * @param fileName name of the file
-	 * @param frameworkName name of the framework, <code>null</code> or "app" for the application bundle
-	 * @param languages array of languages to get localized resource or <code>null</code>
-	 * @return the absolutePath method off of the file object
-	 */
-	private static String pathForResourceNamed(String fileName, String frameworkName, NSArray<String> languages) {
-		String path = null;
-		NSBundle bundle = "app".equals(frameworkName) ? NSBundle.mainBundle() : NSBundle.bundleForName(frameworkName);
-		if (bundle != null && bundle.isJar()) {
-			log.debug("Can't get path when run as jar: {} - {}", frameworkName, fileName);
-		}
-		else {
-			WOApplication application = WOApplication.application();
-			if (application != null) {
-				URL url = application.resourceManager().pathURLForResourceNamed(fileName, frameworkName, languages);
-				if (url != null) {
-					path = url.getFile();
-				}
-			}
-			else if (bundle != null) {
-				URL url = bundle.pathURLForResourcePath(fileName);
-				if (url != null) {
-					path = url.getFile();
-				}
-			}
-		}
-		return path;
-	}
 }

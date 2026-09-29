@@ -111,28 +111,27 @@ public class ERXAdminDirectAction extends WODirectAction {
 			String key = request().stringFormValueForKey("key");
 			WOResponse r = new WOResponse();
 			if (ERXUtilities.stringIsNullOrEmpty(key)) {
+				// The configuration's properties, or with "user", the ones that user would get (their Properties.<user> variants)
 				String user = request().stringFormValueForKey("user");
-				Properties props = ERXConfigurationManager.defaultManager().defaultProperties();
-				if (user != null) {
-					System.setProperty("user.name", user);
-					props = ERXConfigurationManager.defaultManager().applyConfiguration(props);
-				}
+				ERXConfigurationManager configuration = user != null ? ERXConfigurationManager.previewForUser(user) : ERXConfigurationManager.current();
+				Properties props = new Properties();
+				props.putAll(configuration.properties());
 				r.appendContentString(ERXProperties.logString(props));
 			}
 			else {
 				String value = request().stringFormValueForKey("value");
 				value = ERXUtilities.stringIsNullOrEmpty(value) ? "" : value;
+				ERXConfigurationManager.setProperty(key, value);
 				java.util.Properties p = System.getProperties();
-				p.put(key, value);
-				System.setProperties(p);
 				ERXLoggingSupport.configureLoggingWithSystemProperties();
 				for (java.util.Enumeration e = p.keys(); e.hasMoreElements();) {
 					Object k = e.nextElement();
+					final String line = WOMessage.stringByEscapingHTMLString(k + "=" + ERXProperties.maskedValue((String)k, String.valueOf(p.get(k))));
 					if (k.equals(key)) {
-						r.appendContentString("<b>'" + k + "=" + p.get(k) + "'     <= you changed this</b><br>");
+						r.appendContentString("<b>'" + line + "'     <= you changed this</b><br>");
 					}
 					else {
-						r.appendContentString("'" + k + "=" + p.get(k) + "'<br>");
+						r.appendContentString("'" + line + "'<br>");
 					}
 				}
 				r.appendContentString("</body></html>");

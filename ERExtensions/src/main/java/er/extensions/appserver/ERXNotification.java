@@ -29,22 +29,22 @@ public enum ERXNotification {
 	ApplicationDidCreateNotification( "NSApplicationDidCreateNotification" ),
 
 	/**
-	 * Posted when all application initialization processes are complete (after ERXApplication.finishInitialization() has been run)
+	 * Posted by ERXApplication.run() once the plugins' and the application's finishInitialization() have run, before the adaptors start listening
 	 */
 	ApplicationDidFinishInitializationNotification ( "NSApplicationDidFinishInitializationNotification" ),
 	
 	/**
 	 * Posted by WOApplication.run() once the application has been constructed, before the adaptors start listening, so
-	 * before any request can arrive. The place to finish initializing: ERXApplication calls finishInitialization() here
-	 * (and then posts {@link #ApplicationDidFinishInitializationNotification}), and frameworks initialize on it.
-	 * Notification object is the application.
+	 * before any request can arrive. The plugins' and the application's finishInitialization() have run by then (see
+	 * ERXApplication.run()). An adaptor added by an observer of this notification is never started: WOApplication.run()
+	 * has read the adaptors already. Notification object is the application.
 	 */
 	ApplicationWillFinishLaunchingNotification( WOApplication.ApplicationWillFinishLaunchingNotification ),
 	
 	/**
 	 * Posted by WOApplication.run() once the adaptors are listening, so requests may already be arriving. Only posted
-	 * when the application was launched through main(). ERXApplication calls didFinishLaunching() here, which prints
-	 * the startup banner. Notification object is the application.
+	 * when the application was launched through main(). ERXApplication calls the plugins' and then the application's
+	 * didFinishLaunching() here, and prints the startup banner. Notification object is the application.
 	 */
 	ApplicationDidFinishLaunchingNotification( WOApplication.ApplicationDidFinishLaunchingNotification ),
 	

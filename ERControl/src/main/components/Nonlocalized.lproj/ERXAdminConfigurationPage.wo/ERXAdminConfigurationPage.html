@@ -1,0 +1,111 @@
+<wo:ERXAdminLayout title="Configuration" section="configuration" subtitle="The plugins in the order they run, the sources of properties in the order they're applied, and every property with the source it came from.">
+	<wo:if condition="$notice"><div class="alert alert-info"><wo:str value="$notice" /></div></wo:if>
+	<div class="row row-cards">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title"><wo:str value="$pluginCount" /> plugins</h3><div class="card-subtitle ms-3">in the order they run: a plugin runs after those it requires</div></div>
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table table-sm">
+						<thead><tr><th>Plugin</th><th>Framework</th><th>Requires</th></tr></thead>
+						<tbody>
+							<wo:repetition list="$plugins" item="$currentPlugin">
+								<tr>
+									<td class="text-nowrap"><strong><wo:str value="$currentPlugin.name" /></strong> <span class="text-secondary font-monospace small"><wo:str value="$currentPlugin.className" /></span></td>
+									<td class="text-nowrap"><wo:str value="$currentPlugin.framework" /></td>
+									<td class="text-secondary"><wo:str value="$currentPlugin.requires" /></td>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Sources</h3><div class="card-subtitle ms-3">applied in this order: a later source overrides an earlier one. Files looked for where no file is present are listed where they would apply.</div></div>
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table table-sm">
+						<thead><tr><th class="w-1">#</th><th>Source</th><th>Location</th><th class="text-end">Sets</th><th class="text-end">In effect</th><th class="text-end">Overridden</th><th></th></tr></thead>
+						<tbody>
+							<wo:repetition list="$sourceRows" item="$currentSource">
+								<tr>
+									<td class="text-secondary"><wo:str value="$currentSource.position" /></td>
+									<wo:if condition="$currentSource.source.found">
+										<td class="text-nowrap"><strong><wo:str value="$currentSource.source.name" /></strong></td>
+										<td class="font-monospace text-break small"><wo:str value="$currentSource.source.location" /></td>
+										<td class="text-end"><wo:str value="$currentSource.count" /></td>
+										<td class="text-end"><wo:str value="$currentSource.inEffect" /></td>
+										<td class="text-end text-secondary"><wo:str value="$currentSource.overridden" /></td>
+										<td class="text-end"><wo:form><wo:submit action="$showSource" value="Show" class="btn btn-sm" /></wo:form></td>
+									</wo:if>
+									<wo:if condition="$currentSource.source.found" negate="true">
+										<td class="text-nowrap text-secondary"><wo:str value="$currentSource.source.name" /></td>
+										<td class="font-monospace text-break small text-secondary"><wo:str value="$currentSource.source.location" /></td>
+										<td colspan="4" class="text-end"><span class="badge bg-secondary-lt">no file present</span></td>
+									</wo:if>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<wo:form class="d-flex align-items-center gap-2 w-100 flex-wrap">
+						<wo:popUpButton list="$sources" item="$sourceItem" displayString="$sourceItemLabel" selection="$selectedSource" noSelectionString="Every property in effect" class="form-select" style="max-width: 24rem" />
+						<wo:textfield value="$filter" class="form-control" placeholder="Filter by key or value..." style="max-width: 20rem" />
+						<wo:if condition="$showingOneSource" negate="true"><label class="d-flex align-items-center gap-2 text-nowrap"><wo:checkbox checked="$onlyExplicit" /> only those a source set</label></wo:if>
+						<wo:submit action="$apply" value="Show" class="btn btn-primary" />
+						<span class="text-secondary ms-auto"><wo:str value="$propertyCount" /> properties</span>
+					</wo:form>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-vcenter card-table table-sm">
+						<wo:if condition="$showingOneSource">
+							<thead><tr><th>Key</th><th>Value in this source</th><th>In effect</th></tr></thead>
+						</wo:if>
+						<wo:if condition="$showingOneSource" negate="true">
+							<thead><tr><th>Key</th><th>Value</th><th>Source</th></tr></thead>
+						</wo:if>
+						<tbody>
+							<wo:repetition list="$properties" item="$current">
+								<tr>
+									<td class="font-monospace text-nowrap"><wo:str value="$current.key" /></td>
+									<td class="font-monospace text-break"><wo:str value="$current.value" /> <wo:if condition="$current.secret"><span class="badge bg-warning-lt">masked</span></wo:if></td>
+									<wo:if condition="$showingOneSource">
+										<td class="text-nowrap"><wo:if condition="$current.isOverridden"><span class="text-secondary">overridden by <wo:str value="$current.overriddenBy" /></span></wo:if><wo:if condition="$current.isOverridden" negate="true"><span class="badge bg-green-lt">in effect</span></wo:if></td>
+									</wo:if>
+									<wo:if condition="$showingOneSource" negate="true">
+										<td>
+											<wo:if condition="$current.setOnThisInstance">
+												<wo:form class="d-inline-flex align-items-center gap-2"><span class="badge bg-orange-lt">set on this instance</span> <wo:submit action="$unsetProperty" value="Unset" class="btn btn-sm" /></wo:form>
+											</wo:if>
+											<wo:if condition="$current.setOnThisInstance" negate="true"><wo:if condition="$current.hasOrigin"><span class="badge bg-primary-lt"><wo:str value="$current.origin" /></span></wo:if></wo:if>
+											<wo:if condition="$current.changedHere"> <span class="badge bg-orange-lt">changed on this instance</span></wo:if>
+											<wo:if condition="$current.hasOverrides"><div class="text-secondary small">overrides <wo:str value="$current.overrides" /></div></wo:if>
+										</td>
+									</wo:if>
+								</tr>
+							</wo:repetition>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header"><h3 class="card-title">Set a property on this instance</h3></div>
+				<div class="card-body">
+					<wo:form class="d-flex align-items-center gap-2">
+						<wo:textfield value="$newKey" class="form-control font-monospace" placeholder="key" />
+						<wo:textfield value="$newValue" class="form-control font-monospace" placeholder="value" />
+						<wo:submit action="$setProperty" value="Set" class="btn btn-primary" />
+					</wo:form>
+					<div class="form-hint">Overrides every other source, the application's arguments included, and reconfigures logging from the properties, so log levels can be changed this way. Nothing is written to disk. The property shows as set on this instance, and can be unset; otherwise it lasts until the instance stops.</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</wo:ERXAdminLayout>

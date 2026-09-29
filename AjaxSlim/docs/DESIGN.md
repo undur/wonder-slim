@@ -24,9 +24,9 @@ The legacy `Ajax` framework remains untouched as the donor/legacy reference.
 
 ## Architecture
 
-### Bootstrap (the framework principal)
+### Bootstrap (the plugin)
 
-`er.ajax.AjaxSlim` (extends `ERXFrameworkPrincipal`) is the principal, modeled on the legacy
+`er.ajax.AjaxSlim` (an `ERXPlugin`) is the framework's plugin, modeled on the legacy
 `er.ajax.Ajax`. On `finishInitialization` it:
 
 1. Registers `AjaxRequestHandler` under the `ajax` request-handler key (unless already registered).
@@ -286,7 +286,7 @@ ms→s before feeding it through.
 | Periodic refresh | `Ajax.PeriodicalUpdater` (self-scheduling) | `setInterval` with an idempotency guard (clears prior timer for the id) |
 | Effects / insertion | `insertion` / `Effect.*` / `AUC.insertionFunc` / `beforeInsertionDuration` / `afterInsertionDuration` | **DROPPED** (see rationale) |
 | `createAjaxOptions` / `AjaxOption` / `AjaxOptions` | full Prototype option dictionaries (`onLoading`, `onComplete`, `evalScripts`, `asynchronous`, `method`, `decay`, …) | **DROPPED** — not needed by the fetch path |
-| Comet / push | `AjaxPushRequestHandler` registered by principal | **DROPPED** — out of scope |
+| Comet / push | `AjaxPushRequestHandler` registered by the plugin | **DROPPED** — out of scope |
 | `AjaxUtils` array helpers | `arrayValueForObject` etc. via `org.json` | **DROPPED** — avoids the `org.json` dependency |
 | `updateDomElement` / `AjaxValue` | present | **DROPPED** — unused by the core |
 

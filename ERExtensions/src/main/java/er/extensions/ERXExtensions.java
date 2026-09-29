@@ -6,19 +6,8 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions;
 
-import er.extensions.foundation.ERXConfigurationManager;
-import er.extensions.foundation.ERXProperties;
-
-public class ERXExtensions extends ERXFrameworkPrincipal {
-
-	/**
-	 * Loads the configuration (the Properties cascade, then the logging configuration it describes) once the
-	 * application has been created. Until then, logging goes to the console appender ERXApplication.main() installs.
-	 */
-	@Override
-	public void finishInitialization() {
-		ERXConfigurationManager.defaultManager().loadConfiguration();
-		ERXConfigurationManager.defaultManager().configureRapidTurnAround();
-		ERXProperties.pathsForUserAndBundleProperties(true);
-	}
-}
+/**
+ * ERExtensions' plugin, which every other plugin of the framework requires. It has no hooks of its own: ERExtensions'
+ * startup is ERXApplication's.
+ */
+public class ERXExtensions implements ERXPlugin {}

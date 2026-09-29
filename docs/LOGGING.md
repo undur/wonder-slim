@@ -24,12 +24,13 @@ Roughly, in sequence:
 
 1. `ERXApplication.main()` runs. Its first act is `ERXLoggingSupport.configureDefaultLogging()`:
    a plain console appender at INFO on the root logger, so logging works from here on. It then
-   installs the clamping `NSLog.debug` logger (see below) and hands over to `WOApplication.main()`.
-2. WO loads the bundles. On `AllBundlesLoadedNotification`, `ERXExtensions.bundleDidLoad` runs
-   `ERXConfigurationManager.initialize()` and then
+   installs the clamping `NSLog.debug` logger (see below).
+2. `main()` composes the configuration (`ERXConfigurationManager`, see `CONFIGURATION.md`) and
+   hands over to `WOApplication.main()`, which constructs the application. At the end of
+   `ERXApplication`'s constructor, it runs
    `ERXLogger.configureLoggingWithSystemProperties()`: `LogManager.resetConfiguration()`,
    `BasicConfigurator.configure()`, install the `NSLog` bridge, then
-   `PropertyConfigurator.configure(properties)` from the merged Properties cascade. If the
+   `PropertyConfigurator.configure(properties)` from the composed configuration. If the
    properties yield no appenders it falls back to a default `ConsoleAppender` on `System.out`.
    This replaces the appender from step 1. At the top of the application constructor,
    `ERXLoggingSupport.reInitConsoleAppenders()` calls `activateOptions()` on the console
@@ -79,8 +80,7 @@ files and the command line set, not the whole of `System.getProperties()`.
 
 Open threads worth folding into a proper logging story:
 
-- Kill the "temporary" reflective bridge (`ERXTemporaryLoggingBridge`) once initialization
-  has a real home.
+- Kill the "temporary" reflective bridge (`ERXTemporaryLoggingBridge`) (#44).
 - Decide whether `NSLog` still needs to be bridged into log4j at all, or whether WO's
   stream usage can be handled more directly.
 - The default fallback appender pattern and the property-driven pattern differ; unify.

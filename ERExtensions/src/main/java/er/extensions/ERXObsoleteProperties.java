@@ -42,6 +42,8 @@ public class ERXObsoleteProperties {
 	private static final String PATCHER = "ERXPatcher's element patches have been removed; the dynamic elements render standard HTML.";
 	private static final String MESSAGE_ENCODING = "ERXMessageEncoding has been removed.";
 	private static final String JSON = "Ajax's JSON-RPC bridge has been removed.";
+	private static final String FRAMEWORK_PRINCIPAL = "ERXFrameworkPrincipal has been removed. Frameworks take part in startup as plugins, see er.extensions.ERXPlugin.";
+	private static final String FILE_NOTIFICATION_CENTER = "ERXFileNotificationCenter has been removed. The configuration's files are checked for changes every second, independent of requests: in development, the files themselves; in deployment, the touch file (er.extensions.ERXConfigurationManager.PropertiesTouchFile), when one is set.";
 	private static final String OGNL = "WOOgnl has been removed. Templates are parsed by Parsley, which ERExtensions enables by default.";
 
 	/**
@@ -51,6 +53,13 @@ public class ERXObsoleteProperties {
 	 * replacement, the message names it. Add a line when a feature with configuration is removed.
 	 */
 	private static final List<ObsoleteProperty> OBSOLETE_PROPERTIES = List.of(
+		// ERXFileNotificationCenter
+		new ObsoleteProperty( "er.extensions.ERXFileNotificationCenter.CheckFilesPeriod", FILE_NOTIFICATION_CENTER ),
+		new ObsoleteProperty( "ERXFileNotificationCenter.symlinkSupport", FILE_NOTIFICATION_CENTER ),
+
+		// ERXFrameworkPrincipal
+		new ObsoleteProperty( "er.extensions.ERXFrameworkPrincipal.logLifecycle", FRAMEWORK_PRINCIPAL ),
+
 		// URL rewriting
 		new ObsoleteProperty( "er.extensions.ERXApplication.replaceApplicationPath.pattern", URL_REWRITING ),
 		new ObsoleteProperty( "er.extensions.ERXApplication.replaceApplicationPath.replace", URL_REWRITING ),

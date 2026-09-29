@@ -25,8 +25,8 @@ import er.extensions.routes.RouteTable;
  * its session has logged in with the admin password ({@link #PASSWORD_PROPERTY}). Anything else gets the login page.
  * A logged-in session times out after {@link #SESSION_TIMEOUT_SECONDS} without activity.
  *
- * The routes are registered by the ERControl framework principal once the application object exists, after the
- * application's own, so a route an application maps itself always wins over ours.
+ * The routes are registered by ERControl's plugin ({@code ERXControl}) once the application is constructed, after
+ * the application's own, so a route an application maps itself always wins over ours.
  */
 public final class ERXAdmin {
 
@@ -64,7 +64,7 @@ public final class ERXAdmin {
 			new Section( "caches", "Sessions and caches", ERXAdminCachesPage.class ),
 			new Section( "threads", "Threads", ERXAdminThreadsPage.class ),
 			new Section( "log", "Log", ERXAdminLogPage.class ),
-			new Section( "properties", "Properties", ERXAdminPropertiesPage.class ),
+			new Section( "configuration", "Configuration", ERXAdminConfigurationPage.class ),
 			new Section( "bundles", "Bundles", ERXAdminBundlesPage.class ) );
 
 	private ERXAdmin() {}
