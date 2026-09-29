@@ -6,8 +6,10 @@
   The control panel shows the logging backend and its own configuration, and every logger with a
   level set: the level, the layer and source that set it (`er.logging.level.*` with the source it
   came from, `log4j.logger.*`, the backend's own configuration, or set on this instance) and what
-  it overrides. A level set there is `er.logging.level.<logger>` set on the running instance, so it
-  survives a reload of the configuration and can be unset. ERExtensions registers the page. A
+  it overrides; or every logger the backend knows, filtered by name or to the application's own
+  package, each with its own or inherited level. Clicking a level sets `er.logging.level.<logger>`
+  on the running instance, so it survives a reload of the configuration; clicking it again unsets
+  it. ERExtensions registers the page. A
   logging backend now also reports its name, its own configuration and the levels it set, and the
   loggers it knows (`ERXLoggingBackend`). ERLoggingReload4j's `ERXLog4JConfiguration` page is
   removed, with `ERXLog4jAction` and `ERXRadioButtonMatrix`: it worked with reload4j only, and its

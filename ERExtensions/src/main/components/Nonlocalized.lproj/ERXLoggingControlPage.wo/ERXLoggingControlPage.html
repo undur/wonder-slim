@@ -24,27 +24,46 @@
 		</div>
 		<div class="col-12">
 			<div class="card">
-				<div class="card-header"><h3 class="card-title">Levels</h3><div class="card-subtitle ms-3">every logger with a level set: a logger without one logs at the level of the nearest logger above it</div></div>
+				<div class="card-header d-flex align-items-center gap-2">
+					<h3 class="card-title">Levels</h3>
+					<wo:form class="d-flex align-items-center gap-2 ms-3">
+						<wo:submit action="$listConfigured" value="Configured" class="$showConfiguredClass" />
+						<wo:submit action="$listAll" value="All loggers" class="$showAllClass" />
+						<wo:textfield value="$filter" class="form-control font-monospace form-control-sm" placeholder="Only loggers containing..." style="flex: 0 0 16rem" />
+						<wo:submit action="$applyFilter" value="Filter" class="btn btn-sm" />
+						<wo:if condition="$applicationPackage"><wo:submit action="$showApplicationLoggers" value="This application's" class="btn btn-sm" /></wo:if>
+					</wo:form>
+					<wo:if condition="$hasLevelsSetOnInstance"><wo:form class="ms-auto"><wo:submit action="$unsetAll" value="Unset all set on this instance" class="btn btn-sm" /></wo:form></wo:if>
+				</div>
+				<div class="card-body text-secondary small py-2">
+					<wo:if condition="$showAll">Every logger <wo:str value="$backend.name" /> knows. A filled level is set on the logger itself, a shaded one inherited from the nearest logger above it.</wo:if>
+					<wo:if condition="$showAll" negate="true"><wo:str value="$configuredCount" /> loggers with a level set in the configuration. A logger without one logs at the level of the nearest logger above it.</wo:if>
+					Clicking a level sets it on this instance; clicking the level set on this instance unsets it.
+				</div>
 				<div class="table-responsive">
 					<table class="table table-vcenter card-table table-sm">
 						<thead><tr><th>Logger</th><th>Level</th><th>Set by</th><th>Source</th><th>Overrides</th></tr></thead>
 						<tbody>
-							<wo:repetition list="$rows" item="$currentRow">
+							<wo:repetition list="$entries" item="$currentEntry">
 								<tr>
-									<td class="font-monospace text-nowrap"><wo:str value="$currentRow.logger" /></td>
-									<td><span class="badge bg-primary-lt"><wo:str value="$currentRow.level" /></span></td>
-									<td class="font-monospace small text-nowrap"><wo:str value="$currentRow.setBy.setting" /></td>
-									<td class="text-nowrap">
-										<wo:if condition="$currentRow.isSetOnInstance">
-											<wo:form class="d-inline-flex align-items-center gap-2"><span class="badge bg-orange-lt">set on this instance</span> <wo:submit action="$unsetLevel" value="Unset" class="btn btn-sm" /></wo:form>
-										</wo:if>
-										<wo:if condition="$currentRow.isSetOnInstance" negate="true">
-											<wo:if condition="$currentRow.setBy.source"><span class="badge bg-primary-lt"><wo:str value="$currentRow.setBy.source" /></span></wo:if>
-										</wo:if>
-									</td>
-									<td class="text-secondary small"><wo:str value="$currentRow.overridesDescription" /></td>
+									<td class="font-monospace text-nowrap"><wo:str value="$currentEntry.name" /></td>
+									<td class="text-nowrap"><div class="btn-group"><wo:repetition list="$levelButtons" item="$currentLevel"><wo:link action="$selectLevel" class="$currentLevelClass" title="$currentLevelTitle"><wo:str value="$currentLevel" /></wo:link></wo:repetition></div></td>
+									<wo:if condition="$currentEntry.isConfigured">
+										<td class="font-monospace small text-nowrap"><wo:str value="$currentEntry.configured.setBy.setting" /></td>
+										<td class="text-nowrap">
+											<wo:if condition="$currentEntry.isSetOnInstance">
+												<wo:form class="d-inline-flex align-items-center gap-2"><span class="badge bg-orange-lt">set on this instance</span> <wo:submit action="$unsetLevel" value="Unset" class="btn btn-sm" /></wo:form>
+											</wo:if>
+											<wo:if condition="$currentEntry.isSetOnInstance" negate="true">
+												<wo:if condition="$currentEntry.configured.setBy.source"><span class="badge bg-primary-lt"><wo:str value="$currentEntry.configured.setBy.source" /></span></wo:if>
+											</wo:if>
+										</td>
+										<td class="text-secondary small"><wo:str value="$currentEntry.configured.overridesDescription" /></td>
+									</wo:if>
+									<wo:if condition="$currentEntry.isConfigured" negate="true"><td></td><td></td><td></td></wo:if>
 								</tr>
 							</wo:repetition>
+							<wo:if condition="$hasEntries" negate="true"><tr><td colspan="5" class="text-secondary">No loggers match.</td></tr></wo:if>
 						</tbody>
 					</table>
 				</div>
