@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **`ERXProperties`' readers are bridges to `NSProperties`**
+  ERFoundation's `NSProperties` reads and converts property values exactly as `ERXProperties`
+  did, so `stringForKey()`, `booleanForKey()`, `intForKey()`, `longForKeyWithDefault()`,
+  `arrayForKey()` and their variants now call `NSProperties`' own, and either can be used. Values
+  are no longer cached, so a value changed with `System.setProperty()` is read as it is (before,
+  the value cached earlier was). A value spelled `-undefined-` reads as the string it is, or as no
+  value for a boolean, number or array, instead of null or an exception. A test compares the two
+  over a matrix of values, and another pins what each reader returns. `NSProperties.cacheEnabled`
+  (a JVM option, `-DNSProperties.cacheEnabled=true`) must stay off; a warning says so at startup
+  if it's on. (#148)
+
 - **`ERXProperties` is typed reading only**
   The loading plumbing and the handling of secrets moved to `ERXConfigurationManager`:
   `isSecretKey()`, `maskedValue()` and `logString()` are `ERXConfigurationManager`'s now, and

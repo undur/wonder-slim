@@ -1,0 +1,624 @@
+stringForKey	(absent)	null
+stringForKeyWithDefault(def)	(absent)	String def
+booleanForKey	(absent)	Boolean false
+booleanForKeyWithDefault(true)	(absent)	Boolean true
+booleanForKeyWithDefault(false)	(absent)	Boolean false
+intForKey	(absent)	Integer 0
+intForKeyWithDefault(7)	(absent)	Integer 7
+longForKeyWithDefault(7)	(absent)	Long 7
+arrayForKey	(absent)	null
+arrayForKeyWithDefault((d))	(absent)	array [d]
+bigDecimalForKeyWithDefault(10)	(absent)	BigDecimal 10
+enumValueForKey(TimeUnit)	(absent)	null
+stringForKey	''	String 
+stringForKeyWithDefault(def)	''	String 
+booleanForKey	''	Boolean false
+booleanForKeyWithDefault(true)	''	Boolean true
+booleanForKeyWithDefault(false)	''	Boolean false
+intForKey	''	Integer 0
+intForKeyWithDefault(7)	''	Integer 7
+longForKeyWithDefault(7)	''	Long 7
+arrayForKey	''	null
+arrayForKeyWithDefault((d))	''	array [d]
+bigDecimalForKeyWithDefault(10)	''	BigDecimal 10
+enumValueForKey(TimeUnit)	''	null
+stringForKey	' '	String  
+stringForKeyWithDefault(def)	' '	String  
+booleanForKey	' '	Boolean false
+booleanForKeyWithDefault(true)	' '	Boolean true
+booleanForKeyWithDefault(false)	' '	Boolean false
+intForKey	' '	Integer 0
+intForKeyWithDefault(7)	' '	Integer 7
+longForKeyWithDefault(7)	' '	Long 7
+arrayForKey	' '	null
+arrayForKeyWithDefault((d))	' '	array [d]
+bigDecimalForKeyWithDefault(10)	' '	BigDecimal 10
+enumValueForKey(TimeUnit)	' '	null
+stringForKey	'  \t '	String   	 
+stringForKeyWithDefault(def)	'  \t '	String   	 
+booleanForKey	'  \t '	Boolean false
+booleanForKeyWithDefault(true)	'  \t '	Boolean true
+booleanForKeyWithDefault(false)	'  \t '	Boolean false
+intForKey	'  \t '	Integer 0
+intForKeyWithDefault(7)	'  \t '	Integer 7
+longForKeyWithDefault(7)	'  \t '	Long 7
+arrayForKey	'  \t '	null
+arrayForKeyWithDefault((d))	'  \t '	array [d]
+bigDecimalForKeyWithDefault(10)	'  \t '	BigDecimal 10
+enumValueForKey(TimeUnit)	'  \t '	null
+stringForKey	'yes'	String yes
+stringForKeyWithDefault(def)	'yes'	String yes
+booleanForKey	'yes'	Boolean true
+booleanForKeyWithDefault(true)	'yes'	Boolean true
+booleanForKeyWithDefault(false)	'yes'	Boolean true
+intForKey	'yes'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'yes'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'yes'	threw java.lang.IllegalArgumentException
+arrayForKey	'yes'	array [yes]
+arrayForKeyWithDefault((d))	'yes'	array [yes]
+bigDecimalForKeyWithDefault(10)	'yes'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'yes'	null
+stringForKey	'YES'	String YES
+stringForKeyWithDefault(def)	'YES'	String YES
+booleanForKey	'YES'	Boolean true
+booleanForKeyWithDefault(true)	'YES'	Boolean true
+booleanForKeyWithDefault(false)	'YES'	Boolean true
+intForKey	'YES'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'YES'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'YES'	threw java.lang.IllegalArgumentException
+arrayForKey	'YES'	array [YES]
+arrayForKeyWithDefault((d))	'YES'	array [YES]
+bigDecimalForKeyWithDefault(10)	'YES'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'YES'	null
+stringForKey	'Yes'	String Yes
+stringForKeyWithDefault(def)	'Yes'	String Yes
+booleanForKey	'Yes'	Boolean true
+booleanForKeyWithDefault(true)	'Yes'	Boolean true
+booleanForKeyWithDefault(false)	'Yes'	Boolean true
+intForKey	'Yes'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'Yes'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'Yes'	threw java.lang.IllegalArgumentException
+arrayForKey	'Yes'	array [Yes]
+arrayForKeyWithDefault((d))	'Yes'	array [Yes]
+bigDecimalForKeyWithDefault(10)	'Yes'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'Yes'	null
+stringForKey	'y'	String y
+stringForKeyWithDefault(def)	'y'	String y
+booleanForKey	'y'	Boolean true
+booleanForKeyWithDefault(true)	'y'	Boolean true
+booleanForKeyWithDefault(false)	'y'	Boolean true
+intForKey	'y'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'y'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'y'	threw java.lang.IllegalArgumentException
+arrayForKey	'y'	array [y]
+arrayForKeyWithDefault((d))	'y'	array [y]
+bigDecimalForKeyWithDefault(10)	'y'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'y'	null
+stringForKey	'Y'	String Y
+stringForKeyWithDefault(def)	'Y'	String Y
+booleanForKey	'Y'	Boolean true
+booleanForKeyWithDefault(true)	'Y'	Boolean true
+booleanForKeyWithDefault(false)	'Y'	Boolean true
+intForKey	'Y'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'Y'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'Y'	threw java.lang.IllegalArgumentException
+arrayForKey	'Y'	array [Y]
+arrayForKeyWithDefault((d))	'Y'	array [Y]
+bigDecimalForKeyWithDefault(10)	'Y'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'Y'	null
+stringForKey	'no'	String no
+stringForKeyWithDefault(def)	'no'	String no
+booleanForKey	'no'	Boolean false
+booleanForKeyWithDefault(true)	'no'	Boolean false
+booleanForKeyWithDefault(false)	'no'	Boolean false
+intForKey	'no'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'no'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'no'	threw java.lang.IllegalArgumentException
+arrayForKey	'no'	array [no]
+arrayForKeyWithDefault((d))	'no'	array [no]
+bigDecimalForKeyWithDefault(10)	'no'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'no'	null
+stringForKey	'NO'	String NO
+stringForKeyWithDefault(def)	'NO'	String NO
+booleanForKey	'NO'	Boolean false
+booleanForKeyWithDefault(true)	'NO'	Boolean false
+booleanForKeyWithDefault(false)	'NO'	Boolean false
+intForKey	'NO'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'NO'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'NO'	threw java.lang.IllegalArgumentException
+arrayForKey	'NO'	array [NO]
+arrayForKeyWithDefault((d))	'NO'	array [NO]
+bigDecimalForKeyWithDefault(10)	'NO'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'NO'	null
+stringForKey	'n'	String n
+stringForKeyWithDefault(def)	'n'	String n
+booleanForKey	'n'	Boolean false
+booleanForKeyWithDefault(true)	'n'	Boolean false
+booleanForKeyWithDefault(false)	'n'	Boolean false
+intForKey	'n'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'n'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'n'	threw java.lang.IllegalArgumentException
+arrayForKey	'n'	array [n]
+arrayForKeyWithDefault((d))	'n'	array [n]
+bigDecimalForKeyWithDefault(10)	'n'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'n'	null
+stringForKey	'N'	String N
+stringForKeyWithDefault(def)	'N'	String N
+booleanForKey	'N'	Boolean false
+booleanForKeyWithDefault(true)	'N'	Boolean false
+booleanForKeyWithDefault(false)	'N'	Boolean false
+intForKey	'N'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'N'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'N'	threw java.lang.IllegalArgumentException
+arrayForKey	'N'	array [N]
+arrayForKeyWithDefault((d))	'N'	array [N]
+bigDecimalForKeyWithDefault(10)	'N'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'N'	null
+stringForKey	'true'	String true
+stringForKeyWithDefault(def)	'true'	String true
+booleanForKey	'true'	Boolean true
+booleanForKeyWithDefault(true)	'true'	Boolean true
+booleanForKeyWithDefault(false)	'true'	Boolean true
+intForKey	'true'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'true'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'true'	threw java.lang.IllegalArgumentException
+arrayForKey	'true'	array [true]
+arrayForKeyWithDefault((d))	'true'	array [true]
+bigDecimalForKeyWithDefault(10)	'true'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'true'	null
+stringForKey	'TRUE'	String TRUE
+stringForKeyWithDefault(def)	'TRUE'	String TRUE
+booleanForKey	'TRUE'	Boolean true
+booleanForKeyWithDefault(true)	'TRUE'	Boolean true
+booleanForKeyWithDefault(false)	'TRUE'	Boolean true
+intForKey	'TRUE'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'TRUE'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'TRUE'	threw java.lang.IllegalArgumentException
+arrayForKey	'TRUE'	array [TRUE]
+arrayForKeyWithDefault((d))	'TRUE'	array [TRUE]
+bigDecimalForKeyWithDefault(10)	'TRUE'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'TRUE'	null
+stringForKey	'True'	String True
+stringForKeyWithDefault(def)	'True'	String True
+booleanForKey	'True'	Boolean true
+booleanForKeyWithDefault(true)	'True'	Boolean true
+booleanForKeyWithDefault(false)	'True'	Boolean true
+intForKey	'True'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'True'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'True'	threw java.lang.IllegalArgumentException
+arrayForKey	'True'	array [True]
+arrayForKeyWithDefault((d))	'True'	array [True]
+bigDecimalForKeyWithDefault(10)	'True'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'True'	null
+stringForKey	'false'	String false
+stringForKeyWithDefault(def)	'false'	String false
+booleanForKey	'false'	Boolean false
+booleanForKeyWithDefault(true)	'false'	Boolean false
+booleanForKeyWithDefault(false)	'false'	Boolean false
+intForKey	'false'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'false'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'false'	threw java.lang.IllegalArgumentException
+arrayForKey	'false'	array [false]
+arrayForKeyWithDefault((d))	'false'	array [false]
+bigDecimalForKeyWithDefault(10)	'false'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'false'	null
+stringForKey	'FALSE'	String FALSE
+stringForKeyWithDefault(def)	'FALSE'	String FALSE
+booleanForKey	'FALSE'	Boolean false
+booleanForKeyWithDefault(true)	'FALSE'	Boolean false
+booleanForKeyWithDefault(false)	'FALSE'	Boolean false
+intForKey	'FALSE'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'FALSE'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'FALSE'	threw java.lang.IllegalArgumentException
+arrayForKey	'FALSE'	array [FALSE]
+arrayForKeyWithDefault((d))	'FALSE'	array [FALSE]
+bigDecimalForKeyWithDefault(10)	'FALSE'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'FALSE'	null
+stringForKey	' true '	String  true 
+stringForKeyWithDefault(def)	' true '	String  true 
+booleanForKey	' true '	Boolean true
+booleanForKeyWithDefault(true)	' true '	Boolean true
+booleanForKeyWithDefault(false)	' true '	Boolean true
+intForKey	' true '	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	' true '	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	' true '	threw java.lang.IllegalArgumentException
+arrayForKey	' true '	array [true]
+arrayForKeyWithDefault((d))	' true '	array [true]
+bigDecimalForKeyWithDefault(10)	' true '	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	' true '	null
+stringForKey	'yes '	String yes 
+stringForKeyWithDefault(def)	'yes '	String yes 
+booleanForKey	'yes '	Boolean true
+booleanForKeyWithDefault(true)	'yes '	Boolean true
+booleanForKeyWithDefault(false)	'yes '	Boolean true
+intForKey	'yes '	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'yes '	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'yes '	threw java.lang.IllegalArgumentException
+arrayForKey	'yes '	array [yes]
+arrayForKeyWithDefault((d))	'yes '	array [yes]
+bigDecimalForKeyWithDefault(10)	'yes '	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'yes '	null
+stringForKey	'on'	String on
+stringForKeyWithDefault(def)	'on'	String on
+booleanForKey	'on'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'on'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'on'	threw java.lang.IllegalArgumentException
+intForKey	'on'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'on'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'on'	threw java.lang.IllegalArgumentException
+arrayForKey	'on'	array [on]
+arrayForKeyWithDefault((d))	'on'	array [on]
+bigDecimalForKeyWithDefault(10)	'on'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'on'	null
+stringForKey	'off'	String off
+stringForKeyWithDefault(def)	'off'	String off
+booleanForKey	'off'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'off'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'off'	threw java.lang.IllegalArgumentException
+intForKey	'off'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'off'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'off'	threw java.lang.IllegalArgumentException
+arrayForKey	'off'	array [off]
+arrayForKeyWithDefault((d))	'off'	array [off]
+bigDecimalForKeyWithDefault(10)	'off'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'off'	null
+stringForKey	'0'	String 0
+stringForKeyWithDefault(def)	'0'	String 0
+booleanForKey	'0'	Boolean false
+booleanForKeyWithDefault(true)	'0'	Boolean false
+booleanForKeyWithDefault(false)	'0'	Boolean false
+intForKey	'0'	Integer 0
+intForKeyWithDefault(7)	'0'	Integer 0
+longForKeyWithDefault(7)	'0'	Long 0
+arrayForKey	'0'	array [0]
+arrayForKeyWithDefault((d))	'0'	array [0]
+bigDecimalForKeyWithDefault(10)	'0'	BigDecimal 0
+enumValueForKey(TimeUnit)	'0'	null
+stringForKey	'1'	String 1
+stringForKeyWithDefault(def)	'1'	String 1
+booleanForKey	'1'	Boolean true
+booleanForKeyWithDefault(true)	'1'	Boolean true
+booleanForKeyWithDefault(false)	'1'	Boolean true
+intForKey	'1'	Integer 1
+intForKeyWithDefault(7)	'1'	Integer 1
+longForKeyWithDefault(7)	'1'	Long 1
+arrayForKey	'1'	array [1]
+arrayForKeyWithDefault((d))	'1'	array [1]
+bigDecimalForKeyWithDefault(10)	'1'	BigDecimal 1
+enumValueForKey(TimeUnit)	'1'	null
+stringForKey	'2'	String 2
+stringForKeyWithDefault(def)	'2'	String 2
+booleanForKey	'2'	Boolean true
+booleanForKeyWithDefault(true)	'2'	Boolean true
+booleanForKeyWithDefault(false)	'2'	Boolean true
+intForKey	'2'	Integer 2
+intForKeyWithDefault(7)	'2'	Integer 2
+longForKeyWithDefault(7)	'2'	Long 2
+arrayForKey	'2'	array [2]
+arrayForKeyWithDefault((d))	'2'	array [2]
+bigDecimalForKeyWithDefault(10)	'2'	BigDecimal 2
+enumValueForKey(TimeUnit)	'2'	null
+stringForKey	'-1'	String -1
+stringForKeyWithDefault(def)	'-1'	String -1
+booleanForKey	'-1'	Boolean true
+booleanForKeyWithDefault(true)	'-1'	Boolean true
+booleanForKeyWithDefault(false)	'-1'	Boolean true
+intForKey	'-1'	Integer -1
+intForKeyWithDefault(7)	'-1'	Integer -1
+longForKeyWithDefault(7)	'-1'	Long -1
+arrayForKey	'-1'	array [-1]
+arrayForKeyWithDefault((d))	'-1'	array [-1]
+bigDecimalForKeyWithDefault(10)	'-1'	BigDecimal -1
+enumValueForKey(TimeUnit)	'-1'	null
+stringForKey	'+5'	String +5
+stringForKeyWithDefault(def)	'+5'	String +5
+booleanForKey	'+5'	Boolean true
+booleanForKeyWithDefault(true)	'+5'	Boolean true
+booleanForKeyWithDefault(false)	'+5'	Boolean true
+intForKey	'+5'	Integer 5
+intForKeyWithDefault(7)	'+5'	Integer 5
+longForKeyWithDefault(7)	'+5'	Long 5
+arrayForKey	'+5'	threw java.lang.IllegalArgumentException
+arrayForKeyWithDefault((d))	'+5'	threw java.lang.IllegalArgumentException
+bigDecimalForKeyWithDefault(10)	'+5'	BigDecimal 5
+enumValueForKey(TimeUnit)	'+5'	null
+stringForKey	'042'	String 042
+stringForKeyWithDefault(def)	'042'	String 042
+booleanForKey	'042'	Boolean true
+booleanForKeyWithDefault(true)	'042'	Boolean true
+booleanForKeyWithDefault(false)	'042'	Boolean true
+intForKey	'042'	Integer 42
+intForKeyWithDefault(7)	'042'	Integer 42
+longForKeyWithDefault(7)	'042'	Long 42
+arrayForKey	'042'	array [042]
+arrayForKeyWithDefault((d))	'042'	array [042]
+bigDecimalForKeyWithDefault(10)	'042'	BigDecimal 42
+enumValueForKey(TimeUnit)	'042'	null
+stringForKey	' 42 '	String  42 
+stringForKeyWithDefault(def)	' 42 '	String  42 
+booleanForKey	' 42 '	Boolean true
+booleanForKeyWithDefault(true)	' 42 '	Boolean true
+booleanForKeyWithDefault(false)	' 42 '	Boolean true
+intForKey	' 42 '	Integer 42
+intForKeyWithDefault(7)	' 42 '	Integer 42
+longForKeyWithDefault(7)	' 42 '	Long 42
+arrayForKey	' 42 '	array [42]
+arrayForKeyWithDefault((d))	' 42 '	array [42]
+bigDecimalForKeyWithDefault(10)	' 42 '	BigDecimal 42
+enumValueForKey(TimeUnit)	' 42 '	null
+stringForKey	'1.5'	String 1.5
+stringForKeyWithDefault(def)	'1.5'	String 1.5
+booleanForKey	'1.5'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'1.5'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'1.5'	threw java.lang.IllegalArgumentException
+intForKey	'1.5'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'1.5'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'1.5'	threw java.lang.IllegalArgumentException
+arrayForKey	'1.5'	array [1.5]
+arrayForKeyWithDefault((d))	'1.5'	array [1.5]
+bigDecimalForKeyWithDefault(10)	'1.5'	BigDecimal 1.5
+enumValueForKey(TimeUnit)	'1.5'	null
+stringForKey	'1e3'	String 1e3
+stringForKeyWithDefault(def)	'1e3'	String 1e3
+booleanForKey	'1e3'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'1e3'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'1e3'	threw java.lang.IllegalArgumentException
+intForKey	'1e3'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'1e3'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'1e3'	threw java.lang.IllegalArgumentException
+arrayForKey	'1e3'	array [1e3]
+arrayForKeyWithDefault((d))	'1e3'	array [1e3]
+bigDecimalForKeyWithDefault(10)	'1e3'	BigDecimal 1E+3
+enumValueForKey(TimeUnit)	'1e3'	null
+stringForKey	'0x10'	String 0x10
+stringForKeyWithDefault(def)	'0x10'	String 0x10
+booleanForKey	'0x10'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'0x10'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'0x10'	threw java.lang.IllegalArgumentException
+intForKey	'0x10'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'0x10'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'0x10'	threw java.lang.IllegalArgumentException
+arrayForKey	'0x10'	array [0x10]
+arrayForKeyWithDefault((d))	'0x10'	array [0x10]
+bigDecimalForKeyWithDefault(10)	'0x10'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'0x10'	null
+stringForKey	'abc'	String abc
+stringForKeyWithDefault(def)	'abc'	String abc
+booleanForKey	'abc'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'abc'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'abc'	threw java.lang.IllegalArgumentException
+intForKey	'abc'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'abc'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'abc'	threw java.lang.IllegalArgumentException
+arrayForKey	'abc'	array [abc]
+arrayForKeyWithDefault((d))	'abc'	array [abc]
+bigDecimalForKeyWithDefault(10)	'abc'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'abc'	null
+stringForKey	'2147483647'	String 2147483647
+stringForKeyWithDefault(def)	'2147483647'	String 2147483647
+booleanForKey	'2147483647'	Boolean true
+booleanForKeyWithDefault(true)	'2147483647'	Boolean true
+booleanForKeyWithDefault(false)	'2147483647'	Boolean true
+intForKey	'2147483647'	Integer 2147483647
+intForKeyWithDefault(7)	'2147483647'	Integer 2147483647
+longForKeyWithDefault(7)	'2147483647'	Long 2147483647
+arrayForKey	'2147483647'	array [2147483647]
+arrayForKeyWithDefault((d))	'2147483647'	array [2147483647]
+bigDecimalForKeyWithDefault(10)	'2147483647'	BigDecimal 2147483647
+enumValueForKey(TimeUnit)	'2147483647'	null
+stringForKey	'2147483648'	String 2147483648
+stringForKeyWithDefault(def)	'2147483648'	String 2147483648
+booleanForKey	'2147483648'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'2147483648'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'2147483648'	threw java.lang.IllegalArgumentException
+intForKey	'2147483648'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'2147483648'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'2147483648'	Long 2147483648
+arrayForKey	'2147483648'	array [2147483648]
+arrayForKeyWithDefault((d))	'2147483648'	array [2147483648]
+bigDecimalForKeyWithDefault(10)	'2147483648'	BigDecimal 2147483648
+enumValueForKey(TimeUnit)	'2147483648'	null
+stringForKey	'-2147483649'	String -2147483649
+stringForKeyWithDefault(def)	'-2147483649'	String -2147483649
+booleanForKey	'-2147483649'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'-2147483649'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'-2147483649'	threw java.lang.IllegalArgumentException
+intForKey	'-2147483649'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'-2147483649'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'-2147483649'	Long -2147483649
+arrayForKey	'-2147483649'	array [-2147483649]
+arrayForKeyWithDefault((d))	'-2147483649'	array [-2147483649]
+bigDecimalForKeyWithDefault(10)	'-2147483649'	BigDecimal -2147483649
+enumValueForKey(TimeUnit)	'-2147483649'	null
+stringForKey	'9223372036854775807'	String 9223372036854775807
+stringForKeyWithDefault(def)	'9223372036854775807'	String 9223372036854775807
+booleanForKey	'9223372036854775807'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'9223372036854775807'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'9223372036854775807'	threw java.lang.IllegalArgumentException
+intForKey	'9223372036854775807'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'9223372036854775807'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'9223372036854775807'	Long 9223372036854775807
+arrayForKey	'9223372036854775807'	array [9223372036854775807]
+arrayForKeyWithDefault((d))	'9223372036854775807'	array [9223372036854775807]
+bigDecimalForKeyWithDefault(10)	'9223372036854775807'	BigDecimal 9223372036854775807
+enumValueForKey(TimeUnit)	'9223372036854775807'	null
+stringForKey	'9223372036854775808'	String 9223372036854775808
+stringForKeyWithDefault(def)	'9223372036854775808'	String 9223372036854775808
+booleanForKey	'9223372036854775808'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'9223372036854775808'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'9223372036854775808'	threw java.lang.IllegalArgumentException
+intForKey	'9223372036854775808'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'9223372036854775808'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'9223372036854775808'	threw java.lang.IllegalArgumentException
+arrayForKey	'9223372036854775808'	array [9223372036854775808]
+arrayForKeyWithDefault((d))	'9223372036854775808'	array [9223372036854775808]
+bigDecimalForKeyWithDefault(10)	'9223372036854775808'	BigDecimal 9223372036854775808
+enumValueForKey(TimeUnit)	'9223372036854775808'	null
+stringForKey	'(a,b)'	String (a,b)
+stringForKeyWithDefault(def)	'(a,b)'	String (a,b)
+booleanForKey	'(a,b)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'(a,b)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'(a,b)'	threw java.lang.IllegalArgumentException
+intForKey	'(a,b)'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'(a,b)'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'(a,b)'	threw java.lang.IllegalArgumentException
+arrayForKey	'(a,b)'	array [a, b]
+arrayForKeyWithDefault((d))	'(a,b)'	array [a, b]
+bigDecimalForKeyWithDefault(10)	'(a,b)'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'(a,b)'	null
+stringForKey	'( a , b )'	String ( a , b )
+stringForKeyWithDefault(def)	'( a , b )'	String ( a , b )
+booleanForKey	'( a , b )'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'( a , b )'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'( a , b )'	threw java.lang.IllegalArgumentException
+intForKey	'( a , b )'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'( a , b )'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'( a , b )'	threw java.lang.IllegalArgumentException
+arrayForKey	'( a , b )'	array [a, b]
+arrayForKeyWithDefault((d))	'( a , b )'	array [a, b]
+bigDecimalForKeyWithDefault(10)	'( a , b )'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'( a , b )'	null
+stringForKey	'("a b", c)'	String ("a b", c)
+stringForKeyWithDefault(def)	'("a b", c)'	String ("a b", c)
+booleanForKey	'("a b", c)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'("a b", c)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'("a b", c)'	threw java.lang.IllegalArgumentException
+intForKey	'("a b", c)'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'("a b", c)'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'("a b", c)'	threw java.lang.IllegalArgumentException
+arrayForKey	'("a b", c)'	array [a b, c]
+arrayForKeyWithDefault((d))	'("a b", c)'	array [a b, c]
+bigDecimalForKeyWithDefault(10)	'("a b", c)'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'("a b", c)'	null
+stringForKey	'(a)'	String (a)
+stringForKeyWithDefault(def)	'(a)'	String (a)
+booleanForKey	'(a)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'(a)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'(a)'	threw java.lang.IllegalArgumentException
+intForKey	'(a)'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'(a)'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'(a)'	threw java.lang.IllegalArgumentException
+arrayForKey	'(a)'	array [a]
+arrayForKeyWithDefault((d))	'(a)'	array [a]
+bigDecimalForKeyWithDefault(10)	'(a)'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'(a)'	null
+stringForKey	'  (a) '	String   (a) 
+stringForKeyWithDefault(def)	'  (a) '	String   (a) 
+booleanForKey	'  (a) '	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'  (a) '	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'  (a) '	threw java.lang.IllegalArgumentException
+intForKey	'  (a) '	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'  (a) '	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'  (a) '	threw java.lang.IllegalArgumentException
+arrayForKey	'  (a) '	array [a]
+arrayForKeyWithDefault((d))	'  (a) '	array [a]
+bigDecimalForKeyWithDefault(10)	'  (a) '	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'  (a) '	null
+stringForKey	'()'	String ()
+stringForKeyWithDefault(def)	'()'	String ()
+booleanForKey	'()'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'()'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'()'	threw java.lang.IllegalArgumentException
+intForKey	'()'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'()'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'()'	threw java.lang.IllegalArgumentException
+arrayForKey	'()'	array []
+arrayForKeyWithDefault((d))	'()'	array []
+bigDecimalForKeyWithDefault(10)	'()'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'()'	null
+stringForKey	'(1,2,3)'	String (1,2,3)
+stringForKeyWithDefault(def)	'(1,2,3)'	String (1,2,3)
+booleanForKey	'(1,2,3)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'(1,2,3)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'(1,2,3)'	threw java.lang.IllegalArgumentException
+intForKey	'(1,2,3)'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'(1,2,3)'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'(1,2,3)'	threw java.lang.IllegalArgumentException
+arrayForKey	'(1,2,3)'	array [1, 2, 3]
+arrayForKeyWithDefault((d))	'(1,2,3)'	array [1, 2, 3]
+bigDecimalForKeyWithDefault(10)	'(1,2,3)'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'(1,2,3)'	null
+stringForKey	'((a),b)'	String ((a),b)
+stringForKeyWithDefault(def)	'((a),b)'	String ((a),b)
+booleanForKey	'((a),b)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'((a),b)'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'((a),b)'	threw java.lang.IllegalArgumentException
+intForKey	'((a),b)'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'((a),b)'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'((a),b)'	threw java.lang.IllegalArgumentException
+arrayForKey	'((a),b)'	array [( a ), b]
+arrayForKeyWithDefault((d))	'((a),b)'	array [( a ), b]
+bigDecimalForKeyWithDefault(10)	'((a),b)'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'((a),b)'	null
+stringForKey	'(a,'	String (a,
+stringForKeyWithDefault(def)	'(a,'	String (a,
+booleanForKey	'(a,'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'(a,'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'(a,'	threw java.lang.IllegalArgumentException
+intForKey	'(a,'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'(a,'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'(a,'	threw java.lang.IllegalArgumentException
+arrayForKey	'(a,'	threw java.lang.IllegalArgumentException
+arrayForKeyWithDefault((d))	'(a,'	threw java.lang.IllegalArgumentException
+bigDecimalForKeyWithDefault(10)	'(a,'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'(a,'	null
+stringForKey	'a,b'	String a,b
+stringForKeyWithDefault(def)	'a,b'	String a,b
+booleanForKey	'a,b'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'a,b'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'a,b'	threw java.lang.IllegalArgumentException
+intForKey	'a,b'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'a,b'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'a,b'	threw java.lang.IllegalArgumentException
+arrayForKey	'a,b'	array [a, b]
+arrayForKeyWithDefault((d))	'a,b'	array [a, b]
+bigDecimalForKeyWithDefault(10)	'a,b'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'a,b'	null
+stringForKey	'a'	String a
+stringForKeyWithDefault(def)	'a'	String a
+booleanForKey	'a'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'a'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'a'	threw java.lang.IllegalArgumentException
+intForKey	'a'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'a'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'a'	threw java.lang.IllegalArgumentException
+arrayForKey	'a'	array [a]
+arrayForKeyWithDefault((d))	'a'	array [a]
+bigDecimalForKeyWithDefault(10)	'a'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'a'	null
+stringForKey	'{a=b;}'	String {a=b;}
+stringForKeyWithDefault(def)	'{a=b;}'	String {a=b;}
+booleanForKey	'{a=b;}'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'{a=b;}'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'{a=b;}'	threw java.lang.IllegalArgumentException
+intForKey	'{a=b;}'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'{a=b;}'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'{a=b;}'	threw java.lang.IllegalArgumentException
+arrayForKey	'{a=b;}'	array [{a = "b"; }]
+arrayForKeyWithDefault((d))	'{a=b;}'	array [{a = "b"; }]
+bigDecimalForKeyWithDefault(10)	'{a=b;}'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'{a=b;}'	null
+stringForKey	'"a"'	String "a"
+stringForKeyWithDefault(def)	'"a"'	String "a"
+booleanForKey	'"a"'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(true)	'"a"'	threw java.lang.IllegalArgumentException
+booleanForKeyWithDefault(false)	'"a"'	threw java.lang.IllegalArgumentException
+intForKey	'"a"'	threw java.lang.IllegalArgumentException
+intForKeyWithDefault(7)	'"a"'	threw java.lang.IllegalArgumentException
+longForKeyWithDefault(7)	'"a"'	threw java.lang.IllegalArgumentException
+arrayForKey	'"a"'	array [a]
+arrayForKeyWithDefault((d))	'"a"'	array [a]
+bigDecimalForKeyWithDefault(10)	'"a"'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'"a"'	null
+stringForKey	'-undefined-'	String -undefined-
+stringForKeyWithDefault(def)	'-undefined-'	String -undefined-
+booleanForKey	'-undefined-'	Boolean false
+booleanForKeyWithDefault(true)	'-undefined-'	Boolean true
+booleanForKeyWithDefault(false)	'-undefined-'	Boolean false
+intForKey	'-undefined-'	Integer 0
+intForKeyWithDefault(7)	'-undefined-'	Integer 7
+longForKeyWithDefault(7)	'-undefined-'	Long 7
+arrayForKey	'-undefined-'	null
+arrayForKeyWithDefault((d))	'-undefined-'	array [d]
+bigDecimalForKeyWithDefault(10)	'-undefined-'	threw java.lang.NumberFormatException
+enumValueForKey(TimeUnit)	'-undefined-'	null

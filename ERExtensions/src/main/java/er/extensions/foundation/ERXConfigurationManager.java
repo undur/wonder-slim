@@ -263,6 +263,12 @@ public final class ERXConfigurationManager {
 			// The arguments go in first, so that finding the files sees them (as it sees the JVM's options, already there)
 			putAll( argumentsSource().properties() );
 
+			// NSProperties' own cache gives wrong values when a key is read as one type and then another (see ERXProperties).
+			// NSProperties reads this once, before main() runs, so only a JVM option can have turned it on: the launch properties.
+			if( Boolean.parseBoolean( _launchProperties.getProperty( "NSProperties.cacheEnabled", "false" ).trim() ) ) {
+				log.warn( "NSProperties.cacheEnabled is on. Reading a property as one type and then another can give wrong values or exceptions with it; turn it off." );
+			}
+
 			return composeAndApply( NSProperties.getProperty( "user.name" ), Map.of() );
 		} );
 	}
