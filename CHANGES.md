@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **ERLoggingReload4j carries its own stack trace settings**
+  `er.extensions.stackTrace.cleanup` and `er.extensions.stackTrace.skipPatternsFile`, with the
+  `StackTraceSkipPatterns` files, moved from ERExtensions to ERLoggingReload4j: only its
+  `ERXConsoleAppender` reads them. (#161)
+
 ## 2026-09-29 (8.0.12)
 
 This release reworks how an application starts, is configured and logs. The configuration is

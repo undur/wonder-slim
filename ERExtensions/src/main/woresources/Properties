@@ -119,12 +119,6 @@ er.logging.pattern=%d{MMM dd HH:mm:ss} %-5p %c - %m%n
 # er.extensions.ERXWORepetition.raiseOnUnmatchedObject = true
 
 #########################################################################
-# ERXExceptionUtilities 
-#########################################################################
-er.extensions.stackTrace.cleanup=true
-er.extensions.stackTrace.skipPatternsFile=StackTraceSkipPatterns-Normal.plist
-
-#########################################################################
 # Components 
 #########################################################################
 er.extensions.ERXWOForm.multipleSubmitDefault=true
