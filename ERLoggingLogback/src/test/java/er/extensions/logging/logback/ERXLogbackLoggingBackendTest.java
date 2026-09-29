@@ -112,6 +112,24 @@ public class ERXLogbackLoggingBackendTest {
 	}
 
 	@Test
+	public void parenthesesInTheLayoutAreLiteral() {
+		assertEquals( "%d \\(%F:%L\\) %-5p %c - %m%n", ERXLogbackLoggingBackend.logbackPattern( "%d (%F:%L) %-5p %c - %m%n" ) );
+
+		System.setProperty( "er.extensions.logging.pattern", "[(%F:%L) %-5p %m]%n" );
+		_backend.installCapture();
+		_backend.configure();
+
+		final ch.qos.logback.classic.PatternLayout layout = new ch.qos.logback.classic.PatternLayout();
+		layout.setContext( (LoggerContext)LoggerFactory.getILoggerFactory() );
+		layout.setPattern( ERXLogbackLoggingBackend.logbackPattern( "[(%F:%L) %-5p %m]" ) );
+		layout.start();
+
+		final ch.qos.logback.classic.spi.LoggingEvent event = new ch.qos.logback.classic.spi.LoggingEvent( "x", logger( "test.layout" ), Level.INFO, "the message", null, null );
+		final String line = layout.doLayout( event );
+		assertTrue( line.startsWith( "[(" ) && line.endsWith( "INFO  the message]" ), line );
+	}
+
+	@Test
 	public void withoutItsOwnConfigurationTheConsoleOutputStays() {
 		_backend.configure();
 		assertNotNull( logger( Logger.ROOT_LOGGER_NAME ).getAppender( "console" ) );

@@ -160,7 +160,7 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 	private static Appender<ILoggingEvent> console( final String pattern ) {
 		final PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 		encoder.setContext( context() );
-		encoder.setPattern( pattern );
+		encoder.setPattern( logbackPattern( pattern ) );
 		encoder.start();
 
 		final ConsoleAppender<ILoggingEvent> console = new ConsoleAppender<>();
@@ -169,6 +169,14 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 		console.setEncoder( encoder );
 		console.start();
 		return console;
+	}
+
+	/**
+	 * @return The given layout ({@code er.extensions.logging.pattern}, in the conversions log4j and logback share) as
+	 *         logback reads it: logback takes parentheses for grouping, so a literal one, as in {@code (%F:%L)}, is escaped
+	 */
+	static String logbackPattern( final String pattern ) {
+		return pattern.replace( "(", "\\(" ).replace( ")", "\\)" );
 	}
 
 	/**

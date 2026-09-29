@@ -21,7 +21,8 @@
   `logback.xml` for logback), which wins where it names a logger; and levels set on the running
   instance, which win over everything. With reload4j, console output without `log4j.*`
   configuration now uses `er.extensions.logging.pattern`'s layout (by default
-  `%d{MMM dd HH:mm:ss} %-5p %c - %m%n`) instead of log4j's own. (#44)
+  `%d{MMM dd HH:mm:ss} %-5p %c - %m%n`) instead of log4j's own. Literal parentheses in the layout,
+  as in `(%F:%L)`, stay literal with logback, which otherwise reads them as grouping. (#44)
 
 - **WebObjects' NSLog output goes to slf4j, whichever logging backend is used**
   `ERXNSLogBridge`, in ERExtensions, replaces ERLoggingReload4j's `ERXNSLogLog4jBridge`: NSLog's
