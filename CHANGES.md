@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2026-09-29 (8.0.12)
 
 This release reworks how an application starts, is configured and logs. The configuration is
