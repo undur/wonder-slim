@@ -55,6 +55,17 @@ public enum ERXP {
 	 */
 	NSLOG_IGNORE_SETTINGS( "er.extensions.ERXNSLogLog4jBridge.ignoreNSLogSettings" ),
 
+	// ERXLoggingConfiguration
+	/**
+	 * A prefix, not a key: {@code er.extensions.logging.level.<logger>} sets a logger's level ({@code TRACE}, {@code DEBUG}, {@code INFO}, {@code WARN}, {@code ERROR}, {@code OFF}) with any logging backend; {@code er.extensions.logging.level.root} the root logger's. The backend's own configuration wins where it names the same logger; set on the running instance, it wins over everything. ERExtensions' Properties sets the root to INFO.
+	 */
+	LOGGING_LEVEL_PREFIX( "er.extensions.logging.level." ),
+
+	/**
+	 * The layout of the console output a logging backend sets up when its own configuration sets up none, in conversions both backends understand ({@code %d{...} %p %c %m %t %F %L %n}). ERExtensions' Properties sets {@code %d{MMM dd HH:mm:ss} %-5p %c - %m%n}.
+	 */
+	LOGGING_PATTERN( "er.extensions.logging.pattern" ),
+
 	/**
 	 * Seconds the instance lives before it's stopped, plus a random interval of up to 10 minutes. Unset or 0: no limit.
 	 */

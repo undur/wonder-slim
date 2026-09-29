@@ -37,15 +37,16 @@ public final class ERXLoggingConfiguration {
 	/**
 	 * The prefix of the level keys: {@code er.extensions.logging.level.<logger>}
 	 */
-	public static final String LEVEL_PREFIX = "er.extensions.logging.level.";
+	public static final String LEVEL_PREFIX = ERXP.LOGGING_LEVEL_PREFIX.id();
 
 	/**
 	 * The key of the console output's layout
 	 */
-	public static final String PATTERN = "er.extensions.logging.pattern";
+	public static final String PATTERN = ERXP.LOGGING_PATTERN.id();
 
 	/**
-	 * The console output's layout when {@link #PATTERN} isn't set
+	 * The console output's layout when {@link #PATTERN} isn't set: ERExtensions' Properties sets the same, so this only
+	 * applies without it (in a unit test, say)
 	 */
 	public static final String DEFAULT_PATTERN = "%d{MMM dd HH:mm:ss} %-5p %c - %m%n";
 

@@ -9,6 +9,22 @@
 WOAllowsConcurrentRequestHandling=true
 
 #########################################################################
+# Logging
+#########################################################################
+## The framework's logging defaults, in keys every logging backend (ERLoggingReload4j, ERLoggingLogback) understands.
+## Set the same keys in the application's Properties to change them: er.extensions.logging.level.<logger> for a
+## logger's level (TRACE, DEBUG, INFO, WARN, ERROR, OFF), er.extensions.logging.level.root for the root logger's.
+## The backend's own configuration (log4j.* for reload4j, logback.xml for logback) wins where it names a logger.
+er.extensions.logging.level.root=INFO
+
+## The layout of the console output, when the backend's own configuration sets up none. Conversions both backends
+## understand: %d{...} date, %p level, %c logger, %m message, %t thread, %F file, %L line, %n newline.
+er.extensions.logging.pattern=%d{MMM dd HH:mm:ss} %-5p %c - %m%n
+
+## The ERXStats statistics after each request-response loop, logged at DEBUG (see er.extensions.erxStats.enabled)
+# er.extensions.logging.level.er.extensions.ERXApplication.Statistics=DEBUG
+
+#########################################################################
 # ERXProperties
 #########################################################################
 ## Enables support for custom properties file lookup. 
@@ -49,9 +65,6 @@ WOAllowsConcurrentRequestHandling=true
 
 ## ERXStats max size
 # er.extensions.erxStats.max = 1000
-
-## to display the stats after the RR loop
-# log4j.category.er.extensions.ERXApplication.Statistics=DEBUG
 
 ## When set, starts refusing new session once memory is filled up to this threshold, which results in a more responsive app.
 ## If mem comes available again the app again starts to accept new session.
