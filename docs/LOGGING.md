@@ -12,9 +12,9 @@ from facts rather than archaeology. It is descriptive, not aspirational.
   that backend (`er.extensions.logging.ERXTemporaryLoggingBridge` — the class's own
   javadoc calls it "Temporary bridge until we work out a nicer method of initializing
   logging"), so ERExtensions carries no compile dependency on the backend.
-- WebObjects' own `NSLog` output is redirected **into** log4j by
-  `ERXNSLogLog4jBridge` (installed in `ERXLogger.configureLogging`), and log4j's
-  `ConsoleAppender` writes back **out** to `System.out`. So `NSLog` → log4j → `System.out`
+- WebObjects' own `NSLog` output is redirected **into** slf4j, and so the backend, by
+  `ERXNSLogBridge` (installed first thing in `ERXApplication.main()`), and log4j's
+  `ConsoleAppender` writes back **out** to `System.out`. So `NSLog` → slf4j → log4j → `System.out`
   is a loop that the configuration code has to be careful not to feed twice — this is why,
   for example, `ERXConsoleCapture` attaches at the appender rather than teeing the streams.
 
@@ -24,12 +24,12 @@ Roughly, in sequence:
 
 1. `ERXApplication.main()` runs. Its first act is `ERXLoggingSupport.configureDefaultLogging()`:
    a plain console appender at INFO on the root logger, so logging works from here on. It then
-   installs the clamping `NSLog.debug` logger (see below).
+   installs the NSLog bridge (see below).
 2. `main()` composes the configuration (`ERXConfigurationManager`, see `CONFIGURATION.md`) and
    hands over to `WOApplication.main()`, which constructs the application. At the end of
    `ERXApplication`'s constructor, it runs
    `ERXLogger.configureLoggingWithSystemProperties()`: `LogManager.resetConfiguration()`,
-   `BasicConfigurator.configure()`, install the `NSLog` bridge, then
+   `BasicConfigurator.configure()`, then
    `PropertyConfigurator.configure(properties)` from the composed configuration. If the
    properties yield no appenders it falls back to a default `ConsoleAppender` on `System.out`.
    This replaces the appender from step 1. At the top of the application constructor,
@@ -71,7 +71,7 @@ reads as a document regardless of the configured pattern layout. Ordering: the a
 section is deliberately last, since it is what one reaches for first.
 
 WO's own `NSLog.debug` chatter (the WOProperties dump, "Application project found", "Waiting for
-requests...") is capped at `NSLog.DebugLevelCritical` by a clamping debug logger installed in
+requests...") is capped at `NSLog.DebugLevelCritical` by the NSLog bridge (`ERXNSLogBridge`), installed in
 `main()`; `-Der.extensions.NSLog.debugLevel=2` (or `3`) restores it. The properties report masks
 any key that looks like a secret (`ERXProperties.isSecretKey`) and shows only keys the Properties
 files and the command line set, not the whole of `System.getProperties()`.
@@ -81,6 +81,4 @@ files and the command line set, not the whole of `System.getProperties()`.
 Open threads worth folding into a proper logging story:
 
 - Kill the "temporary" reflective bridge (`ERXTemporaryLoggingBridge`) (#44).
-- Decide whether `NSLog` still needs to be bridged into log4j at all, or whether WO's
-  stream usage can be handled more directly.
 - The default fallback appender pattern and the property-driven pattern differ; unify.

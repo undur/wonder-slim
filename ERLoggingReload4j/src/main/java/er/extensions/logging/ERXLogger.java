@@ -10,7 +10,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 
@@ -174,19 +173,9 @@ public class ERXLogger extends Logger {
 	public static synchronized void configureLogging(Properties properties) {
 		LogManager.resetConfiguration();
 		BasicConfigurator.configure();
-		// AK: we re-configure the logging a few lines later from the
-		// properties, but in case
-		// no config is set, we set the root level to info, install the brigde
-		// which sets it's own logging level to DEBUG
-		// and the output should be pretty much the same as with plain WO
+		// AK: we re-configure the logging a few lines later from the properties, but in case no config is set, we set
+		// the root level to info. (WebObjects' NSLog reaches log4j through slf4j, see ERXNSLogBridge.)
 		Logger.getRootLogger().setLevel(Level.INFO);
-		int allowedLevel = NSLog.debug.allowedDebugLevel();
-		if (!(NSLog.debug instanceof ERXNSLogLog4jBridge)) {
-			NSLog.setOut(new ERXNSLogLog4jBridge(ERXNSLogLog4jBridge.OUT));
-			NSLog.setErr(new ERXNSLogLog4jBridge(ERXNSLogLog4jBridge.ERR));
-			NSLog.setDebug(new ERXNSLogLog4jBridge(ERXNSLogLog4jBridge.DEBUG));
-		}
-		NSLog.debug.setAllowedDebugLevel(allowedLevel);
 		PropertyConfigurator.configure(properties);
 		// AK: if the root logger has no appenders, something is really broken
 		// most likely the properties didn't read correctly.

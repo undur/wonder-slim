@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **WebObjects' NSLog output goes to slf4j, whichever logging backend is used**
+  `ERXNSLogBridge`, in ERExtensions, replaces ERLoggingReload4j's `ERXNSLogLog4jBridge`: NSLog's
+  out, err and debug go to slf4j's `NSLog` logger at INFO, WARN and DEBUG, from the first line of
+  `main()` rather than once the application is constructed. Startup output WebObjects writes
+  through NSLog therefore appears in the log's format. It caps NSLog's debug level at
+  `er.extensions.NSLog.debugLevel` itself, replacing the separate logger `main()` installed, and
+  stays an `NSLog.PrintStreamLogger`, which WebObjects requires where `WOOutputPath` is set.
+  `er.extensions.ERXNSLogLog4jBridge.ignoreNSLogSettings` keeps its name. (#44)
+
 - **The logging backend is found through `ServiceLoader`**
   A logging module lists its backend (`ERXLoggingBackend`) in
   `META-INF/services/er.extensions.ERXLoggingBackend`; ERLoggingReload4j's is

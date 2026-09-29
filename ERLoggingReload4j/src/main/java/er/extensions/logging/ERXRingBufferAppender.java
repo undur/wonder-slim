@@ -18,7 +18,7 @@ import org.apache.log4j.spi.ThrowableInformation;
  * development-only request handler).
  *
  * <p><b>Why an appender, not a System.out tee.</b> In this stack the WO {@code NSLog}
- * facility is bridged INTO log4j ({@link ERXNSLogLog4jBridge}), while log4j's own
+ * facility is bridged INTO log4j (through slf4j, {@code ERXNSLogBridge}), while log4j's own
  * {@code ConsoleAppender} writes back OUT to {@code System.out}. Wrapping
  * {@code System.out}/{@code System.err} to capture output therefore sits inside that
  * feedback path and can re-capture the appender's own output, producing runaway

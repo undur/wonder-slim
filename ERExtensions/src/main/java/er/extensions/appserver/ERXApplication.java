@@ -53,6 +53,7 @@ import er.extensions.ERXPlugin;
 import er.extensions.ERXPlugins;
 import er.extensions.ERXKVCReflectionHack;
 import er.extensions.ERXLoggingSupport;
+import er.extensions.ERXNSLogBridge;
 import er.extensions.ERXObsoleteProperties;
 import er.extensions.ERXMonitorServer;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
@@ -156,25 +157,12 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		ERXKVCReflectionHack.enable();
 		ERXShutdownHook.initERXShutdownHookIfEnabled();
 
-		// WO's own debug chatter - WOProperties.printWODefaults() dumping every WO default as
-		// "[date] <main> WOxxx=yyy", "Application project found", "Cannot use rapid turnaround" and
-		// friends - is emitted through NSLog.debug at the Informational level during WOApplication's
-		// own initialization, before our logging is configured. The properties report and the startup
-		// banner cover what matters from it. Setting the level here would not stick: WO re-derives it
-		// from NSDebugLevel / WODebuggingEnabled inside _initWOApp, just before the dump. So the debug
-		// logger installed here clamps whatever level WO later sets on it; ERXLogger carries the
-		// clamped level over to the log4j bridge when logging is configured. er.extensions.NSLog.debugLevel
-		// (0-3, the NSLog.DebugLevel* values; a -D system property, since this runs before WO reads its
-		// own arguments) raises the cap when WO's debug output is wanted.
-		final int nsLogDebugCap = Integer.getInteger(ERXP.NSLOG_DEBUG_LEVEL.id(), NSLog.DebugLevelCritical);
-
-		NSLog.setDebug(new NSLog.PrintStreamLogger(System.out) {
-			@Override
-			public void setAllowedDebugLevel(int level) {
-				super.setAllowedDebugLevel(Math.min(level, nsLogDebugCap));
-			}
-		});
-		NSLog.debug.setAllowedDebugLevel(nsLogDebugCap);
+		// WebObjects' own logging (NSLog) to slf4j from here on, its debug output capped: WO writes its startup
+		// chatter - every WO default, "Application project found" and friends - through NSLog.debug while it
+		// initializes, and resets the level it allows from its own properties as it does, so the bridge caps whatever
+		// level WO sets. er.extensions.NSLog.debugLevel (0-3, the NSLog.DebugLevel* values; a -D JVM option, since
+		// this runs before WO reads its own arguments) raises the cap. See ERXNSLogBridge.
+		ERXNSLogBridge.install();
 
 		// The configuration, composed from all its sources before the application is constructed, so the constructor
 		// sees the properties the application runs with. See ERXConfigurationManager.

@@ -51,6 +51,11 @@ public enum ERXP {
 	NSLOG_DEBUG_LEVEL( "er.extensions.NSLog.debugLevel" ),
 
 	/**
+	 * If true, all of WebObjects' NSLog debug output goes to slf4j, and slf4j's configuration alone decides what's logged, rather than NSLog's debug level (see {@code ERXNSLogBridge}). The key names the bridge's former, log4j-specific class. Defaults to false.
+	 */
+	NSLOG_IGNORE_SETTINGS( "er.extensions.ERXNSLogLog4jBridge.ignoreNSLogSettings" ),
+
+	/**
 	 * Seconds the instance lives before it's stopped, plus a random interval of up to 10 minutes. Unset or 0: no limit.
 	 */
 	TIME_TO_LIVE( "ERTimeToLive" ),
