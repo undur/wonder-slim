@@ -27,19 +27,19 @@
 				<div class="card-header"><h3 class="card-title">Levels</h3><div class="card-subtitle ms-3">every logger with a level set: a logger without one logs at the level of the nearest logger above it</div></div>
 				<div class="table-responsive">
 					<table class="table table-vcenter card-table table-sm">
-						<thead><tr><th>Logger</th><th>Level</th><th>Set by</th><th>Overrides</th></tr></thead>
+						<thead><tr><th>Logger</th><th>Level</th><th>Set by</th><th>Source</th><th>Overrides</th></tr></thead>
 						<tbody>
 							<wo:repetition list="$rows" item="$currentRow">
 								<tr>
 									<td class="font-monospace text-nowrap"><wo:str value="$currentRow.logger" /></td>
 									<td><span class="badge bg-primary-lt"><wo:str value="$currentRow.level" /></span></td>
-									<td>
+									<td class="font-monospace small text-nowrap"><wo:str value="$currentRow.setBy.setting" /></td>
+									<td class="text-nowrap">
 										<wo:if condition="$currentRow.isSetOnInstance">
 											<wo:form class="d-inline-flex align-items-center gap-2"><span class="badge bg-orange-lt">set on this instance</span> <wo:submit action="$unsetLevel" value="Unset" class="btn btn-sm" /></wo:form>
 										</wo:if>
 										<wo:if condition="$currentRow.isSetOnInstance" negate="true">
-											<span class="font-monospace small"><wo:str value="$currentRow.setBy.setting" /></span>
-											<wo:if condition="$currentRow.setBy.source"> <span class="badge bg-primary-lt"><wo:str value="$currentRow.setBy.source" /></span></wo:if>
+											<wo:if condition="$currentRow.setBy.source"><span class="badge bg-primary-lt"><wo:str value="$currentRow.setBy.source" /></span></wo:if>
 										</wo:if>
 									</td>
 									<td class="text-secondary small"><wo:str value="$currentRow.overridesDescription" /></td>
