@@ -972,7 +972,7 @@ public final class ERXConfigurationManager {
 
 	/**
 	 * The startup report on configuration: the sources in the order they were applied, then every property in effect,
-	 * alphabetically, with the ones a source set marked, so the application's own configuration stands out from
+	 * alphabetically, with the source that set it, so the application's own configuration stands out from
 	 * WebObjects' and the JVM's defaults while those stay available (the effective session timeout, worker thread count,
 	 * caching flag or handler keys are as operationally relevant as anything the application set itself). Printed in
 	 * the same banner style as the rest of the startup output.
@@ -998,24 +998,29 @@ public final class ERXConfigurationManager {
 			effective.put( key, value == null ? "" : value );
 		}
 
+		// The source column: as wide as the longest source name that set a property in effect
+		final int sourceWidth = effective.keySet().stream().map( _origins::get ).filter( Objects::nonNull ).mapToInt( source -> source.name().length() ).max().orElse( 0 );
+		final String line = "%-46s  %-" + Math.max( sourceWidth, 1 ) + "s = %s%n";
+
 		out.append( '\n' );
 		out.append( "================= PROPERTIES ===================\n" );
-		out.append( "(* = set by a properties file, a JVM option or an argument; the rest are WebObjects and JVM defaults)\n" );
+		out.append( "(each with the source that set it; those without one are WebObjects and JVM defaults)\n" );
 
 		for( final Map.Entry<String, String> entry : effective.entrySet() ) {
 			final String key = entry.getKey();
-			final String marker = _origins.containsKey( key ) ? "*" : " ";
+			final Source origin = _origins.get( key );
+			final String source = origin == null ? "" : origin.name();
 
 			if( "java.class.path".equals( key ) ) {
 				final String[] elements = entry.getValue().split( Pattern.quote( File.pathSeparator ) );
-				out.append( String.format( "%s %-46s = %s%n", marker, key, elements.length > 0 ? elements[0] : "" ) );
+				out.append( String.format( line, key, source, elements.length > 0 ? elements[0] : "" ) );
 
 				for( int i = 1; i < elements.length; i++ ) {
-					out.append( String.format( "  %-46s   %s%n", "", elements[i] ) );
+					out.append( String.format( line.replace( " = ", "   " ), "", "", elements[i] ) );
 				}
 			}
 			else {
-				out.append( String.format( "%s %-46s = %s%n", marker, key, maskedValue( key, entry.getValue() ).replace( "\n", "\\n" ) ) );
+				out.append( String.format( line, key, source, maskedValue( key, entry.getValue() ).replace( "\n", "\\n" ) ) );
 			}
 		}
 

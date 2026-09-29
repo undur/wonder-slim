@@ -79,7 +79,7 @@
   `-D` option now takes precedence over properties files throughout, where before it did in the
   constructor and not afterwards. A reload gives a property no file sets any more its value from
   launch back, instead of keeping it. The startup report lists every source, framework jars, JVM
-  options and arguments included. `ERXConfigurationManager` now composes the configuration and
+  options and arguments included, and each property with the source that set it. `ERXConfigurationManager` now composes the configuration and
   holds its sources and where each value came from (`ERXConfigurationManager.current()`), and
   checks its files for changes on a thread of its own rather than on each request, replacing
   `ERXFileNotificationCenter`. Its old instance API (`defaultManager()`, the argument and loading
