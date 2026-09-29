@@ -17,15 +17,15 @@ import er.extensions.foundation.ERXConfigurationManager.Source;
  * <ol>
  * <li>{@link #legacyLevels(Properties)}: the levels in Project Wonder style log4j configuration ({@code log4j.logger.X},
  * {@code log4j.rootLogger}, {@code log4j.rootCategory}), for a backend other than log4j's, which reads those itself</li>
- * <li>{@link #levels(Properties, boolean) levels( properties, false )}: {@code er.extensions.logging.level.<logger>} and
- * {@code er.extensions.logging.level.root}, set anywhere but on the running instance</li>
+ * <li>{@link #levels(Properties, boolean) levels( properties, false )}: {@code er.logging.level.<logger>} and
+ * {@code er.logging.level.root}, set anywhere but on the running instance</li>
  * <li>the backend's own configuration ({@code log4j.*} for reload4j, {@code logback.xml} for logback), which can
  * express what these can't, and wins where both name a logger</li>
  * <li>{@link #levels(Properties, boolean) levels( properties, true )}: the same keys set on the running instance
  * ({@code ERXConfigurationManager.setProperty()}, the admin console), which win over everything</li>
  * </ol>
  *
- * {@link #pattern(Properties)} ({@code er.extensions.logging.pattern}) is the layout of the console output a backend
+ * {@link #pattern(Properties)} ({@code er.logging.pattern}) is the layout of the console output a backend
  * sets up when its own configuration sets up none.
  */
 public final class ERXLoggingConfiguration {
@@ -36,7 +36,7 @@ public final class ERXLoggingConfiguration {
 	public static final String ROOT = "root";
 
 	/**
-	 * The prefix of the level keys: {@code er.extensions.logging.level.<logger>}
+	 * The prefix of the level keys: {@code er.logging.level.<logger>}
 	 */
 	public static final String LEVEL_PREFIX = ERXP.LOGGING_LEVEL_PREFIX.id();
 
@@ -59,7 +59,7 @@ public final class ERXLoggingConfiguration {
 	private ERXLoggingConfiguration() {}
 
 	/**
-	 * @return The levels set by {@code er.extensions.logging.level.*} keys, by logger name ({@link #ROOT} for the root
+	 * @return The levels set by {@code er.logging.level.*} keys, by logger name ({@link #ROOT} for the root
 	 *         logger), upper-cased: those set on the running instance, or those set anywhere else. A key naming no level
 	 *         the backends know is left out.
 	 */

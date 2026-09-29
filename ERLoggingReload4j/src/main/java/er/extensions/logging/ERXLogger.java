@@ -183,7 +183,7 @@ public class ERXLogger extends Logger {
 	public static synchronized void configureLogging(Properties properties) {
 		LogManager.resetConfiguration();
 
-		// Console output in the configured layout (er.extensions.logging.pattern) at INFO, for when log4j.* sets up none:
+		// Console output in the configured layout (er.logging.pattern) at INFO, for when log4j.* sets up none:
 		// log4j.rootLogger/rootCategory naming appenders replaces it. (WebObjects' NSLog reaches log4j through slf4j, see
 		// ERXNSLogBridge.)
 		Logger.getRootLogger().setLevel(Level.INFO);

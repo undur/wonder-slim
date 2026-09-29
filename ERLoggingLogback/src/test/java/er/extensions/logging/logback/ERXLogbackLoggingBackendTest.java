@@ -26,7 +26,7 @@ public class ERXLogbackLoggingBackendTest {
 
 	private final ERXLogbackLoggingBackend _backend = new ERXLogbackLoggingBackend();
 
-	private static final List<String> KEYS = List.of( "er.extensions.logging.level.test.neutral", "er.extensions.logging.level.test.both", "er.extensions.logging.level.test.legacyAndNeutral", "log4j.logger.test.legacy", "log4j.logger.test.legacyAndNeutral", "log4j.appender.A1", "logback.configurationFile", "er.extensions.logging.pattern" );
+	private static final List<String> KEYS = List.of( "er.logging.level.test.neutral", "er.logging.level.test.both", "er.logging.level.test.legacyAndNeutral", "log4j.logger.test.legacy", "log4j.logger.test.legacyAndNeutral", "log4j.appender.A1", "logback.configurationFile", "er.logging.pattern" );
 
 	@AfterEach
 	public void clean() {
@@ -62,7 +62,7 @@ public class ERXLogbackLoggingBackendTest {
 
 	@Test
 	public void aNeutralLevelIsSet() {
-		System.setProperty( "er.extensions.logging.level.test.neutral", "debug" );
+		System.setProperty( "er.logging.level.test.neutral", "debug" );
 		_backend.configure();
 		assertEquals( Level.DEBUG, logger( "test.neutral" ).getLevel() );
 	}
@@ -71,7 +71,7 @@ public class ERXLogbackLoggingBackendTest {
 	public void aLegacyLevelIsUsedAndANeutralOneWinsOverIt() {
 		System.setProperty( "log4j.logger.test.legacy", "WARN, A1" );
 		System.setProperty( "log4j.logger.test.legacyAndNeutral", "WARN" );
-		System.setProperty( "er.extensions.logging.level.test.legacyAndNeutral", "TRACE" );
+		System.setProperty( "er.logging.level.test.legacyAndNeutral", "TRACE" );
 		_backend.configure();
 		assertEquals( Level.WARN, logger( "test.legacy" ).getLevel() );
 		assertEquals( Level.TRACE, logger( "test.legacyAndNeutral" ).getLevel() );
@@ -79,8 +79,8 @@ public class ERXLogbackLoggingBackendTest {
 
 	@Test
 	public void logbacksOwnConfigurationWinsWhereItNamesALoggerAndTakesOverTheOutput() throws IOException {
-		System.setProperty( "er.extensions.logging.level.test.both", "DEBUG" );
-		System.setProperty( "er.extensions.logging.level.test.neutral", "DEBUG" );
+		System.setProperty( "er.logging.level.test.both", "DEBUG" );
+		System.setProperty( "er.logging.level.test.neutral", "DEBUG" );
 		System.setProperty( "logback.configurationFile", nativeConfiguration( "<logger name=\"test.both\" level=\"ERROR\" />" ).toString() );
 		_backend.configure();
 
@@ -97,14 +97,14 @@ public class ERXLogbackLoggingBackendTest {
 		}
 
 		System.setProperty( "logback.configurationFile", nativeConfiguration( "<logger name=\"test.instance\" level=\"ERROR\" />" ).toString() );
-		ERXConfigurationManager.setProperty( "er.extensions.logging.level.test.instance", "TRACE" );
+		ERXConfigurationManager.setProperty( "er.logging.level.test.instance", "TRACE" );
 
 		try {
 			_backend.configure();
 			assertEquals( Level.TRACE, logger( "test.instance" ).getLevel() );
 		}
 		finally {
-			ERXConfigurationManager.unsetProperty( "er.extensions.logging.level.test.instance" );
+			ERXConfigurationManager.unsetProperty( "er.logging.level.test.instance" );
 		}
 
 		_backend.configure();
@@ -115,7 +115,7 @@ public class ERXLogbackLoggingBackendTest {
 	public void parenthesesInTheLayoutAreLiteral() {
 		assertEquals( "%d \\(%F:%L\\) %-5p %c - %m%n", ERXLogbackLoggingBackend.logbackPattern( "%d (%F:%L) %-5p %c - %m%n" ) );
 
-		System.setProperty( "er.extensions.logging.pattern", "[(%F:%L) %-5p %m]%n" );
+		System.setProperty( "er.logging.pattern", "[(%F:%L) %-5p %m]%n" );
 		_backend.installCapture();
 		_backend.configure();
 
@@ -145,7 +145,7 @@ public class ERXLogbackLoggingBackendTest {
 
 	@Test
 	public void webObjectsCallsToTheLog4jApiReachLogback() {
-		System.setProperty( "er.extensions.logging.level.test.neutral", "DEBUG" );
+		System.setProperty( "er.logging.level.test.neutral", "DEBUG" );
 		_backend.installCapture();
 		_backend.configure();
 

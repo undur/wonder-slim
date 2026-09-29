@@ -23,12 +23,12 @@ public class ERXLoggingConfigurationTest {
 	@Test
 	public void neutralLevelsAreReadByLoggerNameAndNormalized() {
 		final Properties properties = properties(
-				"er.extensions.logging.level.root", "info",
-				"er.extensions.logging.level.er.extensions", " Debug ",
-				"er.extensions.logging.level.a", "warning",
-				"er.extensions.logging.level.b", "fatal",
-				"er.extensions.logging.level.c", "loud",
-				"er.extensions.logging.level.", "DEBUG",
+				"er.logging.level.root", "info",
+				"er.logging.level.er.extensions", " Debug ",
+				"er.logging.level.a", "warning",
+				"er.logging.level.b", "fatal",
+				"er.logging.level.c", "loud",
+				"er.logging.level.", "DEBUG",
 				"unrelated", "DEBUG" );
 
 		assertEquals( Map.of( "root", "INFO", "er.extensions", "DEBUG", "a", "WARN", "b", "ERROR" ), ERXLoggingConfiguration.levels( properties, false ) );
@@ -49,7 +49,7 @@ public class ERXLoggingConfigurationTest {
 
 	@Test
 	public void neutralLevelsWinOverLegacyOnesBeneathTheBackendsOwn() {
-		final Properties properties = properties( "log4j.logger.x", "WARN", "er.extensions.logging.level.x", "TRACE", "log4j.logger.y", "ERROR" );
+		final Properties properties = properties( "log4j.logger.x", "WARN", "er.logging.level.x", "TRACE", "log4j.logger.y", "ERROR" );
 		assertEquals( Map.of( "x", "TRACE", "y", "ERROR" ), ERXLoggingConfiguration.belowNativeConfiguration( properties, true ) );
 		assertEquals( Map.of( "x", "TRACE" ), ERXLoggingConfiguration.belowNativeConfiguration( properties, false ) );
 	}
@@ -57,6 +57,6 @@ public class ERXLoggingConfigurationTest {
 	@Test
 	public void thePatternDefaults() {
 		assertEquals( ERXLoggingConfiguration.DEFAULT_PATTERN, ERXLoggingConfiguration.pattern( properties() ) );
-		assertEquals( "%m%n", ERXLoggingConfiguration.pattern( properties( "er.extensions.logging.pattern", "%m%n" ) ) );
+		assertEquals( "%m%n", ERXLoggingConfiguration.pattern( properties( "er.logging.pattern", "%m%n" ) ) );
 	}
 }

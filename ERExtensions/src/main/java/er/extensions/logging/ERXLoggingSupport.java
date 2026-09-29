@@ -56,11 +56,11 @@ public class ERXLoggingSupport {
 	}
 
 	/**
-	 * @return true if the property is part of the logging configuration: {@code er.extensions.logging.*}, log4j's own
+	 * @return true if the property is part of the logging configuration: {@code er.logging.*}, log4j's own
 	 *         ({@code log4j.*}) or logback's ({@code logback.configurationFile})
 	 */
 	public static boolean isLoggingProperty( final String key ) {
-		return key.startsWith( "er.extensions.logging." ) || key.startsWith( "log4j." ) || key.equals( "logback.configurationFile" );
+		return key.startsWith( "er.logging." ) || key.startsWith( "log4j." ) || key.equals( "logback.configurationFile" );
 	}
 
 	/**

@@ -31,16 +31,16 @@ In layers, lowest first; a later layer wins where two name the same logger
    `log4j.rootCategory`), for a backend other than reload4j, which reads `log4j.*` itself.
    The rest of log4j's configuration (appenders, layouts) can't be translated; logback names
    those keys in a warning, once.
-2. **Keys every backend understands**: `er.extensions.logging.level.<logger>` and
-   `er.extensions.logging.level.root` (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`), and
-   `er.extensions.logging.pattern`, the layout of the console output a backend sets up when its
+2. **Keys every backend understands**: `er.logging.level.<logger>` and
+   `er.logging.level.root` (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`), and
+   `er.logging.pattern`, the layout of the console output a backend sets up when its
    own configuration sets up none.
 3. **The backend's own configuration**, which can express what these can't: `log4j.*` for
    reload4j (read as it always has been, through `PropertyConfigurator`), and for logback the
    file `logback.configurationFile` names or `logback.xml` on the classpath. If logback's
    configuration gives the root logger output of its own, the console output from layer 2
    stands aside.
-4. **`er.extensions.logging.level.*` set on the running instance**
+4. **`er.logging.level.*` set on the running instance**
    (`ERXConfigurationManager.setProperty()`, the admin console), which wins over everything.
 
 ## Initialization timeline (why order matters)
@@ -56,7 +56,7 @@ Roughly, in sequence:
    console output from step 1. From here on, everything logged reaches the configured log: every
    plugin hook, and the whole of the application's construction. Only what's logged while the
    configuration is being composed goes to the console output from step 1. The same call makes
-   logging follow the configuration: a change to a logging property (`er.extensions.logging.*`,
+   logging follow the configuration: a change to a logging property (`er.logging.*`,
    `log4j.*`, `logback.configurationFile`), from a watched file or set on the running instance,
    configures logging again (`ERXConfigurationManager.onChange()`).
    Then `WOApplication.main()` constructs the application. WebObjects' constructor redirects

@@ -36,10 +36,10 @@ import er.extensions.logging.ERXLoggingConfiguration;
  * <ol>
  * <li>the levels in Project Wonder style log4j configuration ({@code log4j.logger.X}, {@code log4j.rootLogger}); the
  * rest of it (appenders, layouts) can't be translated, and is named in a warning</li>
- * <li>{@code er.extensions.logging.level.*}, and console output in the layout {@code er.extensions.logging.pattern}</li>
+ * <li>{@code er.logging.level.*}, and console output in the layout {@code er.logging.pattern}</li>
  * <li>logback's own configuration: the file {@code logback.configurationFile} names, or {@code logback.xml} on the
  * classpath. If it gives the root logger output of its own, the console output above stands aside.</li>
- * <li>{@code er.extensions.logging.level.*} set on the running instance</li>
+ * <li>{@code er.logging.level.*} set on the running instance</li>
  * </ol>
  *
  * logback's console output writes to whatever {@code System.out} is at the time, so it follows WebObjects' redirect to
@@ -172,7 +172,7 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 	}
 
 	/**
-	 * @return The given layout ({@code er.extensions.logging.pattern}, in the conversions log4j and logback share) as
+	 * @return The given layout ({@code er.logging.pattern}, in the conversions log4j and logback share) as
 	 *         logback reads it: logback takes parentheses for grouping, so a literal one, as in {@code (%F:%L)}, is escaped
 	 */
 	static String logbackPattern( final String pattern ) {

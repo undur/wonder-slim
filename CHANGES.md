@@ -7,7 +7,7 @@
   finished; until then, everything went to a console appender in a fixed layout. Now it's
   configured in `ERXApplication.main()`, right after the configuration is composed, so everything
   the plugins and the application's construction log reaches the configured log. After that,
-  logging is configured again when a logging property changes (`er.extensions.logging.*`,
+  logging is configured again when a logging property changes (`er.logging.*`,
   `log4j.*`, `logback.configurationFile`), from a watched file or set on the running instance,
   instead of on every reload of the configuration. (#44)
 
@@ -16,11 +16,11 @@
   ERLoggingReload4j (one or the other). It brings `log4j-over-slf4j`, since WebObjects itself
   calls the log4j API. Logging is configured in layers, lowest first: Project Wonder style
   `log4j.logger.*` and `log4j.rootLogger` levels (for logback; its appenders and layouts are named
-  in a warning); `er.extensions.logging.level.<logger>` and `er.extensions.logging.pattern`, which
+  in a warning); `er.logging.level.<logger>` and `er.logging.pattern`, which
   every backend understands; the backend's own configuration (`log4j.*` for reload4j, as before,
   `logback.xml` for logback), which wins where it names a logger; and levels set on the running
   instance, which win over everything. With reload4j, console output without `log4j.*`
-  configuration now uses `er.extensions.logging.pattern`'s layout (by default
+  configuration now uses `er.logging.pattern`'s layout (by default
   `%d{MMM dd HH:mm:ss} %-5p %c - %m%n`) instead of log4j's own. Literal parentheses in the layout,
   as in `(%F:%L)`, stay literal with logback, which otherwise reads them as grouping. The defaults,
   root at INFO and that layout, are set in ERExtensions' own `Properties`, so the Configuration page

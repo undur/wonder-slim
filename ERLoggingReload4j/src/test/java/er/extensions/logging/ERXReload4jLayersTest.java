@@ -17,7 +17,7 @@ import er.extensions.foundation.ERXConfigurationManager;
  */
 public class ERXReload4jLayersTest {
 
-	private static final List<String> KEYS = List.of( "er.extensions.logging.level.test.neutral", "er.extensions.logging.level.test.both", "log4j.logger.test.both" );
+	private static final List<String> KEYS = List.of( "er.logging.level.test.neutral", "er.logging.level.test.both", "log4j.logger.test.both" );
 
 	@AfterEach
 	public void clean() {
@@ -27,14 +27,14 @@ public class ERXReload4jLayersTest {
 
 	@Test
 	public void aNeutralLevelIsSet() {
-		System.setProperty( "er.extensions.logging.level.test.neutral", "DEBUG" );
+		System.setProperty( "er.logging.level.test.neutral", "DEBUG" );
 		ERXLogger.configureLoggingWithSystemProperties();
 		assertEquals( Level.DEBUG, Logger.getLogger( "test.neutral" ).getLevel() );
 	}
 
 	@Test
 	public void log4jConfigurationWinsWhereItNamesALogger() {
-		System.setProperty( "er.extensions.logging.level.test.both", "DEBUG" );
+		System.setProperty( "er.logging.level.test.both", "DEBUG" );
 		System.setProperty( "log4j.logger.test.both", "ERROR" );
 		ERXLogger.configureLoggingWithSystemProperties();
 		assertEquals( Level.ERROR, Logger.getLogger( "test.both" ).getLevel() );
@@ -47,13 +47,13 @@ public class ERXReload4jLayersTest {
 		}
 
 		ERXLoggingSupport.configureAndFollowChanges();
-		ERXConfigurationManager.setProperty( "er.extensions.logging.level.test.followed", "TRACE" );
+		ERXConfigurationManager.setProperty( "er.logging.level.test.followed", "TRACE" );
 
 		try {
 			assertEquals( Level.TRACE, Logger.getLogger( "test.followed" ).getLevel(), "No explicit reconfiguration: the listener did it" );
 		}
 		finally {
-			ERXConfigurationManager.unsetProperty( "er.extensions.logging.level.test.followed" );
+			ERXConfigurationManager.unsetProperty( "er.logging.level.test.followed" );
 		}
 
 		assertEquals( null, Logger.getLogger( "test.followed" ).getLevel(), "Unset, and reconfigured again" );
@@ -66,14 +66,14 @@ public class ERXReload4jLayersTest {
 		}
 
 		System.setProperty( "log4j.logger.test.both", "ERROR" );
-		ERXConfigurationManager.setProperty( "er.extensions.logging.level.test.both", "TRACE" );
+		ERXConfigurationManager.setProperty( "er.logging.level.test.both", "TRACE" );
 
 		try {
 			ERXLogger.configureLoggingWithSystemProperties();
 			assertEquals( Level.TRACE, Logger.getLogger( "test.both" ).getLevel() );
 		}
 		finally {
-			ERXConfigurationManager.unsetProperty( "er.extensions.logging.level.test.both" );
+			ERXConfigurationManager.unsetProperty( "er.logging.level.test.both" );
 		}
 	}
 }
