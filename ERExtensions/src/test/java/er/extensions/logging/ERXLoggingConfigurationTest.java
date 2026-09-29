@@ -35,6 +35,12 @@ public class ERXLoggingConfigurationTest {
 	}
 
 	@Test
+	public void allLevelsAreReadWithoutTheConfiguration() {
+		final Properties properties = properties( "er.logging.level.root", "warn", "er.logging.level.a.b", "Debug", "er.logging.level.c", "loud" );
+		assertEquals( Map.of( "root", "WARN", "a.b", "DEBUG" ), ERXLoggingConfiguration.allLevels( properties ) );
+	}
+
+	@Test
 	public void legacyLevelsAreTheLevelPartOfLog4jConfiguration() {
 		final Properties properties = properties(
 				"log4j.rootCategory", "INFO, A1",

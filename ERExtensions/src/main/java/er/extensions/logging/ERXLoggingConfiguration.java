@@ -80,6 +80,26 @@ public final class ERXLoggingConfiguration {
 	}
 
 	/**
+	 * @return The levels set by {@code er.logging.level.*} keys wherever they're set, by logger name ({@link #ROOT} for
+	 *         the root logger), upper-cased, without asking the configuration which were set on the running instance
+	 */
+	public static Map<String, String> allLevels( final Properties properties ) {
+		final Map<String, String> levels = new TreeMap<>();
+
+		for( final String key : properties.stringPropertyNames() ) {
+			if( key.startsWith( LEVEL_PREFIX ) && key.length() > LEVEL_PREFIX.length() ) {
+				final String level = level( properties.getProperty( key ) );
+
+				if( level != null ) {
+					levels.put( key.substring( LEVEL_PREFIX.length() ), level );
+				}
+			}
+		}
+
+		return levels;
+	}
+
+	/**
 	 * @return The levels in Project Wonder style log4j configuration, by logger name ({@link #ROOT} for the root logger):
 	 *         {@code log4j.logger.X=LEVEL[, appenders]}, and {@code log4j.rootLogger} or {@code log4j.rootCategory}
 	 */

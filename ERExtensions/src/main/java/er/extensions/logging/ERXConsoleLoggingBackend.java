@@ -26,7 +26,20 @@ import org.slf4j.LoggerFactory;
  * module.
  *
  * Not listed in {@code META-INF/services}, so slf4j never finds it on its own and never has two providers to choose
- * between: {@link #activateIfNoBackend()} names it as slf4j's provider when there's no other backend.
+ * between: {@link #activateIfNoBackend()} names it as slf4j's provider when there's no other backend, from
+ * {@code ERXApplication}'s static initializer.
+ *
+ * A program that doesn't start through {@code ERXApplication} (a stand-alone tool, a batch job, unit tests) names it
+ * itself, most reliably as a JVM option, since slf4j chooses its provider when the first logger is created, often in a
+ * static field before {@code main()} runs:
+ *
+ * <pre>
+ * -Dslf4j.provider=er.extensions.logging.ERXConsoleServiceProvider
+ * </pre>
+ *
+ * It then configures itself from the system properties, so {@code -Der.logging.level.<logger>=DEBUG} and
+ * {@code er.logging.pattern} work there too. A program that creates no logger before its first line can call
+ * {@link #activateIfNoBackend()} instead.
  */
 public final class ERXConsoleLoggingBackend implements ERXLoggingBackend {
 
@@ -75,7 +88,8 @@ public final class ERXConsoleLoggingBackend implements ERXLoggingBackend {
 	/**
 	 * Names this as slf4j's provider, if no other logging backend is on the classpath and nothing else names one. Must
 	 * run before anything creates an slf4j logger: {@code ERXApplication}'s static initializer invokes it, which the
-	 * JVM runs before {@code main()}.
+	 * JVM runs before {@code main()}. A program that doesn't start through {@code ERXApplication} can invoke it first
+	 * thing, as long as nothing has created a logger before (a static logger field in its main class has).
 	 */
 	public static void activateIfNoBackend() {
 		if( System.getProperty( PROVIDER_PROPERTY ) != null ) {
@@ -111,6 +125,24 @@ public final class ERXConsoleLoggingBackend implements ERXLoggingBackend {
 	public void configureDefault() {
 		_levels = Map.of( ERXLoggingConfiguration.ROOT, LEVEL_VALUES.get( "INFO" ) );
 		_layout = ERXConsoleLayout.of( ERXLoggingConfiguration.DEFAULT_PATTERN );
+		_generation++;
+	}
+
+	/**
+	 * Configures from the system properties as they are when slf4j initializes the provider, for a program that doesn't
+	 * start through {@code ERXApplication}, where nothing else configures logging: the legacy and neutral levels, and
+	 * the pattern. Doesn't consult {@code ERXConfigurationManager}, whose own logger would be created while slf4j is
+	 * still initializing; nothing is set on the running instance yet anyway.
+	 */
+	void configureInitially() {
+		final Properties properties = System.getProperties();
+		final Map<String, Integer> levels = new HashMap<>();
+		levels.put( ERXLoggingConfiguration.ROOT, LEVEL_VALUES.get( "INFO" ) );
+		ERXLoggingConfiguration.legacyLevels( properties ).forEach( ( logger, level ) -> levels.put( logger, LEVEL_VALUES.get( level ) ) );
+		ERXLoggingConfiguration.allLevels( properties ).forEach( ( logger, level ) -> levels.put( logger, LEVEL_VALUES.get( level ) ) );
+
+		_levels = Map.copyOf( levels );
+		_layout = ERXConsoleLayout.of( ERXLoggingConfiguration.pattern( properties ) );
 		_generation++;
 	}
 

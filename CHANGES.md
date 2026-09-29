@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Console logging for programs that don't start through `ERXApplication`**
+  A stand-alone tool, a batch job or an application's unit tests get the console logger without a
+  logging module by naming it as slf4j's provider:
+  `-Dslf4j.provider=er.extensions.logging.ERXConsoleServiceProvider`. It configures itself from the
+  system properties when slf4j starts it, so `-Der.logging.level.<logger>=DEBUG` and
+  `er.logging.pattern` work there too. (#159)
+
 - **What's written before `WOOutputPath` takes effect goes to the start of its file**
   WebObjects redirects the console to the `WOOutputPath` file while the application is
   constructed, so what was written before (logging while the configuration is composed, plugins

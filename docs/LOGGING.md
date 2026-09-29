@@ -19,7 +19,12 @@ descriptive, not aspirational.
   competes with another provider: `ERXApplication`'s static initializer, which the JVM runs before
   `main()` and before any logger is created, names it as slf4j's provider (`slf4j.provider`) when
   no backend is on the classpath and nothing else names one. A program that doesn't start
-  through `ERXApplication` gets slf4j's own behaviour, which is to discard everything.
+  through `ERXApplication` (a stand-alone tool, a batch job, unit tests) names it with a JVM option,
+  `-Dslf4j.provider=er.extensions.logging.ERXConsoleServiceProvider` (and
+  `-Dslf4j.internal.verbosity=WARN` to leave out slf4j's note that it did), since slf4j chooses
+  its provider when the first logger is created, often before `main()`. The provider then
+  configures itself from the system properties, so `-Der.logging.level.<logger>` works there too.
+  Without the option, slf4j discards everything, as it does without any provider.
 - **WebObjects needs no log4j API.** Its form value encoder (`WOCGIFormValues$Encoder`, encoding
   a direct action's query parameters) calls `org.apache.log4j.Logger`, and `ERXApplication.main()`
   rewrites it to call slf4j before WebObjects first uses it (`ERXLog4jRewrite`). An application

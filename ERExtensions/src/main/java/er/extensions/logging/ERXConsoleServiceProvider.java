@@ -18,7 +18,8 @@ import org.slf4j.spi.SLF4JServiceProvider;
 
 /**
  * slf4j's provider for {@link ERXConsoleLoggingBackend}: loggers that write to the console at the levels it's configured
- * with. Named as slf4j's provider by {@link ERXConsoleLoggingBackend#activateIfNoBackend()}, never found on its own.
+ * with. Named as slf4j's provider by {@link ERXConsoleLoggingBackend#activateIfNoBackend()}, or with
+ * {@code -Dslf4j.provider=er.extensions.logging.ERXConsoleServiceProvider}; never found on its own.
  */
 public final class ERXConsoleServiceProvider implements SLF4JServiceProvider {
 
@@ -51,8 +52,14 @@ public final class ERXConsoleServiceProvider implements SLF4JServiceProvider {
 		return "2.0.99";
 	}
 
+	/**
+	 * Configures the console logger from the system properties: a program that doesn't start through
+	 * {@code ERXApplication} has nothing else to configure it
+	 */
 	@Override
-	public void initialize() {}
+	public void initialize() {
+		ERXConsoleLoggingBackend.INSTANCE.configureInitially();
+	}
 
 	/**
 	 * The loggers, by name
