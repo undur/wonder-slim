@@ -106,9 +106,17 @@ the others. `onChange()` returns the listener, to `remove()` it. A property set 
 
 - **Precedence between frameworks without a plugin follows the classpath.** Those with one follow
   plugin order: a framework overrides the frameworks it requires.
-- **WebObjects' principal classes run before the properties are composed.** They're initialized
-  with `NSBundle`, which composing uses to find the files. Reading the files as classpath resources
-  instead would let them run after (#151).
+- **WebObjects' principal classes run while the properties are composed.** They're initialized
+  with `NSBundle`, which composing uses to find the files: after the plugins are found and default
+  logging is up, before the configuration is complete and before logging is configured from it.
+  A framework that can't depend on wonder-slim (one also meant for plain WebObjects or Project
+  Wonder), and so takes part through a principal class, should do its setup on
+  `ApplicationWillFinishLaunchingNotification` rather than in the principal's static initializer:
+  with wonder-slim that comes after every plugin's `finishInitialization()` and the application's,
+  with the configuration complete, and it's the same moment in plain WebObjects and Project Wonder.
+  `NSNotificationCenter` holds observers weakly, so the observer goes in a static field. Reading
+  the files without `NSBundle`, so principal classes run after composing, was considered and not
+  pursued (#151).
 - **`NSBundle` still applies its own pass** of the bundles' `Properties` while initializing. The
   composed configuration then overrides every value it set.
 - **The properties are strings**, read by key, with the type, default and meaning known only where
