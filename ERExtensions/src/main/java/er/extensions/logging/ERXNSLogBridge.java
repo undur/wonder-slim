@@ -1,10 +1,12 @@
-package er.extensions;
+package er.extensions.logging;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.foundation.NSLog;
 import com.webobjects.foundation.NSProperties;
+
+import er.extensions.ERXP;
 
 /**
  * Sends WebObjects' own logging (NSLog) to slf4j's {@code NSLog} logger, and from there to whichever logging backend is

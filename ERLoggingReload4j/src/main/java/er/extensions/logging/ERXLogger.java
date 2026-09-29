@@ -13,7 +13,6 @@ import org.apache.log4j.PropertyConfigurator;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 
-import er.extensions.ERXLoggingConfiguration;
 import er.extensions.foundation.ERXConfigurationManager;
 
 /**

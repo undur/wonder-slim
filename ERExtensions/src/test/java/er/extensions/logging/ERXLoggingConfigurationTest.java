@@ -1,4 +1,4 @@
-package er.extensions;
+package er.extensions.logging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

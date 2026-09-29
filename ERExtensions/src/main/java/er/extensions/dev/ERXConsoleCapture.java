@@ -2,7 +2,7 @@ package er.extensions.dev;
 
 import java.util.List;
 
-import er.extensions.ERXLoggingSupport;
+import er.extensions.logging.ERXLoggingSupport;
 
 /**
  * Development aid that makes the application's recent log output readable back over
@@ -23,7 +23,7 @@ import er.extensions.ERXLoggingSupport;
  * the loop and never disturbs the streams.
  *
  * <p>This class is a thin, backend-agnostic facade over the logging backend a plugin
- * provides ({@link er.extensions.ERXLoggingBackend}), so ERExtensions keeps no compile
+ * provides ({@link er.extensions.logging.ERXLoggingBackend}), so ERExtensions keeps no compile
  * dependency on a specific logging backend. Without one, install is a no-op and
  * snapshots are empty.
  *

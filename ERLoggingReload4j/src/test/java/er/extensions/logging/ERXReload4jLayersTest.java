@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
 
 /**

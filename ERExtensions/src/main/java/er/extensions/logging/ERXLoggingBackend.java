@@ -1,10 +1,10 @@
-package er.extensions;
+package er.extensions.logging;
 
 import java.util.List;
 
 /**
  * The logging implementation behind slf4j, as the framework drives it. Found through {@link java.util.ServiceLoader}: a
- * jar lists its backend in {@code META-INF/services/er.extensions.ERXLoggingBackend}; at most one may. ERLoggingReload4j
+ * jar lists its backend in {@code META-INF/services/er.extensions.logging.ERXLoggingBackend}; at most one may. ERLoggingReload4j
  * provides the reload4j one. See {@link ERXLoggingSupport}.
  */
 public interface ERXLoggingBackend {

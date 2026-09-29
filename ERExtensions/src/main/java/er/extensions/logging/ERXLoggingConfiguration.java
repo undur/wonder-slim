@@ -1,4 +1,4 @@
-package er.extensions;
+package er.extensions.logging;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import er.extensions.ERXP;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXConfigurationManager.Source;
 

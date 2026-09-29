@@ -7,7 +7,7 @@ descriptive, not aspirational.
 
 - The framework logs through **slf4j** (`org.slf4j.Logger`), as does application code.
 - A **backend** does the logging behind slf4j, as an `ERXLoggingBackend` found through
-  `ServiceLoader` (`META-INF/services/er.extensions.ERXLoggingBackend`); at most one may be on
+  `ServiceLoader` (`META-INF/services/er.extensions.logging.ERXLoggingBackend`); at most one may be on
   the classpath. `ERXLoggingSupport` is the framework's entry point to it, so ERExtensions
   carries no compile dependency on a backend. Two exist:
   - **`ERLoggingReload4j`**: log4j 1.x via reload4j (`ERXReload4jLoggingBackend`). The default.

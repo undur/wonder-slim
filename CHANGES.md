@@ -38,9 +38,13 @@
 
 - **The logging backend is found through `ServiceLoader`**
   A logging module lists its backend (`ERXLoggingBackend`) in
-  `META-INF/services/er.extensions.ERXLoggingBackend`; ERLoggingReload4j's is
+  `META-INF/services/er.extensions.logging.ERXLoggingBackend`; ERLoggingReload4j's is
   `ERXReload4jLoggingBackend`. It replaces the reflective `ERXTemporaryLoggingBridge`. At most one
   backend may be on the classpath: two stop the launch, naming both. (#44)
+
+- **The logging classes are in `er.extensions.logging`**
+  `ERXLoggingSupport` moved there from `er.extensions`, alongside the new `ERXLoggingBackend`,
+  `ERXLoggingConfiguration` and `ERXNSLogBridge` and the logging modules' own classes. (#44)
 
 - **`ERXProperties`' readers are bridges to `NSProperties`**
   ERFoundation's `NSProperties` reads and converts property values exactly as `ERXProperties`

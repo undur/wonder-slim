@@ -26,11 +26,11 @@ import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.joran.spi.JoranException;
 
-import er.extensions.ERXLoggingBackend;
-import er.extensions.ERXLoggingConfiguration;
+import er.extensions.logging.ERXLoggingBackend;
+import er.extensions.logging.ERXLoggingConfiguration;
 
 /**
- * The logback logging backend, listed in META-INF/services/er.extensions.ERXLoggingBackend. Configures logback in the
+ * The logback logging backend, listed in META-INF/services/er.extensions.logging.ERXLoggingBackend. Configures logback in the
  * layers {@link ERXLoggingConfiguration} describes:
  *
  * <ol>

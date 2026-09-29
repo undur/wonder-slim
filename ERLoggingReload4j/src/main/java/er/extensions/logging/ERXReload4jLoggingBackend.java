@@ -9,10 +9,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import er.extensions.ERXLoggingBackend;
-
 /**
- * The reload4j logging backend, listed in META-INF/services/er.extensions.ERXLoggingBackend
+ * The reload4j logging backend, listed in META-INF/services/er.extensions.logging.ERXLoggingBackend
  */
 public class ERXReload4jLoggingBackend implements ERXLoggingBackend {
 

@@ -1,4 +1,4 @@
-package er.extensions;
+package er.extensions.logging;
 
 import java.util.List;
 import java.util.ServiceLoader;

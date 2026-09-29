@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import er.extensions.ERXLoggingBackend;
-import er.extensions.ERXLoggingSupport;
+import er.extensions.logging.ERXLoggingBackend;
+import er.extensions.logging.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
 
 public class ERXLogbackLoggingBackendTest {
