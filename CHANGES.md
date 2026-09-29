@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Pages for the control panel are registered from ERExtensions, in categories**
+  `ERXControlPages.register()` adds a page to ERControl's control panel: a category, a name (its
+  path beneath `/wonder/admin`), a title, a description and the component rendering its content.
+  Plugins, the application or any other code can register pages without depending on ERControl;
+  when ERControl is present, it shows each one in its layout, behind its login, and lists it in its
+  navigation under its category. The framework's own pages are registered the same way, in the
+  first category, `wonder-slim`, with their paths unchanged. A name registered twice throws. (#154)
+
 - **Logging is configured as soon as the configuration is composed**
   Logging used to be configured from the configuration only when `ERXApplication`'s constructor
   finished; until then, everything went to a console appender in a fixed layout. Now it's

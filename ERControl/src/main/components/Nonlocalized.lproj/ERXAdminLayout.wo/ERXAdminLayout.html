@@ -11,11 +11,14 @@
 		<div class="page">
 			<aside class="navbar navbar-vertical">
 				<span class="navbar-brand"><wo:str value="$applicationName" /><small><wo:str value="$instanceDescription" /> &middot; <wo:str value="$modeDescription" /></small></span>
-				<ul class="navbar-nav">
-					<wo:repetition list="$sections" item="$currentSection">
-						<wo:container elementName="li" class="$currentSectionClass"><wo:container elementName="a" class="nav-link" href="$currentSectionURL"><span class="nav-link-title"><wo:str value="$currentSection.title" /></span></wo:container></wo:container>
-					</wo:repetition>
-				</ul>
+				<wo:repetition list="$categories" item="$currentCategory">
+					<div class="nav-category"><wo:str value="$currentCategory.title" /></div>
+					<ul class="navbar-nav">
+						<wo:repetition list="$currentCategory.pages" item="$currentPage">
+							<wo:container elementName="li" class="$currentPageClass"><wo:container elementName="a" class="nav-link" href="$currentPageURL"><span class="nav-link-title"><wo:str value="$currentPage.title" /></span></wo:container></wo:container>
+						</wo:repetition>
+					</ul>
+				</wo:repetition>
 				<wo:if condition="$showLogout"><span class="navbar-text"><wo:container elementName="a" href="$logoutURL">Log out</wo:container></span></wo:if>
 			</aside>
 			<div class="page-wrapper">

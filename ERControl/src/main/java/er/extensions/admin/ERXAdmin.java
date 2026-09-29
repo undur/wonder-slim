@@ -14,12 +14,14 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOSession;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.control.ERXControlPages;
+import er.extensions.control.ERXControlPages.Page;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.routes.RouteInvocation;
 import er.extensions.routes.RouteTable;
 
 /**
- * The framework's admin UI: one gate, one set of routes, one list of sections.
+ * The framework's admin UI: one gate, one set of routes, and the pages registered with {@link ERXControlPages}.
  *
  * Everything lives beneath {@link #PATH}. A request is let in when the application runs in development mode, or when
  * its session has logged in with the admin password ({@link #PASSWORD_PROPERTY}). Anything else gets the login page.
@@ -47,30 +49,37 @@ public final class ERXAdmin {
 	public static final int SESSION_TIMEOUT_SECONDS = 10 * 60;
 
 	/**
-	 * A section of the admin UI: a path beneath {@link #PATH}, its title in the navigation and the page that renders it
+	 * The framework's own pages, in the order they're listed
 	 */
-	public record Section( String name, String title, Class<? extends WOComponent> pageClass ) {
+	private static final List<Page> PAGES = List.of(
+			page( "", "Overview", null, ERXAdminOverviewPage.class ),
+			page( "statistics", "Statistics", "What the statistics store has counted since the instance started.", ERXAdminStatisticsPage.class ),
+			page( "events", "Events", "WOEvent instrumentation: turn recording on for the event classes of interest, exercise the application, then read what was recorded.", ERXAdminEventsPage.class ),
+			page( "exceptions", "Exceptions", "The exceptions this instance has handled since it started, newest last.", ERXAdminExceptionsPage.class ),
+			page( "caches", "Sessions and caches", "Active sessions, what their page caches hold, and how the pressure valve is doing.", ERXAdminCachesPage.class ),
+			page( "threads", "Threads", "A thread dump of this JVM, taken when the page rendered.", ERXAdminThreadsPage.class ),
+			page( "log", "Log", "The tail of what this instance has logged, from an in-memory ring buffer.", ERXAdminLogPage.class ),
+			page( "configuration", "Configuration", "The plugins in the order they run, the sources of properties in the order they're applied, and every property with the source it came from.", ERXAdminConfigurationPage.class ),
+			page( "bundles", "Bundles", "The application's main bundle and the frameworks loaded alongside it.", ERXAdminBundlesPage.class ) );
 
-		public String path() {
-			return name.isEmpty() ? PATH : PATH + "/" + name;
-		}
+	private static Page page( final String name, final String title, final String description, final Class<? extends WOComponent> component ) {
+		return new Page( ERXControlPages.FRAMEWORK_CATEGORY, name, title, description, component );
 	}
-
-	private static final List<Section> SECTIONS = List.of(
-			new Section( "", "Overview", ERXAdminOverviewPage.class ),
-			new Section( "statistics", "Statistics", ERXAdminStatisticsPage.class ),
-			new Section( "events", "Events", ERXAdminEventsPage.class ),
-			new Section( "exceptions", "Exceptions", ERXAdminExceptionsPage.class ),
-			new Section( "caches", "Sessions and caches", ERXAdminCachesPage.class ),
-			new Section( "threads", "Threads", ERXAdminThreadsPage.class ),
-			new Section( "log", "Log", ERXAdminLogPage.class ),
-			new Section( "configuration", "Configuration", ERXAdminConfigurationPage.class ),
-			new Section( "bundles", "Bundles", ERXAdminBundlesPage.class ) );
 
 	private ERXAdmin() {}
 
-	public static List<Section> sections() {
-		return SECTIONS;
+	/**
+	 * Registers the framework's own pages with {@link ERXControlPages}
+	 */
+	public static void registerPages() {
+		PAGES.forEach( ERXControlPages::register );
+	}
+
+	/**
+	 * @return The path of a page
+	 */
+	public static String path( final Page page ) {
+		return page.name().isEmpty() ? PATH : PATH + "/" + page.name();
 	}
 
 	/**
@@ -107,13 +116,12 @@ public final class ERXAdmin {
 			return page( ERXAdminLoginPage.class, context );
 		}
 
-		for( final Section section : SECTIONS ) {
-			if( section.path().equals( url ) ) {
-				return page( section.pageClass(), context );
-			}
-		}
+		final String name = url.equals( PATH ) ? "" : url.substring( PATH.length() + 1 );
+		final Page page = ERXControlPages.page( name );
 
-		return page( ERXAdminOverviewPage.class, context );
+		final ERXAdminPage adminPage = page( ERXAdminPage.class, context );
+		adminPage.controlPage = page != null ? page : ERXControlPages.page( "" );
+		return adminPage;
 	}
 
 	@SuppressWarnings("unchecked")

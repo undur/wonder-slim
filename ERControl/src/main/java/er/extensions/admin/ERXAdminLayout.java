@@ -7,16 +7,21 @@ import com.webobjects.appserver.WOContext;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.components.ERXStatelessComponent;
+import er.extensions.control.ERXControlPages;
+import er.extensions.control.ERXControlPages.Category;
+import er.extensions.control.ERXControlPages.Page;
 
 /**
  * The chrome around every page of the admin UI: navigation, page header, footer. The page's own content goes inside.
  *
- * Bindings: [title] the page's title, [section] the name of the section to mark as current in the navigation,
+ * Bindings: [title] the page's title, [section] the name of the page to mark as current in the navigation,
  * [subtitle] an optional line beneath the title.
  */
 public class ERXAdminLayout extends ERXStatelessComponent {
 
-	public ERXAdmin.Section currentSection;
+	public Category currentCategory;
+
+	public Page currentPage;
 
 	public ERXAdminLayout( WOContext context ) {
 		super( context );
@@ -30,16 +35,16 @@ public class ERXAdminLayout extends ERXStatelessComponent {
 		return stringValueForBinding( "subtitle", null );
 	}
 
-	public List<ERXAdmin.Section> sections() {
-		return ERXAdmin.sections();
+	public List<Category> categories() {
+		return ERXControlPages.categories();
 	}
 
-	public String currentSectionURL() {
-		return ERXAdmin.url( context(), currentSection.path() );
+	public String currentPageURL() {
+		return ERXAdmin.url( context(), ERXAdmin.path( currentPage ) );
 	}
 
-	public String currentSectionClass() {
-		return currentSection.name().equals( stringValueForBinding( "section", "" ) ) ? "nav-item active" : "nav-item";
+	public String currentPageClass() {
+		return currentPage.name().equals( stringValueForBinding( "section", "" ) ) ? "nav-item active" : "nav-item";
 	}
 
 	public String logoutURL() {
