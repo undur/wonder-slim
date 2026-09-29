@@ -7,16 +7,42 @@ from facts rather than archaeology. It is descriptive, not aspirational.
 ## The stack, as it stands
 
 - The framework logs through **slf4j** (`org.slf4j.Logger`), as does application code.
-- The backend is **log4j 1.x via reload4j**, wired up in the `ERLoggingReload4j` module.
-- `er.extensions.ERXLoggingSupport` is a thin reflective bridge from ERExtensions into
-  that backend (`er.extensions.logging.ERXTemporaryLoggingBridge` — the class's own
-  javadoc calls it "Temporary bridge until we work out a nicer method of initializing
-  logging"), so ERExtensions carries no compile dependency on the backend.
+- A **backend** does the logging behind slf4j, as an `ERXLoggingBackend` found through
+  `ServiceLoader` (`META-INF/services/er.extensions.ERXLoggingBackend`); at most one may be on
+  the classpath. `ERXLoggingSupport` is the framework's entry point to it, so ERExtensions
+  carries no compile dependency on a backend. Two exist:
+  - **`ERLoggingReload4j`**: log4j 1.x via reload4j (`ERXReload4jLoggingBackend`). The default.
+  - **`ERLoggingLogback`**: logback (`ERXLogbackLoggingBackend`).
+- **WebObjects calls the log4j API itself**: `WOCGIFormValues$Encoder` (encoding a direct action's
+  query parameters) uses `org.apache.log4j.Logger`, so some log4j API must be on the classpath.
+  Each backend module brings it: reload4j itself, or `log4j-over-slf4j` (which hands the calls to
+  slf4j) for logback. The two can't be on the classpath together.
 - WebObjects' own `NSLog` output is redirected **into** slf4j, and so the backend, by
   `ERXNSLogBridge` (installed first thing in `ERXApplication.main()`), and log4j's
   `ConsoleAppender` writes back **out** to `System.out`. So `NSLog` → slf4j → log4j → `System.out`
   is a loop that the configuration code has to be careful not to feed twice — this is why,
   for example, `ERXConsoleCapture` attaches at the appender rather than teeing the streams.
+
+## Configuring logging
+
+In layers, lowest first; a later layer wins where two name the same logger
+(`ERXLoggingConfiguration`):
+
+1. **Project Wonder style log4j levels** (`log4j.logger.X`, `log4j.rootLogger`,
+   `log4j.rootCategory`), for a backend other than reload4j, which reads `log4j.*` itself.
+   The rest of log4j's configuration (appenders, layouts) can't be translated; logback names
+   those keys in a warning, once.
+2. **Keys every backend understands**: `er.extensions.logging.level.<logger>` and
+   `er.extensions.logging.level.root` (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`), and
+   `er.extensions.logging.pattern`, the layout of the console output a backend sets up when its
+   own configuration sets up none.
+3. **The backend's own configuration**, which can express what these can't: `log4j.*` for
+   reload4j (read as it always has been, through `PropertyConfigurator`), and for logback the
+   file `logback.configurationFile` names or `logback.xml` on the classpath. If logback's
+   configuration gives the root logger output of its own, the console output from layer 2
+   stands aside.
+4. **`er.extensions.logging.level.*` set on the running instance**
+   (`ERXConfigurationManager.setProperty()`, the admin console), which wins over everything.
 
 ## Initialization timeline (why order matters)
 

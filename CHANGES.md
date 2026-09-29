@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **ERLoggingLogback: logback as the logging backend, and logging configuration every backend understands**
+  A second logging module, ERLoggingLogback, puts logback behind slf4j, in place of
+  ERLoggingReload4j (one or the other). It brings `log4j-over-slf4j`, since WebObjects itself
+  calls the log4j API. Logging is configured in layers, lowest first: Project Wonder style
+  `log4j.logger.*` and `log4j.rootLogger` levels (for logback; its appenders and layouts are named
+  in a warning); `er.extensions.logging.level.<logger>` and `er.extensions.logging.pattern`, which
+  every backend understands; the backend's own configuration (`log4j.*` for reload4j, as before,
+  `logback.xml` for logback), which wins where it names a logger; and levels set on the running
+  instance, which win over everything. With reload4j, console output without `log4j.*`
+  configuration now uses `er.extensions.logging.pattern`'s layout (by default
+  `%d{MMM dd HH:mm:ss} %-5p %c - %m%n`) instead of log4j's own. (#44)
+
 - **WebObjects' NSLog output goes to slf4j, whichever logging backend is used**
   `ERXNSLogBridge`, in ERExtensions, replaces ERLoggingReload4j's `ERXNSLogLog4jBridge`: NSLog's
   out, err and debug go to slf4j's `NSLog` logger at INFO, WARN and DEBUG, from the first line of

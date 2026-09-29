@@ -1,9 +1,9 @@
 package er.extensions.logging;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Appender;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -13,6 +13,7 @@ import org.apache.log4j.PropertyConfigurator;
 import com.webobjects.foundation.NSNotificationCenter;
 import com.webobjects.foundation.NSProperties;
 
+import er.extensions.ERXLoggingConfiguration;
 import er.extensions.foundation.ERXConfigurationManager;
 
 /**
@@ -159,6 +160,16 @@ public class ERXLogger extends Logger {
 		super(name);
 	}
 
+	/**
+	 * Sets the given levels, by logger name ({@link ERXLoggingConfiguration#ROOT} for the root logger)
+	 */
+	private static void setLevels(final Map<String, String> levels) {
+		levels.forEach((name, level) -> {
+			final Logger logger = ERXLoggingConfiguration.ROOT.equals(name) ? Logger.getRootLogger() : Logger.getLogger(name);
+			logger.setLevel(Level.toLevel(level));
+		});
+	}
+
 	public static synchronized void configureLoggingWithSystemProperties() {
 		ERXLogger.configureLogging(NSProperties._getProperties());
 	}
@@ -172,11 +183,18 @@ public class ERXLogger extends Logger {
 	 */
 	public static synchronized void configureLogging(Properties properties) {
 		LogManager.resetConfiguration();
-		BasicConfigurator.configure();
-		// AK: we re-configure the logging a few lines later from the properties, but in case no config is set, we set
-		// the root level to info. (WebObjects' NSLog reaches log4j through slf4j, see ERXNSLogBridge.)
+
+		// Console output in the configured layout (er.extensions.logging.pattern) at INFO, for when log4j.* sets up none:
+		// log4j.rootLogger/rootCategory naming appenders replaces it. (WebObjects' NSLog reaches log4j through slf4j, see
+		// ERXNSLogBridge.)
 		Logger.getRootLogger().setLevel(Level.INFO);
+		Logger.getRootLogger().addAppender(new ConsoleAppender(new ERXPatternLayout(ERXLoggingConfiguration.pattern(properties)), "System.out"));
+
+		// The layers, see ERXLoggingConfiguration: the neutral levels, then log4j.* (which wins where both name a logger),
+		// then the neutral levels set on the running instance (which win over everything)
+		setLevels(ERXLoggingConfiguration.levels(properties, false));
 		PropertyConfigurator.configure(properties);
+		setLevels(ERXLoggingConfiguration.levels(properties, true));
 		// AK: if the root logger has no appenders, something is really broken
 		// most likely the properties didn't read correctly.
 		if (!Logger.getRootLogger().getAllAppenders().hasMoreElements()) {
