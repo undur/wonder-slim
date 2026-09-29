@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **What's written before `WOOutputPath` takes effect goes to the start of its file**
+  WebObjects redirects the console to the `WOOutputPath` file while the application is
+  constructed, so what was written before (logging while the configuration is composed, plugins
+  before construction, WebObjects' own startup messages) went to the process's original output,
+  which wotaskd doesn't keep. It's now kept from `ERXApplication`'s static initializer, while still
+  written to the console, and written at the start of the file once WebObjects has redirected,
+  between two marker lines (`ERXEarlyOutput`). WebObjects' rotation of the previous file is
+  unchanged. (#158)
+
 - **Logging works without a logging module**
   Without ERLoggingLogback or ERLoggingReload4j, slf4j found no provider and discarded everything.
   ERExtensions now logs to the console itself in that case (`ERXConsoleLoggingBackend`), with the

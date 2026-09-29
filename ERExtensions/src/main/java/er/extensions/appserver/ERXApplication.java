@@ -53,6 +53,7 @@ import er.extensions.ERXPlugin;
 import er.extensions.ERXPlugins;
 import er.extensions.ERXKVCReflectionHack;
 import er.extensions.logging.ERXConsoleLoggingBackend;
+import er.extensions.logging.ERXEarlyOutput;
 import er.extensions.logging.ERXLog4jRewrite;
 import er.extensions.logging.ERXLoggingSupport;
 import er.extensions.logging.ERXNSLogBridge;
@@ -82,9 +83,12 @@ import parsley.ParsleyConfiguration;
  */
 public abstract class ERXApplication extends ERXAjaxApplication {
 
-	// Logging to the console when there's no logging module: slf4j's provider has to be named before the first logger
-	// is created, the one on the next line. The JVM runs this before main(). See ERXConsoleLoggingBackend.
+	// The JVM runs this before main(). First, a copy of what's written to the console from here on, for the start of the
+	// WOOutputPath file once WebObjects redirects to it (see ERXEarlyOutput). Then logging to the console when there's
+	// no logging module: slf4j's provider has to be named before the first logger is created, the one below. See
+	// ERXConsoleLoggingBackend.
 	static {
+		ERXEarlyOutput.start();
 		ERXConsoleLoggingBackend.activateIfNoBackend();
 	}
 
@@ -193,7 +197,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public ERXApplication() {
 
 		// WebObjects' constructor (above, in super()) redirects System.out and System.err to the WOOutputPath file when
-		// it's set, and logging was configured before that: console output follows the redirect from here on
+		// it's set: what was written to the console before goes at its start, and logging, configured before that,
+		// follows the redirect from here on
+		ERXEarlyOutput.finish();
 		ERXLoggingSupport.reInitConsoleAppenders();
 
 		// Register and initialize the parsley template parser, with development features
