@@ -56,7 +56,8 @@
 									<version>[3.9.0,)</version>
 								</requireMavenVersion>
 								<requireJavaVersion>
-									<version>[21,)</version>
+									<version>[25,)</version>
+									<message>wonder-slim is built for Java 25 (maven.compiler.release), and rewrites WebObjects' form value encoder with the JDK's class-file API</message>
 								</requireJavaVersion>
 							</rules>
 						</configuration>
