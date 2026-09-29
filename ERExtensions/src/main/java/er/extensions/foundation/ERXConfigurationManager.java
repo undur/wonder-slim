@@ -75,7 +75,7 @@ import er.extensions.appserver.ERXApplication;
  * in any source: the files are found again after composing, and composed again, until they stop changing.
  *
  * The files are found through {@code NSBundle}, which initializes WebObjects' principal classes while it initializes
- * itself; they run before the properties are composed. See #33.
+ * itself; they run before the properties are composed. See #151.
  */
 public final class ERXConfigurationManager {
 

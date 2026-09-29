@@ -1,6 +1,6 @@
 # Configuration in wonder-slim
 
-Status: **how properties are loaded is being reworked** (#143, alongside #33). This document records
+Status: **how properties are loaded is being reworked** (#143). This document records
 how it currently works, so each step of the rework starts from facts. It is descriptive, not
 aspirational, in the manner of `LOGGING.md`.
 
@@ -108,7 +108,7 @@ the others. `onChange()` returns the listener, to `remove()` it. A property set 
   plugin order: a framework overrides the frameworks it requires.
 - **WebObjects' principal classes run before the properties are composed.** They're initialized
   with `NSBundle`, which composing uses to find the files. Reading the files as classpath resources
-  instead would let them run after (#33).
+  instead would let them run after (#151).
 - **`NSBundle` still applies its own pass** of the bundles' `Properties` while initializing. The
   composed configuration then overrides every value it set.
 - **The properties are strings**, read by key, with the type, default and meaning known only where
