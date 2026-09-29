@@ -52,6 +52,7 @@ import er.extensions.components.errorpages.WOExceptionPage;
 import er.extensions.ERXPlugin;
 import er.extensions.ERXPlugins;
 import er.extensions.ERXKVCReflectionHack;
+import er.extensions.logging.ERXLog4jRewrite;
 import er.extensions.logging.ERXLoggingSupport;
 import er.extensions.logging.ERXNSLogBridge;
 import er.extensions.ERXObsoleteProperties;
@@ -150,6 +151,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// constructor-time output). The configuration's logging settings replace it once the application
 		// has been constructed (see the end of the ERXApplication constructor).
 		ERXLoggingSupport.configureDefaultLogging();
+
+		// WebObjects' form value encoder, rewritten to log through slf4j before WebObjects first uses it, so WebObjects
+		// needs no log4j API on the classpath. See ERXLog4jRewrite.
+		ERXLog4jRewrite.install();
 
 		// The plugins, found and ordered. See ERXPlugin.
 		ERXPlugins.load();

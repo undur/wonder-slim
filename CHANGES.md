@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **WebObjects needs no log4j API**
+  WebObjects' form value encoder (`WOCGIFormValues$Encoder`) logs through the log4j 1.x API, so
+  without one on the classpath the first URL with query parameters failed with a
+  `NoClassDefFoundError`. `ERXApplication.main()` now rewrites the encoder to log through slf4j
+  before WebObjects first uses it (`ERXLog4jRewrite`), with the JDK's class-file API and without an
+  agent. If the encoder uses log4j in a way the rewrite doesn't handle, or is loaded already, it's
+  left as it is, with a warning. (#156)
+
 - **ERControl: a Logging page**
   The control panel shows the logging backend and its own configuration, and every logger with a
   level set: the level, the layer and source that set it (`er.logging.level.*` with the source it
