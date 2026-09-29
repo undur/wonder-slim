@@ -168,6 +168,11 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// sees the properties the application runs with. See ERXConfigurationManager.
 		ERXConfigurationManager.compose(argv);
 
+		// Logging from the configuration, replacing the console appender above, before any plugin or the application
+		// runs: everything logged from here on reaches the configured log. Configured again when a logging property
+		// changes. See ERXLoggingSupport.
+		ERXLoggingSupport.configureAndFollowChanges();
+
 		ERXPlugins.forEach(ERXPlugin::beforeApplicationConstruction);
 
 		WOApplication.main(argv, applicationClass);
@@ -175,7 +180,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 	public ERXApplication() {
 
-		// FIXME: We need to validate the entire setup of logging at some point // Hugi 2025-06-07
+		// WebObjects' constructor (above, in super()) redirects System.out and System.err to the WOOutputPath file when
+		// it's set, and logging was configured before that: console output follows the redirect from here on
 		ERXLoggingSupport.reInitConsoleAppenders();
 
 		// Register and initialize the parsley template parser, with development features
@@ -253,9 +259,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// Adding notification hooks for the application's launch lifecycle
 		ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver(this::didFinishLaunching);
 		
-		// Logging from the configuration (replacing the console appender main() installs), reloading when the
-		// configuration's files change, and the startup report on the configuration
-		ERXLoggingSupport.configureLoggingWithSystemProperties();
+		// Reloading when the configuration's files change, and the startup report on the configuration
 		ERXConfigurationManager.watchForChanges(this);
 		ERXConfigurationManager.current().printStartupReport();
 

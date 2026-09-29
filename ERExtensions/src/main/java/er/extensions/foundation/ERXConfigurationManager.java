@@ -34,7 +34,6 @@ import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSProperties;
 
-import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXP;
 import er.extensions.ERXPlugin;
 import er.extensions.ERXPlugins;
@@ -438,7 +437,7 @@ public final class ERXConfigurationManager {
 				.toList();
 	}
 	/**
-	 * Reloads the configuration, and reconfigures logging from it, when a file changes. Invoked once, when the application
+	 * Reloads the configuration when a file changes (logging follows through its listener to changes, see ERXLoggingSupport). Invoked once, when the application
 	 * has been constructed.
 	 *
 	 * With WOCachingEnabled off (in development), the configuration's files are watched: those it was read from, and
@@ -555,7 +554,6 @@ public final class ERXConfigurationManager {
 
 			try {
 				reload();
-				ERXLoggingSupport.configureLoggingWithSystemProperties();
 				log.info( "Reloaded the configuration, since {} changed", changed );
 			}
 			catch( RuntimeException e ) {

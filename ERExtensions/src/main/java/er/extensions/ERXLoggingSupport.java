@@ -3,6 +3,8 @@ package er.extensions;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import er.extensions.foundation.ERXConfigurationManager;
+
 /**
  * Drives the logging backend (see {@link ERXLoggingBackend}), found through {@link ServiceLoader} the first time it's
  * needed: first thing in {@code ERXApplication.main()}. With none, logging goes wherever slf4j sends it without
@@ -41,6 +43,24 @@ public class ERXLoggingSupport {
 	 */
 	public static ERXLoggingBackend backend() {
 		return Holder.BACKEND;
+	}
+
+	/**
+	 * Configures logging from the configuration, then again whenever a logging property changes (see
+	 * {@link #isLoggingProperty(String)}), whether a watched file changed or a property was set on the running instance.
+	 * Invoked once, from {@code ERXApplication.main()}, right after the configuration is composed.
+	 */
+	public static void configureAndFollowChanges() {
+		configureLoggingWithSystemProperties();
+		ERXConfigurationManager.onChange( ERXLoggingSupport::isLoggingProperty, change -> configureLoggingWithSystemProperties() );
+	}
+
+	/**
+	 * @return true if the property is part of the logging configuration: {@code er.extensions.logging.*}, log4j's own
+	 *         ({@code log4j.*}) or logback's ({@code logback.configurationFile})
+	 */
+	public static boolean isLoggingProperty( final String key ) {
+		return key.startsWith( "er.extensions.logging." ) || key.startsWith( "log4j." ) || key.equals( "logback.configurationFile" );
 	}
 
 	/**

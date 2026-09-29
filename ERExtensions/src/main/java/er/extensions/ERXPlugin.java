@@ -40,7 +40,7 @@ public interface ERXPlugin {
 	 *
 	 * <ul>
 	 * <li>The configuration is composed: every property has the value the application will run with.</li>
-	 * <li>Logging goes to the console at INFO; the configuration's logging settings aren't applied yet.</li>
+	 * <li>Logging is configured from the configuration: what's logged from here on reaches the configured log.</li>
 	 * <li>The bundles are loaded ({@code NSBundle}), and WebObjects has initialized their principal classes.</li>
 	 * <li>There's no application object: {@code WOApplication.application()} is null.</li>
 	 * </ul>

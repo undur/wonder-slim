@@ -45,9 +45,9 @@ sources in order, and for each property the source its value came from.
    is constructed** (`WOApplication.main()`). WO applies the application's arguments again, with the
    same values. The constructors see the composed configuration.
 
-4. **At the end of `ERXApplication`'s constructor**, logging is configured from the configuration
-   (see `LOGGING.md`), reloading is set up, and the startup report is printed: the sources in order,
-   and every property in effect, those a source set marked.
+4. **At the end of `ERXApplication`'s constructor**, reloading is set up and the startup report is
+   printed: the sources in order, and every property in effect with the source that set it. (Logging
+   was configured from the configuration as soon as it was composed, in step 2; see `LOGGING.md`.)
 
 5. **Each plugin's `finishInitialization()`**, then the application's, runs once the application is
    constructed, before its adaptors start listening; **each plugin's `didFinishLaunching()`**, then

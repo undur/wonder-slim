@@ -1,8 +1,7 @@
 # Logging in wonder-slim
 
-Status: **the logging setup is known-messy and slated for a rethink.** This document
-records how it currently works and the traps it holds, so the eventual cleanup starts
-from facts rather than archaeology. It is descriptive, not aspirational.
+Status: reworked in #44. This document records how logging works and the traps it holds. It is
+descriptive, not aspirational.
 
 ## The stack, as it stands
 
@@ -49,18 +48,21 @@ In layers, lowest first; a later layer wins where two name the same logger
 Roughly, in sequence:
 
 1. `ERXApplication.main()` runs. Its first act is `ERXLoggingSupport.configureDefaultLogging()`:
-   a plain console appender at INFO on the root logger, so logging works from here on. It then
-   installs the NSLog bridge (see below).
-2. `main()` composes the configuration (`ERXConfigurationManager`, see `CONFIGURATION.md`) and
-   hands over to `WOApplication.main()`, which constructs the application. At the end of
-   `ERXApplication`'s constructor, it runs
-   `ERXLogger.configureLoggingWithSystemProperties()`: `LogManager.resetConfiguration()`,
-   `BasicConfigurator.configure()`, then
-   `PropertyConfigurator.configure(properties)` from the composed configuration. If the
-   properties yield no appenders it falls back to a default `ConsoleAppender` on `System.out`.
-   This replaces the appender from step 1. At the top of the application constructor,
-   `ERXLoggingSupport.reInitConsoleAppenders()` calls `activateOptions()` on the console
-   appender(s) "so we get logging into `WOOutputPath` again."
+   the backend's console output at INFO, so logging works from here on. It then installs the NSLog
+   bridge (see below).
+2. `main()` composes the configuration (`ERXConfigurationManager`, see `CONFIGURATION.md`), and
+   straight after, `ERXLoggingSupport.configureAndFollowChanges()` configures logging from it
+   (`ERXLoggingBackend.configure()`, in the layers under *Configuring logging*), replacing the
+   console output from step 1. From here on, everything logged reaches the configured log: every
+   plugin hook, and the whole of the application's construction. Only what's logged while the
+   configuration is being composed goes to the console output from step 1. The same call makes
+   logging follow the configuration: a change to a logging property (`er.extensions.logging.*`,
+   `log4j.*`, `logback.configurationFile`), from a watched file or set on the running instance,
+   configures logging again (`ERXConfigurationManager.onChange()`).
+   Then `WOApplication.main()` constructs the application. WebObjects' constructor redirects
+   `System.out`/`System.err` to the `WOOutputPath` file when it's set; at the top of
+   `ERXApplication`'s constructor, `ERXLoggingSupport.reInitConsoleAppenders()` has reload4j's
+   console appenders follow (logback's console output follows by itself).
 3. The **application constructor** runs (`ERXApplication()`), which does the bulk of
    framework setup: request handler registration, cache config, environment checks, etc.
 4. `ApplicationWillFinishLaunching` → `finishInitialization()`, then
@@ -101,10 +103,3 @@ requests...") is capped at `NSLog.DebugLevelCritical` by the NSLog bridge (`ERXN
 `main()`; `-Der.extensions.NSLog.debugLevel=2` (or `3`) restores it. The properties report masks
 any key that looks like a secret (`ERXProperties.isSecretKey`) and shows only keys the Properties
 files and the command line set, not the whole of `System.getProperties()`.
-
-## For the eventual cleanup
-
-Open threads worth folding into a proper logging story:
-
-- Kill the "temporary" reflective bridge (`ERXTemporaryLoggingBridge`) (#44).
-- The default fallback appender pattern and the property-driven pattern differ; unify.

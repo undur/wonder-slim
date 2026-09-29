@@ -13,7 +13,6 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSProperties;
 
-import er.extensions.ERXLoggingSupport;
 import er.extensions.ERXPlugin;
 import er.extensions.ERXPlugins;
 import er.extensions.components.ERXComponent;
@@ -221,7 +220,6 @@ public class ERXAdminConfigurationPage extends ERXComponent {
 
 		final String key = newKey.trim();
 		ERXConfigurationManager.setProperty( key, newValue == null ? "" : newValue );
-		ERXLoggingSupport.configureLoggingWithSystemProperties();
 		notice = "Set " + key + " on this instance. It overrides every other source until it's unset or the instance stops.";
 		filter = key;
 		selectedSource = null;
@@ -236,7 +234,6 @@ public class ERXAdminConfigurationPage extends ERXComponent {
 	public WOActionResults unsetProperty() {
 		final String key = current.key();
 		ERXConfigurationManager.unsetProperty( key );
-		ERXLoggingSupport.configureLoggingWithSystemProperties();
 		notice = "Unset " + key + " on this instance. Its value is the one the other sources give it again, if any.";
 		return null;
 	}

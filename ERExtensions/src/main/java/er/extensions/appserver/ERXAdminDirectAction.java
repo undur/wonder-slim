@@ -18,7 +18,6 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver.WOStatisticsStore;
 
-import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
 import er.extensions.foundation.ERXUtilities;
 import er.extensions.statistics.ERXStats;
@@ -122,7 +121,6 @@ public class ERXAdminDirectAction extends WODirectAction {
 				value = ERXUtilities.stringIsNullOrEmpty(value) ? "" : value;
 				ERXConfigurationManager.setProperty(key, value);
 				java.util.Properties p = System.getProperties();
-				ERXLoggingSupport.configureLoggingWithSystemProperties();
 				for (java.util.Enumeration e = p.keys(); e.hasMoreElements();) {
 					Object k = e.nextElement();
 					final String line = WOMessage.stringByEscapingHTMLString(k + "=" + ERXConfigurationManager.maskedValue((String)k, String.valueOf(p.get(k))));

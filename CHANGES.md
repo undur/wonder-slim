@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Logging is configured as soon as the configuration is composed**
+  Logging used to be configured from the configuration only when `ERXApplication`'s constructor
+  finished; until then, everything went to a console appender in a fixed layout. Now it's
+  configured in `ERXApplication.main()`, right after the configuration is composed, so everything
+  the plugins and the application's construction log reaches the configured log. After that,
+  logging is configured again when a logging property changes (`er.extensions.logging.*`,
+  `log4j.*`, `logback.configurationFile`), from a watched file or set on the running instance,
+  instead of on every reload of the configuration. (#44)
+
 - **ERLoggingLogback: logback as the logging backend, and logging configuration every backend understands**
   A second logging module, ERLoggingLogback, puts logback behind slf4j, in place of
   ERLoggingReload4j (one or the other). It brings `log4j-over-slf4j`, since WebObjects itself

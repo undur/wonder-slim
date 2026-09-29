@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import er.extensions.ERXLoggingSupport;
 import er.extensions.foundation.ERXConfigurationManager;
 
 /**
@@ -38,6 +39,25 @@ public class ERXReload4jLayersTest {
 		System.setProperty( "log4j.logger.test.both", "ERROR" );
 		ERXLogger.configureLoggingWithSystemProperties();
 		assertEquals( Level.ERROR, Logger.getLogger( "test.both" ).getLevel() );
+	}
+
+	@Test
+	public void aChangedLoggingPropertyReconfiguresLoggingByItself() {
+		if( ERXConfigurationManager.current() == null ) {
+			ERXConfigurationManager.compose( new String[0] );
+		}
+
+		ERXLoggingSupport.configureAndFollowChanges();
+		ERXConfigurationManager.setProperty( "er.extensions.logging.level.test.followed", "TRACE" );
+
+		try {
+			assertEquals( Level.TRACE, Logger.getLogger( "test.followed" ).getLevel(), "No explicit reconfiguration: the listener did it" );
+		}
+		finally {
+			ERXConfigurationManager.unsetProperty( "er.extensions.logging.level.test.followed" );
+		}
+
+		assertEquals( null, Logger.getLogger( "test.followed" ).getLevel(), "Unset, and reconfigured again" );
 	}
 
 	@Test
