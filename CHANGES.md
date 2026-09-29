@@ -2,21 +2,58 @@
 
 ## Unreleased
 
-- **Console logging for programs that don't start through `ERXApplication`**
-  A stand-alone tool, a batch job or an application's unit tests get the console logger without a
-  logging module by naming it as slf4j's provider:
-  `-Dslf4j.provider=er.extensions.logging.ERXConsoleServiceProvider`. It configures itself from the
-  system properties when slf4j starts it, so `-Der.logging.level.<logger>=DEBUG` and
-  `er.logging.pattern` work there too. (#159)
+This release reworks how an application starts, is configured and logs. The configuration is
+composed from all its sources before the application is constructed, frameworks take part in
+startup as plugins, and the control panel shows where each value came from. Logging is configured
+the same way whichever logging module is used, levels can be changed on a running instance, and
+neither a logging module nor a log4j API is required any more.
 
-- **What's written before `WOOutputPath` takes effect goes to the start of its file**
-  WebObjects redirects the console to the `WOOutputPath` file while the application is
-  constructed, so what was written before (logging while the configuration is composed, plugins
-  before construction, WebObjects' own startup messages) went to the process's original output,
-  which wotaskd doesn't keep. It's now kept from `ERXApplication`'s static initializer, while still
-  written to the console, and written at the start of the file once WebObjects has redirected,
-  between two marker lines (`ERXEarlyOutput`). WebObjects' rotation of the previous file is
-  unchanged. (#158)
+- **The configuration is composed once, before the application is constructed**
+  `ERXApplication.main()` now composes the configuration from all its sources before the application
+  exists, so its constructor sees the properties it runs with. Before, the constructor saw only
+  WebObjects' own pass: a property read there (the port, caching, `shortURLs`, `publicHost` and the
+  like) set in `Properties.dev`, `Properties.<user>`, an optional configuration file or
+  `/etc/WebObjects` showed in the startup report but had no effect. A JVM `-D` option now takes
+  precedence over properties files throughout, where before it did in the constructor and not
+  afterwards. A reload gives a property no file sets any more its value from launch back, instead of
+  keeping it. The startup report lists every source, framework jars, JVM options and arguments
+  included, and each property with the source that set it. `ERXConfigurationManager` now composes
+  the configuration and holds its sources and where each value came from
+  (`ERXConfigurationManager.current()`), and checks its files for changes on a thread of its own
+  rather than on each request, replacing `ERXFileNotificationCenter`. Its old instance API
+  (`defaultManager()`, the argument and loading methods) and
+  `ERXProperties.pathsForUserAndBundleProperties()` and `applyConfiguration()` are gone.
+  `ERXConfigurationManager.onChange()` calls a listener when a property's value changes (or any of a
+  family of properties'), whether by a reload or by setting it on the running instance. A touch file
+  (`er.extensions.ERXConfigurationManager.PropertiesTouchFile`) now works without
+  `er.extensions.ERXFileNotificationCenter.CheckFilesPeriod`, which nothing reads any more. (#144)
+
+- **Frameworks take part in startup as plugins, found through `ServiceLoader`**
+  A framework or application module implements `ERXPlugin` and lists it in
+  `META-INF/services/er.extensions.ERXPlugin`. Plugins are ordered by what they require
+  (`requires()`), never by classpath order, with class name breaking ties. A missing required plugin
+  or a cycle stops the launch with a message naming them. Each runs, in that order, at
+  `beforeApplicationConstruction()` (the configuration composed, no application object yet),
+  `finishInitialization()` (fully constructed, the application's own constructor included, and no
+  request can arrive yet) and `didFinishLaunching()` (the adaptors are listening, and requests may
+  be arriving concurrently). The application's own `finishInitialization()` and
+  `didFinishLaunching()` run at the same points, once all plugins have run theirs. The plugins' and
+  the application's `finishInitialization()` now run before
+  `ApplicationWillFinishLaunchingNotification` is posted, rather than as observers of it, in no
+  defined order among the others. A framework with a plugin has its `Properties` applied in plugin
+  order, so it overrides the frameworks it requires. ERExtensions' principal, `ERXExtensions`, is
+  now a plugin. (#33)
+
+- **`ERXFrameworkPrincipal` removed; Ajax, AjaxSlim and ERControl are plugins**
+  A framework joins startup by implementing `ERXPlugin` and listing it in
+  `META-INF/services/er.extensions.ERXPlugin`, instead of subclassing `ERXFrameworkPrincipal`,
+  registering itself from a static initializer and naming itself as `NSPrincipalClass`. The Ajax
+  frameworks register their request handlers and response delegate once, when the application is
+  constructed (before, on two notifications). ERControl maps its routes then too, after the
+  application's own constructor, so a route the application maps at `/wonder/admin` wins as
+  documented. `er.extensions.ERXFrameworkPrincipal.logLifecycle` is reported as obsolete. A
+  framework still subclassing `ERXFrameworkPrincipal` fails at launch with a `NoClassDefFoundError`.
+  (#33)
 
 - **Logging works without a logging module**
   Without ERLoggingLogback or ERLoggingReload4j, slf4j found no provider and discarded everything.
@@ -24,8 +61,8 @@
   same levels as the modules (`er.logging.level.*`, Project Wonder style `log4j.logger.*`, levels
   set on the running instance) and lines laid out by `er.logging.pattern`, and the control panel's
   Logging page works with it. A logging module stays the way to get files, appenders and its own
-  configuration. It's named as slf4j's provider only when no logging module is on the classpath,
-  so it never competes with one. (#157)
+  configuration. It's named as slf4j's provider only when no logging module is on the classpath, so
+  it never competes with one. (#157)
 
 - **WebObjects needs no log4j API**
   WebObjects' form value encoder (`WOCGIFormValues$Encoder`) logs through the log4j 1.x API, so
@@ -35,57 +72,105 @@
   agent. If the encoder uses log4j in a way the rewrite doesn't handle, or is loaded already, it's
   left as it is, with a warning. (#156)
 
+- **ERLoggingLogback: logback as the logging backend, and logging configuration every backend understands**
+  A second logging module, ERLoggingLogback, puts logback behind slf4j, in place of
+  ERLoggingReload4j (one or the other). An application whose own code calls the log4j API adds
+  `log4j-over-slf4j` alongside it. Logging is configured in layers, lowest first: Project Wonder
+  style `log4j.logger.*` and `log4j.rootLogger` levels (for logback; its appenders and layouts are
+  named in a warning); `er.logging.level.<logger>` and `er.logging.pattern`, which every backend
+  understands; the backend's own configuration (`log4j.*` for reload4j, as before, `logback.xml` for
+  logback), which wins where it names a logger; and levels set on the running instance, which win
+  over everything. With reload4j, console output without `log4j.*` configuration now uses
+  `er.logging.pattern`'s layout (by default `%d{MMM dd HH:mm:ss} %-5p %c - %m%n`) instead of log4j's
+  own. Literal parentheses in the layout, as in `(%F:%L)`, stay literal with logback, which
+  otherwise reads them as grouping. The defaults, root at INFO and that layout, are set in
+  ERExtensions' own `Properties`, so the Configuration page and the startup report show where they
+  come from, and an application changes them by setting the same keys. (#44)
+
+- **Logging is configured as soon as the configuration is composed**
+  Logging used to be configured from the configuration only when `ERXApplication`'s constructor
+  finished; until then, everything went to a console appender in a fixed layout. Now it's configured
+  in `ERXApplication.main()`, right after the configuration is composed, so everything the plugins
+  and the application's construction log reaches the configured log. After that, logging is
+  configured again when a logging property changes (`er.logging.*`, `log4j.*`,
+  `logback.configurationFile`), from a watched file or set on the running instance, instead of on
+  every reload of the configuration. (#44)
+
+- **What's written before `WOOutputPath` takes effect goes to the start of its file**
+  WebObjects redirects the console to the `WOOutputPath` file while the application is constructed,
+  so what was written before (logging while the configuration is composed, plugins before
+  construction, WebObjects' own startup messages) went to the process's original output, which
+  wotaskd doesn't keep. It's now kept from `ERXApplication`'s static initializer, while still
+  written to the console, and written at the start of the file once WebObjects has redirected,
+  between two marker lines (`ERXEarlyOutput`). WebObjects' rotation of the previous file is
+  unchanged. (#158)
+
+- **A password passed as an argument is masked in `sun.java.command` too**
+  The startup report masks a property whose key names a secret, but the JVM keeps the whole command
+  line in `sun.java.command`, so a password given as an argument was printed as part of that value.
+  Now the value of every secret property is masked wherever it appears
+  (`ERXConfigurationManager.maskedValue()`), in the startup report, the admin console and
+  `ERXAdminDirectAction`'s property listing, which also escapes what it writes now. (#145)
+
+- **ERControl: a Configuration page, with the plugins, the sources and where each value came from**
+  The admin console's Properties section becomes Configuration (`/wonder/admin/configuration`). It
+  lists the plugins in the order they run, with what each requires and provides; the sources in the
+  order they're applied, with how many of each one's properties are in effect or overridden; and
+  every property with the source it came from and the sources it overrides, or one source's
+  properties with their own values. A value changed on the running instance is marked. A property
+  set in the console is a source of its own, "Set on this instance", above every other source, the
+  application's arguments included; it survives a reload of the configuration, and can be unset,
+  giving the property back the value the other sources give it
+  (`ERXConfigurationManager.setProperty()` and `unsetProperty()`). The files an application or
+  machine usually configures with are listed even when they aren't there (the application's
+  `Properties` files, `~/WebObjects.properties`, `/etc/WebObjects/Properties` and
+  `/etc/WebObjects/<App>/Properties`, each optional configuration file), marked "no file present",
+  here and in the startup report. (#146)
+
 - **ERControl: a Logging page**
   The control panel shows the logging backend and its own configuration, and every logger with a
   level set: the level, the layer and source that set it (`er.logging.level.*` with the source it
-  came from, `log4j.logger.*`, the backend's own configuration, or set on this instance) and what
-  it overrides; or every logger the backend knows, filtered by name or to the application's own
+  came from, `log4j.logger.*`, the backend's own configuration, or set on this instance) and what it
+  overrides; or every logger the backend knows, filtered by name or to the application's own
   package, each with its own or inherited level. Clicking a level sets `er.logging.level.<logger>`
   on the running instance, so it survives a reload of the configuration; clicking it again unsets
-  it. ERExtensions registers the page. A
-  logging backend now also reports its name, its own configuration and the levels it set, and the
-  loggers it knows (`ERXLoggingBackend`). ERLoggingReload4j's `ERXLog4JConfiguration` page is
-  removed, with `ERXLog4jAction` and `ERXRadioButtonMatrix`: it worked with reload4j only, and its
-  changes were lost the next time logging was configured. (#155)
+  it. ERExtensions registers the page. A logging backend now also reports its name, its own
+  configuration and the levels it set, and the loggers it knows (`ERXLoggingBackend`).
+  ERLoggingReload4j's `ERXLog4JConfiguration` page is removed, with `ERXLog4jAction` and
+  `ERXRadioButtonMatrix`: it worked with reload4j only, and its changes were lost the next time
+  logging was configured. (#155)
 
 - **Pages for the control panel are registered from ERExtensions, in categories**
   `ERXControlPages.register()` adds a page to ERControl's control panel: a category, a name (its
   path beneath `/wonder/admin`), a title, a description and the component rendering its content.
-  Plugins, the application or any other code can register pages without depending on ERControl;
-  when ERControl is present, it shows each one in its layout, behind its login, and lists it in its
-  navigation under its category. The framework's own pages are registered the same way, in the
-  first category, `wonder-slim`, with their paths unchanged. A name registered twice throws. (#154)
+  Plugins, the application or any other code can register pages without depending on ERControl; when
+  ERControl is present, it shows each one in its layout, behind its login, and lists it in its
+  navigation under its category. The framework's own pages are registered the same way, in the first
+  category, `wonder-slim`, with their paths unchanged. A name registered twice throws. (#154)
 
-- **Logging is configured as soon as the configuration is composed**
-  Logging used to be configured from the configuration only when `ERXApplication`'s constructor
-  finished; until then, everything went to a console appender in a fixed layout. Now it's
-  configured in `ERXApplication.main()`, right after the configuration is composed, so everything
-  the plugins and the application's construction log reaches the configured log. After that,
-  logging is configured again when a logging property changes (`er.logging.*`,
-  `log4j.*`, `logback.configurationFile`), from a watched file or set on the running instance,
-  instead of on every reload of the configuration. (#44)
+- **`ERXProperties`' readers are bridges to `NSProperties`**
+  ERFoundation's `NSProperties` reads and converts property values exactly as `ERXProperties` did,
+  so `stringForKey()`, `booleanForKey()`, `intForKey()`, `longForKeyWithDefault()`, `arrayForKey()`
+  and their variants now call `NSProperties`' own, and either can be used. Values are no longer
+  cached, so a value changed with `System.setProperty()` is read as it is (before, the value cached
+  earlier was). A value spelled `-undefined-` reads as the string it is, or as no value for a
+  boolean, number or array, instead of null or an exception. A test compares the two over a matrix
+  of values, and another pins what each reader returns. `NSProperties.cacheEnabled` (a JVM option,
+  `-DNSProperties.cacheEnabled=true`) must stay off; a warning says so at startup if it's on. (#148)
 
-- **ERLoggingLogback: logback as the logging backend, and logging configuration every backend understands**
-  A second logging module, ERLoggingLogback, puts logback behind slf4j, in place of
-  ERLoggingReload4j (one or the other). An application whose own code calls the log4j API adds
-  `log4j-over-slf4j` alongside it. Logging is configured in layers, lowest first: Project Wonder style
-  `log4j.logger.*` and `log4j.rootLogger` levels (for logback; its appenders and layouts are named
-  in a warning); `er.logging.level.<logger>` and `er.logging.pattern`, which
-  every backend understands; the backend's own configuration (`log4j.*` for reload4j, as before,
-  `logback.xml` for logback), which wins where it names a logger; and levels set on the running
-  instance, which win over everything. With reload4j, console output without `log4j.*`
-  configuration now uses `er.logging.pattern`'s layout (by default
-  `%d{MMM dd HH:mm:ss} %-5p %c - %m%n`) instead of log4j's own. Literal parentheses in the layout,
-  as in `(%F:%L)`, stay literal with logback, which otherwise reads them as grouping. The defaults,
-  root at INFO and that layout, are set in ERExtensions' own `Properties`, so the Configuration page
-  and the startup report show where they come from, and an application changes them by setting the
-  same keys. (#44)
+- **`ERXProperties` is typed reading only**
+  The loading plumbing and the handling of secrets moved to `ERXConfigurationManager`:
+  `isSecretKey()`, `maskedValue()` and `logString()` are `ERXConfigurationManager`'s now, and
+  `propertiesFromArgv()` and the reading of properties files are private to it.
+  `transferPropertiesFromSourceToDest()` and `explicitlySetKeys()` are removed. `ERXProperties`
+  keeps what applications use it for: `stringForKey()`, `booleanForKeyWithDefault()` and the other
+  typed readers. (#147)
 
 - **WebObjects' NSLog output goes to slf4j, whichever logging backend is used**
   `ERXNSLogBridge`, in ERExtensions, replaces ERLoggingReload4j's `ERXNSLogLog4jBridge`: NSLog's
   out, err and debug go to slf4j's `NSLog` logger at INFO, WARN and DEBUG, from the first line of
-  `main()` rather than once the application is constructed. Startup output WebObjects writes
-  through NSLog therefore appears in the log's format. It caps NSLog's debug level at
+  `main()` rather than once the application is constructed. Startup output WebObjects writes through
+  NSLog therefore appears in the log's format. It caps NSLog's debug level at
   `er.extensions.NSLog.debugLevel` itself, replacing the separate logger `main()` installed, and
   stays an `NSLog.PrintStreamLogger`, which WebObjects requires where `WOOutputPath` is set.
   `er.extensions.ERXNSLogLog4jBridge.ignoreNSLogSettings` keeps its name. (#44)
@@ -100,93 +185,12 @@
   `ERXLoggingSupport` moved there from `er.extensions`, alongside the new `ERXLoggingBackend`,
   `ERXLoggingConfiguration` and `ERXNSLogBridge` and the logging modules' own classes. (#44)
 
-- **`ERXProperties`' readers are bridges to `NSProperties`**
-  ERFoundation's `NSProperties` reads and converts property values exactly as `ERXProperties`
-  did, so `stringForKey()`, `booleanForKey()`, `intForKey()`, `longForKeyWithDefault()`,
-  `arrayForKey()` and their variants now call `NSProperties`' own, and either can be used. Values
-  are no longer cached, so a value changed with `System.setProperty()` is read as it is (before,
-  the value cached earlier was). A value spelled `-undefined-` reads as the string it is, or as no
-  value for a boolean, number or array, instead of null or an exception. A test compares the two
-  over a matrix of values, and another pins what each reader returns. `NSProperties.cacheEnabled`
-  (a JVM option, `-DNSProperties.cacheEnabled=true`) must stay off; a warning says so at startup
-  if it's on. (#148)
-
-- **`ERXProperties` is typed reading only**
-  The loading plumbing and the handling of secrets moved to `ERXConfigurationManager`:
-  `isSecretKey()`, `maskedValue()` and `logString()` are `ERXConfigurationManager`'s now, and
-  `propertiesFromArgv()` and the reading of properties files are private to it.
-  `transferPropertiesFromSourceToDest()` and `explicitlySetKeys()` are removed.
-  `ERXProperties` keeps what applications use it for: `stringForKey()`,
-  `booleanForKeyWithDefault()` and the other typed readers. (#147)
-
-- **ERControl: a Configuration page, with the plugins, the sources and where each value came from**
-  The admin console's Properties section becomes Configuration (`/wonder/admin/configuration`).
-  It lists the plugins in the order they run, with what each requires and provides; the sources
-  in the order they're applied, with how many of each one's properties are in effect or
-  overridden; and every property with the source it came from and the sources it overrides, or
-  one source's properties with their own values. A value changed on the running instance is
-  marked. A property set in the console is a source of its own, "Set on this instance", above every
-  other source, the application's arguments included; it survives a reload of the configuration,
-  and can be unset, giving the property back the value the other sources give it
-  (`ERXConfigurationManager.setProperty()` and `unsetProperty()`). The files an application or
-  machine usually configures with are listed even when they
-  aren't there (the application's `Properties` files, `~/WebObjects.properties`,
-  `/etc/WebObjects/Properties` and `/etc/WebObjects/<App>/Properties`, each optional configuration
-  file), marked "no file present", here and in the startup report. Setting a property there now takes effect for values read through `ERXProperties`,
-  which kept the old value cached (`ERXProperties.setProperty()`). (#146)
-
-- **A password passed as an argument is masked in `sun.java.command` too**
-  The startup report masks a property whose key names a secret, but the JVM keeps the whole
-  command line in `sun.java.command`, so a password given as an argument was printed as part of
-  that value. Now the value of every secret property is masked wherever it appears
-  (`ERXProperties.maskedValue()`), in the startup report, the admin console and
-  `ERXAdminDirectAction`'s property listing, which also escapes what it writes now. (#145)
-
-- **Frameworks take part in startup as plugins, found through `ServiceLoader`**
-  A framework or application module implements `ERXPlugin` and lists it in
-  `META-INF/services/er.extensions.ERXPlugin`. Plugins are ordered by what they require
-  (`requires()`), never by classpath order, with class name breaking ties. A missing required
-  plugin or a cycle stops the launch with a message naming them. Each runs, in that order, at
-  `beforeApplicationConstruction()` (the configuration composed, no application object yet),
-  `finishInitialization()` (fully constructed, the application's own constructor included, and no
-  request can arrive yet; an adaptor added here is started with the others) and
-  `didFinishLaunching()` (the adaptors are listening, and requests may be arriving concurrently).
-  The application's own `finishInitialization()` and `didFinishLaunching()` run at the same points,
-  after every plugin's. The application's `finishInitialization()` now runs before any observer of
-  `ApplicationWillFinishLaunchingNotification`, rather than as one of them. A framework with a plugin has its
-  `Properties` applied in plugin order, so it overrides the frameworks it requires. ERExtensions'
-  principal, `ERXExtensions`, is now a plugin. (#33)
-
-- **`ERXFrameworkPrincipal` removed; Ajax, AjaxSlim and ERControl are plugins**
-  A framework joins startup by implementing `ERXPlugin` and listing it in
-  `META-INF/services/er.extensions.ERXPlugin`, instead of subclassing `ERXFrameworkPrincipal`,
-  registering itself from a static initializer and naming itself as `NSPrincipalClass`. The Ajax
-  frameworks register their request handlers and response delegate once, when the application is
-  constructed (before, on two notifications). ERControl maps its routes then too, after the
-  application's own constructor, so a route the application maps at `/wonder/admin` wins as
-  documented. `er.extensions.ERXFrameworkPrincipal.logLifecycle` is reported as obsolete. A
-  framework still subclassing `ERXFrameworkPrincipal` fails at launch with a
-  `NoClassDefFoundError`. (#33)
-
-- **The configuration is composed once, before the application is constructed**
-  `ERXApplication.main()` now composes the configuration from all its sources before the
-  application exists, so its constructor sees the properties it runs with. Before, the constructor
-  saw only WebObjects' own pass: a property read there (the port, caching, `shortURLs`,
-  `publicHost` and the like) set in `Properties.dev`, `Properties.<user>`, an optional
-  configuration file or `/etc/WebObjects` showed in the startup report but had no effect. A JVM
-  `-D` option now takes precedence over properties files throughout, where before it did in the
-  constructor and not afterwards. A reload gives a property no file sets any more its value from
-  launch back, instead of keeping it. The startup report lists every source, framework jars, JVM
-  options and arguments included, and each property with the source that set it. `ERXConfigurationManager` now composes the configuration and
-  holds its sources and where each value came from (`ERXConfigurationManager.current()`), and
-  checks its files for changes on a thread of its own rather than on each request, replacing
-  `ERXFileNotificationCenter`. Its old instance API (`defaultManager()`, the argument and loading
-  methods) and `ERXProperties.pathsForUserAndBundleProperties()` and `applyConfiguration()` are
-  gone. `ERXConfigurationManager.onChange()` calls a listener when a property's value changes
-  (or any of a family of properties'), whether by a reload or by setting it on the running
-  instance. A touch file (`er.extensions.ERXConfigurationManager.PropertiesTouchFile`) now works
-  without `er.extensions.ERXFileNotificationCenter.CheckFilesPeriod`, which nothing reads
-  any more. (#144)
+- **Console logging for programs that don't start through `ERXApplication`**
+  A stand-alone tool, a batch job or an application's unit tests get the console logger without a
+  logging module by naming it as slf4j's provider:
+  `-Dslf4j.provider=er.extensions.logging.ERXConsoleServiceProvider`. It configures itself from the
+  system properties when slf4j starts it, so `-Der.logging.level.<logger>=DEBUG` and
+  `er.logging.pattern` work there too. (#159)
 
 ## 2026-09-28 (8.0.11)
 
