@@ -3,16 +3,34 @@ package er.extensions.logging;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Locale;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
  * The layout's own conversions (%W application info, %V JVM memory). Without a running application, application info
- * falls back to "-" for every value.
+ * falls back to "-" for every value. Memory is formatted in the JVM's default locale, which the tests set, so the numbers
+ * have a decimal point wherever they run.
  */
 public class ERXPatternLayoutTest {
+
+	private Locale _defaultLocale;
+
+	@BeforeEach
+	public void useEnglish() {
+		_defaultLocale = Locale.getDefault();
+		Locale.setDefault( Locale.ENGLISH );
+	}
+
+	@AfterEach
+	public void restoreLocale() {
+		Locale.setDefault( _defaultLocale );
+	}
 
 	private static String format( final String pattern ) {
 		final LoggingEvent event = new LoggingEvent( Logger.class.getName(), Logger.getLogger( "test" ), Level.INFO, "message", null );

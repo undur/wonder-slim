@@ -6,21 +6,35 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
+/**
+ * The layout writes dates in the JVM's default locale, which the tests set, so month names are English wherever they run
+ */
 public class ERXConsoleLoggingBackendTest {
 
 	private static final List<String> KEYS = List.of( "er.logging.level.test.console", "er.logging.level.test.console.quiet", "log4j.logger.test.legacy", "er.logging.pattern" );
 
 	private static final ERXConsoleLoggingBackend backend = ERXConsoleLoggingBackend.INSTANCE;
 
+	private Locale _defaultLocale;
+
+	@BeforeEach
+	public void useEnglish() {
+		_defaultLocale = Locale.getDefault();
+		Locale.setDefault( Locale.ENGLISH );
+	}
+
 	@AfterEach
 	public void clean() {
 		KEYS.forEach( System::clearProperty );
 		backend.configure();
+		Locale.setDefault( _defaultLocale );
 	}
 
 	private static Logger logger( final String name ) {
