@@ -7,10 +7,14 @@
   `ERXStackTraces`: a throwable that only wraps another (`NSForwardException`,
   `InvocationTargetException`) is printed as the one it wraps (`er.logging.stackTrace.unwrap`,
   default true), and optionally only the innermost cause (`er.logging.stackTrace.innermostOnly`).
-  With reload4j it applies to every appender, not only `ERXConsoleAppender`. Skipping stack trace
-  frames by pattern has been removed, with ERLoggingReload4j's `StackTraceSkipPatterns` files, and
-  the `er.extensions.stackTrace.*` keys are reported as obsolete. An application's own `logback.xml`
-  opts in with a `<conversionRule>` for `ex` (see docs/LOGGING.md). (#161)
+  With reload4j it applies to every appender, not only `ERXConsoleAppender`. Skipping frames that
+  are plumbing is opt-in (`er.logging.stackTrace.skipFrames`), with a new built-in list for today's
+  stack (reflection, key-value coding, the element tree, Parsley, the request's dispatch, the
+  server's threads) that takes a component action's trace from 40 lines to about 12, or patterns of
+  your own (`er.logging.stackTrace.skipPatterns`). ERLoggingReload4j's `StackTraceSkipPatterns`
+  files are gone, and the `er.extensions.stackTrace.*` keys are reported as obsolete, naming their
+  replacements. An application's own `logback.xml` opts in with a `<conversionRule>` for `ex` (see
+  docs/LOGGING.md). (#161)
 
 - **More obsolete properties reported at startup**
   ERJavaMail's `er.javamail.*` settings, `er.extensions.ERXNSLogLog4jBridge` (NSLog always writes to slf4j,

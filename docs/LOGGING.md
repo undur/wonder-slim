@@ -69,8 +69,19 @@ the console logger uses it directly, reload4j through a `ThrowableRenderer` on t
   `NSForwardException` or an `InvocationTargetException`, is printed as the one it wraps.
 - `er.logging.stackTrace.innermostOnly` (default `false`): only the innermost cause of the
   chain is printed.
+- `er.logging.stackTrace.skipFrames` (default `false`): runs of two or more frames that are
+  plumbing rather than code anyone acts on are each collapsed into one `... n frames skipped`
+  line. The built-in list (`ERXStackTraces.DEFAULT_SKIP_PATTERNS`) covers reflection, key-value
+  coding, the element tree WebObjects walks (not the elements themselves, which say where in the
+  template), Parsley's proxies, the way from the worker thread to the page, and the server's
+  threads. A component action's trace goes from 40 lines to about 12. The first frame of each
+  throwable is always written.
+- `er.logging.stackTrace.skipPatterns`: regular expressions, comma separated, matched against
+  `class.method`, replacing the built-in list. An invalid one writes the whole trace, with the
+  problem named above it.
 
-Otherwise the trace is the JDK's own. An application's own `logback.xml` appenders opt in with
+Otherwise the trace is the JDK's own, and with frames skipped it keeps the JDK's layout
+(`Caused by:`, `Suppressed:`, `... n more`). An application's own `logback.xml` appenders opt in with
 `<conversionRule conversionWord="ex" class="er.extensions.logging.logback.ERXThrowableConverter"/>`.
 
 ## Initialization timeline (why order matters)

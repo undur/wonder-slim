@@ -77,6 +77,16 @@ public enum ERXP {
 	LOGGING_STACK_TRACE_INNERMOST_ONLY( "er.logging.stackTrace.innermostOnly" ),
 
 	/**
+	 * Whether runs of stack frames that are plumbing (reflection, the element tree WebObjects walks, the server's threads) are each collapsed into one line in logged stack traces, with any logging backend. Default false.
+	 */
+	LOGGING_STACK_TRACE_SKIP_FRAMES( "er.logging.stackTrace.skipFrames" ),
+
+	/**
+	 * The frames er.logging.stackTrace.skipFrames skips, replacing its built-in list: regular expressions, comma separated, matched against {@code class.method}.
+	 */
+	LOGGING_STACK_TRACE_SKIP_PATTERNS( "er.logging.stackTrace.skipPatterns" ),
+
+	/**
 	 * Seconds the instance lives before it's stopped, plus a random interval of up to 10 minutes. Unset or 0: no limit.
 	 */
 	TIME_TO_LIVE( "ERTimeToLive" ),
