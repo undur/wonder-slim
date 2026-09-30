@@ -1,17 +1,6 @@
 # Changelog
 
-## Unreleased
-
-- **Project bundles from build.properties only when `NSProjectBundleEnabled` is set**
-  ERProjectLayout's bundle factory now follows the same rule as WebObjects' own project bundles, so a
-  built application is never taken for a project, even when run from inside its project folder.
-  wonder-slim and Project Wonder applications set the flag when run from their project; a plain
-  WebObjects application passes `-DNSProjectBundleEnabled=true` in its development launch.
-
-- **The current call stack read with `StackWalker`**
-  `ERXExceptionUtilities.stackTrace()` and reload4j's `%@` conversion (the call stack of the logging
-  call) read the stack with `StackWalker` instead of printing an exception and cutting up the text.
-  `%@` now also leaves out the slf4j bridge's frames, and no longer drops the stack's last frame.
+## 2026-09-30 (8.0.14)
 
 - **Stack traces written the same way with every logging backend**
   The console logger, reload4j and logback now write a logged throwable's stack trace through
@@ -27,11 +16,15 @@
   replacements. An application's own `logback.xml` opts in with a `<conversionRule>` for `ex` (see
   docs/LOGGING.md). (#161)
 
-- **More obsolete properties reported at startup**
-  ERJavaMail's `er.javamail.*` settings, `er.extensions.ERXNSLogLog4jBridge` (NSLog always writes to slf4j,
-  under the logger `NSLog`), and a few more EOF settings: `er.extensions.ERXOpenEditingContextLocksPassword`
-  and the MySQL and PostgreSQL plug-ins' `com.webobjects.jdbcadaptor.*` options. All were set in applications
-  started from the Project Wonder templates.
+- **Project bundles from build.properties only when `NSProjectBundleEnabled` is set**
+  ERProjectLayout's bundle factory now follows the same rule as WebObjects' own project bundles, so a
+  built application is never taken for a project, even when run from inside its project folder.
+  wonder-slim and Project Wonder applications set the flag when run from their project; a plain
+  WebObjects application passes `-DNSProjectBundleEnabled=true` in its development launch.
+
+- **A layout key declared without a value stops the application**
+  A line like `dir.woresources=` left in `build.properties` now stops startup with an error naming
+  the key, instead of pointing at the project folder itself. Remove the line to use the default.
 
 - **A warning when WebObjects' JavaXML is on the classpath**
   JavaWebObjects brings JavaXML along unless the pom excludes it, and it replaces the JDK's XML
@@ -39,9 +32,16 @@
   its own log4j 1.2 and servlet API. Nothing in wonder-slim needs it. An application that has it now
   says so at startup, naming the jar and showing the exclusion to add to its pom. (#163)
 
-- **A layout key declared without a value stops the application**
-  A line like `dir.woresources=` left in `build.properties` now stops startup with an error naming
-  the key, instead of pointing at the project folder itself. Remove the line to use the default.
+- **More obsolete properties reported at startup**
+  ERJavaMail's `er.javamail.*` settings, `er.extensions.ERXNSLogLog4jBridge` (NSLog always writes to slf4j,
+  under the logger `NSLog`), and a few more EOF settings: `er.extensions.ERXOpenEditingContextLocksPassword`
+  and the MySQL and PostgreSQL plug-ins' `com.webobjects.jdbcadaptor.*` options. All were set in applications
+  started from the Project Wonder templates.
+
+- **The current call stack read with `StackWalker`**
+  `ERXExceptionUtilities.stackTrace()` and reload4j's `%@` conversion (the call stack of the logging
+  call) read the stack with `StackWalker` instead of printing an exception and cutting up the text.
+  `%@` now also leaves out the slf4j bridge's frames, and no longer drops the stack's last frame.
 
 ## 2026-09-30 (8.0.13)
 
