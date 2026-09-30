@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **More obsolete properties reported at startup**
+  ERJavaMail's `er.javamail.*` settings, `er.extensions.ERXNSLogLog4jBridge` (NSLog always writes to slf4j,
+  under the logger `NSLog`), and a few more EOF settings: `er.extensions.ERXOpenEditingContextLocksPassword`
+  and the MySQL and PostgreSQL plug-ins' `com.webobjects.jdbcadaptor.*` options. All were set in applications
+  started from the Project Wonder templates.
+
 - **A warning when WebObjects' JavaXML is on the classpath**
   JavaWebObjects brings JavaXML along unless the pom excludes it, and it replaces the JDK's XML
   parsers and transformers for the whole application with old Xerces and Xalan, besides carrying

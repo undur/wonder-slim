@@ -45,6 +45,7 @@ public class ERXObsoleteProperties {
 	private static final String FRAMEWORK_PRINCIPAL = "ERXFrameworkPrincipal has been removed. Frameworks take part in startup as plugins, see er.extensions.ERXPlugin.";
 	private static final String FILE_NOTIFICATION_CENTER = "ERXFileNotificationCenter has been removed. The configuration's files are checked for changes every second, independent of requests: in development, the files themselves; in deployment, the touch file (er.extensions.ERXConfigurationManager.PropertiesTouchFile), when one is set.";
 	private static final String OGNL = "WOOgnl has been removed. Templates are parsed by Parsley, which ERExtensions enables by default.";
+	private static final String JAVAMAIL = "Project Wonder's ERJavaMail isn't part of wonder-slim. Send mail with a mail library directly, such as Jakarta Mail or Simple Java Mail.";
 
 	/**
 	 * Properties that configured removed features, reported at startup (see {@link #printObsoleteProperties()}). Every
@@ -139,6 +140,39 @@ public class ERXObsoleteProperties {
 		new ObsoleteProperty( "ognl.parseStandardTags", OGNL ),
 		new ObsoleteProperty( "ognl.webobjects.WOAssociation.shouldThrowExceptions", OGNL ),
 
+		// ERJavaMail
+		new ObsoleteProperty( "er.javamail.adminEmail", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.AllowEmailAddressPatterns", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.BlackListEmailAddressPatterns", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.centralize", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.debugEnabled", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.defaultEncoding", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.DenyEmailAddressPatterns", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.emailPattern", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.imapHost", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.jndiSessionContext", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.jndiSessionContext.*", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.mailer.XMailerHeader", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.milliSecondsWaitIfSenderOverflowed", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.senderDelayMillis", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.senderQueue.size", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.sessionConfigViaJNDI", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpAuth", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpAuth.*", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpHost", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpHost.*", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpPassword", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpPassword.*", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpPort", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpPort.*", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpProtocol", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpProtocol.*", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpUser", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.smtpUser.*", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.useSenderDelay", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.WhiteListEmailAddressPatterns", JAVAMAIL ),
+		new ObsoleteProperty( "er.javamail.XMailerHeader", JAVAMAIL ),
+
 		// Other removed features
 		new ObsoleteProperty( "er.extensions.ERXExpiringCache.reaperFrequency", "ERXExpiringCache has been removed." ),
 		new ObsoleteProperty( "er.extensions.ERXJavaScript.hideInComment", "ERXJavaScript no longer renders script content, so there is nothing to hide in a comment." ),
@@ -151,6 +185,7 @@ public class ERXObsoleteProperties {
 		new ObsoleteProperty( "er.extensions.ERXGracefulShutdown.Enabled", "ERXGracefulShutdownHook has been removed. Use ERXShutdownHook instead." ),
 		new ObsoleteProperty( "er.extensions.ERXGracefulShutdown.SignalsToHandle", "ERXGracefulShutdownHook has been removed. Use ERXShutdownHook instead." ),
 		new ObsoleteProperty( "er.extensions.erxloggerclass", "ERXLogger has been removed. wonder-slim logs through SLF4J." ),
+		new ObsoleteProperty( "er.extensions.ERXNSLogLog4jBridge", "NSLog always writes to slf4j through ERXNSLogBridge, under the logger NSLog; set its level with er.logging.level.NSLog. er.extensions.ERXNSLogLog4jBridge.ignoreNSLogSettings still applies." ),
 		new ObsoleteProperty( "er.extensions.ERXNavigationManager.includeLabelSpanTag", "The navigation manager has been removed." ),
 		new ObsoleteProperty( "er.extensions.ERXNavigationManager.localizeDisplayKeys", "The navigation manager has been removed." ),
 		new ObsoleteProperty( "er.extensions.ERXNavigationManager.NavigationMenuFileName", "The navigation manager has been removed." ),
@@ -199,6 +234,10 @@ public class ERXObsoleteProperties {
 		new ObsoleteProperty( "wodka.a10.A10TcpIp.UseThisIp", WONDER_FEATURE ),
 
 		// Project Wonder's EOF support
+		new ObsoleteProperty( "com.webobjects.jdbcadaptor.MySQLExpression.enable", EOF_SUPPORT ),
+		new ObsoleteProperty( "com.webobjects.jdbcadaptor.MySQLExpression.enableIdentifierQuoting", EOF_SUPPORT ),
+		new ObsoleteProperty( "com.webobjects.jdbcadaptor.MySQLExpression.enableLinePerClause", EOF_SUPPORT ),
+		new ObsoleteProperty( "com.webobjects.jdbcadaptor.PostgresqlExpression.enableIdentifierQuoting", EOF_SUPPORT ),
 		new ObsoleteProperty( "dbConfigNameGLOBAL", EOF_SUPPORT ),
 		new ObsoleteProperty( "dbConnectAdaptorGLOBAL", EOF_SUPPORT ),
 		new ObsoleteProperty( "dbConnectDatabaseGLOBAL", EOF_SUPPORT ),
@@ -307,6 +346,7 @@ public class ERXObsoleteProperties {
 		new ObsoleteProperty( "er.extensions.ERXModelGroup.sqlDumpDirectory", EOF_SUPPORT ),
 		new ObsoleteProperty( "er.extensions.ERXObjectStoreCoordinatorPool.maxCoordinators", EOF_SUPPORT ),
 		new ObsoleteProperty( "er.extensions.ERXObjectStoreCoordinatorPool.threadOSC", EOF_SUPPORT ),
+		new ObsoleteProperty( "er.extensions.ERXOpenEditingContextLocksPassword", EOF_SUPPORT ),
 		new ObsoleteProperty( "er.extensions.ERXOpenEditingContextLockTracesPassword", EOF_SUPPORT ),
 		new ObsoleteProperty( "er.extensions.ERXPrimaryKeyBatchSize", EOF_SUPPORT ),
 		new ObsoleteProperty( "er.extensions.ERXRaiseOnMissingEditingContextDelegate", EOF_SUPPORT ),
