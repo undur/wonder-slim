@@ -163,4 +163,27 @@ public class ERXLogbackLoggingBackendTest {
 		log4j.debug( "THROUGH-LOG4J-API" );
 		assertEquals( 1, _backend.capturedLines( "THROUGH-LOG4J-API", 0 ).size() );
 	}
+
+	@Test
+	public void theLayoutAlwaysEndsWithTheThrowable() {
+		assertEquals( "%m%n%ex", ERXLogbackLoggingBackend.withThrowable( "%m%n" ) );
+		assertEquals( "%m%n%ex{5}", ERXLogbackLoggingBackend.withThrowable( "%m%n%ex{5}" ), "Already written" );
+		assertEquals( "%m%n%nopex", ERXLogbackLoggingBackend.withThrowable( "%m%n%nopex" ), "Suppressed on purpose" );
+	}
+
+	@Test
+	public void stackTracesAreWrittenThroughERXStackTraces() {
+		_backend.configure();
+
+		final ch.qos.logback.classic.PatternLayout layout = new ch.qos.logback.classic.PatternLayout();
+		layout.setContext( (LoggerContext)LoggerFactory.getILoggerFactory() );
+		layout.setPattern( "%m%n%ex" );
+		layout.start();
+
+		final Throwable wrapped = new com.webobjects.foundation.NSForwardException( new IllegalStateException( "EXPECTED-IN-TEST" ) );
+		final ch.qos.logback.classic.spi.LoggingEvent event = new ch.qos.logback.classic.spi.LoggingEvent( "x", logger( "test.trace" ), Level.WARN, "Failed", wrapped, null );
+		final String output = layout.doLayout( event );
+
+		assertTrue( output.startsWith( "Failed" + System.lineSeparator() + "java.lang.IllegalStateException: EXPECTED-IN-TEST" ), output );
+	}
 }

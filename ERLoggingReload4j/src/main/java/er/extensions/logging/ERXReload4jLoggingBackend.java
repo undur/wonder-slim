@@ -11,6 +11,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.spi.ThrowableRendererSupport;
 
 /**
  * The reload4j logging backend, listed in META-INF/services/er.extensions.logging.ERXLoggingBackend
@@ -20,6 +21,7 @@ public class ERXReload4jLoggingBackend implements ERXLoggingBackend {
 	@Override
 	public void configure() {
 		ERXLogger.configureLoggingWithSystemProperties();
+		installThrowableRenderer();
 	}
 
 	/**
@@ -37,6 +39,17 @@ public class ERXReload4jLoggingBackend implements ERXLoggingBackend {
 		LogManager.resetConfiguration();
 		Logger.getRootLogger().addAppender( new ConsoleAppender( new ERXPatternLayout( "%d{MMM dd HH:mm:ss} %-5p %c - %m%n" ), "System.out" ) );
 		Logger.getRootLogger().setLevel( Level.INFO );
+		installThrowableRenderer();
+	}
+
+	/**
+	 * Every appender writes stack traces through ERXStackTraces, as the other backends do. Installed again after each
+	 * configuration, since a configuration may set a renderer of its own (log4j.throwableRenderer).
+	 */
+	private static void installThrowableRenderer() {
+		if( LogManager.getLoggerRepository() instanceof ThrowableRendererSupport repository ) {
+			repository.setThrowableRenderer( new ERXThrowableRenderer() );
+		}
 	}
 
 	/**

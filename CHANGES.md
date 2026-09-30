@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **Stack traces written the same way with every logging backend**
+  The console logger, reload4j and logback now write a logged throwable's stack trace through
+  `ERXStackTraces`: a throwable that only wraps another (`NSForwardException`,
+  `InvocationTargetException`) is printed as the one it wraps (`er.logging.stackTrace.unwrap`,
+  default true), and optionally only the innermost cause (`er.logging.stackTrace.innermostOnly`).
+  With reload4j it applies to every appender, not only `ERXConsoleAppender`. Skipping stack trace
+  frames by pattern has been removed, with ERLoggingReload4j's `StackTraceSkipPatterns` files, and
+  the `er.extensions.stackTrace.*` keys are reported as obsolete. An application's own `logback.xml`
+  opts in with a `<conversionRule>` for `ex` (see docs/LOGGING.md). (#161)
+
 - **More obsolete properties reported at startup**
   ERJavaMail's `er.javamail.*` settings, `er.extensions.ERXNSLogLog4jBridge` (NSLog always writes to slf4j,
   under the logger `NSLog`), and a few more EOF settings: `er.extensions.ERXOpenEditingContextLocksPassword`

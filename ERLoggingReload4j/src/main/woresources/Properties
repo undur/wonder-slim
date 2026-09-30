@@ -1,8 +1,0 @@
-## These properties are pushed into the Java system properties for applications linking against this framework
-## You can override them from the application's Properties file or command-line arguments.
-
-#########################################################################
-# ERXConsoleAppender: how it prints stack traces
-#########################################################################
-er.extensions.stackTrace.cleanup=true
-er.extensions.stackTrace.skipPatternsFile=StackTraceSkipPatterns-Normal.plist

@@ -58,6 +58,21 @@ In layers, lowest first; a later layer wins where two name the same logger
 4. **`er.logging.level.*` set on the running instance**
    (`ERXConfigurationManager.setProperty()`, the admin console), which wins over everything.
 
+## Stack traces
+
+A logged throwable's stack trace is written the same way with every backend (`ERXStackTraces`):
+the console logger uses it directly, reload4j through a `ThrowableRenderer` on the repository
+(so for every appender), and logback through a converter for `%ex`, `%exception` and
+`%throwable` in the console output the backend sets up.
+
+- `er.logging.stackTrace.unwrap` (default `true`): a throwable that only wraps another, an
+  `NSForwardException` or an `InvocationTargetException`, is printed as the one it wraps.
+- `er.logging.stackTrace.innermostOnly` (default `false`): only the innermost cause of the
+  chain is printed.
+
+Otherwise the trace is the JDK's own. An application's own `logback.xml` appenders opt in with
+`<conversionRule conversionWord="ex" class="er.extensions.logging.logback.ERXThrowableConverter"/>`.
+
 ## Initialization timeline (why order matters)
 
 Roughly, in sequence:

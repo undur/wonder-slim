@@ -1,7 +1,5 @@
 package er.extensions.logging;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -172,9 +170,7 @@ public final class ERXConsoleLayout {
 		}
 
 		if( throwable != null ) {
-			final StringWriter trace = new StringWriter();
-			throwable.printStackTrace( new PrintWriter( trace ) );
-			line.append( trace );
+			line.append( ERXStackTraces.format( throwable ) );
 		}
 
 		return line.toString();

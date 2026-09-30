@@ -67,6 +67,16 @@ public enum ERXP {
 	LOGGING_PATTERN( "er.logging.pattern" ),
 
 	/**
+	 * Whether a logged throwable that only wraps another (an {@code NSForwardException}, an {@code InvocationTargetException}) is printed as the throwable it wraps, with any logging backend. Default true.
+	 */
+	LOGGING_STACK_TRACE_UNWRAP( "er.logging.stackTrace.unwrap" ),
+
+	/**
+	 * Whether only the innermost cause of a logged throwable is printed, instead of the whole chain of causes, with any logging backend. Default false.
+	 */
+	LOGGING_STACK_TRACE_INNERMOST_ONLY( "er.logging.stackTrace.innermostOnly" ),
+
+	/**
 	 * Seconds the instance lives before it's stopped, plus a random interval of up to 10 minutes. Unset or 0: no limit.
 	 */
 	TIME_TO_LIVE( "ERTimeToLive" ),

@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +30,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.pattern.DynamicConverter;
 
 import er.extensions.logging.ERXLoggingBackend;
 import er.extensions.logging.ERXLoggingConfiguration;
@@ -241,9 +245,11 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 	}
 
 	private static Appender<ILoggingEvent> console( final String pattern ) {
+		registerThrowableConverter();
+
 		final PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 		encoder.setContext( context() );
-		encoder.setPattern( logbackPattern( pattern ) );
+		encoder.setPattern( withThrowable( logbackPattern( pattern ) ) );
 		encoder.start();
 
 		final ConsoleAppender<ILoggingEvent> console = new ConsoleAppender<>();
@@ -260,6 +266,36 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 	 */
 	static String logbackPattern( final String pattern ) {
 		return pattern.replace( "(", "\\(" ).replace( ")", "\\)" );
+	}
+
+	/**
+	 * A conversion that writes the throwable, in any of its names, or one that suppresses it
+	 */
+	private static final Pattern THROWABLE_CONVERSION = Pattern.compile( "%(ex|exception|throwable|xEx|xException|xThrowable|rEx|rootException|nopex|nopexception)\\b" );
+
+	/**
+	 * @return The given logback layout, ending with %ex unless it already writes or suppresses the throwable: without
+	 *         one, logback appends its own converter, not ours
+	 */
+	static String withThrowable( final String pattern ) {
+		return THROWABLE_CONVERSION.matcher( pattern ).find() ? pattern : pattern + "%ex";
+	}
+
+	/**
+	 * Makes %ex, %exception and %throwable in the layouts of this logger context write through ERXStackTraces
+	 */
+	private static void registerThrowableConverter() {
+		@SuppressWarnings("unchecked")
+		Map<String, Supplier<DynamicConverter>> registry = (Map<String, Supplier<DynamicConverter>>)context().getObject( CoreConstants.PATTERN_RULE_REGISTRY_FOR_SUPPLIERS );
+
+		if( registry == null ) {
+			registry = new HashMap<>();
+			context().putObject( CoreConstants.PATTERN_RULE_REGISTRY_FOR_SUPPLIERS, registry );
+		}
+
+		for( final String word : List.of( "ex", "exception", "throwable" ) ) {
+			registry.put( word, ERXThrowableConverter::new );
+		}
 	}
 
 	/**
@@ -350,15 +386,16 @@ public class ERXLogbackLoggingBackend implements ERXLoggingBackend {
 
 		@Override
 		public void start() {
+			registerThrowableConverter();
 			_layout.setContext( getContext() );
-			_layout.setPattern( "%d{MMM dd HH:mm:ss} %-5p %c - %m" );
+			_layout.setPattern( "%d{MMM dd HH:mm:ss} %-5p %c - %m%n%ex" );
 			_layout.start();
 			super.start();
 		}
 
 		@Override
 		protected void append( final ILoggingEvent event ) {
-			final String line = _layout.doLayout( event );
+			final String line = _layout.doLayout( event ).stripTrailing();
 
 			synchronized( _lines ) {
 				if( _lines.size() == MAX_LINES ) {
