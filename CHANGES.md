@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The current call stack read with `StackWalker`**
+  `ERXExceptionUtilities.stackTrace()` and reload4j's `%@` conversion (the call stack of the logging
+  call) read the stack with `StackWalker` instead of printing an exception and cutting up the text.
+  `%@` now also leaves out the slf4j bridge's frames, and no longer drops the stack's last frame.
+
 - **Stack traces written the same way with every logging backend**
   The console logger, reload4j and logback now write a logged throwable's stack trace through
   `ERXStackTraces`: a throwable that only wraps another (`NSForwardException`,

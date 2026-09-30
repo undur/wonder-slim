@@ -1,9 +1,8 @@
 package er.extensions.foundation;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.util.stream.Collectors;
 
 import com.webobjects.foundation.NSForwardException;
 
@@ -78,36 +77,15 @@ public class ERXExceptionUtilities {
 	}
 
 	/**
-	 * @return A string representation of the current stacktrace.
+	 * @return The current call stack, from the caller of this method down: a line separator, then a line per frame
+	 *         ({@code \tat ...}), each ending with a line separator
 	 */
 	public static String stackTrace() {
+		final String separator = System.lineSeparator();
 
-		String result = stackTrace(new Throwable());
-	
-		final String separator = System.getProperties().getProperty("line.separator");
-	
-		// Chop off the 1st line, "java.lang.Throwable"
-		int offset = result.indexOf(separator);
-		result = result.substring(offset + 1);
-	
-		// Chop off the lines at the start that refer to this class
-		offset = result.indexOf(separator);
-
-		while (result.substring(0, offset).indexOf("ERXExceptionUtilities.java") >= 0) {
-			result = result.substring(offset + 1);
-			offset = result.indexOf(separator);
-		}
-
-		return separator + result;
-	}
-	
-	/**
-	 * @return The throwable's stacktrace as a string
-	 */
-	private static String stackTrace(Throwable t) {
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-		final PrintStream printStream = new PrintStream(baos);
-		t.printStackTrace(printStream);
-		return baos.toString();
+		return StackWalker.getInstance().walk( frames -> frames
+				.skip( 1 ) // this method
+				.map( frame -> "\tat " + frame.toStackTraceElement() + separator )
+				.collect( Collectors.joining( "", separator, "" ) ) );
 	}
 }

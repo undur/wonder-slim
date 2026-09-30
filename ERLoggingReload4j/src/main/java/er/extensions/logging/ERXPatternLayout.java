@@ -6,8 +6,8 @@
  * included with this distribution in the LICENSE.NPL file.  */
 package er.extensions.logging;
 
-import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,9 +22,7 @@ import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSArray;
 import com.webobjects.foundation.NSKeyValueCoding;
-import com.webobjects.foundation.NSMutableArray;
 
-import er.extensions.foundation.ERXExceptionUtilities;
 import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.foundation.ERXUtilities;
 
@@ -181,31 +179,29 @@ class ERXPatternParser extends PatternParser {
 		}
 
 		/**
-		 * For a given log event returns the string representation of a stack
-		 * trace for the current logging call minus all of the log4j stack.
-		 * 
-		 * @param event
-		 *            current logging event
-		 * @return string representation of the current backtrace.
+		 * @return The call stack of the logging call: the frames below the last one of the logging libraries (log4j and
+		 *         slf4j), a {@code \tat ...} line each
 		 */
 		@Override
 		public String convert(LoggingEvent event) {
-			NSArray parts = NSArray.componentsSeparatedByString(ERXExceptionUtilities.stackTrace(), "\n\t");
-			NSMutableArray subParts = new NSMutableArray();
-			boolean first = true;
-			for (Enumeration e = parts.reverseObjectEnumerator(); e.hasMoreElements();) {
-				String element = (String) e.nextElement();
-				if (element.indexOf("org.apache.log4j") != -1) {
-					break;
-				}
-				if (!first) {
-					subParts.insertObjectAtIndex(element, 0);
-				}
-				else {
-					first = false;
+			final List<StackTraceElement> frames = StackWalker.getInstance().walk( stream -> stream.map( StackWalker.StackFrame::toStackTraceElement ).toList() );
+			int firstCaller = 0;
+
+			for( int i = 0; i < frames.size(); i++ ) {
+				final String className = frames.get( i ).getClassName();
+
+				if( className.startsWith( "org.apache.log4j." ) || className.startsWith( "org.slf4j." ) ) {
+					firstCaller = i + 1;
 				}
 			}
-			return "\t" + subParts.componentsJoinedByString("\n\t") + "\n";
+
+			final StringBuilder trace = new StringBuilder();
+
+			for( final StackTraceElement frame : frames.subList( firstCaller, frames.size() ) ) {
+				trace.append( "\tat " ).append( frame ).append( '\n' );
+			}
+
+			return trace.toString();
 		}
 	}
 

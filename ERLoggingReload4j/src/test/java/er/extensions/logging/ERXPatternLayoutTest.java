@@ -73,4 +73,24 @@ public class ERXPatternLayoutTest {
 		assertEquals( "cost $5 \\ ok", ERXPatternParser.fillTemplate( "cost @@price@@ ok", java.util.Map.of( "price", "$5 \\" ) ) );
 		assertEquals( "no placeholders", ERXPatternParser.fillTemplate( "no placeholders", java.util.Map.of() ) );
 	}
+
+	@Test
+	public void theCallStackOfTheLoggingCall() {
+		final java.io.StringWriter output = new java.io.StringWriter();
+		final Logger logger = Logger.getLogger( "test.callstack" );
+		final org.apache.log4j.WriterAppender appender = new org.apache.log4j.WriterAppender( new ERXPatternLayout( "%@" ), output );
+		logger.addAppender( appender );
+
+		try {
+			logger.info( "message" );
+		}
+		finally {
+			logger.removeAppender( appender );
+		}
+
+		final String trace = output.toString();
+		assertTrue( trace.startsWith( "\tat er.extensions.logging.ERXPatternLayoutTest.theCallStackOfTheLoggingCall(" ), trace );
+		assertTrue( !trace.contains( "org.apache.log4j" ), "The logging library's own frames are left out" );
+		assertTrue( trace.endsWith( "\n" ) );
+	}
 }
