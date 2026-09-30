@@ -15,11 +15,6 @@ import com.webobjects.foundation.NSForwardException;
 public class ERXExceptionUtilities {
 
 	/**
-	 * Implemented by exception classes that you explicitly want to not appear in stack dumps.
-	 */
-	private static interface WeDontNeedAStackTraceException {}
-
-	/**
 	 * @return The "meaningful" root cause from the given throwable. For instance, an InvocationTargetException is useless, it's the cause that matters.
 	 */
 	public static Throwable getMeaningfulThrowable(Throwable t) {
@@ -29,9 +24,6 @@ public class ERXExceptionUtilities {
 			meaningfulThrowable = t.getCause();
 		}
 		else if (t instanceof InvocationTargetException ) {
-			meaningfulThrowable = t.getCause();
-		}
-		else if (t instanceof WeDontNeedAStackTraceException && t.getMessage() == null) {
 			meaningfulThrowable = t.getCause();
 		}
 		else {
