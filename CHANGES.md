@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 2026-09-30 (8.0.13)
+
+This release is about project layout. A project's `build.properties` now says where its components
+and resources are, and every project running from its folder in development is found from it,
+instead of being guessed from its Eclipse natures.
 
 - **A project can declare its layout in build.properties**
   `dir.components`, `dir.woresources` and `dir.webserverResources` in `build.properties` tell
@@ -13,6 +17,12 @@
   must now move them or declare its folders. This comes from the new ERProjectLayout module, which
   `ERXApplication` registers before NSBundle is loaded. It depends only on ERFoundation, so it
   works with Project Wonder too. vermilingua 1.1.11 packages from the same folders. (#164)
+
+- **The exception page shows the source of any project in the workspace**
+  A stack frame counts as your own code, with its source shown, for any project running from its
+  folder, not only one that ERFoundation loaded as an `NSMavenProjectBundle`. The source is looked
+  for under `src/main/java`, then `Sources`, in the frame's own project, where before the main
+  bundle's layout was applied to every project. (#165)
 
 - **ERLoggingReload4j carries its own stack trace settings**
   `er.extensions.stackTrace.cleanup` and `er.extensions.stackTrace.skipPatternsFile`, with the
