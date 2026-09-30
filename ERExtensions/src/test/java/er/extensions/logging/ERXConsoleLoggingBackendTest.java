@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -78,11 +80,24 @@ public class ERXConsoleLoggingBackendTest {
 		backend.configure();
 		backend.installCapture();
 
-		logger( "test.console.layout" ).info( "Hello {}", "there" );
-		assertEquals( List.of( "[INFO ] test.console.layout: Hello there" ), backend.capturedLines( "test.console.layout", 0 ) );
+		// The lines go to a buffer instead of the console, so the exception's stack trace doesn't end up in the build log
+		final ByteArrayOutputStream console = new ByteArrayOutputStream();
+		final PrintStream originalOut = System.out;
+		System.setOut( new PrintStream( console, true ) );
 
-		logger( "test.console.layout" ).warn( "Failed", new IllegalStateException( "EXPECTED-IN-TEST" ) );
-		assertTrue( backend.capturedLines( "EXPECTED-IN-TEST", 0 ).getFirst().startsWith( "[WARN ] test.console.layout: Failed" ) );
+		try {
+			logger( "test.console.layout" ).info( "Hello {}", "there" );
+			assertEquals( List.of( "[INFO ] test.console.layout: Hello there" ), backend.capturedLines( "test.console.layout", 0 ) );
+
+			logger( "test.console.layout" ).warn( "Failed", new IllegalStateException( "EXPECTED-IN-TEST" ) );
+			assertTrue( backend.capturedLines( "EXPECTED-IN-TEST", 0 ).getFirst().startsWith( "[WARN ] test.console.layout: Failed" ) );
+		}
+		finally {
+			System.setOut( originalOut );
+		}
+
+		assertTrue( console.toString().contains( "[INFO ] test.console.layout: Hello there" ) );
+		assertTrue( console.toString().contains( "java.lang.IllegalStateException: EXPECTED-IN-TEST" ), "The stack trace is written with the line" );
 	}
 
 	@Test
