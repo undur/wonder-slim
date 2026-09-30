@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **A warning when WebObjects' JavaXML is on the classpath**
+  JavaWebObjects brings JavaXML along unless the pom excludes it, and it replaces the JDK's XML
+  parsers and transformers for the whole application with old Xerces and Xalan, besides carrying
+  its own log4j 1.2 and servlet API. Nothing in wonder-slim needs it. An application that has it now
+  says so at startup, naming the jar and showing the exclusion to add to its pom. (#163)
+
 - **A layout key declared without a value stops the application**
   A line like `dir.woresources=` left in `build.properties` now stops startup with an error naming
   the key, instead of pointing at the project folder itself. Remove the line to use the default.

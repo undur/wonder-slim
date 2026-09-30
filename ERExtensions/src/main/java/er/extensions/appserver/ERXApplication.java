@@ -160,6 +160,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public static void main(String[] argv, Class applicationClass) {
 		_wasERXApplicationMainInvoked = true;
 
+		// Before anything parses XML, since JavaXML replaces the JDK's XML implementations
+		warnIfJavaXMLOnClasspath();
+
 		// A console appender from the very first line, so nothing logged during WO's and our own
 		// initialization is dropped (log4j's "No appenders could be found" - and, worse, silently lost
 		// constructor-time output). The configuration's logging settings replace it once the application
@@ -1101,6 +1104,41 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				if( !foundERFoundation || !foundERWebObjects || !foundERExtensions ) {
 					throw new IllegalStateException("Whoops. ERFoundation, ERWebObjects and ERExtensions must appear earlier on the classpath than JavaFoundation and JavaWebObjects. The best way to ensure this is to make ERExtensions the first <dependency> in your pom file");
 				}
+			}
+		}
+	}
+
+	/**
+	 * Warn, loudly, when WebObjects' JavaXML is on the classpath. JavaWebObjects declares it as a dependency, so an
+	 * application gets it unless its pom excludes it, and nothing wonder-slim uses needs it (#163).
+	 */
+	private static void warnIfJavaXMLOnClasspath() {
+		for( final String classpathElement : System.getProperty( "java.class.path" ).split( File.pathSeparator ) ) {
+			final Path fileName = Path.of( classpathElement ).getFileName();
+
+			if( fileName != null && fileName.toString().toLowerCase().startsWith( "javaxml" ) ) {
+				IO.println( """
+
+						================================================================================
+						== WARNING: WebObjects' JavaXML is on the classpath
+						== %s
+						==
+						== It replaces the JDK's XML parsers and transformers for the whole application
+						== with Xerces and Xalan from 2005, so every library that parses XML runs on them.
+						== It also carries its own copy of log4j 1.2, which can collide with reload4j,
+						== and an old servlet API. Nothing in wonder-slim needs it.
+						==
+						== Exclude it from the JavaWebObjects dependency in your pom:
+						==
+						==   <exclusions>
+						==     <exclusion>
+						==       <groupId>com.webobjects</groupId>
+						==       <artifactId>JavaXML</artifactId>
+						==     </exclusion>
+						==   </exclusions>
+						================================================================================
+						""".formatted( classpathElement ) );
+				return;
 			}
 		}
 	}
