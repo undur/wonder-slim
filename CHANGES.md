@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2026-09-30 (8.0.14)
 
 - **Stack traces written the same way with every logging backend**
