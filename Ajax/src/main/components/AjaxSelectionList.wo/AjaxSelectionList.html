@@ -1,27 +1,27 @@
-<webobject name = "HiddenField"/>
-<webobject name = "ContainerLink">
-	<webobject name = "List">
-		<webobject name = "Items">
-			<webobject name = "Content"/>
-		</webobject>
-	</webobject>
-</webobject>
+<wo:WOHiddenField value="$value" name="$^name" id="$fieldID" />
+<wo:container elementName="$containerElementName" id="$containerID" class="_selectionList" href="javascript:void(0)">
+	<wo:container elementName="$elementName" id="$id" class="$^class" style="$^style">
+		<wo:repetition list="$list" item="$item">
+			<wo:content />
+		</wo:repetition>
+	</wo:container>
+</wo:container>
 <script>
-	var selectionList = new AjaxSelectionList('<webobject name = "ContainerID"/>');
-	selectionList.setSelectionIndex(<webobject name = "SelectedIndex"/>, false);
+	var selectionList = new AjaxSelectionList('<wo:str value="$containerID" />');
+	selectionList.setSelectionIndex(<wo:str value="$selectedIndex" />, false);
 	selectionList.onchange = function(list) {
-		$wi('<webobject name = "FieldID"/>').value = list.selectionIndex;
-		<webobject name = "IfOnChange">
-		<webobject name = "OnChange"/>
-		</webobject>
+		$wi('<wo:str value="$fieldID" />').value = list.selectionIndex;
+		<wo:if condition="$^onchange">
+		<wo:str value="$^onchange" />
+		</wo:if>
 	}
-	<webobject name = "IfOnSelect">
-	selectionList.onselect = function() { <webobject name = "OnSelect"/> }
-	</webobject>
-	<webobject name = "IfOnDelete">
-	selectionList.ondelete = function() { <webobject name = "OnDelete"/> }
-	</webobject>
-	<webobject name = "IfFocus">
-		$wi('<webobject name = "ContainerID"/>').focus();
-	</webobject>
+	<wo:if condition="$^onselect">
+	selectionList.onselect = function() { <wo:str value="$^onselect" /> }
+	</wo:if>
+	<wo:if condition="$^ondelete">
+	selectionList.ondelete = function() { <wo:str value="$^ondelete" /> }
+	</wo:if>
+	<wo:if condition="$^focus">
+		$wi('<wo:str value="$containerID" />').focus();
+	</wo:if>
 </script>

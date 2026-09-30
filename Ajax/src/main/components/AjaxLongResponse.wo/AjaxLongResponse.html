@@ -1,10 +1,10 @@
-<script type="text/javascript"><webobject name=ID></webobject>PeriodicalUpdater = null;</script>
-<webobject name="AjaxUpdateContainer"><webobject name="Content"></webobject><script type="text/javascript">
-if(<webobject name=ID></webobject>PeriodicalUpdater != null) {
-	<webobject name="IsRunning">if(!<webobject name=ID></webobject>PeriodicalUpdater.isRunning()) { 
-		<webobject name=ID></webobject>PeriodicalUpdater.start();
-	}</webobject><webobject name="IsNotRunning">if(<webobject name=ID></webobject>PeriodicalUpdater.isRunning()) { 
-		<webobject name=ID></webobject>Stop();
-	}</webobject>
+<script type="text/javascript"><wo:str value="$^id" />PeriodicalUpdater = null;</script>
+<wo:AjaxUpdateContainer id="$^id" elementName="$elementName" class="$^class" style="$^style" frequency="$frequency" stopped="$^stopped" onRefreshComplete="$^onRefreshComplete"><wo:content /><script type="text/javascript">
+if(<wo:str value="$^id" />PeriodicalUpdater != null) {
+	<wo:if condition="$^isRunning">if(!<wo:str value="$^id" />PeriodicalUpdater.isRunning()) { 
+		<wo:str value="$^id" />PeriodicalUpdater.start();
+	}</wo:if><wo:if condition="$^isRunning" negate="$true">if(<wo:str value="$^id" />PeriodicalUpdater.isRunning()) { 
+		<wo:str value="$^id" />Stop();
+	}</wo:if>
 }
-</script></webobject>
+</script></wo:AjaxUpdateContainer>

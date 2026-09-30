@@ -1,59 +1,59 @@
-<webobject name = "ProgressUpdateContainer">
-	<webobject name = "FireStartedJavascriptEventsConditional">
+<wo:AjaxUpdateContainer id="$id" action="$refreshing">
+	<wo:if condition="$fireStartedJavascriptEvent">
 		<script>
-		<webobject name = "StartedFunction"/>
+		<wo:str value="$^startedFunction" />
 		</script>
-	</webobject>
-	<webobject name = "ProgressBarVisible">
+	</wo:if>
+	<wo:if condition="$progressBarVisible">
 		<table class = "progressBarContainer">
 			<tr>
 				<td><table class = "progressBar" width = "100%" cellspacing = "0">
 							<tr>
-								<webobject name = "ProgressStartedConditional">
-									<webobject name = "Finished">&nbsp;</webobject>
-								</webobject>
-								<webobject name = "ProgressNotDoneConditional">
-									<webobject name = "Unfinished">&nbsp;</webobject>
-								</webobject>
+								<wo:if condition="$progress.started">
+									<wo:container elementName="td" width="$percentage" class="$finishedClass">&nbsp;</wo:container>
+								</wo:if>
+								<wo:if condition="$progress.done" negate="$true">
+									<wo:container elementName="td" class="percentageUnfinished">&nbsp;</wo:container>
+								</wo:if>
 							</tr>
 						</table></td>
 			</tr>
 			
 			<tr>
 				<td class = "progressSummary">
-					<webobject name = "ProcedureStartedConditional">
-						<webobject name = "ProgressNotStartedConditional"><webobject name = "StartingText"/></webobject>
-						<webobject name = "CanceledConditional"><webobject name = "CancelingText"/></webobject>
-					</webobject>
-					<webobject name = "ProgressStartedConditional">
-						<webobject name = "NotCanceledConditional">
-							<webobject name = "Value" /> <webobject name="ProgressOfText"/> <webobject name = "Maximum" /><webobject name = "HasStatusConditional">, <webobject name = "Status"/></webobject>
-							<webobject name = "AllowCancelConditional">
-								( <webobject name = "CancelAction"><webobject name = "CancelText"/></webobject> )
-							</webobject>
-						</webobject>
-					</webobject>
+					<wo:if condition="$started">
+						<wo:if condition="$progress.started" negate="$true"><wo:str value="$startingText" /></wo:if>
+						<wo:if condition="$progress.canceled"><wo:str value="$cancelingText" /></wo:if>
+					</wo:if>
+					<wo:if condition="$progress.started">
+						<wo:if condition="$progress.canceled" negate="$true">
+							<wo:str value="$displayValue" /> <wo:str value="$progressOfText" /> <wo:str value="$displayMaximum" /><wo:if condition="$progress.status">, <wo:str value="$progress.status" /></wo:if>
+							<wo:if condition="$^allowCancel">
+								( <wo:AjaxUpdateLink updateContainerID="$id" action="$cancel" class="cancelAction" disabled="$done"><wo:str value="$cancelText" /></wo:AjaxUpdateLink> )
+							</wo:if>
+						</wo:if>
+					</wo:if>
 				</td>
 			</tr>
 		</table>
-	</webobject>
-	<webobject name = "ProcedureStartedConditional">
-		<webobject name = "DoneConditional">
-			<webobject name = "FireFinishedJavascriptEventsConditional">
+	</wo:if>
+	<wo:if condition="$started">
+		<wo:if condition="$done">
+			<wo:if condition="$fireFinishedJavascriptEvents">
 				<script>
-					<webobject name = "FinishedFunction"/>
-					<webobject name = "CanceledConditional"><webobject name = "CanceledFunction"/></webobject>
-					<webobject name = "FailedConditional"><webobject name = "FailedFunction"/></webobject>
-					<webobject name = "SucceededConditional"><webobject name = "SucceededFunction"/></webobject>
-					<webobject name = "ID"/>Update();
+					<wo:str value="$^finishedFunction" />
+					<wo:if condition="$progress.canceled"><wo:str value="$^canceledFunction" /></wo:if>
+					<wo:if condition="$progress.failed"><wo:str value="$^failedFunction" /></wo:if>
+					<wo:if condition="$progress.succeeded"><wo:str value="$^succeededFunction" /></wo:if>
+					<wo:str value="$id" />Update();
 				</script>
-			</webobject>
-		</webobject>
-		<webobject name = "NotDoneConditional">
+			</wo:if>
+		</wo:if>
+		<wo:if condition="$done" negate="$true">
 			<script>
-			setTimeout("<webobject name = "ID"/>Update()", <webobject name = "RefreshTime"/>);
+			setTimeout("<wo:str value="$id" />Update()", <wo:str value="$refreshTime" />);
 			</script>
-		</webobject>
-	</webobject>
-	<webobject name = "Contents"/>
-</webobject>
+		</wo:if>
+	</wo:if>
+	<wo:content />
+</wo:AjaxUpdateContainer>

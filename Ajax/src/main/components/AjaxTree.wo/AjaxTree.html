@@ -1,12 +1,12 @@
-<script type = "text/javascript"><webobject name = "ToggleFunctionName"/> = function(actionUrl) { new Ajax.Updater('<webobject name = "ContainerID"></webobject>', actionUrl, { method:'get', evalScripts: true }); return true; };</script>
-<webobject name = "TreeNodeUpdater">
-	<webobject name = "TreeNodeRepetition">
-		<webobject name = "CloseCountRepetition"><webobject name = "CloseULLI"/></webobject>
-		<webobject name = "IsLeafConditional"><webobject name = "NodeItem"/><webobject name = "LeafImage"/><webobject name = "TreeNodeRenderer"/><webobject name = "CloseLI"/></webobject>
-		<webobject name = "IsNotLeafConditional">
-			<webobject name = "IsCollapsedConditional"><webobject name = "NodeItem"/><webobject name = "ExpandAction"><webobject name = "CollapsedImage"/></webobject><webobject name = "TreeNodeRenderer"/><webobject name = "CloseLI"/></webobject>
-			<webobject name = "IsExpandedConditional"><webobject name = "NodeItem"/><webobject name = "CollapseAction"><webobject name = "ExpandedImage"/></webobject><webobject name = "TreeNodeRenderer"/><webobject name = "OpenUL"/></webobject>
-		</webobject>
-	</webobject>
-	<webobject name = "LastCloseCountRepetition"><webobject name = "CloseULLI"/></webobject>
-</webobject>
+<script type = "text/javascript"><wo:str value="$toggleFunctionName" /> = function(actionUrl) { new Ajax.Updater('<wo:str value="$id" />', actionUrl, { method:'get', evalScripts: true }); return true; };</script>
+<wo:AjaxUpdateContainer id="$^id" class="$^class" elementName="ul" skipFunction="$false">
+	<wo:repetition list="$nodes" item="$item">
+		<wo:repetition count="$closeCount"><wo:str value="</ul></li>" escapeHTML="$false" /></wo:repetition>
+		<wo:if condition="$leaf"><wo:str value="$nodeItem" escapeHTML="$false" /><wo:WOImage filename="$leafImage" framework="$leafImageFramework" class="nodeControl" /><wo:content /><wo:str value="</li>" escapeHTML="$false" /></wo:if>
+		<wo:if condition="$leaf" negate="$true">
+			<wo:if condition="$expanded" negate="$true"><wo:str value="$nodeItem" escapeHTML="$false" /><wo:AjaxUpdateLink action="$expand" updateContainerID="$^id" function="$toggleFunctionName" class="$imageLinkClass"><wo:WOImage filename="$collapsedImage" framework="$collapsedImageFramework" class="nodeControl" /></wo:AjaxUpdateLink><wo:content /><wo:str value="</li>" escapeHTML="$false" /></wo:if>
+			<wo:if condition="$expanded"><wo:str value="$nodeItem" escapeHTML="$false" /><wo:AjaxUpdateLink action="$collapse" updateContainerID="$id" function="$toggleFunctionName" class="$imageLinkClass"><wo:WOImage filename="$expandedImage" framework="$expandedImageFramework" class="nodeControl" /></wo:AjaxUpdateLink><wo:content /><wo:str value="<ul>" escapeHTML="$false" /></wo:if>
+		</wo:if>
+	</wo:repetition>
+	<wo:repetition count="$lastCloseCount"><wo:str value="</ul></li>" escapeHTML="$false" /></wo:repetition>
+</wo:AjaxUpdateContainer>

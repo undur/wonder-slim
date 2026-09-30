@@ -1,4 +1,4 @@
-<webobject name = "PingUpdateContainer">
-	<webobject name = "HasTargetContainerID"><webobject name = "PingUpdate"/></webobject><webobject name = "ComponentContent"/>
-	<webobject name = "Running"><script type="text/javascript">setTimeout("<webobject name = "ID"/>Update()", <webobject name = "Frequency"/>)</script></webobject>
-</webobject>
+<wo:AjaxUpdateContainer id="$id">
+	<wo:if condition="$^targetContainerID"><wo:AjaxPingUpdate cacheKey="$^cacheKey" targetContainerID="$^targetContainerID" onBeforeUpdate="$^onBeforeUpdate" /></wo:if><wo:content />
+	<wo:if condition="$^stop" negate="$true"><script type="text/javascript">setTimeout("<wo:str value="$id" />Update()", <wo:str value="$frequency" />)</script></wo:if>
+</wo:AjaxUpdateContainer>

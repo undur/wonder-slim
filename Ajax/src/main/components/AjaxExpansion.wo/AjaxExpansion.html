@@ -1,8 +1,8 @@
-<webobject name = "ToggleLink"><webobject name = "LabelContent"><webobject name = "ToggleLinkString" /></webobject></webobject>
-<webobject name = "AjaxUpdateContainer">
-  <webobject name = "Expanded"><webobject name = "Content" /></webobject>
-  <webobject name="IsAjaxRequest"><script type="text/javascript">
-      AjaxUtils.toggleClassName('<webobject name = "LinkID" />', 'expanded', <webobject name = "ExpandedValue" />);
-      <webobject name="HasEscapedLinkString">$('<webobject name = "LinkID" />').update('<webobject name = "EscapedLinkString" />');</webobject>
-  </script></webobject>
-</webobject>
+<wo:AjaxUpdateLink insertion="$^insertion" insertionDuration="$^insertionDuration" id="$linkID" action="$toggle" updateContainerID="$id" class="$linkClass" accesskey="$^accesskey" elementName="$^elementName" onLoading="$^onLoading" onComplete="$^onComplete" onFailure="$^onFailure" onSuccess="$^onSuccess"><wo:ERXWOComponentContent templateName="label"><wo:str value="$string" /></wo:ERXWOComponentContent></wo:AjaxUpdateLink>
+<wo:AjaxUpdateContainer id="$id" class="$^class" onRefreshComplete="$onExpansionComplete">
+  <wo:if condition="$expanded"><wo:ERXWOComponentContent /></wo:if>
+  <wo:if condition="$isAjaxRequest"><script type="text/javascript">
+      AjaxUtils.toggleClassName('<wo:str value="$linkID" />', 'expanded', <wo:str value="$expanded" />);
+      <wo:if condition="$jsEscapedString.length">$('<wo:str value="$linkID" />').update('<wo:str value="$jsEscapedString" />');</wo:if>
+  </script></wo:if>
+</wo:AjaxUpdateContainer>

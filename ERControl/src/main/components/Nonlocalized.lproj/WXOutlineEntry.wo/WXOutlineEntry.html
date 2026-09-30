@@ -1,6 +1,6 @@
-<webobject name=Content></webobject>
-<webobject name=IsExpandedConditional>
-        <webobject name=Outline>
-            <webobject name=Content></webobject>
-        </webobject>
-</webobject>
+<wo:content />
+<wo:if condition="$isExpanded">
+        <wo:WXOutlineRepetition list="$^sublist" item="$^item" sublist="$^sublist" hasChildren="$^hasChildren" selectionPath="$^selectionPath" nestingLevel="$nestingLevelForChildren">
+            <wo:content />
+        </wo:WXOutlineRepetition>
+</wo:if>

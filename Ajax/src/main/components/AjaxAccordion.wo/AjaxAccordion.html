@@ -1,6 +1,6 @@
-<webobject name = "AccordionDiv">
-	<webobject name = "Content"></webobject>
-</webobject>
+<wo:container elementName="div" id="$accordionID" class="accordion" otherTagString="data-morph-ignore=\"true\"">
+	<wo:content />
+</wo:container>
 <script type = "text/javascript">
-new Rico.Accordion($wi('<webobject name = "AccordionContainerID"></webobject>'), <webobject name = "AjaxOptions"></webobject>);
+new Rico.Accordion($wi('<wo:str value="$accordionID" />'), <wo:AjaxOptions options="$createAjaxOptions" />);
 </script>

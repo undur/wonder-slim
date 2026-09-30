@@ -1,3 +1,3 @@
-<webobject name = "CustomStyleConditional"><webobject name = "CustomBusyDiv"></webobject></webobject>
-<webobject name = "DefaultStyleConditional"><webobject name = "BusyDiv"></webobject></webobject>
-<script>AjaxBusy.register('<webobject name = "BusyClass" />', '<webobject name = "DivID" />', '<webobject name = "WatchContainerID" />', <webobject name = "OnCreate" />, <webobject name = "OnComplete" />, true, <webobject name = "SpinOpts" />)</script>
+<wo:if condition="$customStyle"><wo:container elementName="div" id="$divID" class="$^class" style="$style" /></wo:if>
+<wo:if condition="$customStyle" negate="$true"><wo:container elementName="div" id="$divID" style="display: none; position: fixed; top: 50%; left: 50%; z-index: 9999" /></wo:if>
+<script>AjaxBusy.register('<wo:str value="$^busyClass" />', '<wo:str value="$divID" />', '<wo:str value="$^watchContainerID" />', <wo:str value="$onCreate" />, <wo:str value="$onComplete" />, true, <wo:str value="$spinOpts" escapeHTML="$false" />)</script>

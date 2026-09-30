@@ -1,5 +1,5 @@
-<webobject name = "BusyImageConditional">
-  <webobject name = "CustomStyleConditional"><webobject name = "CustomBusyDiv"><webobject name = "BusyImage"></webobject></webobject></webobject>
-  <webobject name = "DefaultStyleConditional"><webobject name = "BusyDiv"><table width = "100%" height = "100%"><tr><td align="center"><webobject name = "BusyImage"></webobject><br/></td></tr></table></webobject></webobject>
-</webobject>
-<script>AjaxBusy.register('<webobject name = "BusyClass"></webobject>', '<webobject name = "DivID"></webobject>', '<webobject name = "WatchContainerID"/>', <webobject name = "OnCreate"/>, <webobject name = "OnComplete"/>)</script>
+<wo:if condition="$^busyImage">
+  <wo:if condition="$customStyle"><wo:container elementName="div" id="$divID" class="$^class" style="$style"><wo:WOImage filename="$^busyImage" framework="$^busyImageFramework" /></wo:container></wo:if>
+  <wo:if condition="$customStyle" negate="$true"><wo:container elementName="div" id="$divID" style="display: none; position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; z-index: 9999;"><table width = "100%" height = "100%"><tr><td align="center"><wo:WOImage filename="$^busyImage" framework="$^busyImageFramework" /><br/></td></tr></table></wo:container></wo:if>
+</wo:if>
+<script>AjaxBusy.register('<wo:str value="$^busyClass" />', '<wo:str value="$divID" />', '<wo:str value="$^watchContainerID" />', <wo:str value="$onCreate" />, <wo:str value="$onComplete" />)</script>

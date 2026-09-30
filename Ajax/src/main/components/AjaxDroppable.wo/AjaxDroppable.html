@@ -1,1 +1,1 @@
-<webobject name = "DroppableContainer"><webobject name = "Content"></webobject></webobject><webobject name="DisabledConditional"><script>ADP.register('<webobject name = "DroppableContainerID"></webobject>', <webobject name = "AjaxOptions"></webobject>);</script></webobject>
+<wo:container elementName="$elementName" class="$^class" id="$^id" style="$^style"><wo:content /></wo:container><wo:if condition="$^disabled" negate="$true"><script>ADP.register('<wo:str value="$^id" />', <wo:AjaxOptions options="$createAjaxOptions" onDrop="$onDrop" />);</script></wo:if>

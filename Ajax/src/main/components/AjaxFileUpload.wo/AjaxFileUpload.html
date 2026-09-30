@@ -1,17 +1,17 @@
-<webobject name = "HiddenFrame"/>
-<webobject name = "UploadForm">
-	<webobject name = "HiddenWOSID"/>
-	<webobject name = "HiddenID"/>
+<wo:WOIFrame name="$uploadFrameName" src="$srcUrl" width="0" height="0" style="border: none;" border="0" />
+<wo:form multipleSubmit="$false" enctype="multipart/form-data" target="$uploadFrameName" href="$uploadUrl" name="$uploadFormID">
+	<wo:element elementName="input" type="hidden" name="$application.sessionIdKey" value="$session.sessionID" />
+	<wo:element elementName="input" type="hidden" name="id" value="$id" />
 	<table>
 		<tr class="upload_row">
-			<td class="input_col"><webobject name = "UploadField"/></td>
-			<td class="action_col"><webobject name = "UploadAction"/></td>
+			<td class="input_col"><wo:element elementName="input" type="file" name="uploadedFile" class="$^class" id="$^id" style="$^style" onchange="$^onFileSelected" /></td>
+			<td class="action_col"><wo:AjaxUpdateLink updateContainerID="$progressBarID" action="$startUpload" button="$true" functionName="$^uploadFunctionName" value="$uploadLabel" disabled="$false" /></td>
 		</tr>
 		
 		<tr class="progress_row">
 			<td colspan = "2">
-				<webobject name = "UploadProgressBar"><webobject name = "Contents"/></webobject>
+				<wo:AjaxProgressBar id="$progressBarID" progressID="$id" progress="$uploadProgress" started="$uploadStarted" succeededAction="$uploadSucceeded" startedFunction="$^startedFunction" finishedFunction="$^finishedFunction" succeededFunction="$^succeededFunction" failedAction="$uploadFailed" failedFunction="$^failedFunction" canceledAction="$uploadCanceled" canceledFunction="$^canceledFunction" displayValue="$bytesReadSize" displayMaximum="$streamLengthSize" allowCancel="$^allowCancel" visibleBeforeStart="$progressBarBeforeStart" visibleAfterDone="$progressBarAfterDone" cancelText="$cancelText" cancelingText="$cancelingText" startingText="$startingText" refreshTime="$^refreshTime" progressOfText="$^progressOfText"><wo:content /></wo:AjaxProgressBar>
 			</td>
 		</tr>
 	</table>
-</webobject>
+</wo:form>

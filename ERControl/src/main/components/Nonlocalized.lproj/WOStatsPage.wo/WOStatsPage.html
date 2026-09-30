@@ -4,13 +4,13 @@
     <title></title>
   </head>
   <body bgcolor = "#FFFFFF">
-    <webobject name = "REFUSED">
+    <wo:if condition="$allowedToViewStatistics" negate="1">
       <center>
         <h2>
           <font color = "#FF0000">This Request Requires A User Login</font>
         </h2>
         <br/>
-          <webobject name = "Form1">
+          <wo:form>
             <table border = "1" cellPadding = "2" cellSpacing = "0" bgcolor = "#f6ffff">
               <tr>
                 <td>
@@ -18,19 +18,19 @@
                     <tr align = "CENTER">
                       <td>User</td>
                       <td>
-                        <webobject name = "USERNAME"></webobject>
+                        <wo:textfield WIDTH="$12" value="$userName" />
                       </td>
                     </tr>
                     <tr align = "CENTER">
                       <td>Password</td>
                       <td>
-                        <webobject name = "PASSWORD"></webobject>
+                        <wo:password WIDTH="$12" value="$password" />
                       </td>
                     </tr>
                     <tr>
                       <td></td>
                       <td>
-                        <webobject name = "SUBMIT"></webobject>
+                        <wo:submit action="$submit" />
                       </td>
                     </tr>
                   </table>
@@ -38,39 +38,39 @@
               </tr>
             </table>
             <br/>
-          </webobject>
+          </wo:form>
       </center>
-    </webobject>
-    <webobject name = "ALLOWED">
-      <webobject name = "Form4">
+    </wo:if>
+    <wo:if condition="$allowedToViewStatistics">
+      <wo:form directActionName="WOStats">
         <table border = "0" width = "100%">
           <tr>
             <td align = "CENTER" colspan = "2">
               <H2>
                 Statistics For
                 <font color = "#FF0000">
-                  <webobject name = "ApplicationName"></webobject>
-                  <webobject name = "Instance">
+                  <wo:str value="$application.name" />
+                  <wo:if condition="$instance">
                     #
                     <font color = "#FF0000">
-                      <webobject name = "Instance1"></webobject>
+                      <wo:str value="$instance" />
                     </font>
-                  </webobject>
+                  </wo:if>
                 </font>
                 On Host
                 <font color = "#FF0000">
-                  <webobject name = "Host"></webobject>
+                  <wo:str value="$host" />
                 </font>
               </H2>
             </td>
           </tr>
           <tr>
             <td align = "CENTER">
-              <webobject name = "REFRESH"></webobject>
+              <wo:submit actionClass="ERXDirectAction" directActionName="stats" value="Refresh Page" />
             </td>
           </tr>
         </table>
-      </webobject>
+      </wo:form>
       <hr />
       <br/>
         <center>
@@ -116,27 +116,27 @@
               <td>Overall</td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "Transactions"></webobject>
+                  <wo:str value="$transactions.Transactions" />
                 </font>
               </td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "AvgTransactionTime"></webobject>
+                  <wo:str numberformat="0.000" value="$avgTransactionTime" />
                 </font>
               </td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "AvgIdleTime"></webobject>
+                  <wo:str numberformat="0.000" value="$avgIdleTime" />
                 </font>
               </td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "MovingAvgTransactionTime"></webobject>
+                  <wo:str numberformat="0.000" value="$movingAvgTransactionTime" />
                 </font>
               </td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "MovingAvgIdleTime"></webobject>
+                  <wo:str numberformat="0.000" value="$movingAvgIdleTime" />
                 </font>
               </td>
             </tr>
@@ -144,12 +144,12 @@
               <td>Component Actions</td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "ComponentActionTransactions"></webobject>
+                  <wo:str value="$componentActionTransactions" />
                 </font>
               </td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "AvgComponentActionTransactions"></webobject>
+                  <wo:str numberformat="0.000" value="$avgComponentActionTransactions" />
                 </font>
               </td>
               <td align = "CENTER">
@@ -164,12 +164,12 @@
               <td>Direct Actions</td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "DirectActionTransactions"></webobject>
+                  <wo:str value="$directActionTransactions" numberformat="#,000" />
                 </font>
               </td>
               <td align = "CENTER">
                 <font color = "#0000FF">
-                  <webobject name = "AvgDirectActionTransactions"></webobject>
+                  <wo:str numberformat="0.000" value="$avgDirectActionTransactions" />
                 </font>
               </td>
               <td align = "CENTER">
@@ -184,7 +184,7 @@
               <td>Started at</td>
               <td colspan = "5">
                 <font color = "#0000FF">
-                  <webobject name = "StatsDictStartedAt"></webobject>
+                  <wo:str dateformat="%H:%M:%S on %a, %b %d %Y %Z" value="$statsDict.StartedAt" />
                 </font>
               </td>
             </tr>
@@ -192,7 +192,7 @@
               <td>Running time</td>
               <td colspan = "5">
                 <font color = "#0000FF">
-                  <webobject name = "RunningTime"></webobject>
+                  <wo:str value="$runningTime" />
                 </font>
               </td>
             </tr>
@@ -200,7 +200,7 @@
           <font size = "-1">
             * The sample size for Moving Averages is
             <font color = "#0000FF">
-              <webobject name = "MovingAvgSampleSize"></webobject>
+              <wo:str value="$movingAvgSampleSize" />
             </font>
             transactions.
           </font>
@@ -215,30 +215,30 @@
                 </font>
               </td>
             </tr>
-            <webobject name = "SessionsRepetition">
+            <wo:WODictionaryRepetition dictionary="$sessionsDict" item="$currentItem" key="$currentKey">
               <tr>
                 <td>
-                  <webobject name = "SessionsKeyCell"></webobject>
+                  <wo:str value="$currentKey" />
                 </td>
                 <td align="right">
                   <font color = "#0000FF">
-                    <webobject name = "SessionsValueCell"></webobject>
+                    <wo:str numberformat="0.00" value="$currentItem" />
                   </font>
                 </td>
               </tr>
-            </webobject>
-            <webobject name = "ISMAXSESSIONS">
+            </wo:WODictionaryRepetition>
+            <wo:if condition="$maxSessionsDate">
               <tr>
                 <td colspan = "2">
                   Peak Concurrent Sessions at
                   <br/>
                     <font color = "#0000FF">
-                      <webobject name = "MaxSessions"></webobject>
+                      <wo:str dateformat="%H:%M:%S on %a, %b %d %Y %Z" value="$maxSessionsDate" />
                     </font>
                   
                 </td>
               </tr>
-            </webobject>
+            </wo:if>
           </table>
         </center>
         <br/>
@@ -253,18 +253,18 @@
                         <b>Memory Usage</b>
                       </td>
                     </tr>
-                    <webobject name = "MemoryRepetition">
+                    <wo:WODictionaryRepetition dictionary="$memoryDict" item="$currentItem" key="$currentKey">
                       <tr>
                         <td>
-                          <webobject name = "MemoryKeyCell"></webobject>
+                          <wo:str value="$currentKey" />
                         </td>
                         <td align = "RIGHT">
                           <font color = "#0000FF">
-                            <webobject name = "MemoryValueCell"></webobject>
+                            <wo:str formatter="$byteFormat" value="$currentItem" />
                           </font>
                         </td>
                       </tr>
-                    </webobject>
+                    </wo:WODictionaryRepetition>
                   </table>
                 </td>
                 <td align = "CENTER">
@@ -274,42 +274,42 @@
                         <b>Avg. Memory Usage Per Session (bytes)</b>
                       </td>
                     </tr>
-                    <webobject name = "SessionMemoryRepetition">
+                    <wo:WODictionaryRepetition dictionary="$sessionMemoryDict" item="$currentItem" key="$currentKey">
                       <tr>
                         <td>
-                          <webobject name = "SessionMemoryKeyCell"></webobject>
+                          <wo:str value="$currentKey" />
                         </td>
                         <td align = "RIGHT">
                           <font color = "#0000FF">
-                            <webobject name = "SessionMemoryValueCell"></webobject>
+                            <wo:str formatter="$byteFormat" value="$currentItem" />
                           </font>
                         </td>
                       </tr>
-                    </webobject>
+                    </wo:WODictionaryRepetition>
                   </table>
                 </td>
               </tr>
             </table>
           </center>
           <br/>
-            <webobject name = "ISLASTUSER">
+            <wo:if condition="$isLastUser">
               Response Descriptions For Last User :
               <br/>
                 <center>
                   <table border = "2" cellpadding = "4" cellspacing = "2" bgcolor = "#d0d0d0" width = "80%">
-                    <webobject name = "SessionStatsRepetition">
+                    <wo:repetition item="$currentItem" list="$sessionStats">
                       <tr>
                         <td>
                           <font color = "#0000FF">
-                            <webobject name = "SessionStatsField"></webobject>
+                            <wo:str value="$currentItem" />
                           </font>
                         </td>
                       </tr>
-                    </webobject>
+                    </wo:repetition>
                   </table>
                 </center>
               
-            </webobject>
+            </wo:if>
             <hr />
             <center>
               <table border = "2" cellpadding = "4" cellspacing = "2" width = "80%" bgcolor = "#d0d0d0">
@@ -330,35 +330,35 @@
                   <td width = "10%">Avg</td>
                   <td width = "10%">Max</td>
                 </tr>
-                <webobject name = "PagesRepetition">
+                <wo:WODictionaryRepetition dictionary="$pagesDict" item="$currentItem" key="$currentKey">
                   <tr>
                     <td align = "CENTER">
                       <font color = "#0000FF">
-                        <webobject name = "PageName"></webobject>
+                        <wo:str value="$currentKey" />
                       </font>
                     </td>
                     <td align = "left">
-                      <webobject name = "PageCountBar"></webobject>
+                      <wo:WOCompletionBar align="RIGHT" numberformat="0" value="$pageCount" valueMax="$maxPageCount" />
                     </td>
                     <td align = "CENTER">
                       <font color = "#0000FF">
-                        <webobject name = "PageMin"></webobject>
+                        <wo:str numberformat="0.000" value="$pageMin" />
                       </font>
                     </td>
                     <td align = "CENTER">
                       <font color = "#0000FF">
                         <b>
-                          <webobject name = "PageAvg"></webobject>
+                          <wo:str numberformat="0.000" value="$pageAvg" />
                         </b>
                       </font>
                     </td>
                     <td align = "CENTER">
                       <font color = "#0000FF">
-                        <webobject name = "PageMax"></webobject>
+                        <wo:str numberformat="0.000" value="$pageMax" />
                       </font>
                     </td>
                   </tr>
-                </webobject>
+                </wo:WODictionaryRepetition>
               </table>
             </center>
             <hr />
@@ -378,35 +378,35 @@
                   <td width = "10%">Avg</td>
                   <td width = "10%">Max</td>
                 </tr>
-                <webobject name = "ActionsRepetition">
+                <wo:WODictionaryRepetition dictionary="$directActionsDict" item="$currentItem" key="$currentKey">
                   <tr>
                     <td align = "CENTER">
                       <font color = "#0000FF">
-                        <webobject name = "ActionName"></webobject>
+                        <wo:str value="$currentKey" />
                       </font>
                     </td>
                     <td align = "left">
-                      <webobject name = "ActionBar"></webobject>
+                      <wo:WOCompletionBar align="RIGHT" numberformat="0" value="$actionCount" valueMax="$maxActionCount" />
                     </td>
                     <td align = "CENTER">
                       <font color = "#0000FF">
-                        <webobject name = "ActionMin"></webobject>
+                        <wo:str numberformat="0.000" value="$actionMin" />
                       </font>
                     </td>
                     <td align = "CENTER">
                       <font color = "#0000FF">
                         <b>
-                          <webobject name = "ActionAvg"></webobject>
+                          <wo:str numberformat="0.000" value="$actionAvg" />
                         </b>
                       </font>
                     </td>
                     <td align = "CENTER">
                       <font color = "#0000FF">
-                        <webobject name = "ActionMax"></webobject>
+                        <wo:str numberformat="0.000" value="$actionMax" />
                       </font>
                     </td>
                   </tr>
-                </webobject>
+                </wo:WODictionaryRepetition>
               </table>
             </center>
             <hr />
@@ -427,41 +427,41 @@
                   <td width = "50%">Percent Of Total</td>
                   <td width = "10%">Served</td>
                 </tr>
-                <webobject name = "DetailsRepetition">
+                <wo:WODictionaryRepetition dictionary="$detailsDict" item="$currentItem" key="$currentKey">
                   <tr>
                     <td align = "CENTER">
                       <font color = "#0000FF">
-                        <webobject name = "DetailName"></webobject>
+                        <wo:str value="$currentKey" />
                       </font>
                     </td>
                     <td align = "left">
-                      <webobject name = "BAR_DETAILS"></webobject>
+                      <wo:WOCompletionBar align="RIGHT" numberformat="0%" value="$detailPercent" />
                     </td>
                     <td align = "CENTER">
                       <font color = "#0000FF">
-                        <webobject name = "DetailCount"></webobject>
+                        <wo:str value="$detailCount" />
                       </font>
                     </td>
                   </tr>
-                </webobject>
+                </wo:WODictionaryRepetition>
               </table>
               <br/>
-                <webobject name = "ISLOGPATH">
+                <wo:if condition="$isLogPath">
                   <hr />
                   <br/>
                     Statistics Details Saved In Common Log Format In File
                     <font color = "#0000FF">
-                      <webobject name = "LOGPATH"></webobject>
+                      <wo:str value="$statsDict.LogFile" />
                     </font>
                   
-                </webobject>
+                </wo:if>
                 <hr />
                 <center>
                   <table border = "2" cellpadding = "4" cellspacing = "2" width = "80%" bgcolor = "#d0d0d0">
                     <tr>
                       <td colspan = "5" align = "CENTER" bgcolor = "#b0b0b0">
                         <font size = "+1">
-                          <b>ERX Stats (<webobject name = "ResetStats">reset</webobject>, <webobject name = "ShowTraces">show traces</webobject>)</b>
+                          <b>ERX Stats (<wo:link actionClass="ERXDirectAction" directActionName="resetStats">reset</wo:link>, <wo:link actionClass="ERXDirectAction" directActionName="stats" ?showTraces="$1">show traces</wo:link>)</b>
                         </font>
                       </td>
                     </tr>
@@ -472,37 +472,37 @@
                       <td width = "10%">Max</td>
                       <td width = "10%">Sum</td>
                     </tr>
-                    <webobject name = "ERXStatsRepetition">
+                    <wo:repetition list="$aggregateLogEntries" item="$aggregateLogEntry">
                       <tr>
                         <td colspan="5">
-                          <webobject name = "ERXStatsKey" />
+                          <wo:str value="$aggregateLogEntry.key" />
                         </td>
                       </tr>
                       <tr>
                         <td>
-                          <webobject name = "ERXStatsCountBar" />
+                          <wo:WOCompletionBar align="RIGHT" numberformat="0" value="$aggregateLogEntry.count" valueMax="$aggregateLogEntries.@sum.count" />
                         </td>
                         <td>
-                          <webobject name = "ERXStatsMin" />
+                          <wo:str value="$aggregateLogEntry.min" numberformat="#,##0" />
                         </td>
                         <td>
-                          <webobject name = "ERXStatsAvg" />
+                          <wo:str value="$aggregateLogEntry.avg" numberformat="#,##0.00" />
                         </td>
                         <td>
-                          <webobject name = "ERXStatsMax" />
+                          <wo:str value="$aggregateLogEntry.max" numberformat="#,##0" />
                         </td>
                         <td>
-                          <webobject name = "ERXStatsSumBar" />
+                          <wo:WOCompletionBar align="RIGHT" numberformat="0" value="$aggregateLogEntry.sum" valueMax="$aggregateLogEntries.@sum.sum" />
                         </td>
                       </tr>
-                      <webobject name = "ShouldShowTraces">
+                      <wo:if condition="$context.request.formValues.showTraces">
 	                      <tr>
 	                        <td colspan="5">
-	                          <pre><webobject name = "ERXStatsTraces" /></pre>
+	                          <pre><wo:str value="$aggregateLogEntry.traces" /></pre>
 	                        </td>
 	                      </tr>
-	                  </webobject>
-                    </webobject>
+	                  </wo:if>
+                    </wo:repetition>
                   </table>
                 </center>
                 <hr />
@@ -520,23 +520,23 @@
                   <tr>
                     <td>Vendor</td>
                     <td>
-                      <webobject name = "Link"></webobject>
+                      <wo:link disabled="$vendorURLdisabled" href="$vendorURL" string="$vendorDescription" target="VENDOR_WINDOW" />
                     </td>
                   </tr>
                   <tr>
                     <td>JDK</td>
                     <td>
-                      <webobject name = "JdkVersion"></webobject>
+                      <wo:str value="$jdkVersion" />
                     </td>
                   </tr>
                   <tr>
                     <td>Operating System</td>
                     <td>
-                      <webobject name = "OperatingSystem"></webobject>
+                      <wo:str value="$operatingSystem" />
                     </td>
                   </tr>
                 </table>
             </center>
-    </webobject>
+    </wo:if>
   </body>
 </html>

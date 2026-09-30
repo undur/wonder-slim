@@ -5,34 +5,34 @@
 	</head>
 	<body>
 		
-		<webobject name=Conditional1> <U><B><FONT SIZE=6>WOEvent Logging Setup</FONT></B></U>
-			<P/><webobject name=Hyperlink2>Show Event Log</webobject><b><font size=6><br/>
+		<wo:if condition="$allowedToViewEvents"> <U><B><FONT SIZE=6>WOEvent Logging Setup</FONT></B></U>
+			<P/><wo:link directActionName="WOEventDisplay">Show Event Log</wo:link><b><font size=6><br/>
 			</font></b><font size=4>You have the following classes registered for
-			logging:</font><webobject name=LogClassListForm>
+			logging:</font><wo:form multipleSubmit="$true">
 				<table>
-					<webobject name=ClassLoop><webobject name=CategoryLoop>
+					<wo:repetition item="$currentClass" list="$registeredEventClasses"><wo:repetition index="$currentIndex" item="$currentEventDescription" list="$currentEventDescriptions">
 							<tr>
-								<td><webobject name=IsClassName>
-										<webobject name=IsClassSelected></webobject>
-									</webobject><webobject name=IsNotClassName>&nbsp;</webobject></td>
-								<td><webobject name=ClassOrCategoryName></webobject></td>
+								<td><wo:if condition="$isClassName">
+										<wo:checkbox checked="$isClassRegisteredForLogging" />
+									</wo:if><wo:if condition="$isClassName" negate="$true">&nbsp;</wo:if></td>
+								<td><wo:str value="$currentEventDescription" /></td>
 							</tr>
-						</webobject>
+						</wo:repetition>
 						<tr>
 							<td>&nbsp;</td>
 							<td>
 								<hr/>
 							</td>
 						</tr>
-					</webobject>
+					</wo:repetition>
 				</table>
 				<P/>
-				<webobject name=SelectAllButton></webobject>&nbsp;&nbsp;&nbsp;<webobject name=ClearAllButton></webobject>&nbsp;&nbsp;&nbsp;<webobject name=SetAsSelected></webobject>
+				<wo:submit action="$selectAll" value="Set To All" />&nbsp;&nbsp;&nbsp;<wo:submit action="$clearAll" value="Set To None" />&nbsp;&nbsp;&nbsp;<wo:submit value="Set As Selected" action="$submit" />
 				<P/>
-				<webobject name=Hyperlink1>Show Event Log</webobject></webobject>
-		</webobject><webobject name=Conditional2><h2 ALIGN=CENTER><FONT COLOR=#ff0000>This Request Requires A User
+				<wo:link directActionName="WOEventDisplay">Show Event Log</wo:link></wo:form>
+		</wo:if><wo:if condition="$allowedToViewEvents" negate="$true"><h2 ALIGN=CENTER><FONT COLOR=#ff0000>This Request Requires A User
 			Login</FONT></h2><br/>
-			<WEBOBJECT NAME=Form1>
+			<wo:form>
 				<TABLE CELLPADDING="2" BORDER="1" BGCOLOR="#f6ffff" ALIGN="CENTER" CELLSPACING="0">
 						<TR>
 							<TD>
@@ -40,25 +40,25 @@
 									<TR align=CENTER>
 										<TD> User </TD>
 										<TD>
-											<WEBOBJECT NAME="USERNAME"></WEBOBJECT>
+											<wo:textfield WIDTH="$12" value="$userName" />
 										</TD>
 									</TR>
 									<TR align=CENTER>
 										<TD> Password </TD>
 										<TD>
-											<WEBOBJECT NAME="PASSWORD"></WEBOBJECT>
+											<wo:password WIDTH="$12" value="$password" />
 										</TD>
 									</TR>
 									<TR>
 										<TD></TD>
-										<TD><WEBOBJECT NAME=SUBMIT></WEBOBJECT></TD>
+										<TD><wo:submit action="$submit" /></TD>
 									</TR>
 								</TABLE>
 							</TD>
 						</TR>
 					</TABLE>
 				<br/>
-			</WEBOBJECT></webobject>
+			</wo:form></wo:if>
 		<p/>
 	</body>
 </html>

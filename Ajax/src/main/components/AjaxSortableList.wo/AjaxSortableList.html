@@ -1,8 +1,8 @@
-<webobject name = "ListContainer">
-	<webobject name = "ListRepetition">
-		<webobject name = "ListItemContainer"><webobject name = "Content"></webobject></webobject>
-	</webobject>
-</webobject>
+<wo:container elementName="$listElementName" id="$id" class="$^listClass" style="$^listStyle" otherTagString="data-morph-ignore=\"true\"">
+	<wo:repetition list="$^list" item="$^item" index="$^index">
+		<wo:container elementName="$listItemElementName" id="$listItemID" class="$^listItemClass" style="$^listItemStyle"><wo:content /></wo:container>
+	</wo:repetition>
+</wo:container>
 <script type = "text/javascript" language = "javascript">
-Sortable.create('<webobject name = "ContainerID"></webobject>', <webobject name = "AjaxOptions"></webobject>);
+Sortable.create('<wo:str value="$id" />', <wo:AjaxOptions options="$createAjaxOptions" onUpdate="$onUpdate" />);
 </script>

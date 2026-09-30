@@ -1,16 +1,16 @@
-<webobject name = "Disabled"><webobject name = "TextField" /></webobject>
-<webobject name = "NotDisabled">
-	<webobject name = "ShowItem">
-		<webobject name = "TextField" />
-		<webobject name = "HasIndicator"><webobject name = "Indicator" /></webobject>
-		<webobject name = "AutoCompleteContainer"><webobject name = "ZIndexContainer" /></webobject>
+<wo:if condition="$^disabled"><wo:textfield autocomplete="off" class="$^class" id="$fieldName" disabled="$^disabled" name="$fieldName" value="$stringValue" size="$^size" onblur="$^onblur" onchange="$^onchange" onfocus="$^onfocus" onmouseup="$^onmouseup" onmousedown="$^onmousedown" onclick="$^onclick" accesskey="$^accesskey" tabindex="$^tabindex" default="$^default" style="$^style" type="$^type" results="$^results" placeholder="$^placeholder" /></wo:if>
+<wo:if condition="$^disabled" negate="$true">
+	<wo:if condition="$true">
+		<wo:textfield autocomplete="off" class="$^class" id="$fieldName" disabled="$^disabled" name="$fieldName" value="$stringValue" size="$^size" onblur="$^onblur" onchange="$^onchange" onfocus="$^onfocus" onmouseup="$^onmouseup" onmousedown="$^onmousedown" onclick="$^onclick" accesskey="$^accesskey" tabindex="$^tabindex" default="$^default" style="$^style" type="$^type" results="$^results" placeholder="$^placeholder" />
+		<wo:if condition="$^indicatorFilename"><wo:WOImage id="$indicatorName" class="autocomplete_indicator" framework="$^indicatorFramework" filename="$^indicatorFilename" style="display: none" /></wo:if>
+		<wo:container elementName="div" class="auto_complete" id="$divName"><wo:container elementName="div" id="$zcontainerName" style="position: absolute; top: 0px; left: 0px; z-index: 1000;" /></wo:container>
 		<script>
 			Event.observe(window, 'load', function() {
-				var div = $('<webobject name = "ZIndexContainerName" />');
-				<webobject name = "hasContainerId">document.getElementById('<webobject name = "containerId" />').appendChild(div);</webobject>
-				<webobject name = "else">document.getElementsByTagName('body')[0].appendChild(div);</webobject>
+				var div = $('<wo:str value="$zcontainerName" />');
+				<wo:if condition="$^containerId">document.getElementById('<wo:str value="$^containerId" />').appendChild(div);</wo:if>
+				<wo:if condition="$^containerId" negate="$true">document.getElementsByTagName('body')[0].appendChild(div);</wo:if>
 			});    
 		</script>
-	</webobject>
-	<webobject name = "ShowList"><webobject name = "Content" /></webobject>
-</webobject>
+	</wo:if>
+	<wo:if condition="$false"><wo:content /></wo:if>
+</wo:if>

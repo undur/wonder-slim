@@ -1,10 +1,10 @@
-<webobject name = "AccordionTabDiv">
-	<webobject name = "TitleBarDiv">
-		<webobject name = "Title"></webobject>
- 	</webobject>
- 	<webobject name = "ContentDiv">
+<wo:container elementName="div" id="$tabID" class="accordionTab">
+	<wo:container elementName="div" id="$headerID" class="accordionTabTitleBar">
+		<wo:str value="$^title" />
+ 	</wo:container>
+ 	<wo:container elementName="div" id="$contentID" class="accordionTabContentBox">
  		<div class = "accordionTabContent">
-	 		<webobject name = "Content"></webobject>
+	 		<wo:content />
 	 	</div>
- 	</webobject>
-</webobject>
+ 	</wo:container>
+</wo:container>

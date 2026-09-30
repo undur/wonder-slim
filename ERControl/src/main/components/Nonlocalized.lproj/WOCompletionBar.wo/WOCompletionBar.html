@@ -1,21 +1,21 @@
-<WEBOBJECT NAME=TableContainer>
+<wo:container border="$^border" cellpadding="0" cellspacing="0" elementName="TABLE" width="$width">
 <TR>
-<WEBOBJECT NAME=InProgress>
-	<WEBOBJECT NAME=NameCellContainer>
-        <WEBOBJECT NAME=InProgressFont><WEBOBJECT NAME=String></webobject></WEBOBJECT>
-    </WEBOBJECT>
-	<WEBOBJECT NAME=BackgroundColorCell>
+<wo:if condition="$inProgress">
+	<wo:container align="$align" bgcolor="$barColor" elementName="TD" nowrap="" width="$percentValue">
+        <wo:container color="$backgroundColor" elementName="FONT" size="$2"><wo:str numberformat="$^numberformat" value="$value" /></wo:container>
+    </wo:container>
+	<wo:container bgcolor="$backgroundColor" elementName="TD" nowrap="" width="$percentNotValue">
         &nbsp;
-    </WEBOBJECT>
-</WEBOBJECT>
+    </wo:container>
+</wo:if>
 
-<WEBOBJECT NAME=NotInProgress>
-    <WEBOBJECT NAME=NotInProgressBackgroundColorCell>
-        <WEBOBJECT NAME=NotInProgressFont>
-                <WEBOBJECT NAME=String2></webobject>
-        </WEBOBJECT>
-    </WEBOBJECT>
-</WEBOBJECT>
+<wo:if condition="$inProgress" negate="$true">
+    <wo:container align="$align" bgcolor="$notInProgressBackgroundColor" elementName="TD" nowrap="" width="$100">
+        <wo:container color="$notInProgressColor" elementName="FONT" size="$2">
+                <wo:str numberformat="$^numberformat" value="$value" />
+        </wo:container>
+    </wo:container>
+</wo:if>
 </TR>
 
-</WEBOBJECT>
+</wo:container>

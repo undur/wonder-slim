@@ -1,21 +1,21 @@
-<webobject name = "UpdateContainer">
-	<webobject name = "IsNotEditingConditional"><webobject name = "IsChangingToViewConditional"><script>AIP.cleanupEdit('<webobject name = "ID"></webobject>');</script></webobject>
-		<webobject name = "EditFunction"></webobject><webobject name = "ManualViewControlConditional">
-			<webobject name = "ViewComponent"/>
-		</webobject>
-		<webobject name = "NotManualViewControlConditional">
-			<webobject name = "EditAction"><webobject name = "ViewComponent"/></webobject>
-		</webobject>
-	</webobject>
-	<webobject name = "IsEditingConditional"><webobject name = "EditForm">
-			<webobject name = "EditComponent"/><webobject name = "IsChangingToEditConditional"><script>AIP.cleanupView('<webobject name = "ID"></webobject>');</script></webobject>
-			<webobject name = "SubmitOnSaveConditional"><webobject name = "SaveSubmitFunction"></webobject></webobject>
-			<webobject name = "LinkOnSaveConditional"><webobject name = "SaveLinkFunction"></webobject></webobject>
-			<webobject name = "CancelFunction"></webobject>
-			<webobject name = "NotManualEditControlConditional">
-				<webobject name = "ButtonConditional"><webobject name = "SaveButtonAction"></webobject></webobject>
-				<webobject name = "LinkConditional"><webobject name = "SaveLinkAction"><webobject name = "SaveLabel"/></webobject></webobject>
-				<webobject name = "CancelAction"><webobject name = "CancelLabel"/></webobject>
-			</webobject>
-	</webobject></webobject>
-</webobject>
+<wo:AjaxUpdateContainer id="$id" class="$^class" style="$^style" elementName="$elementName" evalScripts="$true" onLoading="$^onLoading" onRefreshComplete="$^onRefreshComplete" morph="$false">
+	<wo:if condition="$editing" negate="$true"><wo:if condition="$changingToView"><script>AIP.cleanupEdit('<wo:str value="$id" />');</script></wo:if>
+		<wo:AjaxUpdateLink action="$startEditing" onClick="$^onEditClick" onClickBefore="$^onEditClickBefore" onSuccess="$^onEditSuccess" onFailure="$^onEditFailure" onLoading="$^onEditing" evalScripts="$true" disabled="$^disabled" functionName="$editFunctionName" updateContainerID="$id" insertion="$^editInsertion" insertionDuration="$^editInsertionDuration" beforeInsertionDuration="$^editBeforeInsertionDuration" afterInsertionDuration="$^editAfterInsertionDuration" /><wo:if condition="$manualViewControl">
+			<wo:ERXWOComponentContent templateName="view" />
+		</wo:if>
+		<wo:if condition="$manualViewControl" negate="$true">
+			<wo:container elementName="div" onclick="$editFunctionCall" class="$^editClass"><wo:ERXWOComponentContent templateName="view" /></wo:container>
+		</wo:if>
+	</wo:if>
+	<wo:if condition="$editing"><wo:form multipleSubmit="$true" name="$id" disabled="$disableForm" onsubmit="$^onsubmit" class="$^formClass">
+			<wo:ERXWOComponentContent templateName="edit" /><wo:if condition="$changingToEdit"><script>AIP.cleanupView('<wo:str value="$id" />');</script></wo:if>
+			<wo:if condition="$submitOnSave"><wo:AjaxSubmitButton action="$save" button="$false" formName="$formName" onClick="$^onSaveClick" onClickBefore="$^onSaveClickBefore" onSuccess="$^onSaveSuccess" onFailure="$^onSaveFailure" onLoading="$^onSaving" evalScripts="$true" functionName="$saveFunctionName" updateContainerID="$saveUpdateContainerID" insertion="$^saveInsertion" insertionDuration="$^saveInsertionDuration" beforeInsertionDuration="$^saveBeforeInsertionDuration" afterInsertionDuration="$^saveAfterInsertionDuration" formSerializer="$^formSerializer" /></wo:if>
+			<wo:if condition="$linkOnSave"><wo:AjaxUpdateLink action="$save" formName="$formName" onClick="$^onSaveClick" onClickBefore="$^onSaveClickBefore" onSuccess="$^onSaveSuccess" onFailure="$^onSaveFailure" onLoading="$^onSaving" evalScripts="$true" functionName="$saveFunctionName" updateContainerID="$saveUpdateContainerID" insertion="$^saveInsertion" insertionDuration="$^saveInsertionDuration" beforeInsertionDuration="$^saveBeforeInsertionDuration" afterInsertionDuration="$^saveAfterInsertionDuration" /></wo:if>
+			<wo:AjaxUpdateLink action="$cancel" onClick="$^onCancelClick" onClickBefore="$^onCancelClickBefore" onSuccess="$^onCancelSuccess" onFailure="$^onCancelFailure" onLoading="$^onCancelling" evalScripts="$true" functionName="$cancelFunctionName" updateContainerID="$cancelUpdateContainerID" insertion="$^cancelInsertion" insertionDuration="$^cancelInsertionDuration" beforeInsertionDuration="$^cancelBeforeInsertionDuration" afterInsertionDuration="$^cancelAfterInsertionDuration" />
+			<wo:if condition="$manualEditControl" negate="$true">
+				<wo:if condition="$button"><wo:container elementName="input" type="button" onclick="$saveFunctionCall" value="$saveLabel" class="$^saveClass" /></wo:if>
+				<wo:if condition="$button" negate="$true"><wo:container elementName="a" href="javascript:void(0)" onclick="$saveFunctionCall" class="$^saveClass"><wo:str value="$saveLabel" /></wo:container></wo:if>
+				<wo:container elementName="a" href="javascript:void(0)" onclick="$cancelFunctionCall" class="$^cancelClass"><wo:str value="$^cancelLabel" valueWhenEmpty="cancel" /></wo:container>
+			</wo:if>
+	</wo:form></wo:if>
+</wo:AjaxUpdateContainer>

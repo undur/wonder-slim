@@ -4,7 +4,7 @@
 		<TITLE>WOEvent Display Page</TITLE>
 	</head>
 	<body bgcolor=#FFFFFF>
-		<WEBOBJECT NAME=Conditional3><h2 ALIGN=CENTER><FONT COLOR=#ff0000>This Request Requires A User Login</FONT></h2><br/><CENTER><WEBOBJECT NAME=Form1>
+		<wo:if condition="$allowedToViewEvents" negate="$true"><h2 ALIGN=CENTER><FONT COLOR=#ff0000>This Request Requires A User Login</FONT></h2><br/><CENTER><wo:form>
 			<TABLE border=1 cellPadding=2 cellSpacing=0 bgcolor="#f6ffff">
 						<TR>
 							<TD>
@@ -13,50 +13,50 @@
 		
 										<TD> User </TD>
 										<TD>
-											<WEBOBJECT NAME="USERNAME"></WEBOBJECT>
+											<wo:textfield WIDTH="$12" value="$userName" />
 										</TD>
 									</TR>
 									<TR align=CENTER>
 										<TD> Password </TD>
 										<TD>
-											<WEBOBJECT NAME="PASSWORD"></WEBOBJECT>
+											<wo:password WIDTH="$12" value="$password" />
 										</TD>
 									</TR>
 									<TR>
 										<TD></TD>
-										<TD><WEBOBJECT NAME=SUBMIT></WEBOBJECT></TD>
+										<TD><wo:submit action="$submit" /></TD>
 									</TR>
 								</TABLE>
 							</TD>
 						</TR>
 					</TABLE>
 			<br/>
-		</WEBOBJECT></CENTER></WEBOBJECT>
-		<WEBOBJECT NAME=Conditional4>
-			<P><WEBOBJECT NAME=Hyperlink1>Set up logging</WEBOBJECT></P>
-			<WEBOBJECT NAME=Conditional1><WEBOBJECT NAME=DisplayModeForm><WEBOBJECT NAME=ShowAllRoot></WEBOBJECT>
+		</wo:form></CENTER></wo:if>
+		<wo:if condition="$allowedToViewEvents">
+			<P><wo:link directActionName="WOEventSetup">Set up logging</wo:link></P>
+			<wo:if condition="$isEmpty" negate="$true"><wo:form multipleSubmit="$true"><wo:WORadioButton name="DisplayMode" selection="$displayMode" value="$0" />
 					Show all root events<br/>
-					<WEBOBJECT NAME=ShowAggregated></WEBOBJECT>
+					<wo:WORadioButton name="DisplayMode" selection="$displayMode" value="$1" />
 					Show aggregated hierarchical events<br/>
-					<WEBOBJECT NAME=ShowByPageComponent></WEBOBJECT>
+					<wo:WORadioButton name="DisplayMode" selection="$displayMode" value="$2" />
 					Show events grouped by page, then by component<br/>
-					<WEBOBJECT NAME=ShowByPage></WEBOBJECT>
+					<wo:WORadioButton name="DisplayMode" selection="$displayMode" value="$3" />
 					Show events grouped by page<br/>
-					<WEBOBJECT NAME=ShowByPageAssoc></WEBOBJECT>
+					<wo:WORadioButton name="DisplayMode" selection="$displayMode" value="$4" />
 					Show events grouped by page, associations only<br/>
 					<P>
-						<WEBOBJECT NAME=ChangeLoggingButton></WEBOBJECT>&nbsp;&nbsp;&nbsp;<WEBOBJECT NAME=ResetLogging></WEBOBJECT></P></WEBOBJECT>
+						<wo:submit action="$refreshLoggingClicked" value="Redisplay" />&nbsp;&nbsp;&nbsp;<wo:submit action="$resetLoggingClicked" value="Reset Event Log" /></P></wo:form>
 				<P ALIGN=LEFT><FONT SIZE=5><U>Current Event Log:<br/>
 					</U></FONT><FONT SIZE=2>based on
-					<WEBOBJECT NAME=String1></WEBOBJECT>
+					<wo:str value="$eventCount" />
 					events -- spent
-					<WEBOBJECT NAME=String2></WEBOBJECT>
+					<wo:str value="$eofEventDuration" />
 					ms in
-					<WEBOBJECT NAME=String4></WEBOBJECT>
+					<wo:str value="$eofEventCount" />
 					events in EOF,
-					<WEBOBJECT NAME=String3></WEBOBJECT>
+					<wo:str value="$webEventDuration" />
 					ms in
-					<WEBOBJECT NAME=String5></WEBOBJECT>
+					<wo:str value="$webEventCount" />
 					events in WOF<br/>
 					</FONT></P>
 				<TABLE CELLSPACING=1 WIDTH=100% BGCOLOR=#eeeeee>
@@ -67,16 +67,16 @@
 						<TD ALIGN=right BGCOLOR=#cccccc><B>Calls</B></TD>
 						<TD ALIGN=left BGCOLOR=#cccccc><B>Relative</B></TD>
 					</TR>
-					<WEBOBJECT NAME=Outline>
-						<WEBOBJECT NAME=RowSwitch>
-						</WEBOBJECT>
-					</WEBOBJECT>
+					<wo:WXOutlineRepetition hasChildren="$isDirectory" item="$currentEvent" list="$rootEventList" selectionPath="$selectionPath" sublist="$currentEventChildren">
+						<wo:WOSwitchComponent WOComponentName="$displayComponentName" controller="$self" displayMode="$displayMode" event="$currentEvent" object="$currentEvent">
+						</wo:WOSwitchComponent>
+					</wo:WXOutlineRepetition>
 				</TABLE>
 				<p/>
-			</WEBOBJECT><WEBOBJECT NAME=Conditional2>The event log is empty.</WEBOBJECT>
+			</wo:if><wo:if condition="$isEmpty">The event log is empty.</wo:if>
 			<HR>
-			<P><WEBOBJECT NAME=Hyperlink2>Set up logging</WEBOBJECT></P>
+			<P><wo:link directActionName="WOEventSetup">Set up logging</wo:link></P>
 			<p/>
-		</WEBOBJECT>
+		</wo:if>
 	</body>
 </html>

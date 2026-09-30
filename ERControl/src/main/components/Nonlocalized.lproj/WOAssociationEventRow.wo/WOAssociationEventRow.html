@@ -3,9 +3,9 @@
   -- [JavaWOExtensions Project]
 -->
 	<tr>
-		<td BGCOLOR=#cccccc><webobject name=OutlineControl></webobject></td> 
-		<webObject name=TableCell><webobject name=BindingName></webobject></webobject>
-		<td align=right><webobject name=EventDuration></webobject></td> 
-		<td align=right><webobject name=LoopCount></webobject> </td> 
-		<TD align=left nowrap><webobject name=PixelShim></webobject><br/><webobject name=PercentOfMaxTimeBar></webobject></TD>
+		<td BGCOLOR=#cccccc><wo:WXOutlineControl title="$hyperlinkTitle" /></td> 
+		<wo:container elementName="td" bgcolor="$backgroundColor"><wo:str value="$bindingName" /></wo:container>
+		<td align=right><wo:str value="$eventDuration" /></td> 
+		<td align=right><wo:str value="$loopCount" /> </td> 
+		<TD align=left nowrap><wo:WOImage filename="TransparentPixel.gif" height="1" width="108" /><br/><wo:WXBar fullWidth="$100" percentage="$percentOfMaxTime" /></TD>
 	</tr>

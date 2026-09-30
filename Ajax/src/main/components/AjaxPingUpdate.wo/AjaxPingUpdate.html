@@ -1,1 +1,1 @@
-<webobject name = "RefreshTargetConditional"><script><webobject name = "HasOnBeforeUpdateFunc">if (<webobject name = "OnBeforeUpdateFunc"/>()) {</webobject>AUC.update('<webobject name = "TargetContainerID"/>');<webobject name = "HasOnBeforeUpdateFunc"> }</webobject></script></webobject>
+<wo:if condition="$refreshTarget"><script><wo:if condition="$^onBeforeUpdate">if (<wo:str value="$^onBeforeUpdate" />()) {</wo:if>AUC.update('<wo:str value="$targetContainerID" />');<wo:if condition="$^onBeforeUpdate"> }</wo:if></script></wo:if>

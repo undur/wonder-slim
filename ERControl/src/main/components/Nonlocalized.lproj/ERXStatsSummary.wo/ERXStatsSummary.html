@@ -1,15 +1,15 @@
-<webobject name="IfHasStats">
+<wo:if condition="$hasStats">
 <table class="ERXStatsSummary" border="0" cellspacing="0" cellpadding="2">
     <tr>
         <th scope="col">Type</th>
         <th scope="col">Duration</th>
     </tr>
-    <webobject name="EventTypeRepetition">
+    <wo:repetition item="$currentType" list="$statsTypes">
     <tr>
-        <td><webobject name="EventType"></webobject></td>
-        <td align="right"><webobject name="Duration"></webobject> ms</td>
+        <td><wo:str value="$currentType" /></td>
+        <td align="right"><wo:str value="$durationForStatsType" /> ms</td>
     </tr>
-    </webobject>
+    </wo:repetition>
 
 </table>
-</webobject>
+</wo:if>
