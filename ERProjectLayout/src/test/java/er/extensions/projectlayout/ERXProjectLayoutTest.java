@@ -2,6 +2,7 @@ package er.extensions.projectlayout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Properties;
@@ -49,6 +50,11 @@ public class ERXProjectLayoutTest {
 	public void pathsAreTakenAsWritten() {
 		final ERXProjectLayout layout = ERXProjectLayout.fromBuildProperties( properties( ERXProjectLayout.COMPONENTS_KEY, "./Components/" ) );
 		assertEquals( "./Components/", layout.components() );
+	}
+
+	@Test
+	public void emptyValuesAreRefused() {
+		assertThrows( IllegalArgumentException.class, () -> ERXProjectLayout.fromBuildProperties( properties( ERXProjectLayout.WORESOURCES_KEY, "" ) ) );
 	}
 
 	@Test

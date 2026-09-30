@@ -100,14 +100,28 @@ public final class ERXProjectLayout {
 	 * @return The layout declared in the given build.properties, with the defaults for what it doesn't declare
 	 */
 	public static ERXProjectLayout fromBuildProperties( final Properties buildProperties ) {
-		final String components = buildProperties.getProperty( COMPONENTS_KEY );
-		final String woresources = buildProperties.getProperty( WORESOURCES_KEY );
-		final String webserverResources = buildProperties.getProperty( WEBSERVER_RESOURCES_KEY );
+		final String components = folder( buildProperties, COMPONENTS_KEY );
+		final String woresources = folder( buildProperties, WORESOURCES_KEY );
+		final String webserverResources = folder( buildProperties, WEBSERVER_RESOURCES_KEY );
 
 		return new ERXProjectLayout(
 				components != null ? components : DEFAULT_COMPONENTS,
 				woresources != null ? woresources : DEFAULT_WORESOURCES,
 				webserverResources != null ? webserverResources : DEFAULT_WEBSERVER_RESOURCES );
+	}
+
+	/**
+	 * @return The folder declared under the given key, or null if it isn't declared
+	 * @throws IllegalArgumentException if the key is declared without a value, which would mean the project folder itself
+	 */
+	private static String folder( final Properties buildProperties, final String key ) {
+		final String value = buildProperties.getProperty( key );
+
+		if( value != null && value.isEmpty() ) {
+			throw new IllegalArgumentException( String.format( "'%s' is declared in build.properties without a value. Give it a folder, or remove it to use the default", key ) );
+		}
+
+		return value;
 	}
 
 	/**

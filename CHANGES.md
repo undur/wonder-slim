@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **A layout key declared without a value stops the application**
+  A line like `dir.woresources=` left in `build.properties` now stops startup with an error naming
+  the key, instead of pointing at the project folder itself. Remove the line to use the default.
+
 ## 2026-09-30 (8.0.13)
 
 This release is about project layout. A project's `build.properties` now says where its components
