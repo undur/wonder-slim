@@ -24,7 +24,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSBundle;
 import com.webobjects.foundation.NSForwardException;
 import com.webobjects.foundation.NSPropertyListSerialization;
-import com.webobjects.foundation.development.NSMavenProjectBundle;
+import com.webobjects.foundation.development.NSProjectBundle;
 
 import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
@@ -77,6 +77,11 @@ public class WOExceptionPage extends ERXComponent {
 	 * regular path can be accommodated.
 	 */
 	private String pathModifier;
+
+	/**
+	 * Where a project keeps its Java sources, looked for in this order
+	 */
+	private static final List<String> SOURCE_FOLDERS = List.of( "src/main/java", "Sources" );
 	
 	public WOExceptionPage( WOContext aContext ) {
 		super( aContext );
@@ -1046,7 +1051,7 @@ public class WOExceptionPage extends ERXComponent {
 	public enum FrameCategory {
 		/** The application's own main bundle — almost always where you look first. */
 		MAIN,
-		/** Another project in the workspace (an NSMavenProjectBundle). Source is available. */
+		/** Another project in the workspace (an NSProjectBundle). Source is available. */
 		WORKSPACE,
 		/** Framework / library code, living in a jar. Context, not something you edit. */
 		EXTERNAL
@@ -1062,7 +1067,7 @@ public class WOExceptionPage extends ERXComponent {
 			return FrameCategory.MAIN;
 		}
 
-		if( bundle instanceof NSMavenProjectBundle ) {
+		if( bundle instanceof NSProjectBundle ) {
 			return FrameCategory.WORKSPACE;
 		}
 
@@ -1159,16 +1164,16 @@ public class WOExceptionPage extends ERXComponent {
 
 		final String pathToJavaFileInProject = fullyClassifiedNameOfThrowingClass.replace( ".", "/" ) + ".java";
 
-		final String pathString;
+		// The project's source folder: Maven's, or a Fluffy Bunny project's
+		for( final String sourceFolder : SOURCE_FOLDERS ) {
+			final Path path = Paths.get( bundle.bundlePath() + pathModifier, sourceFolder, pathToJavaFileInProject );
 
-		if( NSBundle.mainBundle() instanceof NSMavenProjectBundle ) {
-			pathString = bundle.bundlePath() + pathModifier + "/src/main/java/" + pathToJavaFileInProject;
-		}
-		else {
-			pathString = bundle.bundlePath() + pathModifier + "/Sources/" + pathToJavaFileInProject;
+			if( Files.exists( path ) ) {
+				return path;
+			}
 		}
 
-		return Paths.get( pathString );
+		return null;
 	}
 
 	/**
