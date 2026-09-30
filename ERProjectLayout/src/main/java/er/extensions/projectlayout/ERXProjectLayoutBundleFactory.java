@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.util.Properties;
 
 import com.webobjects.foundation.NSBundle;
+import com.webobjects.foundation.NSValueUtilities;
 import com.webobjects.foundation.development.NSStandardProjectBundle;
 
 /**
@@ -15,9 +16,29 @@ import com.webobjects.foundation.development.NSStandardProjectBundle;
  * its type (see {@link ERXProjectLayout#isProject(Properties)}). Any other folder gets null, leaving it to the other bundle
  * factories.
  *
+ * Like WebObjects' own project bundles, only when NSProjectBundleEnabled is set, which is what running from a project
+ * folder means. It's read when bundles are looked up, not when the factory is registered, since ERXApplication registers
+ * the factory before it sets the flag.
+ *
  * Registered with {@link ERXProjectLayout#register()}, or by naming it in the NSBundleFactories system property.
  */
 public class ERXProjectLayoutBundleFactory extends NSStandardProjectBundle.Factory {
+
+	@Override
+	public NSBundle bundleForPath( final String path, final boolean shouldCreateBundle, final boolean newIsJar ) {
+		if( !projectBundlesEnabled() ) {
+			return null;
+		}
+
+		return super.bundleForPath( path, shouldCreateBundle, newIsJar );
+	}
+
+	/**
+	 * @return true if NSProjectBundleEnabled is set, read as NSBundle reads it
+	 */
+	static boolean projectBundlesEnabled() {
+		return NSValueUtilities.booleanValue( System.getProperty( "NSProjectBundleEnabled" ) );
+	}
 
 	@Override
 	protected NSBundle createBundleFromProjectFolder( final File projectFolder ) {

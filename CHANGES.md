@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Project bundles from build.properties only when `NSProjectBundleEnabled` is set**
+  ERProjectLayout's bundle factory now follows the same rule as WebObjects' own project bundles, so a
+  built application is never taken for a project, even when run from inside its project folder.
+  wonder-slim and Project Wonder applications set the flag when run from their project; a plain
+  WebObjects application passes `-DNSProjectBundleEnabled=true` in its development launch.
+
 - **The current call stack read with `StackWalker`**
   `ERXExceptionUtilities.stackTrace()` and reload4j's `%@` conversion (the call stack of the logging
   call) read the stack with `StackWalker` instead of printing an exception and cutting up the text.

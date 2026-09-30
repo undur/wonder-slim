@@ -108,4 +108,19 @@ public class ERXProjectLayoutBundleTest {
 			throw new AssertionError( e );
 		}
 	}
+
+	@Test
+	public void nothingIsClaimedUnlessProjectBundlesAreEnabled() throws IOException {
+		Files.writeString( projectFolder.resolve( "build.properties" ), "project.name=Test\nproject.type=application\n" );
+		final String previous = System.clearProperty( "NSProjectBundleEnabled" );
+
+		try {
+			assertNull( new ERXProjectLayoutBundleFactory().bundleForPath( projectFolder.toString(), true, false ) );
+		}
+		finally {
+			if( previous != null ) {
+				System.setProperty( "NSProjectBundleEnabled", previous );
+			}
+		}
+	}
 }
