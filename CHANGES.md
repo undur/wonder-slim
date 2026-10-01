@@ -8,12 +8,14 @@
   mapped routes and how to map one. Deployed, both stay the plain 404 they were. (#162)
 
 - **Routing is a chain: routes, fallback, not found**
-  A URL no route claims goes to the route table's fallback, if one is set, and then to its not found
-  handler, which always answers: the plain 404 by default, the pages above in development, or one of
-  your own (`RouteTable.setNotFoundRouteHandler()`). `RouteTable.PassOnRouteHandler` passes the
-  request on to the next handler in the server instead, for an application sharing its server with
-  ng-objects; the plain 404 no longer does, so an application on wo-adaptor-jetty answers with its own
-  404. A fallback passes a URL on to not found by returning null, which is how public resources work:
+  A URL goes to the routes whose pattern matches it, then to the route table's fallback, if one is set,
+  and then to its not found handler: the plain 404 by default, the pages above in development, or one
+  of your own (`RouteTable.setNotFoundRouteHandler()`). Each handler answers, or declines by returning
+  `RouteHandler.DECLINED`, and the next one gets the URL; a route can now match a pattern and still
+  leave the URL to the routes after it. A URL every handler declines is passed on to the next handler
+  in the server, for an application sharing its server with ng-objects, whose not found handler is
+  `RouteTable.PassOnRouteHandler`; the plain 404 no longer passes it on, so an application on
+  wo-adaptor-jetty answers with its own 404. Public resources are a fallback:
   `ERXApplication.setServesPublicResources(true)` is now
   `RouteTable.defaultRouteTable().setFallbackRouteHandler( new ERXPublicResources() )`.
   `RouteTable.notFoundRouteHandler()` is per table rather than static, and `RouteTable.routes()` lists

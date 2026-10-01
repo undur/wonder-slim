@@ -86,7 +86,7 @@ public class ERXPublicResources implements RouteHandler {
 			return handler.responseForPath( "app/" + FOLDER + "/" + path, invocation.request() );
 		}
 
-		return null;
+		return DECLINED;
 	}
 
 	/**

@@ -3,6 +3,7 @@ package er.extensions.routes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class RouteTableNotFoundTest {
 	 * @return A public resources handler that has a file only at the given URL
 	 */
 	private static RouteHandler publicResourceAt( final String url ) {
-		return invocation -> url.equals( invocation.url() ) ? answering( "the file" ).handle( invocation ) : null;
+		return invocation -> url.equals( invocation.url() ) ? answering( "the file" ).handle( invocation ) : RouteHandler.DECLINED;
 	}
 
 	private static WOResponse handle( final RouteTable routeTable, final String url ) {
@@ -54,6 +55,24 @@ public class RouteTableNotFoundTest {
 		routeTable.setNotFoundRouteHandler( answering( "our own" ) );
 
 		assertEquals( "our own", handle( routeTable, "/nothing" ).contentString() );
+	}
+
+	@Test
+	public void aDeclinedURLGoesToTheNextMatchingRoute() {
+		final RouteTable routeTable = new RouteTable();
+		routeTable.map( "/things/*", invocation -> invocation.url().endsWith( "/known" ) ? answering( "the first" ).handle( invocation ) : RouteHandler.DECLINED );
+		routeTable.map( "/things/*", answering( "the second" ) );
+
+		assertEquals( "the first", handle( routeTable, "/things/known" ).contentString() );
+		assertEquals( "the second", handle( routeTable, "/things/other" ).contentString() );
+	}
+
+	@Test
+	public void nullIsNotAnAnswer() {
+		final RouteTable routeTable = new RouteTable();
+		routeTable.map( "/broken", invocation -> null );
+
+		assertThrows( IllegalStateException.class, () -> handle( routeTable, "/broken" ), "A handler declines with RouteHandler.DECLINED, so a null is a mistake" );
 	}
 
 	@Test

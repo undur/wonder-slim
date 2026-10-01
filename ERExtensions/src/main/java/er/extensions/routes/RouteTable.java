@@ -17,20 +17,24 @@ import com.webobjects.appserver.WOResponse;
 import er.extensions.appserver.ERXRequest;
 
 /**
- * Route handling: a chain of route handlers, each getting a URL the ones before it didn't answer.
+ * Route handling: a chain of route handlers. Each handler in turn either answers the URL or declines it (returns
+ * {@link RouteHandler#DECLINED}), and the first answer is the response.
  *
  * <ol>
- * <li><b>The routes</b>, in the order they're mapped: the first whose pattern matches the URL answers it.</li>
- * <li><b>The fallback</b>, if one is set: {@link #setFallbackRouteHandler(RouteHandler)}. It answers a URL or passes it
- * on. {@code new ERXPublicResources()} is the one wonder-slim has: a file in the application's {@code public} folder
- * answers its URL, and anything else goes on.</li>
- * <li><b>Not found</b>, which always answers: {@link #setNotFoundRouteHandler(RouteHandler)}. A plain 404 by default,
- * and in development {@link ERXDevelopmentNotFoundRouteHandler}'s pages. {@link PassOnRouteHandler} passes the request
- * on to the next handler in the server instead, for an application sharing its server with another (such as an
- * ng-objects application).</li>
+ * <li><b>The routes</b> whose pattern matches the URL, in the order they're mapped.</li>
+ * <li><b>The fallback</b>, if one is set: {@link #setFallbackRouteHandler(RouteHandler)}. {@code new ERXPublicResources()}
+ * is the one wonder-slim has: a file in the application's {@code public} folder answers its URL, and anything else is
+ * declined.</li>
+ * <li><b>Not found</b>: {@link #setNotFoundRouteHandler(RouteHandler)}. A plain 404 by default, and in development
+ * {@link ERXDevelopmentNotFoundRouteHandler}'s pages.</li>
  * </ol>
  *
  * The fallback and not found are always the last two, after every route, whenever they were set.
+ *
+ * A URL every handler declines is passed on to the next handler in the server: the answer is a bare 404 marked
+ * unhandled (see {@link #UNHANDLED_RESPONSE_KEY}), which wo-adaptor-jetty discards to let the next handler try the
+ * request. An application sharing its server with another (such as an ng-objects application) has not found decline
+ * every URL, with {@link PassOnRouteHandler}.
  */
 public class RouteTable {
 
@@ -78,9 +82,9 @@ public class RouteTable {
 	}
 
 	/**
-	 * Sets the fallback, or null for none: it gets a URL no route claims before the not found handler does, and returns
-	 * null for a URL it has no answer for, which then goes on to the not found handler. {@code new ERXPublicResources()}
-	 * serves the files in the application's {@code public} folder; set it in the application's constructor.
+	 * Sets the fallback, or null for none: it gets a URL no route answers before the not found handler does.
+	 * {@code new ERXPublicResources()} serves the files in the application's {@code public} folder, and declines anything
+	 * else; set it in the application's constructor.
 	 */
 	public void setFallbackRouteHandler( final RouteHandler routeHandler ) {
 		_fallbackRouteHandler = routeHandler;
@@ -91,17 +95,6 @@ public class RouteTable {
 	 */
 	public List<Route> routes() {
 		return Collections.unmodifiableList( _routes );
-	}
-
-	private RouteHandler handlerForURL( final String url ) {
-
-		for( final Route route : routes() ) {
-			if( matches( route.pattern, url ) ) {
-				return route.routeHandler;
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -138,21 +131,57 @@ public class RouteTable {
 		logger.info( "Handling URL: {};{};{}", routeURL, ipAddress, userAgent );
 
 		final RouteInvocation invocation = new RouteInvocation( routeURL, request );
-		final RouteHandler routeHandler = handlerForURL( routeURL );
 
-		if( routeHandler != null ) {
-			return routeHandler.handle( invocation );
-		}
+		for( final Route route : _routes ) {
+			if( matches( route.pattern(), routeURL ) ) {
+				final WOActionResults results = answer( route.routeHandler(), invocation );
 
-		if( _fallbackRouteHandler != null ) {
-			final WOActionResults fallbackResults = _fallbackRouteHandler.handle( invocation );
-
-			if( fallbackResults != null ) {
-				return fallbackResults;
+				if( results != RouteHandler.DECLINED ) {
+					return results;
+				}
 			}
 		}
 
-		return _notFoundRouteHandler.handle( invocation );
+		if( _fallbackRouteHandler != null ) {
+			final WOActionResults results = answer( _fallbackRouteHandler, invocation );
+
+			if( results != RouteHandler.DECLINED ) {
+				return results;
+			}
+		}
+
+		final WOActionResults results = answer( _notFoundRouteHandler, invocation );
+
+		if( results != RouteHandler.DECLINED ) {
+			return results;
+		}
+
+		return passedOn();
+	}
+
+	/**
+	 * @return The handler's answer, or {@link RouteHandler#DECLINED}
+	 */
+	private static WOActionResults answer( final RouteHandler routeHandler, final RouteInvocation invocation ) {
+		final WOActionResults results = routeHandler.handle( invocation );
+
+		if( results == null ) {
+			throw new IllegalStateException( "The route handler %s returned null for URL '%s'. Return RouteHandler.DECLINED to pass the URL on to the next handler".formatted( routeHandler, invocation.url() ) );
+		}
+
+		return results;
+	}
+
+	/**
+	 * @return The answer to a URL every handler declined: a bare 404 marked unhandled (see {@link #UNHANDLED_RESPONSE_KEY}),
+	 *         which wo-adaptor-jetty discards to let the next handler in the server try the request. Nothing else is
+	 *         generated, since nobody sees it.
+	 */
+	private static WOResponse passedOn() {
+		final WOResponse response = new WOResponse();
+		response.setStatus( 404 );
+		response.setUserInfoForKey( "true", UNHANDLED_RESPONSE_KEY );
+		return response;
 	}
 
 	/**
@@ -172,12 +201,11 @@ public class RouteTable {
 	}
 
 	/**
-	 * @return true if a mapped route claims the given URL (the path, without a
-	 *         query string). Lets other URL handling — short URLs — defer to
-	 *         explicit routes.
+	 * @return true if a mapped route's pattern matches the given URL (the path, without a query string), whether or not
+	 *         its handler answers it when asked. Lets other URL handling — short URLs — defer to explicit routes.
 	 */
 	public boolean hasRouteFor( final String url ) {
-		return handlerForURL( url ) != null;
+		return _routes.stream().anyMatch( route -> matches( route.pattern(), url ) );
 	}
 
 	public void map( final String pattern, final RouteHandler routeHandler ) {
@@ -219,25 +247,21 @@ public class RouteTable {
 
 	/**
 	 * userInfo key that tells wo-adaptor-jetty a response is "unhandled": the adaptor discards it and lets the next Jetty
-	 * handler try the request (e.g. an ng-objects handler in the same server). Set by {@link PassOnRouteHandler}. Same
+	 * handler try the request (e.g. an ng-objects handler in the same server). Set when every handler declined. Same
 	 * literal as WOAdaptorJetty.UNHANDLED_RESPONSE_KEY, duplicated on purpose since ERExtensions must not depend on the
 	 * adaptor. Other adaptors ignore it and just serve the 404.
 	 */
 	public static final String UNHANDLED_RESPONSE_KEY = "wo-unhandled-response";
 
 	/**
-	 * Passes the request on to the next handler in the server: a bare 404 marked unhandled (see
-	 * {@link #UNHANDLED_RESPONSE_KEY}), which wo-adaptor-jetty discards to let the next handler try the request. Nothing
-	 * else is generated, since nobody sees it. For an application sharing its server with another handler; with nothing
-	 * after WebObjects, the bare 404 is what's left.
+	 * Declines every URL, so a URL no route answers is passed on to the next handler in the server (see
+	 * {@link RouteTable}). The not found handler for an application sharing its server with another handler, such as an
+	 * ng-objects application.
 	 */
 	public static class PassOnRouteHandler implements RouteHandler {
 		@Override
 		public WOActionResults handle( final RouteInvocation invocation ) {
-			final WOResponse response = new WOResponse();
-			response.setStatus( 404 );
-			response.setUserInfoForKey( "true", UNHANDLED_RESPONSE_KEY );
-			return response;
+			return DECLINED;
 		}
 	}
 
