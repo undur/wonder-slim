@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.5.38</version>
+			<version>1.6.5</version>
 		</dependency>
 		<!--
 			For the test of an application's own log4j calls. WebObjects needs no log4j API (see ERXLog4jRewrite); an

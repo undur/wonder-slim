@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **ERLoggingLogback uses logback 1.6.5** (was 1.5.38).
+
 - **The console logger understands log4j's named date formats**
   `%d{ISO8601}`, `%d{ABSOLUTE}` and `%d{DATE}` in `er.logging.pattern` write the dates they write with
   reload4j, instead of stopping the application while logging is set up.
