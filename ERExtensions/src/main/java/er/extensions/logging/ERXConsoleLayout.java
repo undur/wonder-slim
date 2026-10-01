@@ -21,6 +21,11 @@ import java.util.List;
  * Each takes a minimum width, right-aligned ({@code %5p}) or left-aligned ({@code %-5p}); a maximum ({@code %.30c}) is
  * ignored, as is anything in braces after a conversion other than the date's. A conversion not listed is written as it
  * stands, so nothing in the pattern is lost silently.
+ *
+ * The long names ({@code %date}, {@code %level}, {@code %logger}, {@code %msg}, {@code %thread}) are logback's: reload4j
+ * reads only single characters, and would take {@code %level} for {@code %l} followed by "evel". A pattern meant for
+ * every backend uses the single-character forms. log4j's named date formats ({@code %d{ISO8601}}, {@code %d{ABSOLUTE}},
+ * {@code %d{DATE}}) aren't understood: the date's option is a {@link DateTimeFormatter} pattern.
  */
 public final class ERXConsoleLayout {
 

@@ -49,7 +49,11 @@ In layers, lowest first; a later layer wins where two name the same logger
 2. **Keys every backend understands**: `er.logging.level.<logger>` and
    `er.logging.level.root` (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`), and
    `er.logging.pattern`, the layout of the console output a backend sets up when its
-   own configuration sets up none.
+   own configuration sets up none. Each backend reads it in its own pattern language, and
+   only `%d{…}`, `%p`, `%c`, `%m`, `%t` and `%n` mean the same in all three: reload4j reads
+   single characters only (`%level` is `%l` followed by "evel"), and the console logger
+   doesn't know log4j's named date formats such as `%d{ISO8601}`. What each backend writes
+   beyond that is in #152.
 3. **The backend's own configuration**, which can express what these can't: `log4j.*` for
    reload4j (read as it always has been, through `PropertyConfigurator`), and for logback the
    file `logback.configurationFile` names or `logback.xml` on the classpath. If logback's
