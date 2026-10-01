@@ -110,6 +110,16 @@ public class ERXConsoleLoggingBackendTest {
 	}
 
 	@Test
+	public void log4jsNamedDateFormatsAreUnderstood() {
+		final ERXConsoleLayout.Event event = new ERXConsoleLayout.Event( "INFO", "a.b.C", "message", "main", LocalDateTime.of( 2026, 9, 29, 14, 5, 7 ) );
+
+		assertEquals( "2026-09-29 14:05:07,000", ERXConsoleLayout.of( "%d{ISO8601}" ).format( event, null ) );
+		assertEquals( "14:05:07,000", ERXConsoleLayout.of( "%d{ABSOLUTE}" ).format( event, null ) );
+		assertEquals( "29 Sep 2026 14:05:07,000", ERXConsoleLayout.of( "%d{DATE}" ).format( event, null ) );
+		assertEquals( "2026-09-29 14:05:07,000", ERXConsoleLayout.of( "%d" ).format( event, null ), "ISO8601 is the default, as with log4j" );
+	}
+
+	@Test
 	public void theBackendListsItsLoggers() {
 		System.setProperty( "er.logging.level.test.console", "DEBUG" );
 		backend.configure();

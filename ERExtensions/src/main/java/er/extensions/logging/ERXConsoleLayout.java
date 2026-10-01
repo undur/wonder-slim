@@ -4,13 +4,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The layout of the console logger's lines ({@link ERXConsoleLoggingBackend}): the common part of log4j's and logback's
  * pattern language, as {@code er.logging.pattern} writes it.
  *
  * <ul>
- * <li>{@code %d} / {@code %date}, optionally with a date format in braces ({@code %d{MMM dd HH:mm:ss}})</li>
+ * <li>{@code %d} / {@code %date}, optionally with a date format in braces ({@code %d{MMM dd HH:mm:ss}}), or one of
+ * log4j's names for one: {@code ISO8601} (the default), {@code ABSOLUTE} or {@code DATE}</li>
  * <li>{@code %p} / {@code %le} / {@code %level}, the level</li>
  * <li>{@code %c} / {@code %lo} / {@code %logger}, the logger's name</li>
  * <li>{@code %m} / {@code %msg} / {@code %message}, the message</li>
@@ -24,10 +26,17 @@ import java.util.List;
  *
  * The long names ({@code %date}, {@code %level}, {@code %logger}, {@code %msg}, {@code %thread}) are logback's: reload4j
  * reads only single characters, and would take {@code %level} for {@code %l} followed by "evel". A pattern meant for
- * every backend uses the single-character forms. log4j's named date formats ({@code %d{ISO8601}}, {@code %d{ABSOLUTE}},
- * {@code %d{DATE}}) aren't understood: the date's option is a {@link DateTimeFormatter} pattern.
+ * every backend uses the single-character forms.
  */
 public final class ERXConsoleLayout {
+
+	/**
+	 * log4j's names for date formats, so a pattern written for reload4j writes the same dates
+	 */
+	private static final Map<String, String> NAMED_DATE_FORMATS = Map.of(
+			"ISO8601", "yyyy-MM-dd HH:mm:ss,SSS",
+			"ABSOLUTE", "HH:mm:ss,SSS",
+			"DATE", "dd MMM yyyy HH:mm:ss,SSS" );
 
 	/**
 	 * A logging event, as the layout needs it
@@ -140,7 +149,8 @@ public final class ERXConsoleLayout {
 	private static Part conversion( final String name, final String option ) {
 		return switch( name ) {
 			case "d", "date" -> {
-				final DateTimeFormatter format = DateTimeFormatter.ofPattern( option == null || option.isBlank() ? "yyyy-MM-dd HH:mm:ss,SSS" : option );
+				final String pattern = option == null || option.isBlank() ? NAMED_DATE_FORMATS.get( "ISO8601" ) : NAMED_DATE_FORMATS.getOrDefault( option, option );
+				final DateTimeFormatter format = DateTimeFormatter.ofPattern( pattern );
 				yield ( line, event ) -> line.append( format.format( event.time() ) );
 			}
 			case "p", "le", "level" -> ( line, event ) -> line.append( event.level() );
