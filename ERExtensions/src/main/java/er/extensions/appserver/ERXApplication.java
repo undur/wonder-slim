@@ -159,9 +159,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public static void main(String[] argv, Class applicationClass) {
 		_wasERXApplicationMainInvoked = true;
 
-		// Before anything parses XML, since JavaXML replaces the JDK's XML implementations
-		warnIfJavaXMLOnClasspath();
-
 		// A console appender from the very first line, so nothing logged during WO's and our own
 		// initialization is dropped (log4j's "No appenders could be found" - and, worse, silently lost
 		// constructor-time output). The configuration's logging settings replace it once the application
@@ -437,10 +434,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	public final void didFinishLaunching(NSNotification n) {
 		ERXPlugins.forEach(plugin -> plugin.didFinishLaunching(this));
 		didFinishLaunching();
-
-		// Logged post-launch so it lands after the configured logging is in place and near the
-		// startup banner, where a misconfiguration is actually read.
-		warnIfWODisplayExceptionPagesDisabled();
 
 		// Development only: announce our port to the Eclipse dev server so external
 		// tooling/agents can discover where this app runs by name (…/apps) rather than
@@ -1016,7 +1009,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 
 	/**
-	 * Run some environment validation. If any of those checks fail, we log the error and exit.
+	 * Run some environment validation. If any of the checks fail, we log the error and exit. Then warn about what's
+	 * allowed but probably not intended.
 	 */
 	private void checkEnvironment() {
 		try {
@@ -1029,6 +1023,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			e.printStackTrace();
 			System.exit(1);
 		}
+
+		warnIfJavaXMLOnClasspath();
+		warnIfWODisplayExceptionPagesDisabled();
 	}
 
 	/**
