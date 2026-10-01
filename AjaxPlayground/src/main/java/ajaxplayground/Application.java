@@ -7,6 +7,8 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.resources.ERXPublicResources;
+import er.extensions.routes.RouteTable;
 
 /**
  * Minimal WebObjects application that exercises the Ajax framework's components. It is
@@ -40,7 +42,7 @@ public class Application extends ERXApplication {
 		Routes.register();
 
 		// The files in webserver-resources/public (robots.txt, ...) at the root of the URL space
-		setServesPublicResources( true );
+		RouteTable.defaultRouteTable().setFallbackRouteHandler( new ERXPublicResources() );
 
 		// WebSocket test endpoint (served by WOAdaptorJetty — the app must
 		// run with -WOAdaptor WOAdaptorJetty for this to be live). Exercised

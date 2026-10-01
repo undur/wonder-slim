@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **A welcome page at `/`, and a helpful 404, in development**
+  An application that hasn't mapped `/` shows a page there in development that says what's running and
+  how to map a page of its own, instead of a 404. Any other URL no route claims shows the URL, the
+  mapped routes and how to map one. Deployed, both stay the plain 404 they were. (#162)
+
+- **Routing is a chain: routes, fallback, not found**
+  A URL no route claims goes to the route table's fallback, if one is set, and then to its not found
+  handler, which always answers: the plain 404 by default, the pages above in development, or one of
+  your own (`RouteTable.setNotFoundRouteHandler()`). `RouteTable.PassOnRouteHandler` passes the
+  request on to the next handler in the server instead, for an application sharing its server with
+  ng-objects; the plain 404 no longer does, so an application on wo-adaptor-jetty answers with its own
+  404. A fallback passes a URL on to not found by returning null, which is how public resources work:
+  `ERXApplication.setServesPublicResources(true)` is now
+  `RouteTable.defaultRouteTable().setFallbackRouteHandler( new ERXPublicResources() )`.
+  `RouteTable.notFoundRouteHandler()` is per table rather than static, and `RouteTable.routes()` lists
+  the mapped routes.
+
 ## 2026-09-30 (8.0.14)
 
 - **Stack traces written the same way with every logging backend**

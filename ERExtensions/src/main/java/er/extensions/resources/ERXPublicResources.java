@@ -30,9 +30,14 @@ import er.extensions.routes.RouteTable;
  * {@code /.well-known/security.txt}. For the files browsers, crawlers and other services ask a site's root for without
  * being told where: {@code favicon.ico}, {@code robots.txt}, {@code sitemap.xml}, {@code .well-known/…}.
  *
- * Off unless the application turns it on, see {@link ERXApplication#setServesPublicResources(boolean)}. When on, this is
- * the default route table's fallback: a URL is looked up here only once no request handler and no route has claimed it,
- * so a route always wins over a file, and a miss gets the route table's usual 404.
+ * Off unless the application turns it on, in its constructor:
+ *
+ * <pre>
+ * RouteTable.defaultRouteTable().setFallbackRouteHandler( new ERXPublicResources() );
+ * </pre>
+ *
+ * A URL is then looked up here only once no request handler and no route has claimed it, so a route always wins over a
+ * file, and a URL that isn't a file goes on to the route table's not found handler (see {@link RouteTable}).
  *
  * Only files in the folder are served. The folder is indexed on first use, and a path that isn't in the index is a miss
  * without any lookup: finding a resource through the resource manager takes most of a millisecond when it isn't there,
@@ -81,7 +86,7 @@ public class ERXPublicResources implements RouteHandler {
 			return handler.responseForPath( "app/" + FOLDER + "/" + path, invocation.request() );
 		}
 
-		return RouteTable.notFoundRouteHandler().handle( invocation );
+		return null;
 	}
 
 	/**

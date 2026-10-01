@@ -72,7 +72,7 @@ import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.projectlayout.ERXProjectLayout;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
-import er.extensions.resources.ERXPublicResources;
+import er.extensions.routes.ERXDevelopmentNotFoundRouteHandler;
 import er.extensions.routes.RouteTable;
 import er.extensions.statistics.ERXStats;
 import parsley.ParsleyConfiguration;
@@ -237,24 +237,29 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		registerRequestHandler(new ERXDirectActionRequestHandler(), directActionRequestHandlerKey());
 		registerRequestHandler( resourceRequestHandler, ERXAppBasedResourceRequestHandler.KEY );
 
-		// Development only: capture recent log output and expose it for reading over HTTP
-		// (.../App.woa/log), so external tooling can read the app's logs instead of a
-		// human copying the IDE console.
-		//
-		// Capture attaches a bounded in-memory appender to the logging backend's root
-		// logger; it does NOT touch System.out/System.err, deliberately — in this stack
-		// NSLog bridges the streams INTO log4j and log4j's ConsoleAppender writes back OUT
-		// to System.out, so teeing the streams would sit inside a feedback loop. Capturing
-		// at the appender — the single point where all logging converges — sidesteps that.
-		// It runs after reInitConsoleAppenders() (above) so the root logger is configured.
 		if( isDevelopmentModeSafe() ) {
+
+			// Capture recent log output and expose it for reading over HTTP (.../App.woa/log), so external tooling can
+			// read the app's logs instead of a human copying the IDE console.
+			//
+			// Capture attaches a bounded in-memory appender to the logging backend's root logger; it does NOT touch
+			// System.out/System.err, deliberately — in this stack NSLog bridges the streams INTO log4j and log4j's
+			// ConsoleAppender writes back OUT to System.out, so teeing the streams would sit inside a feedback loop.
+			// Capturing at the appender — the single point where all logging converges — sidesteps that. It runs after
+			// reInitConsoleAppenders() (above) so the root logger is configured.
 			ERXConsoleCapture.install();
 			registerRequestHandler( new ERXConsoleLogRequestHandler(), ERXConsoleLogRequestHandler.KEY );
-			// Dev endpoints shared (in shape and behavior) with ng-objects, backed by ng-core:
-			// evaluate a snippet in the running JVM, and read back the runtime problems the app
-			// rendered into its pages. See the ng-objects /ng/dev/eval and /ng/dev/problems routes.
+
+			// Dev endpoints shared (in shape and behavior) with ng-objects, backed by ng-core: evaluate a snippet in the
+			// running JVM, and read back the runtime problems the app rendered into its pages. See the ng-objects
+			// /ng/dev/eval and /ng/dev/problems routes.
 			registerRequestHandler( new ERXEvalRequestHandler(), ERXEvalRequestHandler.KEY );
 			registerRequestHandler( new ERXRuntimeProblemsRequestHandler(), ERXRuntimeProblemsRequestHandler.KEY );
+
+			// A URL nothing claims gets a page showing the mapped routes, and an unmapped / a welcome page, instead of the
+			// plain 404. Set before the application's own constructor runs, so it can set a handler of its own, or the
+			// plain one back. See ERXDevelopmentNotFoundRouteHandler.
+			RouteTable.defaultRouteTable().setNotFoundRouteHandler( new ERXDevelopmentNotFoundRouteHandler() );
 		}
 
 
@@ -899,15 +904,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		}
 
 		return response;
-	}
-
-	/**
-	 * Serves the application's public resources, the files in the {@code public} folder of its web server resources, at
-	 * the root of its URL space ({@code public/robots.txt} at {@code /robots.txt}), after every route has declined. Off by
-	 * default; turn it on in the application's constructor. See {@link ERXPublicResources}.
-	 */
-	public void setServesPublicResources( final boolean servesPublicResources ) {
-		RouteTable.defaultRouteTable().setFallbackRouteHandler( servesPublicResources ? new ERXPublicResources() : RouteTable.notFoundRouteHandler() );
 	}
 
 	/**

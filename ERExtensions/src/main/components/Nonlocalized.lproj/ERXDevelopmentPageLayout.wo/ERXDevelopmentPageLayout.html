@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title><wo:str value="$title" /></title>
+		<style>
+			:root {
+				--bg: #f6f5f1;
+				--card: #ffffff;
+				--text: #1f2328;
+				--muted: #626a73;
+				--line: #e3e1da;
+				--accent: #3d7a4f;
+				--accent-soft: #e4f0e7;
+				--code-bg: #f1efe9;
+			}
+
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--bg: #15171a;
+					--card: #1d2024;
+					--text: #e6e6e3;
+					--muted: #9aa1a9;
+					--line: #2e3238;
+					--accent: #7cc48f;
+					--accent-soft: #1f3326;
+					--code-bg: #262a2f;
+				}
+			}
+
+			* { box-sizing: border-box; }
+
+			body {
+				margin: 0;
+				padding: 48px 16px;
+				background: var(--bg);
+				color: var(--text);
+				font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+			}
+
+			main {
+				max-width: 720px;
+				margin: 0 auto;
+			}
+
+			header {
+				margin-bottom: 32px;
+			}
+
+			.badge {
+				display: inline-block;
+				padding: 2px 10px;
+				border-radius: 999px;
+				background: var(--accent-soft);
+				color: var(--accent);
+				font-size: 13px;
+				font-weight: 600;
+				letter-spacing: 0.02em;
+			}
+
+			h1 {
+				margin: 12px 0 4px;
+				font-size: 40px;
+				line-height: 1.15;
+				letter-spacing: -0.02em;
+				overflow-wrap: anywhere;
+			}
+
+			h1 code {
+				font-size: 0.8em;
+			}
+
+			.lead {
+				margin: 0;
+				color: var(--muted);
+				font-size: 18px;
+			}
+
+			section {
+				background: var(--card);
+				border: 1px solid var(--line);
+				border-radius: 12px;
+				padding: 24px 28px;
+				margin-bottom: 20px;
+			}
+
+			section p {
+				margin: 0;
+			}
+
+			section p + p, section p + pre, section pre + p {
+				margin-top: 12px;
+			}
+
+			h2 {
+				margin: 0 0 12px;
+				font-size: 18px;
+			}
+
+			a {
+				color: var(--accent);
+			}
+
+			code, pre {
+				font: 14px ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+				background: var(--code-bg);
+				border-radius: 5px;
+			}
+
+			code {
+				padding: 1px 6px;
+			}
+
+			pre {
+				margin: 0;
+				padding: 14px 16px;
+				overflow-x: auto;
+				line-height: 1.5;
+				tab-size: 4;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			td {
+				padding: 8px 0;
+				border-top: 1px solid var(--line);
+				vertical-align: top;
+			}
+
+			tr:first-child td {
+				border-top: none;
+			}
+
+			td:first-child {
+				width: 1%;
+				padding-right: 20px;
+				white-space: nowrap;
+			}
+
+			td:last-child {
+				color: var(--muted);
+				overflow-wrap: anywhere;
+			}
+
+			.empty {
+				color: var(--muted);
+			}
+
+			footer {
+				margin-top: 28px;
+				color: var(--muted);
+				font-size: 14px;
+				text-align: center;
+			}
+
+			@media (max-width: 560px) {
+				h1 { font-size: 32px; }
+				section { padding: 20px; }
+				td { display: block; }
+				td:first-child { width: auto; padding-bottom: 2px; }
+				td:last-child { border-top: none; padding-top: 0; }
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<wo:content />
+
+			<section>
+				<h2>Mapped routes</h2>
+				<wo:if condition="$hasRoutes">
+					<table>
+						<wo:repetition list="$routes" item="$currentRoute">
+							<tr>
+								<td><code><wo:str value="$currentRoute.pattern" /></code></td>
+								<td><wo:str value="$currentRouteTarget" /></td>
+							</tr>
+						</wo:repetition>
+					</table>
+				</wo:if>
+				<wo:if condition="$hasRoutes" negate="$true">
+					<p class="empty">No routes are mapped yet.</p>
+				</wo:if>
+			</section>
+
+			<footer>wonder-slim shows this page in development only</footer>
+		</main>
+	</body>
+</html>

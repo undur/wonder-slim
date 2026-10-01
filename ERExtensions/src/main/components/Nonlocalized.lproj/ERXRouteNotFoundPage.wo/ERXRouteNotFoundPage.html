@@ -1,0 +1,20 @@
+<wo:ERXDevelopmentPageLayout title="No route">
+	<header>
+		<span class="badge">404 in development</span>
+		<h1>No route for <code><wo:str value="$url" /></code></h1>
+		<p class="lead">
+			Nothing in the route table matches this URL, so the answer is 404. Deployed, it's the same 404, without this
+			page.
+		</p>
+	</header>
+
+	<section>
+		<h2>Map it</h2>
+		<p>Routes are mapped in the application's constructor:</p>
+		<pre>RouteTable.defaultRouteTable().map( "<wo:str value="$url" />", SomeComponent.class );</pre>
+		<p>
+			They're matched in the order they're mapped, and a pattern ending in <code>*</code> matches every URL that
+			starts with what comes before it.
+		</p>
+	</section>
+</wo:ERXDevelopmentPageLayout>

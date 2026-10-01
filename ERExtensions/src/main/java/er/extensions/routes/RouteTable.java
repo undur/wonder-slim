@@ -1,7 +1,9 @@
 package er.extensions.routes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,22 +17,35 @@ import com.webobjects.appserver.WOResponse;
 import er.extensions.appserver.ERXRequest;
 
 /**
- * Route handling.
+ * Route handling: a chain of route handlers, each getting a URL the ones before it didn't answer.
+ *
+ * <ol>
+ * <li><b>The routes</b>, in the order they're mapped: the first whose pattern matches the URL answers it.</li>
+ * <li><b>The fallback</b>, if one is set: {@link #setFallbackRouteHandler(RouteHandler)}. It answers a URL or passes it
+ * on. {@code new ERXPublicResources()} is the one wonder-slim has: a file in the application's {@code public} folder
+ * answers its URL, and anything else goes on.</li>
+ * <li><b>Not found</b>, which always answers: {@link #setNotFoundRouteHandler(RouteHandler)}. A plain 404 by default,
+ * and in development {@link ERXDevelopmentNotFoundRouteHandler}'s pages. {@link PassOnRouteHandler} passes the request
+ * on to the next handler in the server instead, for an application sharing its server with another (such as an
+ * ng-objects application).</li>
+ * </ol>
+ *
+ * The fallback and not found are always the last two, after every route, whenever they were set.
  */
-
 public class RouteTable {
 
 	private static final Logger logger = LoggerFactory.getLogger( RouteTable.class );
 
 	/**
-	 * Invoked when no route was found to handle a given URL
+	 * Answers a URL nothing claims, see {@link #setNotFoundRouteHandler(RouteHandler)}
 	 */
-	private static final NotFoundRouteHandler NOT_FOUND_ROUTE_HANDLER = new NotFoundRouteHandler();
+	private RouteHandler _notFoundRouteHandler = new NotFoundRouteHandler();
 
 	/**
-	 * Handles a URL no route claims, see {@link #setFallbackRouteHandler(RouteHandler)}
+	 * Gets a URL no route claims before the not found handler does, see {@link #setFallbackRouteHandler(RouteHandler)}.
+	 * Null for none.
 	 */
-	private RouteHandler _fallbackRouteHandler = NOT_FOUND_ROUTE_HANDLER;
+	private RouteHandler _fallbackRouteHandler;
 
 	/**
 	 * A list of all routes mapped by this table
@@ -47,23 +62,35 @@ public class RouteTable {
 	}
 
 	/**
-	 * Sets the handler for URLs no route claims, in place of the default 404 (see {@link #notFoundRouteHandler()}). The
-	 * application's public resources are served this way (see ERXPublicResources), after every route has declined.
+	 * @return The handler answering a URL nothing claims
+	 */
+	public RouteHandler notFoundRouteHandler() {
+		return _notFoundRouteHandler;
+	}
+
+	/**
+	 * Sets the handler answering a URL nothing claims. The default is {@link NotFoundRouteHandler}, a plain 404; in
+	 * development, ERXApplication sets {@link ERXDevelopmentNotFoundRouteHandler} before the application's constructor
+	 * runs, so the application can set a handler of its own, or the plain one back, in its constructor.
+	 */
+	public void setNotFoundRouteHandler( final RouteHandler routeHandler ) {
+		_notFoundRouteHandler = Objects.requireNonNull( routeHandler );
+	}
+
+	/**
+	 * Sets the fallback, or null for none: it gets a URL no route claims before the not found handler does, and returns
+	 * null for a URL it has no answer for, which then goes on to the not found handler. {@code new ERXPublicResources()}
+	 * serves the files in the application's {@code public} folder; set it in the application's constructor.
 	 */
 	public void setFallbackRouteHandler( final RouteHandler routeHandler ) {
 		_fallbackRouteHandler = routeHandler;
 	}
 
 	/**
-	 * @return The handler answering 404 for a URL nothing claims (marked unhandled, for an adaptor that can pass the
-	 *         request on, see {@link #UNHANDLED_RESPONSE_KEY})
+	 * @return The routes mapped by this table, in the order they're matched
 	 */
-	public static RouteHandler notFoundRouteHandler() {
-		return NOT_FOUND_ROUTE_HANDLER;
-	}
-
-	private List<Route> routes() {
-		return _routes;
+	public List<Route> routes() {
+		return Collections.unmodifiableList( _routes );
 	}
 
 	private RouteHandler handlerForURL( final String url ) {
@@ -110,13 +137,22 @@ public class RouteTable {
 
 		logger.info( "Handling URL: {};{};{}", routeURL, ipAddress, userAgent );
 
-		RouteHandler routeHandler = handlerForURL( routeURL );
+		final RouteInvocation invocation = new RouteInvocation( routeURL, request );
+		final RouteHandler routeHandler = handlerForURL( routeURL );
 
-		if( routeHandler == null ) {
-			routeHandler = _fallbackRouteHandler;
+		if( routeHandler != null ) {
+			return routeHandler.handle( invocation );
 		}
 
-		return routeHandler.handle( new RouteInvocation( routeURL, request ) );
+		if( _fallbackRouteHandler != null ) {
+			final WOActionResults fallbackResults = _fallbackRouteHandler.handle( invocation );
+
+			if( fallbackResults != null ) {
+				return fallbackResults;
+			}
+		}
+
+		return _notFoundRouteHandler.handle( invocation );
 	}
 
 	/**
@@ -183,11 +219,27 @@ public class RouteTable {
 
 	/**
 	 * userInfo key that tells wo-adaptor-jetty a response is "unhandled": the adaptor discards it and lets the next Jetty
-	 * handler try the request (e.g. an ng-objects handler in the same server). Same literal as
-	 * WOAdaptorJetty.UNHANDLED_RESPONSE_KEY, duplicated on purpose since ERExtensions must not depend on the adaptor. Other
-	 * adaptors ignore it and just serve the 404.
+	 * handler try the request (e.g. an ng-objects handler in the same server). Set by {@link PassOnRouteHandler}. Same
+	 * literal as WOAdaptorJetty.UNHANDLED_RESPONSE_KEY, duplicated on purpose since ERExtensions must not depend on the
+	 * adaptor. Other adaptors ignore it and just serve the 404.
 	 */
 	public static final String UNHANDLED_RESPONSE_KEY = "wo-unhandled-response";
+
+	/**
+	 * Passes the request on to the next handler in the server: a bare 404 marked unhandled (see
+	 * {@link #UNHANDLED_RESPONSE_KEY}), which wo-adaptor-jetty discards to let the next handler try the request. Nothing
+	 * else is generated, since nobody sees it. For an application sharing its server with another handler; with nothing
+	 * after WebObjects, the bare 404 is what's left.
+	 */
+	public static class PassOnRouteHandler implements RouteHandler {
+		@Override
+		public WOActionResults handle( final RouteInvocation invocation ) {
+			final WOResponse response = new WOResponse();
+			response.setStatus( 404 );
+			response.setUserInfoForKey( "true", UNHANDLED_RESPONSE_KEY );
+			return response;
+		}
+	}
 
 	/**
 	 * For returning 404
@@ -198,7 +250,6 @@ public class RouteTable {
 			final WOResponse response = new WOResponse();
 			response.setStatus( 404 );
 			response.setContent( "No route found for URL: " + invocation.url() );
-			response.setUserInfoForKey( "true", UNHANDLED_RESPONSE_KEY );
 			return response;
 		}
 	}

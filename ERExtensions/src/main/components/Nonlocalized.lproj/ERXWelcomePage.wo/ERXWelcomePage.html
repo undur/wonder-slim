@@ -1,0 +1,48 @@
+<wo:ERXDevelopmentPageLayout title="$application.name">
+	<header>
+		<span class="badge">Running in development</span>
+		<h1><wo:str value="$application.name" /> is running</h1>
+		<p class="lead">
+			Nothing is mapped to <code>/</code> yet, so wonder-slim shows this page in its place. It's only here in
+			development: deployed, <code>/</code> answers 404 until the application maps it.
+		</p>
+	</header>
+
+	<section>
+		<h2>Use your own page</h2>
+		<p>Map <code>/</code> to a component in your application's constructor:</p>
+		<pre>public Application() {
+	RouteTable.defaultRouteTable().map( "/", Main.class );
+}</pre>
+		<p>
+			Any component will do, and <code>Main</code> is the traditional one. Once <code>/</code> is mapped, it answers
+			instead of this page, in development too.
+		</p>
+	</section>
+
+	<wo:if condition="$hasProject">
+		<section>
+			<h2>Your project</h2>
+			<table>
+				<tr>
+					<td>Project folder</td>
+					<td><code><wo:str value="$projectPath" /></code></td>
+				</tr>
+				<tr>
+					<td>Components</td>
+					<td><code><wo:str value="$componentsFolder" /></code>, a folder like <code>Main.wo</code> with its <code>Main.html</code> for each</td>
+				</tr>
+			</table>
+		</section>
+	</wo:if>
+
+	<wo:if condition="$hasControlPanel">
+		<section>
+			<h2>The control panel</h2>
+			<p>
+				<a href="/wonder/admin">/wonder/admin</a> shows what the application is doing: its configuration,
+				statistics, threads and more.
+			</p>
+		</section>
+	</wo:if>
+</wo:ERXDevelopmentPageLayout>
