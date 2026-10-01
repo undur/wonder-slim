@@ -1,12 +1,6 @@
 # Changelog
 
-## Unreleased
-
-- **ERLoggingLogback uses logback 1.6.5** (was 1.5.38).
-
-- **The console logger understands log4j's named date formats**
-  `%d{ISO8601}`, `%d{ABSOLUTE}` and `%d{DATE}` in `er.logging.pattern` write the dates they write with
-  reload4j, instead of stopping the application while logging is set up.
+## 2026-10-01 (8.0.15)
 
 - **A welcome page at `/`, and a helpful 404, in development**
   An application that hasn't mapped `/` shows a page there in development that says what's running and
@@ -26,6 +20,12 @@
   `RouteTable.defaultRouteTable().setFallbackRouteHandler( new ERXPublicResources() )`.
   `RouteTable.notFoundRouteHandler()` is per table rather than static, and `RouteTable.routes()` lists
   the mapped routes.
+
+- **The console logger understands log4j's named date formats**
+  `%d{ISO8601}`, `%d{ABSOLUTE}` and `%d{DATE}` in `er.logging.pattern` write the dates they write with
+  reload4j, instead of stopping the application while logging is set up.
+
+- **ERLoggingLogback uses logback 1.6.5** (was 1.5.38).
 
 ## 2026-09-30 (8.0.14)
 
