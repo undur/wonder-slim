@@ -1,6 +1,10 @@
 package er.ajax;
 
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
@@ -27,7 +31,7 @@ import com.webobjects.foundation.NSRange;
  * @binding listItemClass the CSS class of the current list item
  * @binding listItemStyle the CSS style attribute of the current list item
  * @binding startIndex the start index of the list
- * @binding action the action to fire when the list is reordered
+ * @binding action the action to fire when the list is reordered. Its return value is ignored
  * @binding tag
  * @binding only
  * @binding overlap
@@ -60,6 +64,13 @@ public class AjaxSortableList extends AjaxComponent {
 	 * <a href="http://java.sun.com/j2se/1.4/pdf/serial-spec.pdf">Java Object Serialization Spec</a>
 	 */
 	private static final long serialVersionUID = 1L;
+
+  private static final Logger log = LoggerFactory.getLogger(AjaxSortableList.class);
+
+  /**
+   * Set once the action has returned something, so the warning is logged once
+   */
+  private static final AtomicBoolean _warnedAboutActionResults = new AtomicBoolean();
 
   private String _id;
   private String _actionUrl;
@@ -279,8 +290,8 @@ public class AjaxSortableList extends AjaxComponent {
 
     if (canGetValueForBinding("action")) {
       WOActionResults results = (WOActionResults) valueForBinding("action");
-      if (results != null) {
-        IO.println("AjaxDroppable.handleRequest: Not quite sure what to do with non-null results yet ...");
+      if (results != null && _warnedAboutActionResults.compareAndSet(false, true)) {
+        log.warn("The action bound to AjaxSortableList returned {}, which is ignored: the action is called for what it does, and the response is the update container, if any. Return null.", results.getClass().getName());
       }
     }
 
