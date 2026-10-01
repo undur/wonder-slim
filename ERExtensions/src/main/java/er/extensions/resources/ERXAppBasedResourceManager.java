@@ -40,7 +40,7 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 	/**
 	 * Generates a URL for the given resource. Format: .../App.woa/res/[framework]/[resourceName]
 	 *
-	 * In production, the resource name carries a stamp of the resource's content ({@code css/site.3f9c1e07ab.css}, see
+	 * In production, the resource name carries a stamp of the resource's content ({@code css/site@3f9c1e07ab.css}, see
 	 * {@link ERXResourceStamps}), so the URL changes whenever the content does and the resource request handler can let
 	 * browsers cache it for good. Not in development, where files change while the application runs.
 	 *

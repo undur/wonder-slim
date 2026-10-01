@@ -93,7 +93,7 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 			return notFoundResponse(path);
 		}
 
-		// A stamped name (css/site.3f9c1e07ab.css, as the resource manager generates it) names the resource without the
+		// A stamped name (css/site@3f9c1e07ab.css, as the resource manager generates it) names the resource without the
 		// stamp. If there's nothing by that name, the name may be a file's own, and is looked up as it is.
 		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse(path);
 		String resourcePath = stamped != null ? stamped.unstampedPath() : path;

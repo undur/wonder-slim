@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Stamped resource URLs mark the stamp with an `@`**
+  A resource's URL carries its content stamp as `css/site@3f9c1e07ab.css` instead of
+  `css/site.3f9c1e07ab.css`, so the stamp stands apart from the name. The period form is still served,
+  for pages rendered by an instance not yet updated during a deploy, as is the marker encoded (`%40`).
+  (#168)
+
 ## 2026-10-01 (8.0.15)
 
 - **A welcome page at `/`, and a helpful 404, in development**

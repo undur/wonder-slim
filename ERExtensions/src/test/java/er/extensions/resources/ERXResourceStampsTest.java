@@ -31,17 +31,18 @@ public class ERXResourceStampsTest {
 	}
 
 	@Test
-	public void theStampGoesBeforeTheExtension() {
-		assertEquals( "site.3f9c1e07ab.css", ERXResourceStamps.stampedPath( "site.css", STAMP ) );
-		assertEquals( "css/site.3f9c1e07ab.css", ERXResourceStamps.stampedPath( "css/site.css", STAMP ) );
-		assertEquals( "archive.tar.3f9c1e07ab.gz", ERXResourceStamps.stampedPath( "archive.tar.gz", STAMP ) );
-		assertEquals( "LICENSE.3f9c1e07ab", ERXResourceStamps.stampedPath( "LICENSE", STAMP ) );
-		assertEquals( "x/.htaccess.3f9c1e07ab", ERXResourceStamps.stampedPath( "x/.htaccess", STAMP ) );
+	public void theStampGoesBeforeTheExtensionMarkedByAnAt() {
+		assertEquals( "site@3f9c1e07ab.css", ERXResourceStamps.stampedPath( "site.css", STAMP ) );
+		assertEquals( "css/site@3f9c1e07ab.css", ERXResourceStamps.stampedPath( "css/site.css", STAMP ) );
+		assertEquals( "archive.tar@3f9c1e07ab.gz", ERXResourceStamps.stampedPath( "archive.tar.gz", STAMP ) );
+		assertEquals( "LICENSE@3f9c1e07ab", ERXResourceStamps.stampedPath( "LICENSE", STAMP ) );
+		assertEquals( "x/.htaccess@3f9c1e07ab", ERXResourceStamps.stampedPath( "x/.htaccess", STAMP ) );
+		assertEquals( "img/logo@2x@3f9c1e07ab.png", ERXResourceStamps.stampedPath( "img/logo@2x.png", STAMP ) );
 	}
 
 	@Test
 	public void aStampedPathParsesBackToThePathAndTheStamp() {
-		for( final String path : new String[] { "site.css", "app/css/site.css", "archive.tar.gz", "LICENSE", "x/.htaccess", "my.file.name.js" } ) {
+		for( final String path : new String[] { "site.css", "app/css/site.css", "archive.tar.gz", "LICENSE", "x/.htaccess", "my.file.name.js", "app/img/logo@2x.png" } ) {
 			final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse( ERXResourceStamps.stampedPath( path, STAMP ) );
 			assertEquals( path, stamped.unstampedPath() );
 			assertEquals( STAMP, stamped.stamp() );
@@ -56,5 +57,29 @@ public class ERXResourceStampsTest {
 		assertNull( ERXResourceStamps.parse( "app/x.3f9c1e07a.css" ) ); // nine digits isn't one
 		assertNull( ERXResourceStamps.parse( "app/3f9c1e07ab.css" ) ); // nothing before it: the name itself
 		assertNull( ERXResourceStamps.parse( "app/x.3f9c1e07ab/y.css" ) ); // in a folder name, not the file's
+		assertNull( ERXResourceStamps.parse( "app/x@3f9c1e07ab/y.css" ) ); // nor with the marker
+		assertNull( ERXResourceStamps.parse( "app/img/logo@2x.png" ) ); // a density variant, not a stamp
+		assertNull( ERXResourceStamps.parse( "app/x@3F9C1E07AB.css" ) ); // uppercase isn't a stamp
+	}
+
+	@Test
+	public void theMarkerIsAcceptedEncoded() {
+		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse( "app/css/site%403f9c1e07ab.css" );
+		assertEquals( "app/css/site.css", stamped.unstampedPath() );
+		assertEquals( STAMP, stamped.stamp() );
+	}
+
+	@Test
+	public void theFormerPeriodFormIsStillAccepted() {
+		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse( "app/css/site.3f9c1e07ab.css" );
+		assertEquals( "app/css/site.css", stamped.unstampedPath() );
+		assertEquals( STAMP, stamped.stamp() );
+	}
+
+	@Test
+	public void aDensityVariantIsStampedAndParsedBack() {
+		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse( "app/img/logo@2x@3f9c1e07ab.png" );
+		assertEquals( "app/img/logo@2x.png", stamped.unstampedPath() );
+		assertEquals( STAMP, stamped.stamp() );
 	}
 }
