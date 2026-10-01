@@ -464,21 +464,21 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 
 		ERXObsoleteProperties.printObsoleteProperties();
 
-		System.out.println( "================ LOADED BUNDLES ================" );
-		System.out.println( String.format( "%-22s : %-65s : %s", "-- Name --", "-- Bundle class --", "-- isJar --" ) );
+		IO.println( "================ LOADED BUNDLES ================" );
+		IO.println( String.format( "%-22s : %-65s : %s", "-- Name --", "-- Bundle class --", "-- isJar --" ) );
 
 		for( NSBundle nsBundle : NSBundle._allBundlesReally() ) {
-			System.out.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass().getName(), nsBundle.isJar() ) );
+			IO.println( String.format( "%-22s : %-65s : %s", nsBundle.name(), nsBundle.getClass().getName(), nsBundle.isJar() ) );
 		}
 
 		// The page cache and how it's bounded. Surfaced at launch to make the configuration
 		// visible during the page-cache migration; may be removed once that has settled.
-		System.out.println();
-		System.out.println( "============= CACHE CONFIGURATION ==============" );
-		System.out.println( String.format( "%-37s : %s", "unified page cache (instances)", pageCacheSize() ) );
-		System.out.println( String.format( "%-37s : %s (obsolete: savePageInPermanentCache throws)", "WO permanent page cache", permanentPageCacheSize() ) );
-		System.out.println( String.format( "%-37s : %s (unused: unified cache handles all restores)", "WO page fragment cache", pageFragmentCacheSize() ) );
-		System.out.println( String.format( "%-37s : %s", "memory pressure valve", _pageCachePressureValve != null ? _pageCachePressureValve.bannerDescription() : "disabled" ) );
+		IO.println();
+		IO.println( "============= CACHE CONFIGURATION ==============" );
+		IO.println( String.format( "%-37s : %s", "unified page cache (instances)", pageCacheSize() ) );
+		IO.println( String.format( "%-37s : %s (obsolete: savePageInPermanentCache throws)", "WO permanent page cache", permanentPageCacheSize() ) );
+		IO.println( String.format( "%-37s : %s (unused: unified cache handles all restores)", "WO page fragment cache", pageFragmentCacheSize() ) );
+		IO.println( String.format( "%-37s : %s", "memory pressure valve", _pageCachePressureValve != null ? _pageCachePressureValve.bannerDescription() : "disabled" ) );
 
 		// Last, and in every mode, because it's what you reach for first in a log: the name this
 		// application answers to and where it can be reached. The name is what WOApplication.name()
@@ -486,19 +486,19 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// name - and the bundle name is shown alongside whenever the two differ, since URL generation
 		// fills in name() for requests that carry no application name and a mismatch is otherwise
 		// invisible until a URL fails to route.
-		System.out.println();
-		System.out.println( "================= APPLICATION ==================" );
+		IO.println();
+		IO.println( "================= APPLICATION ==================" );
 
 		final String bundleName = NSBundle.mainBundle() != null ? NSBundle.mainBundle().name() : null;
 
 		if( bundleName == null || bundleName.equals( name() ) ) {
-			System.out.println( String.format( "%-15s : %s", "name", name() ) );
+			IO.println( String.format( "%-15s : %s", "name", name() ) );
 		}
 		else {
-			System.out.println( String.format( "%-15s : %s (deployed name; the bundle is %s)", "name", name(), bundleName ) );
+			IO.println( String.format( "%-15s : %s (deployed name; the bundle is %s)", "name", name(), bundleName ) );
 		}
 
-		System.out.println( String.format( "%-15s : %s", "pid", ProcessHandle.current().pid() ) );
+		IO.println( String.format( "%-15s : %s", "pid", ProcessHandle.current().pid() ) );
 
 		if( isDirectConnectEnabled() ) {
 			// One URL per line so each is conveniently double clickable. The host is forced to
@@ -508,7 +508,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			// -WOPort was passed); the bound port lives on the adaptor itself, which is how WO's own
 			// directConnectURL() sources it (see WOApplication.directConnectURLForAdaptor).
 			final int port = defaultAdaptor().port();
-			System.out.println( String.format( "%-15s : http://localhost:%s", "direct connect", port ) );
+			IO.println( String.format( "%-15s : http://localhost:%s", "direct connect", port ) );
 
 			// The jetty adaptor binds all interfaces (its connector sets no host), so the app is
 			// just as reachable from other devices on the network - a phone on the same Wi-Fi, say.
@@ -531,7 +531,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 						final var address = addresses.nextElement();
 
 						if( address instanceof java.net.Inet4Address && !address.isLoopbackAddress() && !address.isLinkLocalAddress() ) {
-							System.out.println( String.format( "%-15s : http://%s:%s", "", address.getHostAddress(), port ) );
+							IO.println( String.format( "%-15s : http://%s:%s", "", address.getHostAddress(), port ) );
 						}
 					}
 				}
@@ -541,7 +541,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			}
 		}
 
-		System.out.println( "================================================" );
+		IO.println( "================================================" );
 	}
 
 	/**

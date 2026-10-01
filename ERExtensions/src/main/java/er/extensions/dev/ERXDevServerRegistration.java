@@ -103,7 +103,7 @@ public final class ERXDevServerRegistration {
 					.build();
 			final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
 			if (response.statusCode() == 200) {
-				System.out.println("Registered '" + appName + "' (port " + port + ") with the Eclipse dev server.");
+				IO.println("Registered '" + appName + "' (port " + port + ") with the Eclipse dev server.");
 			}
 		}
 		catch (Exception e) {

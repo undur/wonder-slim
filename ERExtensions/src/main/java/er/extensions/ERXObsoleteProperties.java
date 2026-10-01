@@ -421,9 +421,9 @@ public class ERXObsoleteProperties {
 
 		if( !lines.isEmpty() ) {
 			log.warn( "{} obsolete propert{} set, for features that no longer exist. See OBSOLETE PROPERTIES below.", lines.size(), lines.size() == 1 ? "y is" : "ies are" );
-			System.out.println( "============= OBSOLETE PROPERTIES ==============" );
-			lines.forEach( System.out::println );
-			System.out.println();
+			IO.println( "============= OBSOLETE PROPERTIES ==============" );
+			lines.forEach( IO::println );
+			IO.println();
 		}
 	}
 }

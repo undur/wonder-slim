@@ -280,7 +280,7 @@ public class AjaxSortableList extends AjaxComponent {
     if (canGetValueForBinding("action")) {
       WOActionResults results = (WOActionResults) valueForBinding("action");
       if (results != null) {
-        System.out.println("AjaxDroppable.handleRequest: Not quite sure what to do with non-null results yet ...");
+        IO.println("AjaxDroppable.handleRequest: Not quite sure what to do with non-null results yet ...");
       }
     }
 

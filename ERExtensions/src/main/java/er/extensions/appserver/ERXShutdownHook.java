@@ -65,8 +65,8 @@ public abstract class ERXShutdownHook extends Thread {
 				try {
 					synchronized( ALL_HOOKS ) {
 						while( ALL_HOOKS.size() > 0 ) {
-							// Use System.out to minimize dependencies
-							System.out.println( "ShutdownHook waiting for " + ALL_HOOKS.size() + " hook" + (ALL_HOOKS.size() > 1 ? "s" : "") + " to complete" );
+							// Use IO to minimize dependencies
+							IO.println( "ShutdownHook waiting for " + ALL_HOOKS.size() + " hook" + (ALL_HOOKS.size() > 1 ? "s" : "") + " to complete" );
 							ALL_HOOKS.wait();
 						}
 
@@ -74,7 +74,7 @@ public abstract class ERXShutdownHook extends Thread {
 							NSNotificationCenter.defaultCenter().postNotification(new NSNotification(ERXNotification.ApplicationWillTerminateNotification.id(), NSKeyValueCoding.NullValue));
 						}
 
-						System.out.println( "APPLICATION SHUTDOWN SEQUENCE COMPLETE" );
+						IO.println( "APPLICATION SHUTDOWN SEQUENCE COMPLETE" );
 					}
 				} catch( Exception e ) {
 					e.printStackTrace();
@@ -118,9 +118,9 @@ public abstract class ERXShutdownHook extends Thread {
 	@Override
 	public final void run() {
 		try {
-			if( name != null ) System.out.println( "ERXShutdownHook " + name + " launched" );
+			if( name != null ) IO.println( "ERXShutdownHook " + name + " launched" );
 			hook();
-			if( name != null ) System.out.println( "ERXShutdownHook " + name + " completed" );
+			if( name != null ) IO.println( "ERXShutdownHook " + name + " completed" );
 			synchronized( ALL_HOOKS ) {
 				ALL_HOOKS.remove( this );
 				ALL_HOOKS.notify();

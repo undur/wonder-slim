@@ -35,7 +35,7 @@ public class ERXLoggingSupport {
 				return ERXConsoleLoggingBackend.INSTANCE;
 			}
 
-			System.out.println( "====== No logging backend (such as ERLoggingLogback's) is on the classpath: logging is left unconfigured" );
+			IO.println( "====== No logging backend (such as ERLoggingLogback's) is on the classpath: logging is left unconfigured" );
 			return null;
 		}
 

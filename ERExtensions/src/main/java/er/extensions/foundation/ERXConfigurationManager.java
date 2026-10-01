@@ -1022,7 +1022,7 @@ public final class ERXConfigurationManager {
 			}
 		}
 
-		System.out.print( out );
+		IO.print( out );
 	}
 
 	/**
