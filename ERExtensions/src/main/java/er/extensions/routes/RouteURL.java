@@ -88,7 +88,9 @@ public class RouteURL {
 	}
 
 	/**
-	 * @return The integer value at [index] in the path. defaultValue if [index] does not exist.
+	 * @return The integer value at [index] in the path. defaultValue if [index] does not exist, or isn't an integer: a
+	 *         URL is user input, and /team/abc for a route reading an id is a URL nothing answers (a 404), not a failure
+	 *         of the app (a 500 from NumberFormatException)
 	 */
 	public Integer getInteger( int index, Integer defaultValue ) {
 		String value = getString( index );
@@ -97,11 +99,16 @@ public class RouteURL {
 			return defaultValue;
 		}
 
-		return Integer.valueOf( value );
+		try {
+			return Integer.valueOf( value );
+		}
+		catch( NumberFormatException e ) {
+			return defaultValue;
+		}
 	}
 
 	/**
-	 * @return The integer value at [index] in the path. null if [index] does not exist.
+	 * @return The integer value at [index] in the path. null if [index] does not exist, or isn't an integer.
 	 */
 	public Integer getInteger( int index ) {
 		return getInteger( index, null );

@@ -54,6 +54,15 @@ public class TestRouteURL {
 	}
 
 	@Test
+	public void integerValueOfANonIntegerIsTheDefault() {
+		// A URL is user input: /team/abc must not throw (a 500); the route answers "not found"
+		RouteURL url = RouteURL.create( "/team/abc" );
+		assertNull( url.getInteger( 1 ) );
+		assertEquals( Integer.valueOf( 7 ), url.getInteger( 1, 7 ) );
+		assertNull( RouteURL.create( "/team/99999999999" ).getInteger( 1 ) ); // overflow
+	}
+
+	@Test
 	public void integerValueExceedingLengthIsNull() {
 		RouteURL url = RouteURL.create( "/url/2/haha" );
 		assertNull( url.getInteger( 4 ) );

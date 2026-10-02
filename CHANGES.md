@@ -13,6 +13,11 @@
   for pages rendered by an instance not yet updated during a deploy, as is the marker encoded (`%40`).
   (#168)
 
+- **`RouteURL.getInteger` answers its default for a segment that isn't an integer**
+  A URL is user input, so a segment that isn't an integer, or is too large for one, gets the default
+  (null unless another is given), as a missing segment does. A route reading an id from `/team/abc`
+  can then answer "not found", or decline the URL. (#169)
+
 ## 2026-10-01 (8.0.15)
 
 - **A welcome page at `/`, and a helpful 404, in development**
