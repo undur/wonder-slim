@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2026-10-02 (8.0.16)
 
 - **Stamped resource URLs mark the stamp with an `@`**
