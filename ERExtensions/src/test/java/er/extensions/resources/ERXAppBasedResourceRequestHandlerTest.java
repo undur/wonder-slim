@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -108,6 +109,21 @@ public class ERXAppBasedResourceRequestHandlerTest {
 		cache.put( "a", resourceOf( 50 ) );
 		assertEquals( 50, cache.bytes() );
 		assertEquals( 1, cache.size() );
+	}
+
+	@Test
+	public void theCacheSizeIsGivenInMegabytes() {
+		assertEquals( 64L * 1024 * 1024, ERXAppBasedResourceRequestHandler.cacheByteLimit( ERXAppBasedResourceRequestHandler.DEFAULT_CACHE_MEGABYTES ) );
+		assertEquals( 0, ERXAppBasedResourceRequestHandler.cacheByteLimit( 0 ) );
+		assertThrows( IllegalArgumentException.class, () -> ERXAppBasedResourceRequestHandler.cacheByteLimit( -1 ) );
+	}
+
+	@Test
+	public void aCacheOfNoSizeHoldsNoContent() {
+		final ERXAppBasedResourceRequestHandler.ResourceCache cache = new ERXAppBasedResourceRequestHandler.ResourceCache( 0 );
+		cache.put( "a", resourceOf( 100 ) );
+		assertEquals( 0, cache.bytes() );
+		assertNull( cache.get( "a" ) );
 	}
 
 	@Test

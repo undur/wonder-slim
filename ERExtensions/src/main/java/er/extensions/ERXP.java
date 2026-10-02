@@ -215,6 +215,12 @@ public enum ERXP {
 	 */
 	X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL( "er.extensions.appserver.ERXRequest.xForwardedProtoHeaderKeyForSsl" ),
 
+	// ERXAppBasedResourceRequestHandler
+	/**
+	 * Megabytes of resource content the resource request handler holds in memory at most, in production; past it, the resource requested least recently is forgotten. Defaults to 64. 0 holds none, reading every resource from its bundle for each request.
+	 */
+	RESOURCE_CACHE_MEGABYTES( "er.extensions.ERXAppBasedResourceRequestHandler.cacheMegabytes" ),
+
 	// ERXResponseCompression
 	/**
 	 * If true, responses are gzip-compressed for clients that accept it. Defaults to false.

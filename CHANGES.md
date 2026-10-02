@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The resource cache's size is configurable**
+  `er.extensions.ERXAppBasedResourceRequestHandler.cacheMegabytes` sets how many megabytes of
+  resource content the resource request handler holds in memory in production, 64 by default. 0 holds
+  none, reading every resource from its bundle for each request.
+
 - **Stamped resource URLs mark the stamp with an `@`**
   A resource's URL carries its content stamp as `css/site@3f9c1e07ab.css` instead of
   `css/site.3f9c1e07ab.css`, so the stamp stands apart from the name. The period form is still served,

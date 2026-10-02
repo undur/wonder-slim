@@ -18,7 +18,9 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 
+import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
+import er.extensions.foundation.ERXProperties;
 
 /**
  * Request handler for serving web server resources through the application (rather than the web server "split install").
@@ -49,14 +51,15 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 	static final long LARGE_RESOURCE_SIZE = 1024 * 1024;
 
 	/**
-	 * How many bytes of resource content the cache holds in memory at most, see {@link ResourceCache}
+	 * How many megabytes of resource content the cache holds in memory at most, unless
+	 * {@code er.extensions.ERXAppBasedResourceRequestHandler.cacheMegabytes} says otherwise, see {@link ResourceCache}
 	 */
-	static final long CACHE_BYTE_LIMIT = 64 * 1024 * 1024;
+	static final long DEFAULT_CACHE_MEGABYTES = 64;
 
 	/**
 	 * The resources found (production), bounded, see {@link ResourceCache}
 	 */
-	private final ResourceCache _cache = new ResourceCache( CACHE_BYTE_LIMIT );
+	private final ResourceCache _cache;
 
 	/**
 	 * How many paths known to name no resource are remembered, see {@link #_missingPaths}
@@ -72,6 +75,19 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 
 	public ERXAppBasedResourceRequestHandler() {
 		_useCache = !ERXApplication.isDevelopmentModeSafe();
+		_cache = new ResourceCache( cacheByteLimit( ERXProperties.longForKeyWithDefault( ERXP.RESOURCE_CACHE_MEGABYTES.id(), DEFAULT_CACHE_MEGABYTES ) ) );
+	}
+
+	/**
+	 * @return The number of bytes of content the cache holds at most, for the given number of megabytes
+	 */
+	static long cacheByteLimit( final long megabytes ) {
+
+		if( megabytes < 0 ) {
+			throw new IllegalArgumentException( "%s can't be negative, but is %d. 0 holds no resources in memory".formatted( ERXP.RESOURCE_CACHE_MEGABYTES.id(), megabytes ) );
+		}
+
+		return megabytes * 1024 * 1024;
 	}
 
 	@Override
