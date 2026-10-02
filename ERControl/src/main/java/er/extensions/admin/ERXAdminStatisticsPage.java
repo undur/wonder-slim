@@ -15,6 +15,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSTimestamp;
 
+import er.extensions.ERXP;
 import er.extensions.components.ERXComponent;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.statistics.ERXStats;
@@ -207,7 +208,7 @@ public class ERXAdminStatisticsPage extends ERXComponent {
 	// --- ERXStats ---
 
 	public boolean isCollectingERXStats() {
-		return ERXProperties.booleanForKey( "er.extensions.erxStats.enabled" );
+		return ERXProperties.booleanForKey( ERXP.STATS_ENABLED.id() );
 	}
 
 	public boolean hasERXStats() {

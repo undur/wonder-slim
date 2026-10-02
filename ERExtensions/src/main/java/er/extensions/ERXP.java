@@ -9,7 +9,7 @@ import er.extensions.foundation.ERXProperties;
  * 
  *  FIXME: Properties should be typed (i.e. a property should know which type it will return and offer suitably typed retrieval methods) // Hugi 2025-10-25
  *  FIXME: Libraries/Frameworks/Apps should be able to declare their own properties // Hugi 2025-10-25
- *  FIXME: Eliminate direct usage of ERXPRoperties in code // Hugi 2025-10-25
+ *  FIXME: Read properties through typed accessors on ERXP ({@code ERXP.SHORT_URLS.booleanValue()}) rather than through ERXProperties // Hugi 2025-10-25
  */
 
 public enum ERXP {
