@@ -1,11 +1,6 @@
 # Changelog
 
-## Unreleased
-
-- **The resource cache's size is configurable**
-  `er.extensions.ERXAppBasedResourceRequestHandler.cacheMegabytes` sets how many megabytes of
-  resource content the resource request handler holds in memory in production, 64 by default. 0 holds
-  none, reading every resource from its bundle for each request.
+## 2026-10-02 (8.0.16)
 
 - **Stamped resource URLs mark the stamp with an `@`**
   A resource's URL carries its content stamp as `css/site@3f9c1e07ab.css` instead of
@@ -17,6 +12,17 @@
   A URL is user input, so a segment that isn't an integer, or is too large for one, gets the default
   (null unless another is given), as a missing segment does. A route reading an id from `/team/abc`
   can then answer "not found", or decline the URL. (#169)
+
+- **Parsley 1.6.2**
+  Inline error display keeps what was rendered before the failing element (the doctype, the head,
+  the stylesheets) instead of losing it and cascading into further errors. Recorded problems name the
+  template location and tag (`Main.html:14:9 <wo:str>`), unknown-key messages explain collection
+  operators and keys that can't be set, and stack traces point at template locations readably.
+
+- **The resource cache's size is configurable**
+  `er.extensions.ERXAppBasedResourceRequestHandler.cacheMegabytes` sets how many megabytes of
+  resource content the resource request handler holds in memory in production, 64 by default. 0 holds
+  none, reading every resource from its bundle for each request.
 
 ## 2026-10-01 (8.0.15)
 
