@@ -46,6 +46,7 @@ import com.webobjects.foundation.NSProperties;
 import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation.NSTimestamp;
 import er.extensions.ERXP;
+import er.extensions.internal.ERXStaleComponentDefinitions;
 import er.extensions.components.errorpages.WOExceptionPage;
 
 import er.extensions.ERXPlugin;
@@ -719,7 +720,21 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			languages = languages != null ? languages.arrayByAddingObjectsFromArray(_expectedLanguages()) : _expectedLanguages();
 		}
 
-		return super._componentDefinition(componentName, languages);
+		final WOComponentDefinition definition = super._componentDefinition(componentName, languages);
+
+		// A component created while the application runs can be cached without its template, see ERXStaleComponentDefinitions
+		if (isDevelopmentMode() && ERXStaleComponentDefinitions.isStale(componentName, definition)) {
+			ERXStaleComponentDefinitions.refresh(this);
+			final WOComponentDefinition refreshedDefinition = super._componentDefinition(componentName, languages);
+
+			if (refreshedDefinition == null || refreshedDefinition.pathURL() == null) {
+				ERXStaleComponentDefinitions.unrecoverable(componentName);
+			}
+
+			return refreshedDefinition;
+		}
+
+		return definition;
 	}
 
 	/**

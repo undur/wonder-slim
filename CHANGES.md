@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **A component created while the application runs renders in development**
+  A new component's template is found at its first use, as is a template added to a component already
+  in use: when a component's template is on disk but not yet in the project's resource index, the
+  projects are rescanned and the component looked up again. (#171)
+
 ## 2026-10-02 (8.0.16)
 
 - **Stamped resource URLs mark the stamp with an `@`**
