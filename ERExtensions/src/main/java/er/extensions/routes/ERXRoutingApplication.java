@@ -34,16 +34,10 @@ public abstract class ERXRoutingApplication extends WOApplication {
 	 */
 	private final boolean _shortURLs;
 
-	/**
-	 * The public path the application is served beneath ({@code /App}), empty for the root (#51)
-	 */
-	private final String _basePath;
-
 	public ERXRoutingApplication() {
 		super();
 
 		_shortURLs = booleanProperty( ERXP.SHORT_URLS.id(), true );
-		_basePath = basePath( System.getProperty( BASE_PATH_PROPERTY ), _shortURLs );
 
 		// RouteAction is a very generic name for a direct action class, so we register it explicitly to prevent problems
 		_NSUtilities.setClassForName( RouteAction.class, "RouteAction" );
@@ -71,7 +65,7 @@ public abstract class ERXRoutingApplication extends WOApplication {
 		@SuppressWarnings("unchecked")
 		final Collection<String> handlerKeys = registeredRequestHandlerKeys();
 
-		final String canonicalURL = ERXShortURLs.canonicalize( url, _basePath, adaptorPath(), name(), applicationExtension(), handlerKeys );
+		final String canonicalURL = ERXShortURLs.canonicalize( url, adaptorPath(), name(), applicationExtension(), handlerKeys );
 		return newRequest( method, canonicalURL, httpVersion, headers, content, info );
 	}
 
@@ -110,7 +104,7 @@ public abstract class ERXRoutingApplication extends WOApplication {
 		final String location = super._newLocationForRequest( request );
 
 		if( shortURLs() && request != null ) {
-			return ERXShortURLs.shorten( location, ERXShortURLs.applicationPrefix( request.adaptorPrefix(), request.applicationName(), "" ), _basePath );
+			return ERXShortURLs.shorten( location, ERXShortURLs.applicationPrefix( request.adaptorPrefix(), request.applicationName(), "" ) );
 		}
 
 		return location;
@@ -122,7 +116,7 @@ public abstract class ERXRoutingApplication extends WOApplication {
 	@Override
 	public String directConnectURL() {
 		final String url = super.directConnectURL();
-		return shortURLs() ? ERXShortURLs.shorten( url, applicationURLPrefix(), _basePath ) : url;
+		return shortURLs() ? ERXShortURLs.shorten( url, applicationURLPrefix() ) : url;
 	}
 
 	/**
@@ -138,43 +132,6 @@ public abstract class ERXRoutingApplication extends WOApplication {
 	 */
 	public boolean shortURLs() {
 		return _shortURLs;
-	}
-
-	/**
-	 * The property naming the public path the application is served beneath
-	 */
-	public static final String BASE_PATH_PROPERTY = "er.extensions.ERXApplication.basePath";
-
-	/**
-	 * @return The public path the application is served beneath ({@code /App}), empty for the root: two applications on
-	 *         one hostname, or the application beneath a path of its own (#51). Property
-	 *         {@value #BASE_PATH_PROPERTY}. Generated URLs start with it, and a request's URL has it removed before
-	 *         anything else reads it; behind mod_WebObjects the front end removes it. Needs short URLs.
-	 */
-	public String basePath() {
-		return _basePath;
-	}
-
-	/**
-	 * @return The base path as configured, checked: empty for none, otherwise starting with a slash and not ending with one
-	 */
-	static String basePath( final String value, final boolean shortURLs ) {
-
-		if( value == null || value.isBlank() || value.strip().equals( "/" ) ) {
-			return "";
-		}
-
-		final String basePath = value.strip();
-
-		if( !basePath.startsWith( "/" ) || basePath.endsWith( "/" ) || basePath.contains( "?" ) || basePath.contains( "//" ) ) {
-			throw new IllegalStateException( "%s is '%s': a path starting with a slash and not ending with one (/App)".formatted( BASE_PATH_PROPERTY, value ) );
-		}
-
-		if( !shortURLs ) {
-			throw new IllegalStateException( "%s is set, and short URLs are off: a base path is applied to short URLs (er.extensions.ERXApplication.shortURLs)".formatted( BASE_PATH_PROPERTY ) );
-		}
-
-		return basePath;
 	}
 
 	/**

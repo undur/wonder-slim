@@ -55,17 +55,16 @@ public class RouteURLs {
 	 */
 	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues ) {
 		final ERXApplication application = ERXApplication.erxApplication();
-		return completeURL( path, host, values, queryValues, PublicAddress.required(), application.shortURLs() ? null : application.applicationURLPrefix(), application.basePath() );
+		return completeURL( path, host, values, queryValues, PublicAddress.required(), application.shortURLs() ? null : application.applicationURLPrefix() );
 	}
 
 	/**
 	 * @param applicationURLPrefix The application's URL prefix ({@code /cgi-bin/WebObjects/App.woa}), null for short URLs
-	 * @param basePath The public path the application is served beneath (short URLs), empty for none
 	 */
-	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues, final PublicAddress.Origin publicAddress, final String applicationURLPrefix, final String basePath ) {
+	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues, final PublicAddress.Origin publicAddress, final String applicationURLPrefix ) {
 		final String query = query( queryValues );
 		final String routePath = path.path( values );
-		final String applicationPath = applicationURLPrefix == null ? basePath + routePath : applicationURLPrefix + "/" + ERXShortURLs.ROUTE_KEY + routePath;
+		final String applicationPath = applicationURLPrefix == null ? routePath : applicationURLPrefix + "/" + ERXShortURLs.ROUTE_KEY + routePath;
 		final String origin = host == null ? publicAddress.origin() : publicAddress.origin( host.host( values ) );
 		return origin + applicationPath + (query.isEmpty() ? "" : "?" + query);
 	}
@@ -192,12 +191,29 @@ public class RouteURLs {
 	}
 
 	/**
-	 * @return The short URL to a route without the route key it was composed under, see
-	 *         {@link ERXShortURLs#withoutRouteKey(String, String)}
+	 * Routes travel under the route request handler key, which a short URL leaves out ({@code /route/search/bork} is
+	 * {@code /search/bork}). FIXME: Belongs in ERXShortURLs, as the reverse of canonicalize(), when this converges
 	 */
 	private static String withoutRouteKey( final String url ) {
-		final ERXApplication application = ERXApplication.erxApplication();
-		return application.shortURLs() ? ERXShortURLs.withoutRouteKey( url, application.basePath() ) : url;
-	}
 
+		if( !ERXApplication.erxApplication().shortURLs() ) {
+			return url;
+		}
+
+		final int schemeEnd = url.indexOf( "://" );
+		final int pathStart = schemeEnd == -1 ? 0 : url.indexOf( '/', schemeEnd + 3 );
+		final String routePrefix = "/" + ERXShortURLs.ROUTE_KEY;
+
+		if( pathStart == -1 || !url.startsWith( routePrefix, pathStart ) ) {
+			return url;
+		}
+
+		final int afterKey = pathStart + routePrefix.length();
+
+		if( afterKey == url.length() || url.charAt( afterKey ) == '?' ) {
+			return url.substring( 0, pathStart ) + "/" + url.substring( afterKey );
+		}
+
+		return url.charAt( afterKey ) == '/' ? url.substring( 0, pathStart ) + url.substring( afterKey ) : url;
+	}
 }

@@ -97,7 +97,7 @@ public class ERXRoutingContext extends WOContext {
 	 */
 	private String shortened( final String url ) {
 		final ERXRoutingApplication application = (ERXRoutingApplication)WOApplication.application();
-		return application.shortURLs() ? ERXShortURLs.shorten( url, generatedApplicationPrefix( application ), application.basePath() ) : url;
+		return application.shortURLs() ? ERXShortURLs.shorten( url, generatedApplicationPrefix( application ) ) : url;
 	}
 
 	/**
