@@ -213,6 +213,84 @@ Where it's behind: template links aren't checked in the editor yet (parslips#12)
 instance, there's no HTTP method handling, no composition, a fixed list of parameter types, and matching is a prefix
 plus "decline what isn't mine", with no precedence rules or conflict detection.
 
+## The router API (proposal)
+
+Covering #173 (matching), #179 (preconditions), #174 (conflicts), #176 (groups) and #177 (methods) in one shape, so the
+parts built later slot in. Nothing here is built yet. Decisions still open are marked.
+
+### Scopes
+
+A scope is a value: a path prefix, preconditions (a host, methods), a trailing slash policy and wrappers. The router is
+the root scope, and every scope can make narrower ones and map routes:
+
+```java
+final Router routes = new Router();
+
+routes.map( "/", Main.class );                                   // any host, any method (today's behaviour)
+routes.map( "/items/{id}", ri -> ItemPage.page( ri, ri.parameter( "id" ) ) );
+routes.map( "/news/*", news );                                   // wildcard: everything beneath /news/
+
+routes.methods( POST ).map( "/hooks/github", hooks::github );    // other methods: 405
+routes.host( "{tenant}.example.com" ).map( "/", TenantHome.class );
+
+routes.host( "admin.example.com" ).group( "/manage", manage -> {
+	manage.wrap( requireLogin );                                 // wraps every route in the group
+	manage.map( "/users", Users.class );
+	manage.map( "/users/{id}", User.class );
+} );
+
+routes.trailingSlash( TrailingSlash.REDIRECT ).map( "/docs/", Docs.class );   // per route; the default is IGNORE
+```
+
+- **Parameters by name:** `invocation.parameter( "id" )`, and `invocation.parameters()` for all of them. Host parameters
+  (`{tenant}`) are included. A host parameter and a path parameter with the same name are refused when mapped.
+- **Wrapping:** a `RouteFilter` gets the invocation and the next handler, and either answers itself (a redirect to a
+  login page, a 403) or passes on: `( invocation, next ) -> loggedIn( invocation ) ? next.handle( invocation ) : login()`.
+  A nested group's filters run inside its parent's.
+- **Endpoints** are mapped like any route, and their records get the parameters by name, host parameters included.
+
+### Outcomes
+
+For a request (method, host, path), in this order:
+
+1. **Match:** the candidates are the routes whose path and host match, in precedence order: a literal segment before a
+   parameter before a wildcard, then, for the same path shape, a route with preconditions before one without. The
+   first that answers wins. One that declines (`RouteHandler.DECLINED`) passes the URL to the next candidate.
+2. **405:** a path matched, but no route there accepts the method. The answer is `405` with an `Allow` header. `HEAD` is
+   accepted wherever `GET` is.
+3. **308:** under the redirect policy, the path matched only in its other trailing-slash form.
+4. **Declined:** nothing matched, or every candidate declined. The router declines, and what comes after it (the
+   fallback, not found) gets the URL.
+
+### Decided
+
+- Trailing slashes: a route's pattern declares its form, generated URLs use it, and the policy (**ignore** by default,
+  **redirect** or **strict**) is set for the router and per route. `/` never changes form.
+- Paths are case-sensitive, hosts aren't. Segments are percent-decoded after splitting, so `%2F` stays in its segment.
+  A parameter never matches an empty segment.
+- `/x` is exact, and `/x/*` matches `/x/` and anything beneath it, but not `/x`, as today.
+- The router's core takes plain strings (method, host, path) and returns plain values: no WebObjects types, so
+  ng-objects could use the same code.
+
+### Open
+
+1. **Conflicts and declining.** #174 refuses two routes with the same shape, but declining exists so the next candidate
+   can have the URL. Under #174 the next candidate can only be a less specific route. Either same-shape routes are
+   refused, and alternatives at one shape become one route whose handler tries several
+   (`RouteHandler.firstOf( pages, products )`), or they're allowed and the mapping order breaks ties.
+2. **Where the router lives.** Beside `RouteTable` in the experimental package, mapped into the existing table as one
+   handler that declines when nothing matches, so `er.extensions.routes` stays as it is until convergence. Or replacing
+   `RouteTable`'s matching now.
+3. **Endpoints in groups.** An endpoint's URL depends on its group's prefix and host. Either:
+   - (a) endpoint patterns are absolute, and a group checks that they start with its prefix
+   - (b) they're relative, completed when mapped, and `url()` before mapping is an error
+   - (c) endpoints are declared from a scope (`shop.endpoint( "/items/{id}", ShopItem.class )`), so the full pattern
+     and preconditions are known from the start. A group's parameters (`/shops/{shop}`) are then components of the
+     record, checked when it's declared. An endpoint with a host pattern generates a complete URL to that host, its
+     host parameters taken from the record.
+4. **Which host.** The `Host` header, read in one place. `x-forwarded-host` only once forwarded headers are restricted to
+   trusted front ends (#67).
+
 ## Next steps
 
 Tracked in #178. The whole API is designed in the first round, host patterns, methods and groups included, so later
