@@ -14,16 +14,16 @@ import com.webobjects.appserver._private.WOKeyValueAssociation;
 import com.webobjects.foundation.NSKeyValueCoding;
 
 /**
- * A key path binding ({@code $routes.search}) whose keys may name static members (#172): a {@code public static} field,
+ * A key path binding ({@code $limits.maxRows}) whose keys may name static members (#172): a {@code public static} field,
  * or a {@code public static} method without arguments, of the class of the object the key is applied to (the component,
  * for the first key), its superclasses or the interfaces it implements. Instance members win: a static one is used only
  * when key-value coding finds no member of that name. So constants on an interface the pages implement are reachable
  * from their templates, and an instance of the interface groups them under a name of their own:
  *
  * <pre>
- * public interface Routes {
- *     Routes routes = new Routes() {};               // $routes.search, clear of the page's own keys
- *     Route&lt;Search&gt; search = Route.of( Search.class ); // $search too, when the page has no member of its own named so
+ * public interface Limits {
+ *     Limits limits = new Limits() {};  // $limits.maxRows, clear of the page's own keys
+ *     int maxRows = 50;                 // $maxRows too, when the page has no member of its own named so
  * }
  * </pre>
  *
