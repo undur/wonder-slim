@@ -176,13 +176,13 @@ Phoenix's verified routes (links checked at compile time).
    as a check.
 2. **Required and optional.** Path parameters are always required. Query parameters could be optional by being boxed
    (null when absent), or primitives with defaults.
-3. **Registration.** An explicit `routes.map( Search.class )`, or found by scanning. Either way, a link to a route
-   that isn't mapped is an error at render, not a dead URL.
-4. **Types.** Which component types convert (strings, numbers, booleans, enums, dates), and whether there's a way to add
-   more.
+3. **Registration.** Answered: explicit, routes declared from a group (`group.route( pattern, Record.class )`), which
+   maps them.
+4. **Types.** Answered: the router's converters, built in for the common types, and registered by the application for
+   its own (#175).
 5. **Routes beyond pages**: a JSON endpoint or a redirect is linked to the same way, presumably.
-6. **Which elements take `route`**: `wo:link`, `wo:form` (a GET form to a route, its fields named after the
-   components), an element rendering a bare URL for scripts, the Ajax elements' URLs.
+6. **Which elements take `route`**: answered for links (`<wo:route>`) and forms (`<wo:routeForm>`), both taking a
+   typed or a plain route. Still open: an element rendering a bare URL for scripts, and the Ajax elements' URLs.
 
 ## Compared with other frameworks
 
@@ -382,9 +382,18 @@ plugins join the application's named groups (#184), and converters make objects 
    a restart. That run had been through several hot swaps of ERExtensions; template edits reloaded normally after the
    restart.
 
+An outside review of the design (2026-10-03) found six bugs and several gaps, now fixed: two conditions of one type are
+refused when mapped, host parameter names keep their case, host values are checked to be one label, cross-host links
+in complete URLs replace the host, converters work for interfaces, and the router claims only its own routes in the
+route table's `hasRouteFor()` (through `RouteClaims`, the one addition to ERExtensions), refusing routes a request
+handler's key would hide. Plain routes have an identity (`map()` returns a `PlainRoute`, and links, forms and redirects
+take any `Linkable`), URLs are built without constructing the record, form fields that don't convert reach the route
+in `conversionErrors()`, plugins can join groups named later, routes are listable, `OPTIONS` is answered, and a value
+has one text. Disputed and kept: methods are checked before a group's filters run, a minor disclosure that's correct
+HTTP.
+
 Not built yet:
 
-- Converters, so objects are parameters (#175).
 - Tables read again on each request in development.
 - The `.apiext` addition, and the checks and completion in Parslips.
 - Converging with the existing routes.

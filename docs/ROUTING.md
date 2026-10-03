@@ -26,7 +26,9 @@ public Application() {
 
 The default router is created on first use and mapped into the existing route table then, as one route. What the
 router has no route for passes on to the table's other routes, then its fallback and not found handling, so the router
-and existing routes work side by side.
+and existing routes work side by side. The table's `hasRouteFor()` answers for the router's routes, not for every URL.
+
+`ERXRouter.defaultRouter().routes()` lists every route in precedence order, with its pattern, conditions and table.
 
 ## Routes
 
@@ -36,7 +38,15 @@ and existing routes work side by side.
 club.map( "/files/*", ri -> text( 200, "The file %s of %s".formatted( ri.parameter( "*" ), ri.parameter( "club" ) ) ) );
 ```
 
-`map( pattern, PageClass.class )` maps a route to a page.
+`map( pattern, PageClass.class )` maps a route to a page. Both return the route, a `PlainRoute`, for links, forms and
+redirects to it (see [Links](#links)):
+
+```java
+rules = club.map( "/rules/", ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
+```
+
+A route whose first path element is a request handler's key (`/wa/…`, `/wo/…`) is refused when it's mapped: the
+request handler would get every request for it.
 
 A parameter is text, `ri.parameter( "id" )`, or converted to a type, `ri.parameter( "book", Book.class )`, with the
 router's converters (see [Parameter types](#parameter-types)). A value that doesn't convert, or names an object that
@@ -89,13 +99,7 @@ A typed route is a route whose parameters are the components of a record. The re
 and what the route receives, with each value converted to its component's type:
 
 ```java
-public record Books( String club, Sort sort, Integer page ) implements Routable {
-
-	public Books {
-		if( page != null && page < 1 ) {
-			throw new IllegalArgumentException( "Pages start at 1" );
-		}
-	}
+public record Books( Club club, Sort sort, Integer page ) implements Routable {
 
 	@Override
 	public WOActionResults invoke( final RouteInvocation invocation ) {
@@ -103,22 +107,27 @@ public record Books( String club, Sort sort, Integer page ) implements Routable 
 	}
 }
 
-books = club.route( "/books/", Books.class );
+books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
 ```
 
 - **Path, host and query parameters:** components named in the pattern (`{id}`) or in a host pattern (`{club}`) come
   from the URL's path and host. The others are query parameters (`?sort=author&page=2`), or a form's fields.
 - **Types:** anything the router's converters convert (see [Parameter types](#parameter-types)). A query parameter
   can be absent, so it's a boxed type or an object, and null when absent.
-- **Validation:** the record's constructor is the place for it. A value that doesn't convert (`?page=abc`), or that the
-  constructor refuses (`?page=0`), declines the URL.
+- **Values that don't convert:** a route parameter (path or host) that doesn't convert, or names an object that doesn't
+  exist, declines the request: the URL is wrong. A query parameter or a form's field that doesn't convert is null, and
+  the route hears about it in `invocation.conversionErrors()`, with the text that was given, so it can answer a form
+  with its errors.
+- **Validation:** the record's constructor checks what makes the route's own parameters valid, and a value it refuses
+  (an `IllegalArgumentException`) declines the request. A form's fields are checked by the route, which can show the
+  form again with what's wrong.
 - **What the route does:** a record implementing `Routable` does the route's work in `invoke`. A record that's only
   data gets an action instead:
 
   ```java
-  public record DeleteBook( String club, int id ) {}
+  public record DeleteBook( Club club, Book book ) {}
 
-  deleteBook = club.route( "/books/{id}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
+  deleteBook = club.route( "/books/{book}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
   ```
 
   Several routes can share a record that way (a page and its JSON, say).
@@ -126,21 +135,30 @@ books = club.route( "/books/", Books.class );
 ### Parameter types
 
 The router's converters turn a parameter's value into URL text and back. `String`, `Integer`/`int`, `Long`/`long`,
-`Boolean`/`boolean`, `LocalDate` and enums are built in, and an application registers its own types, before declaring
-the routes taking them:
+`Boolean`/`boolean`, `Double`, `LocalDate`, `Instant`, `UUID` and enums are built in, and an application registers its
+own types, before declaring the routes taking them. A converter registered for a class or an interface converts its
+subclasses and implementations.
 
 ```java
+router.converters().register( Club.class, Converter.of( id -> Library.club( id ).orElse( null ), Club::id ) );
 router.converters().register( Book.class, Converter.of( id -> Library.book( Integer.parseInt( id ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
 
-public record BookView( String club, Book book ) implements Routable { … }
+public record BookView( Club club, Book book ) implements Routable { … }
 
 book = club.route( "/books/{book}", BookView.class );
 ```
+
+The `{club}` of the club's host is a `Club` too: a host parameter converts as a path parameter does, so an unknown
+club's host declines before any of the club's routes is invoked.
 
 A link passes the object (`:book="$book"`), and its URL has the book's id (`/books/2`). A request's id becomes the
 book. An id that isn't a number (`/books/abc`) or isn't a book's (`/books/999`) declines the request before the route
 is invoked: `fromString` throws `IllegalArgumentException` for text that isn't a value of the type, and returns null for
 a value that doesn't exist. A type that has no converter is an error when the route is declared.
+
+A value has one text: `/books/007` and `/books/+7` decline, rather than being other URLs of `/books/7`. Text that
+converts to a value whose text is different isn't accepted, unless the converter says its type is written more than one
+way (`canonical()` is false, as for `Double`).
 
 ### Reaching typed routes from templates
 
@@ -168,32 +186,40 @@ public abstract class BaseComponent extends ERXComponent {
 
 ### In templates
 
-`<wo:route>` links to a typed route. Each `:` attribute is one of its parameters:
+`<wo:route>` links to a route, typed or plain. Each `:` attribute is one of its parameters:
 
 ```html
 <wo:route route="$routes.book" :book="$book"><wo:str value="$book.title" /></wo:route>
 <wo:route route="$routes.books" :sort="author">Sort by author</wo:route>
 <wo:route route="$routes.admin" ?key="letmein">Admin</wo:route>
-<wo:route route="$routes.clubHome" :club="$current.id">Visit</wo:route>    <!-- from localhost, to a club's host -->
+<wo:route route="$routes.clubHome" :club="$current">Visit</wo:route>    <!-- from localhost, to a club's host -->
+<wo:route route="$routes.rules">Rules</wo:route>                         <!-- a plain route -->
 ```
 
-- A constant (`:sort="author"`) is converted to the parameter's type, so `author` becomes the enum value.
+- A constant (`:sort="author"`) is checked against the parameter's type, so `author` must be one of the enum's values.
+- Building a link's URL doesn't construct the typed route's record: only its route parameters are needed.
+- A plain route's `:` parameters are its pattern's and its host's, and other values are query parameters.
 - A host parameter the link leaves out is the current request's: on `acme.localhost`, links to the club's routes don't
   repeat `:club`. A link from another host (the landing page on `localhost`) gives it.
 - `?` attributes add query parameters the typed route doesn't declare, as on any link.
-- A parameter the typed route doesn't have, a missing path parameter, or a value of the wrong type is an error when the
-  link renders, naming the typed route and its parameters.
-- `<wo:route>` takes its URL from the typed route only, so it has no `href`, `action` or `pageName`. Other links are
+- A parameter a typed route doesn't have, a missing route parameter, or a value of the wrong type is an error when the
+  link renders, naming the route and its parameters.
+- A host parameter's value must be one host label (letters, digits and hyphens): a dot or a slash would make the link
+  go to another host.
+- `<wo:route>` takes its URL from the route only, so it has no `href`, `action` or `pageName`. Other links are
   `<wo:link>`.
 
 ### From Java
 
 ```java
-final String url = routes.book.url( new BookView( club, book.id() ) );
+final String url = routes.book.url( new BookView( club, book ) );
+final String rules = routes.rules.url( context );
+final String sorted = routes.books.url( Map.of( "sort", Sort.author ), context );
 ```
 
-`url()` generates the URL in the current context, `url( parameters, context )` in a given one. URLs are short
-(`/books/6`) when the application's short URLs are on.
+A typed route takes its record, and any route takes values by name (`url( values, context )`), host parameters taken
+from the request as links do. URLs are short (`/books/6`) when the application's short URLs are on, and a link to
+another host is complete, to that host, in a context generating complete URLs (an email) too.
 
 ### Forms
 
@@ -201,7 +227,7 @@ final String url = routes.book.url( new BookView( club, book.id() ) );
 other components are the form's fields:
 
 ```java
-public record CreateBook( String club, String title, String author, Integer year ) {}
+public record CreateBook( Club club, String title, String author, Integer year ) {}
 
 createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
 ```
@@ -219,11 +245,19 @@ createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook,
 The method is `post` unless the form binds another. `href`, `action` and the direct action bindings aren't accepted:
 other forms are `<wo:form>`.
 
-After a form's post, answer with a redirect to the result (post, redirect, get):
+The route checks the form's fields, and shows the form again with what's wrong, a field that didn't convert included.
+Otherwise it answers with a redirect to the result (post, redirect, get):
 
 ```java
-final Book book = Library.book( form.club(), form.title(), form.author(), form.year() );
-return seeOther( routes.book.url( new BookView( form.club(), book.id() ), invocation.context() ) );
+private static WOActionResults createBook( final CreateBook form, final RouteInvocation invocation ) {
+
+	if( invocation.conversionErrors().containsKey( "year" ) ) {
+		… the form again: "The year is a number, not 'abc'"
+	}
+
+	final Book book = Library.book( form.club().id(), form.title(), form.author(), form.year() );
+	return seeOther( instance().book.url( new BookView( form.club(), book ), invocation.context() ) );
+}
 ```
 
 ## Conditions
@@ -243,7 +277,11 @@ A route accepts every method unless it declares the ones it accepts: `Method.GET
 something, so that a link, a prefetch or a crawler can't trigger it.
 
 When routes at a path don't accept the request's method, the answer is `405 Method Not Allowed`, with an `Allow` header
-listing the methods they do accept. A less specific route, a catch-all say, doesn't get the request instead.
+listing the methods they do accept. A less specific route, a catch-all say, doesn't get the request instead. An
+`OPTIONS` request there is answered with `204` and the same `Allow`.
+
+The method is checked before a group's filters run, so a route behind a login filter answers `405` to a wrong method
+before asking for the login.
 
 Routes with the same pattern and different methods are separate routes:
 
@@ -261,8 +299,9 @@ the route isn't there: the router tries the next route.
 Among routes with the same pattern, one with conditions comes before one without, and an exact host before a host
 pattern.
 
-A typed route with a host pattern takes the host's parameters as components (`ClubHome( String club )`), and links to it
-from another host are complete URLs: `http://acme.localhost:1300/`.
+A typed route with a host pattern takes the host's parameters as components (`ClubHome( Club club )`), and links to it
+from another host are complete URLs: `http://acme.localhost:1300/`. Host parameter names keep their case
+(`{tenantId}`). A route has one condition of each type: a route can't add a host or methods its group already has.
 
 In development, any name ending in `.localhost` is this machine, so host routes need no setup: Bookclubs' clubs are at
 `acme.localhost:1300` and `kronan.localhost:1300`.
@@ -326,7 +365,7 @@ A router has tables: the application's (`application()`) ranks first, whenever i
 ```java
 final RouteGroup routes = router.application();                 // the application's
 …
-GuestbookPlugin.register( router.table( "guestbook" ) );       // a plugin's
+guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
 ```
 
 - **Conflicts:** within one table, two routes matching the same requests (the same pattern, whatever the parameters are
@@ -343,24 +382,28 @@ GuestbookPlugin.register( router.table( "guestbook" ) );       // a plugin's
   final RouteGroup admin = club.group( "/admin" ).named( "admin" );
 
   routes.join( "club" ).map( "/guestbook", … );                              // the plugin
-  routes.join( "admin" ).map( "/guestbook", … );                             // behind the application's admin filter
+  routes.join( "admin", admin -> admin.map( "/guestbook", … ) );            // behind the application's admin filter
   ```
 
-  A group is named before a plugin joins it.
+  `join( name )` joins a group that's named already. A plugin starts before the application declares its groups, so
+  `join( name, body )` maps its routes once the group is named, or now if it is. A group joined but never named is an
+  error on the first request.
 - **Specificity comes first:** a table's rank only decides between the same route. A plugin's `/guestbook` still answers
   `/guestbook` beside an application's catch-all.
 
 ## What a request gets
 
 1. The routes whose path and conditions match, most specific first. The first that doesn't decline answers.
-2. `405` with `Allow`, if routes at the path don't accept the method.
+2. `405` with `Allow`, if routes at the path don't accept the method (`204` with `Allow`, for `OPTIONS`).
 3. `308`, if the path matched a redirecting route only in its other trailing slash form.
 4. Otherwise the router declines, and the route table's other routes, fallback and not found handling get the URL.
 
 ## Not there yet
 
-- Static fields in key paths (#172): templates reach typed routes through an instance.
-- Completing and checking a typed route's parameters in the editor (undur/parslips#12). Until then, link mistakes show
-  when the link renders.
+- Static fields in key paths (#172): templates reach routes through an instance.
+- Completing and checking a route's parameters in the editor (undur/parslips#12), and a form's fields against its
+  record. Until then, link mistakes show when the link renders.
 - Reading a table's routes again on each request in development.
-- A typed route's link to another host assumes the request's scheme and port.
+- A link to another host from a request without a complete URL assumes the request's scheme and port.
+- Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.
+- `/docs` and `/docs/`, both strict, are refused as the same route, though no request matches both.
