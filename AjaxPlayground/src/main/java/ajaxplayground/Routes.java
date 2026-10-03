@@ -59,8 +59,7 @@ public class Routes {
 		// Index
 		routes.map( "/", Main.class );
 
-		// EXPERIMENTAL (route-links branch): endpoints, and the page linking to them
-		Endpoints.INSTANCE.register( routes );
+		// EXPERIMENTAL (route-links branch): the page linking to the endpoints (declared in RouterDemo)
 		routes.map( "/typed", ScenarioRouteLinks.class );
 
 		// Echoes RouteRequestHandler.routePath() for the request, for the URL-shape probe

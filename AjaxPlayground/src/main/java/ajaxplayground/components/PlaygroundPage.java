@@ -21,6 +21,6 @@ public abstract class PlaygroundPage extends ERXComponent {
 	 * EXPERIMENTAL (route-links branch). The endpoints, for links: {@code <wo:link route="$routes.search" …>}
 	 */
 	public Endpoints routes() {
-		return Endpoints.INSTANCE;
+		return Endpoints.instance();
 	}
 }

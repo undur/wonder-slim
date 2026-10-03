@@ -23,6 +23,8 @@ import er.extensions.experimental.routing.core.TrailingSlash;
  *     manage.wrap( requireLogin );
  *     manage.map( "/users", Users.class );
  * }, Host.of( "admin.example.com" ) );
+ *
+ * Endpoint&lt;Search&gt; search = routes.endpoint( "/search/{area}", Search.class );
  * </pre>
  */
 
@@ -71,6 +73,31 @@ public final class RouteGroup {
 	 */
 	public void map( final String pattern, final Class<? extends WOComponent> pageClass, final RouteCondition... conditions ) {
 		map( pattern, invocation -> WOApplication.application().pageWithName( pageClass.getName(), invocation.context() ), conditions );
+	}
+
+	/**
+	 * @return An endpoint mapped in this group, invoked by its parameter record's own {@link Routable#invoke(RoutedInvocation)}
+	 */
+	public <P extends Record & Routable> Endpoint<P> endpoint( final String pattern, final Class<P> parametersClass, final RouteCondition... conditions ) {
+		return endpoint( pattern, parametersClass, ( parameters, invocation ) -> parameters.invoke( invocation ), conditions );
+	}
+
+	/**
+	 * @return An endpoint mapped in this group, invoked by the given action: for a parameter record that's only data, or
+	 *         one of several routes taking the same parameters
+	 */
+	public <P extends Record> Endpoint<P> endpoint( final String pattern, final Class<P> parametersClass, final Endpoint.Action<P> action, final RouteCondition... conditions ) {
+		final List<RouteCondition> allConditions = allConditions( conditions );
+		final Endpoint<P> endpoint = new Endpoint<>( fullPattern( pattern ), allConditions, parametersClass, action );
+		_router.map( _table, fullPattern( pattern ), null, new ERXRouter.Mapped( endpoint::handle, this ), allConditions );
+		return endpoint;
+	}
+
+	/**
+	 * @return A nested group, for mapping its routes and declaring its endpoints afterwards
+	 */
+	public RouteGroup group( final String prefix, final RouteCondition... conditions ) {
+		return group( prefix, group -> {}, conditions );
 	}
 
 	/**

@@ -10,6 +10,8 @@
 			<li><wo:route route="$routes.search" :area="books" :q="$query" :more="$true" id="searchLink">Search books</wo:route></li>
 			<li><wo:route route="$routes.search" :area="music" id="searchMusicLink">Search music, no query</wo:route></li>
 			<li><wo:route route="$routes.item" :id="42" :tab="history" ?highlight="yes" id="itemLink">Item 42, history tab, plus a free query parameter</wo:route></li>
+			<li><wo:route route="$routes.tenantHome" :tenant="acme" :tab="billing" id="tenantLink">Acme's home, on its own host</wo:route></li>
+			<li><wo:route route="$routes.shopItem" :shop="kronan" :id="7" id="shopItemLink">Item 7 in the shop kronan (a group's parameter)</wo:route></li>
 			<li>From Java: <wo:link href="$javaURL" id="javaLink"><wo:str value="$javaURL" /></wo:link></li>
 		</ul>
 		<p>Received: <strong id="received"><wo:str value="$received" valueWhenEmpty="(not rendered by a route)" /></strong></p>

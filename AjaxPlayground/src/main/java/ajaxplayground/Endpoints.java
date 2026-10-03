@@ -5,16 +5,17 @@ import com.webobjects.appserver.WOActionResults;
 import ajaxplayground.components.scenario.ScenarioRouteLinks;
 import er.extensions.experimental.routing.Endpoint;
 import er.extensions.experimental.routing.Routable;
-import er.extensions.routes.RouteInvocation;
-import er.extensions.routes.RouteTable;
+import er.extensions.experimental.routing.RouteGroup;
+import er.extensions.experimental.routing.RoutedInvocation;
+import er.extensions.experimental.routing.core.Host;
 
 /**
- * EXPERIMENTAL (route-links branch). The playground's endpoints, reached by templates as {@code $routes}
- * (see {@code PlaygroundPage.routes()}).
+ * EXPERIMENTAL (route-links branch). The playground's endpoints, declared from the router's routes, reached by templates
+ * as {@code $routes} (see {@code PlaygroundPage.routes()}).
  */
 public class Endpoints {
 
-	public static final Endpoints INSTANCE = new Endpoints();
+	private static Endpoints _instance;
 
 	public enum Area {
 		books, music, films
@@ -26,7 +27,7 @@ public class Endpoints {
 	public record Search( Area area, String q, Boolean more ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RouteInvocation invocation ) {
+		public WOActionResults invoke( final RoutedInvocation invocation ) {
 			return show( this, invocation );
 		}
 	}
@@ -43,21 +44,55 @@ public class Endpoints {
 		}
 	}
 
-	public final Endpoint<Search> search = Endpoint.of( "/typed/search/{area}", Search.class );
+	/**
+	 * A host parameter: the tenant is the host's first label ({tenant}.localhost)
+	 */
+	public record TenantHome( String tenant, String tab ) implements Routable {
 
-	public final Endpoint<ItemParameters> item = Endpoint.of( "/typed/item/{id}", ItemParameters.class, Endpoints::show );
-
-	private Endpoints() {}
-
-	public void register( final RouteTable routes ) {
-		search.mapInto( routes );
-		item.mapInto( routes );
+		@Override
+		public WOActionResults invoke( final RoutedInvocation invocation ) {
+			return show( this, invocation );
+		}
 	}
 
 	/**
-	 * Both routes show the link page, with the parameters they received
+	 * A group's path parameter: the shop comes from the group's prefix (/typed/shops/{shop})
 	 */
-	private static <P> WOActionResults show( final P parameters, final RouteInvocation invocation ) {
+	public record ShopItem( String shop, int id ) implements Routable {
+
+		@Override
+		public WOActionResults invoke( final RoutedInvocation invocation ) {
+			return show( this, invocation );
+		}
+	}
+
+	public final Endpoint<Search> search;
+	public final Endpoint<ItemParameters> item;
+	public final Endpoint<TenantHome> tenantHome;
+	public final Endpoint<ShopItem> shopItem;
+
+	private Endpoints( final RouteGroup routes ) {
+		search = routes.endpoint( "/typed/search/{area}", Search.class );
+		item = routes.endpoint( "/typed/item/{id}", ItemParameters.class, Endpoints::show );
+		tenantHome = routes.endpoint( "/typed/tenant", TenantHome.class, Host.of( "{tenant}.localhost" ) );
+		shopItem = routes.group( "/typed/shops/{shop}" ).endpoint( "/items/{id}", ShopItem.class );
+	}
+
+	/**
+	 * Declares the endpoints in the given routes
+	 */
+	public static void declare( final RouteGroup routes ) {
+		_instance = new Endpoints( routes );
+	}
+
+	public static Endpoints instance() {
+		return _instance;
+	}
+
+	/**
+	 * Every endpoint shows the link page, with the parameters it received
+	 */
+	private static <P> WOActionResults show( final P parameters, final RoutedInvocation invocation ) {
 		final ScenarioRouteLinks page = new ScenarioRouteLinks( invocation.context() );
 		page.received = parameters.toString();
 		return page;

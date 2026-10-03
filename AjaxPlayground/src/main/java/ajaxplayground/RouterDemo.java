@@ -49,6 +49,9 @@ public class RouterDemo {
 		routes.map( "/router/pages/*", ri -> text( ri, "pages wildcard" ) );
 		routes.map( "/router/pages/{name}", ri -> "secret".equals( ri.parameter( "name" ) ) ? RouteHandler.DECLINED : text( ri, "page" ) );
 
+		// The endpoints the /typed page links to
+		Endpoints.declare( routes );
+
 		router.mapInto( routeTable );
 	}
 

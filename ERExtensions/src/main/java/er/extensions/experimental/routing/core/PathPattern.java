@@ -1,5 +1,7 @@
 package er.extensions.experimental.routing.core;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -176,6 +178,43 @@ public final class PathPattern {
 		// The root has one form only
 		final boolean exactForm = count == 0 || path.trailingSlash() == _trailingSlash;
 		return new Match( parameters, exactForm );
+	}
+
+	/**
+	 * @return The path for the given parameter values, each encoded as a path segment, in the pattern's trailing slash
+	 *         form: the reverse of {@link #match(RequestPath)}
+	 * @throws IllegalArgumentException if a parameter has no value, or the pattern is a wildcard
+	 */
+	public String path( final Map<String, String> values ) {
+
+		if( _wildcard ) {
+			throw new IllegalArgumentException( "A path can't be generated for the wildcard pattern " + _source );
+		}
+
+		if( _segments.isEmpty() ) {
+			return "/";
+		}
+
+		final StringBuilder b = new StringBuilder();
+
+		for( final Segment segment : _segments ) {
+			final String text = switch( segment ) {
+				case Literal literal -> literal.text();
+				case Parameter parameter -> {
+					final String value = values.get( parameter.name() );
+
+					if( value == null || value.isEmpty() ) {
+						throw new IllegalArgumentException( "The path pattern %s needs its parameter '%s'".formatted( _source, parameter.name() ) );
+					}
+
+					yield value;
+				}
+			};
+
+			b.append( '/' ).append( URLEncoder.encode( text, StandardCharsets.UTF_8 ).replace( "+", "%20" ) );
+		}
+
+		return _trailingSlash ? b.append( '/' ).toString() : b.toString();
 	}
 
 	/**

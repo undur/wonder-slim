@@ -25,6 +25,6 @@ public class ScenarioRouteLinks extends PlaygroundPage {
 	}
 
 	public String javaURL() {
-		return Endpoints.INSTANCE.search.url( new Search( Area.films, "noir", null ), context() );
+		return Endpoints.instance().search.url( new Search( Area.films, "noir", null ), context() );
 	}
 }

@@ -268,4 +268,17 @@ public class RouterTest {
 		assertEquals( "acme.example.com", Host.of( "{tenant}.example.com" ).host( Map.of( "tenant", "Acme" ) ) );
 		assertTrue( Host.of( "admin.example.com" ).parameterNames().isEmpty() );
 	}
+
+	@Test
+	public void pathsForParameters() {
+		assertEquals( "/", PathPattern.parse( "/" ).path( Map.of() ) );
+		assertEquals( "/items/42", PathPattern.parse( "/items/{id}" ).path( Map.of( "id", "42" ) ) );
+		assertEquals( "/files/a%2Fb%20c/", PathPattern.parse( "/files/{name}/" ).path( Map.of( "name", "a/b c" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/items/{id}" ).path( Map.of() ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/news/*" ).path( Map.of() ) );
+
+		// The reverse of matching
+		final PathPattern pattern = PathPattern.parse( "/files/{name}" );
+		assertEquals( Map.of( "name", "kaffi & kökur/2" ), pattern.match( RequestPath.parse( pattern.path( Map.of( "name", "kaffi & kökur/2" ) ) ) ).parameters() );
+	}
 }
