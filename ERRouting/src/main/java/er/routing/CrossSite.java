@@ -4,21 +4,22 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
 /**
- * EXPERIMENTAL (route-links branch). Whether a route takes requests that change things (POST, PUT, PATCH, DELETE) from
- * a page on another site. By default it doesn't: such a request is answered with {@code 403}, so a page elsewhere can't
- * post a form to the application with the user's cookies. A route meant for that (a webhook a browser posts to, a form
- * another site embeds) says so with {@link #ALLOWED}, as a group can for its routes.
+ * EXPERIMENTAL (route-links branch). Which sites a route takes requests that change things (POST, PUT, PATCH, DELETE)
+ * from. By default only its own origin ({@link #SAME_ORIGIN}): such a request from a page elsewhere is answered with
+ * {@code 403}, so another site can't post a form to the application with the user's cookies. {@link #OWN_HOSTS} also
+ * takes the application's other hosts (a form on the landing page posting to a club's host), and {@link #ALLOWED} any
+ * site (a form another site embeds). A group's level reaches its routes, and a route can set its own.
  *
- * The browser says where a request comes from: {@code Sec-Fetch-Site}, or failing that {@code Origin}, compared with the
- * request's host (and the {@link PublicAddress public address}). A request with neither is allowed, since it doesn't
- * come from a browser page (curl, a server's webhook). Another subdomain counts as another site: a club's page on
- * {@code kronan.example.com} doesn't post to {@code acme.example.com}. Schemes aren't compared, since behind a front end
- * terminating TLS the application sees http.
+ * The browser says where a request comes from: {@code Sec-Fetch-Site}, and {@code Origin}, compared with the request's
+ * host (and the {@link PublicAddress public address}). A request with neither is taken, since it doesn't come from a
+ * browser page (curl, a server's webhook). Schemes aren't compared, since behind a front end terminating TLS the
+ * application sees http. Whether a browser's script on another site may read the answer is CORS's business, not this.
  *
  * Covers routes only: component actions and the route table's other routes aren't checked.
  */
@@ -26,33 +27,44 @@ import com.webobjects.appserver.WOResponse;
 public enum CrossSite implements RouteBehavior {
 
 	/**
-	 * The route takes requests from pages on other sites
+	 * Requests from the route's own origin only (the default)
+	 */
+	SAME_ORIGIN,
+
+	/**
+	 * Requests from any of the application's hosts too: a host one of its routes answers, or the public address's
+	 */
+	OWN_HOSTS,
+
+	/**
+	 * Requests from any site
 	 */
 	ALLOWED;
 
 	private static final Set<String> SAFE_METHODS = Set.of( "GET", "HEAD", "OPTIONS", "TRACE" );
 
 	/**
-	 * @return true if the request changes things (its method isn't GET, HEAD, OPTIONS or TRACE) and comes from a page on
-	 *         another site
+	 * @param ownHost Whether a host (without its port) is one of the application's, for {@link #OWN_HOSTS}
+	 * @return true if the request changes things (its method isn't GET, HEAD, OPTIONS or TRACE) and comes from a site
+	 *         this level doesn't take
 	 */
-	static boolean refused( final WORequest request, final String requestHost, final PublicAddress.Origin publicAddress ) {
+	boolean refuses( final WORequest request, final String requestHost, final PublicAddress.Origin publicAddress, final Predicate<String> ownHost ) {
 
-		if( SAFE_METHODS.contains( request.method().toUpperCase( Locale.ROOT ) ) ) {
+		if( this == ALLOWED || SAFE_METHODS.contains( request.method().toUpperCase( Locale.ROOT ) ) ) {
 			return false;
 		}
 
-		final String fetchSite = request.headerForKey( "sec-fetch-site" );
+		final String fetchSite = request.headerForKey( "sec-fetch-site" ) == null ? null : request.headerForKey( "sec-fetch-site" ).toLowerCase( Locale.ROOT );
 
-		if( fetchSite != null ) {
-			// none: the user's own doing (typed, bookmarked)
-			return !fetchSite.equals( "same-origin" ) && !fetchSite.equals( "none" );
+		// none: the user's own doing (typed, bookmarked)
+		if( "same-origin".equals( fetchSite ) || "none".equals( fetchSite ) ) {
+			return false;
 		}
 
 		final String origin = request.headerForKey( "origin" );
 
 		if( origin == null ) {
-			return false;
+			return fetchSite != null;
 		}
 
 		final String authority = authority( origin );
@@ -61,7 +73,16 @@ public enum CrossSite implements RouteBehavior {
 			return true;
 		}
 
-		return !authority.equals( lower( requestHost ) ) && (publicAddress == null || !authority.equals( publicAddress.host() + publicAddress.portSuffix() ));
+		if( authority.equals( lower( requestHost ) ) || (publicAddress != null && authority.equals( publicAddress.host() + publicAddress.portSuffix() )) ) {
+			return false;
+		}
+
+		return !(this == OWN_HOSTS && ownHost.test( withoutPort( authority ) ));
+	}
+
+	private static String withoutPort( final String authority ) {
+		final int colon = authority.lastIndexOf( ':' );
+		return colon == -1 || authority.endsWith( "]" ) ? authority : authority.substring( 0, colon );
 	}
 
 	/**

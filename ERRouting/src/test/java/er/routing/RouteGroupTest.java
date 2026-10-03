@@ -173,7 +173,7 @@ public class RouteGroupTest {
 		assertEquals( search, searchDescription.route() );
 		assertEquals( Search.class, searchDescription.parametersClass() );
 
-		assertFalse( searchDescription.crossSiteAllowed() );
+		assertEquals( CrossSite.SAME_ORIGIN, searchDescription.crossSite() );
 		assertFalse( searchDescription.fieldsReported() );
 
 		final RouteDescription aboutDescription = router.routes().stream().filter( d -> d.pattern().equals( "/about" ) ).findFirst().orElseThrow();
@@ -347,6 +347,22 @@ public class RouteGroupTest {
 		assertEquals( List.of( CrossSite.ALLOWED ), api.allOptions().stream().filter( CrossSite.class::isInstance ).toList() );
 		assertTrue( router.application().group( "/other" ).allOptions().stream().noneMatch( CrossSite.class::isInstance ) );
 		assertTrue( router.table( "plugin" ).join( "api" ).allOptions().contains( CrossSite.ALLOWED ) );
-		assertTrue( entry( router, "/api/hooks" ).crossSiteAllowed() );
+		assertEquals( CrossSite.ALLOWED, entry( router, "/api/hooks" ).crossSite() );
+
+		// A route sets its own, back to the default
+		api.map( "/strict", NOTHING, Method.POST, CrossSite.SAME_ORIGIN );
+		assertEquals( CrossSite.SAME_ORIGIN, entry( router, "/api/strict" ).crossSite() );
+
+		final RouteGroup forms = router.application().group( "/forms", Fields.REPORTED );
+		assertFalse( forms.route( "/plain", Form.class, ( f, invocation ) -> null, Fields.DECLINED ).reportsFields() );
+	}
+
+	@Test
+	public void aHostRelativeToTheDomainIsResolved() {
+		final ERXRouter router = new ERXRouter();
+		router.application().group( "", Host.of( "{club}.@" ) ).map( "/books", NOTHING );
+
+		// Without a public address, the domain is localhost
+		assertEquals( "{club}.localhost", ((Host)entry( router, "/books" ).conditions().getFirst()).pattern() );
 	}
 }

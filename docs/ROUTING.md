@@ -353,11 +353,19 @@ where a request comes from (`Sec-Fetch-Site`, or `Origin`, compared with the req
 a request with neither isn't from a browser page (curl, a server's webhook), so it's taken. Another subdomain is another
 site: a page on `kronan.localhost` doesn't post to `acme.localhost`.
 
-A route (or a group) meant to take them says so:
+A route or a group says which sites it takes them from:
+
+- `CrossSite.SAME_ORIGIN`: its own origin only, the default.
+- `CrossSite.OWN_HOSTS`: the application's other hosts too, those its routes' host patterns match and the public
+  address's (a form on the landing page posting to a club).
+- `CrossSite.ALLOWED`: any site.
 
 ```java
 final RouteGroup api = club.group( "/api", TrailingSlash.STRICT, CrossSite.ALLOWED );
 ```
+
+A route's own setting wins over its group's, so a route in that group can be `CrossSite.SAME_ORIGIN` again. The same
+goes for fields: `Fields.DECLINED` is the default that `Fields.REPORTED` replaces. `routes()` says each route's level.
 
 This covers routes: component actions and the route table's other routes aren't checked.
 
@@ -368,7 +376,7 @@ its trailing slash policy):
 
 ```java
 createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
-home = routes.route( "/", Home.class, Host.of( "localhost" ) );
+home = routes.route( "/", Home.class, Host.of( "@" ) );
 ```
 
 ### Methods
@@ -404,8 +412,11 @@ A typed route with a host pattern takes the host's parameters as components (`Cl
 from another host are complete URLs: `http://acme.localhost:1300/`. Host parameter names keep their case
 (`{tenantId}`). A host pattern has no port (hosts are compared without one). A route has one condition of each type: a route can't add a host or methods its group already has.
 
-In development, any name ending in `.localhost` is this machine, so host routes need no setup: Bookclubs' clubs are at
-`acme.localhost:1300` and `kronan.localhost:1300`.
+A pattern ending in `@` is relative to the application's domain: the public address's host, or `localhost` without
+one. Bookclubs' clubs are `Host.of( "{club}.@" )` and its landing page `Host.of( "@" )`, so the same code answers
+`acme.localhost:1300` in development (any name ending in `.localhost` is this machine, so there's no setup) and
+`acme.bookclubs.example.com` with `er.routing.publicAddress=https://bookclubs.example.com`. `@` is a whole label, and
+the last.
 
 The host is the request's `Host` header. Whether a front end's `x-forwarded-host` counts is to be decided with #67.
 

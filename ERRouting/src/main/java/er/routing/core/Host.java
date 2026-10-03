@@ -12,6 +12,10 @@ import java.util.regex.Pattern;
 /**
  * A route answers requests to a host: exact ({@code admin.example.com}) or a pattern ({@code {tenant}.example.com}),
  * whose parameters reach the route like path parameters. Hosts are compared without case and port.
+ *
+ * A pattern may end in {@value #DOMAIN}, the application's domain ({@code {tenant}.@}), so the same routes answer
+ * {@code acme.localhost} in development and {@code acme.example.com} deployed. Such a host is resolved with
+ * {@link #withDomain(String)} before it's used.
  */
 
 public final class Host implements RouteCondition {
@@ -22,6 +26,11 @@ public final class Host implements RouteCondition {
 	 * One label of a host name (RFC 1123)
 	 */
 	private static final Pattern HOST_LABEL = Pattern.compile( "[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?" );
+
+	/**
+	 * The last label of a pattern relative to the application's domain
+	 */
+	public static final String DOMAIN = "@";
 
 	private final String _pattern;
 	private final List<String> _labels;
@@ -63,6 +72,14 @@ public final class Host implements RouteCondition {
 
 				names.add( name );
 			}
+			else if( label.equals( DOMAIN ) ) {
+				if( _labels.indexOf( DOMAIN ) != _labels.size() - 1 ) {
+					throw new IllegalArgumentException( "The domain (%s) is the last label of a host pattern: '%s'".formatted( DOMAIN, pattern ) );
+				}
+			}
+			else if( label.contains( DOMAIN ) ) {
+				throw new IllegalArgumentException( "The domain (%s) is a whole label of a host pattern: '%s'".formatted( DOMAIN, pattern ) );
+			}
 			else if( label.contains( "{" ) || label.contains( "}" ) ) {
 				throw new IllegalArgumentException( "A parameter is a whole label of a host pattern: '%s'".formatted( pattern ) );
 			}
@@ -78,6 +95,30 @@ public final class Host implements RouteCondition {
 		return new Host( pattern );
 	}
 
+	public boolean isRelative() {
+		return _labels.getLast().equals( DOMAIN );
+	}
+
+	/**
+	 * @return The host with the application's domain for {@value #DOMAIN} ({@code {tenant}.@} with {@code example.com}
+	 *         is {@code {tenant}.example.com}), itself if it isn't relative
+	 */
+	public Host withDomain( final String domain ) {
+		if( !isRelative() ) {
+			return this;
+		}
+
+		final List<String> labels = new ArrayList<>( _labels.subList( 0, _labels.size() - 1 ) );
+		labels.add( domain );
+		return new Host( String.join( ".", labels ) );
+	}
+
+	private void requireResolved() {
+		if( isRelative() ) {
+			throw new IllegalStateException( "The host pattern %s is relative to the application's domain, and was used before it was resolved (withDomain())".formatted( _pattern ) );
+		}
+	}
+
 	public String pattern() {
 		return _pattern;
 	}
@@ -88,6 +129,7 @@ public final class Host implements RouteCondition {
 
 	@Override
 	public Result test( final RouteRequest request ) {
+		requireResolved();
 		final String host = request.host();
 
 		if( host == null ) {
@@ -161,6 +203,7 @@ public final class Host implements RouteCondition {
 	 * @return The host for the given parameter values, for generating a URL to the route
 	 */
 	public String host( final Map<String, String> parameters ) {
+		requireResolved();
 		final List<String> labels = new ArrayList<>();
 
 		for( final String label : _labels ) {

@@ -51,7 +51,7 @@ public class BookclubRoutes {
 	/**
 	 * The host every club's routes answer
 	 */
-	public static final Host CLUB_HOST = Host.of( "{club}.localhost" );
+	public static final Host CLUB_HOST = Host.of( "{club}.@" );
 
 	// ---- The landing page, on localhost ----
 
@@ -230,7 +230,7 @@ public class BookclubRoutes {
 		final RouteGroup routes = router.application();
 
 		// The landing page answers localhost only: on a club's host, / is the club's home
-		home = routes.route( "/", Home.class, Host.of( "localhost" ) );
+		home = routes.route( "/", Home.class, Host.of( "@" ) );
 
 		// A group by host alone: every route in it answers {club}.localhost, with "club" a parameter
 		final RouteGroup club = routes.group( "", CLUB_HOST ).named( "club" );

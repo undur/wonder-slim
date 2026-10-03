@@ -21,6 +21,7 @@ import com.webobjects.appserver.WOResponse;
 import er.routing.core.Converters;
 import er.routing.core.Host;
 import er.routing.core.RouteOption;
+import er.routing.core.RouteCondition;
 import er.routing.core.RouteRequest;
 import er.routing.core.Router;
 import er.routing.core.TrailingSlash;
@@ -48,7 +49,7 @@ public class ERXRouter {
 	/**
 	 * What the core router routes to: a handler, and the group it was mapped in (for its wrapping)
 	 */
-	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, boolean crossSiteAllowed ) {}
+	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, CrossSite crossSite ) {}
 
 	private final Router<Mapped> _router;
 	private final Converters _converters = new Converters();
@@ -101,7 +102,7 @@ public class ERXRouter {
 	 *         listing them, say)
 	 */
 	public List<RouteDescription> routes() {
-		return _router.routes().stream().map( e -> new RouteDescription( e.path().source(), e.conditions(), e.trailingSlash(), e.table(), e.handler().route(), e.handler().parametersClass(), e.handler().crossSiteAllowed(), e.handler().route() instanceof Route<?> r && r.reportsFields() ) ).toList();
+		return _router.routes().stream().map( e -> new RouteDescription( e.path().source(), e.conditions(), e.trailingSlash(), e.table(), e.handler().route(), e.handler().parametersClass(), e.handler().crossSite(), e.handler().route() instanceof Route<?> r && r.reportsFields() ) ).toList();
 	}
 
 	/**
@@ -130,6 +131,20 @@ public class ERXRouter {
 	 */
 	public RouteGroup table( final String name ) {
 		return new RouteGroup( this, _router.table( name ), null, "", List.of() );
+	}
+
+	/**
+	 * @return true if one of the routes answers the host (without a port), or it's the public address's
+	 */
+	boolean isOwnHost( final String host ) {
+		final PublicAddress.Origin publicAddress = PublicAddress.configured();
+
+		if( publicAddress != null && publicAddress.host().equals( host ) ) {
+			return true;
+		}
+
+		final RouteRequest request = new RouteRequest( "GET", host, "/" );
+		return _router.routes().stream().flatMap( e -> e.conditions().stream() ).filter( Host.class::isInstance ).anyMatch( h -> h.test( request ) instanceof RouteCondition.Satisfied );
 	}
 
 	/**
@@ -266,21 +281,13 @@ public class ERXRouter {
 
 	private WOActionResults answer( final Router.Matched<Mapped> matched, final er.extensions.routes.RouteInvocation invocation ) {
 
-		Boolean crossSite = null;
-
 		for( final Router.Candidate<Mapped> candidate : matched.candidates() ) {
 			final Mapped mapped = candidate.handler();
 
-			// A post from a page on another site, to a route that doesn't take those
-			if( !mapped.crossSiteAllowed() ) {
-				if( crossSite == null ) {
-					crossSite = CrossSite.refused( invocation.request(), RequestHost.host( invocation.request() ), PublicAddress.configured() );
-				}
-
-				if( crossSite ) {
-					logger.debug( "The route {} refused {} {} from another site (origin {})", candidate.entry(), invocation.request().method(), invocation.url(), invocation.request().headerForKey( "origin" ) );
-					return CrossSite.forbidden();
-				}
+			// A post from a page on a site the route doesn't take those from
+			if( mapped.crossSite().refuses( invocation.request(), RequestHost.host( invocation.request() ), PublicAddress.configured(), this::isOwnHost ) ) {
+				logger.debug( "The route {} refused {} {} from another site (origin {})", candidate.entry(), invocation.request().method(), invocation.url(), invocation.request().headerForKey( "origin" ) );
+				return CrossSite.forbidden();
 			}
 
 			final RouteInvocation routedInvocation = new RouteInvocation( invocation.url(), invocation.request(), candidate.parameters(), _converters );

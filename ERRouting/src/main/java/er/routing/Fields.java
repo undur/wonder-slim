@@ -17,6 +17,11 @@ package er.routing;
 public enum Fields implements RouteBehavior {
 
 	/**
+	 * A field that doesn't convert declines the request, or goes to the route's {@code whenInvalid} (the default)
+	 */
+	DECLINED,
+
+	/**
 	 * Fields that don't convert are null, and reported in {@link RouteInvocation#conversionErrors()}
 	 */
 	REPORTED;

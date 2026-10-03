@@ -59,7 +59,7 @@ public final class RouteGroup {
 		_table = table;
 		_parent = parent;
 		_prefix = prefix;
-		_conditions = options.stream().filter( RouteCondition.class::isInstance ).map( RouteCondition.class::cast ).toList();
+		_conditions = options.stream().filter( RouteCondition.class::isInstance ).map( option -> (RouteCondition)resolved( option ) ).toList();
 		_trailingSlash = options.stream().filter( TrailingSlash.class::isInstance ).map( TrailingSlash.class::cast ).findFirst().orElse( null );
 		_behaviors = options.stream().filter( RouteBehavior.class::isInstance ).map( RouteBehavior.class::cast ).toList();
 	}
@@ -129,7 +129,7 @@ public final class RouteGroup {
 		final List<RouteOption> allOptions = allOptions( options );
 		final Host host = (Host)allOptions.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
 		final PlainRoute route = new PlainRoute( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, allOptions.contains( CrossSite.ALLOWED ) ), allOptions );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, crossSite( allOptions ) ), allOptions );
 		return route;
 	}
 
@@ -154,7 +154,7 @@ public final class RouteGroup {
 	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteOption... options ) {
 		final List<RouteOption> allOptions = allOptions( options );
 		final Route<P> route = new Route<>( fullPattern( pattern ), allOptions, parametersClass, action, _router.converters() );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( route::handle, this, route, parametersClass, allOptions.contains( CrossSite.ALLOWED ) ), allOptions );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( route::handle, this, route, parametersClass, crossSite( allOptions ) ), allOptions );
 		return route;
 	}
 
@@ -201,7 +201,7 @@ public final class RouteGroup {
 
 		for( final RouteOption option : options ) {
 			Objects.requireNonNull( option, "A route option is null (a static field read before it was set?)" );
-			all.add( option );
+			all.add( resolved( option ) );
 			ownPolicy |= option instanceof TrailingSlash;
 		}
 
@@ -218,6 +218,21 @@ public final class RouteGroup {
 		}
 
 		return all;
+	}
+
+	/**
+	 * @return The sites the options take requests that change things from: their level, the same origin by default
+	 */
+	private static CrossSite crossSite( final List<RouteOption> options ) {
+		return options.stream().filter( CrossSite.class::isInstance ).map( CrossSite.class::cast ).findFirst().orElse( CrossSite.SAME_ORIGIN );
+	}
+
+	/**
+	 * @return The option, a host relative to the application's domain ({@code {club}.@}) resolved to the public
+	 *         address's host, or {@code localhost} without one
+	 */
+	private static RouteOption resolved( final RouteOption option ) {
+		return option instanceof Host host && host.isRelative() ? host.withDomain( PublicAddress.domain() ) : option;
 	}
 
 	/**

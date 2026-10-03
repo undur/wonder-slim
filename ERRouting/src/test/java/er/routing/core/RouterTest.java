@@ -438,4 +438,16 @@ public class RouterTest {
 		assertInstanceOf( NoMatch.class, get( router, "/files/./y" ) );
 		assertEquals( Map.of( "*", "x/.../y" ), parameters( get( router, "/files/x/.../y" ) ) );
 	}
+
+	@Test
+	public void aHostRelativeToTheDomain() {
+		final Host host = Host.of( "{club}.@" );
+
+		assertTrue( host.isRelative() );
+		assertEquals( "{club}.example.com", host.withDomain( "example.com" ).pattern() );
+		assertEquals( "example.com", Host.of( "@" ).withDomain( "example.com" ).pattern() );
+		assertThrows( IllegalStateException.class, () -> host.host( Map.of( "club", "acme" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> Host.of( "@.example.com" ) );
+		assertThrows( IllegalArgumentException.class, () -> Host.of( "{club}.x@" ) );
+	}
 }

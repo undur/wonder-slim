@@ -75,6 +75,15 @@ public final class PublicAddress {
 	}
 
 	/**
+	 * @return The application's domain, for host patterns relative to it ({@code {club}.@}): the public address's host,
+	 *         {@code localhost} without one (development, where any {@code *.localhost} is this machine)
+	 */
+	public static String domain() {
+		final Origin origin = configured();
+		return origin == null ? "localhost" : origin.host();
+	}
+
+	/**
 	 * @return The configured public address
 	 * @throws IllegalStateException if none is set, naming the property
 	 */

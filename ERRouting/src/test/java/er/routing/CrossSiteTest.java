@@ -25,7 +25,7 @@ public class CrossSiteTest {
 	}
 
 	private static boolean refused( final String method, final Map<String, String> headers ) {
-		return CrossSite.refused( request( method, headers ), HOST, null );
+		return CrossSite.SAME_ORIGIN.refuses( request( method, headers ), HOST, null, host -> false );
 	}
 
 	@Test
@@ -62,7 +62,21 @@ public class CrossSiteTest {
 	public void thePublicAddressIsTheApplicationsOwn() {
 		final WORequest request = request( "POST", Map.of( "origin", "https://bookclubs.example.com" ) );
 
-		assertFalse( CrossSite.refused( request, "localhost:1300", PublicAddress.parse( "https://bookclubs.example.com" ) ) );
-		assertTrue( CrossSite.refused( request, "localhost:1300", null ) );
+		assertFalse( CrossSite.SAME_ORIGIN.refuses( request, "localhost:1300", PublicAddress.parse( "https://bookclubs.example.com" ), host -> false ) );
+		assertTrue( CrossSite.SAME_ORIGIN.refuses( request, "localhost:1300", null, host -> false ) );
+	}
+
+	@Test
+	public void ownHostsTakesTheApplicationsOtherHosts() {
+		final java.util.function.Predicate<String> ownHost = host -> host.endsWith( ".localhost" ) || host.equals( "localhost" );
+		final WORequest fromLanding = request( "POST", Map.of( "sec-fetch-site", "same-site", "origin", "http://localhost:1300" ) );
+		final WORequest fromElsewhere = request( "POST", Map.of( "sec-fetch-site", "cross-site", "origin", "https://evil.example" ) );
+		final WORequest sameSiteWithoutOrigin = request( "POST", Map.of( "sec-fetch-site", "same-site" ) );
+
+		assertTrue( CrossSite.SAME_ORIGIN.refuses( fromLanding, HOST, null, ownHost ) );
+		assertFalse( CrossSite.OWN_HOSTS.refuses( fromLanding, HOST, null, ownHost ) );
+		assertTrue( CrossSite.OWN_HOSTS.refuses( fromElsewhere, HOST, null, ownHost ) );
+		assertTrue( CrossSite.OWN_HOSTS.refuses( sameSiteWithoutOrigin, HOST, null, ownHost ) );
+		assertFalse( CrossSite.ALLOWED.refuses( fromElsewhere, HOST, null, ownHost ) );
 	}
 }
