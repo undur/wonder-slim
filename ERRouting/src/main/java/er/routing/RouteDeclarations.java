@@ -75,7 +75,7 @@ class RouteDeclarations {
 	private volatile RuntimeException _failure;
 
 	/**
-	 * True once it's logged that the routes aren't declared again, since one was mapped outside a declaration
+	 * True once it's logged that the routes aren't declared again, since something was added outside a declaration
 	 */
 	private volatile boolean _reloadRefusalLogged;
 
@@ -128,7 +128,7 @@ class RouteDeclarations {
 		if( undeclared != null ) {
 			if( !_reloadRefusalLogged && _changes.changed() ) {
 				_reloadRefusalLogged = true;
-				logger.warn( "The routes aren't declared again when their classes change, since {} outside a declaration (ERXRouter.declare()), and it would be lost", undeclared );
+				logger.warn( "The routes aren't declared again when their classes change: {} outside a declaration (ERXRouter.declare()), which declaring them again would lose", undeclared );
 			}
 
 			return;

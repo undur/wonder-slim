@@ -186,4 +186,19 @@ public class RouteDeclarationsTest {
 		admin[0].wrap( ( invocation, next ) -> next.handle( invocation ) );
 		assertEquals( "a filter on /admin, added", declarations.router().undeclared() );
 	}
+
+	@Test
+	public void aWhenInvalidOrAJoinOutsideADeclarationStopsDeclaringAgain() {
+		final Object[] kept = new Object[2];
+		final RouteDeclarations first = new RouteDeclarations( ERXRouter::new, new Switch() );
+		final RouteDeclarations second = new RouteDeclarations( ERXRouter::new, new Switch() );
+		first.declare( router -> kept[0] = router.application().route( "/pages", Page.class, ( p, invocation ) -> null ) );
+		second.declare( router -> kept[1] = router.table( "plugin" ) );
+
+		((Route<?>)kept[0]).whenInvalid( ( invocation, reason ) -> null );
+		assertTrue( first.router().undeclared().startsWith( "the whenInvalid of" ), first.router().undeclared() );
+
+		((RouteGroup)kept[1]).join( "admin", admin -> {} );
+		assertEquals( "a join to the group admin, made", second.router().undeclared() );
+	}
 }

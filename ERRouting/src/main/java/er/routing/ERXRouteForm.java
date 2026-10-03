@@ -55,6 +55,14 @@ public class ERXRouteForm extends ERXWOForm {
 	}
 
 	@Override
+	public void appendToResponse( final WOResponse response, final WOContext context ) {
+
+		// A render that threw before its children left no query for this one, whose action may not be rendered (disabled)
+		_query.remove();
+		super.appendToResponse( response, context );
+	}
+
+	@Override
 	public void appendChildrenToResponse( final WOResponse response, final WOContext context ) {
 		super.appendChildrenToResponse( response, context );
 

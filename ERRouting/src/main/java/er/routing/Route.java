@@ -74,6 +74,7 @@ public final class Route<P extends Record> implements Linkable {
 	private final Host _host;
 	private final Class<P> _parametersClass;
 	private final Action<P> _action;
+	private final ERXRouter _router;
 	private final Converters _converters;
 	private final boolean _reportFields;
 	private volatile Invalid _whenInvalid;
@@ -90,8 +91,9 @@ public final class Route<P extends Record> implements Linkable {
 	 */
 	private final List<String> _routeParameterNames;
 
-	Route( final String pattern, final List<RouteOption> options, final Class<P> parametersClass, final Action<P> action, final Converters converters ) {
-		_converters = Objects.requireNonNull( converters );
+	Route( final ERXRouter router, final String pattern, final List<RouteOption> options, final Class<P> parametersClass, final Action<P> action ) {
+		_router = router;
+		_converters = router.converters();
 		_reportFields = options.contains( Fields.REPORTED );
 		_path = PathPattern.parse( pattern );
 		_host = (Host)options.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
@@ -245,6 +247,7 @@ public final class Route<P extends Record> implements Linkable {
 	 * @return The route
 	 */
 	public Route<P> whenInvalid( final Invalid handler ) {
+		_router.undeclared( "the whenInvalid of " + description() + ", set" );
 		_whenInvalid = Objects.requireNonNull( handler );
 		return this;
 	}

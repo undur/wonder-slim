@@ -26,7 +26,7 @@ public class AppRoutes {
 	private AppRoutes( final ERXRouter router ) {
 		final RouteGroup routes = router.application();
 		home = routes.map( "/", Main.class );
-		routes.map( "/items/{id}", ri -> ri.page( ItemPage.class ).item( ri.parameter( "id", Item.class ) ) );
+		routes.map( "/items/{id}", ri -> ri.page( ItemPage.class ).itemID( ri.parameter( "id", Integer.class ) ) );
 	}
 
 	public static void declare() {
@@ -67,7 +67,8 @@ not for every URL: a route for one host doesn't claim a path for all of them. (A
 seen by the welcome page's check, then.)
 
 `ERXRouter.defaultRouter().routes()` describes every route in precedence order (`RouteDescription`): its pattern,
-conditions, trailing slash policy and table, the route itself for linking, and a typed route's record class.
+conditions, trailing slash policy and table, the route itself for linking, a typed route's record class, the sites it
+takes posts from (`CrossSite`), and whether it reports fields that don't convert (`Fields.REPORTED`).
 
 ## Routes
 
@@ -115,8 +116,8 @@ Throwing `Declined` declines from anywhere inside a route, as returning `RouteHa
 - Paths are case-sensitive.
 - A path with a `.` or `..` segment (or its encoded form) matches no route. Browsers resolve them away, so such a path
   was written by hand, and a wildcard's remainder never carries one: a handler serving files from it is safe from `../`.
-  Generating a link with `.` or `..` as a parameter's value is an error, and so is one containing `%` or `\`: servers
-  refuse an encoded `%` or `\` in a path, so the link wouldn't reach the application.
+  Generating a link with `.` or `..` as a parameter's value is an error, and so is one containing `%`, `\` or a control
+  character: servers refuse those in a path, encoded, so the link wouldn't reach the application.
 
 ### Which route answers
 
@@ -237,6 +238,7 @@ A query parameter or field given several values (`?author=Laxness&author=Undset`
 component of a type with a converter:
 
 ```java
+// Books, with an author filter
 public record Books( Club club, Sort sort, Integer page, List<String> author ) implements Routable { … }
 ```
 
@@ -252,8 +254,8 @@ with: an absent `Boolean` is null, and a checked one posts `on`.
 
 ### Reaching typed routes from templates
 
-Templates reach typed routes through a key path, which the editor can follow to each typed route's record. Bookclubs keeps its
-typed routes as fields of one class, and its pages reach it as `$routes`:
+Templates reach typed routes through a key path, which the editor can follow to each typed route's record. Bookclubs
+keeps its typed routes as fields of one class, and its pages reach it as `$routes`:
 
 ```java
 public class BookclubRoutes {
@@ -338,19 +340,20 @@ A scheme, a host, and a port if it isn't the scheme's: a path is refused (a base
 - `route.completeURL( record )`, or `completeURL( values )` on any route, makes a complete URL without a request, for
   a background job's email. Host parameters are given then, since there's no request to take them from.
 
-Without it, URLs take the request's scheme, host and port, and `completeURL` outside a request fails, naming the
-property. Relative links don't change either way.
+Without it, a link to another host takes the request's scheme and port, a complete URL of a route without a host has
+the machine's name (`http://my-macbook.local:1300/…`), and `completeURL` outside a request fails, naming the property.
+Relative links don't change either way.
 
 ### Forms
 
-`<wo:routeForm>` posts to a typed route. It takes `route` and `:` parameters as `<wo:route>` does, and the record's
-other components are the form's fields. A `method="get"` form's query parameters (`:sort="$sort"`) are rendered as
-hidden fields, since a browser replaces a get form's action query with its fields.
+`<wo:routeForm>` posts to a route, typed or plain. It takes `route` and `:` parameters as `<wo:route>` does, and a typed
+route's other components are the form's fields. A `method="get"` form's query parameters (`:sort="$sort"`) are rendered
+as hidden fields, since a browser replaces a get form's action query with its fields.
 
 ```java
 public record CreateBook( Club club, String title, String author, Integer year ) {}
 
-createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
+createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
 ```
 
 ```html
@@ -387,8 +390,8 @@ A route doesn't take a request that changes things (POST, PUT, PATCH, DELETE) fr
 answered with `403`, so a page elsewhere can't post a form to the application with the user's cookies. The browser says
 where a request comes from (`Sec-Fetch-Site`, or `Origin`, compared with the request's host and the public address), and
 a request with neither isn't from a browser page (curl, a server's webhook), so it's taken. For the same origin, the
-browser's `Sec-Fetch-Site` decides when it's sent, since it accounts for the scheme, which the application can't see. Another subdomain is another
-site: a page on `kronan.localhost` doesn't post to `acme.localhost`.
+browser's `Sec-Fetch-Site` decides when it's sent, since it accounts for the scheme, which the application can't see.
+Another subdomain is another site: a page on `kronan.localhost` doesn't post to `acme.localhost`.
 
 A route or a group says which sites it takes them from:
 
@@ -413,7 +416,7 @@ A route can require more of a request than its path. Conditions are declared wit
 its trailing slash policy):
 
 ```java
-createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
+createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
 home = routes.route( "/", Home.class, Host.of( "@" ) );
 ```
 
@@ -433,8 +436,8 @@ before asking for the login.
 Routes with the same pattern and different methods are separate routes:
 
 ```java
-api.map( "/books/{id}", BookclubRoutes::apiBook, Method.GET );
-api.map( "/books/{id}", BookclubRoutes::apiDeleteBook, Method.DELETE );
+api.map( "/books/{book}", BookclubRoutes::apiBook, Method.GET );
+api.map( "/books/{book}", BookclubRoutes::apiDeleteBook, Method.DELETE );
 ```
 
 ### Hosts
@@ -448,7 +451,8 @@ pattern.
 
 A typed route with a host pattern takes the host's parameters as components (`ClubHome( Club club )`), and links to it
 from another host are complete URLs: `http://acme.localhost:1300/`. Host parameter names keep their case
-(`{tenantId}`). A host pattern has no port (hosts are compared without one). A route has one condition of each type: a route can't add a host or methods its group already has.
+(`{tenantId}`). A host pattern has no port (hosts are compared without one). A route has one condition of each type:
+a route can't add a host or methods its group already has.
 
 A pattern ending in `@` is relative to the application's domain: the public address's host, or `localhost` without
 one. Bookclubs' clubs are `Host.of( "{club}.@" )` and its landing page `Host.of( "@" )`, so the same code answers
@@ -545,17 +549,21 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
 
 ## What a request gets
 
-1. The routes whose path and conditions match, most specific first. The first that doesn't decline answers.
+1. The routes whose path and conditions match, most specific first. The first that doesn't decline answers, unless:
+   - the request changes things and comes from a site the route doesn't take those from: `403`;
+   - a route parameter isn't in its canonical text (`/books/007`): `308` to the URL with it (`/books/7`).
 2. `405` with `Allow`, if routes at the path don't accept the method (`204` with `Allow`, for `OPTIONS`).
 3. `308`, if the path matched a redirecting route only in its other trailing slash form.
 4. Otherwise the router declines, and the route table's other routes, fallback and not found handling get the URL.
 
 ## Not there yet
 
+The routing work's open items, in full, are in `docs/ROUTE_LINKS.md` (and #178). Those a user of the router meets:
+
 - Static fields in key paths (#172): templates reach routes through an instance.
 - Completing and checking a route's parameters in the editor (undur/parslips#12), and a form's fields against its
   record. Until then, link mistakes show when the link renders.
-- Without the public address, a link to another host assumes the request's scheme and port, and complete URLs of
-  routes without a host have the machine's name (`http://my-macbook.local:1300/…`).
 - Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.
 - `/docs` and `/docs/`, both strict, are refused as the same route, though no request matches both.
+- An element rendering a route's bare URL (for a script), and route URLs for the Ajax elements.
+- Converging with the existing route table (`er.extensions.routes`), and the same router in ng-objects.

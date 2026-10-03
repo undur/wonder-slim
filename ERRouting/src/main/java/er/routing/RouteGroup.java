@@ -89,6 +89,7 @@ public final class RouteGroup {
 	 * A group never named fails the application's startup (see {@link ERXRouter#checkJoins()}).
 	 */
 	public void join( final String name, final Consumer<RouteGroup> body ) {
+		_router.undeclared( "a join to the group " + name + ", made" );
 		_router.whenNamed( name, named -> body.accept( joined( named ) ) );
 	}
 
@@ -155,7 +156,7 @@ public final class RouteGroup {
 	 */
 	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteOption... options ) {
 		final List<RouteOption> allOptions = allOptions( options );
-		final Route<P> route = new Route<>( fullPattern( pattern ), allOptions, parametersClass, action, _router.converters() );
+		final Route<P> route = new Route<>( _router, fullPattern( pattern ), allOptions, parametersClass, action );
 		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( route::handle, this, route, parametersClass, crossSite( allOptions ) ), allOptions );
 		return route;
 	}
