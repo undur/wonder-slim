@@ -1,5 +1,7 @@
 package er.routing;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.webobjects.appserver.WORequest;
@@ -15,7 +17,7 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 
 	private final Map<String, String> _parameters;
 	private final Converters _converters;
-	private final Map<String, String> _conversionErrors = new java.util.LinkedHashMap<>();
+	private final Map<String, String> _conversionErrors = new LinkedHashMap<>();
 
 	public RouteInvocation( final String url, final WORequest request, final Map<String, String> parameters, final Converters converters ) {
 		super( url, request );
@@ -56,6 +58,11 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 			throw new Declined( "There's no %s '%s'".formatted( type.getSimpleName(), string ) );
 		}
 
+		// One URL per value: other text for it is redirected to its own (007 to 7)
+		if( !_converters.isCanonical( string, value ) ) {
+			throw new NotCanonical( name, _converters.toString( value ) );
+		}
+
 		return value;
 	}
 
@@ -64,7 +71,7 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 	 *         don't exist), by name, with the text that was given. Those components are null.
 	 */
 	public Map<String, String> conversionErrors() {
-		return java.util.Collections.unmodifiableMap( _conversionErrors );
+		return Collections.unmodifiableMap( _conversionErrors );
 	}
 
 	void addConversionError( final String name, final String text ) {

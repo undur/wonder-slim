@@ -33,8 +33,8 @@ public final class Converters {
 		public String toString( T value );
 
 		/**
-		 * @return true if a value has one text: text converting to a value whose text is different ({@code 007} for 7)
-		 *         isn't accepted, so each value has one URL. False for types written more than one way ({@code 1} and
+		 * @return true if a value has one text: a route parameter given other text ({@code 007} for 7) is redirected to
+		 *         its canonical text, so each value has one URL. False for types written more than one way ({@code 1} and
 		 *         {@code 1.0}).
 		 */
 		public default boolean canonical() {
@@ -150,15 +150,23 @@ public final class Converters {
 			return (T)Enum.valueOf( (Class<Enum>)boxed, string );
 		}
 
-		final Converter converter = converter( boxed );
-		final Object value = converter.fromString( string );
+		return (T)converter( boxed ).fromString( string );
+	}
 
-		// One text per value: 007 isn't 7's text, so /books/007 isn't another URL of /books/7
-		if( value != null && converter.canonical() && !string.equals( converter.toString( value ) ) ) {
-			throw new IllegalArgumentException( "'%s' isn't how a %s is written: '%s' is".formatted( string, boxed.getSimpleName(), converter.toString( value ) ) );
+	/**
+	 * @return true if the text is the value's text, or the value's type is written more than one way ({@link
+	 *         Converter#canonical()} is false): a route parameter given other text ({@code 007} for 7) is answered with a
+	 *         redirect to the URL with the canonical text, so each value has one URL
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public boolean isCanonical( final String text, final Object value ) {
+
+		if( value instanceof Enum<?> e ) {
+			return text.equals( e.name() );
 		}
 
-		return (T)value;
+		final Converter converter = converter( value.getClass() );
+		return !converter.canonical() || text.equals( converter.toString( value ) );
 	}
 
 	/**
@@ -204,12 +212,19 @@ public final class Converters {
 		return type;
 	}
 
+	/**
+	 * @return true for {@code true}, and for {@code on}, what a checkbox without a value posts; false for {@code false}
+	 */
 	private static Boolean parseBoolean( final String string ) {
-		if( !string.equals( "true" ) && !string.equals( "false" ) ) {
-			throw new IllegalArgumentException( "Not a boolean: " + string );
+		if( string.equalsIgnoreCase( "true" ) || string.equalsIgnoreCase( "on" ) ) {
+			return true;
 		}
 
-		return Boolean.valueOf( string );
+		if( string.equalsIgnoreCase( "false" ) ) {
+			return false;
+		}
+
+		throw new IllegalArgumentException( "Not a boolean: " + string );
 	}
 
 	private static Instant parseInstant( final String string ) {

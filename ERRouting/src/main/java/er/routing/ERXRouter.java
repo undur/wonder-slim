@@ -1,7 +1,14 @@
 package er.routing;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +19,7 @@ import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
 import er.routing.core.Converters;
+import er.routing.core.Host;
 import er.routing.core.RouteOption;
 import er.routing.core.RouteRequest;
 import er.routing.core.Router;
@@ -43,8 +51,8 @@ public class ERXRouter {
 
 	private final Router<Mapped> _router;
 	private final Converters _converters = new Converters();
-	private final java.util.Map<String, RouteGroup> _namedGroups = new java.util.concurrent.ConcurrentHashMap<>();
-	private final java.util.Map<String, List<java.util.function.Consumer<RouteGroup>>> _pendingJoins = new java.util.LinkedHashMap<>();
+	private final Map<String, RouteGroup> _namedGroups = new ConcurrentHashMap<>();
+	private final Map<String, List<Consumer<RouteGroup>>> _pendingJoins = new LinkedHashMap<>();
 	private int _loggedOverrides;
 	private RouteGroup _application;
 
@@ -148,7 +156,7 @@ public class ERXRouter {
 		}
 
 		// Plugins that joined the group before it was named map their routes now
-		final List<java.util.function.Consumer<RouteGroup>> pending = _pendingJoins.remove( name );
+		final List<Consumer<RouteGroup>> pending = _pendingJoins.remove( name );
 
 		if( pending != null ) {
 			pending.forEach( join -> join.accept( group ) );
@@ -158,14 +166,14 @@ public class ERXRouter {
 	/**
 	 * Runs the action with the named group: now, if it's named, otherwise once it is
 	 */
-	synchronized void whenNamed( final String name, final java.util.function.Consumer<RouteGroup> action ) {
+	synchronized void whenNamed( final String name, final Consumer<RouteGroup> action ) {
 		final RouteGroup group = _namedGroups.get( name );
 
 		if( group != null ) {
 			action.accept( group );
 		}
 		else {
-			_pendingJoins.computeIfAbsent( name, n -> new java.util.ArrayList<>() ).add( action );
+			_pendingJoins.computeIfAbsent( name, n -> new ArrayList<>() ).add( action );
 		}
 	}
 
@@ -246,6 +254,9 @@ public class ERXRouter {
 			catch( Declined declined ) {
 				results = RouteHandler.DECLINED;
 			}
+			catch( NotCanonical notCanonical ) {
+				return canonicalRedirect( candidate, notCanonical, invocation );
+			}
 
 			if( results == null ) {
 				throw new IllegalStateException( "The route %s returned null for URL '%s'. Return RouteHandler.DECLINED to pass the URL on to the next route".formatted( candidate.entry(), invocation.url() ) );
@@ -269,10 +280,34 @@ public class ERXRouter {
 	}
 
 	/**
+	 * A {@code 308} to the URL with a route parameter's canonical text ({@code /books/007} to {@code /books/7}), keeping
+	 * the query string
+	 */
+	private static WOActionResults canonicalRedirect( final Router.Candidate<Mapped> candidate, final NotCanonical notCanonical, final er.extensions.routes.RouteInvocation invocation ) {
+		final Map<String, String> values = new LinkedHashMap<>( candidate.parameters() );
+		values.put( notCanonical.name, notCanonical.canonicalText );
+		final Host host = (Host)candidate.entry().conditions().stream().filter( Host.class::isInstance ).findFirst().orElse( null );
+
+		// A wildcard route has no URL of its own to redirect to
+		if( candidate.entry().path().isWildcard() ) {
+			return RouteHandler.DECLINED;
+		}
+
+		final String uri = invocation.request().uri();
+		final int q = uri.indexOf( '?' );
+		final String url = RouteURLs.url( candidate.entry().path(), host, values, values.keySet(), invocation.context() );
+
+		final WOResponse response = new WOResponse();
+		response.setStatus( 308 );
+		response.setHeader( q == -1 ? url : url + uri.substring( q ), "location" );
+		return response;
+	}
+
+	/**
 	 * The answer to {@code OPTIONS} at a path whose routes don't take it themselves: the methods they accept
 	 */
 	private static WOResponse options( final Router.MethodNotAllowed<Mapped> notAllowed ) {
-		final java.util.Set<String> allowed = new java.util.TreeSet<>( notAllowed.allowedMethods() );
+		final Set<String> allowed = new TreeSet<>( notAllowed.allowedMethods() );
 		allowed.add( "OPTIONS" );
 
 		final WOResponse response = new WOResponse();

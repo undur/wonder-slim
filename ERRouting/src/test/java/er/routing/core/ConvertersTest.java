@@ -82,16 +82,22 @@ public class ConvertersTest {
 	}
 
 	@Test
-	public void oneTextPerValue() {
+	public void lenientParsingAndCanonicalText() {
 		final Converters converters = new Converters();
 
-		assertThrows( IllegalArgumentException.class, () -> converters.fromString( "007", Integer.class ) );
-		assertThrows( IllegalArgumentException.class, () -> converters.fromString( "+5", Integer.class ) );
-		assertEquals( 7, converters.fromString( "7", Integer.class ) );
+		// Parsing takes the common forms
+		assertEquals( 7, converters.fromString( "007", Integer.class ) );
+		assertEquals( java.time.Instant.parse( "2026-10-03T17:00:00Z" ), converters.fromString( "2026-10-03T17:00:00.000Z", java.time.Instant.class ) );
+		assertEquals( java.util.UUID.fromString( "a2a0e1a4-2b6c-4a35-9b1e-0f1d2c3b4a59" ), converters.fromString( "A2A0E1A4-2B6C-4A35-9B1E-0F1D2C3B4A59", java.util.UUID.class ) );
+		assertEquals( true, converters.fromString( "on", Boolean.class ) );
+
+		// One text per value, for route parameters
+		assertFalse( converters.isCanonical( "007", 7 ) );
+		assertFalse( converters.isCanonical( "+5", 5 ) );
+		assertTrue( converters.isCanonical( "7", 7 ) );
 
 		// Decimals are written more than one way
-		assertEquals( 1.0, converters.fromString( "1", Double.class ) );
-		assertEquals( 1.5, converters.fromString( "1.50", Double.class ) );
+		assertTrue( converters.isCanonical( "1", 1.0 ) );
 	}
 
 	@Test

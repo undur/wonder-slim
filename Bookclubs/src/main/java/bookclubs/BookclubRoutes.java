@@ -21,6 +21,7 @@ import bookclubs.data.Library.Book;
 import bookclubs.data.Library.Club;
 import bookclubs.data.Library.Sort;
 import er.routing.ERXRouter;
+import er.routing.Fields;
 import er.routing.PlainRoute;
 import er.routing.Route;
 import er.routing.Routable;
@@ -216,8 +217,8 @@ public class BookclubRoutes {
 		clubText = club.route( "/{name}", ClubText.class );
 		about = club.route( "/about", About.class );
 
-		// Methods: a form posts here. Other methods at /books are redirected to the list at /books/.
-		createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
+		// Methods: a form posts here, and its fields' conversion errors are reported to the action (Fields.REPORTED). Other methods at /books are redirected to the list at /books/.
+		createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
 		deleteBook = club.route( "/books/{book}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
 
 		// Trailing slashes: /rules redirects to /rules/ (and /books to /books/, above)

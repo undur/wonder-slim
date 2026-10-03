@@ -57,6 +57,7 @@ public final class Route<P extends Record> implements Linkable {
 	private final Class<P> _parametersClass;
 	private final Action<P> _action;
 	private final Converters _converters;
+	private final boolean _reportFields;
 	private final RecordComponent[] _components;
 	private final Constructor<P> _constructor;
 
@@ -67,6 +68,7 @@ public final class Route<P extends Record> implements Linkable {
 
 	Route( final String pattern, final List<RouteOption> options, final Class<P> parametersClass, final Action<P> action, final Converters converters ) {
 		_converters = Objects.requireNonNull( converters );
+		_reportFields = options.contains( Fields.REPORTED );
 		_path = PathPattern.parse( pattern );
 		_host = (Host)options.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
 		_parametersClass = Objects.requireNonNull( parametersClass );
@@ -288,14 +290,25 @@ public final class Route<P extends Record> implements Linkable {
 				arguments[i] = null;
 			}
 
-			if( arguments[i] == null ) {
+			if( _routeParameterNames.contains( name ) ) {
 
 				// A route parameter that isn't one of the type, or names an object that doesn't exist, means the URL is wrong
-				if( _routeParameterNames.contains( name ) ) {
+				if( arguments[i] == null ) {
 					return RouteHandler.DECLINED;
 				}
 
-				// A query parameter or a form's field is input to the route: it's absent, and the route hears why
+				// One URL per value: other text for it is redirected to its own (007 to 7)
+				if( !_converters.isCanonical( string, arguments[i] ) ) {
+					throw new NotCanonical( name, _converters.toString( arguments[i] ) );
+				}
+			}
+			else if( arguments[i] == null ) {
+
+				// A query parameter or field that doesn't convert declines, unless the route takes the errors (a form)
+				if( !_reportFields ) {
+					return RouteHandler.DECLINED;
+				}
+
 				invocation.addConversionError( name, string );
 			}
 		}

@@ -145,7 +145,9 @@ public final class Router<H> {
 
 						trailingSlash = policy;
 					}
-					default -> throw new IllegalArgumentException( "Unknown route option " + option );
+					default -> {
+						// An option for the layer using the router (how a typed route treats its fields, say)
+					}
 				}
 			}
 
