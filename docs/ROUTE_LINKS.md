@@ -215,81 +215,89 @@ plus "decline what isn't mine", with no precedence rules or conflict detection.
 
 ## The router API (proposal)
 
-Covering #173 (matching), #179 (preconditions), #174 (conflicts), #176 (groups) and #177 (methods) in one shape, so the
-parts built later slot in. Nothing here is built yet. Decisions still open are marked.
+Covering #173 (matching), #179 (conditions), #174 (conflicts), #176 (groups) and #177 (methods) in one shape, so the
+parts built later slot in. Nothing here is built yet.
 
-### Scopes
+### Routes carry their conditions
 
-A scope is a value: a path prefix, preconditions (a host, methods), a trailing slash policy and wrappers. The router is
-the root scope, and every scope can make narrower ones and map routes:
+A method or a host is a fact about a route, so it's declared with the route, not configured on the table. The table
+iterates over its routes, and each says what it requires of a request:
 
 ```java
-final Router routes = new Router();
-
 routes.map( "/", Main.class );                                   // any host, any method (today's behaviour)
 routes.map( "/items/{id}", ri -> ItemPage.page( ri, ri.parameter( "id" ) ) );
 routes.map( "/news/*", news );                                   // wildcard: everything beneath /news/
+routes.map( "/hooks/github", hooks::github, Method.POST );
+routes.map( "/", TenantHome.class, Host.of( "{tenant}.example.com" ) );
 
-routes.methods( POST ).map( "/hooks/github", hooks::github );    // other methods: 405
-routes.host( "{tenant}.example.com" ).map( "/", TenantHome.class );
-
-routes.host( "admin.example.com" ).group( "/manage", manage -> {
-	manage.wrap( requireLogin );                                 // wraps every route in the group
-	manage.map( "/users", Users.class );
-	manage.map( "/users/{id}", User.class );
-} );
-
-routes.trailingSlash( TrailingSlash.REDIRECT ).map( "/docs/", Docs.class );   // per route; the default is IGNORE
+Endpoint.of( "/hooks/github", Hook.class, Method.POST );
 ```
 
-- **Parameters by name:** `invocation.parameter( "id" )`, and `invocation.parameters()` for all of them. Host parameters
-  (`{tenant}`) are included. A host parameter and a path parameter with the same name are refused when mapped.
+- **`RouteCondition`** is an interface. Testing a request gives one of three outcomes:
+  - **match**, possibly contributing parameters (a host pattern's `{tenant}`)
+  - **not here**: the route doesn't exist for this request (a host mismatch)
+  - **not allowed**: the path is there, but not for this request (a method mismatch, which is what turns into a 405)
+- **Built-in conditions:** `Host` (exact, or a pattern with parameters, case-insensitive) and `Method` (`HEAD` is accepted
+  wherever `GET` is). Others (`Scheme`, `Header`) and an application's own conditions use the same interface.
+- **Parameters by name:** `invocation.parameter( "id" )`, and `invocation.parameters()` for all of them, host parameters
+  included. A host parameter and a path parameter with the same name are refused when mapped.
+- **The trailing slash policy** is set for the table, and a route can override it: **ignore** by default, **redirect**
+  (`308` to the declared form, keeping method and body) or **strict**.
+
+### Groups
+
+A group is a set of routes sharing a prefix, conditions and wrapping:
+
+```java
+routes.group( "/manage", manage -> {
+	manage.wrap( requireLogin );
+	manage.map( "/users", Users.class );
+	manage.map( "/users/{id}", User.class );
+}, Host.of( "admin.example.com" ) );
+```
+
 - **Wrapping:** a `RouteFilter` gets the invocation and the next handler, and either answers itself (a redirect to a
-  login page, a 403) or passes on: `( invocation, next ) -> loggedIn( invocation ) ? next.handle( invocation ) : login()`.
-  A nested group's filters run inside its parent's.
-- **Endpoints** are mapped like any route, and their records get the parameters by name, host parameters included.
+  login page, a 403) or passes on. A nested group's filters run inside its parent's.
+- **Endpoints are declared from a group** (`manage.endpoint( "/users/{id}", User.class )`), so an endpoint knows its full
+  pattern and conditions from the start. A group's path parameters (`/shops/{shop}`) are components of the record,
+  checked when it's declared. An endpoint with a host pattern generates a complete URL to that host, its host
+  parameters taken from the record.
 
 ### Outcomes
 
 For a request (method, host, path), in this order:
 
-1. **Match:** the candidates are the routes whose path and host match, in precedence order: a literal segment before a
-   parameter before a wildcard, then, for the same path shape, a route with preconditions before one without. The
-   first that answers wins. One that declines (`RouteHandler.DECLINED`) passes the URL to the next candidate.
-2. **405:** a path matched, but no route there accepts the method. The answer is `405` with an `Allow` header. `HEAD` is
-   accepted wherever `GET` is.
+1. **Match:** the candidates are the routes whose path matches and whose conditions don't say "not here", in
+   precedence order: a literal segment before a parameter before a wildcard, then, for the same path shape, a route
+   with conditions before one without. The first that answers wins. One that declines (`RouteHandler.DECLINED`) passes
+   the URL to the next candidate.
+2. **405:** a path matched, but every route there said "not allowed". The answer is `405` with an `Allow` header.
 3. **308:** under the redirect policy, the path matched only in its other trailing-slash form.
-4. **Declined:** nothing matched, or every candidate declined. The router declines, and what comes after it (the
-   fallback, not found) gets the URL.
+4. **Declined:** nothing matched, or every candidate declined. What comes after the router (the fallback, not found)
+   gets the URL.
+
+### Conflicts and overrides
+
+- **Conflicts:** within one table, two routes with the same path shape (regardless of parameter names) and equal
+  conditions are a conflict, refused when mapped, naming both.
+- **Overrides:** as in ng-objects, routes come in layered tables: the application's, and one per framework or plugin.
+  Each table refuses its own conflicts. Between tables, the same route is an override, not a conflict: the
+  application's table wins, and plugins rank among themselves in dependency order. Specificity still comes first
+  across tables, and a table's rank only breaks a tie between equal shapes, so an application's `/*` doesn't hide a
+  plugin's `/admin/users`. Each override is logged at startup. (To check: how ng-objects orders its tables.)
 
 ### Decided
 
-- Trailing slashes: a route's pattern declares its form, generated URLs use it, and the policy (**ignore** by default,
-  **redirect** or **strict**) is set for the router and per route. `/` never changes form.
 - Paths are case-sensitive, hosts aren't. Segments are percent-decoded after splitting, so `%2F` stays in its segment.
-  A parameter never matches an empty segment.
+  A parameter never matches an empty segment. `/` never changes form.
 - `/x` is exact, and `/x/*` matches `/x/` and anything beneath it, but not `/x`, as today.
+- **Where the router lives:** beside `RouteTable`, in the experimental package, mapped into the existing table as one
+  handler that declines when nothing matches. `er.extensions.routes` stays as it is until convergence.
 - The router's core takes plain strings (method, host, path) and returns plain values: no WebObjects types, so
   ng-objects could use the same code.
-
-### Open
-
-1. **Conflicts and declining.** #174 refuses two routes with the same shape, but declining exists so the next candidate
-   can have the URL. Under #174 the next candidate can only be a less specific route. Either same-shape routes are
-   refused, and alternatives at one shape become one route whose handler tries several
-   (`RouteHandler.firstOf( pages, products )`), or they're allowed and the mapping order breaks ties.
-2. **Where the router lives.** Beside `RouteTable` in the experimental package, mapped into the existing table as one
-   handler that declines when nothing matches, so `er.extensions.routes` stays as it is until convergence. Or replacing
-   `RouteTable`'s matching now.
-3. **Endpoints in groups.** An endpoint's URL depends on its group's prefix and host. Either:
-   - (a) endpoint patterns are absolute, and a group checks that they start with its prefix
-   - (b) they're relative, completed when mapped, and `url()` before mapping is an error
-   - (c) endpoints are declared from a scope (`shop.endpoint( "/items/{id}", ShopItem.class )`), so the full pattern
-     and preconditions are known from the start. A group's parameters (`/shops/{shop}`) are then components of the
-     record, checked when it's declared. An endpoint with a host pattern generates a complete URL to that host, its
-     host parameters taken from the record.
-4. **Which host.** The `Host` header, read in one place. `x-forwarded-host` only once forwarded headers are restricted to
-   trusted front ends (#67).
+- **The host is the `Host` header**, for now. The framework must determine the host in exactly one place, used by
+  everything that needs it (routing, URL generation, `ERXRequest`), and whether a forwarded header counts is decided
+  there, with #67.
 
 ## Next steps
 
