@@ -21,6 +21,7 @@ import bookclubs.data.Library.Book;
 import bookclubs.data.Library.Club;
 import bookclubs.data.Library.Sort;
 import er.routing.ERXRouter;
+import er.routing.PlainRoute;
 import er.routing.Route;
 import er.routing.Routable;
 import er.routing.RouteGroup;
@@ -208,6 +209,8 @@ public class BookclubRoutes {
 	public final Route<Admin> admin;
 	public final Route<Danger> danger;
 	public final Route<Reset> reset;
+	public final PlainRoute rules;
+	public final GuestbookPlugin guestbook;
 
 	private BookclubRoutes() {
 		final ERXRouter router = ERXRouter.defaultRouter();
@@ -237,7 +240,7 @@ public class BookclubRoutes {
 		deleteBook = club.route( "/books/{book}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
 
 		// Trailing slashes: /rules redirects to /rules/ (and /books to /books/, above)
-		club.map( "/rules/", ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
+		rules = club.map( "/rules/", ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
 
 		// A wildcard: everything beneath /files/
 		club.map( "/files/*", ri -> text( 200, "The file %s of %s".formatted( ri.parameter( "*" ), ri.parameter( "club" ) ) ) );
@@ -269,7 +272,7 @@ public class BookclubRoutes {
 		api.map( "/books/{book}", BookclubRoutes::apiDeleteBook, Method.DELETE );
 
 		// A plugin's table, ranked below the application's
-		GuestbookPlugin.register( router.table( "guestbook" ) );
+		guestbook = new GuestbookPlugin( router.table( "guestbook" ) );
 	}
 
 	/**
@@ -294,9 +297,13 @@ public class BookclubRoutes {
 			return RouteHandler.DECLINED;
 		}
 
-		if( form.title() == null || form.title().isBlank() || form.author() == null || form.author().isBlank() ) {
+		// The form's fields are checked here, where the form can be shown again with what's wrong
+		final String error = invocation.conversionErrors().containsKey( "year" ) ? "The year is a number, not '%s'".formatted( invocation.conversionErrors().get( "year" ) )
+				: form.title() == null || form.title().isBlank() || form.author() == null || form.author().isBlank() ? "A book has a title and an author" : null;
+
+		if( error != null ) {
 			final NewBookPage page = page( NewBookPage.class, invocation.context() ).club( Library.club( form.club() ).get() );
-			page.error = "A book has a title and an author";
+			page.error = error;
 			return page;
 		}
 

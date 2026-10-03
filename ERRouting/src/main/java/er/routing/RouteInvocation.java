@@ -15,6 +15,7 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 
 	private final Map<String, String> _parameters;
 	private final Converters _converters;
+	private final Map<String, String> _conversionErrors = new java.util.LinkedHashMap<>();
 
 	public RouteInvocation( final String url, final WORequest request, final Map<String, String> parameters, final Converters converters ) {
 		super( url, request );
@@ -56,6 +57,18 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 		}
 
 		return value;
+	}
+
+	/**
+	 * @return The query parameters or form fields that didn't convert to their components' types (or named objects that
+	 *         don't exist), by name, with the text that was given. Those components are null.
+	 */
+	public Map<String, String> conversionErrors() {
+		return java.util.Collections.unmodifiableMap( _conversionErrors );
+	}
+
+	void addConversionError( final String name, final String text ) {
+		_conversionErrors.put( name, text );
 	}
 
 	/**

@@ -8,6 +8,8 @@ import java.util.function.Consumer;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 
+import er.routing.core.Host;
+import er.routing.core.PathPattern;
 import er.routing.core.RouteCondition;
 import er.routing.core.RouteOption;
 import er.routing.core.Router;
@@ -93,16 +95,21 @@ public final class RouteGroup {
 
 	/**
 	 * Maps a route
+	 *
+	 * @return The route, for links, forms and redirects to it
 	 */
-	public void map( final String pattern, final RouteHandler handler, final RouteOption... options ) {
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this ), allOptions( options ) );
+	public PlainRoute map( final String pattern, final RouteHandler handler, final RouteOption... options ) {
+		final List<RouteOption> allOptions = allOptions( options );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this ), allOptions );
+		final Host host = (Host)allOptions.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
+		return new PlainRoute( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
 	}
 
 	/**
 	 * Maps a route to a page
 	 */
-	public void map( final String pattern, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
-		map( pattern, invocation -> WOApplication.application().pageWithName( pageClass.getName(), invocation.context() ), options );
+	public PlainRoute map( final String pattern, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
+		return map( pattern, invocation -> WOApplication.application().pageWithName( pageClass.getName(), invocation.context() ), options );
 	}
 
 	/**

@@ -73,17 +73,15 @@ class RouteBindings {
 		public Object valueInComponent( final WOComponent component ) {
 			final Object route = _route.valueInComponent( component );
 
-			if( !(route instanceof Route<?> typedRoute) ) {
-				throw new IllegalArgumentException( "The 'route' binding (%s) is %s, not a Route".formatted( _route.keyPath(), route == null ? "null" : "a " + route.getClass().getName() ) );
+			if( !(route instanceof Linkable linkable) ) {
+				throw new IllegalArgumentException( "The 'route' binding (%s) is %s, not a route".formatted( _route.keyPath(), route == null ? "null" : "a " + route.getClass().getName() ) );
 			}
 
 			final Map<String, Object> values = new LinkedHashMap<>();
 			_parameters.forEach( ( name, association ) -> values.put( name, association.valueInComponent( component ) ) );
-			return url( typedRoute, values, component );
-		}
 
-		private static <P extends Record> String url( final Route<P> route, final Map<String, Object> values, final WOComponent component ) {
-			return route.url( route.parameters( values, component.context() ), component.context() );
+			// An attribute's value, and WO doesn't escape it
+			return linkable.url( values, component.context() ).replace( "&", "&amp;" );
 		}
 
 		@Override

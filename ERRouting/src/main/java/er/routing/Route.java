@@ -3,15 +3,12 @@ package er.routing;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
@@ -20,9 +17,7 @@ import er.extensions.appserver.ERXWOContext;
 import er.routing.core.Converters;
 import er.routing.core.Host;
 import er.routing.core.PathPattern;
-import er.routing.core.RouteCondition;
 import er.routing.core.RouteOption;
-import er.routing.core.RouteRequest;
 
 /**
  * EXPERIMENTAL (route-links branch). A route whose parameters are the components of a record, see docs/ROUTE_LINKS.md.
@@ -46,7 +41,7 @@ import er.routing.core.RouteRequest;
  * {@code routes.search.url( new Search( "bork", someString, null ) )}.
  */
 
-public final class Route<P extends Record> {
+public final class Route<P extends Record> implements Linkable {
 
 	/**
 	 * What the route does when invoked, given its parameters
@@ -136,36 +131,6 @@ public final class Route<P extends Record> {
 	}
 
 	/**
-	 * @return The route's parameters built from values by name, as a link element has them, taking host parameters the
-	 *         values don't have from the context's request (see below). A value given as a string (a constant in a
-	 *         template) is converted to the component's type.
-	 */
-	public P parameters( final Map<String, Object> values, final WOContext context ) {
-		return parameters( withHostParameters( values, context ) );
-	}
-
-	/**
-	 * @return The values, with the host parameters they don't have taken from the request's host, if it matches the
-	 *         route's host pattern: a link within a host doesn't repeat its parameters
-	 */
-	private Map<String, Object> withHostParameters( final Map<String, Object> values, final WOContext context ) {
-
-		if( _host == null || _host.parameterNames().isEmpty() || context == null || context.request() == null || values.keySet().containsAll( _host.parameterNames() ) ) {
-			return values;
-		}
-
-		final String requestHost = RequestHost.host( context.request() );
-
-		if( requestHost == null || !(_host.test( new RouteRequest( "GET", requestHost, "/" ) ) instanceof RouteCondition.Satisfied satisfied) ) {
-			return values;
-		}
-
-		final Map<String, Object> all = new LinkedHashMap<>( values );
-		satisfied.parameters().forEach( all::putIfAbsent );
-		return all;
-	}
-
-	/**
 	 * @return The route's parameters built from values by name. A value given as a string (a constant in a template) is
 	 *         converted to the component's type.
 	 */
@@ -222,8 +187,6 @@ public final class Route<P extends Record> {
 	 *         has a host other than the request's.
 	 */
 	public String url( final P parameters, final WOContext context ) {
-		Objects.requireNonNull( context, "A route URL is generated in a context, and there's none" );
-
 		final Map<String, String> strings = new LinkedHashMap<>();
 		values( parameters ).forEach( ( name, value ) -> {
 			if( value != null ) {
@@ -231,50 +194,80 @@ public final class Route<P extends Record> {
 			}
 		} );
 
-		final String query = strings.entrySet().stream()
-				.filter( e -> !_routeParameterNames.contains( e.getKey() ) )
-				.map( e -> URLEncoder.encode( e.getKey(), StandardCharsets.UTF_8 ) + "=" + URLEncoder.encode( e.getValue(), StandardCharsets.UTF_8 ) )
-				.collect( Collectors.joining( "&" ) );
-
-		final String url = RouteURLs.url( _path.path( strings ), query.isEmpty() ? null : query, context );
-
-		if( _host == null ) {
-			return url;
-		}
-
-		// To the route's host, unless the request is already there. FIXME: Assumes the same scheme and port as the request's
-		final String host = _host.host( strings );
-		final String requestHost = context.request() == null ? null : RequestHost.host( context.request() );
-
-		if( requestHost != null && new RouteRequest( "GET", requestHost, "/" ).host().equals( host ) ) {
-			return url;
-		}
-
-		// A context generating complete URLs (an email) gave one already: its host is replaced, keeping its scheme and port
-		final int schemeEnd = url.indexOf( "://" );
-
-		if( schemeEnd != -1 ) {
-			final int authorityStart = schemeEnd + 3;
-			final int pathStart = url.indexOf( '/', authorityStart ) == -1 ? url.length() : url.indexOf( '/', authorityStart );
-			return url.substring( 0, authorityStart ) + host + port( url.substring( authorityStart, pathStart ) ) + url.substring( pathStart );
-		}
-
-		final String scheme = context.request() != null && context.request().isSecure() ? "https" : "http";
-		return scheme + "://" + host + (requestHost == null ? "" : port( requestHost )) + url;
+		return RouteURLs.url( _path, _host, strings, _routeParameterNames, context );
 	}
 
 	/**
-	 * @return The port of a host as written in a URL or a Host header ({@code :1300}), empty for none
+	 * @return The route's URL for parameter values by name, as a link or a form has them, without constructing the
+	 *         record: only the route parameters must be there (a host parameter can be the request's), so a form's URL
+	 *         doesn't depend on its fields. Each value is checked against its component's type.
+	 * @throws IllegalArgumentException for a parameter the route doesn't have, a value of the wrong type, or a route
+	 *         parameter that's missing
 	 */
-	private static String port( final String hostAndPort ) {
-		final int colon = hostAndPort.lastIndexOf( ':' );
-		return colon == -1 || hostAndPort.endsWith( "]" ) ? "" : hostAndPort.substring( colon );
+	@Override
+	public String url( final Map<String, Object> values, final WOContext context ) {
+		final Map<String, Object> all = RouteURLs.withHostParameters( _host, values, context );
+		final List<String> unknown = all.keySet().stream().filter( name -> !parameterNames().contains( name ) ).toList();
+
+		if( !unknown.isEmpty() ) {
+			throw new IllegalArgumentException( "The route %s has no parameter %s. Its parameters are %s".formatted( description(), unknown, parameterNames() ) );
+		}
+
+		final Map<String, String> strings = new LinkedHashMap<>();
+
+		for( final RecordComponent component : _components ) {
+			final Object value = all.get( component.getName() );
+
+			if( value == null ) {
+				if( _routeParameterNames.contains( component.getName() ) ) {
+					throw new IllegalArgumentException( "The route %s needs its parameter '%s'".formatted( description(), component.getName() ) );
+				}
+
+				continue;
+			}
+
+			strings.put( component.getName(), text( component, value ) );
+		}
+
+		return RouteURLs.url( _path, _host, strings, _routeParameterNames, context );
 	}
 
 	/**
-	 * Invokes the route: the parameters are the router's (path and host) and the request's query values, converted to
-	 * their types. A URL whose values don't convert, or that the record refuses (an IllegalArgumentException from its
-	 * constructor), is declined.
+	 * @return The value as URL text, checked against the component's type: a string is converted to the type and back
+	 *         (so it's the canonical text), anything else must be of the type
+	 */
+	private String text( final RecordComponent component, final Object value ) {
+		final Class<?> type = Converters.boxed( component.getType() );
+
+		if( value instanceof String string && type != String.class ) {
+			final Object converted;
+
+			try {
+				converted = _converters.fromString( string, type );
+			}
+			catch( IllegalArgumentException e ) {
+				throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and '%s' isn't one".formatted( component.getName(), description(), type.getSimpleName(), string ), e );
+			}
+
+			if( converted == null ) {
+				throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and there's none for '%s'".formatted( component.getName(), description(), type.getSimpleName(), string ) );
+			}
+
+			return _converters.toString( converted );
+		}
+
+		if( !type.isInstance( value ) ) {
+			throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, but was given a %s: %s".formatted( component.getName(), description(), type.getSimpleName(), value.getClass().getSimpleName(), value ) );
+		}
+
+		return _converters.toString( value );
+	}
+
+	/**
+	 * Invokes the route: the parameters are the router's (path and host) and the request's query values or form fields,
+	 * converted to their types. A route parameter that doesn't convert declines the request, as does a record whose
+	 * constructor refuses its values (an IllegalArgumentException). A query parameter or field that doesn't convert is
+	 * null, and reported in {@link RouteInvocation#conversionErrors()}, so the route can answer a form with its errors.
 	 */
 	WOActionResults handle( final RouteInvocation invocation ) {
 		final Object[] arguments = new Object[_components.length];
@@ -284,20 +277,26 @@ public final class Route<P extends Record> {
 			final String name = component.getName();
 			final String string = _routeParameterNames.contains( name ) ? invocation.parameter( name ) : invocation.request().stringFormValueForKey( name );
 
-			if( string == null ) {
+			if( string == null || (string.isEmpty() && component.getType() != String.class) ) {
 				continue;
 			}
 
-			// A value that isn't one of the type, or names an object that doesn't exist, declines the URL
 			try {
 				arguments[i] = _converters.fromString( string, component.getType() );
 			}
 			catch( IllegalArgumentException e ) {
-				return RouteHandler.DECLINED;
+				arguments[i] = null;
 			}
 
 			if( arguments[i] == null ) {
-				return RouteHandler.DECLINED;
+
+				// A route parameter that isn't one of the type, or names an object that doesn't exist, means the URL is wrong
+				if( _routeParameterNames.contains( name ) ) {
+					return RouteHandler.DECLINED;
+				}
+
+				// A query parameter or a form's field is input to the route: it's absent, and the route hears why
+				invocation.addConversionError( name, string );
 			}
 		}
 

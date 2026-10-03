@@ -6,7 +6,7 @@
 
 Attributes prefixed with `?` become query parameters. Every other attribute is rendered on the tag.]]></doc>
 
-		<binding name="route" required="true"><pull><type>er.routing.Route</type></pull><doc>Typed route to post to. Its parameters are bound with `:` attributes.</doc></binding>
+		<binding name="route" required="true"><pull><type>er.routing.Linkable</type></pull><doc>Route to post to: a typed route or a plain one. Its parameters are bound with `:` attributes.</doc></binding>
 		<binding name="queryDictionary"><pull><type>java.util.Map</type></pull><doc>Query parameters added to the form's URL.</doc></binding>
 		<binding name="fragmentIdentifier"><pull><type>java.lang.String</type></pull><doc>Fragment (`#…`) appended to the form's URL, for example to scroll to error messages after submitting.</doc></binding>
 		<binding name="secure"><pull><type>java.lang.Boolean</type></pull><doc>Submit to an https URL.</doc></binding>
