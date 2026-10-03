@@ -77,6 +77,9 @@ Throwing `Declined` declines from anywhere inside a route, as returning `RouteHa
 - Path elements are decoded before they're handed over: `/files/a%2Fb` gives `a/b`, and `%2F` doesn't split the
   path.
 - Paths are case-sensitive.
+- A path with a `.` or `..` segment (or its encoded form) matches no route. Browsers resolve them away, so such a path
+  was written by hand, and a wildcard's remainder never carries one: a handler serving files from it is safe from `../`.
+  Generating a link with `.` or `..` as a parameter's value is an error.
 
 ### Which route answers
 

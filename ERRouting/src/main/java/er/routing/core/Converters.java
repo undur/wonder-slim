@@ -98,7 +98,7 @@ public final class Converters {
 	 * @return true if values of the type can be converted
 	 */
 	public boolean converts( final Class<?> type ) {
-		return boxed( type ).isEnum() || registered( boxed( type ) ) != null;
+		return Enum.class.isAssignableFrom( boxed( type ) ) || registered( boxed( type ) ) != null;
 	}
 
 	/**

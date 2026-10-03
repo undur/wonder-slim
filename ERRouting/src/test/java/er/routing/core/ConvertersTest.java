@@ -109,4 +109,22 @@ public class ConvertersTest {
 		assertEquals( java.time.Instant.parse( "2026-10-03T12:00:00Z" ), converters.fromString( "2026-10-03T12:00:00Z", java.time.Instant.class ) );
 		assertThrows( IllegalArgumentException.class, () -> converters.fromString( "not-a-uuid", java.util.UUID.class ) );
 	}
+
+	enum Kind {
+		PLAIN,
+		FANCY {
+			@Override
+			public String toString() {
+				return "fancy";
+			}
+		}
+	}
+
+	@Test
+	public void anEnumConstantWithABody() {
+		final Converters converters = new Converters();
+
+		assertTrue( converters.converts( Kind.FANCY.getClass() ) );
+		assertEquals( "FANCY", converters.toString( Kind.FANCY ) );
+	}
 }

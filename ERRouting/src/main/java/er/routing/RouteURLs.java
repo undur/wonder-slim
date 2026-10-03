@@ -46,15 +46,23 @@ public class RouteURLs {
 			return url;
 		}
 
-		// To the route's host, unless the request is already there
-		final String hostName = host.host( values );
 		final String requestHost = context.request() == null ? null : RequestHost.host( context.request() );
+		return toRouteHost( url, host.host( values ), requestHost, context.request() != null && context.request().isSecure() );
+	}
 
-		if( requestHost != null && new RouteRequest( "GET", requestHost, "/" ).host().equals( hostName ) ) {
+	/**
+	 * @return The URL for a route on the given host: a relative URL stays relative when the request is on that host, and
+	 *         is made complete to it otherwise; a complete URL (in a context generating them, an email) always gets the
+	 *         route's host, since the context's is the machine's
+	 */
+	static String toRouteHost( final String url, final String hostName, final String requestHost, final boolean secure ) {
+		final boolean complete = url.contains( "://" );
+
+		if( !complete && requestHost != null && new RouteRequest( "GET", requestHost, "/" ).host().equals( hostName ) ) {
 			return url;
 		}
 
-		return toHost( url, hostName, requestHost, context.request() != null && context.request().isSecure() );
+		return toHost( url, hostName, requestHost, secure );
 	}
 
 	/**

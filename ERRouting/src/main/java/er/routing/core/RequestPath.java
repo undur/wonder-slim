@@ -45,7 +45,15 @@ public record RequestPath( String raw, List<String> segments, boolean trailingSl
 
 		for( final String segment : body.split( "/", -1 ) ) {
 			try {
-				segments.add( URLDecoder.decode( segment.replace( "+", "%2B" ), StandardCharsets.UTF_8 ) );
+				final String decoded = URLDecoder.decode( segment.replace( "+", "%2B" ), StandardCharsets.UTF_8 );
+
+				// Browsers resolve dot segments away, so a path with one was written by hand: it matches no route, and a
+				// wildcard's remainder never carries one (a handler serving files from it is safe from ../)
+				if( decoded.equals( "." ) || decoded.equals( ".." ) ) {
+					return null;
+				}
+
+				segments.add( decoded );
 			}
 			catch( IllegalArgumentException e ) {
 				return null;

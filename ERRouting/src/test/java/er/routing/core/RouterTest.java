@@ -421,4 +421,15 @@ public class RouterTest {
 		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "." ) ) );
 		assertEquals( "/members/...", members.path( Map.of( "handle", "..." ) ) );
 	}
+
+	@Test
+	public void aPathWithADotSegmentMatchesNothing() {
+		final Router<String> router = new Router<>();
+		table( router ).map( "/files/*", "files" );
+
+		assertInstanceOf( NoMatch.class, get( router, "/files/x/../y" ) );
+		assertInstanceOf( NoMatch.class, get( router, "/files/x/%2E%2E/y" ) );
+		assertInstanceOf( NoMatch.class, get( router, "/files/./y" ) );
+		assertEquals( Map.of( "*", "x/.../y" ), parameters( get( router, "/files/x/.../y" ) ) );
+	}
 }
