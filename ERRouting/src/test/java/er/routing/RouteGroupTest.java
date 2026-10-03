@@ -308,7 +308,7 @@ public class RouteGroupTest {
 	}
 
 	@Test
-	public void aListsLinkRepeatsTheParameter() {
+	public void aListsLinkTakesOnlyItsTypesValues() {
 		final Route<Shelf> shelf = new ERXRouter().application().route( "/{club}/shelf", Shelf.class, ( s, invocation ) -> null );
 
 		// By name: a collection, or one value
@@ -329,5 +329,17 @@ public class RouteGroupTest {
 		assertThrows( IllegalArgumentException.class, () -> routes.route( "/tags/{tags}", ListInPath.class, ( r, invocation ) -> null ) );
 		assertThrows( IllegalArgumentException.class, () -> routes.route( "/raw", RawList.class, ( r, invocation ) -> null ) );
 		assertThrows( IllegalArgumentException.class, () -> routes.route( "/threads", ListOfObjects.class, ( r, invocation ) -> null ) );
+	}
+
+	@Test
+	public void aGroupsBehaviorsReachItsRoutes() {
+		final ERXRouter router = new ERXRouter();
+		final RouteGroup api = router.application().group( "/api", CrossSite.ALLOWED ).named( "api" );
+		api.map( "/hooks", NOTHING, Method.POST );
+		router.table( "plugin" ).join( "api" ).map( "/more", NOTHING, Method.POST );
+
+		assertEquals( List.of( CrossSite.ALLOWED ), api.allOptions().stream().filter( CrossSite.class::isInstance ).toList() );
+		assertTrue( router.application().group( "/other" ).allOptions().stream().noneMatch( CrossSite.class::isInstance ) );
+		assertTrue( router.table( "plugin" ).join( "api" ).allOptions().contains( CrossSite.ALLOWED ) );
 	}
 }

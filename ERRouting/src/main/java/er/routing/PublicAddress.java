@@ -3,6 +3,7 @@ package er.routing;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
+import java.util.Optional;
 
 import er.extensions.foundation.ERXProperties;
 
@@ -49,15 +50,28 @@ public final class PublicAddress {
 		}
 	}
 
+	/**
+	 * The configured address, read once (empty for none), null until it's read
+	 */
+	private static volatile Optional<Origin> _configured;
+
 	private PublicAddress() {}
 
 	/**
-	 * @return The configured public address, null if there's none
+	 * @return The configured public address, null if there's none. Read once: the router reads it as the application
+	 *         finishes launching, so a value that isn't an address stops the launch rather than the first page.
 	 * @throws IllegalStateException if it's set to something that isn't one, naming the property
 	 */
 	public static Origin configured() {
-		final String value = ERXProperties.stringForKey( PROPERTY );
-		return value == null || value.isBlank() ? null : parse( value.trim() );
+		Optional<Origin> configured = _configured;
+
+		if( configured == null ) {
+			final String value = ERXProperties.stringForKey( PROPERTY );
+			configured = Optional.ofNullable( value == null || value.isBlank() ? null : parse( value.trim() ) );
+			_configured = configured;
+		}
+
+		return configured.orElse( null );
 	}
 
 	/**

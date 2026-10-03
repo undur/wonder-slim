@@ -353,7 +353,7 @@ site: a page on `kronan.localhost` doesn't post to `acme.localhost`.
 A route (or a group) meant to take them says so:
 
 ```java
-api.map( "/hooks/payment", BookclubRoutes::paymentHook, Method.POST, CrossSite.ALLOWED );
+final RouteGroup api = club.group( "/api", TrailingSlash.STRICT, CrossSite.ALLOWED );
 ```
 
 This covers routes: component actions and the route table's other routes aren't checked.

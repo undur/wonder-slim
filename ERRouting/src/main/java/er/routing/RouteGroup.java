@@ -212,12 +212,19 @@ public final class RouteGroup {
 		// The group's behaviors reach its routes, unless a route sets its own of the type (a plain route ignores those that
 		// don't apply to it)
 		for( final RouteBehavior behavior : _behaviors ) {
-			if( all.stream().noneMatch( option -> option.getClass() == behavior.getClass() ) ) {
+			if( all.stream().noneMatch( option -> type( option ) == type( behavior ) ) ) {
 				all.add( behavior );
 			}
 		}
 
 		return all;
+	}
+
+	/**
+	 * @return The option's type: an enum constant's enum (a constant with a body is a subclass of it)
+	 */
+	private static Class<?> type( final RouteOption option ) {
+		return option instanceof Enum<?> constant ? constant.getDeclaringClass() : option.getClass();
 	}
 
 	/**

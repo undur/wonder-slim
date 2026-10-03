@@ -22,6 +22,7 @@ import bookclubs.data.Library.Book;
 import bookclubs.data.Library.Club;
 import bookclubs.data.Library.Sort;
 import er.routing.ERXRouter;
+import er.routing.CrossSite;
 import er.routing.Fields;
 import er.routing.PlainRoute;
 import er.routing.Route;
@@ -276,7 +277,8 @@ public class BookclubRoutes {
 		reset = dangerGroup.route( "/reset", Reset.class, BookclubRoutes::reset, Method.POST );
 
 		// A JSON API: strict about trailing slashes, and about methods (anything else is 405, with Allow)
-		final RouteGroup api = club.group( "/api", TrailingSlash.STRICT );
+		// An API takes posts from anywhere (a script on another site), so its routes allow requests from other sites
+		final RouteGroup api = club.group( "/api", TrailingSlash.STRICT, CrossSite.ALLOWED );
 		api.map( "/books", BookclubRoutes::apiBooks, Method.GET );
 		api.map( "/books", BookclubRoutes::apiCreateBook, Method.POST );
 		api.map( "/books/{book}", BookclubRoutes::apiBook, Method.GET );

@@ -73,9 +73,13 @@ public class ERXRouter {
 			_defaultRouter = new ERXRouter();
 			_defaultRouter.mapInto( RouteTable.defaultRouteTable() );
 
-			// By the time the application is about to listen for requests, the groups plugins joined are named
+			// By the time the application is about to listen for requests, the groups plugins joined are named. The public
+			// address is read then too, so a value that isn't one stops the launch.
 			final ERXRouter router = _defaultRouter;
-			ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver( notification -> router.checkJoins() );
+			ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver( notification -> {
+				router.checkJoins();
+				PublicAddress.configured();
+			} );
 		}
 
 		return _defaultRouter;
