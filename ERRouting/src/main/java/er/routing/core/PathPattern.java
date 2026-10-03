@@ -212,10 +212,11 @@ public final class PathPattern {
 						throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: browsers resolve it away".formatted( value, parameter.name(), _source ) );
 					}
 
-					// Servers refuse these in a path, encoded (an encoded % or \ is "ambiguous" to them), so the URL wouldn't reach
-					// the application. Refused for now, since allowing a character later is easier than refusing it.
-					if( value.contains( "%" ) || value.contains( "\\" ) ) {
-						throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: servers refuse a path with an encoded %% or \\".formatted( value, parameter.name(), _source ) );
+					// Servers refuse these in a path, encoded (an encoded %, \ or control character is "ambiguous" or "suspicious" to
+					// them), so the URL wouldn't reach the application. Refused for now, since allowing a character later is easier
+					// than refusing it.
+					if( value.chars().anyMatch( PathPattern::refusedInPath ) ) {
+						throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: servers refuse a path with an encoded %%, \\ or control character".formatted( value, parameter.name(), _source ) );
 					}
 
 					yield value;
@@ -226,6 +227,13 @@ public final class PathPattern {
 		}
 
 		return _trailingSlash ? b.append( '/' ).toString() : b.toString();
+	}
+
+	/**
+	 * @return true for a character servers refuse in a path, encoded: %, \, the control characters and DEL
+	 */
+	private static boolean refusedInPath( final int c ) {
+		return c == '%' || c == '\\' || c < 0x20 || c == 0x7F;
 	}
 
 	/**

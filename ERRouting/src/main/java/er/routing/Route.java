@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
@@ -61,6 +64,8 @@ public final class Route<P extends Record> implements Linkable {
 		public WOActionResults invoke( RouteInvocation invocation, RuntimeException reason );
 	}
 
+
+	private static final Logger logger = LoggerFactory.getLogger( Route.class );
 
 	private final PathPattern _path;
 	private final Host _host;
@@ -301,7 +306,7 @@ public final class Route<P extends Record> implements Linkable {
 
 				// A route parameter that isn't one of the type, or names an object that doesn't exist, means the URL is wrong
 				if( arguments[i] == null ) {
-					return RouteHandler.DECLINED;
+					return declined( invocation, "its parameter '%s' is '%s', which isn't a %s, or names none".formatted( name, string, component.getType().getSimpleName() ) );
 				}
 
 				// One URL per value: other text for it is redirected to its own (007 to 7)
@@ -313,7 +318,7 @@ public final class Route<P extends Record> implements Linkable {
 
 				// A query parameter or field that doesn't convert declines, unless the route takes the errors (a form)
 				if( !_reportFields ) {
-					return RouteHandler.DECLINED;
+					return declined( invocation, "the query parameter or field '%s' is '%s', which isn't a %s, or names none (Fields.REPORTED hands that to the route)".formatted( name, string, component.getType().getSimpleName() ) );
 				}
 
 				invocation.addConversionError( name, string );
@@ -328,10 +333,42 @@ public final class Route<P extends Record> implements Linkable {
 			parameters = construct( arguments );
 		}
 		catch( IllegalArgumentException | NullPointerException e ) {
-			return _whenInvalid != null ? _whenInvalid.invoke( invocation, e ) : RouteHandler.DECLINED;
+			final RuntimeException reason = withMissingNamed( e, arguments );
+			return _whenInvalid != null ? _whenInvalid.invoke( invocation, reason ) : declined( invocation, "%s refused its values: %s".formatted( _parametersClass.getSimpleName(), reason.getMessage() ) );
 		}
 
 		return _action.invoke( parameters, invocation );
+	}
+
+	/**
+	 * @return The reason the record refused its values: a NullPointerException without a message (from
+	 *         {@code Objects.requireNonNull( q )}) is given one naming the components that were absent
+	 */
+	private RuntimeException withMissingNamed( final RuntimeException e, final Object[] arguments ) {
+
+		if( !(e instanceof NullPointerException) || e.getMessage() != null ) {
+			return e;
+		}
+
+		final List<String> missing = new ArrayList<>();
+
+		for( int i = 0; i < _components.length; i++ ) {
+			if( arguments[i] == null ) {
+				missing.add( _components[i].getName() );
+			}
+		}
+
+		final NullPointerException named = new NullPointerException( "Missing: " + missing );
+		named.initCause( e );
+		return named;
+	}
+
+	/**
+	 * @return {@link RouteHandler#DECLINED}, logged (at debug) with why, for "why is this a 404"
+	 */
+	private WOActionResults declined( final RouteInvocation invocation, final String reason ) {
+		logger.debug( "The route {} declined {}: {}", description(), invocation.url(), reason );
+		return RouteHandler.DECLINED;
 	}
 
 	private P construct( final Object[] arguments ) {

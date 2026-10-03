@@ -421,7 +421,9 @@ public class RouterTest {
 		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "." ) ) );
 		assertEquals( "/members/...", members.path( Map.of( "handle", "..." ) ) );
 
-		// Servers refuse an encoded % or \ in a path
+		// Servers refuse an encoded %, \ or control character in a path
+		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "a\tb" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "a\u007Fb" ) ) );
 		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "50% off" ) ) );
 		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "a\\b" ) ) );
 	}

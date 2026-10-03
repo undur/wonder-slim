@@ -141,8 +141,15 @@ books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
   ```java
   search = club.route( "/search", Search.class ).whenInvalid( ( invocation, reason ) -> … "What are you searching for?" … );
   ```
- A form's fields are checked by the route, which can show the
-  form again with what's wrong.
+
+  The reason names what was wrong: `Objects.requireNonNull( q, "q" )` says so itself, and a `NullPointerException`
+  without a message is given one naming the absent components (`Missing: [q]`). A form's fields are checked by the
+  route, which can show the form again with what's wrong.
+- **Bad input, three ways:** a value that doesn't convert declines the request; with `Fields.REPORTED`, a query
+  parameter or field that doesn't convert is null instead, reported in `conversionErrors()`, and the record is built;
+  `whenInvalid` answers what the record's constructor refuses (a value that didn't convert reaches it only through
+  `Fields.REPORTED`, as a null). Each decline is logged at debug level (`er.routing.Route`, `er.routing.ERXRouter`),
+  naming the route and why: the answer to "why is this a 404".
 - **What the route does:** a record implementing `Routable` does the route's work in `invoke`. A record that's only
   data gets an action instead:
 

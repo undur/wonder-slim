@@ -271,6 +271,7 @@ public class ERXRouter {
 				results = mapped.group().wrapped( mapped.handler() ).handle( routedInvocation );
 			}
 			catch( Declined declined ) {
+				logger.debug( "The route {} declined {}: {}", candidate.entry(), invocation.url(), declined.getMessage() );
 				results = RouteHandler.DECLINED;
 			}
 			catch( NotCanonical notCanonical ) {

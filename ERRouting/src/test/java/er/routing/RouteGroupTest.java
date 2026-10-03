@@ -216,11 +216,38 @@ public class RouteGroupTest {
 		}
 	}
 
+	/**
+	 * A request whose form values are given, since reading them from a URI needs a running application
+	 */
+	private static RouteInvocation invocation( final String path, final Map<String, String> formValues, final ERXRouter router ) {
+		final com.webobjects.appserver.WORequest request = new com.webobjects.appserver.WORequest( "GET", path, "HTTP/1.1", null, null, null ) {
+			@Override
+			public String stringFormValueForKey( final String key ) {
+				return formValues.get( key );
+			}
+		};
+
+		return new RouteInvocation( path, request, Map.of(), router.converters() );
+	}
+
 	@Test
 	public void aRouteHandlesARecordItCantBuild() {
-		final WOActionResults shown = () -> null;
-		final Route<Query> search = new ERXRouter().application().route( "/search", Query.class, ( query, invocation ) -> null );
+		final ERXRouter router = new ERXRouter();
+		final WOActionResults found = () -> null;
+		final List<String> reasons = new ArrayList<>();
+		final Route<Query> search = router.application().route( "/search", Query.class, ( query, invocation ) -> found );
 
-		assertEquals( search, search.whenInvalid( ( invocation, reason ) -> shown ) );
+		// Without whenInvalid, a record that refuses its values declines
+		assertEquals( RouteHandler.DECLINED, search.handle( invocation( "/search", Map.of(), router ) ) );
+
+		final WOActionResults asked = () -> null;
+		assertEquals( search, search.whenInvalid( ( invocation, reason ) -> {
+			reasons.add( reason.getMessage() );
+			return asked;
+		} ) );
+
+		assertEquals( asked, search.handle( invocation( "/search", Map.of(), router ) ) );
+		assertEquals( List.of( "Missing: [q]" ), reasons );
+		assertEquals( found, search.handle( invocation( "/search", Map.of( "q", "dune" ), router ) ) );
 	}
 }

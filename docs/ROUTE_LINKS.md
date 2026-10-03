@@ -399,8 +399,16 @@ Also built:
   are refused. Methods are checked before a group's filters run: a `405` reveals that a route exists, which is correct
   HTTP.
 
-Not built yet:
+Not built yet (the guide's "Not there yet" lists them for users):
 
 - Tables read again on each request in development.
-- The `.apiext` addition, and the checks and completion in Parslips.
-- Converging with the existing routes.
+- Wildcards in typed routes, and a redirect to a wildcard's own form.
+- Repeated parameters (`List` components).
+- Protection against forms posted from another site (with ngobjects/ng-objects#58).
+- The application's public address, for complete URLs (#187).
+- The bare-URL element and the Ajax elements' URLs.
+- Static fields in key paths (#172).
+- The `.apiext` addition, and the checks and completion in Parslips (undur/parslips#12).
+- Converging with the existing routes, and the ng-objects side.
+- A tree for matching: the router scans its routes, sorted by precedence, which takes about 9 µs per request with 1,000
+  routes. That's fine at any realistic size, and a segment tree (#173's title) can replace the scan when one isn't.
