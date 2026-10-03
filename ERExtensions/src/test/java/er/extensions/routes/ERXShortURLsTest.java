@@ -143,4 +143,48 @@ public class ERXShortURLsTest {
 		assertEquals( "/res/app/x.css", ERXShortURLs.shorten( "/Apps/WebObjects/App.woa/3/res/app/x.css", prefix ) );
 		assertEquals( "/", ERXShortURLs.shorten( "/Apps/WebObjects/App", ERXShortURLs.applicationPrefix( "/Apps/WebObjects", "App", "" ) ) );
 	}
+
+	// ---- A base path (#51) ----
+
+	private static String canonicalBeneath( final String url ) {
+		return ERXShortURLs.canonicalize( url, "/App", ADAPTOR, "App", ".woa", KEYS );
+	}
+
+	@Test
+	public void theBasePathIsRemovedFromARequestsURL() {
+		assertEquals( PREFIX + "/wo/123.4.5.6", canonicalBeneath( "/App/wo/123.4.5.6" ) );
+		assertEquals( PREFIX + "/route/about?x=1", canonicalBeneath( "/App/about?x=1" ) );
+		assertEquals( PREFIX + "/route/", canonicalBeneath( "/App/" ) );
+		assertEquals( PREFIX + "/route/", canonicalBeneath( "/App" ) );
+
+		// A path merely starting with the same letters isn't beneath it
+		assertEquals( PREFIX + "/route/Apple", canonicalBeneath( "/Apple" ) );
+	}
+
+	@Test
+	public void theBasePathIsPrependedToGeneratedURLs() {
+		assertEquals( "/App/wo/123.4.5.6", ERXShortURLs.shorten( PREFIX + "/wo/123.4.5.6", PREFIX, "/App" ) );
+		assertEquals( "https://example.com/App/wa/x", ERXShortURLs.shorten( "https://example.com" + PREFIX + "/wa/x", PREFIX, "/App" ) );
+		assertEquals( "/App/", ERXShortURLs.shorten( PREFIX, PREFIX, "/App" ) );
+
+		// A URL that isn't the application's is left alone
+		assertEquals( "https://elsewhere.example/x", ERXShortURLs.shorten( "https://elsewhere.example/x", PREFIX, "/App" ) );
+	}
+
+	@Test
+	public void aRoutesShortURLLosesTheRouteKeyBeneathTheBasePath() {
+		assertEquals( "/App/search/bork", ERXShortURLs.withoutRouteKey( "/App/route/search/bork", "/App" ) );
+		assertEquals( "/search/bork", ERXShortURLs.withoutRouteKey( "/route/search/bork", "" ) );
+		assertEquals( "https://example.com/App/?q=1", ERXShortURLs.withoutRouteKey( "https://example.com/App/route?q=1", "/App" ) );
+	}
+
+	@Test
+	public void aBasePathIsAPath() {
+		assertEquals( "", ERXRoutingApplication.basePath( null, true ) );
+		assertEquals( "", ERXRoutingApplication.basePath( "/", true ) );
+		assertEquals( "/App", ERXRoutingApplication.basePath( " /App ", true ) );
+		org.junit.jupiter.api.Assertions.assertThrows( IllegalStateException.class, () -> ERXRoutingApplication.basePath( "App", true ) );
+		org.junit.jupiter.api.Assertions.assertThrows( IllegalStateException.class, () -> ERXRoutingApplication.basePath( "/App/", true ) );
+		org.junit.jupiter.api.Assertions.assertThrows( IllegalStateException.class, () -> ERXRoutingApplication.basePath( "/App", false ) );
+	}
 }
