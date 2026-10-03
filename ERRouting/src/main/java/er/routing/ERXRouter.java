@@ -10,6 +10,7 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
+import er.routing.core.Converters;
 import er.routing.core.RouteOption;
 import er.routing.core.RouteRequest;
 import er.routing.core.Router;
@@ -41,6 +42,7 @@ public class ERXRouter {
 	record Mapped( RouteHandler handler, RouteGroup group ) {}
 
 	private final Router<Mapped> _router;
+	private final Converters _converters = new Converters();
 	private int _loggedOverrides;
 
 	/**
@@ -52,6 +54,14 @@ public class ERXRouter {
 
 	public ERXRouter( final TrailingSlash trailingSlash ) {
 		_router = new Router<>( trailingSlash );
+	}
+
+	/**
+	 * @return The converters for route parameters: register an application's own types here, before declaring routes
+	 *         taking them
+	 */
+	public Converters converters() {
+		return _converters;
 	}
 
 	/**
@@ -99,12 +109,19 @@ public class ERXRouter {
 		};
 	}
 
-	private static WOActionResults answer( final Router.Matched<Mapped> matched, final er.extensions.routes.RouteInvocation invocation ) {
+	private WOActionResults answer( final Router.Matched<Mapped> matched, final er.extensions.routes.RouteInvocation invocation ) {
 
 		for( final Router.Candidate<Mapped> candidate : matched.candidates() ) {
 			final Mapped mapped = candidate.handler();
-			final RouteInvocation routedInvocation = new RouteInvocation( invocation.url(), invocation.request(), candidate.parameters() );
-			final WOActionResults results = mapped.group().wrapped( mapped.handler() ).handle( routedInvocation );
+			final RouteInvocation routedInvocation = new RouteInvocation( invocation.url(), invocation.request(), candidate.parameters(), _converters );
+			WOActionResults results;
+
+			try {
+				results = mapped.group().wrapped( mapped.handler() ).handle( routedInvocation );
+			}
+			catch( Declined declined ) {
+				results = RouteHandler.DECLINED;
+			}
 
 			if( results == null ) {
 				throw new IllegalStateException( "The route %s returned null for URL '%s'. Return RouteHandler.DECLINED to pass the URL on to the next route".formatted( candidate.entry(), invocation.url() ) );

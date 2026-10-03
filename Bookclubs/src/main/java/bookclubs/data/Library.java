@@ -15,7 +15,7 @@ public class Library {
 
 	public record Club( String id, String name, String motto ) {}
 
-	public record Book( int id, String title, String author, Integer year ) {}
+	public record Book( int id, String club, String title, String author, Integer year ) {}
 
 	public record Member( String handle, String name, String favourite ) {}
 
@@ -95,9 +95,16 @@ public class Library {
 	}
 
 	public static synchronized Book book( final String club, final String title, final String author, final Integer year ) {
-		final Book book = new Book( NEXT_ID.getAndIncrement(), title, author, year );
+		final Book book = new Book( NEXT_ID.getAndIncrement(), club, title, author, year );
 		BOOKS.get( club ).add( book );
 		return book;
+	}
+
+	/**
+	 * @return The book with the id, in whichever club
+	 */
+	public static synchronized Optional<Book> book( final int id ) {
+		return BOOKS.values().stream().flatMap( List::stream ).filter( b -> b.id() == id ).findFirst();
 	}
 
 	public static synchronized boolean removeBook( final String club, final int id ) {

@@ -5,21 +5,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.DateTimeException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 
 import er.extensions.appserver.ERXWOContext;
+import er.routing.core.Converters;
 import er.routing.core.Host;
 import er.routing.core.PathPattern;
 import er.routing.core.RouteOption;
@@ -57,12 +55,12 @@ public final class Route<P extends Record> {
 		public WOActionResults invoke( P parameters, RouteInvocation invocation );
 	}
 
-	private static final Set<Class<?>> SUPPORTED_TYPES = Set.of( String.class, Integer.class, int.class, Long.class, long.class, Boolean.class, boolean.class, LocalDate.class );
 
 	private final PathPattern _path;
 	private final Host _host;
 	private final Class<P> _parametersClass;
 	private final Action<P> _action;
+	private final Converters _converters;
 	private final RecordComponent[] _components;
 	private final Constructor<P> _constructor;
 
@@ -71,7 +69,8 @@ public final class Route<P extends Record> {
 	 */
 	private final List<String> _routeParameterNames;
 
-	Route( final String pattern, final List<RouteOption> options, final Class<P> parametersClass, final Action<P> action ) {
+	Route( final String pattern, final List<RouteOption> options, final Class<P> parametersClass, final Action<P> action, final Converters converters ) {
+		_converters = Objects.requireNonNull( converters );
 		_path = PathPattern.parse( pattern );
 		_host = (Host)options.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
 		_parametersClass = Objects.requireNonNull( parametersClass );
@@ -99,8 +98,8 @@ public final class Route<P extends Record> {
 		}
 
 		for( final RecordComponent component : _components ) {
-			if( !SUPPORTED_TYPES.contains( component.getType() ) && !component.getType().isEnum() ) {
-				throw new IllegalArgumentException( "%s.%s is a %s, which a route parameter can't be. Use one of String, Integer, Long, Boolean, LocalDate or an enum".formatted( parametersClass.getSimpleName(), component.getName(), component.getType().getSimpleName() ) );
+			if( !_converters.converts( component.getType() ) ) {
+				throw new IllegalArgumentException( "%s.%s is a %s, which has no converter, so it can't be a route parameter. Register one in the router's converters before declaring the route".formatted( parametersClass.getSimpleName(), component.getName(), component.getType().getSimpleName() ) );
 			}
 
 			if( component.getType().isPrimitive() && !_routeParameterNames.contains( component.getName() ) ) {
@@ -154,14 +153,18 @@ public final class Route<P extends Record> {
 
 			if( value instanceof String string && component.getType() != String.class ) {
 				try {
-					value = fromString( string, component.getType() );
+					value = _converters.fromString( string, component.getType() );
+
+					if( value == null ) {
+						throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and there's none for '%s'".formatted( component.getName(), description(), component.getType().getSimpleName(), string ) );
+					}
 				}
 				catch( IllegalArgumentException e ) {
 					throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and '%s' isn't one".formatted( component.getName(), description(), component.getType().getSimpleName(), string ), e );
 				}
 			}
 
-			if( value != null && !boxed( component.getType() ).isInstance( value ) ) {
+			if( value != null && !Converters.boxed( component.getType() ).isInstance( value ) ) {
 				throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, but was given a %s: %s".formatted( component.getName(), description(), component.getType().getSimpleName(), value.getClass().getSimpleName(), value ) );
 			}
 
@@ -193,7 +196,7 @@ public final class Route<P extends Record> {
 		final Map<String, String> strings = new LinkedHashMap<>();
 		values( parameters ).forEach( ( name, value ) -> {
 			if( value != null ) {
-				strings.put( name, toString( value ) );
+				strings.put( name, _converters.toString( value ) );
 			}
 		} );
 
@@ -235,10 +238,19 @@ public final class Route<P extends Record> {
 			final String name = component.getName();
 			final String string = _routeParameterNames.contains( name ) ? invocation.parameter( name ) : invocation.request().stringFormValueForKey( name );
 
+			if( string == null ) {
+				continue;
+			}
+
+			// A value that isn't one of the type, or names an object that doesn't exist, declines the URL
 			try {
-				arguments[i] = string == null ? null : fromString( string, component.getType() );
+				arguments[i] = _converters.fromString( string, component.getType() );
 			}
 			catch( IllegalArgumentException e ) {
+				return RouteHandler.DECLINED;
+			}
+
+			if( arguments[i] == null ) {
 				return RouteHandler.DECLINED;
 			}
 		}
@@ -285,69 +297,6 @@ public final class Route<P extends Record> {
 		}
 
 		return values;
-	}
-
-	private static String toString( final Object value ) {
-		return value instanceof Enum<?> e ? e.name() : value.toString();
-	}
-
-	/**
-	 * @throws IllegalArgumentException if the string isn't a value of the type
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static Object fromString( final String string, final Class<?> type ) {
-		final Class<?> boxed = boxed( type );
-
-		if( boxed == String.class ) {
-			return string;
-		}
-
-		if( boxed == Integer.class ) {
-			return Integer.valueOf( string );
-		}
-
-		if( boxed == Long.class ) {
-			return Long.valueOf( string );
-		}
-
-		if( boxed == Boolean.class ) {
-			if( !string.equals( "true" ) && !string.equals( "false" ) ) {
-				throw new IllegalArgumentException( "Not a boolean: " + string );
-			}
-
-			return Boolean.valueOf( string );
-		}
-
-		if( boxed == LocalDate.class ) {
-			try {
-				return LocalDate.parse( string );
-			}
-			catch( DateTimeException e ) {
-				throw new IllegalArgumentException( e );
-			}
-		}
-
-		if( boxed.isEnum() ) {
-			return Enum.valueOf( (Class<Enum>)boxed, string );
-		}
-
-		throw new IllegalArgumentException( "Unsupported type " + type );
-	}
-
-	private static Class<?> boxed( final Class<?> type ) {
-		if( type == int.class ) {
-			return Integer.class;
-		}
-
-		if( type == long.class ) {
-			return Long.class;
-		}
-
-		if( type == boolean.class ) {
-			return Boolean.class;
-		}
-
-		return type;
 	}
 
 	/**

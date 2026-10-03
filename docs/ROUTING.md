@@ -43,6 +43,19 @@ club.map( "/files/*", ri -> text( 200, "The file %s of %s".formatted( ri.paramet
 
 `map( pattern, PageClass.class )` maps a route to a page.
 
+A parameter is text, `ri.parameter( "id" )`, or converted to a type, `ri.parameter( "book", Book.class )`, with the
+router's converters (see [Parameter types](#parameter-types)). A value that doesn't convert, or names an object that
+doesn't exist, declines the request, without code in the route:
+
+```java
+private static WOActionResults apiBook( final RouteInvocation invocation ) {
+	final Book book = invocation.parameter( "book", Book.class );
+	…
+}
+```
+
+Throwing `Declined` declines from anywhere inside a route, as returning `RouteHandler.DECLINED` does from its handler.
+
 ### Patterns
 
 | Pattern | Matches |
@@ -100,9 +113,8 @@ books = club.route( "/books/", Books.class );
 
 - **Path, host and query parameters:** components named in the pattern (`{id}`) or in a host pattern (`{club}`) come
   from the URL's path and host. The others are query parameters (`?sort=author&page=2`), or a form's fields.
-- **Types:** `String`, `Integer`/`int`, `Long`/`long`, `Boolean`/`boolean`, `LocalDate` and enums. A query parameter
-  can be absent, so it's a boxed type, and null when absent. Objects as parameters (a `Book` from its id) aren't
-  possible yet (#175), so records carry ids, and the route looks the object up.
+- **Types:** anything the router's converters convert (see [Parameter types](#parameter-types)). A query parameter
+  can be absent, so it's a boxed type or an object, and null when absent.
 - **Validation:** the record's constructor is the place for it. A value that doesn't convert (`?page=abc`), or that the
   constructor refuses (`?page=0`), declines the URL.
 - **What the route does:** a record implementing `Routable` does the route's work in `invoke`. A record that's only
@@ -115,6 +127,25 @@ books = club.route( "/books/", Books.class );
   ```
 
   Several routes can share a record that way (a page and its JSON, say).
+
+### Parameter types
+
+The router's converters turn a parameter's value into URL text and back. `String`, `Integer`/`int`, `Long`/`long`,
+`Boolean`/`boolean`, `LocalDate` and enums are built in, and an application registers its own types, before declaring
+the routes taking them:
+
+```java
+router.converters().register( Book.class, Converter.of( id -> Library.book( Integer.parseInt( id ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
+
+public record BookView( String club, Book book ) implements Routable { … }
+
+book = club.route( "/books/{book}", BookView.class );
+```
+
+A link passes the object (`:book="$book"`), and its URL has the book's id (`/books/2`). A request's id becomes the
+book. An id that isn't a number (`/books/abc`) or isn't a book's (`/books/999`) declines the request before the route
+is invoked: `fromString` throws `IllegalArgumentException` for text that isn't a value of the type, and returns null for
+a value that doesn't exist. A type that has no converter is an error when the route is declared.
 
 ### Reaching typed routes from templates
 
@@ -310,7 +341,6 @@ GuestbookPlugin.register( router.table( "guestbook" ) );
 
 ## Not there yet
 
-- Objects as parameters (#175): records carry ids.
 - Forms taking a typed route: they post to URLs generated in Java.
 - Static fields in key paths (#172): templates reach typed routes through an instance.
 - Completing and checking a typed route's parameters in the editor (undur/parslips#12). Until then, link mistakes show

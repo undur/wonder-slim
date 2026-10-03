@@ -7,7 +7,7 @@
 	</p>
 	<ul>
 		<wo:repetition list="$books" item="$book">
-			<li><wo:route route="$routes.book" :club="$club.id" :id="$book.id"><wo:str value="$book.title" /></wo:route> <span class="muted"><wo:str value="$book.author" />, <wo:str value="$book.year" valueWhenEmpty="year unknown" /></span></li>
+			<li><wo:route route="$routes.book" :club="$club.id" :book="$book"><wo:str value="$book.title" /></wo:route> <span class="muted"><wo:str value="$book.author" />, <wo:str value="$book.year" valueWhenEmpty="year unknown" /></span></li>
 		</wo:repetition>
 	</ul>
 	<p class="pager">

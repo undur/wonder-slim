@@ -91,7 +91,7 @@ public final class RouteGroup {
 	 */
 	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteOption... options ) {
 		final List<RouteOption> allOptions = allOptions( options );
-		final Route<P> route = new Route<>( fullPattern( pattern ), allOptions, parametersClass, action );
+		final Route<P> route = new Route<>( fullPattern( pattern ), allOptions, parametersClass, action, _router.converters() );
 		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( route::handle, this ), allOptions );
 		return route;
 	}

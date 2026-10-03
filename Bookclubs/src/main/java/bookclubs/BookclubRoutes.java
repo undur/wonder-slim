@@ -25,6 +25,7 @@ import er.routing.Route;
 import er.routing.Routable;
 import er.routing.RouteGroup;
 import er.routing.RouteInvocation;
+import er.routing.core.Converters.Converter;
 import er.routing.core.Host;
 import er.routing.core.Method;
 import er.routing.core.TrailingSlash;
@@ -91,16 +92,16 @@ public class BookclubRoutes {
 	}
 
 	/**
-	 * A book: an unknown id declines, so the club's own not found page answers
+	 * A book, converted from its id in the URL by the converter registered for books. An id that isn't a book's declines
+	 * before the route is invoked, and so does another club's book (here), so the club's own not found page answers.
 	 */
-	public record BookView( String club, int id ) implements Routable {
+	public record BookView( String club, Book book ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
 			final Club c = Library.club( club ).orElse( null );
-			final Book book = Library.book( club, id ).orElse( null );
 
-			if( c == null || book == null ) {
+			if( c == null || !book.club().equals( club ) ) {
 				return RouteHandler.DECLINED;
 			}
 
@@ -111,7 +112,7 @@ public class BookclubRoutes {
 	}
 
 	/**
-	 * The form for a new book. A literal segment ("new") comes before the parameter ({id}), whatever the mapping order.
+	 * The form for a new book. A literal segment ("new") comes before the parameter ({book}), whatever the mapping order.
 	 */
 	public record NewBook( String club ) implements Routable {
 
@@ -126,7 +127,7 @@ public class BookclubRoutes {
 	 */
 	public record CreateBook( String club, String title, String author, Integer year ) {}
 
-	public record DeleteBook( String club, int id ) {}
+	public record DeleteBook( String club, Book book ) {}
 
 	public record MemberView( String club, String handle ) implements Routable {
 
@@ -210,6 +211,9 @@ public class BookclubRoutes {
 
 	private BookclubRoutes( final ERXRouter router ) {
 
+		// Books are route parameters: a book in a URL is its id
+		router.converters().register( Book.class, Converter.of( id -> Library.book( Integer.parseInt( id ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
+
 		// The application's table comes first, so its routes override a plugin's
 		final RouteGroup routes = router.table( "application" );
 
@@ -222,14 +226,14 @@ public class BookclubRoutes {
 		clubHome = club.route( "/", ClubHome.class );
 		books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
 		newBook = club.route( "/books/new", NewBook.class );
-		book = club.route( "/books/{id}", BookView.class );
+		book = club.route( "/books/{book}", BookView.class );
 		member = club.route( "/members/{handle}", MemberView.class );
 		clubText = club.route( "/{name}", ClubText.class );
 		about = club.route( "/about", About.class );
 
 		// Methods: a form posts here. Other methods at /books are redirected to the list at /books/.
 		createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
-		deleteBook = club.route( "/books/{id}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
+		deleteBook = club.route( "/books/{book}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
 
 		// Trailing slashes: /rules redirects to /rules/ (and /books to /books/, above)
 		club.map( "/rules/", ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
@@ -260,8 +264,8 @@ public class BookclubRoutes {
 		final RouteGroup api = club.group( "/api", TrailingSlash.STRICT );
 		api.map( "/books", BookclubRoutes::apiBooks, Method.GET );
 		api.map( "/books", BookclubRoutes::apiCreateBook, Method.POST );
-		api.map( "/books/{id}", BookclubRoutes::apiBook, Method.GET );
-		api.map( "/books/{id}", BookclubRoutes::apiDeleteBook, Method.DELETE );
+		api.map( "/books/{book}", BookclubRoutes::apiBook, Method.GET );
+		api.map( "/books/{book}", BookclubRoutes::apiDeleteBook, Method.DELETE );
 
 		// A plugin's table, ranked below the application's
 		GuestbookPlugin.register( router.table( "guestbook" ) );
@@ -293,12 +297,12 @@ public class BookclubRoutes {
 		}
 
 		final Book book = Library.book( form.club(), form.title().strip(), form.author().strip(), form.year() );
-		return seeOther( instance().book.url( new BookView( form.club(), book.id() ), invocation.context() ) );
+		return seeOther( instance().book.url( new BookView( form.club(), book ), invocation.context() ) );
 	}
 
 	private static WOActionResults deleteBook( final DeleteBook delete, final RouteInvocation invocation ) {
 
-		if( !Library.removeBook( delete.club(), delete.id() ) ) {
+		if( !Library.removeBook( delete.club(), delete.book().id() ) ) {
 			return RouteHandler.DECLINED;
 		}
 
@@ -318,14 +322,12 @@ public class BookclubRoutes {
 		return jsonResponse( 200, "[" + String.join( ",", books ) + "]" );
 	}
 
+	/**
+	 * A plain route's parameter converted to its type: what doesn't convert declines, without code here
+	 */
 	private static WOActionResults apiBook( final RouteInvocation invocation ) {
-		try {
-			final int id = Integer.parseInt( invocation.parameter( "id" ) );
-			return Library.book( invocation.parameter( "club" ), id ).<WOActionResults>map( b -> jsonResponse( 200, json( b ) ) ).orElse( RouteHandler.DECLINED );
-		}
-		catch( NumberFormatException e ) {
-			return RouteHandler.DECLINED;
-		}
+		final Book book = invocation.parameter( "book", Book.class );
+		return book.club().equals( invocation.parameter( "club" ) ) ? jsonResponse( 200, json( book ) ) : RouteHandler.DECLINED;
 	}
 
 	private static WOActionResults apiCreateBook( final RouteInvocation invocation ) {
@@ -340,12 +342,8 @@ public class BookclubRoutes {
 	}
 
 	private static WOActionResults apiDeleteBook( final RouteInvocation invocation ) {
-		try {
-			return Library.removeBook( invocation.parameter( "club" ), Integer.parseInt( invocation.parameter( "id" ) ) ) ? text( 204, "" ) : RouteHandler.DECLINED;
-		}
-		catch( NumberFormatException e ) {
-			return RouteHandler.DECLINED;
-		}
+		final Book book = invocation.parameter( "book", Book.class );
+		return Library.removeBook( invocation.parameter( "club" ), book.id() ) ? text( 204, "" ) : RouteHandler.DECLINED;
 	}
 
 	// ---- Helpers ----

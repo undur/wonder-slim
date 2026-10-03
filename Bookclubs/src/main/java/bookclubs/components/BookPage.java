@@ -17,6 +17,6 @@ public class BookPage extends BaseComponent {
 	 * Forms don't take a route yet, so the form posts to a URL built in Java
 	 */
 	public String deleteURL() {
-		return routes().deleteBook.url( new DeleteBook( club.id(), book.id() ), context() );
+		return routes().deleteBook.url( new DeleteBook( club.id(), book ), context() );
 	}
 }
