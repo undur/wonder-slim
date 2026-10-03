@@ -21,14 +21,27 @@ public class GuestbookPlugin {
 	private static final Map<String, List<String>> ENTRIES = new ConcurrentHashMap<>();
 
 	/**
-	 * The guestbook's page, for links to it
+	 * The guestbook's page, for links to it: set once the application names the club group
 	 */
-	public final PlainRoute page;
+	private PlainRoute _page;
 
+	/**
+	 * Joins the application's groups as they're named, so it works whether the plugin is set up before or after the
+	 * application declares its routes, as a plugin would be
+	 */
 	public GuestbookPlugin( final RouteGroup routes ) {
-		final RouteGroup club = routes.join( "club" );
+		routes.join( "club", this::mapClubRoutes );
 
-		page = club.map( "/guestbook", ri -> BookclubRoutes.text( 200, "Guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ), Method.GET );
+		// In the application's admin group, so behind its admin filter
+		routes.join( "admin", admin -> admin.map( "/guestbook", ri -> BookclubRoutes.text( 200, "Moderating the guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ) ) );
+	}
+
+	public PlainRoute page() {
+		return _page;
+	}
+
+	private void mapClubRoutes( final RouteGroup club ) {
+		_page = club.map( "/guestbook", ri -> BookclubRoutes.text( 200, "Guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ), Method.GET );
 
 		// Post, redirect, get, to the page's URL (no URL written by hand)
 		club.map( "/guestbook", ri -> {
@@ -38,14 +51,10 @@ public class GuestbookPlugin {
 				entries( ri.parameter( "club" ) ).add( entry.strip() );
 			}
 
-			return BookclubRoutes.seeOther( page.url( ri.context() ) );
+			return BookclubRoutes.seeOther( _page.url( ri.context() ) );
 		}, Method.POST );
 
 		club.map( "/about", ri -> BookclubRoutes.text( 200, "The guestbook plugin's about page" ) );
-
-		// In the application's admin group, so behind its admin filter. Joined once the application names the group, so
-		// this works whichever is set up first.
-		routes.join( "admin", admin -> admin.map( "/guestbook", ri -> BookclubRoutes.text( 200, "Moderating the guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ) ) );
 	}
 
 	private static List<String> entries( final String club ) {

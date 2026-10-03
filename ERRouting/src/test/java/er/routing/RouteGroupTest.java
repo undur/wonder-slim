@@ -102,6 +102,14 @@ public class RouteGroupTest {
 	@Test
 	public void joiningAGroupNeverNamedFails() {
 		assertThrows( IllegalArgumentException.class, () -> new ERXRouter().table( "plugin" ).join( "nowhere" ) );
+
+		// Deferred, it fails the check made once the application has launched
+		final ERXRouter router = new ERXRouter();
+		router.table( "plugin" ).join( "nowhere", group -> group.map( "/x", NOTHING ) );
+		assertThrows( IllegalStateException.class, router::checkJoins );
+
+		router.application().group( "/somewhere" ).named( "nowhere" );
+		router.checkJoins();
 	}
 
 	@Test

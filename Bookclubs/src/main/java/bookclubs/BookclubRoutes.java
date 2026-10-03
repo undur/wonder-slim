@@ -200,6 +200,10 @@ public class BookclubRoutes {
 		router.converters().register( Club.class, Converter.of( id -> Library.club( id ).orElse( null ), Club::id ) );
 		router.converters().register( Book.class, Converter.of( id -> Library.book( Integer.parseInt( id ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
 
+		// A plugin's table, ranked below the application's. Set up first, as a plugin would be: it joins the application's
+		// groups once they're named below.
+		guestbook = new GuestbookPlugin( router.table( "guestbook" ) );
+
 		// The application's table comes first, so its routes override a plugin's
 		final RouteGroup routes = router.application();
 
@@ -256,8 +260,7 @@ public class BookclubRoutes {
 		api.map( "/books/{book}", BookclubRoutes::apiBook, Method.GET );
 		api.map( "/books/{book}", BookclubRoutes::apiDeleteBook, Method.DELETE );
 
-		// A plugin's table, ranked below the application's
-		guestbook = new GuestbookPlugin( router.table( "guestbook" ) );
+
 	}
 
 	/**

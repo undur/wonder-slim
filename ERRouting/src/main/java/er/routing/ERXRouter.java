@@ -24,6 +24,7 @@ import er.routing.core.RouteOption;
 import er.routing.core.RouteRequest;
 import er.routing.core.Router;
 import er.routing.core.TrailingSlash;
+import er.extensions.appserver.ERXNotification;
 import er.extensions.routes.RouteClaims;
 import er.extensions.routes.RouteTable;
 
@@ -66,6 +67,10 @@ public class ERXRouter {
 		if( _defaultRouter == null ) {
 			_defaultRouter = new ERXRouter();
 			_defaultRouter.mapInto( RouteTable.defaultRouteTable() );
+
+			// By the time the application has launched, the groups plugins joined are named
+			final ERXRouter router = _defaultRouter;
+			ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver( notification -> router.checkJoins() );
 		}
 
 		return _defaultRouter;
@@ -164,6 +169,16 @@ public class ERXRouter {
 	}
 
 	/**
+	 * @throws IllegalStateException if a group was joined that's never been named: the routes a plugin mapped in it don't
+	 *         exist. Checked for the default router once the application has launched, so it fails at startup.
+	 */
+	public synchronized void checkJoins() {
+		if( !_pendingJoins.isEmpty() ) {
+			throw new IllegalStateException( "Groups were joined that are never named: %s. The routes mapped in them don't exist. Their names are %s".formatted( _pendingJoins.keySet(), _namedGroups.keySet() ) );
+		}
+	}
+
+	/**
 	 * Runs the action with the named group: now, if it's named, otherwise once it is
 	 */
 	synchronized void whenNamed( final String name, final Consumer<RouteGroup> action ) {
@@ -206,11 +221,6 @@ public class ERXRouter {
 
 		@Override
 		public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
-
-		if( !_pendingJoins.isEmpty() ) {
-			throw new IllegalStateException( "Groups were joined that are never named: %s. A plugin's routes in them don't exist".formatted( _pendingJoins.keySet() ) );
-		}
-
 			return ERXRouter.this.handle( invocation );
 		}
 
@@ -225,11 +235,6 @@ public class ERXRouter {
 	 *         trailing slash form, or {@link RouteHandler#DECLINED}
 	 */
 	public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
-
-		if( !_pendingJoins.isEmpty() ) {
-			throw new IllegalStateException( "Groups were joined that are never named: %s. A plugin's routes in them don't exist".formatted( _pendingJoins.keySet() ) );
-		}
-
 		final WORequest request = invocation.request();
 		final RouteRequest routeRequest = new RouteRequest( request.method(), RequestHost.host( request ), invocation.url() );
 

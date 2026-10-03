@@ -79,7 +79,7 @@ public final class RouteGroup {
 	/**
 	 * Joins the named group as {@link #join(String)} does, once it's named: a plugin starts before the application
 	 * declares its groups, so the body maps its routes in the group when the application names it (or now, if it has).
-	 * A group never named is an error on the first request.
+	 * A group never named fails the application's startup (see {@link ERXRouter#checkJoins()}).
 	 */
 	public void join( final String name, final Consumer<RouteGroup> body ) {
 		_router.whenNamed( name, named -> body.accept( joined( named ) ) );
