@@ -503,4 +503,43 @@ public class RouteGroupTest {
 		assertSame( first.get( StringBuilder.class ), second.get( StringBuilder.class ) );
 		assertEquals( 1, made.size() );
 	}
+
+	public record Org( String id ) {}
+
+	public record Project( Integer project ) {}
+
+	public static class ProjectPage extends com.webobjects.appserver.WOComponent {
+		public Integer project;
+
+		public ProjectPage( final com.webobjects.appserver.WOContext context ) {
+			super( context );
+		}
+	}
+
+	@Test
+	public void aGroupsParameter() {
+		final ERXRouter router = new ERXRouter();
+		router.converters().register( Org.class, er.routing.core.Converters.Converter.of( id -> id.equals( "acme" ) ? new Org( id ) : null, Org::id ) );
+		final RouteGroup org = router.application().group( "/orgs/{org}" ).parameter( "org", Org.class );
+
+		// A record and a page leave it out
+		final Route<Project> project = org.route( "/projects/{project}", Project.class, ( p, invocation ) -> () -> null );
+		org.map( "/projects/{project}/page", ProjectPage.class );
+
+		// An unknown one declines every route of the group, before its filters
+		final List<String> filtered = new ArrayList<>();
+		org.wrap( ( invocation, next ) -> {
+			filtered.add( "filter" );
+			return next.handle( invocation );
+		} );
+		final RouteHandler handler = org.wrapped( invocation -> () -> null );
+		assertThrows( Declined.class, () -> handler.handle( new RouteInvocation( "/orgs/nope/projects/1", invocationWithLists( "/x", Map.of(), router ).request(), Map.of( "org", "nope", "project", "1" ), router.converters() ) ) );
+		assertTrue( filtered.isEmpty() );
+
+		// A complete URL outside a request needs it given
+		assertThrows( IllegalArgumentException.class, () -> project.completeURL( new Project( 1 ) ) );
+
+		// Only the prefix's and the host's parameters are a group's
+		assertThrows( IllegalArgumentException.class, () -> router.application().group( "/teams" ).parameter( "team", String.class ) );
+	}
 }

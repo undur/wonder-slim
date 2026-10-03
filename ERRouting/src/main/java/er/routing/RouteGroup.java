@@ -54,6 +54,16 @@ public final class RouteGroup {
 	private final List<RouteBehavior> _behaviors;
 	private final List<RouteFilter> _filters = new ArrayList<>();
 
+	/**
+	 * A parameter of the group's ({@link #parameter(String, Class)})
+	 */
+	private record GroupParameter( String name, Class<?> type ) {}
+
+	/**
+	 * The group's own parameters (its parents' are theirs)
+	 */
+	private final List<GroupParameter> _parameters = new ArrayList<>();
+
 	RouteGroup( final ERXRouter router, final Router<ERXRouter.Mapped>.Table table, final RouteGroup parent, final String prefix, final List<RouteOption> options ) {
 		options.forEach( option -> Objects.requireNonNull( option, "A route option is null (a static field read before it was set?)" ) );
 		_router = router;
@@ -108,6 +118,57 @@ public final class RouteGroup {
 	}
 
 	/**
+	 * Makes one of the group's parameters (its prefix's, {@code /orgs/{org}}, or its host's, {@code {club}.@}) the
+	 * group's: converted to the type once, before the group's filters run, so one that isn't of the type or names nothing
+	 * declines every route in the group (an unknown club's host answers nothing). Its routes' records and pages may leave
+	 * it out, and a link to them takes it from the current route's, as it takes a host's from the request.
+	 *
+	 * <pre>
+	 * final RouteGroup club = routes.group( "", Host.of( "{club}.@" ) ).parameter( "club", Club.class );
+	 * </pre>
+	 *
+	 * @return The group
+	 */
+	public RouteGroup parameter( final String name, final Class<?> type ) {
+		_router.undeclared( "the group parameter " + name + ", declared" );
+		Objects.requireNonNull( type );
+
+		final List<String> available = new ArrayList<>( PathPattern.parse( _prefix.isEmpty() ? "/" : _prefix ).parameterNames() );
+		_conditions.stream().filter( Host.class::isInstance ).forEach( host -> available.addAll( ((Host)host).parameterNames() ) );
+
+		if( !available.contains( name ) ) {
+			throw new IllegalArgumentException( "The group %s has no parameter {%s}: its prefix's and its host's are %s".formatted( _prefix.isEmpty() ? "/" : _prefix, name, available ) );
+		}
+
+		if( !_router.converters().converts( type ) ) {
+			throw new IllegalArgumentException( "The group parameter {%s} is a %s, which has no converter. Register one in the router's converters before declaring the group".formatted( name, type.getSimpleName() ) );
+		}
+
+		_parameters.add( new GroupParameter( name, type ) );
+		return this;
+	}
+
+	/**
+	 * @return The parameters of this group and its parents, outermost first
+	 */
+	private List<GroupParameter> groupParameters() {
+		final List<GroupParameter> all = new ArrayList<>();
+
+		for( RouteGroup group = this; group != null; group = group._parent ) {
+			all.addAll( 0, group._parameters );
+		}
+
+		return all;
+	}
+
+	/**
+	 * @return The names of this group's and its parents' parameters
+	 */
+	List<String> groupParameterNames() {
+		return groupParameters().stream().map( GroupParameter::name ).toList();
+	}
+
+	/**
 	 * Wraps every route of the group, including those mapped before this call and those of its nested groups. A nested
 	 * group's filters run inside its parent's.
 	 */
@@ -150,7 +211,7 @@ public final class RouteGroup {
 
 		final List<RouteOption> allOptions = allOptions( options );
 		final Host host = (Host)allOptions.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
-		final PlainBinding binding = new PlainBinding( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
+		final PlainBinding binding = new PlainBinding( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters(), groupParameterNames() );
 		_router.bind( route, binding );
 		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, crossSite( allOptions ), crossOrigin( allOptions ) ), allOptions );
 		return route;
@@ -176,7 +237,7 @@ public final class RouteGroup {
 		}
 
 		names.addAll( path.parameterNames() );
-		return map( pattern, route, new PageSetters( pageClass, names, _router.converters(), fullPattern( pattern ) ), options );
+		return map( pattern, route, new PageSetters( pageClass, names, _router.converters(), fullPattern( pattern ), groupParameterNames() ), options );
 	}
 
 	/**
@@ -203,7 +264,7 @@ public final class RouteGroup {
 	public <P extends Record> Route<P> route( final String pattern, final Route<P> route, final Route.Action<P> action, final RouteOption... options ) {
 		Objects.requireNonNull( route, "A route constant is null: one declared after the constants it's used with (a static field read before it was set?)" );
 		final List<RouteOption> allOptions = allOptions( options );
-		final RouteBinding<P> binding = new RouteBinding<>( _router, fullPattern( pattern ), allOptions, route.parametersClass(), action );
+		final RouteBinding<P> binding = new RouteBinding<>( _router, fullPattern( pattern ), allOptions, route.parametersClass(), action, groupParameterNames() );
 		_router.bind( route, binding );
 		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( binding::handle, this, route, route.parametersClass(), crossSite( allOptions ), crossOrigin( allOptions ) ), allOptions );
 		return route;
@@ -386,6 +447,17 @@ public final class RouteGroup {
 				final RouteHandler next = wrapped;
 				wrapped = invocation -> filter.filter( invocation, next );
 			}
+		}
+
+		// The groups' parameters, converted before any filter runs: one that names nothing declines every route in them
+		final List<GroupParameter> parameters = groupParameters();
+
+		if( !parameters.isEmpty() ) {
+			final RouteHandler filtered = wrapped;
+			wrapped = invocation -> {
+				parameters.forEach( parameter -> invocation.parameter( parameter.name(), parameter.type() ) );
+				return filtered.handle( invocation );
+			};
 		}
 
 		return wrapped;

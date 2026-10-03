@@ -45,13 +45,18 @@ final class PageSetters implements RouteHandler {
 	/**
 	 * @throws IllegalArgumentException if the page has no member for a parameter, or one of a type without a converter
 	 */
-	PageSetters( final Class<? extends WOComponent> pageClass, final List<String> parameterNames, final Converters converters, final String pattern ) {
+	PageSetters( final Class<? extends WOComponent> pageClass, final List<String> parameterNames, final Converters converters, final String pattern, final List<String> groupParameters ) {
 		_pageClass = Objects.requireNonNull( pageClass );
 		_converters = converters;
 		_setters = new ArrayList<>();
 
 		for( final String name : parameterNames ) {
 			final Setter setter = setter( pageClass, name );
+
+			// A group's parameter is the group's: set on a page that has a member for it, and left out of one that doesn't
+			if( setter == null && groupParameters.contains( name ) ) {
+				continue;
+			}
 
 			if( setter == null ) {
 				throw new IllegalArgumentException( "The route %s sets its parameter {%s} on %s, which has no public field '%s', setter set%s( … ) or method %s( … ) for it".formatted( pattern, name, pageClass.getSimpleName(), name, capitalized( name ), name ) );
@@ -75,10 +80,12 @@ final class PageSetters implements RouteHandler {
 			final String text = invocation.parameter( setter.name() );
 			Object value;
 
+			// Converted once per request (a group's parameter is converted before its filters), redirected to its own text
+			// if it's other text for the value
 			try {
-				value = _converters.fromString( text, setter.type(), invocation );
+				value = invocation.parameter( setter.name(), setter.type() );
 			}
-			catch( IllegalArgumentException e ) {
+			catch( Declined e ) {
 				value = null;
 			}
 
@@ -88,10 +95,6 @@ final class PageSetters implements RouteHandler {
 				logger.debug( "The page route to {} declined {}: {}", _pageClass.getSimpleName(), invocation.url(), reason );
 				invocation.declinedBecause( reason );
 				return RouteHandler.DECLINED;
-			}
-
-			if( !_converters.isCanonical( text, value ) ) {
-				throw new NotCanonical( setter.name(), _converters.toString( value ) );
 			}
 
 			values[i] = value;

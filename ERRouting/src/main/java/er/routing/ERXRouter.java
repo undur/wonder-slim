@@ -478,6 +478,9 @@ public class ERXRouter {
 			}
 
 			final RouteInvocation routedInvocation = new RouteInvocation( invocation.url(), invocation.request(), candidate.parameters(), _converters, mapped.route() );
+
+			// The route's parameters, for links from its answer to inherit a group's
+			invocation.request().setUserInfoForKey( candidate.parameters(), RouteURLs.ROUTE_PARAMETERS_KEY );
 			WOActionResults results;
 
 			try {

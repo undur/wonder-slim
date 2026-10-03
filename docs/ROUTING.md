@@ -48,7 +48,8 @@ member of its own by the name (#172), so `$routes.book` is the constant. `routes
 a page's own keys (a page's `book` is its book, not the route); `$book` would reach the constant too where nothing
 clashes. Java code uses the constants directly: `Routes.book.url( Map.of( "book", book ) )`.
 
-A constant no declaration gives a pattern to stops the application's launch, naming it, and so does one given two.
+A constant no declaration gives a pattern to stops the application's launch, naming it, and so does one given two. One a
+declaration may leave without a pattern (a route mapped in development only) says so: `Route.plain().optional()`.
 
 ### Changing routes while the application runs
 
@@ -126,7 +127,8 @@ The handler gets a `RouteInvocation`, and answers with a response or a page (`ri
 - Throwing `Declined` declines from anywhere inside a route, as returning `RouteHandler.DECLINED` does.
 
 `redirect( pattern, route )` answers an old URL with a `308` to a route's (a browser and a search engine remember it,
-and it keeps the method), its parameters the route's by name, the query string kept:
+and it keeps the method), its parameters the route's by name (checked once the routes are declared), the query string
+kept. A value the route doesn't take declines:
 
 ```java
 club.redirect( "/book/{book}", Routes.book );
@@ -147,6 +149,9 @@ request handler would get every request for it.
 
 - One parameter to an element. A parameter never matches an empty text, so `/books//edit` doesn't match
   `/books/{id}/edit`.
+- Two parameters within literal text at the same place: the one with more literal text on the same side comes first
+  (`{a}.min.json` before `{a}.json`). Literal text on opposite sides (`pre-{a}` and `{a}.json`, which both match
+  `pre-7.json`) is refused as a conflict, since neither comes first.
 - `/files` is the wildcard's other trailing slash form, which the route's policy decides: matched with nothing beneath
   (the default), redirected to `/files/`, or not matched (see [Trailing slashes](#trailing-slashes)).
 - A link to a named wildcard gives its remainder (`:path="minutes/2026.txt"`), each element encoded.
@@ -198,10 +203,11 @@ Route<Books> books = Route.of( Books.class );                    // Routes
 club.route( "/books/", Routes.books, TrailingSlash.REDIRECT );   // the declaration
 ```
 
-- **Path, host and query parameters:** components named in the pattern (`{id}`) are the path's, and must be there.
-  Components named in a host pattern (`{club}`) are the host's, and may be left out: the tenant every route of a group
-  has is read from the invocation (`ri.parameter( "club", Club.class )`), and a link takes it from the request. The
-  other components are query parameters (`?sort=author&page=2`), or a form's fields.
+- **Path, host and query parameters:** components named in the pattern (`{id}`) are the path's, and must be there,
+  unless they're a group's parameter (see [Groups](#groups)). Components named in a host pattern (`{club}`) are the
+  host's, and may be left out: the tenant every route of a group has is read from the invocation
+  (`ri.parameter( "club", Club.class )`), and a link takes it from the request. The other components are query
+  parameters (`?sort=author&page=2`), or a form's fields.
 - **Types:** anything the router's converters convert (see [Parameter types](#parameter-types)). A query parameter
   can be absent, so it's a boxed type or an object, and null when absent or empty.
 - **What the route does:** a record implementing `Routable` does its work in `invoke`. A record that's only data gets an
@@ -261,7 +267,9 @@ router.converters().register( Book.class, Converter.scoped( ( id, scope ) -> Lib
 ```
 
 `scope.get( WOContext.class )` and `scope.get( WORequest.class )` are the request's, and the application provides more:
-`router.converters().provide( EOEditingContext.class, scope -> … )`, an editing context to fetch in. Parameters are
+`router.converters().provide( EOEditingContext.class, scope -> … )`, an editing context to fetch in. A provided object
+is made once per request, and ending it (an editing context's disposal) is the application's, since the request's page
+renders after the route has answered. Parameters are
 converted host first, then path, then query, so a converter finds those it looks in. Without a request (a link's text),
 the scope is empty.
 
@@ -397,9 +405,11 @@ browser: its requests are answered with `Access-Control-Allow-Origin`, and the b
 final RouteGroup api = club.group( "/api", TrailingSlash.STRICT, CrossSite.ALLOWED, CrossOrigin.allow( "https://partner.example" ) );
 ```
 
-An origin allowed may post to the route whatever its `CrossSite` level: allowing another site's script to call a route
-is allowing it to change things through it. `CrossOrigin.ANY` allows every origin, without credentials, and
-`withCredentials()` lets named origins send the user's cookies.
+A named origin allowed may post to the route whatever its `CrossSite` level: allowing a partner's script to call a route
+is allowing it to change things through it. `CrossOrigin.ANY` allows every origin's scripts to read, without
+credentials, and doesn't waive `CrossSite`: a form posted from any site carries the user's cookies by the browser's
+rules. `withCredentials()` lets named origins send the user's cookies. A route with named origins varies by `Origin` on
+every answer, so a cache keeps one origin's answer from another.
 
 ## Conditions
 
@@ -472,7 +482,20 @@ final RouteGroup shop = routes.group( "/shops/{shop}" );                        
 ```
 
 `group( prefix, body, options )` takes a body mapping the group's routes, and `group( prefix, options )` returns the
-group for mapping them afterwards. A group's routes include its prefix in their patterns (`/api` and `/books` give
+group for mapping them afterwards.
+
+### Group parameters
+
+A parameter every route of a group has (the tenant on its host, `/orgs/{org}` in its prefix) is the group's:
+
+```java
+final RouteGroup club = routes.group( "", Host.of( "{club}.@" ) ).parameter( "club", Club.class ).named( "club" );
+```
+
+It's converted once, before the group's filters run, so one that isn't of the type or names nothing declines every
+route in the group: an unknown club's host answers nothing, its plain routes included. The group's routes' records and
+pages may leave it out (a page with a member for it gets it), and a link to them takes it from the current route's, as
+it takes a host's from the request. Declare it before mapping the group's routes. A group's routes include its prefix in their patterns (`/api` and `/books` give
 `/api/books`) and its conditions in theirs. Its options reach its routes and nested groups unless they set their own:
 a trailing slash policy, `Fields`, `CrossSite`, `CrossOrigin`.
 

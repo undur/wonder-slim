@@ -150,7 +150,7 @@ public class BookclubRoutes {
 		routes.map( "/", Routes.home, Main.class, Host.of( "@" ) );
 
 		// A group by host alone: every route in it answers {club}.localhost, with "club" a parameter
-		final RouteGroup club = routes.group( "", CLUB_HOST ).named( "club" );
+		final RouteGroup club = routes.group( "", CLUB_HOST ).parameter( "club", Club.class ).named( "club" );
 
 		// Pages: a route parameter ({club}) is set on the page by name
 		club.map( "/", Routes.clubHome, ClubPage.class );

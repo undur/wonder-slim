@@ -157,6 +157,41 @@ public class RouteURLs {
 	 * @return The values, with the host parameters they don't have taken from the request's host, if it matches the
 	 *         host pattern: a link within a host doesn't repeat its parameters
 	 */
+	/**
+	 * Request userInfo key for the parameters of the route answering the request, for links to inherit a group's
+	 */
+	static final String ROUTE_PARAMETERS_KEY = "er.routing.routeParameters";
+
+	/**
+	 * @return The values, with the host parameters they don't have taken from the request's host (as for
+	 *         {@link #withHostParameters}), and the group parameters (a path's, {@code /orgs/{org}}) they don't have taken
+	 *         from the route answering the request
+	 */
+	@SuppressWarnings("unchecked")
+	static Map<String, Object> withInheritedParameters( final Host host, final java.util.Collection<String> groupParameters, final Map<String, Object> values, final WOContext context ) {
+		final Map<String, Object> withHost = withHostParameters( host, values, context );
+
+		if( groupParameters.isEmpty() || context == null || context.request() == null || withHost.keySet().containsAll( groupParameters ) ) {
+			return withHost;
+		}
+
+		final Map<String, String> current = (Map<String, String>)context.request().userInfoForKey( ROUTE_PARAMETERS_KEY );
+
+		if( current == null ) {
+			return withHost;
+		}
+
+		final Map<String, Object> all = new LinkedHashMap<>( withHost );
+
+		for( final String name : groupParameters ) {
+			if( !all.containsKey( name ) && current.get( name ) != null ) {
+				all.put( name, new InheritedText( current.get( name ) ) );
+			}
+		}
+
+		return all;
+	}
+
 	static Map<String, Object> withHostParameters( final Host host, final Map<String, Object> values, final WOContext context ) {
 
 		if( host == null || host.parameterNames().isEmpty() || context == null || context.request() == null || values.keySet().containsAll( host.parameterNames() ) ) {

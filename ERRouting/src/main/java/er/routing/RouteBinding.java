@@ -63,7 +63,13 @@ final class RouteBinding<P extends Record> {
 	 */
 	private final List<String> _routeParameterNames;
 
-	RouteBinding( final ERXRouter router, final String pattern, final List<RouteOption> options, final Class<P> parametersClass, final Route.Action<P> action ) {
+	/**
+	 * The parameters of the groups it's in: a record may leave them out, and a link takes them from the current route's
+	 */
+	private final List<String> _groupParameters;
+
+	RouteBinding( final ERXRouter router, final String pattern, final List<RouteOption> options, final Class<P> parametersClass, final Route.Action<P> action, final List<String> groupParameters ) {
+		_groupParameters = List.copyOf( groupParameters );
 		_router = router;
 		_converters = router.converters();
 		_reportFields = options.contains( Fields.REPORTED );
@@ -88,9 +94,10 @@ final class RouteBinding<P extends Record> {
 
 		final List<String> componentNames = parameterNames();
 
-		// A path parameter is the record's, and a host parameter may be left to the group (the tenant every route has)
+		// A path parameter is the record's, and a host parameter or a group's may be left to the group (the tenant every
+		// route has)
 		for( final String name : _path.parameterNames() ) {
-			if( !componentNames.contains( name ) ) {
+			if( !componentNames.contains( name ) && !_groupParameters.contains( name ) ) {
 				throw new IllegalArgumentException( "The route %s has the parameter {%s}, but %s has no component of that name. Its components are %s".formatted( description(), name, parametersClass.getSimpleName(), componentNames ) );
 			}
 		}
@@ -205,12 +212,12 @@ final class RouteBinding<P extends Record> {
 	 */
 	private Map<String, String> withHostTexts( final Map<String, String> routeValues, final WOContext context ) {
 
-		if( _host == null || routeValues.keySet().containsAll( _host.parameterNames() ) ) {
+		if( routeValues.keySet().containsAll( _routeParameterNames ) ) {
 			return routeValues;
 		}
 
 		final Map<String, String> all = new LinkedHashMap<>( routeValues );
-		RouteURLs.withHostParameters( _host, new LinkedHashMap<>( routeValues ), context ).forEach( ( name, value ) -> all.putIfAbsent( name, value instanceof InheritedText inherited ? inherited.text() : String.valueOf( value ) ) );
+		RouteURLs.withInheritedParameters( _host, _groupParameters, new LinkedHashMap<>( routeValues ), context ).forEach( ( name, value ) -> all.putIfAbsent( name, value instanceof InheritedText inherited ? inherited.text() : String.valueOf( value ) ) );
 		return all;
 	}
 
@@ -221,8 +228,8 @@ final class RouteBinding<P extends Record> {
 	public String completeURL( final P parameters ) {
 		final Link link = link( parameters );
 
-		if( _host != null && !link.routeValues().keySet().containsAll( _host.parameterNames() ) ) {
-			throw new IllegalArgumentException( "%s leaves out the host's parameters %s, which a complete URL outside a request has no request to take from: give them by name, completeURL( values )".formatted( _parametersClass.getSimpleName(), _host.parameterNames() ) );
+		if( !link.routeValues().keySet().containsAll( _routeParameterNames ) ) {
+			throw new IllegalArgumentException( "%s leaves out the route's parameters %s, which a complete URL outside a request has no request to take from: give them by name, completeURL( values )".formatted( _parametersClass.getSimpleName(), _routeParameterNames.stream().filter( name -> !link.routeValues().containsKey( name ) ).toList() ) );
 		}
 
 		return RouteURLs.completeURL( _path, _host, link.routeValues(), link.queryValues() );
@@ -314,7 +321,7 @@ final class RouteBinding<P extends Record> {
 	 *         from the context's request (if there's one)
 	 */
 	private Link link( final Map<String, Object> values, final WOContext context ) {
-		final Map<String, Object> all = RouteURLs.withHostParameters( _host, values, context );
+		final Map<String, Object> all = RouteURLs.withInheritedParameters( _host, _groupParameters, values, context );
 		final List<String> unknown = all.keySet().stream().filter( name -> !parameterNames().contains( name ) && !_routeParameterNames.contains( name ) ).toList();
 
 		if( !unknown.isEmpty() ) {
@@ -442,16 +449,14 @@ final class RouteBinding<P extends Record> {
 					continue;
 				}
 
-				arguments[i] = convert( string, component.getType(), invocation );
-
-				// A route parameter that isn't one of the type, or names an object that doesn't exist, means the URL is wrong
-				if( arguments[i] == null ) {
-					return declined( invocation, "its parameter '%s' is '%s', which isn't a %s, or names none".formatted( name, string, component.getType().getSimpleName() ) );
+				// Converted once per request (a group's parameter is converted before its filters), redirected to its own text
+				// if it's other text for the value (007 to 7). One that isn't of the type, or names nothing, means the URL is
+				// wrong.
+				try {
+					arguments[i] = invocation.parameter( name, component.getType() );
 				}
-
-				// One URL per value: other text for it is redirected to its own (007 to 7)
-				if( !_converters.isCanonical( string, arguments[i] ) ) {
-					throw new NotCanonical( name, _converters.toString( arguments[i] ) );
+				catch( Declined e ) {
+					return declined( invocation, "its parameter '%s' is '%s', which isn't a %s, or names none".formatted( name, string, component.getType().getSimpleName() ) );
 				}
 
 				continue;

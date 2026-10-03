@@ -24,7 +24,17 @@ final class PlainBinding {
 	private final Converters _converters;
 	private final List<String> _routeParameterNames;
 
+	/**
+	 * The parameters of the groups it's in, which a link takes from the current route's when it doesn't give them
+	 */
+	private final List<String> _groupParameters;
+
 	PlainBinding( final PathPattern path, final Host host, final Converters converters ) {
+		this( path, host, converters, List.of() );
+	}
+
+	PlainBinding( final PathPattern path, final Host host, final Converters converters, final List<String> groupParameters ) {
+		_groupParameters = List.copyOf( groupParameters );
 		_path = Objects.requireNonNull( path );
 		_host = host;
 		_converters = Objects.requireNonNull( converters );
@@ -79,7 +89,7 @@ final class PlainBinding {
 		}
 
 		final Map<String, String> strings = new LinkedHashMap<>();
-		RouteURLs.withHostParameters( _host, values, context ).forEach( ( name, value ) -> {
+		RouteURLs.withInheritedParameters( _host, _groupParameters, values, context ).forEach( ( name, value ) -> {
 			if( value != null ) {
 				strings.put( name, switch( value ) {
 					case InheritedText inherited -> inherited.text();
