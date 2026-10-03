@@ -53,6 +53,9 @@ public class Routes {
 	public static void register() {
 		final RouteTable routes = RouteTable.defaultRouteTable();
 
+		// EXPERIMENTAL (route-links branch): the new router, first in the table, declining what it has no route for
+		RouterDemo.register( routes );
+
 		// Index
 		routes.map( "/", Main.class );
 
