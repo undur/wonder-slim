@@ -152,7 +152,7 @@ public final class RouteGroup {
 		final Host host = (Host)allOptions.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
 		final PlainBinding binding = new PlainBinding( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
 		_router.bind( route, binding );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, crossSite( allOptions ) ), allOptions );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, crossSite( allOptions ), crossOrigin( allOptions ) ), allOptions );
 		return route;
 	}
 
@@ -205,7 +205,7 @@ public final class RouteGroup {
 		final List<RouteOption> allOptions = allOptions( options );
 		final RouteBinding<P> binding = new RouteBinding<>( _router, fullPattern( pattern ), allOptions, route.parametersClass(), action );
 		_router.bind( route, binding );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( binding::handle, this, route, route.parametersClass(), crossSite( allOptions ) ), allOptions );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( binding::handle, this, route, route.parametersClass(), crossSite( allOptions ), crossOrigin( allOptions ) ), allOptions );
 		return route;
 	}
 
@@ -290,6 +290,13 @@ public final class RouteGroup {
 	 */
 	private static CrossSite crossSite( final List<RouteOption> options ) {
 		return options.stream().filter( CrossSite.class::isInstance ).map( CrossSite.class::cast ).findFirst().orElse( CrossSite.SAME_ORIGIN );
+	}
+
+	/**
+	 * @return The other sites whose scripts may call the route, null for none
+	 */
+	private static CrossOrigin crossOrigin( final List<RouteOption> options ) {
+		return options.stream().filter( CrossOrigin.class::isInstance ).map( CrossOrigin.class::cast ).findFirst().orElse( null );
 	}
 
 	/**

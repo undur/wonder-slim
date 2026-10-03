@@ -322,7 +322,16 @@ public final class Router<H> {
 	/**
 	 * A path matched, but no route at it accepts the request's method: {@code 405}, with {@code Allow}
 	 */
-	public record MethodNotAllowed<H>( Set<String> allowedMethods ) implements Result<H> {}
+	public record MethodNotAllowed<H>( Set<String> allowedMethods, List<Entry<H>> routes ) implements Result<H> {
+
+		/**
+		 * @param routes The routes at the path that don't take the method
+		 */
+		public MethodNotAllowed {
+			allowedMethods = Set.copyOf( allowedMethods );
+			routes = List.copyOf( routes );
+		}
+	}
 
 	/**
 	 * The path matched a route with the redirect policy, but only in the other trailing slash form: {@code 308} to the
@@ -349,6 +358,7 @@ public final class Router<H> {
 
 		final List<Candidate<H>> candidates = new ArrayList<>();
 		final Set<String> allowed = new TreeSet<>();
+		final List<Entry<H>> notAllowedRoutes = new ArrayList<>();
 
 		// The shape of the most specific route that matched the path but not the method, while no route has matched yet
 		String notAllowedShape = null;
@@ -396,6 +406,7 @@ public final class Router<H> {
 			// The route is there, but not for this method: it counts towards a 405
 			if( !accepted ) {
 				allowed.addAll( routeAllows );
+				notAllowedRoutes.add( route );
 
 				if( notAllowedShape == null && candidates.isEmpty() ) {
 					notAllowedShape = route.path().shape();
@@ -423,7 +434,7 @@ public final class Router<H> {
 		}
 
 		if( !allowed.isEmpty() ) {
-			return new MethodNotAllowed<>( Collections.unmodifiableSet( allowed ) );
+			return new MethodNotAllowed<>( allowed, notAllowedRoutes );
 		}
 
 		return new NoMatch<>();

@@ -20,6 +20,7 @@ import com.webobjects.appserver.WOResponse;
 
 import er.routing.core.Converters;
 import er.routing.core.Host;
+import er.routing.core.Method;
 import er.routing.core.RouteOption;
 import er.routing.core.RouteCondition;
 import er.routing.core.RouteRequest;
@@ -51,7 +52,7 @@ public class ERXRouter {
 	/**
 	 * What the core router routes to: a handler, and the group it was mapped in (for its wrapping)
 	 */
-	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, CrossSite crossSite ) {}
+	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, CrossSite crossSite, CrossOrigin crossOrigin ) {}
 
 	private final Router<Mapped> _router;
 	private final Converters _converters = new Converters( type -> undeclared( "the converter for " + type.getName() + ", registered" ) );
@@ -414,7 +415,7 @@ public class ERXRouter {
 
 		return switch( _router.route( routeRequest ) ) {
 			case Router.Matched<Mapped> matched -> answer( matched, invocation );
-			case Router.MethodNotAllowed<Mapped> notAllowed -> "OPTIONS".equals( routeRequest.method() ) ? options( notAllowed ) : methodNotAllowed( notAllowed );
+			case Router.MethodNotAllowed<Mapped> notAllowed -> "OPTIONS".equals( routeRequest.method() ) ? options( notAllowed, routeRequest ) : methodNotAllowed( notAllowed );
 			case Router.Redirect<Mapped> redirect -> redirect( redirect, invocation );
 			case Router.NoMatch<Mapped> noMatch -> RouteHandler.DECLINED;
 		};
@@ -422,11 +423,19 @@ public class ERXRouter {
 
 	private WOActionResults answer( final Router.Matched<Mapped> matched, final er.extensions.routes.RouteInvocation invocation ) {
 
+		final RouteRequest request = routeRequest( invocation.request(), invocation.url() );
+
 		for( final Router.Candidate<Mapped> candidate : matched.candidates() ) {
 			final Mapped mapped = candidate.handler();
+			final boolean allowedOrigin = mapped.crossOrigin() != null && mapped.crossOrigin().allows( request );
 
-			// A post from a page on a site the route doesn't take those from
-			if( mapped.crossSite().refuses( routeRequest( invocation.request(), invocation.url() ), RequestHost.host( invocation.request() ), PublicAddress.configured(), this::isOwnHost ) ) {
+			// A browser's preflight for another site's script: answered for the route, which takes every method
+			if( allowedOrigin && CrossOrigin.isPreflight( request ) ) {
+				return mapped.crossOrigin().preflight( request, Set.of( request.header( "access-control-request-method" ).toUpperCase( java.util.Locale.ROOT ) ) );
+			}
+
+			// A post from a page on a site the route doesn't take those from (an origin it allows calls is taken)
+			if( !allowedOrigin && mapped.crossSite().refuses( request, RequestHost.host( invocation.request() ), PublicAddress.configured(), this::isOwnHost ) ) {
 				logger.debug( "The route {} refused {} {} from another site (origin {})", candidate.entry(), invocation.request().method(), invocation.url(), invocation.request().headerForKey( "origin" ) );
 				return CrossSite.forbidden();
 			}
@@ -458,6 +467,14 @@ public class ERXRouter {
 			}
 
 			if( results != RouteHandler.DECLINED ) {
+
+				// Another site's script may read the answer
+				if( allowedOrigin ) {
+					final WOResponse response = results.generateResponse();
+					mapped.crossOrigin().allow( response, request );
+					return response;
+				}
+
 				return results;
 			}
 
@@ -499,9 +516,22 @@ public class ERXRouter {
 	/**
 	 * The answer to {@code OPTIONS} at a path whose routes don't take it themselves: the methods they accept
 	 */
-	private static WOResponse options( final Router.MethodNotAllowed<Mapped> notAllowed ) {
+	private static WOResponse options( final Router.MethodNotAllowed<Mapped> notAllowed, final RouteRequest request ) {
 		final Set<String> allowed = new TreeSet<>( notAllowed.allowedMethods() );
 		allowed.add( "OPTIONS" );
+
+		// A browser's preflight for another site's script: answered for the routes allowing its origin, with their methods
+		if( CrossOrigin.isPreflight( request ) ) {
+			for( final Router.Entry<Mapped> route : notAllowed.routes() ) {
+				final CrossOrigin crossOrigin = route.handler().crossOrigin();
+
+				if( crossOrigin != null && crossOrigin.allows( request ) ) {
+					final Set<String> methods = new TreeSet<>();
+					notAllowed.routes().stream().filter( r -> r.handler().crossOrigin() != null && r.handler().crossOrigin().allows( request ) ).forEach( r -> r.conditions().stream().filter( Method.class::isInstance ).forEach( m -> methods.addAll( ((Method)m).accepted() ) ) );
+					return crossOrigin.preflight( request, methods );
+				}
+			}
+		}
 
 		final WOResponse response = new WOResponse();
 		response.setStatus( 204 );

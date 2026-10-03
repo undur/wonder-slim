@@ -23,6 +23,7 @@ import bookclubs.data.Library.Book;
 import bookclubs.data.Library.Club;
 import bookclubs.data.Library.Sort;
 import er.routing.ERXRouter;
+import er.routing.CrossOrigin;
 import er.routing.CrossSite;
 import er.routing.Fields;
 import er.routing.Routable;
@@ -197,7 +198,8 @@ public class BookclubRoutes {
 		// An API takes posts from other programs, which may send an Origin (a page's form posting to it, a client
 		// forwarding one), so its routes allow requests from other sites. A browser's script on another site is CORS's
 		// business, which this doesn't touch.
-		final RouteGroup api = club.group( "/api", TrailingSlash.STRICT, CrossSite.ALLOWED );
+		// A partner's scripts call it from their own site (CORS)
+		final RouteGroup api = club.group( "/api", TrailingSlash.STRICT, CrossSite.ALLOWED, CrossOrigin.allow( "https://partner.example" ) );
 		api.map( "/books", BookclubRoutes::apiBooks, Method.GET );
 		api.map( "/books", BookclubRoutes::apiCreateBook, Method.POST );
 		api.map( "/books/{book}", BookclubRoutes::apiBook, Method.GET );
