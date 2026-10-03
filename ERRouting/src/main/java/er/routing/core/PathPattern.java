@@ -170,7 +170,15 @@ public final class PathPattern {
 		}
 
 		if( _wildcard ) {
-			final String remainder = String.join( "/", requestSegments.subList( count, requestSegments.size() ) );
+			final List<String> remaining = requestSegments.subList( count, requestSegments.size() );
+
+			// The remainder is joined with /, so an element with an encoded / in it (..%2F..%2Fetc) would read as more than
+			// one, its own dot segments among them: the remainder is a path a handler may serve files from
+			if( remaining.stream().anyMatch( segment -> segment.contains( "/" ) ) ) {
+				return null;
+			}
+
+			final String remainder = String.join( "/", remaining );
 			parameters.put( WILDCARD_PARAMETER, requestSegments.size() > count && path.trailingSlash() ? remainder + "/" : remainder );
 			return new Match( parameters, true );
 		}

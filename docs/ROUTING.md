@@ -111,8 +111,9 @@ Throwing `Declined` declines from anywhere inside a route, as returning `RouteHa
 
 - A parameter or the wildcard is a whole path element: `/books/book-{id}` isn't a pattern.
 - A parameter never matches an empty element, so `/books//edit` doesn't match `/books/{id}/edit`.
-- Path elements are decoded before they're handed over: `/files/a%2Fb` gives `a/b`, and `%2F` doesn't split the
-  path.
+- Path elements are decoded before they're handed over: `/books/a%2Fb` gives a parameter `a/b`, and `%2F` doesn't
+  split the path. A wildcard doesn't match a path with an encoded `/` in its remainder, since the remainder would then
+  read as more elements than the path had (`..%2F..%2Fetc`).
 - Paths are case-sensitive.
 - A path with a `.` or `..` segment (or its encoded form) matches no route. Browsers resolve them away, so such a path
   was written by hand, and a wildcard's remainder never carries one: a handler serving files from it is safe from `../`.
@@ -416,7 +417,7 @@ A route can require more of a request than its path. Conditions are declared wit
 its trailing slash policy):
 
 ```java
-createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
+deleteBook = club.route( "/books/{book}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
 home = routes.route( "/", Home.class, Host.of( "@" ) );
 ```
 
@@ -490,6 +491,10 @@ adminGroup.wrap( ( invocation, next ) -> {
 ```
 
 A nested group's filters run inside its parent's: `/admin/danger/` runs the admin filter, then the danger filter.
+
+A route declining (`ri.parameter( name, Type )` naming nothing) or redirecting to a parameter's canonical text travels
+out through the filters as an exception (`Declined`, `NotCanonical`), so a filter catching `RuntimeException` rethrows
+those.
 
 ## Trailing slashes
 

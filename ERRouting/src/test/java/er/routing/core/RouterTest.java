@@ -436,6 +436,11 @@ public class RouterTest {
 		assertInstanceOf( NoMatch.class, get( router, "/files/x/../y" ) );
 		assertInstanceOf( NoMatch.class, get( router, "/files/x/%2E%2E/y" ) );
 		assertInstanceOf( NoMatch.class, get( router, "/files/./y" ) );
+
+		// An encoded / in the remainder would carry dot segments past the check
+		assertInstanceOf( NoMatch.class, get( router, "/files/..%2F..%2Fetc%2Fpasswd" ) );
+		assertInstanceOf( NoMatch.class, get( router, "/files/x/..%2Fy" ) );
+		assertInstanceOf( NoMatch.class, get( router, "/files/a%2Fb" ) );
 		assertEquals( Map.of( "*", "x/.../y" ), parameters( get( router, "/files/x/.../y" ) ) );
 	}
 

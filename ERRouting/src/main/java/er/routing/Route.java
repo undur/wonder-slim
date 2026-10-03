@@ -253,6 +253,13 @@ public final class Route<P extends Record> implements Linkable {
 	}
 
 	/**
+	 * @return A redirect to the route with the given parameters ({@code 303 See Other}), in the current context
+	 */
+	public WOResponse redirect( final P parameters ) {
+		return redirect( parameters, ERXWOContext.currentContext() );
+	}
+
+	/**
 	 * @return A redirect to the route with the given parameters ({@code 303 See Other}): what a form's post answers with
 	 */
 	public WOResponse redirect( final P parameters, final WOContext context ) {

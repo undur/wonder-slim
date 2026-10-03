@@ -48,10 +48,11 @@ class RouteBindings {
 			}
 		}
 
+		final List<String> queryNames = associations.allKeys().stream().filter( key -> key.startsWith( "?" ) ).map( key -> key.substring( 1 ) ).toList();
 		final NSMutableDictionary<String, WOAssociation> result = associations.mutableClone();
 		result.removeObjectForKey( ROUTE_KEY );
 		parameters.keySet().forEach( name -> result.removeObjectForKey( PARAMETER_PREFIX + name ) );
-		result.setObjectForKey( new RouteURLAssociation( route, parameters ), "href" );
+		result.setObjectForKey( new RouteURLAssociation( route, parameters, queryNames, tag ), "href" );
 		return result;
 	}
 
@@ -64,9 +65,17 @@ class RouteBindings {
 		private final WOAssociation _route;
 		private final Map<String, WOAssociation> _parameters;
 
-		private RouteURLAssociation( final WOAssociation route, final Map<String, WOAssociation> parameters ) {
+		/**
+		 * The names of the element's {@code ?} bindings, free query parameters
+		 */
+		private final List<String> _queryNames;
+		private final String _tag;
+
+		private RouteURLAssociation( final WOAssociation route, final Map<String, WOAssociation> parameters, final List<String> queryNames, final String tag ) {
 			_route = route;
 			_parameters = parameters;
+			_queryNames = queryNames;
+			_tag = tag;
 		}
 
 		@Override
@@ -75,6 +84,15 @@ class RouteBindings {
 
 			if( !(route instanceof Linkable linkable) ) {
 				throw new IllegalArgumentException( "The 'route' binding (%s) is %s, not a route".formatted( _route.keyPath(), route == null ? "null" : "a " + route.getClass().getName() ) );
+			}
+
+			// A typed route's own parameter as a free query parameter would skip the check a : binding gets
+			if( linkable instanceof Route<?> typed ) {
+				for( final String name : _queryNames ) {
+					if( typed.parameterNames().contains( name ) ) {
+						throw new IllegalArgumentException( "%s binds ?%s, a parameter of the route %s: bind it as :%s, so its value is checked".formatted( _tag, name, typed, name ) );
+					}
+				}
 			}
 
 			final Map<String, Object> values = new LinkedHashMap<>();
