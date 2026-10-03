@@ -143,7 +143,7 @@ books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
   ```
 
   The reason names what was wrong: `Objects.requireNonNull( q, "q" )` says so itself, and a `NullPointerException`
-  without a message is given one naming the absent components (`Missing: [q]`). A form's fields are checked by the
+  without a message is given one naming the absent components (`Absent: [q]`). A form's fields are checked by the
   route, which can show the form again with what's wrong.
 - **Bad input, three ways:** with nothing set, bad input declines the request. With `whenInvalid`, the route answers
   any bad input itself: a query parameter or field that doesn't convert, and values its record's constructor refuses.
@@ -204,7 +204,8 @@ component of a type with a converter:
 public record Books( Club club, Sort sort, Integer page, List<String> author ) implements Routable { … }
 ```
 
-It has every value, in order, and is an empty list when there are none (never null). A value that doesn't convert is bad
+It has every value, in order, and is an empty list when there are none (never null). An empty value (`?q=`, a field
+left empty) is no value, for text too: a `String` component is null then, not `""`. A value that doesn't convert is bad
 input, as for any query parameter (declined, `whenInvalid`, or reported and left out with `Fields.REPORTED`). A link
 repeats the parameter for each value: `:author="$authors"` takes a list (an `NSArray` too) or one value. A route
 parameter has one value, so a path or host parameter can't be a `List`.
@@ -298,7 +299,8 @@ A scheme, a host, and a port if it isn't the scheme's: a path is refused (a base
 
 - Complete URLs (a context generating them, an email's) have its scheme, host and port.
 - A link to a route on another host has its scheme and port, with the route's host: `https://kronan.bookclubs.example.com/`.
-- `route.completeURL( record )` makes a complete URL without a request, for a background job's email.
+- `route.completeURL( record )`, or `completeURL( values )` on any route, makes a complete URL without a request, for
+  a background job's email. Host parameters are given then, since there's no request to take them from.
 
 Without it, URLs take the request's scheme, host and port, and `completeURL` outside a request fails, naming the
 property. Relative links don't change either way.
@@ -306,7 +308,8 @@ property. Relative links don't change either way.
 ### Forms
 
 `<wo:routeForm>` posts to a typed route. It takes `route` and `:` parameters as `<wo:route>` does, and the record's
-other components are the form's fields:
+other components are the form's fields. A `method="get"` form's query parameters (`:sort="$sort"`) are rendered as
+hidden fields, since a browser replaces a get form's action query with its fields.
 
 ```java
 public record CreateBook( Club club, String title, String author, Integer year ) {}
@@ -504,6 +507,6 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
   record. Until then, link mistakes show when the link renders.
 - Reading a table's routes again on each request in development.
 - Without the public address, a link to another host assumes the request's scheme and port, and complete URLs of
-  routes without a host have the request's host.
+  routes without a host have the machine's name (`http://my-macbook.local:1300/…`).
 - Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.
 - `/docs` and `/docs/`, both strict, are refused as the same route, though no request matches both.

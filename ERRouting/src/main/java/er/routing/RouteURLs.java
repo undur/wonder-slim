@@ -54,10 +54,17 @@ public class RouteURLs {
 	 *         address (which must be set), in the application's URL form (short, or with the adaptor prefix)
 	 */
 	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues ) {
-		final PublicAddress.Origin publicAddress = PublicAddress.required();
+		final ERXApplication application = ERXApplication.erxApplication();
+		return completeURL( path, host, values, queryValues, PublicAddress.required(), application.shortURLs() ? null : application.applicationURLPrefix() );
+	}
+
+	/**
+	 * @param applicationURLPrefix The application's URL prefix ({@code /cgi-bin/WebObjects/App.woa}), null for short URLs
+	 */
+	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues, final PublicAddress.Origin publicAddress, final String applicationURLPrefix ) {
 		final String query = query( queryValues );
 		final String routePath = path.path( values );
-		final String applicationPath = ERXApplication.erxApplication().shortURLs() ? routePath : ERXApplication.erxApplication().applicationURLPrefix() + "/" + ERXShortURLs.ROUTE_KEY + routePath;
+		final String applicationPath = applicationURLPrefix == null ? routePath : applicationURLPrefix + "/" + ERXShortURLs.ROUTE_KEY + routePath;
 		final String origin = host == null ? publicAddress.origin() : publicAddress.origin( host.host( values ) );
 		return origin + applicationPath + (query.isEmpty() ? "" : "?" + query);
 	}

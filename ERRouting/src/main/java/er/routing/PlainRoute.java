@@ -55,6 +55,18 @@ public final class PlainRoute implements Linkable {
 	 */
 	@Override
 	public String url( final Map<String, Object> values, final WOContext context ) {
+		return RouteURLs.url( _path, _host, strings( values, context ), List.of(), context );
+	}
+
+	@Override
+	public String completeURL( final Map<String, Object> values ) {
+		return RouteURLs.completeURL( _path, _host, strings( values, null ), List.of() );
+	}
+
+	/**
+	 * @return The values as URL text, host parameters they don't have taken from the context's request (if there's one)
+	 */
+	private Map<String, String> strings( final Map<String, Object> values, final WOContext context ) {
 		final List<String> unknown = values.keySet().stream().filter( name -> !_routeParameterNames.contains( name ) ).toList();
 
 		// Free query parameters are ?-attributes on a link, so a name that isn't a parameter is a mistake, not a query
@@ -73,7 +85,7 @@ public final class PlainRoute implements Linkable {
 			}
 		} );
 
-		return RouteURLs.url( _path, _host, strings, List.of(), context );
+		return strings;
 	}
 
 	@Override

@@ -101,7 +101,7 @@ public class ERXRouter {
 	 *         listing them, say)
 	 */
 	public List<RouteDescription> routes() {
-		return _router.routes().stream().map( e -> new RouteDescription( e.path().source(), e.conditions(), e.trailingSlash(), e.table(), e.handler().route(), e.handler().parametersClass() ) ).toList();
+		return _router.routes().stream().map( e -> new RouteDescription( e.path().source(), e.conditions(), e.trailingSlash(), e.table(), e.handler().route(), e.handler().parametersClass(), e.handler().crossSiteAllowed(), e.handler().route() instanceof Route<?> r && r.reportsFields() ) ).toList();
 	}
 
 	/**

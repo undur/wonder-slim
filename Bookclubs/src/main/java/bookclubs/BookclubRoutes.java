@@ -240,7 +240,7 @@ public class BookclubRoutes {
 		newBook = club.route( "/books/new", NewBook.class );
 		book = club.route( "/books/{book}", BookView.class );
 		member = club.route( "/members/{handle}", MemberView.class );
-		search = club.route( "/search", Search.class ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), invocation.parameter( "club", Club.class ), "Search", "What are you searching for? Add ?q=…" ).status( 400 ) );
+		search = club.route( "/search", Search.class ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), invocation.parameter( "club", Club.class ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
 		clubText = club.route( "/{name}", ClubText.class );
 		about = club.route( "/about", About.class );
 
@@ -277,7 +277,9 @@ public class BookclubRoutes {
 		reset = dangerGroup.route( "/reset", Reset.class, BookclubRoutes::reset, Method.POST );
 
 		// A JSON API: strict about trailing slashes, and about methods (anything else is 405, with Allow)
-		// An API takes posts from anywhere (a script on another site), so its routes allow requests from other sites
+		// An API takes posts from other programs, which may send an Origin (a page's form posting to it, a client
+		// forwarding one), so its routes allow requests from other sites. A browser's script on another site is CORS's
+		// business, which this doesn't touch.
 		final RouteGroup api = club.group( "/api", TrailingSlash.STRICT, CrossSite.ALLOWED );
 		api.map( "/books", BookclubRoutes::apiBooks, Method.GET );
 		api.map( "/books", BookclubRoutes::apiCreateBook, Method.POST );

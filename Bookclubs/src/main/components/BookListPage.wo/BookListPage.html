@@ -5,8 +5,7 @@
 		<wo:route route="$routes.books" :sort="author" :author="$authors">author</wo:route> or
 		<wo:route route="$routes.books" :sort="year" :author="$authors">year</wo:route>
 	</p>
-	<wo:routeForm route="$routes.books" method="get" class="filter">
-		<wo:genericElement elementName="input" type="hidden" name="sort" value="$sort" />
+	<wo:routeForm route="$routes.books" method="get" class="filter" :sort="$sort">
 		<wo:repetition list="$allAuthors" item="$anAuthor">
 			<label><wo:genericElement elementName="input" type="checkbox" name="author" value="$anAuthor" checked="$anAuthorChecked" /> <wo:str value="$anAuthor" /></label>
 		</wo:repetition>

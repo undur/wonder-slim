@@ -265,6 +265,21 @@ public final class Route<P extends Record> implements Linkable {
 	 */
 	@Override
 	public String url( final Map<String, Object> values, final WOContext context ) {
+		final Link link = link( values, context );
+		return RouteURLs.url( _path, _host, link.routeValues(), link.queryValues(), context );
+	}
+
+	@Override
+	public String completeURL( final Map<String, Object> values ) {
+		final Link link = link( values, null );
+		return RouteURLs.completeURL( _path, _host, link.routeValues(), link.queryValues() );
+	}
+
+	/**
+	 * @return The values as URL text, each checked against its component's type, host parameters they don't have taken
+	 *         from the context's request (if there's one)
+	 */
+	private Link link( final Map<String, Object> values, final WOContext context ) {
 		final Map<String, Object> all = RouteURLs.withHostParameters( _host, values, context );
 		final List<String> unknown = all.keySet().stream().filter( name -> !parameterNames().contains( name ) ).toList();
 
@@ -307,7 +322,7 @@ public final class Route<P extends Record> implements Linkable {
 			link.add( name, text( name, _components[i].getType(), value ), _routeParameterNames.contains( name ) );
 		}
 
-		return RouteURLs.url( _path, _host, link.routeValues(), link.queryValues(), context );
+		return link;
 	}
 
 	/**
@@ -397,7 +412,8 @@ public final class Route<P extends Record> implements Linkable {
 				final List<Object> values = new ArrayList<>();
 
 				for( final String text : texts ) {
-					if( text.isEmpty() && _elementTypes[i] != String.class ) {
+					// An empty value is no value, as an empty field is, text included
+					if( text.isEmpty() ) {
 						continue;
 					}
 
@@ -433,7 +449,8 @@ public final class Route<P extends Record> implements Linkable {
 
 			final String string = texts.isEmpty() ? null : texts.getFirst();
 
-			if( string == null || (string.isEmpty() && component.getType() != String.class) ) {
+			// An empty value (?q=, a field left empty) is absent, for text too
+			if( string == null || string.isEmpty() ) {
 				continue;
 			}
 
@@ -456,7 +473,7 @@ public final class Route<P extends Record> implements Linkable {
 			parameters = construct( arguments );
 		}
 		catch( IllegalArgumentException | NullPointerException e ) {
-			final RuntimeException reason = withMissingNamed( e, arguments );
+			final RuntimeException reason = withAbsentNamed( e, arguments );
 			return _whenInvalid != null ? _whenInvalid.invoke( invocation, reason ) : declined( invocation, "%s refused its values: %s".formatted( _parametersClass.getSimpleName(), reason.getMessage() ) );
 		}
 
@@ -467,21 +484,21 @@ public final class Route<P extends Record> implements Linkable {
 	 * @return The reason the record refused its values: a NullPointerException without a message (from
 	 *         {@code Objects.requireNonNull( q )}) is given one naming the components that were absent
 	 */
-	private RuntimeException withMissingNamed( final RuntimeException e, final Object[] arguments ) {
+	private RuntimeException withAbsentNamed( final RuntimeException e, final Object[] arguments ) {
 
 		if( !(e instanceof NullPointerException) || e.getMessage() != null ) {
 			return e;
 		}
 
-		final List<String> missing = new ArrayList<>();
+		final List<String> absent = new ArrayList<>();
 
 		for( int i = 0; i < _components.length; i++ ) {
 			if( arguments[i] == null ) {
-				missing.add( _components[i].getName() );
+				absent.add( _components[i].getName() );
 			}
 		}
 
-		final NullPointerException named = new NullPointerException( "Missing: " + missing );
+		final NullPointerException named = new NullPointerException( "Absent: " + absent );
 		named.initCause( e );
 		return named;
 	}

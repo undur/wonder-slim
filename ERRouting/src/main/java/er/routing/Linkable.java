@@ -36,6 +36,13 @@ public interface Linkable {
 	}
 
 	/**
+	 * @return The route's complete URL for parameter values by name, without a request (a background job's email): at the
+	 *         application's public address ({@link PublicAddress}), which must be set. Host parameters are given, since
+	 *         there's no request to take them from.
+	 */
+	public String completeURL( Map<String, Object> values );
+
+	/**
 	 * @return A redirect to the route ({@code 303 See Other}) for parameter values by name: what a form's post answers
 	 *         with (post, redirect, get)
 	 */

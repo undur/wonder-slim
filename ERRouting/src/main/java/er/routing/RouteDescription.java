@@ -15,6 +15,8 @@ import er.routing.core.TrailingSlash;
  * @param table The table it's mapped in ({@code application}, or a plugin's)
  * @param route The route, for linking to it
  * @param parametersClass A typed route's record class, null for a plain route
+ * @param crossSiteAllowed true if it takes requests that change things from other sites ({@link CrossSite#ALLOWED})
+ * @param fieldsReported true if fields that don't convert are reported to it ({@link Fields#REPORTED})
  */
 
-public record RouteDescription( String pattern, List<RouteCondition> conditions, TrailingSlash trailingSlash, String table, Linkable route, Class<? extends Record> parametersClass ) {}
+public record RouteDescription( String pattern, List<RouteCondition> conditions, TrailingSlash trailingSlash, String table, Linkable route, Class<? extends Record> parametersClass, boolean crossSiteAllowed, boolean fieldsReported ) {}

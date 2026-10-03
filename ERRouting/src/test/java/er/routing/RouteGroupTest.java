@@ -173,6 +173,9 @@ public class RouteGroupTest {
 		assertEquals( search, searchDescription.route() );
 		assertEquals( Search.class, searchDescription.parametersClass() );
 
+		assertFalse( searchDescription.crossSiteAllowed() );
+		assertFalse( searchDescription.fieldsReported() );
+
 		final RouteDescription aboutDescription = router.routes().stream().filter( d -> d.pattern().equals( "/about" ) ).findFirst().orElseThrow();
 		assertEquals( about, aboutDescription.route() );
 		assertNull( aboutDescription.parametersClass() );
@@ -253,8 +256,11 @@ public class RouteGroupTest {
 		} ) );
 
 		assertEquals( asked, search.handle( invocation( "/search", Map.of(), router ) ) );
-		assertEquals( List.of( "Missing: [q]" ), reasons );
+		assertEquals( List.of( "Absent: [q]" ), reasons );
 		assertEquals( found, search.handle( invocation( "/search", Map.of( "q", "dune" ), router ) ) );
+
+		// An empty value is absent, for text too (?q=)
+		assertEquals( asked, search.handle( invocation( "/search", Map.of( "q", "" ), router ) ) );
 	}
 
 	public record Listing( Integer page ) {}
@@ -341,5 +347,6 @@ public class RouteGroupTest {
 		assertEquals( List.of( CrossSite.ALLOWED ), api.allOptions().stream().filter( CrossSite.class::isInstance ).toList() );
 		assertTrue( router.application().group( "/other" ).allOptions().stream().noneMatch( CrossSite.class::isInstance ) );
 		assertTrue( router.table( "plugin" ).join( "api" ).allOptions().contains( CrossSite.ALLOWED ) );
+		assertTrue( entry( router, "/api/hooks" ).crossSiteAllowed() );
 	}
 }
