@@ -359,19 +359,19 @@ Built so far (all on the route-links branch, in `er.extensions.experimental.rout
 
 Found by building Bookclubs, to be tackled:
 
-1. **Links within a host repeat its parameters.** Every link on a club's pages carries `:club="$club.id"`, though it
+1. **Links within a host repeat its parameters** (#180). Every link on a club's pages carries `:club="$club.id"`, though it
    links to the host it's on. Links could take the current request's host parameters unless they're given.
-2. **Endpoints have no trailing slash policy.** `group.endpoint(…)` takes none, so the redirect and strict examples
+2. **Endpoints have no trailing slash policy** (#181). `group.endpoint(…)` takes none, so the redirect and strict examples
    are plain routes.
-3. **Forms can't take an endpoint.** A form posts to a URL generated in Java, which takes building a record of nulls
+3. **Forms can't take an endpoint** (#182). A form posts to a URL generated in Java, which takes building a record of nulls
    (`new CreateBook( club, null, null, null )`) just for the route's own parameters.
-4. **Setting up takes ceremony:** a holder class with a static `create`/`instance`, and a `routes()` accessor in the
+4. **Setting up takes ceremony** (#183): a holder class with a static `create`/`instance`, and a `routes()` accessor in the
    pages' base class. Static fields in key paths (#172) would remove the accessor.
-5. **A plugin can't map into the application's groups,** so the guestbook repeats the club host condition
+5. **A plugin can't map into the application's groups** (#184), so the guestbook repeats the club host condition
    (`CLUB_HOST`) that the application's club group has.
-6. **Plain routes' parameters are strings,** so the JSON API parses ids itself: objects as parameters (#175) and
+6. **Plain routes' parameters are strings** (#185), so the JSON API parses ids itself: objects as parameters (#175) and
    converters for plain routes too.
-7. **Seen once, not reproduced:** a running Bookclubs kept serving the old templates of two pages after an edit, until
+7. **Seen once, not reproduced** (#186): a running Bookclubs kept serving the old templates of two pages after an edit, until
    a restart. That run had been through several hot swaps of ERExtensions; template edits reloaded normally after the
    restart.
 
