@@ -382,15 +382,22 @@ plugins join the application's named groups (#184), and converters make objects 
    a restart. That run had been through several hot swaps of ERExtensions; template edits reloaded normally after the
    restart.
 
-An outside review of the design (2026-10-03) found six bugs and several gaps, now fixed: two conditions of one type are
-refused when mapped, host parameter names keep their case, host values are checked to be one label, cross-host links
-in complete URLs replace the host, converters work for interfaces, and the router claims only its own routes in the
-route table's `hasRouteFor()` (through `RouteClaims`, the one addition to ERExtensions), refusing routes a request
-handler's key would hide. Plain routes have an identity (`map()` returns a `PlainRoute`, and links, forms and redirects
-take any `Linkable`), URLs are built without constructing the record, form fields that don't convert reach the route
-in `conversionErrors()`, plugins can join groups named later, routes are listable, `OPTIONS` is answered, and a value
-has one text. Disputed and kept: methods are checked before a group's filters run, a minor disclosure that's correct
-HTTP.
+Also built:
+
+- **Routes as values.** `map()` returns a `PlainRoute`, `route()` a typed `Route`, and both are `Linkable`: links,
+  forms and redirects take either, and URLs are built from parameter values without constructing a record.
+- **Conversion.** Parsing is lenient. A route parameter that doesn't convert declines the request, and one in other text
+  than its value's is redirected to its canonical URL. A query parameter or field that doesn't convert declines too,
+  unless the route declares `Fields.REPORTED`, which hands the errors to it (`conversionErrors()`), for forms.
+- **Hosts.** A host pattern has no port, parameter names keep their case, matching and generation take one label per
+  parameter, and a link to another host is complete, to that host, in a context generating complete URLs too.
+- **The route table.** The router claims only the URLs of its routes answering any host, through `RouteClaims` (the one
+  addition to ERExtensions), and refuses a route a request handler's key would hide.
+- **Plugins** join the application's groups as they're named (`join( name, body )`), and a group never named fails at
+  launch.
+- **The rest.** `OPTIONS` is answered with `Allow`, `routes()` describes every route, and two conditions of one type
+  are refused. Methods are checked before a group's filters run: a `405` reveals that a route exists, which is correct
+  HTTP.
 
 Not built yet:
 

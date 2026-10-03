@@ -26,9 +26,11 @@ public Application() {
 
 The default router is created on first use and mapped into the existing route table then, as one route. What the
 router has no route for passes on to the table's other routes, then its fallback and not found handling, so the router
-and existing routes work side by side. The table's `hasRouteFor()` answers for the router's routes, not for every URL.
+and existing routes work side by side. The table's `hasRouteFor()` answers for the router's routes that answer any host,
+not for every URL.
 
-`ERXRouter.defaultRouter().routes()` lists every route in precedence order, with its pattern, conditions and table.
+`ERXRouter.defaultRouter().routes()` describes every route in precedence order (`RouteDescription`): its pattern,
+conditions, trailing slash policy and table, the route itself for linking, and a typed route's record class.
 
 ## Routes
 
@@ -115,9 +117,14 @@ books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
 - **Types:** anything the router's converters convert (see [Parameter types](#parameter-types)). A query parameter
   can be absent, so it's a boxed type or an object, and null when absent.
 - **Values that don't convert:** a route parameter (path or host) that doesn't convert, or names an object that doesn't
-  exist, declines the request: the URL is wrong. A query parameter or a form's field that doesn't convert is null, and
-  the route hears about it in `invocation.conversionErrors()`, with the text that was given, so it can answer a form
-  with its errors.
+  exist, declines the request: the URL is wrong. So does a query parameter or a form's field, by default, so a route
+  that never looks at its input's errors fails safe. A route taking a form declares `Fields.REPORTED`: a field that
+  doesn't convert is then null, and the route hears about it in `invocation.conversionErrors()`, with the text that was
+  given, so it can show the form again with its errors.
+
+  ```java
+  createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
+  ```
 - **Validation:** the record's constructor checks what makes the route's own parameters valid, and a value it refuses
   (an `IllegalArgumentException`) declines the request. A form's fields are checked by the route, which can show the
   form again with what's wrong.
@@ -156,9 +163,13 @@ book. An id that isn't a number (`/books/abc`) or isn't a book's (`/books/999`) 
 is invoked: `fromString` throws `IllegalArgumentException` for text that isn't a value of the type, and returns null for
 a value that doesn't exist. A type that has no converter is an error when the route is declared.
 
-A value has one text: `/books/007` and `/books/+7` decline, rather than being other URLs of `/books/7`. Text that
-converts to a value whose text is different isn't accepted, unless the converter says its type is written more than one
-way (`canonical()` is false, as for `Double`).
+Parsing takes a type's common forms: `007` is 7, an ISO date may have milliseconds, a UUID may be upper case, and a
+boolean is `true`, `false`, or `on` (what a checkbox without a `value` posts).
+
+A route parameter has one URL per value: `/books/007` and `/books/+7` are answered with `308` to `/books/7`, keeping
+the query string, so each object has one URL. A converter whose type is written more than one way says so
+(`canonical()` is false, as for `Double`), and its values aren't redirected. Query parameters and fields aren't held to
+one text.
 
 ### Reaching typed routes from templates
 
@@ -198,7 +209,9 @@ public abstract class BaseComponent extends ERXComponent {
 
 - A constant (`:sort="author"`) is checked against the parameter's type, so `author` must be one of the enum's values.
 - Building a link's URL doesn't construct the typed route's record: only its route parameters are needed.
-- A plain route's `:` parameters are its pattern's and its host's, and other values are query parameters.
+- A plain route's `:` parameters are its pattern's and its host's; another name is an error, as on a typed route. Query
+  parameters the route doesn't declare are `?` attributes.
+- A text parameter takes any value: a number's or an object's text, by the converters.
 - A host parameter the link leaves out is the current request's: on `acme.localhost`, links to the club's routes don't
   repeat `:club`. A link from another host (the landing page on `localhost`) gives it.
 - `?` attributes add query parameters the typed route doesn't declare, as on any link.
@@ -301,7 +314,7 @@ pattern.
 
 A typed route with a host pattern takes the host's parameters as components (`ClubHome( Club club )`), and links to it
 from another host are complete URLs: `http://acme.localhost:1300/`. Host parameter names keep their case
-(`{tenantId}`). A route has one condition of each type: a route can't add a host or methods its group already has.
+(`{tenantId}`). A host pattern has no port (hosts are compared without one). A route has one condition of each type: a route can't add a host or methods its group already has.
 
 In development, any name ending in `.localhost` is this machine, so host routes need no setup: Bookclubs' clubs are at
 `acme.localhost:1300` and `kronan.localhost:1300`.
@@ -378,16 +391,16 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
   routes for overrides:
 
   ```java
-  final RouteGroup club = routes.group( "", CLUB_HOST ).named( "club" );       // the application
-  final RouteGroup admin = club.group( "/admin" ).named( "admin" );
+  routes.join( "club", club -> _page = club.map( "/guestbook", … ) );             // the plugin, set up first
+  routes.join( "admin", admin -> admin.map( "/guestbook", … ) );                  // behind the application's admin filter
 
-  routes.join( "club" ).map( "/guestbook", … );                              // the plugin
-  routes.join( "admin", admin -> admin.map( "/guestbook", … ) );            // behind the application's admin filter
+  final RouteGroup club = routes.group( "", CLUB_HOST ).named( "club" );          // the application, later
+  final RouteGroup admin = club.group( "/admin" ).named( "admin" );
   ```
 
-  `join( name )` joins a group that's named already. A plugin starts before the application declares its groups, so
-  `join( name, body )` maps its routes once the group is named, or now if it is. A group joined but never named is an
-  error on the first request.
+  A plugin starts before the application declares its groups, so `join( name, body )` maps its routes once the group is
+  named, or now if it is. A route the plugin links to is kept in a field the body sets. `join( name )` joins a group
+  that's named already. A group joined but never named fails the application's startup.
 - **Specificity comes first:** a table's rank only decides between the same route. A plugin's `/guestbook` still answers
   `/guestbook` beside an application's catch-all.
 
