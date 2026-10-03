@@ -435,4 +435,8 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
 - Reading a table's routes again on each request in development.
 - A link to another host from a request without a complete URL assumes the request's scheme and port.
 - Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.
+- Repeated parameters: `?sort=title&sort=year` takes the first value, and a component can't be a `List` (a search form's
+  checkboxes, say).
+- Protection against forms posted from another site: a route taking a post has none of its own. A stock filter
+  checking the request's origin would cover it (ng-objects has the same question, ngobjects/ng-objects#58).
 - `/docs` and `/docs/`, both strict, are refused as the same route, though no request matches both.

@@ -207,6 +207,11 @@ public final class PathPattern {
 						throw new IllegalArgumentException( "The path pattern %s needs its parameter '%s'".formatted( _source, parameter.name() ) );
 					}
 
+					// A browser resolves these away, encoded or not, so they can't travel as a path element
+					if( value.equals( "." ) || value.equals( ".." ) ) {
+						throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: browsers resolve it away".formatted( value, parameter.name(), _source ) );
+					}
+
 					yield value;
 				}
 			};

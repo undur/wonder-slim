@@ -109,8 +109,18 @@ public class RouteGroupTest {
 		router.table( "plugin" ).join( "nowhere", group -> group.map( "/x", NOTHING ) );
 		assertThrows( IllegalStateException.class, router::checkJoins );
 
+		// It fails again, every time, until the group is named
+		assertThrows( IllegalStateException.class, router::checkJoins );
+
 		router.application().group( "/somewhere" ).named( "nowhere" );
 		router.checkJoins();
+	}
+
+	@Test
+	public void aNullOptionSaysWhatsWrong() {
+		final NullPointerException e = assertThrows( NullPointerException.class, () -> new ERXRouter().application().map( "/p", NOTHING, (er.routing.core.RouteOption)null ) );
+
+		assertTrue( e.getMessage().contains( "route option is null" ) );
 	}
 
 	@Test

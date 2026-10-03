@@ -412,4 +412,13 @@ public class RouterTest {
 	public void anOptionTheRouterDoesntKnowIsRefused() {
 		assertThrows( IllegalArgumentException.class, () -> table( new Router<>() ).map( "/x", "x", Stray.OPTION ) );
 	}
+
+	@Test
+	public void dotSegmentsArentPathElements() {
+		final PathPattern members = PathPattern.parse( "/members/{handle}" );
+
+		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", ".." ) ) );
+		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "." ) ) );
+		assertEquals( "/members/...", members.path( Map.of( "handle", "..." ) ) );
+	}
 }

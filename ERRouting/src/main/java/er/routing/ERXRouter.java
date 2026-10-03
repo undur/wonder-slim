@@ -175,14 +175,15 @@ public class ERXRouter {
 
 	/**
 	 * @throws IllegalStateException if a group was joined that's never been named: the routes a plugin mapped in it don't
-	 *         exist. Checked for the default router once the application has launched, so it fails at startup.
+	 *         exist. Checked for the default router before the application listens for requests, so it fails at startup,
+	 *         and by any router on its first request. A failed check fails again on every request.
 	 */
 	public synchronized void checkJoins() {
-		_joinsChecked = true;
-
 		if( !_pendingJoins.isEmpty() ) {
 			throw new IllegalStateException( "Groups were joined that are never named: %s. The routes mapped in them don't exist. Their names are %s".formatted( _pendingJoins.keySet(), _namedGroups.keySet() ) );
 		}
+
+		_joinsChecked = true;
 	}
 
 	/**
@@ -228,12 +229,6 @@ public class ERXRouter {
 
 		@Override
 		public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
-
-		// A router first used after launch checks its joins on its first request
-		if( !_joinsChecked ) {
-			checkJoins();
-		}
-
 			return ERXRouter.this.handle( invocation );
 		}
 

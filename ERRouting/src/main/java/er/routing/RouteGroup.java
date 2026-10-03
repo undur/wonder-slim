@@ -1,6 +1,7 @@
 package er.routing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -122,7 +123,7 @@ public final class RouteGroup {
 	 */
 	public PlainRoute map( final String pattern, final RouteHandler handler, final RouteOption... options ) {
 
-		if( List.of( options ).stream().anyMatch( Fields.class::isInstance ) ) {
+		if( Arrays.stream( options ).anyMatch( Fields.class::isInstance ) ) {
 			throw new IllegalArgumentException( "The route %s is a plain route, which reads its fields itself: Fields applies to typed routes".formatted( fullPattern( pattern ) ) );
 		}
 
