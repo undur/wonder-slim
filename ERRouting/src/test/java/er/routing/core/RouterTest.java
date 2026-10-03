@@ -455,4 +455,27 @@ public class RouterTest {
 		assertThrows( IllegalArgumentException.class, () -> Host.of( "@.example.com" ) );
 		assertThrows( IllegalArgumentException.class, () -> Host.of( "{club}.x@" ) );
 	}
+
+	@Test
+	public void schemeAndHeaderConditions() {
+		final Router<String> router = new Router<>();
+		final Router<String>.Table table = table( router );
+		table.map( "/admin", "secure", Scheme.HTTPS );
+		table.map( "/api", "v2", Header.of( "X-Api-Version", "2" ) );
+		table.map( "/api", "any version" );
+
+		final java.util.function.Function<String, String> v2 = name -> name.equals( "x-api-version" ) ? "2" : null;
+		assertInstanceOf( NoMatch.class, router.route( new RouteRequest( "GET", "x", "/admin", false, null ) ) );
+		assertInstanceOf( Router.Matched.class, router.route( new RouteRequest( "GET", "x", "/admin", true, null ) ) );
+		assertEquals( "v2", ((Router.Matched<String>)router.route( new RouteRequest( "GET", "x", "/api", false, v2 ) )).candidates().getFirst().handler() );
+		assertEquals( "any version", ((Router.Matched<String>)router.route( new RouteRequest( "GET", "x", "/api", false, null ) )).candidates().getFirst().handler() );
+
+		// A route on a scheme or a header doesn't claim its path for every request
+		assertFalse( router.hasRouteFor( "/admin" ) );
+		assertTrue( router.hasRouteFor( "/api" ) );
+
+		// Two routes on the same header and value conflict, on another value they don't
+		assertThrows( IllegalArgumentException.class, () -> table.map( "/api", "again", Header.of( "x-api-version", "2" ) ) );
+		table.map( "/api", "v3", Header.of( "x-api-version", "3" ) );
+	}
 }

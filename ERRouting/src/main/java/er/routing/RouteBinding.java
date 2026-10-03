@@ -401,7 +401,7 @@ final class RouteBinding<P extends Record> {
 					continue;
 				}
 
-				arguments[i] = convert( string, component.getType() );
+				arguments[i] = convert( string, component.getType(), invocation );
 
 				// A route parameter that isn't one of the type, or names an object that doesn't exist, means the URL is wrong
 				if( arguments[i] == null ) {
@@ -428,7 +428,7 @@ final class RouteBinding<P extends Record> {
 						continue;
 					}
 
-					final Object value = convert( text, _elementTypes[i] );
+					final Object value = convert( text, _elementTypes[i], invocation );
 
 					if( value == null ) {
 						final WOActionResults refused = badInput( invocation, name, text, "The query parameter or field '%s' has the value '%s', which isn't a %s, or names none".formatted( name, text, _elementTypes[i].getSimpleName() ) );
@@ -465,7 +465,7 @@ final class RouteBinding<P extends Record> {
 				continue;
 			}
 
-			arguments[i] = convert( string, component.getType() );
+			arguments[i] = convert( string, component.getType(), invocation );
 
 			if( arguments[i] == null ) {
 				final WOActionResults refused = badInput( invocation, name, string, "The query parameter or field '%s' is '%s', which isn't a %s, or names none".formatted( name, string, component.getType().getSimpleName() ) );
@@ -533,9 +533,9 @@ final class RouteBinding<P extends Record> {
 	/**
 	 * @return The value for the text, null if it isn't one of the type or names nothing
 	 */
-	private Object convert( final String text, final Class<?> type ) {
+	private Object convert( final String text, final Class<?> type, final RouteInvocation invocation ) {
 		try {
-			return _converters.fromString( text, type );
+			return _converters.fromString( text, type, invocation );
 		}
 		catch( IllegalArgumentException e ) {
 			return null;

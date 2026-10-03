@@ -289,12 +289,13 @@ public final class Router<H> {
 	}
 
 	/**
-	 * @return true if the pattern of a route answering any host matches the path (in either trailing slash form), whatever
-	 *         its other conditions. Routes for a host don't claim paths here, since there's no host to compare with.
+	 * @return true if the pattern of a route answering any request at its path matches the path (in either trailing slash
+	 *         form), whatever methods it takes. Routes on a host, a scheme or a header don't claim paths here, since
+	 *         there's no request to compare with.
 	 */
 	public boolean hasRouteFor( final String path ) {
 		final RequestPath requestPath = RequestPath.parse( path );
-		return requestPath != null && sorted().stream().anyMatch( entry -> entry.conditions().stream().noneMatch( Host.class::isInstance ) && entry.path().match( requestPath ) != null );
+		return requestPath != null && sorted().stream().anyMatch( entry -> entry.conditions().stream().allMatch( Method.class::isInstance ) && entry.path().match( requestPath ) != null );
 	}
 
 	/**

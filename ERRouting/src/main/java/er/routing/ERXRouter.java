@@ -266,6 +266,13 @@ public class ERXRouter {
 	}
 
 	/**
+	 * @return The request as the router's core sees it: its method, host, path, scheme and headers
+	 */
+	static RouteRequest routeRequest( final WORequest request, final String path ) {
+		return new RouteRequest( request.method(), RequestHost.host( request ), path, request.isSecure(), request::headerForKey );
+	}
+
+	/**
 	 * @return true if one of the routes answers the host (without a port), or it's the public address's
 	 */
 	boolean isOwnHost( final String host ) {
@@ -403,7 +410,7 @@ public class ERXRouter {
 		}
 
 		final WORequest request = invocation.request();
-		final RouteRequest routeRequest = new RouteRequest( request.method(), RequestHost.host( request ), invocation.url() );
+		final RouteRequest routeRequest = routeRequest( request, invocation.url() );
 
 		return switch( _router.route( routeRequest ) ) {
 			case Router.Matched<Mapped> matched -> answer( matched, invocation );
@@ -419,7 +426,7 @@ public class ERXRouter {
 			final Mapped mapped = candidate.handler();
 
 			// A post from a page on a site the route doesn't take those from
-			if( mapped.crossSite().refuses( invocation.request(), RequestHost.host( invocation.request() ), PublicAddress.configured(), this::isOwnHost ) ) {
+			if( mapped.crossSite().refuses( routeRequest( invocation.request(), invocation.url() ), RequestHost.host( invocation.request() ), PublicAddress.configured(), this::isOwnHost ) ) {
 				logger.debug( "The route {} refused {} {} from another site (origin {})", candidate.entry(), invocation.request().method(), invocation.url(), invocation.request().headerForKey( "origin" ) );
 				return CrossSite.forbidden();
 			}

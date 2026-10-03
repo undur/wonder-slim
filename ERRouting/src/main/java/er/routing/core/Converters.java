@@ -7,7 +7,9 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Converts route parameters between their URL text and their types, both ways: a value to text for a link, and text
@@ -16,6 +18,49 @@ import java.util.function.Consumer;
  */
 
 public final class Converters {
+
+	/**
+	 * What a converter can see of the request it converts a value for: the request's other parameters, and objects the
+	 * application provides ({@link Converters#provide(Class, Function)}, an editing context to fetch in) or the framework
+	 * does (its request and context). So a book's converter finds the book in the club the host names.
+	 */
+	public interface Scope {
+
+		/**
+		 * @return A route parameter's text (a path's or a host's), null if the route has none of the name
+		 */
+		public String parameter( String name );
+
+		/**
+		 * @return A route parameter converted to the type (once per request, whatever asks first)
+		 */
+		public <T> T parameter( String name, Class<T> type );
+
+		/**
+		 * @return An object of the type the framework or the application provides for the request, null if none does
+		 */
+		public <T> T get( Class<T> type );
+
+		/**
+		 * No request: converting a link's text, say
+		 */
+		public static final Scope NONE = new Scope() {
+			@Override
+			public String parameter( final String name ) {
+				return null;
+			}
+
+			@Override
+			public <T> T parameter( final String name, final Class<T> type ) {
+				return null;
+			}
+
+			@Override
+			public <T> T get( final Class<T> type ) {
+				return null;
+			}
+		};
+	}
 
 	/**
 	 * Converts one type
@@ -29,6 +74,15 @@ public final class Converters {
 		public T fromString( String string );
 
 		/**
+		 * @return The value for the text in the request's scope (its other parameters, objects provided for it), or null
+		 *         if there's no such value. A converter needing the scope implements this; the default ignores it.
+		 * @throws IllegalArgumentException if the text isn't a value of the type
+		 */
+		public default T fromString( final String string, final Scope scope ) {
+			return fromString( string );
+		}
+
+		/**
 		 * @return The value's text in a URL
 		 */
 		public String toString( T value );
@@ -40,6 +94,30 @@ public final class Converters {
 		 */
 		public default boolean canonical() {
 			return true;
+		}
+
+		/**
+		 * @return A converter from the two functions, the first seeing the request's scope: a book found in the club the
+		 *         host names, an object fetched in the request's editing context. Without a request (a link's text) the
+		 *         scope is {@link Scope#NONE}.
+		 */
+		public static <T> Converter<T> scoped( final BiFunction<String, Scope, T> fromString, final Function<T, String> toString ) {
+			return new Converter<>() {
+				@Override
+				public T fromString( final String string ) {
+					return fromString( string, Scope.NONE );
+				}
+
+				@Override
+				public T fromString( final String string, final Scope scope ) {
+					return fromString.apply( string, scope );
+				}
+
+				@Override
+				public String toString( final T value ) {
+					return toString.apply( value );
+				}
+			};
 		}
 
 		/**
@@ -61,6 +139,11 @@ public final class Converters {
 	}
 
 	private final Map<Class<?>, Converter<?>> _converters = new ConcurrentHashMap<>();
+
+	/**
+	 * What the application provides for a request, by type ({@link #provide(Class, Function)})
+	 */
+	private final Map<Class<?>, Function<Scope, ?>> _provided = new ConcurrentHashMap<>();
 
 	/**
 	 * Told of each type registered after the built-in ones, null for nothing
@@ -114,6 +197,27 @@ public final class Converters {
 	}
 
 	/**
+	 * Provides an object for a request's scope, which converters see: {@code provide( EOEditingContext.class, scope ->
+	 * session( scope ).defaultEditingContext() )}
+	 */
+	public <T> void provide( final Class<T> type, final Function<Scope, T> provider ) {
+		_provided.put( Objects.requireNonNull( type ), Objects.requireNonNull( provider ) );
+
+		if( _registered != null ) {
+			_registered.accept( type );
+		}
+	}
+
+	/**
+	 * @return The object the application provides of the type for the scope, null if it provides none
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T provided( final Class<T> type, final Scope scope ) {
+		final Function<Scope, ?> provider = _provided.get( type );
+		return provider == null ? null : (T)provider.apply( scope );
+	}
+
+	/**
 	 * @return true if values of the type can be converted
 	 */
 	public boolean converts( final Class<?> type ) {
@@ -161,15 +265,26 @@ public final class Converters {
 	 * @throws IllegalArgumentException if the text isn't a value of the type
 	 * @throws IllegalStateException if the type has no converter
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> T fromString( final String string, final Class<T> type ) {
+		return fromString( string, type, Scope.NONE );
+	}
+
+	/**
+	 * @return The value for the text, converted in the request's scope (see {@link Converter#fromString(String, Scope)}),
+	 *         or null if there's no such value
+	 * @throws IllegalArgumentException if the text isn't a value of the type
+	 * @throws IllegalStateException if the type has no converter
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <T> T fromString( final String string, final Class<T> type, final Scope scope ) {
 		final Class<?> boxed = boxed( type );
 
-		if( boxed.isEnum() ) {
-			return (T)Enum.valueOf( (Class<Enum>)boxed, string );
+		if( Enum.class.isAssignableFrom( boxed ) ) {
+			final Class<? extends Enum> enumType = (Class<? extends Enum>)(boxed.isEnum() ? boxed : (Class<?>)boxed.getSuperclass());
+			return (T)Enum.valueOf( enumType, string );
 		}
 
-		return (T)converter( boxed ).fromString( string );
+		return (T)converter( boxed ).fromString( string, scope == null ? Scope.NONE : scope );
 	}
 
 	/**

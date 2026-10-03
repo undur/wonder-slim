@@ -74,7 +74,7 @@ final class PageSetters implements RouteHandler {
 			Object value;
 
 			try {
-				value = _converters.fromString( text, setter.type() );
+				value = _converters.fromString( text, setter.type(), invocation );
 			}
 			catch( IllegalArgumentException e ) {
 				value = null;

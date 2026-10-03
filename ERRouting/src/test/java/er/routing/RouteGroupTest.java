@@ -417,4 +417,29 @@ public class RouteGroupTest {
 		assertThrows( Declined.class, () -> invocation.query( "bad", Integer.class ) );
 		assertThrows( Declined.class, () -> invocation.query( "twice", Integer.class ) );
 	}
+
+	public record Shelf2( Integer n ) {}
+
+	@Test
+	public void aConverterSeesTheRequestsScope() {
+		final ERXRouter router = new ERXRouter();
+		final List<String> clubsAsked = new ArrayList<>();
+		router.converters().register( Shelf2.class, er.routing.core.Converters.Converter.scoped( ( text, scope ) -> {
+			clubsAsked.add( scope.parameter( "club" ) );
+			return scope.get( String.class ) == null && "acme".equals( scope.parameter( "club" ) ) ? new Shelf2( Integer.valueOf( text ) ) : null;
+		}, shelf -> String.valueOf( shelf.n() ) ) );
+
+		final RouteInvocation acme = new RouteInvocation( "/shelves/2", invocationWithLists( "/shelves/2", Map.of(), router ).request(), Map.of( "club", "acme", "shelf", "2" ), router.converters() );
+		final RouteInvocation kronan = new RouteInvocation( "/shelves/2", invocationWithLists( "/shelves/2", Map.of(), router ).request(), Map.of( "club", "kronan", "shelf", "2" ), router.converters() );
+
+		// Converted once per request, and in the request's club only
+		assertEquals( new Shelf2( 2 ), acme.parameter( "shelf", Shelf2.class ) );
+		assertEquals( new Shelf2( 2 ), acme.parameter( "shelf", Shelf2.class ) );
+		assertThrows( Declined.class, () -> kronan.parameter( "shelf", Shelf2.class ) );
+		assertEquals( List.of( "acme", "kronan" ), clubsAsked );
+
+		// The application provides objects for the scope
+		router.converters().provide( StringBuilder.class, scope -> new StringBuilder( scope.parameter( "club" ) ) );
+		assertEquals( "acme", acme.get( StringBuilder.class ).toString() );
+	}
 }

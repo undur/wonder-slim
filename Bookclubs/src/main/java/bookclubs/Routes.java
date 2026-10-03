@@ -1,6 +1,5 @@
 package bookclubs;
 
-import bookclubs.BookclubRoutes.BookView;
 import bookclubs.BookclubRoutes.Books;
 import bookclubs.BookclubRoutes.ClubText;
 import bookclubs.BookclubRoutes.CreateBook;
@@ -25,7 +24,7 @@ public interface Routes {
 	PlainRoute home = Route.plain();
 	PlainRoute clubHome = Route.plain();
 	Route<Books> books = Route.of( Books.class );
-	Route<BookView> book = Route.of( BookView.class );
+	PlainRoute book = Route.plain();
 	PlainRoute newBook = Route.plain();
 	Route<CreateBook> createBook = Route.of( CreateBook.class );
 	Route<DeleteBook> deleteBook = Route.of( DeleteBook.class );

@@ -2,6 +2,7 @@ package bookclubs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.webobjects.appserver.WOActionResults;
@@ -67,25 +68,6 @@ public class BookclubRoutes {
 			list.page = page == null || page < 1 ? 1 : page;
 			list.authors = author;
 			return list;
-		}
-	}
-
-	/**
-	 * A book, converted from its id in the URL by the converter registered for books. An id that isn't a book's declines
-	 * before the route is invoked, and so does another club's book (here), so the club's own not found page answers.
-	 */
-	public record BookView( Club club, Book book ) implements Routable {
-
-		@Override
-		public WOActionResults invoke( final RouteInvocation invocation ) {
-
-			if( !book.club().equals( club.id() ) ) {
-				return RouteHandler.DECLINED;
-			}
-
-			final BookPage page = invocation.page( BookPage.class ).club( club );
-			page.book = book;
-			return page;
 		}
 	}
 
@@ -156,7 +138,9 @@ public class BookclubRoutes {
 
 		// Clubs and books are route parameters: a club in a URL is its id (a host's first label), a book its number
 		router.converters().register( Club.class, Converter.of( id -> Library.club( id ).orElse( null ), Club::id ) );
-		router.converters().register( Book.class, Converter.of( id -> Library.book( Integer.parseInt( id ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
+		// A book is found in the club the host names (the converter's scope has the request's other parameters), so
+		// another club's book isn't there: /books/3 on kronan's host declines
+		router.converters().register( Book.class, Converter.scoped( ( id, scope ) -> Library.book( Integer.parseInt( id ) ).filter( book -> scope.parameter( "club" ) == null || book.club().equals( scope.parameter( "club" ) ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
 
 		// The application's table comes first, so its routes override a plugin's
 		final RouteGroup routes = router.application();
@@ -171,7 +155,7 @@ public class BookclubRoutes {
 		club.map( "/", Routes.clubHome, ClubPage.class );
 		club.route( "/books/", Routes.books, TrailingSlash.REDIRECT );
 		club.map( "/books/new", Routes.newBook, NewBookPage.class );
-		club.route( "/books/{book}", Routes.book );
+		club.map( "/books/{book}", Routes.book, BookPage.class );
 		club.route( "/members/{handle}", Routes.member );
 		club.route( "/search", Routes.search ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), club( invocation ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
 		club.route( "/{name}", Routes.clubText );
@@ -241,7 +225,7 @@ public class BookclubRoutes {
 
 		final Club club = club( invocation );
 		final Book book = Library.book( club.id(), form.title().strip(), form.author().strip(), form.year() );
-		return Routes.book.redirect( new BookView( club, book ), invocation.context() );
+		return Routes.book.redirect( Map.of( "book", book ), invocation.context() );
 	}
 
 	private static WOActionResults deleteBook( final DeleteBook delete, final RouteInvocation invocation ) {
@@ -270,8 +254,7 @@ public class BookclubRoutes {
 	 * A plain route's parameter converted to its type: what doesn't convert declines, without code here
 	 */
 	private static WOActionResults apiBook( final RouteInvocation invocation ) {
-		final Book book = invocation.parameter( "book", Book.class );
-		return book.club().equals( invocation.parameter( "club" ) ) ? jsonResponse( 200, json( book ) ) : RouteHandler.DECLINED;
+		return jsonResponse( 200, json( invocation.parameter( "book", Book.class ) ) );
 	}
 
 	private static WOActionResults apiCreateBook( final RouteInvocation invocation ) {

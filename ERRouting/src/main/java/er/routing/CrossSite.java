@@ -6,8 +6,9 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
+
+import er.routing.core.RouteRequest;
 
 /**
  * EXPERIMENTAL (route-links branch). Which sites a route takes requests that change things (POST, PUT, PATCH, DELETE)
@@ -44,17 +45,18 @@ public enum CrossSite implements RouteBehavior {
 	private static final Set<String> SAFE_METHODS = Set.of( "GET", "HEAD", "OPTIONS", "TRACE" );
 
 	/**
+	 * @param requestHost The request's host as it sent it, its port included
 	 * @param ownHost Whether a host (without its port) is one of the application's, for {@link #OWN_HOSTS}
 	 * @return true if the request changes things (its method isn't GET, HEAD, OPTIONS or TRACE) and comes from a site
 	 *         this level doesn't take
 	 */
-	boolean refuses( final WORequest request, final String requestHost, final PublicAddress.Origin publicAddress, final Predicate<String> ownHost ) {
+	boolean refuses( final RouteRequest request, final String requestHost, final PublicAddress.Origin publicAddress, final Predicate<String> ownHost ) {
 
-		if( this == ALLOWED || SAFE_METHODS.contains( request.method().toUpperCase( Locale.ROOT ) ) ) {
+		if( this == ALLOWED || SAFE_METHODS.contains( request.method() ) ) {
 			return false;
 		}
 
-		final String fetchSite = request.headerForKey( "sec-fetch-site" ) == null ? null : request.headerForKey( "sec-fetch-site" ).toLowerCase( Locale.ROOT );
+		final String fetchSite = request.header( "sec-fetch-site" ) == null ? null : request.header( "sec-fetch-site" ).toLowerCase( Locale.ROOT );
 
 		// none: the user's own doing (typed, bookmarked)
 		if( "same-origin".equals( fetchSite ) || "none".equals( fetchSite ) ) {
@@ -67,7 +69,7 @@ public enum CrossSite implements RouteBehavior {
 			return true;
 		}
 
-		final String origin = request.headerForKey( "origin" );
+		final String origin = request.header( "origin" );
 
 		if( origin == null ) {
 			return fetchSite != null;

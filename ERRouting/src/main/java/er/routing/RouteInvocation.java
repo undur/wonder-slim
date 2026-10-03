@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
+import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 
 import er.routing.core.Converters;
@@ -15,11 +16,21 @@ import er.routing.core.Converters;
  * name: the path's ({@code {id}}), a host pattern's ({@code {tenant}}) and a wildcard's remainder ({@code *}).
  */
 
-public class RouteInvocation extends er.extensions.routes.RouteInvocation {
+public class RouteInvocation extends er.extensions.routes.RouteInvocation implements Converters.Scope {
 
 	private final Map<String, String> _parameters;
 	private final Converters _converters;
 	private final Map<String, String> _conversionErrors = new LinkedHashMap<>();
+
+	/**
+	 * Route parameters converted, by name and type, so each is converted once whatever asks (the route, a converter)
+	 */
+	private final Map<String, Object> _converted = new java.util.HashMap<>();
+
+	/**
+	 * Route parameters being converted, so a converter asking for one that asks for it back fails, rather than loops
+	 */
+	private final java.util.Set<String> _converting = new java.util.HashSet<>();
 
 	public RouteInvocation( final String url, final WORequest request, final Map<String, String> parameters, final Converters converters ) {
 		super( url, request );
@@ -30,6 +41,7 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 	/**
 	 * @return The named parameter's value, null if the route has no parameter of that name
 	 */
+	@Override
 	public String parameter( final String name ) {
 		return _parameters.get( name );
 	}
@@ -40,6 +52,8 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 	 *         to the next matching route
 	 * @throws IllegalArgumentException if the route has no parameter of that name
 	 */
+	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T parameter( final String name, final Class<T> type ) {
 		final String string = parameter( name );
 
@@ -47,13 +61,26 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 			throw new IllegalArgumentException( "The route has no parameter '%s'. Its parameters are %s".formatted( name, _parameters.keySet() ) );
 		}
 
+		final String key = name + ":" + type.getName();
+
+		if( _converted.containsKey( key ) ) {
+			return (T)_converted.get( key );
+		}
+
+		if( !_converting.add( key ) ) {
+			throw new IllegalStateException( "Converting the parameter '%s' needs it converted: a converter asks for a parameter whose converter asks for it back".formatted( name ) );
+		}
+
 		final T value;
 
 		try {
-			value = _converters.fromString( string, type );
+			value = _converters.fromString( string, type, this );
 		}
 		catch( IllegalArgumentException e ) {
 			throw new Declined( "'%s' isn't a %s".formatted( string, type.getSimpleName() ) );
+		}
+		finally {
+			_converting.remove( key );
 		}
 
 		if( value == null ) {
@@ -65,7 +92,31 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 			throw new NotCanonical( name, _converters.toString( value ) );
 		}
 
+		_converted.put( key, value );
 		return value;
+	}
+
+	/**
+	 * @return The framework's objects for the request (its {@link WOContext}, {@link WORequest}, this invocation), or one
+	 *         the application provides ({@link Converters#provide(Class, java.util.function.Function)}), null for none
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T get( final Class<T> type ) {
+
+		if( type == WOContext.class ) {
+			return (T)context();
+		}
+
+		if( type == WORequest.class ) {
+			return (T)request();
+		}
+
+		if( type.isInstance( this ) ) {
+			return (T)this;
+		}
+
+		return _converters.provided( type, this );
 	}
 
 	/**
@@ -99,7 +150,7 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 		final T value;
 
 		try {
-			value = _converters.fromString( string, type );
+			value = _converters.fromString( string, type, this );
 		}
 		catch( IllegalArgumentException e ) {
 			throw new Declined( "The query parameter or field '%s' is '%s', which isn't a %s".formatted( name, string, type.getSimpleName() ) );
