@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title><wo:str value="$title" /></title>
+		<style>
+			body { font: 16px/1.5 system-ui, sans-serif; max-width: 760px; margin: 0 auto; padding: 24px 16px; color: #222; }
+			header { border-bottom: 1px solid #ddd; margin-bottom: 24px; padding-bottom: 12px; }
+			nav a { margin-right: 12px; }
+			.club { font-size: 22px; font-weight: 600; }
+			.muted { color: #777; }
+			.error { color: #b00020; }
+			code { background: #f3f3f3; padding: 1px 4px; border-radius: 4px; }
+		</style>
+	</head>
+	<body>
+		<header>
+			<wo:if condition="$club">
+				<div class="club"><wo:route route="$routes.clubHome" :club="$club.id"><wo:str value="$club.name" /></wo:route></div>
+				<nav>
+					<wo:route route="$routes.books" :club="$club.id">Books</wo:route>
+					<wo:route route="$routes.newBook" :club="$club.id">Add a book</wo:route>
+					<wo:route route="$routes.clubText" :club="$club.id" :name="history">History</wo:route>
+					<wo:route route="$routes.about" :club="$club.id">About</wo:route>
+					<a href="/rules">Rules</a>
+					<a href="/guestbook">Guestbook</a>
+					<wo:route route="$routes.admin" :club="$club.id" ?key="letmein">Admin</wo:route>
+				</nav>
+			</wo:if>
+			<p class="muted"><wo:route route="$routes.home">All clubs</wo:route></p>
+		</header>
+		<main>
+			<wo:content />
+		</main>
+	</body>
+</html>

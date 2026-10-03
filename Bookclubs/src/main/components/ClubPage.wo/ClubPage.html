@@ -1,0 +1,15 @@
+<wo:Frame club="$club" title="$club.name">
+	<p><em><wo:str value="$club.motto" /></em></p>
+	<h2>Reading</h2>
+	<ul>
+		<wo:repetition list="$books" item="$book">
+			<li><wo:route route="$routes.book" :club="$club.id" :id="$book.id"><wo:str value="$book.title" /></wo:route> <span class="muted"><wo:str value="$book.author" /></span></li>
+		</wo:repetition>
+	</ul>
+	<h2>Members</h2>
+	<ul>
+		<wo:repetition list="$members" item="$member">
+			<li><wo:route route="$routes.member" :club="$club.id" :handle="$member.handle"><wo:str value="$member.name" /></wo:route></li>
+		</wo:repetition>
+	</ul>
+</wo:Frame>

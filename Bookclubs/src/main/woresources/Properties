@@ -1,0 +1,4 @@
+# Bookclubs: the router's example application (EXPERIMENTAL, route-links branch)
+
+# Announces the app to the Parslips dev server
+wolips.port=9485
