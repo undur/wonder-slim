@@ -105,8 +105,8 @@ public final class RouteGroup {
 	 */
 	public RouteGroup group( final String prefix, final Consumer<RouteGroup> body, final RouteCondition... conditions ) {
 
-		if( !prefix.startsWith( "/" ) || prefix.endsWith( "/" ) ) {
-			throw new IllegalArgumentException( "A group's prefix starts with '/' and doesn't end with one: '%s'".formatted( prefix ) );
+		if( !prefix.isEmpty() && (!prefix.startsWith( "/" ) || prefix.endsWith( "/" )) ) {
+			throw new IllegalArgumentException( "A group's prefix is empty (a group by its conditions alone), or starts with '/' and doesn't end with one: '%s'".formatted( prefix ) );
 		}
 
 		final RouteGroup group = new RouteGroup( _router, _table, this, _prefix + prefix, allConditions( conditions ) );
