@@ -212,6 +212,12 @@ public final class PathPattern {
 						throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: browsers resolve it away".formatted( value, parameter.name(), _source ) );
 					}
 
+					// Servers refuse these in a path, encoded (an encoded % or \ is "ambiguous" to them), so the URL wouldn't reach
+					// the application. Refused for now, since allowing a character later is easier than refusing it.
+					if( value.contains( "%" ) || value.contains( "\\" ) ) {
+						throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: servers refuse a path with an encoded %% or \\".formatted( value, parameter.name(), _source ) );
+					}
+
 					yield value;
 				}
 			};

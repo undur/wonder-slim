@@ -420,6 +420,10 @@ public class RouterTest {
 		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", ".." ) ) );
 		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "." ) ) );
 		assertEquals( "/members/...", members.path( Map.of( "handle", "..." ) ) );
+
+		// Servers refuse an encoded % or \ in a path
+		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "50% off" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> members.path( Map.of( "handle", "a\\b" ) ) );
 	}
 
 	@Test

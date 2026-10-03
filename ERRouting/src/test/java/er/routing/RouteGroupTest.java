@@ -208,4 +208,19 @@ public class RouteGroupTest {
 
 		assertThrows( IllegalArgumentException.class, () -> member.url( Map.of( "handle", new Object() ), null ) );
 	}
+
+	public record Query( String q ) {
+
+		public Query {
+			java.util.Objects.requireNonNull( q );
+		}
+	}
+
+	@Test
+	public void aRouteHandlesARecordItCantBuild() {
+		final WOActionResults shown = () -> null;
+		final Route<Query> search = new ERXRouter().application().route( "/search", Query.class, ( query, invocation ) -> null );
+
+		assertEquals( search, search.whenInvalid( ( invocation, reason ) -> shown ) );
+	}
 }

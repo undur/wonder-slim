@@ -52,6 +52,15 @@ public final class Route<P extends Record> implements Linkable {
 		public WOActionResults invoke( P parameters, RouteInvocation invocation );
 	}
 
+	/**
+	 * What the route does when its record can't be built from a request: its constructor refused the values (an
+	 * {@link IllegalArgumentException}, or a {@link NullPointerException} for a value it requires)
+	 */
+	@FunctionalInterface
+	public interface Invalid {
+		public WOActionResults invoke( RouteInvocation invocation, RuntimeException reason );
+	}
+
 
 	private final PathPattern _path;
 	private final Host _host;
@@ -59,6 +68,7 @@ public final class Route<P extends Record> implements Linkable {
 	private final Action<P> _action;
 	private final Converters _converters;
 	private final boolean _reportFields;
+	private volatile Invalid _whenInvalid;
 	private final RecordComponent[] _components;
 	private final Constructor<P> _constructor;
 
@@ -162,6 +172,17 @@ public final class Route<P extends Record> implements Linkable {
 		} );
 
 		return RouteURLs.url( _path, _host, strings, _routeParameterNames, context );
+	}
+
+	/**
+	 * Has the route handle a request its record can't be built from (its constructor refused the values), instead of
+	 * declining it: to show a form again, say
+	 *
+	 * @return The route
+	 */
+	public Route<P> whenInvalid( final Invalid handler ) {
+		_whenInvalid = Objects.requireNonNull( handler );
+		return this;
 	}
 
 	/**
@@ -301,12 +322,13 @@ public final class Route<P extends Record> implements Linkable {
 
 		final P parameters;
 
-		// A URL is user input: values the record refuses decline it, as values that don't convert do
+		// A URL is user input: values the record refuses (or a value it requires that's absent) decline it, as values that
+		// don't convert do, unless the route handles that itself
 		try {
 			parameters = construct( arguments );
 		}
-		catch( IllegalArgumentException e ) {
-			return RouteHandler.DECLINED;
+		catch( IllegalArgumentException | NullPointerException e ) {
+			return _whenInvalid != null ? _whenInvalid.invoke( invocation, e ) : RouteHandler.DECLINED;
 		}
 
 		return _action.invoke( parameters, invocation );

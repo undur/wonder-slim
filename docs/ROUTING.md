@@ -79,7 +79,8 @@ Throwing `Declined` declines from anywhere inside a route, as returning `RouteHa
 - Paths are case-sensitive.
 - A path with a `.` or `..` segment (or its encoded form) matches no route. Browsers resolve them away, so such a path
   was written by hand, and a wildcard's remainder never carries one: a handler serving files from it is safe from `../`.
-  Generating a link with `.` or `..` as a parameter's value is an error.
+  Generating a link with `.` or `..` as a parameter's value is an error, and so is one containing `%` or `\`: servers
+  refuse an encoded `%` or `\` in a path, so the link wouldn't reach the application.
 
 ### Which route answers
 
@@ -134,7 +135,13 @@ books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
   Declining is strict for old URLs too: once an enum value is renamed, a bookmark with the old one (`?sort=year`) is a
   404 on a route without `Fields.REPORTED`.
 - **Validation:** the record's constructor checks what makes the route's own parameters valid, and a value it refuses
-  (an `IllegalArgumentException`) declines the request. A form's fields are checked by the route, which can show the
+  (an `IllegalArgumentException`, or a `NullPointerException` from `Objects.requireNonNull` for a value it requires)
+  declines the request. A route that answers such a request itself says so with `whenInvalid`:
+
+  ```java
+  search = club.route( "/search", Search.class ).whenInvalid( ( invocation, reason ) -> … "What are you searching for?" … );
+  ```
+ A form's fields are checked by the route, which can show the
   form again with what's wrong.
 - **What the route does:** a record implementing `Routable` does the route's work in `invoke`. A record that's only
   data gets an action instead:
@@ -437,6 +444,7 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
   record. Until then, link mistakes show when the link renders.
 - Reading a table's routes again on each request in development.
 - A link to another host from a request without a complete URL assumes the request's scheme and port.
+- The application's public address (#187): complete URLs of routes without a host have the machine's name.
 - Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.
 - Repeated parameters: `?sort=title&sort=year` takes the first value, and a component can't be a `List` (a search form's
   checkboxes, say).

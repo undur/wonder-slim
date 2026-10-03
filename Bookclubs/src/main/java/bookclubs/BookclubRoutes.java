@@ -2,6 +2,7 @@ package bookclubs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOApplication;
@@ -177,6 +178,24 @@ public class BookclubRoutes {
 
 	public record Reset( Club club ) {}
 
+	/**
+	 * Searching the club's books: the record requires a query, and a request without one gets the route's own answer
+	 * ({@code whenInvalid}) instead of a 404
+	 */
+	public record Search( Club club, String q ) implements Routable {
+
+		public Search {
+			Objects.requireNonNull( q );
+		}
+
+		@Override
+		public WOActionResults invoke( final RouteInvocation invocation ) {
+			final String needle = q.toLowerCase();
+			final List<String> found = Library.books( club.id(), Sort.title ).stream().filter( b -> b.title().toLowerCase().contains( needle ) || b.author().toLowerCase().contains( needle ) ).map( Book::title ).toList();
+			return TextPage.create( invocation.context(), club, "Search", "%d found for '%s': %s".formatted( found.size(), q, found ) );
+		}
+	}
+
 	public final Route<Home> home;
 	public final Route<ClubHome> clubHome;
 	public final Route<Books> books;
@@ -190,6 +209,7 @@ public class BookclubRoutes {
 	public final Route<Admin> admin;
 	public final Route<Danger> danger;
 	public final Route<Reset> reset;
+	public final Route<Search> search;
 	public final PlainRoute rules;
 	public final GuestbookPlugin guestbook;
 
@@ -218,6 +238,7 @@ public class BookclubRoutes {
 		newBook = club.route( "/books/new", NewBook.class );
 		book = club.route( "/books/{book}", BookView.class );
 		member = club.route( "/members/{handle}", MemberView.class );
+		search = club.route( "/search", Search.class ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), invocation.parameter( "club", Club.class ), "Search", "What are you searching for? Add ?q=…" ).status( 400 ) );
 		clubText = club.route( "/{name}", ClubText.class );
 		about = club.route( "/about", About.class );
 
