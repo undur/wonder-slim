@@ -23,4 +23,20 @@ public class ERXRouteNotFoundPage extends ERXComponent {
 	public void setURL( final String url ) {
 		_url = url;
 	}
+
+	/**
+	 * @return Why the routes that matched the URL passed it on ({@link er.extensions.routes.RouteTable#DECLINES_KEY}),
+	 *         empty if none did
+	 */
+	@SuppressWarnings("unchecked")
+	public java.util.List<String> declines() {
+		final Object declines = context().request().userInfoForKey( er.extensions.routes.RouteTable.DECLINES_KEY );
+		return declines == null ? java.util.List.of() : (java.util.List<String>)declines;
+	}
+
+	public String decline;
+
+	public boolean hasDeclines() {
+		return !declines().isEmpty();
+	}
 }

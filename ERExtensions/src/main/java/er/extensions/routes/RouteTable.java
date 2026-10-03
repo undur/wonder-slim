@@ -254,6 +254,28 @@ public class RouteTable {
 	public static final String UNHANDLED_RESPONSE_KEY = "wo-unhandled-response";
 
 	/**
+	 * Request userInfo key for why routes that matched a URL passed it on (a {@code List<String>}, one line per route):
+	 * a route handler that declines can add to it, and the not found page in development shows it, answering "why is
+	 * this a 404".
+	 */
+	public static final String DECLINES_KEY = "er.extensions.routes.declines";
+
+	/**
+	 * Adds why a route passed the request on, for the not found page in development
+	 */
+	@SuppressWarnings("unchecked")
+	public static void explainDecline( final com.webobjects.appserver.WORequest request, final String explanation ) {
+		java.util.List<String> declines = (java.util.List<String>)request.userInfoForKey( DECLINES_KEY );
+
+		if( declines == null ) {
+			declines = new java.util.ArrayList<>();
+			request.setUserInfoForKey( declines, DECLINES_KEY );
+		}
+
+		declines.add( explanation );
+	}
+
+	/**
 	 * Declines every URL, so a URL no route answers is passed on to the next handler in the server (see
 	 * {@link RouteTable}). The not found handler for an application sharing its server with another handler, such as an
 	 * ng-objects application.

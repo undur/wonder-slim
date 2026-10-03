@@ -8,6 +8,15 @@
 		</p>
 	</header>
 
+	<wo:if condition="$hasDeclines">
+		<section>
+			<h2>Routes that matched, and passed it on</h2>
+			<ul>
+				<wo:repetition list="$declines" item="$decline"><li><code><wo:str value="$decline" /></code></li></wo:repetition>
+			</ul>
+		</section>
+	</wo:if>
+
 	<section>
 		<h2>Map it</h2>
 		<p>Routes are mapped in the application's constructor:</p>
