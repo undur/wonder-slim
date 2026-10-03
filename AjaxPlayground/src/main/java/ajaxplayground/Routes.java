@@ -25,6 +25,7 @@ import ajaxplayground.components.scenario.ScenarioMultiObserve;
 import ajaxplayground.components.scenario.ScenarioMultiUpdate;
 import ajaxplayground.components.scenario.ScenarioNamedField;
 import ajaxplayground.components.scenario.ScenarioNested;
+import ajaxplayground.components.scenario.ScenarioRouteLinks;
 import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioServerUpdate;
 import ajaxplayground.components.scenario.ScenarioServerUpdateFragments;
@@ -54,6 +55,10 @@ public class Routes {
 
 		// Index
 		routes.map( "/", Main.class );
+
+		// EXPERIMENTAL (route-links branch): endpoints, and the page linking to them
+		Endpoints.INSTANCE.register( routes );
+		routes.map( "/typed", ScenarioRouteLinks.class );
 
 		// Echoes RouteRequestHandler.routePath() for the request, for the URL-shape probe
 		routes.map( "/echo/route-path/*", ri -> {

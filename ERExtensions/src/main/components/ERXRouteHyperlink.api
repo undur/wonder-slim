@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXRouteHyperlink" wocomponentcontent="true">
+		<binding name="route"/>
+		<binding name="queryDictionary"/>
+		<binding name="fragmentIdentifier"/>
+		<binding name="secure" defaults="Boolean"/>
+		<binding name="string"/>
+		<binding name="target"/>
+		<binding name="disabled" defaults="Boolean"/>
+		<validation message="'route' must be bound">
+			<unbound name="route"/>
+		</validation>
+	</wo>
+</wodefinitions>

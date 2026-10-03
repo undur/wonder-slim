@@ -37,6 +37,12 @@
 			<artifactId>parsley</artifactId>
 			<version>1.6.2</version>
 		</dependency>
+		<!-- EXPERIMENTAL (route-links branch): the template parser accepting ':' bindings (ng-objects master, unreleased) -->
+		<dependency>
+			<groupId>is.rebbi.ng</groupId>
+			<artifactId>ng-template-parser</artifactId>
+			<version>0.1.4-SNAPSHOT</version>
+		</dependency>
 		<!--
 			We compile directly against ng-core's ng.dev classes (NGDevLoopback, NGDevJson,
 			NGEvalSession — the shared dev-mode engine behind the eval/problems endpoints), so
