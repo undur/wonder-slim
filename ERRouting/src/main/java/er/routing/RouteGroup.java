@@ -224,6 +224,35 @@ public final class RouteGroup {
 	}
 
 	/**
+	 * Redirects an old URL to a route for good ({@code 308}, which a browser and a search engine remember, and which keeps
+	 * the method): {@code redirect( "/book/{book}", Routes.book )} answers {@code /book/7} with the route's URL for
+	 * {@code book} 7. The old pattern's parameters (and the host's) are the route's by name, and the query string is kept.
+	 *
+	 * @return The old URL's route
+	 */
+	public PlainRoute redirect( final String pattern, final Linkable to, final RouteOption... options ) {
+		Objects.requireNonNull( to, "A route constant is null: one declared after the constants it's used with (a static field read before it was set?)" );
+
+		return map( pattern, invocation -> {
+			final java.util.Map<String, Object> values = new java.util.LinkedHashMap<>();
+			invocation.parameters().forEach( ( name, value ) -> {
+				if( !name.equals( PathPattern.WILDCARD_PARAMETER ) ) {
+					values.put( name, value );
+				}
+			} );
+
+			final String uri = invocation.request().uri();
+			final int query = uri.indexOf( '?' );
+			final String location = to.url( values, invocation.context() ) + (query == -1 ? "" : (to.url( values, invocation.context() ).contains( "?" ) ? "&" : "?") + uri.substring( query + 1 ));
+
+			final com.webobjects.appserver.WOResponse response = new com.webobjects.appserver.WOResponse();
+			response.setStatus( 308 );
+			response.setHeader( location, "location" );
+			return response;
+		}, options );
+	}
+
+	/**
 	 * @return A nested group, for mapping its routes and declaring its routes afterwards
 	 */
 	public RouteGroup group( final String prefix, final RouteOption... options ) {

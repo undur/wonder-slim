@@ -157,6 +157,9 @@ public class BookclubRoutes {
 		club.route( "/books/", Routes.books, TrailingSlash.REDIRECT );
 		club.map( "/books/new", Routes.newBook, NewBookPage.class );
 		club.map( "/books/{book}", Routes.book, BookPage.class );
+
+		// An old URL, redirected to the book's for good
+		club.redirect( "/book/{book}", Routes.book );
 		club.route( "/members/{handle}", Routes.member );
 		club.route( "/search", Routes.search ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), club( invocation ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
 		club.route( "/{name}", Routes.clubText );
@@ -169,8 +172,11 @@ public class BookclubRoutes {
 		// Trailing slashes: /rules redirects to /rules/ (and /books to /books/, above)
 		club.map( "/rules/", Routes.rules, ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
 
-		// A wildcard: everything beneath /files/
-		club.map( "/files/*", ri -> text( 200, "The file %s of %s".formatted( ri.parameter( "*" ), ri.parameter( "club" ) ) ) );
+		// A wildcard, named so links can give it: everything beneath /files/ (and /files, redirected there)
+		club.map( "/files/{path*}", Routes.file, ri -> text( 200, "The file %s of %s".formatted( ri.parameter( "path" ), ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
+
+		// A parameter within a path element: the book as JSON
+		club.map( "/books/{book}.json", ri -> jsonResponse( 200, json( ri.parameter( "book", Book.class ) ) ) );
 
 		// The club's catch-all, last in precedence: what nothing else answered, a declined page included
 		club.map( "/*", ri -> {

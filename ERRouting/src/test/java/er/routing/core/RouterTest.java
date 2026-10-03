@@ -83,9 +83,18 @@ public class RouterTest {
 		assertEquals( Map.of( "*", "2026/10" ), parameters( get( router, "/news/2026/10" ) ) );
 		assertEquals( Map.of( "*", "2026/10/" ), parameters( get( router, "/news/2026/10/" ) ) );
 
-		// Not /news itself, under any policy: the wildcard means "beneath"
-		assertInstanceOf( NoMatch.class, get( router, "/news" ) );
+		// /news is the wildcard's other trailing slash form: matched with nothing beneath (the router ignores the slash)
+		assertEquals( Map.of( "*", "" ), parameters( get( router, "/news" ) ) );
 		assertInstanceOf( NoMatch.class, get( router, "/newsletter" ) );
+
+		// Redirected to /news/, or not matched, as other policies have it
+		final Router<String> redirecting = new Router<>();
+		table( redirecting ).map( "/news/*", "news", TrailingSlash.REDIRECT );
+		assertEquals( new Router.Redirect<String>( "/news/" ), get( redirecting, "/news" ) );
+
+		final Router<String> strict = new Router<>();
+		table( strict ).map( "/news/*", "news", TrailingSlash.STRICT );
+		assertInstanceOf( NoMatch.class, get( strict, "/news" ) );
 	}
 
 	@Test
@@ -287,7 +296,10 @@ public class RouterTest {
 		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "items" ) );
 		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/items//edit" ) );
 		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/items/{id}/{id}" ) );
-		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/items/item-{id}" ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/items/{a}-{b}" ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/items/{id}*" ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/files/{path*}/more" ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/files/{path}/{path*}" ) );
 		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/news/*/latest" ) );
 		assertThrows( IllegalArgumentException.class, () -> Host.of( "{a}.{a}.example.com" ) );
 	}
@@ -477,5 +489,44 @@ public class RouterTest {
 		// Two routes on the same header and value conflict, on another value they don't
 		assertThrows( IllegalArgumentException.class, () -> table.map( "/api", "again", Header.of( "x-api-version", "2" ) ) );
 		table.map( "/api", "v3", Header.of( "x-api-version", "3" ) );
+	}
+
+	@Test
+	public void aParameterWithinAnElement() {
+		final Router<String> router = new Router<>();
+		final Router<String>.Table table = table( router );
+		table.map( "/books/{id}.json", "json" );
+		table.map( "/books/{id}", "page" );
+		table.map( "/books/new.json", "new" );
+
+		// A literal, then a parameter within literal text, then a whole-element parameter
+		assertEquals( "new", ((Router.Matched<String>)get( router, "/books/new.json" )).candidates().getFirst().handler() );
+		assertEquals( Map.of( "id", "7" ), parameters( get( router, "/books/7.json" ) ) );
+		assertEquals( "page", ((Router.Matched<String>)get( router, "/books/7.json" )).candidates().get( 1 ).handler() );
+		assertEquals( Map.of( "id", "7" ), parameters( get( router, "/books/7" ) ) );
+
+		// The parameter isn't empty
+		assertEquals( Map.of( "id", ".json" ), parameters( get( router, "/books/.json" ) ) );
+
+		assertEquals( "/books/7.json", PathPattern.parse( "/books/{id}.json" ).path( Map.of( "id", "7" ) ) );
+		assertEquals( "/book-a%20b", PathPattern.parse( "/book-{id}" ).path( Map.of( "id", "a b" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> table.map( "/books/{other}.json", "again" ) );
+	}
+
+	@Test
+	public void aNamedWildcard() {
+		final PathPattern files = PathPattern.parse( "/files/{path*}" );
+		final Router<String> router = new Router<>();
+		table( router ).map( "/files/{path*}", "files" );
+
+		assertEquals( List.of( "path" ), files.parameterNames() );
+		assertEquals( Map.of( "path", "minutes/2026.txt" ), parameters( get( router, "/files/minutes/2026.txt" ) ) );
+
+		// Its URL from the remainder, each element encoded, dot segments refused
+		assertEquals( "/files/minutes/2026%20notes.txt", files.path( Map.of( "path", "minutes/2026 notes.txt" ) ) );
+		assertEquals( "/files/minutes/", files.path( Map.of( "path", "minutes/" ) ) );
+		assertEquals( "/files/", files.path( Map.of( "path", "" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> files.path( Map.of( "path", "../secret" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/files/*" ).path( Map.of( "*", "x" ) ) );
 	}
 }

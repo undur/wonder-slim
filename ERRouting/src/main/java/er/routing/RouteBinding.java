@@ -73,8 +73,9 @@ final class RouteBinding<P extends Record> {
 		_action = Objects.requireNonNull( action );
 		_components = parametersClass.getRecordComponents();
 
-		if( _path.isWildcard() ) {
-			throw new IllegalArgumentException( "A route's pattern has no wildcard: '%s'".formatted( pattern ) );
+		// A record's component names a wildcard's remainder, so the wildcard needs a name: {path*}
+		if( _path.isWildcard() && PathPattern.WILDCARD_PARAMETER.equals( _path.wildcardName() ) ) {
+			throw new IllegalArgumentException( "A typed route's wildcard is named for the record's component that takes the remainder ('/files/{path*}'): '%s'".formatted( pattern ) );
 		}
 
 		final List<String> routeParameterNames = new ArrayList<>( _path.parameterNames() );

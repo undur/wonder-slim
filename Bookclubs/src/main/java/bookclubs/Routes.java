@@ -36,6 +36,7 @@ public interface Routes {
 	PlainRoute reset = Route.plain();
 	Route<Search> search = Route.of( Search.class );
 	PlainRoute rules = Route.plain();
+	PlainRoute file = Route.plain();
 
 	/**
 	 * The guestbook plugin's page: a plugin's route, which the application links to

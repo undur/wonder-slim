@@ -16,8 +16,11 @@ import java.util.regex.Pattern;
  * <ul>
  * <li>{@code /items} is exact.</li>
  * <li>{@code /items/{id}} has a parameter: one non-empty path element, available by name.</li>
- * <li>{@code /news/*} is a wildcard: {@code /news/} and everything beneath it, but not {@code /news}. What it matched
- * is available as the parameter {@code *}.</li>
+ * <li>{@code /items/{id}.json} and {@code /book-{id}} have a parameter within an element: the element's text around it
+ * is literal. One parameter to an element.</li>
+ * <li>{@code /news/*} is a wildcard: {@code /news/} and everything beneath it. What it matched is available as the
+ * parameter {@code *}, or by a name of its own: {@code /files/{path*}}. {@code /news} itself is the wildcard's other
+ * trailing slash form, which the route's policy decides (redirected, matched with nothing beneath, or not matched).</li>
  * </ul>
  *
  * A pattern declares its trailing slash form ({@code /docs} or {@code /docs/}). Whether a request in the other form
@@ -33,21 +36,32 @@ public final class PathPattern {
 
 	private static final Pattern PARAMETER_NAME = Pattern.compile( "[A-Za-z_][A-Za-z0-9_]*" );
 
-	private sealed interface Segment permits Literal, Parameter {}
+	private sealed interface Segment permits Literal, Parameter, Affixed {}
 
 	private record Literal( String text ) implements Segment {}
 
 	private record Parameter( String name ) implements Segment {}
 
+	/**
+	 * A parameter within an element, literal text before or after it ({@code {id}.json})
+	 */
+	private record Affixed( String prefix, String name, String suffix ) implements Segment {}
+
 	private final String _source;
 	private final List<Segment> _segments;
 	private final boolean _wildcard;
+
+	/**
+	 * The name the wildcard's remainder is available under: {@value #WILDCARD_PARAMETER}, or its own ({@code {path*}})
+	 */
+	private final String _wildcardName;
 	private final boolean _trailingSlash;
 
-	private PathPattern( final String source, final List<Segment> segments, final boolean wildcard, final boolean trailingSlash ) {
+	private PathPattern( final String source, final List<Segment> segments, final boolean wildcard, final String wildcardName, final boolean trailingSlash ) {
 		_source = source;
 		_segments = List.copyOf( segments );
 		_wildcard = wildcard;
+		_wildcardName = wildcardName;
 		_trailingSlash = trailingSlash;
 	}
 
@@ -61,11 +75,16 @@ public final class PathPattern {
 		}
 
 		if( pattern.equals( "/" ) ) {
-			return new PathPattern( pattern, List.of(), false, true );
+			return new PathPattern( pattern, List.of(), false, WILDCARD_PARAMETER, true );
 		}
 
-		final boolean wildcard = pattern.endsWith( "/*" );
-		final String withoutWildcard = wildcard ? pattern.substring( 0, pattern.length() - 1 ) : pattern;
+		// A named wildcard, {path*}, is the wildcard with a name of its own
+		final java.util.regex.Matcher namedWildcard = Pattern.compile( "/\\{([A-Za-z_][A-Za-z0-9_]*)\\*\\}$" ).matcher( pattern );
+		final String wildcardName = namedWildcard.find() ? namedWildcard.group( 1 ) : WILDCARD_PARAMETER;
+		final String unnamed = wildcardName.equals( WILDCARD_PARAMETER ) ? pattern : pattern.substring( 0, namedWildcard.start() ) + "/*";
+
+		final boolean wildcard = unnamed.endsWith( "/*" );
+		final String withoutWildcard = wildcard ? unnamed.substring( 0, unnamed.length() - 1 ) : unnamed;
 		final boolean trailingSlash = withoutWildcard.endsWith( "/" );
 		final String body = withoutWildcard.equals( "/" ) ? "" : withoutWildcard.substring( 1, trailingSlash ? withoutWildcard.length() - 1 : withoutWildcard.length() );
 		final List<Segment> segments = new ArrayList<>();
@@ -90,8 +109,27 @@ public final class PathPattern {
 
 					segments.add( new Parameter( name ) );
 				}
-				else if( segment.contains( "{" ) || segment.contains( "}" ) || segment.contains( "*" ) ) {
-					throw new IllegalArgumentException( "A parameter ('{name}') or a wildcard ('*', at the end) is a whole segment of a path pattern: '%s'".formatted( pattern ) );
+				else if( segment.contains( "*" ) ) {
+					throw new IllegalArgumentException( "A wildcard ('*' or '{name*}') is the last segment of a path pattern: '%s'".formatted( pattern ) );
+				}
+				else if( segment.contains( "{" ) || segment.contains( "}" ) ) {
+					final java.util.regex.Matcher affixed = Pattern.compile( "([^{}]*)\\{([^{}]*)\\}([^{}]*)" ).matcher( segment );
+
+					if( !affixed.matches() ) {
+						throw new IllegalArgumentException( "A path element of a pattern has one parameter at most ('{id}.json'): '%s'".formatted( pattern ) );
+					}
+
+					final String name = affixed.group( 2 );
+
+					if( !PARAMETER_NAME.matcher( name ).matches() ) {
+						throw new IllegalArgumentException( "'%s' isn't a valid parameter name in the path pattern '%s'".formatted( name, pattern ) );
+					}
+
+					if( !names.add( name ) ) {
+						throw new IllegalArgumentException( "The parameter {%s} appears twice in the path pattern '%s'".formatted( name, pattern ) );
+					}
+
+					segments.add( new Affixed( affixed.group( 1 ), name, affixed.group( 3 ) ) );
 				}
 				else {
 					segments.add( new Literal( segment ) );
@@ -99,7 +137,11 @@ public final class PathPattern {
 			}
 		}
 
-		return new PathPattern( pattern, segments, wildcard, trailingSlash || wildcard );
+		if( !wildcardName.equals( WILDCARD_PARAMETER ) && !names.add( wildcardName ) ) {
+			throw new IllegalArgumentException( "The parameter {%s} appears twice in the path pattern '%s'".formatted( wildcardName, pattern ) );
+		}
+
+		return new PathPattern( pattern, segments, wildcard, wildcardName, trailingSlash || wildcard );
 	}
 
 	public String source() {
@@ -115,10 +157,31 @@ public final class PathPattern {
 	}
 
 	/**
-	 * @return The names of the pattern's parameters, in order (the wildcard's not included)
+	 * @return The names of the pattern's parameters, in order, a named wildcard's last (an unnamed one's not included)
 	 */
 	public List<String> parameterNames() {
-		return _segments.stream().filter( Parameter.class::isInstance ).map( s -> ((Parameter)s).name() ).toList();
+		final List<String> names = new ArrayList<>();
+
+		for( final Segment segment : _segments ) {
+			switch( segment ) {
+				case Parameter parameter -> names.add( parameter.name() );
+				case Affixed affixed -> names.add( affixed.name() );
+				case Literal literal -> {}
+			}
+		}
+
+		if( _wildcard && !_wildcardName.equals( WILDCARD_PARAMETER ) ) {
+			names.add( _wildcardName );
+		}
+
+		return List.copyOf( names );
+	}
+
+	/**
+	 * @return The name the wildcard's remainder is available under, null for a pattern without one
+	 */
+	public String wildcardName() {
+		return _wildcard ? _wildcardName : null;
 	}
 
 	/**
@@ -136,11 +199,14 @@ public final class PathPattern {
 		final List<String> requestSegments = path.segments();
 		final int count = _segments.size();
 
+		// The wildcard's prefix itself, without its trailing slash: the wildcard's other form, nothing beneath
+		final boolean prefixAlone = _wildcard && requestSegments.size() == count && !path.trailingSlash();
+
 		if( _wildcard ) {
 			// Everything beneath the prefix: one or more further segments, or the prefix itself with a trailing slash
 			final boolean beneath = requestSegments.size() > count || (requestSegments.size() == count && path.trailingSlash());
 
-			if( !beneath ) {
+			if( !beneath && !prefixAlone ) {
 				return null;
 			}
 		}
@@ -166,6 +232,13 @@ public final class PathPattern {
 
 					parameters.put( parameter.name(), requestSegment );
 				}
+				case Affixed affixed -> {
+					if( requestSegment.length() <= affixed.prefix().length() + affixed.suffix().length() || !requestSegment.startsWith( affixed.prefix() ) || !requestSegment.endsWith( affixed.suffix() ) ) {
+						return null;
+					}
+
+					parameters.put( affixed.name(), requestSegment.substring( affixed.prefix().length(), requestSegment.length() - affixed.suffix().length() ) );
+				}
 			}
 		}
 
@@ -179,8 +252,8 @@ public final class PathPattern {
 			}
 
 			final String remainder = String.join( "/", remaining );
-			parameters.put( WILDCARD_PARAMETER, requestSegments.size() > count && path.trailingSlash() ? remainder + "/" : remainder );
-			return new Match( parameters, true );
+			parameters.put( _wildcardName, requestSegments.size() > count && path.trailingSlash() ? remainder + "/" : remainder );
+			return new Match( parameters, !prefixAlone );
 		}
 
 		// The root has one form only
@@ -195,11 +268,11 @@ public final class PathPattern {
 	 */
 	public String path( final Map<String, String> values ) {
 
-		if( _wildcard ) {
-			throw new IllegalArgumentException( "A path can't be generated for the wildcard pattern " + _source );
+		if( _wildcard && _wildcardName.equals( WILDCARD_PARAMETER ) ) {
+			throw new IllegalArgumentException( "A path can't be generated for the wildcard pattern %s, whose remainder has no name: name it ({path*}) to link to it".formatted( _source ) );
 		}
 
-		if( _segments.isEmpty() ) {
+		if( _segments.isEmpty() && !_wildcard ) {
 			return "/";
 		}
 
@@ -208,33 +281,64 @@ public final class PathPattern {
 		for( final Segment segment : _segments ) {
 			final String text = switch( segment ) {
 				case Literal literal -> literal.text();
-				case Parameter parameter -> {
-					final String value = values.get( parameter.name() );
-
-					if( value == null || value.isEmpty() ) {
-						throw new IllegalArgumentException( "The path pattern %s needs its parameter '%s'".formatted( _source, parameter.name() ) );
-					}
-
-					// A browser resolves these away, encoded or not, so they can't travel as a path element
-					if( value.equals( "." ) || value.equals( ".." ) ) {
-						throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: browsers resolve it away".formatted( value, parameter.name(), _source ) );
-					}
-
-					// Servers refuse these in a path, encoded (an encoded %, \ or control character is "ambiguous" or "suspicious" to
-					// them), so the URL wouldn't reach the application. Refused for now, since allowing a character later is easier
-					// than refusing it.
-					if( value.chars().anyMatch( PathPattern::refusedInPath ) ) {
-						throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: servers refuse a path with an encoded %%, \\ or control character".formatted( value, parameter.name(), _source ) );
-					}
-
-					yield value;
-				}
+				case Parameter parameter -> checked( parameter.name(), values.get( parameter.name() ) );
+				case Affixed affixed -> affixed.prefix() + checked( affixed.name(), values.get( affixed.name() ) ) + affixed.suffix();
 			};
 
-			b.append( '/' ).append( URLEncoder.encode( text, StandardCharsets.UTF_8 ).replace( "+", "%20" ) );
+			b.append( '/' ).append( encoded( text ) );
+		}
+
+		if( _wildcard ) {
+
+			// The remainder's elements, each a path element (an empty remainder is the prefix, with its slash)
+			final String remainder = values.get( _wildcardName );
+
+			if( remainder == null ) {
+				throw new IllegalArgumentException( "The path pattern %s needs its parameter '%s'".formatted( _source, _wildcardName ) );
+			}
+
+			final boolean trailing = remainder.isEmpty() || remainder.endsWith( "/" );
+			final String elements = trailing && !remainder.isEmpty() ? remainder.substring( 0, remainder.length() - 1 ) : remainder;
+
+			if( !elements.isEmpty() ) {
+				for( final String element : elements.split( "/", -1 ) ) {
+					b.append( '/' ).append( encoded( checked( _wildcardName, element ) ) );
+				}
+			}
+
+			return trailing ? b.append( '/' ).toString() : b.toString();
 		}
 
 		return _trailingSlash ? b.append( '/' ).toString() : b.toString();
+	}
+
+	/**
+	 * @return The value, checked to be a path element
+	 * @throws IllegalArgumentException for none, one a browser resolves away, or one a server refuses
+	 */
+	private String checked( final String name, final String value ) {
+
+		if( value == null || value.isEmpty() ) {
+			throw new IllegalArgumentException( "The path pattern %s needs its parameter '%s'".formatted( _source, name ) );
+		}
+
+		// A browser resolves these away, encoded or not, so they can't travel as a path element
+		if( value.equals( "." ) || value.equals( ".." ) ) {
+			throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: browsers resolve it away".formatted( value, name, _source ) );
+		}
+
+		// Servers refuse these in a path, encoded (an encoded %, \ or control character is "ambiguous" or "suspicious" to
+		// them), so the URL wouldn't reach the application. Refused for now, since allowing a character later is easier than
+		// refusing it.
+		if( value.chars().anyMatch( PathPattern::refusedInPath ) ) {
+			throw new IllegalArgumentException( "The value '%s' of the parameter '%s' (%s) can't be a path element: servers refuse a path with an encoded %%, \\ or control character".formatted( value, name, _source ) );
+		}
+
+		return value;
+	}
+
+	private static String encoded( final String text ) {
+		return URLEncoder.encode( text, StandardCharsets.UTF_8 ).replace( "+", "%20" );
 	}
 
 	/**
@@ -252,7 +356,11 @@ public final class PathPattern {
 		final StringBuilder b = new StringBuilder();
 
 		for( final Segment segment : _segments ) {
-			b.append( '/' ).append( segment instanceof Literal literal ? literal.text() : "{}" );
+			b.append( '/' ).append( switch( segment ) {
+				case Literal literal -> literal.text();
+				case Parameter parameter -> "{}";
+				case Affixed affixed -> affixed.prefix() + "{}" + affixed.suffix();
+			} );
 		}
 
 		return _wildcard ? b + "/*" : b.isEmpty() ? "/" : b.toString();
@@ -277,15 +385,19 @@ public final class PathPattern {
 	}
 
 	/**
-	 * @return The rank of the pattern at a position: 0 a literal, 1 a parameter, 2 the wildcard, -1 the end of an exact
-	 *         pattern (lower comes first)
+	 * @return The rank of the pattern at a position: 0 a literal, 1 a parameter within literal text, 2 a parameter, 3 the
+	 *         wildcard, -1 the end of an exact pattern (lower comes first)
 	 */
 	private int rank( final int position ) {
 		if( position < _segments.size() ) {
-			return _segments.get( position ) instanceof Literal ? 0 : 1;
+			return switch( _segments.get( position ) ) {
+				case Literal literal -> 0;
+				case Affixed affixed -> 1;
+				case Parameter parameter -> 2;
+			};
 		}
 
-		return _wildcard ? 2 : -1;
+		return _wildcard ? 3 : -1;
 	}
 
 	@Override
