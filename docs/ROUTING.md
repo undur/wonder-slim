@@ -457,8 +457,9 @@ headers (`RouteRequest`).
 A route's host is the request's `Host` header. Whether a front end's forwarded host (and scheme) counts is decided for
 the whole framework in one place, with #67, rather than by the router.
 
-An application served beneath a path of its own (`https://example.com/shop/…`) is #51, which comes to the framework on
-`master` first; the router's URLs will follow it.
+An application served beneath a path of its own (`https://example.com/shop/…`) sets it in the framework (#51):
+`er.extensions.ERXApplication.basePath=/shop`. Its URLs, the router's complete URLs included, start with it, and a
+request's URL has it removed before routing, so routes are declared as if the application were at the root.
 
 ## Groups
 
