@@ -81,7 +81,8 @@ final class RouteBinding<P extends Record> {
 
 		final List<String> componentNames = parameterNames();
 
-		for( final String name : _routeParameterNames ) {
+		// A path parameter is the record's, and a host parameter may be left to the group (the tenant every route has)
+		for( final String name : _path.parameterNames() ) {
 			if( !componentNames.contains( name ) ) {
 				throw new IllegalArgumentException( "The route %s has the parameter {%s}, but %s has no component of that name. Its components are %s".formatted( description(), name, parametersClass.getSimpleName(), componentNames ) );
 			}
@@ -155,7 +156,21 @@ final class RouteBinding<P extends Record> {
 	 */
 	public String url( final P parameters, final WOContext context ) {
 		final Link link = link( parameters );
-		return RouteURLs.url( _path, _host, link.routeValues(), link.queryValues(), context );
+		return RouteURLs.url( _path, _host, withHostTexts( link.routeValues(), context ), link.queryValues(), context );
+	}
+
+	/**
+	 * @return The route values, with the host parameters the record leaves out taken from the context's request
+	 */
+	private Map<String, String> withHostTexts( final Map<String, String> routeValues, final WOContext context ) {
+
+		if( _host == null || routeValues.keySet().containsAll( _host.parameterNames() ) ) {
+			return routeValues;
+		}
+
+		final Map<String, String> all = new LinkedHashMap<>( routeValues );
+		RouteURLs.withHostParameters( _host, new LinkedHashMap<>( routeValues ), context ).forEach( ( name, value ) -> all.putIfAbsent( name, value instanceof InheritedText inherited ? inherited.text() : String.valueOf( value ) ) );
+		return all;
 	}
 
 	/**
@@ -164,6 +179,11 @@ final class RouteBinding<P extends Record> {
 	 */
 	public String completeURL( final P parameters ) {
 		final Link link = link( parameters );
+
+		if( _host != null && !link.routeValues().keySet().containsAll( _host.parameterNames() ) ) {
+			throw new IllegalArgumentException( "%s leaves out the host's parameters %s, which a complete URL outside a request has no request to take from: give them by name, completeURL( values )".formatted( _parametersClass.getSimpleName(), _host.parameterNames() ) );
+		}
+
 		return RouteURLs.completeURL( _path, _host, link.routeValues(), link.queryValues() );
 	}
 
@@ -254,13 +274,30 @@ final class RouteBinding<P extends Record> {
 	 */
 	private Link link( final Map<String, Object> values, final WOContext context ) {
 		final Map<String, Object> all = RouteURLs.withHostParameters( _host, values, context );
-		final List<String> unknown = all.keySet().stream().filter( name -> !parameterNames().contains( name ) ).toList();
+		final List<String> unknown = all.keySet().stream().filter( name -> !parameterNames().contains( name ) && !_routeParameterNames.contains( name ) ).toList();
 
 		if( !unknown.isEmpty() ) {
 			throw new IllegalArgumentException( "The route %s has no parameter %s. Its parameters are %s".formatted( description(), unknown, parameterNames() ) );
 		}
 
 		final Link link = new Link();
+
+		// The host's parameters the record leaves out, as text
+		for( final String name : _routeParameterNames ) {
+			final Object value = all.get( name );
+
+			if( !parameterNames().contains( name ) ) {
+				if( value == null ) {
+					throw new IllegalArgumentException( "The route %s needs its parameter '%s'".formatted( description(), name ) );
+				}
+
+				link.add( name, switch( value ) {
+					case InheritedText inherited -> inherited.text();
+					case String string -> string;
+					default -> _converters.toString( value );
+				}, true );
+			}
+		}
 
 		for( int i = 0; i < _components.length; i++ ) {
 			final String name = _components[i].getName();

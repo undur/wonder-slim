@@ -365,4 +365,56 @@ public class RouteGroupTest {
 		// Without a public address, the domain is localhost
 		assertEquals( "{club}.localhost", ((Host)entry( router, "/books" ).conditions().getFirst()).pattern() );
 	}
+
+	public static class ItemPage extends com.webobjects.appserver.WOComponent {
+		public Integer id;
+
+		public ItemPage( final com.webobjects.appserver.WOContext context ) {
+			super( context );
+		}
+
+		public ItemPage tenant( final String tenant ) {
+			return this;
+		}
+	}
+
+	@Test
+	public void aPageRouteSetsItsParametersOnThePage() {
+		final RouteGroup tenant = new ERXRouter().application().group( "", Host.of( "{tenant}.example.com" ) );
+
+		// {id} on the field, {tenant} through the fluent setter
+		tenant.map( "/items/{id}", ItemPage.class );
+
+		// A parameter the page has no member for is refused when declared
+		final IllegalArgumentException e = assertThrows( IllegalArgumentException.class, () -> tenant.map( "/items/{id}/{part}", ItemPage.class ) );
+		assertTrue( e.getMessage().contains( "{part}" ), e.getMessage() );
+	}
+
+	public record Order( Integer id, String note ) {}
+
+	@Test
+	public void aRecordLeavesOutTheGroupsHostParameters() {
+		final RouteGroup tenant = new ERXRouter().application().group( "", Host.of( "{tenant}.example.com" ) );
+		final Route<Order> order = tenant.route( "/orders/{id}", Order.class, ( o, invocation ) -> null );
+
+		// By name, the host's parameter is given; outside a request a record's URL can't take it from one
+		assertThrows( IllegalArgumentException.class, () -> order.url( Map.of( "id", 7 ), null ) );
+		final IllegalArgumentException e = assertThrows( IllegalArgumentException.class, () -> order.completeURL( new Order( 7, null ) ) );
+		assertTrue( e.getMessage().contains( "tenant" ), e.getMessage() );
+
+		// A path parameter is the record's
+		assertThrows( IllegalArgumentException.class, () -> tenant.route( "/orders/{id}/{line}", Order.class, ( o, invocation ) -> null ) );
+	}
+
+	@Test
+	public void aPlainRouteReadsTypedQueryValues() {
+		final ERXRouter router = new ERXRouter();
+		final RouteInvocation invocation = invocationWithLists( "/list", Map.of( "page", List.of( "3" ), "bad", List.of( "x" ), "twice", List.of( "1", "2" ), "empty", List.of( "" ) ), router );
+
+		assertEquals( 3, invocation.query( "page", Integer.class ) );
+		assertNull( invocation.query( "absent", Integer.class ) );
+		assertNull( invocation.query( "empty", Integer.class ) );
+		assertThrows( Declined.class, () -> invocation.query( "bad", Integer.class ) );
+		assertThrows( Declined.class, () -> invocation.query( "twice", Integer.class ) );
+	}
 }

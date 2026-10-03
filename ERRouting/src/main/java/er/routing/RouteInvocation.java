@@ -69,6 +69,50 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 	}
 
 	/**
+	 * @return A query parameter's or form field's value, null if it's absent or empty
+	 * @throws Declined if it's given more than once (two fields of the same name): a repeated parameter is a typed route's
+	 *         {@code List} component
+	 */
+	public String query( final String name ) {
+		final java.util.List<String> values = request().formValuesForKey( name ) == null ? java.util.List.of() : request().formValuesForKey( name ).stream().filter( String.class::isInstance ).map( String.class::cast ).toList();
+
+		if( values.size() > 1 ) {
+			throw new Declined( "The query parameter or field '%s' takes one value, and was given %d: %s".formatted( name, values.size(), values ) );
+		}
+
+		return values.isEmpty() || values.getFirst().isEmpty() ? null : values.getFirst();
+	}
+
+	/**
+	 * @return A query parameter's or form field's value converted to the type, by the router's converters, null if it's
+	 *         absent or empty: a plain route's typed query values, as a typed route's record has them
+	 * @throws Declined if it isn't one of the type, names an object that doesn't exist, or is given more than once: bad
+	 *         input declines, as it does for a typed route
+	 */
+	public <T> T query( final String name, final Class<T> type ) {
+		final String string = query( name );
+
+		if( string == null ) {
+			return null;
+		}
+
+		final T value;
+
+		try {
+			value = _converters.fromString( string, type );
+		}
+		catch( IllegalArgumentException e ) {
+			throw new Declined( "The query parameter or field '%s' is '%s', which isn't a %s".formatted( name, string, type.getSimpleName() ) );
+		}
+
+		if( value == null ) {
+			throw new Declined( "The query parameter or field '%s' names no %s: '%s'".formatted( name, type.getSimpleName(), string ) );
+		}
+
+		return value;
+	}
+
+	/**
 	 * @return The query parameters or form fields that didn't convert to their components' types (or named objects that
 	 *         don't exist), by name, with the text that was given. Those components are null.
 	 */

@@ -50,36 +50,19 @@ public class BookclubRoutes {
 	 */
 	public static final Host CLUB_HOST = Host.of( "{club}.@" );
 
-	// ---- The landing page, on localhost ----
-
-	public record Home() implements Routable {
-
-		@Override
-		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return invocation.page( Main.class );
-		}
-	}
-
-	// ---- A club's pages, on {club}.localhost ----
-	// The host's {club} is a Club, converted by the converter registered for clubs: an unknown club's host declines
-	// before any of these is invoked.
-
-	public record ClubHome( Club club ) implements Routable {
-
-		@Override
-		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return invocation.page( ClubPage.class ).club( club );
-		}
-	}
+	// ---- Records, for the routes with query parameters or form fields ----
+	// A club's routes answer its host, {club}.localhost. The host's {club} is a Club, converted by the converter
+	// registered for clubs, so an unknown club's host declines before any route is invoked. The records leave it out:
+	// it's the group's, and an invocation has it (club( invocation )), as a link takes it from the request.
 
 	/**
-	 * The books, sorted, a page at a time: query parameters with types, absent ones (or ones that don't convert) null
+	 * The books, sorted, a page at a time, of the authors chosen: query parameters with types, a repeated one a list
 	 */
-	public record Books( Club club, Sort sort, Integer page, List<String> author ) implements Routable {
+	public record Books( Sort sort, Integer page, List<String> author ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			final BookListPage list = invocation.page( BookListPage.class ).club( club );
+			final BookListPage list = invocation.page( BookListPage.class ).club( club( invocation ) );
 			list.sort = sort == null ? Sort.title : sort;
 			list.page = page == null || page < 1 ? 1 : page;
 			list.authors = author;
@@ -107,27 +90,17 @@ public class BookclubRoutes {
 	}
 
 	/**
-	 * The form for a new book. A literal segment ("new") comes before the parameter ({book}), whatever the mapping order.
-	 */
-	public record NewBook( Club club ) implements Routable {
-
-		@Override
-		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return invocation.page( NewBookPage.class ).club( club );
-		}
-	}
-
-	/**
 	 * The form's post: the form's fields are the record's components, as query parameters are
 	 */
-	public record CreateBook( Club club, String title, String author, Integer year ) {}
+	public record CreateBook( String title, String author, Integer year ) {}
 
-	public record DeleteBook( Club club, Book book ) {}
+	public record DeleteBook( Book book ) {}
 
-	public record MemberView( Club club, String handle ) implements Routable {
+	public record MemberView( String handle ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
+			final Club club = club( invocation );
 			return Library.member( club.id(), handle ).<WOActionResults>map( m -> {
 				final MemberPage page = invocation.page( MemberPage.class ).club( club );
 				page.member = m;
@@ -140,59 +113,39 @@ public class BookclubRoutes {
 	 * A club's page by name ({@code /history}): one it doesn't have declines, and the request passes on to the next
 	 * matching route, the club's catch-all
 	 */
-	public record ClubText( Club club, String name ) implements Routable {
+	public record ClubText( String name ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
+			final Club club = club( invocation );
 			return Library.page( club.id(), name ).<WOActionResults>map( text -> TextPage.create( invocation.context(), club, capitalized( name ), text ) ).orElse( RouteHandler.DECLINED );
 		}
 	}
 
 	/**
-	 * Overrides the guestbook plugin's {@code /about}: the same route in a higher ranked table
-	 */
-	public record About( Club club ) implements Routable {
-
-		@Override
-		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return TextPage.create( invocation.context(), club, "About", "%s: %s. (This is the application's /about, overriding the guestbook plugin's.)".formatted( club.name(), club.motto() ) );
-		}
-	}
-
-	public record Admin( Club club ) implements Routable {
-
-		@Override
-		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return TextPage.create( invocation.context(), club, "Admin", "Filters run, outermost first: " + filtersRun( invocation ) );
-		}
-	}
-
-	public record Danger( Club club ) implements Routable {
-
-		@Override
-		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return TextPage.create( invocation.context(), club, "The danger zone", "Filters run, outermost first: " + filtersRun( invocation ) );
-		}
-	}
-
-	public record Reset( Club club ) {}
-
-	/**
 	 * Searching the club's books: the record requires a query, and a request without one gets the route's own answer
 	 * ({@code whenInvalid}) instead of a 404
 	 */
-	public record Search( Club club, String q ) implements Routable {
+	public record Search( String q ) implements Routable {
 
 		public Search {
-			Objects.requireNonNull( q );
+			Objects.requireNonNull( q, "q" );
 		}
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
+			final Club club = club( invocation );
 			final String needle = q.toLowerCase();
 			final List<String> found = Library.books( club.id(), Sort.title ).stream().filter( b -> b.title().toLowerCase().contains( needle ) || b.author().toLowerCase().contains( needle ) ).map( Book::title ).toList();
 			return TextPage.create( invocation.context(), club, "Search", "%d found for '%s': %s".formatted( found.size(), q, found ) );
 		}
+	}
+
+	/**
+	 * @return The club whose host the request is to
+	 */
+	static Club club( final RouteInvocation invocation ) {
+		return invocation.parameter( "club", Club.class );
 	}
 
 	/**
@@ -209,19 +162,20 @@ public class BookclubRoutes {
 		final RouteGroup routes = router.application();
 
 		// The landing page answers localhost only: on a club's host, / is the club's home
-		routes.route( "/", Routes.home, Host.of( "@" ) );
+		routes.map( "/", Routes.home, Main.class, Host.of( "@" ) );
 
 		// A group by host alone: every route in it answers {club}.localhost, with "club" a parameter
 		final RouteGroup club = routes.group( "", CLUB_HOST ).named( "club" );
 
-		club.route( "/", Routes.clubHome );
+		// Pages: a route parameter ({club}) is set on the page by name
+		club.map( "/", Routes.clubHome, ClubPage.class );
 		club.route( "/books/", Routes.books, TrailingSlash.REDIRECT );
-		club.route( "/books/new", Routes.newBook );
+		club.map( "/books/new", Routes.newBook, NewBookPage.class );
 		club.route( "/books/{book}", Routes.book );
 		club.route( "/members/{handle}", Routes.member );
-		club.route( "/search", Routes.search ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), invocation.parameter( "club", Club.class ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
+		club.route( "/search", Routes.search ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), club( invocation ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
 		club.route( "/{name}", Routes.clubText );
-		club.route( "/about", Routes.about );
+		club.map( "/about", Routes.about, ri -> TextPage.create( ri.context(), club( ri ), "About", "%s: %s. (This is the application's /about, overriding the guestbook plugin's.)".formatted( club( ri ).name(), club( ri ).motto() ) ) );
 
 		// Methods: a form posts here, and its fields' conversion errors are reported to the action (Fields.REPORTED). Other methods at /books are redirected to the list at /books/.
 		club.route( "/books", Routes.createBook, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
@@ -245,15 +199,15 @@ public class BookclubRoutes {
 			recordFilter( invocation, "admin" );
 			return "letmein".equals( invocation.request().stringFormValueForKey( "key" ) ) ? next.handle( invocation ) : text( 403, "Admins only: add ?key=letmein" );
 		} );
-		adminGroup.route( "/", Routes.admin );
+		adminGroup.map( "/", Routes.admin, ri -> TextPage.create( ri.context(), club( ri ), "Admin", "Filters run, outermost first: " + filtersRun( ri ) ) );
 
 		final RouteGroup dangerGroup = adminGroup.group( "/danger" );
 		dangerGroup.wrap( ( invocation, next ) -> {
 			recordFilter( invocation, "danger" );
 			return next.handle( invocation );
 		} );
-		dangerGroup.route( "/", Routes.danger );
-		dangerGroup.route( "/reset", Routes.reset, BookclubRoutes::reset, Method.POST );
+		dangerGroup.map( "/", Routes.danger, ri -> TextPage.create( ri.context(), club( ri ), "The danger zone", "Filters run, outermost first: " + filtersRun( ri ) ) );
+		dangerGroup.map( "/reset", Routes.reset, BookclubRoutes::reset, Method.POST );
 
 		// A JSON API: strict about trailing slashes, and about methods (anything else is 405, with Allow)
 		// An API takes posts from other programs, which may send an Origin (a page's form posting to it, a client
@@ -280,27 +234,28 @@ public class BookclubRoutes {
 				: form.title() == null || form.title().isBlank() || form.author() == null || form.author().isBlank() ? "A book has a title and an author" : null;
 
 		if( error != null ) {
-			final NewBookPage page = invocation.page( NewBookPage.class ).club( form.club() );
+			final NewBookPage page = invocation.page( NewBookPage.class ).club( club( invocation ) );
 			page.error = error;
 			return page;
 		}
 
-		final Book book = Library.book( form.club().id(), form.title().strip(), form.author().strip(), form.year() );
-		return Routes.book.redirect( new BookView( form.club(), book ), invocation.context() );
+		final Club club = club( invocation );
+		final Book book = Library.book( club.id(), form.title().strip(), form.author().strip(), form.year() );
+		return Routes.book.redirect( new BookView( club, book ), invocation.context() );
 	}
 
 	private static WOActionResults deleteBook( final DeleteBook delete, final RouteInvocation invocation ) {
 
-		if( !Library.removeBook( delete.club().id(), delete.book().id() ) ) {
+		if( !Library.removeBook( club( invocation ).id(), delete.book().id() ) ) {
 			return RouteHandler.DECLINED;
 		}
 
-		return Routes.books.redirect( new Books( delete.club(), null, null, List.of() ), invocation.context() );
+		return Routes.books.redirect( new Books( null, null, List.of() ), invocation.context() );
 	}
 
-	private static WOActionResults reset( final Reset reset, final RouteInvocation invocation ) {
+	private static WOActionResults reset( final RouteInvocation invocation ) {
 		Library.reset();
-		return Routes.clubHome.redirect( new ClubHome( reset.club() ), invocation.context() );
+		return Routes.clubHome.redirect( invocation.context() );
 	}
 
 	// ---- The JSON API ----

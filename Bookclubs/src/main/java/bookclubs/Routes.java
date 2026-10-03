@@ -1,18 +1,11 @@
 package bookclubs;
 
-import bookclubs.BookclubRoutes.About;
-import bookclubs.BookclubRoutes.Admin;
 import bookclubs.BookclubRoutes.BookView;
 import bookclubs.BookclubRoutes.Books;
-import bookclubs.BookclubRoutes.ClubHome;
 import bookclubs.BookclubRoutes.ClubText;
 import bookclubs.BookclubRoutes.CreateBook;
-import bookclubs.BookclubRoutes.Danger;
 import bookclubs.BookclubRoutes.DeleteBook;
-import bookclubs.BookclubRoutes.Home;
 import bookclubs.BookclubRoutes.MemberView;
-import bookclubs.BookclubRoutes.NewBook;
-import bookclubs.BookclubRoutes.Reset;
 import bookclubs.BookclubRoutes.Search;
 import er.routing.PlainRoute;
 import er.routing.Route;
@@ -29,19 +22,19 @@ public interface Routes {
 	 */
 	Routes routes = new Routes() {};
 
-	Route<Home> home = Route.of( Home.class );
-	Route<ClubHome> clubHome = Route.of( ClubHome.class );
+	PlainRoute home = Route.plain();
+	PlainRoute clubHome = Route.plain();
 	Route<Books> books = Route.of( Books.class );
 	Route<BookView> book = Route.of( BookView.class );
-	Route<NewBook> newBook = Route.of( NewBook.class );
+	PlainRoute newBook = Route.plain();
 	Route<CreateBook> createBook = Route.of( CreateBook.class );
 	Route<DeleteBook> deleteBook = Route.of( DeleteBook.class );
 	Route<MemberView> member = Route.of( MemberView.class );
 	Route<ClubText> clubText = Route.of( ClubText.class );
-	Route<About> about = Route.of( About.class );
-	Route<Admin> admin = Route.of( Admin.class );
-	Route<Danger> danger = Route.of( Danger.class );
-	Route<Reset> reset = Route.of( Reset.class );
+	PlainRoute about = Route.plain();
+	PlainRoute admin = Route.plain();
+	PlainRoute danger = Route.plain();
+	PlainRoute reset = Route.plain();
 	Route<Search> search = Route.of( Search.class );
 	PlainRoute rules = Route.plain();
 

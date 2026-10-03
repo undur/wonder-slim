@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 
 import er.routing.core.Host;
@@ -158,13 +157,24 @@ public final class RouteGroup {
 	}
 
 	/**
-	 * Gives the route its pattern in this group, answered with a new instance of the page
+	 * Gives the route its pattern in this group, answered with a new instance of the page, its route parameters (the
+	 * path's and the host's) set on it by name: {@code map( "/books/{book}", Routes.book, BookPage.class )} sets
+	 * {@code book}, converted to the type of the page's field or setter of that name. A page lacking one is refused here.
+	 * Query values aren't set: a page reads those itself, so a URL can't write its fields.
 	 *
 	 * @return The route
 	 */
 	public PlainRoute map( final String pattern, final PlainRoute route, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
 		Objects.requireNonNull( pageClass );
-		return map( pattern, route, invocation -> WOApplication.application().pageWithName( pageClass.getName(), invocation.context() ), options );
+		final PathPattern path = PathPattern.parse( fullPattern( pattern ) );
+		final Host host = (Host)allOptions( options ).stream().filter( Host.class::isInstance ).findFirst().orElse( null );
+		final List<String> names = new ArrayList<>( path.parameterNames() );
+
+		if( host != null ) {
+			names.addAll( host.parameterNames() );
+		}
+
+		return map( pattern, route, new PageSetters( pageClass, names, _router.converters(), fullPattern( pattern ) ), options );
 	}
 
 	/**
