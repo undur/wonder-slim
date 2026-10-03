@@ -26,8 +26,8 @@ public class RouteGroupTest {
 
 	private static final RouteHandler NOTHING = invocation -> null;
 
-	private static Router.Entry<?> entry( final ERXRouter router, final String pattern ) {
-		return router.routes().stream().filter( e -> e.path().source().equals( pattern ) ).findFirst().orElseThrow();
+	private static RouteDescription entry( final ERXRouter router, final String pattern ) {
+		return router.routes().stream().filter( e -> e.pattern().equals( pattern ) ).findFirst().orElseThrow();
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class RouteGroupTest {
 		api.map( "/books", NOTHING, Method.GET );
 		api.map( "/loose/", NOTHING, TrailingSlash.IGNORE );
 
-		final Router.Entry<?> books = entry( router, "/api/books" );
+		final RouteDescription books = entry( router, "/api/books" );
 		assertEquals( TrailingSlash.STRICT, books.trailingSlash() );
 		assertEquals( 2, books.conditions().size() );
 
@@ -89,7 +89,7 @@ public class RouteGroupTest {
 		final RouteGroup admin = router.application().group( "/admin", Host.of( "admin.example.com" ) ).named( "admin" );
 		admin.wrap( ( invocation, next ) -> { ran.add( "admin filter" ); return next.handle( invocation ); } );
 
-		final Router.Entry<?> moderate = entry( router, "/admin/moderate" );
+		final RouteDescription moderate = entry( router, "/admin/moderate" );
 		assertEquals( "plugin", moderate.table() );
 		assertEquals( 1, moderate.conditions().size() );
 
@@ -145,10 +145,25 @@ public class RouteGroupTest {
 	}
 
 	@Test
-	public void parametersFromValues() {
-		final Route<Search> search = new ERXRouter().application().route( "/search", Search.class, ( s, invocation ) -> null );
+	public void routesAreDescribed() {
+		final ERXRouter router = new ERXRouter();
+		final Route<Search> search = router.application().route( "/search", Search.class, ( s, invocation ) -> null );
+		final PlainRoute about = router.table( "plugin" ).map( "/about", NOTHING, Method.GET );
 
-		assertEquals( new Search( "kaffi", 2 ), search.parameters( Map.of( "q", "kaffi", "page", "2" ) ) );
-		assertNull( search.parameters( Map.of() ).page() );
+		final RouteDescription searchDescription = router.routes().stream().filter( d -> d.pattern().equals( "/search" ) ).findFirst().orElseThrow();
+		assertEquals( search, searchDescription.route() );
+		assertEquals( Search.class, searchDescription.parametersClass() );
+
+		final RouteDescription aboutDescription = router.routes().stream().filter( d -> d.pattern().equals( "/about" ) ).findFirst().orElseThrow();
+		assertEquals( about, aboutDescription.route() );
+		assertNull( aboutDescription.parametersClass() );
+		assertEquals( "plugin", aboutDescription.table() );
+	}
+
+	@Test
+	public void aPlainRoutesLinkTakesOnlyItsParameters() {
+		final PlainRoute item = new ERXRouter().application().map( "/items/{id}", NOTHING );
+
+		assertThrows( IllegalArgumentException.class, () -> item.url( Map.of( "id", 1, "colour", "red" ), null ) );
 	}
 }

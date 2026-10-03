@@ -47,7 +47,7 @@ public class ERXRouter {
 	/**
 	 * What the core router routes to: a handler, and the group it was mapped in (for its wrapping)
 	 */
-	record Mapped( RouteHandler handler, RouteGroup group ) {}
+	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass ) {}
 
 	private final Router<Mapped> _router;
 	private final Converters _converters = new Converters();
@@ -86,8 +86,8 @@ public class ERXRouter {
 	 * @return Every route, in precedence order: its pattern, conditions, trailing slash policy and table (for a page
 	 *         listing them, say)
 	 */
-	public List<Router.Entry<?>> routes() {
-		return List.copyOf( _router.routes() );
+	public List<RouteDescription> routes() {
+		return _router.routes().stream().map( e -> new RouteDescription( e.path().source(), e.conditions(), e.trailingSlash(), e.table(), e.handler().route(), e.handler().parametersClass() ) ).toList();
 	}
 
 	/**

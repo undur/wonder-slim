@@ -373,11 +373,34 @@ public class RouterTest {
 		final Router<String> router = new Router<>();
 		final var routes = table( router );
 		routes.map( "/books/{book}", "book" );
+		routes.map( "/about/", "about", Method.GET );
 		routes.map( "/admin/", "admin", Host.of( "admin.example.com" ) );
 
 		assertTrue( router.hasRouteFor( "/books/2" ) );
-		assertTrue( router.hasRouteFor( "/admin" ) );
+		assertTrue( router.hasRouteFor( "/about" ) );
+
+		// A route for one host doesn't claim the path for every host
+		assertFalse( router.hasRouteFor( "/admin" ) );
 		assertFalse( router.hasRouteFor( "/wonder/admin" ) );
 		assertFalse( router.hasRouteFor( "/books" ) );
+	}
+
+	@Test
+	public void hostPatternsHaveNoPortAndMatchOnlyLabels() {
+		assertThrows( IllegalArgumentException.class, () -> Host.of( "localhost:1300" ) );
+
+		final Router<String> router = new Router<>();
+		table( router ).map( "/", "club", Host.of( "{club}.localhost" ) );
+
+		assertInstanceOf( NoMatch.class, router.route( new RouteRequest( "GET", "my_club.localhost", "/" ) ) );
+		assertEquals( List.of( "club" ), handlers( router.route( new RouteRequest( "GET", "my-club.localhost", "/" ) ) ) );
+	}
+
+	@Test
+	public void routesForAHostDontClaimPaths() {
+		final Router<String> router = new Router<>();
+		table( router ).map( "/*", "clubCatchAll", Host.of( "{club}.localhost" ) );
+
+		assertFalse( router.hasRouteFor( "/wonder/admin" ) );
 	}
 }

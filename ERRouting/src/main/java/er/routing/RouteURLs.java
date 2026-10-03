@@ -84,7 +84,7 @@ public class RouteURLs {
 		}
 
 		final Map<String, Object> all = new LinkedHashMap<>( values );
-		satisfied.parameters().forEach( all::putIfAbsent );
+		satisfied.parameters().forEach( ( name, text ) -> all.putIfAbsent( name, new InheritedText( text ) ) );
 		return all;
 	}
 

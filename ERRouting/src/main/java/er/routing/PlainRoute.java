@@ -21,8 +21,8 @@ import er.routing.core.PathPattern;
  * return seeOther( guestbook.url( context ) );
  * </pre>
  *
- * Its parameters are its pattern's and its host's, given by name and converted by the router's converters; other values
- * are query parameters.
+ * Its parameters are its pattern's and its host's, given by name and converted by the router's converters. Query
+ * parameters are added to a link with {@code ?} attributes.
  */
 
 public final class PlainRoute implements Linkable {
@@ -55,10 +55,21 @@ public final class PlainRoute implements Linkable {
 	 */
 	@Override
 	public String url( final Map<String, Object> values, final WOContext context ) {
+		final List<String> unknown = values.keySet().stream().filter( name -> !_routeParameterNames.contains( name ) ).toList();
+
+		// Free query parameters are ?-attributes on a link, so a name that isn't a parameter is a mistake, not a query
+		if( !unknown.isEmpty() ) {
+			throw new IllegalArgumentException( "The route %s has no parameter %s. Its parameters are %s".formatted( _path, unknown, _routeParameterNames ) );
+		}
+
 		final Map<String, String> strings = new LinkedHashMap<>();
 		RouteURLs.withHostParameters( _host, values, context ).forEach( ( name, value ) -> {
 			if( value != null ) {
-				strings.put( name, value instanceof String string ? string : _converters.toString( value ) );
+				strings.put( name, switch( value ) {
+					case InheritedText inherited -> inherited.text();
+					case String string -> string;
+					default -> _converters.toString( value );
+				} );
 			}
 		} );
 

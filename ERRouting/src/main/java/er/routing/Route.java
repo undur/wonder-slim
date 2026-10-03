@@ -133,50 +133,6 @@ public final class Route<P extends Record> implements Linkable {
 	}
 
 	/**
-	 * @return The route's parameters built from values by name. A value given as a string (a constant in a template) is
-	 *         converted to the component's type.
-	 */
-	public P parameters( final Map<String, Object> values ) {
-		final List<String> unknown = values.keySet().stream().filter( name -> !parameterNames().contains( name ) ).toList();
-
-		if( !unknown.isEmpty() ) {
-			throw new IllegalArgumentException( "The route %s has no parameter %s. Its parameters are %s".formatted( description(), unknown, parameterNames() ) );
-		}
-
-		final Object[] arguments = new Object[_components.length];
-
-		for( int i = 0; i < _components.length; i++ ) {
-			final RecordComponent component = _components[i];
-			Object value = values.get( component.getName() );
-
-			if( value instanceof String string && component.getType() != String.class ) {
-				try {
-					value = _converters.fromString( string, component.getType() );
-
-					if( value == null ) {
-						throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and there's none for '%s'".formatted( component.getName(), description(), component.getType().getSimpleName(), string ) );
-					}
-				}
-				catch( IllegalArgumentException e ) {
-					throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and '%s' isn't one".formatted( component.getName(), description(), component.getType().getSimpleName(), string ), e );
-				}
-			}
-
-			if( value != null && !Converters.boxed( component.getType() ).isInstance( value ) ) {
-				throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, but was given a %s: %s".formatted( component.getName(), description(), component.getType().getSimpleName(), value.getClass().getSimpleName(), value ) );
-			}
-
-			if( value == null && component.getType().isPrimitive() ) {
-				throw new IllegalArgumentException( "The route %s needs its parameter '%s'".formatted( description(), component.getName() ) );
-			}
-
-			arguments[i] = value;
-		}
-
-		return construct( arguments );
-	}
-
-	/**
 	 * @return The URL of the route with the given parameters, in the current context
 	 */
 	public String url( final P parameters ) {
@@ -240,6 +196,15 @@ public final class Route<P extends Record> implements Linkable {
 	 */
 	private String text( final RecordComponent component, final Object value ) {
 		final Class<?> type = Converters.boxed( component.getType() );
+
+		if( value instanceof InheritedText inherited ) {
+			return inherited.text();
+		}
+
+		// A text parameter takes any value's text
+		if( type == String.class && !(value instanceof String) ) {
+			return _converters.converts( value.getClass() ) ? _converters.toString( value ) : String.valueOf( value );
+		}
 
 		if( value instanceof String string && type != String.class ) {
 			final Object converted;

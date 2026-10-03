@@ -31,6 +31,10 @@ public final class Host implements RouteCondition {
 		final List<String> labels = new ArrayList<>();
 
 		// Literal labels compare without case, so they're lower case. Parameter names keep their case.
+		if( pattern.contains( ":" ) || pattern.contains( "[" ) ) {
+			throw new IllegalArgumentException( "A host pattern has no port, and is a name: '%s'. Hosts are compared without their port, which differs between development and deployment".formatted( pattern ) );
+		}
+
 		for( final String label : pattern.trim().split( "\\.", -1 ) ) {
 			labels.add( label.startsWith( "{" ) ? label : label.toLowerCase( Locale.ROOT ) );
 		}
@@ -102,7 +106,9 @@ public final class Host implements RouteCondition {
 			final String label = _labels.get( i );
 
 			if( label.startsWith( "{" ) ) {
-				if( labels[i].isEmpty() ) {
+
+				// Only what a URL to the route could have (one host label), as generating one requires
+				if( !HOST_LABEL.matcher( labels[i] ).matches() ) {
 					return NotHere.INSTANCE;
 				}
 
