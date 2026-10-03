@@ -211,6 +211,8 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 				? ParsleyConfiguration.defaultDevConfiguration()
 				: ParsleyConfiguration.defaultProductionConfiguration();
 
+		// Key paths reach static members too, when the component has no instance member of the name (#172)
+		parsleyConfiguration.associationFactory( new ERXAssociationFactory() );
 		parsleyConfiguration.register();
 
 		// With er.extensions.erxStats.enabled, collect ERXStats for the main thread during startup. The collected
