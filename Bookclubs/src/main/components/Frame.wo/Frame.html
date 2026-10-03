@@ -5,19 +5,94 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title><wo:str value="$title" /></title>
 		<style>
-			body { font: 16px/1.5 system-ui, sans-serif; max-width: 760px; margin: 0 auto; padding: 24px 16px; color: #222; }
-			header { border-bottom: 1px solid #ddd; margin-bottom: 24px; padding-bottom: 12px; }
-			nav a { margin-right: 12px; }
-			.club { font-size: 22px; font-weight: 600; }
-			.muted { color: #777; }
-			.error { color: #b00020; }
-			code { background: #f3f3f3; padding: 1px 4px; border-radius: 4px; }
+			:root {
+				--paper: #faf6ef;
+				--card: #ffffff;
+				--ink: #2b2520;
+				--muted: #8b8177;
+				--line: #e8dfd2;
+				--accent: #a2421d;
+				--accent-soft: #f8e9df;
+				--serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+			}
+
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--paper: #1a1715;
+					--card: #23201d;
+					--ink: #eee6db;
+					--muted: #a1978c;
+					--line: #38312b;
+					--accent: #f0a06e;
+					--accent-soft: #3b2a20;
+				}
+			}
+
+			* { box-sizing: border-box; }
+
+			body {
+				margin: 0;
+				background: var(--paper);
+				color: var(--ink);
+				font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+			}
+
+			a { color: var(--accent); text-decoration: none; }
+			a:hover { text-decoration: underline; }
+
+			header, main, footer { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
+			header { padding-top: 28px; }
+
+			.top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+			.club { font: 600 30px/1.2 var(--serif); color: var(--ink); }
+			.club:hover { text-decoration: none; }
+			.home { font-size: 14px; color: var(--muted); }
+
+			nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 8px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+			nav a { padding: 4px 12px; border-radius: 999px; background: var(--accent-soft); font-size: 14px; font-weight: 500; }
+			nav a:hover { text-decoration: none; filter: brightness(0.96); }
+
+			main { padding-top: 12px; padding-bottom: 48px; }
+
+			h1, h2 { font-family: var(--serif); font-weight: 600; line-height: 1.2; }
+			h1 { font-size: 34px; margin: 20px 0 12px; }
+			h2 { font-size: 22px; margin: 32px 0 12px; }
+
+			.lead { font: italic 19px/1.5 var(--serif); color: var(--muted); margin-top: 0; }
+			.muted { color: var(--muted); }
+
+			ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+			li { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+			li a { font-weight: 600; }
+			li .muted { display: block; font-size: 14px; }
+
+			.sort, .pager { font-size: 14px; color: var(--muted); }
+			.pager { display: flex; gap: 12px; margin-top: 16px; }
+
+			form { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 14px; }
+			label { display: grid; gap: 4px; font-size: 14px; font-weight: 500; }
+			input { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+			button { justify-self: start; font: inherit; font-weight: 600; padding: 8px 18px; border: 0; border-radius: 6px; background: var(--accent); color: var(--paper); cursor: pointer; }
+			button:hover { filter: brightness(1.08); }
+
+			.error { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 4px; }
+
+			footer { color: var(--muted); font-size: 13px; padding-bottom: 32px; }
 		</style>
 	</head>
 	<body>
 		<header>
+			<div class="top">
+				<wo:if condition="$club">
+					<wo:route route="$routes.clubHome" :club="$club.id" class="club"><wo:str value="$club.name" /></wo:route>
+				</wo:if>
+				<wo:if condition="$club" negate="$true">
+					<span class="club">Book clubs</span>
+				</wo:if>
+				<wo:route route="$routes.home" class="home">All clubs</wo:route>
+			</div>
 			<wo:if condition="$club">
-				<div class="club"><wo:route route="$routes.clubHome" :club="$club.id"><wo:str value="$club.name" /></wo:route></div>
 				<nav>
 					<wo:route route="$routes.books" :club="$club.id">Books</wo:route>
 					<wo:route route="$routes.newBook" :club="$club.id">Add a book</wo:route>
@@ -28,10 +103,10 @@
 					<wo:route route="$routes.admin" :club="$club.id" ?key="letmein">Admin</wo:route>
 				</nav>
 			</wo:if>
-			<p class="muted"><wo:route route="$routes.home">All clubs</wo:route></p>
 		</header>
 		<main>
 			<wo:content />
 		</main>
+		<footer>Every link on this page is a route.</footer>
 	</body>
 </html>

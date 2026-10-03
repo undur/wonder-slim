@@ -1,6 +1,6 @@
 <wo:Frame club="$club" title="Books">
 	<h1>Books</h1>
-	<p>Sort by
+	<p class="sort">Sort by
 		<wo:route route="$routes.books" :club="$club.id" :sort="title">title</wo:route>,
 		<wo:route route="$routes.books" :club="$club.id" :sort="author">author</wo:route> or
 		<wo:route route="$routes.books" :club="$club.id" :sort="year">year</wo:route>
@@ -10,8 +10,8 @@
 			<li><wo:route route="$routes.book" :club="$club.id" :id="$book.id"><wo:str value="$book.title" /></wo:route> <span class="muted"><wo:str value="$book.author" />, <wo:str value="$book.year" valueWhenEmpty="year unknown" /></span></li>
 		</wo:repetition>
 	</ul>
-	<p>
-		<wo:if condition="$hasPrevious"><wo:route route="$routes.books" :club="$club.id" :sort="$sort" :page="$previousPage">Previous</wo:route></wo:if>
-		<wo:if condition="$hasNext"><wo:route route="$routes.books" :club="$club.id" :sort="$sort" :page="$nextPage">Next</wo:route></wo:if>
+	<p class="pager">
+		<wo:if condition="$hasPrevious"><wo:route route="$routes.books" :club="$club.id" :sort="$sort" :page="$previousPage">← Previous</wo:route></wo:if>
+		<wo:if condition="$hasNext"><wo:route route="$routes.books" :club="$club.id" :sort="$sort" :page="$nextPage">Next →</wo:route></wo:if>
 	</p>
 </wo:Frame>
