@@ -66,8 +66,14 @@ public class RouteURLsTest {
 		final er.routing.core.PathPattern path = er.routing.core.PathPattern.parse( "/books/{book}" );
 		final java.util.List<java.util.Map.Entry<String, String>> query = java.util.List.of( java.util.Map.entry( "author", "A B" ), java.util.Map.entry( "author", "C" ) );
 
-		assertEquals( "https://bookclubs.example.com/books/2?author=A+B&author=C", RouteURLs.completeURL( path, null, java.util.Map.of( "book", "2" ), query, publicAddress, null ) );
-		assertEquals( "https://bookclubs.example.com/cgi-bin/WebObjects/App.woa/route/books/2", RouteURLs.completeURL( path, null, java.util.Map.of( "book", "2" ), java.util.List.of(), publicAddress, "/cgi-bin/WebObjects/App.woa" ) );
-		assertEquals( "https://kronan.example.com/books/2", RouteURLs.completeURL( path, er.routing.core.Host.of( "{club}.example.com" ), java.util.Map.of( "book", "2", "club", "kronan" ), java.util.List.of(), publicAddress, null ) );
+		assertEquals( "https://bookclubs.example.com/books/2?author=A+B&author=C", RouteURLs.completeURL( path, null, java.util.Map.of( "book", "2" ), query, publicAddress, null, "" ) );
+		assertEquals( "https://bookclubs.example.com/cgi-bin/WebObjects/App.woa/route/books/2", RouteURLs.completeURL( path, null, java.util.Map.of( "book", "2" ), java.util.List.of(), publicAddress, "/cgi-bin/WebObjects/App.woa", "" ) );
+		assertEquals( "https://kronan.example.com/books/2", RouteURLs.completeURL( path, er.routing.core.Host.of( "{club}.example.com" ), java.util.Map.of( "book", "2", "club", "kronan" ), java.util.List.of(), publicAddress, null, "" ) );
+	}
+
+	@Test
+	public void aCompleteURLBeneathTheBasePath() {
+		final PublicAddress.Origin publicAddress = PublicAddress.parse( "https://example.com" );
+		assertEquals( "https://example.com/shop/books/2", RouteURLs.completeURL( er.routing.core.PathPattern.parse( "/books/{book}" ), null, java.util.Map.of( "book", "2" ), java.util.List.of(), publicAddress, null, "/shop" ) );
 	}
 }
