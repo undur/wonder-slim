@@ -339,6 +339,19 @@ GuestbookPlugin.register( router.table( "guestbook" ) );
 - **Overrides:** between tables, the same route is an override. The application's route answers, and the override is
   logged at startup:
   `The route /about [Host {club}.localhost] (application) overrides /about [Host {club}.localhost] (guestbook)`.
+- **Joining the application's groups:** the application names a group, and a plugin joins it from its own table. The
+  plugin's routes then share the group's prefix, conditions, trailing slash policy and filters, and stay the plugin's
+  routes for overrides:
+
+  ```java
+  final RouteGroup club = routes.group( "", CLUB_HOST ).named( "club" );       // the application
+  final RouteGroup admin = club.group( "/admin" ).named( "admin" );
+
+  routes.join( "club" ).map( "/guestbook", … );                              // the plugin
+  routes.join( "admin" ).map( "/guestbook", … );                             // behind the application's admin filter
+  ```
+
+  A group is named before a plugin joins it.
 - **Specificity comes first:** a table's rank only decides between the same route. A plugin's `/guestbook` still answers
   `/guestbook` beside an application's catch-all.
 

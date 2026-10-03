@@ -221,7 +221,7 @@ public class BookclubRoutes {
 		home = routes.route( "/", Home.class, Host.of( "localhost" ) );
 
 		// A group by host alone: every route in it answers {club}.localhost, with "club" a parameter
-		final RouteGroup club = routes.group( "", CLUB_HOST );
+		final RouteGroup club = routes.group( "", CLUB_HOST ).named( "club" );
 
 		clubHome = club.route( "/", ClubHome.class );
 		books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
@@ -245,7 +245,7 @@ public class BookclubRoutes {
 		club.map( "/*", ri -> Library.club( ri.parameter( "club" ) ).<WOActionResults>map( c -> TextPage.create( ri.context(), c, "Not here", "%s has no page at %s.".formatted( c.name(), ri.url() ) ).status( 404 ) ).orElse( RouteHandler.DECLINED ) );
 
 		// Nested groups with filters: the admin filter runs, then the danger filter
-		final RouteGroup adminGroup = club.group( "/admin" );
+		final RouteGroup adminGroup = club.group( "/admin" ).named( "admin" );
 		adminGroup.wrap( ( invocation, next ) -> {
 			recordFilter( invocation, "admin" );
 			return "letmein".equals( invocation.request().stringFormValueForKey( "key" ) ) ? next.handle( invocation ) : text( 403, "Admins only: add ?key=letmein" );

@@ -43,6 +43,7 @@ public class ERXRouter {
 
 	private final Router<Mapped> _router;
 	private final Converters _converters = new Converters();
+	private final java.util.Map<String, RouteGroup> _namedGroups = new java.util.concurrent.ConcurrentHashMap<>();
 	private int _loggedOverrides;
 
 	/**
@@ -84,6 +85,29 @@ public class ERXRouter {
 			final var override = overrides.get( _loggedOverrides );
 			logger.info( "The route {} overrides {}", override.route(), override.overridden() );
 		}
+	}
+
+	/**
+	 * Registers a group under a name, for plugins to join ({@link RouteGroup#join(String)})
+	 */
+	void name( final String name, final RouteGroup group ) {
+		if( _namedGroups.putIfAbsent( name, group ) != null ) {
+			throw new IllegalArgumentException( "A group is already named '%s'".formatted( name ) );
+		}
+	}
+
+	/**
+	 * @return The group of the given name
+	 * @throws IllegalArgumentException if no group has the name
+	 */
+	RouteGroup namedGroup( final String name ) {
+		final RouteGroup group = _namedGroups.get( name );
+
+		if( group == null ) {
+			throw new IllegalArgumentException( "No group is named '%s'. The named groups are %s, and a group is named before a plugin joins it".formatted( name, _namedGroups.keySet() ) );
+		}
+
+		return group;
 	}
 
 	/**

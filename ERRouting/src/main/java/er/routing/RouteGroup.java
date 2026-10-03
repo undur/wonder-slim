@@ -56,6 +56,32 @@ public final class RouteGroup {
 	}
 
 	/**
+	 * Names the group, so a plugin can map routes into it from its own table ({@link #join(String)})
+	 */
+	public RouteGroup named( final String name ) {
+		_router.name( name, this );
+		return this;
+	}
+
+	/**
+	 * @return The named group, for mapping routes into from this group's table: they share its prefix, conditions,
+	 *         trailing slash policy and filters, while staying this table's routes, so the overrides between tables keep
+	 *         working. A plugin maps into the application's groups this way. Only the named group's prefix and options
+	 *         apply, not this group's.
+	 */
+	public RouteGroup join( final String name ) {
+		final RouteGroup named = _router.namedGroup( name );
+		final List<RouteOption> options = new ArrayList<>( named._conditions );
+
+		if( named._trailingSlash != null ) {
+			options.add( named._trailingSlash );
+		}
+
+		// The named group is the parent, so its filters (and its parents') wrap the routes mapped here
+		return new RouteGroup( _router, _table, named, named._prefix, options );
+	}
+
+	/**
 	 * Wraps every route of the group, including those mapped before this call and those of its nested groups. A nested
 	 * group's filters run inside its parent's.
 	 */
