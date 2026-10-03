@@ -372,9 +372,10 @@ public final class Route<P extends Record> implements Linkable {
 
 	/**
 	 * Invokes the route: the parameters are the router's (path and host) and the request's query values or form fields,
-	 * converted to their types. A route parameter that doesn't convert declines the request, as does a record whose
-	 * constructor refuses its values (an IllegalArgumentException). A query parameter or field that doesn't convert is
-	 * null, and reported in {@link RouteInvocation#conversionErrors()}, so the route can answer a form with its errors.
+	 * converted to their types. A route parameter that doesn't convert declines the request. Bad input otherwise (a query
+	 * parameter or field that doesn't convert, values the record's constructor refuses) declines it too, or goes to the
+	 * route's {@code whenInvalid}; with {@link Fields#REPORTED}, a field that doesn't convert is null instead, reported in
+	 * {@link RouteInvocation#conversionErrors()}, so the route can answer a form with its errors.
 	 */
 	WOActionResults handle( final RouteInvocation invocation ) {
 		final Object[] arguments = new Object[_components.length];

@@ -40,8 +40,8 @@ import er.extensions.routes.RouteTable;
  * it as one route, which declines what the router has no route for, so the table's fallback and not found still apply.
  *
  * <pre>
- * final RouteGroup routes = ERXRouter.defaultRouter().application();
- * routes.map( "/items/{id}", ri -&gt; ItemPage.page( ri, ri.parameter( "id" ) ) );
+ * _routes = ERXRouter.declare( AppRoutes::new );  // AppRoutes( ERXRouter router ) maps them:
+ * router.application().map( "/items/{id}", ri -&gt; ri.page( ItemPage.class ).item( ri.parameter( "id", Item.class ) ) );
  * </pre>
  */
 
@@ -55,7 +55,7 @@ public class ERXRouter {
 	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, CrossSite crossSite ) {}
 
 	private final Router<Mapped> _router;
-	private final Converters _converters = new Converters( type -> undeclared( "the converter for " + type.getName() ) );
+	private final Converters _converters = new Converters( type -> undeclared( "the converter for " + type.getName() + ", registered" ) );
 	private final Map<String, RouteGroup> _namedGroups = new ConcurrentHashMap<>();
 	private final Map<String, List<Consumer<RouteGroup>>> _pendingJoins = new LinkedHashMap<>();
 	private int _loggedOverrides;
@@ -66,8 +66,8 @@ public class ERXRouter {
 	private volatile boolean _joinsChecked;
 
 	/**
-	 * The first route or converter added outside a declaration ({@link #declare(Function)}), which declaring the routes
-	 * again wouldn't bring back, null if there's none
+	 * The first thing added outside a declaration ({@link #declare(Function)}), which declaring the routes again wouldn't
+	 * bring back (a route, a converter, a filter), null if there's none
 	 */
 	private volatile String _undeclared;
 	private RouteGroup _application;
@@ -176,6 +176,8 @@ public class ERXRouter {
 	 *         routes override a plugin's
 	 */
 	public synchronized RouteGroup application() {
+		undeclared( "the application's routes, reached" );
+
 		if( _application == null ) {
 			_application = new RouteGroup( this, _router.table( "application", Integer.MIN_VALUE ), null, "", List.of() );
 		}
@@ -188,20 +190,23 @@ public class ERXRouter {
 	 *         (plugins in dependency order). The same route in a higher ranked table overrides it.
 	 */
 	public RouteGroup table( final String name ) {
+		undeclared( "the table " + name + ", created" );
 		return new RouteGroup( this, _router.table( name ), null, "", List.of() );
 	}
 
 	/**
-	 * @return The first route or converter added outside a declaration, null if there's none
+	 * @return The first thing added outside a declaration, null if there's none
 	 */
 	String undeclared() {
 		return _undeclared;
 	}
 
 	/**
-	 * Notes something added to the router, unless it's added by a declaration into it
+	 * Notes something added to the router (or a way to add to it reached), unless it's a declaration into it doing it.
+	 * Reaching the application's routes or a table outside a declaration counts, since what's added through them (a
+	 * plugin's filter on the application's admin group, say) would be lost if the routes were declared again.
 	 */
-	private void undeclared( final String what ) {
+	void undeclared( final String what ) {
 		if( _undeclared == null && RouteDeclarations.DECLARING.get() != this ) {
 			_undeclared = what;
 		}
@@ -227,7 +232,7 @@ public class ERXRouter {
 	void map( final Router<Mapped>.Table table, final String pattern, final Mapped mapped, final List<RouteOption> options ) {
 		refuseHandlerKeyCollision( pattern );
 
-		undeclared( "the route " + pattern );
+		undeclared( "the route " + pattern + ", mapped" );
 		table.map( pattern, mapped, options.stream().filter( option -> !(option instanceof RouteBehavior) ).toArray( RouteOption[]::new ) );
 
 		final var overrides = _router.overrides();

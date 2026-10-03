@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Converts route parameters between their URL text and their types, both ways: a value to text for a link, and text
@@ -64,7 +65,7 @@ public final class Converters {
 	/**
 	 * Told of each type registered after the built-in ones, null for nothing
 	 */
-	private final java.util.function.Consumer<Class<?>> _registered;
+	private final Consumer<Class<?>> _registered;
 
 	public Converters() {
 		this( null );
@@ -73,7 +74,7 @@ public final class Converters {
 	/**
 	 * @param registered Told of each type an application registers (not the built-in ones)
 	 */
-	public Converters( final java.util.function.Consumer<Class<?>> registered ) {
+	public Converters( final Consumer<Class<?>> registered ) {
 		register( String.class, Converter.of( s -> s, s -> s ) );
 		register( Integer.class, Converter.of( Integer::valueOf, String::valueOf ) );
 		register( Long.class, Converter.of( Long::valueOf, String::valueOf ) );

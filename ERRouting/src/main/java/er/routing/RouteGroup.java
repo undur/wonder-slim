@@ -20,7 +20,7 @@ import er.routing.core.TrailingSlash;
  * root group ({@link ERXRouter#table(String)}).
  *
  * <pre>
- * routes.map( "/items/{id}", ri -&gt; ItemPage.page( ri, ri.parameter( "id" ) ) );
+ * routes.map( "/items/{id}", ri -&gt; ri.page( ItemPage.class ).item( ri.parameter( "id", Item.class ) ) );
  * routes.map( "/hooks/github", hooks::github, Method.POST );
  * routes.group( "/manage", manage -&gt; {
  *     manage.wrap( requireLogin );
@@ -68,6 +68,7 @@ public final class RouteGroup {
 	 * Names the group, so a plugin can map routes into it from its own table ({@link #join(String)})
 	 */
 	public RouteGroup named( final String name ) {
+		_router.undeclared( "the group " + name + ", named" );
 		_router.name( name, this );
 		return this;
 	}
@@ -109,6 +110,7 @@ public final class RouteGroup {
 	 * group's filters run inside its parent's.
 	 */
 	public RouteGroup wrap( final RouteFilter filter ) {
+		_router.undeclared( "a filter on " + (_prefix.isEmpty() ? "/" : _prefix) + ", added" );
 		_filters.add( Objects.requireNonNull( filter ) );
 		return this;
 	}

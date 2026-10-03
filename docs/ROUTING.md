@@ -51,9 +51,10 @@ milliseconds), and the check for changes looks at the class files in those folde
   requests answer with why until the routes are declared again, so the old routes aren't tested by mistake.
 - The holder is made again, so `instance()` is read each time, never kept. State that should outlive a declaration (a
   plugin's data) is kept elsewhere.
-- A route mapped or a converter registered outside a declaration (`ERXRouter.defaultRouter().application().map( … )`
-  in the application's constructor, or a plugin registering a converter at startup) would be lost, so then the routes
-  aren't declared again, and the log says which stopped it.
+- Anything added to the router outside a declaration would be lost: a route mapped, a converter registered, a filter
+  added or a group named, or the application's routes or a table reached to do it
+  (`ERXRouter.defaultRouter().application().map( … )` in the application's constructor, a plugin wrapping the admin
+  group from its startup code). Then the routes aren't declared again, and the log says what stopped it.
 - A new class file's code may reach the running application a beat after it's written (the hot swap), so a declaration
   made within three seconds of a change is made once more after that.
 

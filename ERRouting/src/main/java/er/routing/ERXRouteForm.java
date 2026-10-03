@@ -40,6 +40,12 @@ public class ERXRouteForm extends ERXWOForm {
 	 */
 	private final WOAssociation _method;
 
+	/**
+	 * The query of a get form's action while it's rendered, for its hidden fields: this element's, so a form inside it
+	 * doesn't replace it
+	 */
+	private final ThreadLocal<String> _query = new ThreadLocal<>();
+
 	public ERXRouteForm( final String name, final NSDictionary associations, final WOElement template ) {
 		super( name, RouteBindings.withRouteURL( associations, "<wo:routeForm>", "<wo:form>", URL_KEYS ), template );
 
@@ -52,9 +58,10 @@ public class ERXRouteForm extends ERXWOForm {
 	public void appendChildrenToResponse( final WOResponse response, final WOContext context ) {
 		super.appendChildrenToResponse( response, context );
 
-		// The query the action's URL had, if it's a get form's: its action rendered just before, in this thread
-		final String query = GetFormURL.QUERY.get();
-		GetFormURL.QUERY.remove();
+		// The query the action's URL had, if it's a get form's: this form's action, rendered just before in this thread (a
+		// form inside it, embedded, has its own)
+		final String query = _query.get();
+		_query.remove();
 
 		if( query == null ) {
 			return;
@@ -78,8 +85,6 @@ public class ERXRouteForm extends ERXWOForm {
 	 */
 	private class GetFormURL extends WOAssociation {
 
-		static final ThreadLocal<String> QUERY = new ThreadLocal<>();
-
 		private final WOAssociation _url;
 
 		private GetFormURL( final WOAssociation url ) {
@@ -90,14 +95,14 @@ public class ERXRouteForm extends ERXWOForm {
 		public Object valueInComponent( final WOComponent component ) {
 			final String url = String.valueOf( _url.valueInComponent( component ) );
 			final int q = url.indexOf( '?' );
-			QUERY.remove();
+			_query.remove();
 
 			if( q == -1 || _method == null || !"get".equalsIgnoreCase( String.valueOf( _method.valueInComponent( component ) ) ) ) {
 				return url;
 			}
 
 			// The URL is an attribute's value, its & escaped
-			QUERY.set( url.substring( q + 1 ).replace( "&amp;", "&" ) );
+			_query.set( url.substring( q + 1 ).replace( "&amp;", "&" ) );
 			return url.substring( 0, q );
 		}
 

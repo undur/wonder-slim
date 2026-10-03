@@ -155,7 +155,7 @@ public class RouteDeclarationsTest {
 		declarations.declareAgainIfChanged();
 
 		assertSame( router, declarations.router() );
-		assertEquals( "the route /undeclared", router.undeclared() );
+		assertEquals( "the application's routes, reached", router.undeclared() );
 	}
 
 	@Test
@@ -171,6 +171,19 @@ public class RouteDeclarationsTest {
 		assertEquals( null, declarations.router().undeclared() );
 
 		declarations.router().converters().register( Holder.class, er.routing.core.Converters.Converter.of( s -> null, h -> "" ) );
-		assertEquals( "the converter for " + Holder.class.getName(), declarations.router().undeclared() );
+		assertEquals( "the converter for " + Holder.class.getName() + ", registered", declarations.router().undeclared() );
+	}
+
+	@Test
+	public void aFilterAddedOutsideADeclarationStopsDeclaringAgain() {
+		final Switch changes = new Switch();
+		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, changes );
+		final RouteGroup[] admin = new RouteGroup[1];
+		declarations.declare( router -> admin[0] = router.application().group( "/admin" ).named( "admin" ) );
+		assertEquals( null, declarations.router().undeclared() );
+
+		// A plugin's login filter, added later from its own startup code, would be lost
+		admin[0].wrap( ( invocation, next ) -> next.handle( invocation ) );
+		assertEquals( "a filter on /admin, added", declarations.router().undeclared() );
 	}
 }
