@@ -401,10 +401,15 @@ Also built:
 
 Not built yet (the guide's "Not there yet" lists them for users):
 
-- Wildcards in typed routes, and a redirect to a wildcard's own form.
-- The bare-URL element and the Ajax elements' URLs.
-- Static fields in key paths (#172).
-- The `.apiext` addition, and the checks and completion in Parslips (undur/parslips#12).
-- Converging with the existing routes, and the ng-objects side.
+- The bare-URL element and the Ajax elements' URLs (when they're needed).
+- The editor: Parslips resolving a key path to a static member (#172's editor half), and the checks and completion
+  (undur/parslips#12), with the `.apiext` addition.
+- Converging with the existing routes, and the ng-objects side. The pieces free of WebObjects (the core, the
+  declarations and reload, the cross-site decision) are written to move; routes, groups and links still take the WO
+  request and context, and move behind the core's request view and a result type when ng-objects gets the router.
+- #67 deployed: the application side is built (ERXRequestOrigin); modulo's half, the check of what Apache passes through
+  (undur/modulo#14), and deploying both together aren't.
+- Decisions for convergence: the conditions and converters live in `er.routing.core`, so an application imports from
+  two packages; `RouteHandler` and `RouteInvocation` share their names with `er.extensions.routes` until those go.
 - A tree for matching: the router scans its routes, sorted by precedence, which takes about 9 µs per request with 1,000
   routes. That's fine at any realistic size, and a segment tree (#173's title) can replace the scan when one isn't.
