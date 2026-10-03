@@ -155,6 +155,22 @@ public class RouteDeclarationsTest {
 		declarations.declareAgainIfChanged();
 
 		assertSame( router, declarations.router() );
-		assertEquals( "/undeclared", router.undeclaredRoute() );
+		assertEquals( "the route /undeclared", router.undeclared() );
+	}
+
+	@Test
+	public void aConverterRegisteredOutsideADeclarationStopsDeclaringAgain() {
+		final Switch changes = new Switch();
+		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, changes );
+
+		// Registered by a declaration, it's registered again with it
+		declarations.declare( router -> {
+			router.converters().register( Page.class, er.routing.core.Converters.Converter.of( s -> new Page( 1 ), p -> "1" ) );
+			return "routes";
+		} );
+		assertEquals( null, declarations.router().undeclared() );
+
+		declarations.router().converters().register( Holder.class, er.routing.core.Converters.Converter.of( s -> null, h -> "" ) );
+		assertEquals( "the converter for " + Holder.class.getName(), declarations.router().undeclared() );
 	}
 }

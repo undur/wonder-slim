@@ -61,7 +61,19 @@ public final class Converters {
 
 	private final Map<Class<?>, Converter<?>> _converters = new ConcurrentHashMap<>();
 
+	/**
+	 * Told of each type registered after the built-in ones, null for nothing
+	 */
+	private final java.util.function.Consumer<Class<?>> _registered;
+
 	public Converters() {
+		this( null );
+	}
+
+	/**
+	 * @param registered Told of each type an application registers (not the built-in ones)
+	 */
+	public Converters( final java.util.function.Consumer<Class<?>> registered ) {
 		register( String.class, Converter.of( s -> s, s -> s ) );
 		register( Integer.class, Converter.of( Integer::valueOf, String::valueOf ) );
 		register( Long.class, Converter.of( Long::valueOf, String::valueOf ) );
@@ -85,6 +97,8 @@ public final class Converters {
 				return false;
 			}
 		} );
+
+		_registered = registered;
 	}
 
 	/**
@@ -92,6 +106,10 @@ public final class Converters {
 	 */
 	public <T> void register( final Class<T> type, final Converter<T> converter ) {
 		_converters.put( Objects.requireNonNull( type ), Objects.requireNonNull( converter ) );
+
+		if( _registered != null ) {
+			_registered.accept( type );
+		}
 	}
 
 	/**

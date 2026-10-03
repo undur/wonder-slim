@@ -67,6 +67,16 @@ public class CrossSiteTest {
 	}
 
 	@Test
+	public void theBrowsersVerdictDecidesForTheSameOrigin() {
+
+		// The same host and port, another scheme: an http page posting over https
+		final WORequest otherScheme = request( "POST", Map.of( "sec-fetch-site", "same-site", "origin", "http://" + HOST ) );
+
+		assertTrue( CrossSite.SAME_ORIGIN.refuses( otherScheme, HOST, null, host -> false ) );
+		assertFalse( CrossSite.OWN_HOSTS.refuses( otherScheme, HOST, null, host -> false ) );
+	}
+
+	@Test
 	public void ownHostsTakesTheApplicationsOtherHosts() {
 		final java.util.function.Predicate<String> ownHost = host -> host.endsWith( ".localhost" ) || host.equals( "localhost" );
 		final WORequest fromLanding = request( "POST", Map.of( "sec-fetch-site", "same-site", "origin", "http://localhost:1300" ) );

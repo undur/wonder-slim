@@ -122,13 +122,13 @@ class RouteDeclarations {
 	 */
 	void declareAgainIfChanged() {
 
-		// A route mapped outside a declaration would be lost
-		final String undeclared = _router.undeclaredRoute();
+		// A route or a converter added outside a declaration would be lost
+		final String undeclared = _router.undeclared();
 
 		if( undeclared != null ) {
 			if( !_reloadRefusalLogged && _changes.changed() ) {
 				_reloadRefusalLogged = true;
-				logger.warn( "The routes aren't declared again when their classes change, since {} was mapped outside a declaration (ERXRouter.declare()), and it would be lost", undeclared );
+				logger.warn( "The routes aren't declared again when their classes change, since {} was added outside a declaration (ERXRouter.declare()), and it would be lost", undeclared );
 			}
 
 			return;

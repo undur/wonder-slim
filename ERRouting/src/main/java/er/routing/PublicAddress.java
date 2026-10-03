@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.Optional;
 
+import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXProperties;
 
 /**
@@ -76,11 +77,22 @@ public final class PublicAddress {
 
 	/**
 	 * @return The application's domain, for host patterns relative to it ({@code {club}.@}): the public address's host,
-	 *         {@code localhost} without one (development, where any {@code *.localhost} is this machine)
+	 *         {@code localhost} without one in development (where any {@code *.localhost} is this machine)
+	 * @throws IllegalStateException without a public address outside development, naming the property
 	 */
 	public static String domain() {
 		final Origin origin = configured();
-		return origin == null ? "localhost" : origin.host();
+
+		if( origin != null ) {
+			return origin.host();
+		}
+
+		// Deployed, localhost would be a domain no request has, and every route on it would silently answer nothing
+		if( com.webobjects.appserver.WOApplication.application() != null && !ERXApplication.isDevelopmentModeSafe() ) {
+			throw new IllegalStateException( "A host pattern relative to the application's domain ({club}.@) needs the application's public address outside development: set %s (https://bookclubs.example.com, say)".formatted( PROPERTY ) );
+		}
+
+		return "localhost";
 	}
 
 	/**

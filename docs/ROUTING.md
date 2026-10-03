@@ -51,8 +51,9 @@ milliseconds), and the check for changes looks at the class files in those folde
   requests answer with why until the routes are declared again, so the old routes aren't tested by mistake.
 - The holder is made again, so `instance()` is read each time, never kept. State that should outlive a declaration (a
   plugin's data) is kept elsewhere.
-- A route mapped outside a declaration (`ERXRouter.defaultRouter().application().map( … )` in the application's
-  constructor) would be lost, so then the routes aren't declared again, and the log says which route stopped it.
+- A route mapped or a converter registered outside a declaration (`ERXRouter.defaultRouter().application().map( … )`
+  in the application's constructor, or a plugin registering a converter at startup) would be lost, so then the routes
+  aren't declared again, and the log says which stopped it.
 - A new class file's code may reach the running application a beat after it's written (the hot swap), so a declaration
   made within three seconds of a change is made once more after that.
 
@@ -384,14 +385,16 @@ private static WOActionResults createBook( final CreateBook form, final RouteInv
 A route doesn't take a request that changes things (POST, PUT, PATCH, DELETE) from a page on another site: it's
 answered with `403`, so a page elsewhere can't post a form to the application with the user's cookies. The browser says
 where a request comes from (`Sec-Fetch-Site`, or `Origin`, compared with the request's host and the public address), and
-a request with neither isn't from a browser page (curl, a server's webhook), so it's taken. Another subdomain is another
+a request with neither isn't from a browser page (curl, a server's webhook), so it's taken. For the same origin, the
+browser's `Sec-Fetch-Site` decides when it's sent, since it accounts for the scheme, which the application can't see. Another subdomain is another
 site: a page on `kronan.localhost` doesn't post to `acme.localhost`.
 
 A route or a group says which sites it takes them from:
 
 - `CrossSite.SAME_ORIGIN`: its own origin only, the default.
 - `CrossSite.OWN_HOSTS`: the application's other hosts too, those its routes' host patterns match and the public
-  address's (a form on the landing page posting to a club).
+  address's (a form on the landing page posting to a club). A pattern matches by its shape, so with `{club}.@` that's
+  every subdomain of the domain, whether or not a club is there.
 - `CrossSite.ALLOWED`: any site.
 
 ```java
@@ -450,7 +453,8 @@ A pattern ending in `@` is relative to the application's domain: the public addr
 one. Bookclubs' clubs are `Host.of( "{club}.@" )` and its landing page `Host.of( "@" )`, so the same code answers
 `acme.localhost:1300` in development (any name ending in `.localhost` is this machine, so there's no setup) and
 `acme.bookclubs.example.com` with `er.routing.publicAddress=https://bookclubs.example.com`. `@` is a whole label, and
-the last.
+the last. Outside development, a relative host needs the public address: without one, declaring the route fails,
+naming the property, rather than answering `localhost` that no request has.
 
 The host is the request's `Host` header. Whether a front end's `x-forwarded-host` counts is to be decided with #67.
 

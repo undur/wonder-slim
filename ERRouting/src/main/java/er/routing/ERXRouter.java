@@ -55,7 +55,7 @@ public class ERXRouter {
 	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, CrossSite crossSite ) {}
 
 	private final Router<Mapped> _router;
-	private final Converters _converters = new Converters();
+	private final Converters _converters = new Converters( type -> undeclared( "the converter for " + type.getName() ) );
 	private final Map<String, RouteGroup> _namedGroups = new ConcurrentHashMap<>();
 	private final Map<String, List<Consumer<RouteGroup>>> _pendingJoins = new LinkedHashMap<>();
 	private int _loggedOverrides;
@@ -66,10 +66,10 @@ public class ERXRouter {
 	private volatile boolean _joinsChecked;
 
 	/**
-	 * The first route mapped outside a declaration ({@link #declare(Function)}), which declaring the routes again
-	 * wouldn't bring back, null if there's none
+	 * The first route or converter added outside a declaration ({@link #declare(Function)}), which declaring the routes
+	 * again wouldn't bring back, null if there's none
 	 */
-	private volatile String _undeclaredRoute;
+	private volatile String _undeclared;
 	private RouteGroup _application;
 
 	/**
@@ -192,10 +192,19 @@ public class ERXRouter {
 	}
 
 	/**
-	 * @return The first route mapped outside a declaration, null if there's none
+	 * @return The first route or converter added outside a declaration, null if there's none
 	 */
-	String undeclaredRoute() {
-		return _undeclaredRoute;
+	String undeclared() {
+		return _undeclared;
+	}
+
+	/**
+	 * Notes something added to the router, unless it's added by a declaration into it
+	 */
+	private void undeclared( final String what ) {
+		if( _undeclared == null && RouteDeclarations.DECLARING.get() != this ) {
+			_undeclared = what;
+		}
 	}
 
 	/**
@@ -218,9 +227,7 @@ public class ERXRouter {
 	void map( final Router<Mapped>.Table table, final String pattern, final Mapped mapped, final List<RouteOption> options ) {
 		refuseHandlerKeyCollision( pattern );
 
-		if( _undeclaredRoute == null && RouteDeclarations.DECLARING.get() != this ) {
-			_undeclaredRoute = pattern;
-		}
+		undeclared( "the route " + pattern );
 		table.map( pattern, mapped, options.stream().filter( option -> !(option instanceof RouteBehavior) ).toArray( RouteOption[]::new ) );
 
 		final var overrides = _router.overrides();

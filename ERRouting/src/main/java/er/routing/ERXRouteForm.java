@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import com.webobjects.appserver.WOAssociation;
+import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOElement;
 import com.webobjects.appserver.WOResponse;
@@ -44,25 +45,22 @@ public class ERXRouteForm extends ERXWOForm {
 
 		// Read now: the associations left for attributes are let go of after the element is built
 		_method = _associations.objectForKey( "method" );
+		_href = new GetFormURL( _href );
 	}
 
 	@Override
 	public void appendChildrenToResponse( final WOResponse response, final WOContext context ) {
 		super.appendChildrenToResponse( response, context );
 
-		if( _method == null || !"get".equalsIgnoreCase( String.valueOf( _method.valueInComponent( context.component() ) ) ) ) {
+		// The query the action's URL had, if it's a get form's: its action rendered just before, in this thread
+		final String query = GetFormURL.QUERY.get();
+		GetFormURL.QUERY.remove();
+
+		if( query == null ) {
 			return;
 		}
 
-		// The URL is an attribute's value, its & escaped
-		final String url = String.valueOf( _href.valueInComponent( context.component() ) ).replace( "&amp;", "&" );
-		final int q = url.indexOf( '?' );
-
-		if( q == -1 ) {
-			return;
-		}
-
-		for( final String pair : url.substring( q + 1 ).split( "&" ) ) {
+		for( final String pair : query.split( "&" ) ) {
 			final int equals = pair.indexOf( '=' );
 			final String name = URLDecoder.decode( equals == -1 ? pair : pair.substring( 0, equals ), StandardCharsets.UTF_8 );
 			final String value = equals == -1 ? "" : URLDecoder.decode( pair.substring( equals + 1 ), StandardCharsets.UTF_8 );
@@ -71,6 +69,46 @@ public class ERXRouteForm extends ERXWOForm {
 			response.appendContentString( "\" value=\"" );
 			response.appendContentHTMLAttributeValue( value );
 			response.appendContentString( "\">" );
+		}
+	}
+
+	/**
+	 * The route's URL as a form's action: a get form's without its query, which a browser would replace with the form's
+	 * fields, so the query is kept for the form's hidden fields (the URL generated once)
+	 */
+	private class GetFormURL extends WOAssociation {
+
+		static final ThreadLocal<String> QUERY = new ThreadLocal<>();
+
+		private final WOAssociation _url;
+
+		private GetFormURL( final WOAssociation url ) {
+			_url = url;
+		}
+
+		@Override
+		public Object valueInComponent( final WOComponent component ) {
+			final String url = String.valueOf( _url.valueInComponent( component ) );
+			final int q = url.indexOf( '?' );
+			QUERY.remove();
+
+			if( q == -1 || _method == null || !"get".equalsIgnoreCase( String.valueOf( _method.valueInComponent( component ) ) ) ) {
+				return url;
+			}
+
+			// The URL is an attribute's value, its & escaped
+			QUERY.set( url.substring( q + 1 ).replace( "&amp;", "&" ) );
+			return url.substring( 0, q );
+		}
+
+		@Override
+		public String keyPath() {
+			return _url.keyPath();
+		}
+
+		@Override
+		public String bindingInComponent( final WOComponent component ) {
+			return _url.bindingInComponent( component );
 		}
 	}
 }

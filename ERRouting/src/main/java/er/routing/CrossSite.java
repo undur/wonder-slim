@@ -61,6 +61,12 @@ public enum CrossSite implements RouteBehavior {
 			return false;
 		}
 
+		// The browser's verdict accounts for the scheme, which the application can't see (an http page posting to the same
+		// host over https is another origin), so it decides for the same origin. Other hosts are told by the Origin.
+		if( fetchSite != null && this == SAME_ORIGIN ) {
+			return true;
+		}
+
 		final String origin = request.headerForKey( "origin" );
 
 		if( origin == null ) {

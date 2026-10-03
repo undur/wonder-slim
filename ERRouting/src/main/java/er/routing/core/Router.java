@@ -44,12 +44,12 @@ public final class Router<H> {
 	 * Every table's routes by path shape: only routes of the same shape can match the same requests, so a new route is
 	 * checked against these, not all of them
 	 */
-	private final Map<String, List<Mapped>> _byShape = new HashMap<>();
+	private final Map<String, List<Shaped>> _byShape = new HashMap<>();
 
 	/**
 	 * A route and the table it's mapped in
 	 */
-	private record Mapped( Object table, Entry<?> entry ) {}
+	private record Shaped( Object table, Entry<?> entry ) {}
 
 	/**
 	 * The routes in precedence order, null until they're first needed after a route is mapped: sorting once, not once
@@ -185,15 +185,15 @@ public final class Router<H> {
 
 			final Entry<H> route = new Entry<>( path, List.copyOf( conditionList ), trailingSlash, Objects.requireNonNull( handler ), _name, _rank, _mappedCount++ );
 
-			final List<Mapped> sameShape = _byShape.computeIfAbsent( path.shape(), shape -> new ArrayList<>() );
+			final List<Shaped> sameShape = _byShape.computeIfAbsent( path.shape(), shape -> new ArrayList<>() );
 
-			for( final Mapped mapped : sameShape ) {
+			for( final Shaped mapped : sameShape ) {
 				if( mapped.table() == this && sameRoute( route, mapped.entry() ) ) {
 					throw new IllegalArgumentException( "The route %s conflicts with %s: they match the same requests".formatted( route, mapped.entry() ) );
 				}
 			}
 
-			for( final Mapped mapped : sameShape ) {
+			for( final Shaped mapped : sameShape ) {
 				@SuppressWarnings("unchecked")
 				final Entry<H> existing = (Entry<H>)mapped.entry();
 
@@ -203,7 +203,7 @@ public final class Router<H> {
 			}
 
 			_routes.add( route );
-			sameShape.add( new Mapped( this, route ) );
+			sameShape.add( new Shaped( this, route ) );
 			_sorted = null;
 			return route;
 		}
