@@ -282,11 +282,20 @@ public final class Router<H> {
 		final List<Candidate<H>> candidates = new ArrayList<>();
 		final Set<String> allowed = new TreeSet<>();
 
+		// The shape of the most specific route that matched the path but not the method, while no route has matched yet
+		String notAllowedShape = null;
+
 		for( final Route<H> route : _sorted ) {
 			final PathPattern.Match match = route.path().match( path );
 
 			if( match == null ) {
 				continue;
+			}
+
+			// A more specific route is there, but not for this method: less specific routes (a catch-all) don't get the
+			// request, so it's answered with 405. Routes of the same shape still do.
+			if( notAllowedShape != null && candidates.isEmpty() && !notAllowedShape.equals( route.path().shape() ) ) {
+				break;
 			}
 
 			final Map<String, String> parameters = new LinkedHashMap<>( match.parameters() );
@@ -312,6 +321,11 @@ public final class Router<H> {
 			// The route is there, but not for this method: it counts towards a 405
 			if( !accepted ) {
 				allowed.addAll( routeAllows );
+
+				if( notAllowedShape == null && candidates.isEmpty() ) {
+					notAllowedShape = route.path().shape();
+				}
+
 				continue;
 			}
 

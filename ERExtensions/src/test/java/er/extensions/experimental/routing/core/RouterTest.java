@@ -281,4 +281,28 @@ public class RouterTest {
 		final PathPattern pattern = PathPattern.parse( "/files/{name}" );
 		assertEquals( Map.of( "name", "kaffi & kökur/2" ), pattern.match( RequestPath.parse( pattern.path( Map.of( "name", "kaffi & kökur/2" ) ) ) ).parameters() );
 	}
+
+	@Test
+	public void aCatchAllDoesNotSwallowA405() {
+		final Router<String> router = new Router<>();
+		final var routes = table( router );
+		routes.map( "/api/books", "list", Method.GET );
+		routes.map( "/api/books", "create", Method.POST );
+		routes.map( "/*", "catchAll" );
+
+		assertEquals( Set.of( "GET", "HEAD", "POST" ), assertInstanceOf( MethodNotAllowed.class, router.route( new RouteRequest( "PUT", "example.com", "/api/books" ) ) ).allowedMethods() );
+		assertEquals( List.of( "catchAll" ), handlers( router.route( new RouteRequest( "PUT", "example.com", "/elsewhere" ) ) ) );
+	}
+
+	@Test
+	public void aRouteOfTheSameShapeStillTakesAnotherMethod() {
+		final Router<String> router = new Router<>();
+		final var routes = table( router );
+		routes.map( "/books", "create", Method.POST );
+		routes.map( "/books/", "list" );
+		routes.map( "/*", "catchAll" );
+
+		assertEquals( List.of( "list", "catchAll" ), handlers( get( router, "/books" ) ) );
+		assertEquals( List.of( "create", "list", "catchAll" ), handlers( router.route( new RouteRequest( "POST", "example.com", "/books" ) ) ) );
+	}
 }
