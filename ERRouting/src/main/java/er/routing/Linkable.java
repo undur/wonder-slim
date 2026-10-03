@@ -3,6 +3,7 @@ package er.routing;
 import java.util.Map;
 
 import com.webobjects.appserver.WOContext;
+import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXWOContext;
 
@@ -32,5 +33,20 @@ public interface Linkable {
 	 */
 	public default String url() {
 		return url( ERXWOContext.currentContext() );
+	}
+
+	/**
+	 * @return A redirect to the route ({@code 303 See Other}) for parameter values by name: what a form's post answers
+	 *         with (post, redirect, get)
+	 */
+	public default WOResponse redirect( final Map<String, Object> values, final WOContext context ) {
+		return RouteURLs.seeOther( url( values, context ) );
+	}
+
+	/**
+	 * @return A redirect to the route ({@code 303 See Other}) without parameters of its own
+	 */
+	public default WOResponse redirect( final WOContext context ) {
+		return redirect( Map.of(), context );
 	}
 }

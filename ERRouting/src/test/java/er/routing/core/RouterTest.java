@@ -403,4 +403,13 @@ public class RouterTest {
 
 		assertFalse( router.hasRouteFor( "/wonder/admin" ) );
 	}
+
+	enum Stray implements RouteOption {
+		OPTION
+	}
+
+	@Test
+	public void anOptionTheRouterDoesntKnowIsRefused() {
+		assertThrows( IllegalArgumentException.class, () -> table( new Router<>() ).map( "/x", "x", Stray.OPTION ) );
+	}
 }

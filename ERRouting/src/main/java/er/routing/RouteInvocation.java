@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.webobjects.appserver.WOApplication;
+import com.webobjects.appserver.WOComponent;
 import com.webobjects.appserver.WORequest;
 
 import er.routing.core.Converters;
@@ -76,6 +78,14 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation {
 
 	void addConversionError( final String name, final String text ) {
 		_conversionErrors.put( name, text );
+	}
+
+	/**
+	 * @return A new instance of the page, in the invocation's context
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends WOComponent> T page( final Class<T> pageClass ) {
+		return (T)WOApplication.application().pageWithName( pageClass.getName(), context() );
 	}
 
 	/**

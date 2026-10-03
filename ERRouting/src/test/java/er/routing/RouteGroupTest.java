@@ -1,6 +1,7 @@
 package er.routing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -173,5 +174,28 @@ public class RouteGroupTest {
 		final PlainRoute item = new ERXRouter().application().map( "/items/{id}", NOTHING );
 
 		assertThrows( IllegalArgumentException.class, () -> item.url( Map.of( "id", 1, "colour", "red" ), null ) );
+	}
+
+	public record Form( String title, Integer year ) {}
+
+	public record Member( String handle ) {}
+
+	@Test
+	public void aGroupsFieldsOptionReachesItsTypedRoutes() {
+		final ERXRouter router = new ERXRouter();
+		final RouteGroup forms = router.application().group( "/forms", Fields.REPORTED );
+
+		assertTrue( forms.route( "/book", Form.class, ( f, invocation ) -> null, Method.POST ).reportsFields() );
+		assertFalse( router.application().route( "/plain-form", Form.class, ( f, invocation ) -> null ).reportsFields() );
+
+		// A plain route reads its own fields, so the option means nothing there
+		assertThrows( IllegalArgumentException.class, () -> router.application().map( "/p", NOTHING, Fields.REPORTED ) );
+	}
+
+	@Test
+	public void aTextParameterTakesOnlyConvertibleValues() {
+		final Route<Member> member = new ERXRouter().application().route( "/members/{handle}", Member.class, ( m, invocation ) -> null );
+
+		assertThrows( IllegalArgumentException.class, () -> member.url( Map.of( "handle", new Object() ), null ) );
 	}
 }

@@ -57,7 +57,7 @@ public class BookclubRoutes {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return page( Main.class, invocation.context() );
+			return invocation.page( Main.class );
 		}
 	}
 
@@ -69,7 +69,7 @@ public class BookclubRoutes {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return page( ClubPage.class, invocation.context() ).club( club );
+			return invocation.page( ClubPage.class ).club( club );
 		}
 	}
 
@@ -80,7 +80,7 @@ public class BookclubRoutes {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			final BookListPage list = BookclubRoutes.page( BookListPage.class, invocation.context() ).club( club );
+			final BookListPage list = invocation.page( BookListPage.class ).club( club );
 			list.sort = sort == null ? Sort.title : sort;
 			list.page = page == null || page < 1 ? 1 : page;
 			return list;
@@ -100,7 +100,7 @@ public class BookclubRoutes {
 				return RouteHandler.DECLINED;
 			}
 
-			final BookPage page = page( BookPage.class, invocation.context() ).club( club );
+			final BookPage page = invocation.page( BookPage.class ).club( club );
 			page.book = book;
 			return page;
 		}
@@ -113,7 +113,7 @@ public class BookclubRoutes {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return page( NewBookPage.class, invocation.context() ).club( club );
+			return invocation.page( NewBookPage.class ).club( club );
 		}
 	}
 
@@ -129,7 +129,7 @@ public class BookclubRoutes {
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
 			return Library.member( club.id(), handle ).<WOActionResults>map( m -> {
-				final MemberPage page = page( MemberPage.class, invocation.context() ).club( club );
+				final MemberPage page = invocation.page( MemberPage.class ).club( club );
 				page.member = m;
 				return page;
 			} ).orElse( RouteHandler.DECLINED );
@@ -286,13 +286,13 @@ public class BookclubRoutes {
 				: form.title() == null || form.title().isBlank() || form.author() == null || form.author().isBlank() ? "A book has a title and an author" : null;
 
 		if( error != null ) {
-			final NewBookPage page = page( NewBookPage.class, invocation.context() ).club( form.club() );
+			final NewBookPage page = invocation.page( NewBookPage.class ).club( form.club() );
 			page.error = error;
 			return page;
 		}
 
 		final Book book = Library.book( form.club().id(), form.title().strip(), form.author().strip(), form.year() );
-		return seeOther( instance().book.url( new BookView( form.club(), book ), invocation.context() ) );
+		return instance().book.redirect( new BookView( form.club(), book ), invocation.context() );
 	}
 
 	private static WOActionResults deleteBook( final DeleteBook delete, final RouteInvocation invocation ) {
@@ -301,12 +301,12 @@ public class BookclubRoutes {
 			return RouteHandler.DECLINED;
 		}
 
-		return seeOther( instance().books.url( new Books( delete.club(), null, null ), invocation.context() ) );
+		return instance().books.redirect( new Books( delete.club(), null, null ), invocation.context() );
 	}
 
 	private static WOActionResults reset( final Reset reset, final RouteInvocation invocation ) {
 		Library.reset();
-		return seeOther( instance().clubHome.url( new ClubHome( reset.club() ), invocation.context() ) );
+		return instance().clubHome.redirect( new ClubHome( reset.club() ), invocation.context() );
 	}
 
 	// ---- The JSON API ----
@@ -342,11 +342,6 @@ public class BookclubRoutes {
 	}
 
 	// ---- Helpers ----
-
-	@SuppressWarnings("unchecked")
-	private static <T extends BaseComponent> T page( final Class<T> pageClass, final WOContext context ) {
-		return (T)WOApplication.application().pageWithName( pageClass.getName(), context );
-	}
 
 	private static final String FILTERS_KEY = "bookclubs.filters";
 
@@ -386,13 +381,6 @@ public class BookclubRoutes {
 
 	private static String quoted( final String s ) {
 		return "\"" + s.replace( "\\", "\\\\" ).replace( "\"", "\\\"" ) + "\"";
-	}
-
-	static WOResponse seeOther( final String url ) {
-		final WOResponse response = new WOResponse();
-		response.setStatus( 303 );
-		response.setHeader( url, "location" );
-		return response;
 	}
 
 	private static String capitalized( final String s ) {

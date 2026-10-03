@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.webobjects.appserver.WOContext;
+import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.routes.ERXShortURLs;
@@ -53,7 +54,27 @@ public class RouteURLs {
 			return url;
 		}
 
-		// A context generating complete URLs (an email) gave one already: its host is replaced, keeping its scheme and port
+		return toHost( url, hostName, requestHost, context.request() != null && context.request().isSecure() );
+	}
+
+	/**
+	 * @return A {@code 303 See Other} to the URL
+	 */
+	static WOResponse seeOther( final String url ) {
+		final WOResponse response = new WOResponse();
+		response.setStatus( 303 );
+		response.setHeader( url, "location" );
+		return response;
+	}
+
+	/**
+	 * @param url A URL as the context generated it: relative ({@code /books/2}), or complete in a context generating
+	 *        complete URLs (an email)
+	 * @param requestHost The request's host as it sent it (possibly with a port), null if there's none
+	 * @return The URL to the given host: a complete URL's host replaced, keeping its scheme and port, or a relative URL
+	 *         made complete with the request's scheme and port
+	 */
+	static String toHost( final String url, final String hostName, final String requestHost, final boolean secure ) {
 		final int schemeEnd = url.indexOf( "://" );
 
 		if( schemeEnd != -1 ) {
@@ -63,8 +84,7 @@ public class RouteURLs {
 		}
 
 		// FIXME: Assumes the request's scheme and port, which a host behind another front end may not share
-		final String scheme = context.request() != null && context.request().isSecure() ? "https" : "http";
-		return scheme + "://" + hostName + (requestHost == null ? "" : port( requestHost )) + url;
+		return (secure ? "https" : "http") + "://" + hostName + (requestHost == null ? "" : port( requestHost )) + url;
 	}
 
 	/**

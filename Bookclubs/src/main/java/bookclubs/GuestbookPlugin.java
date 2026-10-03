@@ -51,7 +51,7 @@ public class GuestbookPlugin {
 				entries( ri.parameter( "club" ) ).add( entry.strip() );
 			}
 
-			return BookclubRoutes.seeOther( _page.url( ri.context() ) );
+			return _page.redirect( ri.context() );
 		}, Method.POST );
 
 		club.map( "/about", ri -> BookclubRoutes.text( 200, "The guestbook plugin's about page" ) );

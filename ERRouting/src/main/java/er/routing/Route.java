@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
+import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXWOContext;
 import er.routing.core.Converters;
@@ -115,6 +116,14 @@ public final class Route<P extends Record> implements Linkable {
 	}
 
 	/**
+	 * @return true if fields that don't convert are reported to the route ({@link Fields#REPORTED}), its own option or
+	 *         its group's
+	 */
+	boolean reportsFields() {
+		return _reportFields;
+	}
+
+	/**
 	 * @return The whole path pattern, the group's prefix included
 	 */
 	public String pattern() {
@@ -153,6 +162,13 @@ public final class Route<P extends Record> implements Linkable {
 		} );
 
 		return RouteURLs.url( _path, _host, strings, _routeParameterNames, context );
+	}
+
+	/**
+	 * @return A redirect to the route with the given parameters ({@code 303 See Other}): what a form's post answers with
+	 */
+	public WOResponse redirect( final P parameters, final WOContext context ) {
+		return RouteURLs.seeOther( url( parameters, context ) );
 	}
 
 	/**
@@ -201,9 +217,14 @@ public final class Route<P extends Record> implements Linkable {
 			return inherited.text();
 		}
 
-		// A text parameter takes any value's text
+		// A text parameter takes the text of a value the converters convert (a number, an object with a converter), not
+		// just any object's toString(), which would make a wrong binding a garbage URL
 		if( type == String.class && !(value instanceof String) ) {
-			return _converters.converts( value.getClass() ) ? _converters.toString( value ) : String.valueOf( value );
+			if( !_converters.converts( value.getClass() ) ) {
+				throw new IllegalArgumentException( "The parameter '%s' of the route %s is text, and was given a %s, which has no converter: %s".formatted( component.getName(), description(), value.getClass().getSimpleName(), value ) );
+			}
+
+			return _converters.toString( value );
 		}
 
 		if( value instanceof String string && type != String.class ) {

@@ -46,6 +46,11 @@ public final class RouteGroup {
 	 * The group's trailing slash policy (its own or its parent's), null for the router's
 	 */
 	private final TrailingSlash _trailingSlash;
+
+	/**
+	 * How the group's typed routes treat fields that don't convert ({@link Fields#REPORTED}), null for declining
+	 */
+	private final Fields _fields;
 	private final List<RouteFilter> _filters = new ArrayList<>();
 
 	RouteGroup( final ERXRouter router, final Router<ERXRouter.Mapped>.Table table, final RouteGroup parent, final String prefix, final List<RouteOption> options ) {
@@ -56,6 +61,7 @@ public final class RouteGroup {
 		_prefix = prefix;
 		_conditions = options.stream().filter( RouteCondition.class::isInstance ).map( RouteCondition.class::cast ).toList();
 		_trailingSlash = options.stream().filter( TrailingSlash.class::isInstance ).map( TrailingSlash.class::cast ).findFirst().orElse( null );
+		_fields = options.stream().filter( Fields.class::isInstance ).map( Fields.class::cast ).findFirst().orElse( null );
 	}
 
 	/**
@@ -92,6 +98,10 @@ public final class RouteGroup {
 			options.add( named._trailingSlash );
 		}
 
+		if( named._fields != null ) {
+			options.add( named._fields );
+		}
+
 		// The named group is the parent, so its filters (and its parents') wrap the routes mapped here
 		return new RouteGroup( _router, _table, named, named._prefix, options );
 	}
@@ -111,6 +121,11 @@ public final class RouteGroup {
 	 * @return The route, for links, forms and redirects to it
 	 */
 	public PlainRoute map( final String pattern, final RouteHandler handler, final RouteOption... options ) {
+
+		if( List.of( options ).stream().anyMatch( Fields.class::isInstance ) ) {
+			throw new IllegalArgumentException( "The route %s is a plain route, which reads its fields itself: Fields applies to typed routes".formatted( fullPattern( pattern ) ) );
+		}
+
 		final List<RouteOption> allOptions = allOptions( options );
 		final Host host = (Host)allOptions.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
 		final PlainRoute route = new PlainRoute( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
@@ -192,6 +207,11 @@ public final class RouteGroup {
 
 		if( !ownPolicy && _trailingSlash != null ) {
 			all.add( _trailingSlash );
+		}
+
+		// The group's fields option reaches its typed routes (a plain route ignores it)
+		if( _fields != null && all.stream().noneMatch( Fields.class::isInstance ) ) {
+			all.add( _fields );
 		}
 
 		return all;

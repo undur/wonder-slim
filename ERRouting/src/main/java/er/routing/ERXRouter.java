@@ -55,6 +55,11 @@ public class ERXRouter {
 	private final Map<String, RouteGroup> _namedGroups = new ConcurrentHashMap<>();
 	private final Map<String, List<Consumer<RouteGroup>>> _pendingJoins = new LinkedHashMap<>();
 	private int _loggedOverrides;
+
+	/**
+	 * True once the joins are checked: at launch for the default router, otherwise on the first request
+	 */
+	private volatile boolean _joinsChecked;
 	private RouteGroup _application;
 
 	private static ERXRouter _defaultRouter;
@@ -68,9 +73,9 @@ public class ERXRouter {
 			_defaultRouter = new ERXRouter();
 			_defaultRouter.mapInto( RouteTable.defaultRouteTable() );
 
-			// By the time the application has launched, the groups plugins joined are named
+			// By the time the application is about to listen for requests, the groups plugins joined are named
 			final ERXRouter router = _defaultRouter;
-			ERXNotification.ApplicationDidFinishLaunchingNotification.addObserver( notification -> router.checkJoins() );
+			ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver( notification -> router.checkJoins() );
 		}
 
 		return _defaultRouter;
@@ -128,7 +133,7 @@ public class ERXRouter {
 	 */
 	void map( final Router<Mapped>.Table table, final String pattern, final Mapped mapped, final List<RouteOption> options ) {
 		refuseHandlerKeyCollision( pattern );
-		table.map( pattern, mapped, options.toArray( RouteOption[]::new ) );
+		table.map( pattern, mapped, options.stream().filter( option -> !(option instanceof Fields) ).toArray( RouteOption[]::new ) );
 
 		final var overrides = _router.overrides();
 
@@ -173,6 +178,8 @@ public class ERXRouter {
 	 *         exist. Checked for the default router once the application has launched, so it fails at startup.
 	 */
 	public synchronized void checkJoins() {
+		_joinsChecked = true;
+
 		if( !_pendingJoins.isEmpty() ) {
 			throw new IllegalStateException( "Groups were joined that are never named: %s. The routes mapped in them don't exist. Their names are %s".formatted( _pendingJoins.keySet(), _namedGroups.keySet() ) );
 		}
@@ -221,6 +228,12 @@ public class ERXRouter {
 
 		@Override
 		public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
+
+		// A router first used after launch checks its joins on its first request
+		if( !_joinsChecked ) {
+			checkJoins();
+		}
+
 			return ERXRouter.this.handle( invocation );
 		}
 
@@ -235,6 +248,12 @@ public class ERXRouter {
 	 *         trailing slash form, or {@link RouteHandler#DECLINED}
 	 */
 	public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
+
+		// A router first used after launch checks its joins on its first request
+		if( !_joinsChecked ) {
+			checkJoins();
+		}
+
 		final WORequest request = invocation.request();
 		final RouteRequest routeRequest = new RouteRequest( request.method(), RequestHost.host( request ), invocation.url() );
 
@@ -260,6 +279,12 @@ public class ERXRouter {
 				results = RouteHandler.DECLINED;
 			}
 			catch( NotCanonical notCanonical ) {
+
+				// A wildcard route has no URL of its own to redirect to, so it declines, and the next candidate gets the request
+				if( candidate.entry().path().isWildcard() ) {
+					continue;
+				}
+
 				return canonicalRedirect( candidate, notCanonical, invocation );
 			}
 
@@ -292,11 +317,6 @@ public class ERXRouter {
 		final Map<String, String> values = new LinkedHashMap<>( candidate.parameters() );
 		values.put( notCanonical.name, notCanonical.canonicalText );
 		final Host host = (Host)candidate.entry().conditions().stream().filter( Host.class::isInstance ).findFirst().orElse( null );
-
-		// A wildcard route has no URL of its own to redirect to
-		if( candidate.entry().path().isWildcard() ) {
-			return RouteHandler.DECLINED;
-		}
 
 		final String uri = invocation.request().uri();
 		final int q = uri.indexOf( '?' );
