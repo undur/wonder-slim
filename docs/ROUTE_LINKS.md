@@ -343,6 +343,24 @@ features slot into an established shape instead of redesigning it. Built one at 
 7. **HTTP methods** (#177): a route declares the methods it accepts, `GET` and `HEAD` by default, through the
    preconditions (#179). No dispatch beyond that is needed for it.
 
-Built so far: named parameters in patterns, endpoints with `map`, invocation and `url()`, `<wo:route>` checked at
-render, and `:` in the template parser. Still to do beyond the list: the `.apiext` addition, and the checks and
-completion in Parslips.
+Built so far (all on the route-links branch, in `er.extensions.experimental.routing`):
+
+- **The router's core** (`core`, plain Java, unit tested): path patterns with named parameters and wildcards,
+  conditions (`Host`, exact or a pattern, and `Method`), trailing slash policies, precedence by specificity, layered
+  tables with conflicts refused and overrides recorded, and paths generated from patterns.
+- **`ERXRouter`**, mapped into the existing route table as one route that declines what it has no route for: groups
+  with prefixes, conditions and filters, parameters by name (`RoutedInvocation`), `405` with `Allow`, `308` to the
+  declared trailing slash form. The host is read in one place (`RequestHost`).
+- **Endpoints declared from groups**, routed by the router: a group's path parameters and a host pattern's are record
+  components, and an endpoint with a host pattern links to its host.
+- **`<wo:route>`**, checked at render, and `:` in the template parser.
+- The playground's `/router/` routes and `/typed` page exercise each.
+
+Not built yet:
+
+- Converters, so objects are parameters (#175).
+- Tables read again on each request in development.
+- The default methods: routes without a `Method` condition accept any method, as routes do today. #177 proposes `GET`
+  and `HEAD` by default.
+- The `.apiext` addition, and the checks and completion in Parslips.
+- Converging with the existing routes.
