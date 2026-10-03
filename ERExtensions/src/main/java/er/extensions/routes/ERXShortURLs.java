@@ -68,13 +68,29 @@ public final class ERXShortURLs {
 	 * @param handlerKeys The application's registered request handler keys
 	 */
 	public static String canonicalize( final String url, final String adaptorPath, final String applicationName, final String applicationExtension, final Collection<String> handlerKeys ) {
+		return canonicalize( url, null, adaptorPath, applicationName, applicationExtension, handlerKeys );
+	}
+
+	/**
+	 * As {@link #canonicalize(String, String, String, String, Collection)}, the application's base path ({@code /App},
+	 * #51) removed first when the URL starts with it, so {@code /App/wo/123}, {@code /App/about} and {@code /App/} are
+	 * the application's URLs behind a front end that passes paths on as they arrive
+	 *
+	 * @param basePath The public path the application is served beneath, null or empty for the root
+	 */
+	public static String canonicalize( final String url, final String basePath, final String adaptorPath, final String applicationName, final String applicationExtension, final Collection<String> handlerKeys ) {
 
 		if( url == null || !url.startsWith( "/" ) ) {
 			return url;
 		}
 
-		final String path = pathOf( url );
-		final String query = url.substring( path.length() );
+		final String path = withoutBasePath( pathOf( url ), basePath );
+		final String query = url.substring( pathOf( url ).length() );
+		return canonicalizePath( path, query, adaptorPath, applicationName, applicationExtension, handlerKeys );
+	}
+
+	private static String canonicalizePath( final String path, final String query, final String adaptorPath, final String applicationName, final String applicationExtension, final Collection<String> handlerKeys ) {
+		final String url = path + query;
 
 		String carriedPrefix = null;
 		String rest = path;
@@ -124,6 +140,20 @@ public final class ERXShortURLs {
 	 *         that may follow it — removed, otherwise unchanged
 	 */
 	public static String shorten( final String url, final String applicationPrefix ) {
+		return shorten( url, applicationPrefix, null );
+	}
+
+	/**
+	 * @param basePath The public path the application is served beneath ({@code /App}, #51), prepended to a URL that was
+	 *        shortened (the application's own), null or empty for the root
+	 * @return The URL with the application prefix removed, and the base path in its place
+	 */
+	public static String shorten( final String url, final String applicationPrefix, final String basePath ) {
+		final String shortened = shortenWithoutBasePath( url, applicationPrefix );
+		return shortened == url || basePath == null || basePath.isEmpty() ? shortened : withBasePath( shortened, basePath );
+	}
+
+	private static String shortenWithoutBasePath( final String url, final String applicationPrefix ) {
 
 		if( url == null || applicationPrefix == null || applicationPrefix.isEmpty() || !url.contains( applicationPrefix ) ) {
 			return url;
@@ -162,6 +192,65 @@ public final class ERXShortURLs {
 	 */
 	public static String applicationPrefix( final String adaptorPrefix, final String applicationName, final String applicationExtension ) {
 		return ( adaptorPrefix == null ? "" : adaptorPrefix ) + "/" + applicationName + ( applicationExtension == null ? "" : applicationExtension );
+	}
+
+	/**
+	 * @return The URL, relative or complete, with the base path before its path ({@code /about} gives {@code /App/about},
+	 *         and {@code /} gives {@code /App/})
+	 */
+	static String withBasePath( final String url, final String basePath ) {
+		final int schemeEnd = url.indexOf( "://" );
+		final int pathStart = schemeEnd == -1 ? 0 : url.indexOf( '/', schemeEnd + 3 );
+
+		if( pathStart == -1 ) {
+			return url + basePath + "/";
+		}
+
+		return url.substring( 0, pathStart ) + basePath + url.substring( pathStart );
+	}
+
+	/**
+	 * @return The path without the base path it starts with, the path as it is if it doesn't
+	 */
+	static String withoutBasePath( final String path, final String basePath ) {
+
+		if( basePath == null || basePath.isEmpty() ) {
+			return path;
+		}
+
+		if( path.equals( basePath ) ) {
+			return "/";
+		}
+
+		return path.startsWith( basePath + "/" ) ? path.substring( basePath.length() ) : path;
+	}
+
+	/**
+	 * @return A short URL to a route without the route key it was composed under ({@code /route/search/bork} is
+	 *         {@code /search/bork}, {@code /App/route/search} is {@code /App/search}): the reverse of canonicalize()
+	 */
+	public static String withoutRouteKey( final String url, final String basePath ) {
+		final int schemeEnd = url.indexOf( "://" );
+		final int authorityEnd = schemeEnd == -1 ? 0 : url.indexOf( '/', schemeEnd + 3 );
+
+		if( authorityEnd == -1 ) {
+			return url;
+		}
+
+		final int pathStart = basePath != null && !basePath.isEmpty() && url.startsWith( basePath + "/", authorityEnd ) ? authorityEnd + basePath.length() : authorityEnd;
+		final String routePrefix = "/" + ROUTE_KEY;
+
+		if( !url.startsWith( routePrefix, pathStart ) ) {
+			return url;
+		}
+
+		final int afterKey = pathStart + routePrefix.length();
+
+		if( afterKey == url.length() || url.charAt( afterKey ) == '?' ) {
+			return url.substring( 0, pathStart ) + "/" + url.substring( afterKey );
+		}
+
+		return url.charAt( afterKey ) == '/' ? url.substring( 0, pathStart ) + url.substring( afterKey ) : url;
 	}
 
 	/**
