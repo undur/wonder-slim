@@ -250,10 +250,25 @@ public final class Route<P extends Record> {
 			return url;
 		}
 
-		final int colon = requestHost == null ? -1 : requestHost.lastIndexOf( ':' );
-		final String port = colon == -1 || requestHost.endsWith( "]" ) ? "" : requestHost.substring( colon );
+		// A context generating complete URLs (an email) gave one already: its host is replaced, keeping its scheme and port
+		final int schemeEnd = url.indexOf( "://" );
+
+		if( schemeEnd != -1 ) {
+			final int authorityStart = schemeEnd + 3;
+			final int pathStart = url.indexOf( '/', authorityStart ) == -1 ? url.length() : url.indexOf( '/', authorityStart );
+			return url.substring( 0, authorityStart ) + host + port( url.substring( authorityStart, pathStart ) ) + url.substring( pathStart );
+		}
+
 		final String scheme = context.request() != null && context.request().isSecure() ? "https" : "http";
-		return scheme + "://" + host + port + url;
+		return scheme + "://" + host + (requestHost == null ? "" : port( requestHost )) + url;
+	}
+
+	/**
+	 * @return The port of a host as written in a URL or a Host header ({@code :1300}), empty for none
+	 */
+	private static String port( final String hostAndPort ) {
+		final int colon = hostAndPort.lastIndexOf( ':' );
+		return colon == -1 || hostAndPort.endsWith( "]" ) ? "" : hostAndPort.substring( colon );
 	}
 
 	/**

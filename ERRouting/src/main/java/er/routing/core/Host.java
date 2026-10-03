@@ -18,13 +18,25 @@ public final class Host implements RouteCondition {
 
 	private static final Pattern PARAMETER_NAME = Pattern.compile( "[A-Za-z_][A-Za-z0-9_]*" );
 
+	/**
+	 * One label of a host name (RFC 1123)
+	 */
+	private static final Pattern HOST_LABEL = Pattern.compile( "[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?" );
+
 	private final String _pattern;
 	private final List<String> _labels;
 	private final List<String> _parameterNames;
 
 	private Host( final String pattern ) {
-		_pattern = RouteRequest.normalizedHost( pattern );
-		_labels = List.of( _pattern.split( "\\.", -1 ) );
+		final List<String> labels = new ArrayList<>();
+
+		// Literal labels compare without case, so they're lower case. Parameter names keep their case.
+		for( final String label : pattern.trim().split( "\\.", -1 ) ) {
+			labels.add( label.startsWith( "{" ) ? label : label.toLowerCase( Locale.ROOT ) );
+		}
+
+		_labels = List.copyOf( labels );
+		_pattern = String.join( ".", _labels );
 
 		final List<String> names = new ArrayList<>();
 		final Set<String> unique = new HashSet<>();
@@ -152,6 +164,11 @@ public final class Host implements RouteCondition {
 
 				if( value == null || value.isEmpty() ) {
 					throw new IllegalArgumentException( "The host pattern %s needs its parameter '%s'".formatted( _pattern, name ) );
+				}
+
+				// A host label can't be encoded, so a value has to be one already: no dots, slashes or other characters
+				if( !HOST_LABEL.matcher( value ).matches() ) {
+					throw new IllegalArgumentException( "The value '%s' of the host parameter '%s' (%s) isn't a host label: letters, digits and hyphens, not starting or ending with a hyphen, at most 63 characters".formatted( value, name, _pattern ) );
 				}
 
 				labels.add( value.toLowerCase( Locale.ROOT ) );

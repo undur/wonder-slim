@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webobjects.appserver.WOActionResults;
+import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
@@ -15,6 +16,7 @@ import er.routing.core.RouteOption;
 import er.routing.core.RouteRequest;
 import er.routing.core.Router;
 import er.routing.core.TrailingSlash;
+import er.extensions.routes.RouteClaims;
 import er.extensions.routes.RouteTable;
 
 /**
@@ -103,6 +105,7 @@ public class ERXRouter {
 	 * Maps a route in a table, logging any override it makes
 	 */
 	void map( final Router<Mapped>.Table table, final String pattern, final Mapped mapped, final List<RouteOption> options ) {
+		refuseHandlerKeyCollision( pattern );
 		table.map( pattern, mapped, options.toArray( RouteOption[]::new ) );
 
 		final var overrides = _router.overrides();
@@ -110,6 +113,20 @@ public class ERXRouter {
 		for( ; _loggedOverrides < overrides.size(); _loggedOverrides++ ) {
 			final var override = overrides.get( _loggedOverrides );
 			logger.info( "The route {} overrides {}", override.route(), override.overridden() );
+		}
+	}
+
+	/**
+	 * A route whose first segment is a registered request handler key ({@code /wa/…}) can never be reached: the handler
+	 * gets those URLs. Refused when it's mapped, as the route table does, rather than silently never matching.
+	 */
+	private static void refuseHandlerKeyCollision( final String pattern ) {
+		final WOApplication application = WOApplication.application();
+		final int end = pattern.indexOf( '/', 1 );
+		final String firstSegment = end == -1 ? pattern.substring( 1 ) : pattern.substring( 1, end );
+
+		if( application != null && !firstSegment.isEmpty() && !firstSegment.startsWith( "{" ) && !firstSegment.equals( "*" ) && application.requestHandlerForKey( firstSegment ) != null ) {
+			throw new IllegalArgumentException( "The route %s can never be reached: its first segment '%s' is a request handler key, and request handlers take precedence over routes".formatted( pattern, firstSegment ) );
 		}
 	}
 
@@ -140,7 +157,24 @@ public class ERXRouter {
 	 * Maps the router into a route table as one route, ahead of the routes mapped after it
 	 */
 	public void mapInto( final RouteTable routeTable ) {
-		routeTable.map( "/*", this::handle );
+		routeTable.map( "/*", new MappedRouter() );
+	}
+
+	/**
+	 * The router as one route of a route table, claiming the URLs it has routes for (not every URL its {@code /*} pattern
+	 * matches), so the table's {@code hasRouteFor()} answers for the router's routes
+	 */
+	private class MappedRouter implements er.extensions.routes.RouteHandler, RouteClaims {
+
+		@Override
+		public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
+			return ERXRouter.this.handle( invocation );
+		}
+
+		@Override
+		public boolean claims( final String url ) {
+			return _router.hasRouteFor( url );
+		}
 	}
 
 	/**

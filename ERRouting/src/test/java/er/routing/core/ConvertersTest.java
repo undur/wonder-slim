@@ -65,4 +65,19 @@ public class ConvertersTest {
 	public void aTypeWithoutAConverter() {
 		assertThrows( IllegalStateException.class, () -> new Converters().fromString( "1", Book.class ) );
 	}
+
+	interface Named {
+		String name();
+	}
+
+	record Person( String name ) implements Named {}
+
+	@Test
+	public void aConverterForAnInterface() {
+		final Converters converters = new Converters();
+		converters.register( Named.class, Converter.of( Person::new, Named::name ) );
+
+		assertTrue( converters.converts( Person.class ) );
+		assertEquals( "sol", converters.toString( new Person( "sol" ) ) );
+	}
 }

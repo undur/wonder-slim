@@ -69,7 +69,43 @@ public final class Converters {
 	 * @return true if values of the type can be converted
 	 */
 	public boolean converts( final Class<?> type ) {
-		return boxed( type ).isEnum() || _converters.containsKey( boxed( type ) );
+		return boxed( type ).isEnum() || registered( boxed( type ) ) != null;
+	}
+
+	/**
+	 * @return The converter registered for the type, its superclasses or its interfaces (a proxy, an entity's subclass,
+	 *         an implementation of a registered interface), null for none
+	 */
+	private Converter<?> registered( final Class<?> type ) {
+		for( Class<?> c = type; c != null; c = c.getSuperclass() ) {
+			Converter<?> converter = _converters.get( c );
+
+			if( converter == null ) {
+				converter = registeredForInterfaces( c );
+			}
+
+			if( converter != null ) {
+				return converter;
+			}
+		}
+
+		return null;
+	}
+
+	private Converter<?> registeredForInterfaces( final Class<?> type ) {
+		for( final Class<?> i : type.getInterfaces() ) {
+			Converter<?> converter = _converters.get( i );
+
+			if( converter == null ) {
+				converter = registeredForInterfaces( i );
+			}
+
+			if( converter != null ) {
+				return converter;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -103,12 +139,7 @@ public final class Converters {
 	}
 
 	private Converter<?> converter( final Class<?> type ) {
-		Converter<?> converter = _converters.get( type );
-
-		// A subclass of a registered type (a proxy, an entity's subclass) converts as its superclass
-		for( Class<?> c = type.getSuperclass(); converter == null && c != null; c = c.getSuperclass() ) {
-			converter = _converters.get( c );
-		}
+		final Converter<?> converter = registered( type );
 
 		if( converter == null ) {
 			throw new IllegalStateException( "No converter for %s: register one with Converters.register()".formatted( type.getName() ) );

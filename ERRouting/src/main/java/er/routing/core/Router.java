@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -149,6 +150,13 @@ public final class Router<H> {
 			}
 
 			final PathPattern path = PathPattern.parse( pattern );
+			final Set<Class<?>> conditionTypes = new HashSet<>();
+
+			for( final RouteCondition condition : conditionList ) {
+				if( !conditionTypes.add( condition.getClass() ) ) {
+					throw new IllegalArgumentException( "The route %s has two %s conditions (%s), and a request can't satisfy both. A group's conditions count as its routes', so a route can't add one of a type its group has".formatted( pattern, condition.getClass().getSimpleName(), conditionList ) );
+				}
+			}
 
 			for( final RouteCondition condition : conditionList ) {
 				if( condition instanceof Host host ) {
@@ -245,6 +253,14 @@ public final class Router<H> {
 
 	private static int specificity( final Entry<?> route ) {
 		return route.conditions().stream().mapToInt( RouteCondition::specificity ).sum();
+	}
+
+	/**
+	 * @return true if a route's pattern matches the path (in either trailing slash form), whatever its conditions
+	 */
+	public boolean hasRouteFor( final String path ) {
+		final RequestPath requestPath = RequestPath.parse( path );
+		return requestPath != null && _sorted.stream().anyMatch( entry -> entry.path().match( requestPath ) != null );
 	}
 
 	/**

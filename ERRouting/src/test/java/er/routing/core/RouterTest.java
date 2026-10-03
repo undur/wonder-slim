@@ -1,6 +1,7 @@
 package er.routing.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -332,5 +333,51 @@ public class RouterTest {
 
 		assertEquals( List.of( "list", "catchAll" ), handlers( get( router, "/books" ) ) );
 		assertEquals( List.of( "create", "list", "catchAll" ), handlers( router.route( new RouteRequest( "POST", "example.com", "/books" ) ) ) );
+	}
+
+	@Test
+	public void twoConditionsOfOneTypeAreRefused() {
+		final Router<String> router = new Router<>();
+		final var routes = table( router );
+
+		final IllegalArgumentException e = assertThrows( IllegalArgumentException.class, () -> routes.map( "/x", "x", Method.GET, Method.POST ) );
+		assertTrue( e.getMessage().contains( "/x" ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.map( "/y", "y", Host.of( "a.com" ), Host.of( "b.com" ) ) );
+	}
+
+	@Test
+	public void hostParameterNamesKeepTheirCase() {
+		final Host host = Host.of( "{tenantId}.Example.com" );
+
+		assertEquals( List.of( "tenantId" ), host.parameterNames() );
+		assertEquals( "{tenantId}.example.com", host.pattern() );
+
+		final Router<String> router = new Router<>();
+		table( router ).map( "/", "tenant", host );
+		assertEquals( Map.of( "tenantId", "acme" ), parameters( router.route( new RouteRequest( "GET", "ACME.example.com", "/" ) ) ) );
+	}
+
+	@Test
+	public void hostValuesAreOneLabel() {
+		final Host host = Host.of( "{club}.localhost" );
+
+		assertEquals( "acme-2.localhost", host.host( Map.of( "club", "Acme-2" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> host.host( Map.of( "club", "a.b" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> host.host( Map.of( "club", "evil.com/x" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> host.host( Map.of( "club", "-acme" ) ) );
+		assertThrows( IllegalArgumentException.class, () -> host.host( Map.of( "club", "a b" ) ) );
+	}
+
+	@Test
+	public void hasRouteForClaimsOnlyItsRoutes() {
+		final Router<String> router = new Router<>();
+		final var routes = table( router );
+		routes.map( "/books/{book}", "book" );
+		routes.map( "/admin/", "admin", Host.of( "admin.example.com" ) );
+
+		assertTrue( router.hasRouteFor( "/books/2" ) );
+		assertTrue( router.hasRouteFor( "/admin" ) );
+		assertFalse( router.hasRouteFor( "/wonder/admin" ) );
+		assertFalse( router.hasRouteFor( "/books" ) );
 	}
 }
