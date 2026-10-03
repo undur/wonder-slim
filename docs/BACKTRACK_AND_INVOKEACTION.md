@@ -3,7 +3,7 @@
 > **Status: design exploration / problem statement.** Not a fix and not shipping behaviour. It names a
 > critical error-path problem in WO's request model, the conceptual root cause, and a spectrum of
 > directions — to be solved properly in ng-objects, if not in WO. Connects to the page-identity rethink
-> in [`../../docs/AJAX_FROM_SCRATCH.md`](../../docs/AJAX_FROM_SCRATCH.md); this is the backtrack corollary
+> in [`AJAX_FROM_SCRATCH.md`](AJAX_FROM_SCRATCH.md); this is the backtrack corollary
 > of that idea. No code.
 
 ---
@@ -62,7 +62,7 @@ response for this page" is ambiguous; with a stable identity it is well-defined.
 
 Worms 2 and 3 both point at the same thing: WO ties **page identity**, **instance lifetime**, and
 **response artifact** to a single, ever-changing key — the contextID. Every interaction mints a new one
-(the same reflex [`AJAX_FROM_SCRATCH.md`](../../docs/AJAX_FROM_SCRATCH.md) identifies as the source of the
+(the same reflex [`AJAX_FROM_SCRATCH.md`](AJAX_FROM_SCRATCH.md) identifies as the source of the
 ajax page-cache explosion and the cross-instance bleed). Because the three are conflated:
 
 - "the last response for this page" is ill-defined (no stable page key) → worm 3

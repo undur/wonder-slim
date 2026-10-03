@@ -162,7 +162,7 @@ The client-declared `updateContainerID="a;b;c"` path also lowers to `morph` comm
 
 ## Related
 
-- `MULTI_UPDATE.md` — the one-trigger-many-containers feature; its uniform fragment framing is exactly
+- `AJAXSLIM_MULTI_UPDATE.md` — the one-trigger-many-containers feature; its uniform fragment framing is exactly
   what generalizes into `morph` commands here.
 - `AJAX_FROM_SCRATCH.md`, `SERVER_SIDE_UPDATE_REDESIGN.md` (if present) — adjacent rethinks of identity
   and same-pass rendering.

@@ -1,8 +1,8 @@
 # Ajax.framework — what's worth salvaging into AjaxSlim
 
-_A focused answer to one question: of the ~47 legacy `Ajax` elements NOT yet in AjaxSlim, which carry a **genuinely good idea worth porting well** (with the old framework as reference), rather than re-inventing ad-hoc the day we hit the gap? This is opinionated and deliberately short — see `ASSESSMENT.md` for the full per-element breakdown._
+_A focused answer to one question: of the ~47 legacy `Ajax` elements NOT yet in AjaxSlim, which carry a **genuinely good idea worth porting well** (with the old framework as reference), rather than re-inventing ad-hoc the day we hit the gap? This is opinionated and deliberately short — see `AJAX_ASSESSMENT.md` for the full per-element breakdown._
 
-The lens here is different from `ASSESSMENT.md`. That doc asks "what's the cleanup debt." This one asks: **is the idea good, and would we want it implemented well in a modern, consistent way?** An element can be "needs rewrite" in the assessment yet a clear _skip_ here (because the browser now does it), or a clear _port_ here (because the idea is timeless and the server contract is clean).
+The lens here is different from `AJAX_ASSESSMENT.md`. That doc asks "what's the cleanup debt." This one asks: **is the idea good, and would we want it implemented well in a modern, consistent way?** An element can be "needs rewrite" in the assessment yet a clear _skip_ here (because the browser now does it), or a clear _port_ here (because the idea is timeless and the server contract is clean).
 
 The recurring test: **does it have a clean server-side contract that survives, with only the Prototype/Scriptaculous client needing a fetch+morph reimplementation?** Those are the good ports. Things that are "all client effect, no server idea" or "the platform now does this" are skips.
 

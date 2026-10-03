@@ -190,7 +190,7 @@ either validate the whole idea or kill it before any load-bearing code is touche
 ### Related parked work
 
 - The "don't pay for unrelated data access" dream → request-scoped memoization /
-  stable `pageKey` identity (see `docs/AJAX_FROM_SCRATCH.md`). Orthogonal to this;
+  stable `pageKey` identity (see `AJAX_FROM_SCRATCH.md`). Orthogonal to this;
   composes with it (this makes the walk happen once; that makes the walk's data pulls
   free on repeat).
 - The cache surface this would simplify away from → the cross-instance bleed bug

@@ -375,7 +375,7 @@ Net: keep it, treat it as the stable substrate, but when the Ajax modernization 
 > Prototype callback surface: `onComplete`/`onSuccess`/`onFailure`/`evalScripts`/`asynchronous`/
 > `frequency`/…) that real app templates depend on. Rewriting the client off Prototype silently
 > changes or removes those binding semantics. Do **not** start step 1 below until the contract is
-> decided. See [PROTOTYPE_REMOVAL_BLOCKER.md](PROTOTYPE_REMOVAL_BLOCKER.md) — it needs a real-world
+> decided. See [AJAX_PROTOTYPE_REMOVAL_BLOCKER.md](AJAX_PROTOTYPE_REMOVAL_BLOCKER.md) — it needs a real-world
 > usage audit, then a stance (keep-callbacks-drop-effects / full shim / clean break).
 
 The client transport is shared, so order matters:
