@@ -2,11 +2,12 @@ package er.routing;
 
 import com.webobjects.appserver.WORequest;
 
-import er.extensions.appserver.ERXRequestOrigin;
-
 /**
- * EXPERIMENTAL (route-links branch). The host a request was made to, as the framework determines it in one place
- * ({@link ERXRequestOrigin}, #67): a trusted front end's forwarded host, or the request's {@code Host}.
+ * EXPERIMENTAL (route-links branch). The host a request was made to: the {@code Host} header.
+ *
+ * The framework must determine the host in exactly one place, used by everything that needs it (routing, URL
+ * generation, ERXRequest), and whether a forwarded header from a front end counts is decided there, with #67. This is
+ * that place for the router until it converges, when it moves to ERXRequest.
  */
 
 public class RequestHost {
@@ -14,9 +15,9 @@ public class RequestHost {
 	private RequestHost() {}
 
 	/**
-	 * @return The host the request was made to (possibly with a port), null if none is known
+	 * @return The host the request was made to, as the client sent it (possibly with a port), null if it sent none
 	 */
 	public static String host( final WORequest request ) {
-		return ERXRequestOrigin.host( request );
+		return request.headerForKey( "host" );
 	}
 }

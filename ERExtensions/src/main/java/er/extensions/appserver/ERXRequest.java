@@ -34,6 +34,20 @@ public  class ERXRequest extends WORequest {
     private static final Logger log = LoggerFactory.getLogger(ERXRequest.class);
 
     private static final String UNKNOWN_HOST = "UNKNOWN";
+    private static final String X_FORWARDED_PROTO_FOR_SSL = ERXProperties.stringForKeyWithDefault(ERXP.X_FORWARDED_PROTO_FOR_SSL.id(), "https");
+    private static final String X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL = ERXProperties.stringForKeyWithDefault(ERXP.X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL.id(), "x-forwarded-proto");
+    
+    /**
+     * Headers carrying the client's address as set by a WO adaptor, in the order they're checked
+     */
+    private static final String[] ADAPTOR_ADDRESS_HEADERS = {"x-webobjects-remote-addr", "remote_addr", "remote_host", "pc-remote-addr"};
+
+    /**
+     * 'Host' is the official HTTP 1.1 header for the host name in the request URL, so this should be checked first. @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
+     * when the app is behind a reverse proxy 'Host' will contain the proxy address instead of the requested one so check first for 'x-forwarded-host' @see http://httpd.apache.org/docs/2.2/mod/mod_proxy.html#x-headers
+     * Fallback headers such as server_name will screw up your complete URL generation for secure domains that have wildcard subdomains since it returns sth like *.domain.com for host name
+     */
+    private static final String[] HOST_NAME_HEADERS = {"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"};
     
     /**
      * Specifies whether https should be overridden to be enabled or disabled app-wide. This is 
@@ -126,22 +140,63 @@ public  class ERXRequest extends WORequest {
     }
 
 	/**
-	 * @return The address of the client that sent the request, null if none is known: see {@link ERXRequestOrigin}, which
-	 *         believes a front end's headers only from a trusted one
+	 * The address of the client that sent the request, for logging and display. In order:
+	 *
+	 * <ol>
+	 * <li>The address a WO adaptor passes on (the <code>x-webobjects-remote-addr</code>, <code>remote_addr</code>, <code>remote_host</code> or <code>pc-remote-addr</code> header)</li>
+	 * <li>The first address in <code>x-forwarded-for</code>, the client as a reverse proxy saw it</li>
+	 * <li>The address of the connection the request came in on (when the application is reached directly)</li>
+	 * </ol>
+	 *
+	 * Headers come from whoever sends the request, so when the application can be reached without passing through the adaptor or proxy
+	 * that sets them, the client can put any address there. Don't base access decisions on this.
+	 *
+	 * @return The client's address, or null if none is found
 	 */
 	public static String remoteAddress( final WORequest request ) {
-		return ERXRequestOrigin.clientAddress( request );
+
+		for( final String headerName : ADAPTOR_ADDRESS_HEADERS ) {
+			final String headerValue = request.headerForKey( headerName );
+
+			if( headerValue != null && !headerValue.isBlank() ) {
+				return headerValue.strip();
+			}
+		}
+
+		final String forwardedFor = request.headerForKey( "x-forwarded-for" );
+
+		if( forwardedFor != null ) {
+			final String firstAddress = forwardedFor.split( "," )[0].strip();
+
+			if( !firstAddress.isEmpty() ) {
+				return firstAddress;
+			}
+		}
+
+		final InetAddress originatingAddress = request._originatingAddress();
+
+		if( originatingAddress != null ) {
+			return originatingAddress.getHostAddress();
+		}
+
+		return null;
 	}
 
-
     /**
-     * @return The host the request was addressed to (see {@link ERXRequestOrigin}); "UNKNOWN" when none is known
+     * @return The host the request was addressed to, from the first of {@link #HOST_NAME_HEADERS} present; "UNKNOWN" when none is
      */
     private String requestedHostFromHeaders() {
-    	final String host = ERXRequestOrigin.host( this );
-    	return host != null ? host : UNKNOWN_HOST;
-    }
 
+    	for (final String headerName : HOST_NAME_HEADERS) {
+			final String headerValue = headerForKey(headerName);
+
+			if (headerValue != null) {
+				return headerValue;
+			}
+		}
+
+    	return UNKNOWN_HOST;
+    }
 
     /**
      * @return true if er.extensions.ERXRequest.secureDisabled is true. Defaults to false.
@@ -262,13 +317,46 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
+     * MS: I found this somewhere else a while ago, but I have no idea where or I'd give attribution.
+     * 
      * @param request the request to check
-     * @return whether the request came over https, as a trusted front end reports it (see {@link ERXRequestOrigin})
+     * @return whether or not the given request is secure.
      */
     public static boolean isRequestSecure(WORequest request) {
-        return request != null && ERXRequestOrigin.secure(request);
-    }
+        boolean isRequestSecure = false;
+        
+        // Depending on the adaptor the incoming port can be found in one of two places
+        if (request != null) {
+        	
+	        String serverPort = request.headerForKey("SERVER_PORT");
+	        if (serverPort == null) {
+	        	serverPort = request.headerForKey("x-webobjects-servlet-server-port");
+	        }
+	        if (serverPort == null) {
+	        	serverPort = request.headerForKey("x-webobjects-server-port");
+	        }
+	
+	        // Apache and some other web servers use this to indicate HTTPS mode.
+	        String httpsMode = request.headerForKey("https");
+	
+	        // If either the https header is 'on' or the server port is 443 then we
+	        // consider this to be an HTTPS request (as WO's own isSecure() does).
+	        if (httpsMode != null && httpsMode.equalsIgnoreCase("on")) {
+	        	isRequestSecure = true;
+	        }
+	        else if ("443".equals(serverPort)) {
+	        	isRequestSecure = true;
+	        }
+	        
+	        // Check if we've got an x-forwarded-proto header which is typically sent by a load balancer that is 
+	        // implementing ssl termination to indicate the request on the public side of the load balancer is secure.
+	        else if (X_FORWARDED_PROTO_FOR_SSL.equals(request.headerForKey(X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL))) {
+	    		isRequestSecure = true;
+	        }
+        }
 
+        return isRequestSecure;
+    }
 
     /**
      * Overridden to use our own method for cookie parsing
