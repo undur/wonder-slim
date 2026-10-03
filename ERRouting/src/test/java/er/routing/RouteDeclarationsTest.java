@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Routes declared again when their classes change: a new router and new holders, or the current ones kept if a
- * declaration fails
+ * Route constants given patterns by declarations, and declared again when their classes change: a new router, the
+ * constants following it, or the current ones kept if a declaration fails
  */
 public class RouteDeclarationsTest {
 
@@ -45,86 +45,113 @@ public class RouteDeclarationsTest {
 		}
 	}
 
-	record Holder( int generation, PlainRoute about ) {}
-
 	public record Page( Integer page ) {}
 
+	public interface Routes {
+		Route<Page> pages = Route.of( Page.class );
+		PlainRoute about = Route.plain();
+	}
+
+	/**
+	 * Declarations checking only these constants, not every test's
+	 */
+	private static RouteDeclarations declarations( final Switch changes, final RouteIdentity<?>... constants ) {
+		return new RouteDeclarations( ERXRouter::new, changes, router -> List.of( constants ).stream().filter( c -> router.binding( c ) == null ).<RouteIdentity<?>>map( c -> c ).toList() );
+	}
+
 	@Test
-	public void routesAreDeclaredAgainWhenTheirClassesChange() {
+	public void aConstantFollowsTheRoutesAsTheyreDeclaredAgain() {
 		final Switch changes = new Switch();
-		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, changes );
-		final AtomicInteger runs = new AtomicInteger();
+		final RouteDeclarations declarations = declarations( changes, Routes.pages, Routes.about );
+		final AtomicReference<String> pagesAt = new AtomicReference<>( "/pages" );
 		final List<String> order = new ArrayList<>();
 
-		final Declared<Holder> app = declarations.declare( router -> {
+		declarations.declare( router -> {
 			order.add( "app" );
-			router.application().route( "/pages", Page.class, ( p, invocation ) -> null );
-			return new Holder( runs.incrementAndGet(), router.application().map( "/about", NOTHING ) );
-		} );
-		final Declared<String> plugin = declarations.declare( router -> {
+			router.application().route( pagesAt.get(), Routes.pages, ( p, invocation ) -> null );
+			router.application().map( "/about", Routes.about, NOTHING );
+		}, RouteDeclarationsTest.class );
+		declarations.declare( router -> {
 			order.add( "plugin" );
 
 			// A declaration asking for the default router gets the one it's declaring into
 			assertSame( router, ERXRouter.defaultRouter() );
 			router.table( "plugin" ).map( "/plugin", NOTHING );
-			return "plugin";
-		} );
+		}, RouteDeclarationsTest.class );
 
 		final ERXRouter first = declarations.router();
-		assertEquals( 1, app.get().generation() );
-		assertTrue( changes.watched.contains( Holder.class ) && changes.watched.contains( Page.class ) );
+		assertEquals( "/pages", Routes.pages.pattern() );
+		assertTrue( changes.watched.contains( Routes.class ) && changes.watched.contains( Page.class ) );
 
 		// Unchanged, nothing runs
 		declarations.declareAgainIfChanged();
 		assertSame( first, declarations.router() );
 
+		pagesAt.set( "/pages/all" );
 		changes.changed.set( true );
 		declarations.declareAgainIfChanged();
 
 		assertNotSame( first, declarations.router() );
-		assertEquals( 2, app.get().generation() );
+		assertEquals( "/pages/all", Routes.pages.pattern() );
 		assertEquals( List.of( "app", "plugin", "app", "plugin" ), order );
 		assertEquals( 3, declarations.router().routes().size() );
-		assertEquals( "plugin", plugin.get() );
 	}
 
 	@Test
 	public void aDeclarationThatFailsLeavesTheCurrentRoutes() {
 		final Switch changes = new Switch();
-		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, changes );
+		final RouteDeclarations declarations = declarations( changes, Routes.about );
 		final AtomicBoolean broken = new AtomicBoolean();
 
-		final Declared<String> app = declarations.declare( router -> {
-			router.application().map( "/about", NOTHING );
+		declarations.declare( router -> {
+			router.application().map( "/about", Routes.about, NOTHING );
 
 			if( broken.get() ) {
 				router.application().map( "/about", NOTHING );
 			}
-
-			return "routes";
-		} );
+		}, null );
 
 		final ERXRouter first = declarations.router();
 		broken.set( true );
 		changes.changed.set( true );
 
-		// The current routes stay, and requests say why until the routes are declared again
+		// The current routes stay, the constant keeps its pattern, and requests say why until the routes are declared again
 		final IllegalStateException e = assertThrows( IllegalStateException.class, declarations::declareAgainIfChanged );
 		assertTrue( e.getMessage().contains( "conflicts" ), e.getMessage() );
 		assertSame( first, declarations.router() );
+		assertEquals( "/about", Routes.about.pattern() );
 		assertThrows( IllegalStateException.class, declarations::declareAgainIfChanged );
 
 		broken.set( false );
 		changes.changed.set( true );
 		declarations.declareAgainIfChanged();
 		assertNotSame( first, declarations.router() );
-		assertEquals( "routes", app.get() );
+	}
+
+	@Test
+	public void aConstantNoDeclarationGivesAPatternFails() {
+		final Switch changes = new Switch();
+		final RouteDeclarations declarations = declarations( changes, Routes.about );
+		declarations.declare( router -> router.application().map( "/elsewhere", NOTHING ), null );
+
+		final IllegalStateException e = assertThrows( IllegalStateException.class, declarations::checkDeclared );
+		assertTrue( e.getMessage().contains( "Routes.about" ), e.getMessage() );
+	}
+
+	@Test
+	public void aConstantDeclaredTwiceFails() {
+		final RouteDeclarations declarations = declarations( new Switch() );
+
+		assertThrows( IllegalArgumentException.class, () -> declarations.declare( router -> {
+			router.application().map( "/a", Routes.about, NOTHING );
+			router.application().map( "/b", Routes.about, NOTHING );
+		}, null ) );
 	}
 
 	@Test
 	public void aJoinNeverNamedFailsADeclarationAgain() {
 		final Switch changes = new Switch();
-		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, changes );
+		final RouteDeclarations declarations = declarations( changes );
 		final AtomicBoolean named = new AtomicBoolean( true );
 
 		declarations.declare( router -> {
@@ -133,9 +160,7 @@ public class RouteDeclarationsTest {
 			if( named.get() ) {
 				router.application().group( "/club" ).named( "club" );
 			}
-
-			return "routes";
-		} );
+		}, null );
 
 		named.set( false );
 		changes.changed.set( true );
@@ -143,62 +168,30 @@ public class RouteDeclarationsTest {
 	}
 
 	@Test
-	public void aRouteMappedOutsideADeclarationStopsDeclaringAgain() {
-		final Switch changes = new Switch();
-		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, changes );
-		declarations.declare( router -> router.application().map( "/declared", NOTHING ) );
-
-		// Mapped straight into the router: declaring the routes again would lose it, so they aren't
-		declarations.router().application().map( "/undeclared", NOTHING );
-		final ERXRouter router = declarations.router();
-		changes.changed.set( true );
-		declarations.declareAgainIfChanged();
-
-		assertSame( router, declarations.router() );
-		assertEquals( "the application's routes, reached", router.undeclared() );
-	}
-
-	@Test
-	public void aConverterRegisteredOutsideADeclarationStopsDeclaringAgain() {
-		final Switch changes = new Switch();
-		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, changes );
-
-		// Registered by a declaration, it's registered again with it
+	public void changingTheRoutesOutsideADeclarationFails() {
+		final RouteDeclarations declarations = declarations( new Switch() );
+		final AtomicReference<RouteGroup> admin = new AtomicReference<>();
+		final AtomicReference<RouteGroup> plugin = new AtomicReference<>();
 		declarations.declare( router -> {
+			admin.set( router.application().group( "/admin" ).named( "admin" ) );
+			plugin.set( router.table( "plugin" ) );
 			router.converters().register( Page.class, er.routing.core.Converters.Converter.of( s -> new Page( 1 ), p -> "1" ) );
-			return "routes";
-		} );
-		assertEquals( null, declarations.router().undeclared() );
+		}, null );
 
-		declarations.router().converters().register( Holder.class, er.routing.core.Converters.Converter.of( s -> null, h -> "" ) );
-		assertEquals( "the converter for " + Holder.class.getName() + ", registered", declarations.router().undeclared() );
-	}
+		final ERXRouter router = declarations.router();
 
-	@Test
-	public void aFilterAddedOutsideADeclarationStopsDeclaringAgain() {
-		final Switch changes = new Switch();
-		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, changes );
-		final RouteGroup[] admin = new RouteGroup[1];
-		declarations.declare( router -> admin[0] = router.application().group( "/admin" ).named( "admin" ) );
-		assertEquals( null, declarations.router().undeclared() );
+		// A plugin's login filter added from its own startup code would be lost when the routes are declared again
+		final IllegalStateException e = assertThrows( IllegalStateException.class, () -> admin.get().wrap( ( invocation, next ) -> next.handle( invocation ) ) );
+		assertTrue( e.getMessage().contains( "ERXRouter.declare" ), e.getMessage() );
 
-		// A plugin's login filter, added later from its own startup code, would be lost
-		admin[0].wrap( ( invocation, next ) -> next.handle( invocation ) );
-		assertEquals( "a filter on /admin, added", declarations.router().undeclared() );
-	}
+		assertThrows( IllegalStateException.class, () -> router.application() );
+		assertThrows( IllegalStateException.class, () -> router.table( "other" ) );
+		assertThrows( IllegalStateException.class, () -> admin.get().map( "/x", NOTHING ) );
+		assertThrows( IllegalStateException.class, () -> plugin.get().join( "admin", group -> {} ) );
+		assertThrows( IllegalStateException.class, () -> router.converters().register( RouteDeclarationsTest.class, er.routing.core.Converters.Converter.of( s -> null, t -> "" ) ) );
 
-	@Test
-	public void aWhenInvalidOrAJoinOutsideADeclarationStopsDeclaringAgain() {
-		final Object[] kept = new Object[2];
-		final RouteDeclarations first = new RouteDeclarations( ERXRouter::new, new Switch() );
-		final RouteDeclarations second = new RouteDeclarations( ERXRouter::new, new Switch() );
-		first.declare( router -> kept[0] = router.application().route( "/pages", Page.class, ( p, invocation ) -> null ) );
-		second.declare( router -> kept[1] = router.table( "plugin" ) );
-
-		((Route<?>)kept[0]).whenInvalid( ( invocation, reason ) -> null );
-		assertTrue( first.router().undeclared().startsWith( "the whenInvalid of" ), first.router().undeclared() );
-
-		((RouteGroup)kept[1]).join( "admin", admin -> {} );
-		assertEquals( "a join to the group admin, made", second.router().undeclared() );
+		// Reading is fine
+		assertEquals( 0, router.routes().size() );
+		assertTrue( router.converters().converts( Page.class ) );
 	}
 }

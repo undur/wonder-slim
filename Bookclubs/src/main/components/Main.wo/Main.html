@@ -2,7 +2,7 @@
 	<p class="lead">Each club lives on its own host. Browsers send any name ending in <code>.localhost</code> to this machine.</p>
 	<ul>
 		<wo:repetition list="$clubs" item="$current">
-			<li><wo:route route="$routes.clubHome" :club="$current"><wo:str value="$current.name" /></wo:route> <span class="muted"><wo:str value="$current.motto" /></span></li>
+			<li><wo:route to="$routes.clubHome" :club="$current"><wo:str value="$current.name" /></wo:route> <span class="muted"><wo:str value="$current.motto" /></span></li>
 		</wo:repetition>
 	</ul>
 </wo:Frame>

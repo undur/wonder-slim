@@ -11,12 +11,12 @@ import com.webobjects.foundation.NSMutableDictionary;
 
 /**
  * EXPERIMENTAL (route-links branch). What elements taking a route ({@code <wo:route>}, {@code <wo:routeForm>}) share:
- * their {@code route} binding and its {@code :} parameters become an {@code href} computing the route's URL.
+ * their {@code to} binding (the route) and its {@code :} parameters become an {@code href} computing the route's URL.
  */
 
 class RouteBindings {
 
-	private static final String ROUTE_KEY = "route";
+	private static final String ROUTE_KEY = "to";
 	private static final String PARAMETER_PREFIX = ":";
 
 	private RouteBindings() {}
@@ -25,7 +25,7 @@ class RouteBindings {
 	 * @param tag The element's tag, for error messages ({@code <wo:route>})
 	 * @param otherTag The tag for elements not taking a route, for error messages ({@code <wo:link>})
 	 * @param urlKeys The element's other bindings for its URL, which a route replaces
-	 * @return The associations with {@code route} and the {@code :} parameters replaced by an {@code href} computing the
+	 * @return The associations with {@code to} and the {@code :} parameters replaced by an {@code href} computing the
 	 *         route's URL
 	 */
 	static NSDictionary<String, WOAssociation> withRouteURL( final NSDictionary<String, WOAssociation> associations, final String tag, final String otherTag, final List<String> urlKeys ) {
@@ -39,7 +39,7 @@ class RouteBindings {
 		}
 
 		if( route == null ) {
-			throw new IllegalArgumentException( "%s needs a 'route' binding: the route it goes to".formatted( tag ) );
+			throw new IllegalArgumentException( "%s needs a 'to' binding: the route it goes to".formatted( tag ) );
 		}
 
 		for( final String key : urlKeys ) {
@@ -83,7 +83,7 @@ class RouteBindings {
 			final Object route = _route.valueInComponent( component );
 
 			if( !(route instanceof Linkable linkable) ) {
-				throw new IllegalArgumentException( "The 'route' binding (%s) is %s, not a route".formatted( _route.keyPath(), route == null ? "null" : "a " + route.getClass().getName() ) );
+				throw new IllegalArgumentException( "The 'to' binding (%s) is %s, not a route".formatted( _route.keyPath(), route == null ? "null" : "a " + route.getClass().getName() ) );
 			}
 
 			// A typed route's own parameter as a free query parameter would skip the check a : binding gets

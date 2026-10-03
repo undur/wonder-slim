@@ -23,10 +23,7 @@ import bookclubs.data.Library.Club;
 import bookclubs.data.Library.Sort;
 import er.routing.ERXRouter;
 import er.routing.CrossSite;
-import er.routing.Declared;
 import er.routing.Fields;
-import er.routing.PlainRoute;
-import er.routing.Route;
 import er.routing.Routable;
 import er.routing.RouteGroup;
 import er.routing.RouteInvocation;
@@ -37,7 +34,8 @@ import er.routing.core.TrailingSlash;
 import er.routing.RouteHandler;
 
 /**
- * Every route of the application. Templates reach the endpoints as {@code $routes} (see {@link bookclubs.components.BaseComponent#routes()}).
+ * Every route of the application: their records and what they do, and the declaration giving the routes ({@link Routes})
+ * their patterns.
  *
  * <ul>
  * <li>{@code localhost:1300} lists the clubs.</li>
@@ -46,8 +44,6 @@ import er.routing.RouteHandler;
  * </ul>
  */
 public class BookclubRoutes {
-
-	private static Declared<BookclubRoutes> _routes;
 
 	/**
 	 * The host every club's routes answer
@@ -199,61 +195,40 @@ public class BookclubRoutes {
 		}
 	}
 
-	public final Route<Home> home;
-	public final Route<ClubHome> clubHome;
-	public final Route<Books> books;
-	public final Route<BookView> book;
-	public final Route<NewBook> newBook;
-	public final Route<CreateBook> createBook;
-	public final Route<DeleteBook> deleteBook;
-	public final Route<MemberView> member;
-	public final Route<ClubText> clubText;
-	public final Route<About> about;
-	public final Route<Admin> admin;
-	public final Route<Danger> danger;
-	public final Route<Reset> reset;
-	public final Route<Search> search;
-	public final PlainRoute rules;
-	public final GuestbookPlugin guestbook;
-
 	/**
-	 * Declares the routes in the router: at startup, and again when this class or a route's record changes (in
-	 * development), into a new router and a new instance
+	 * Gives the routes ({@link Routes}) their patterns: at startup, and again when this class, the routes or a route's
+	 * record changes (in development)
 	 */
-	private BookclubRoutes( final ERXRouter router ) {
+	public static void declare( final ERXRouter router ) {
 
 		// Clubs and books are route parameters: a club in a URL is its id (a host's first label), a book its number
 		router.converters().register( Club.class, Converter.of( id -> Library.club( id ).orElse( null ), Club::id ) );
 		router.converters().register( Book.class, Converter.of( id -> Library.book( Integer.parseInt( id ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
 
-		// A plugin's table, ranked below the application's. Set up first, as a plugin would be: it joins the application's
-		// groups once they're named below.
-		guestbook = new GuestbookPlugin( router.table( "guestbook" ) );
-
 		// The application's table comes first, so its routes override a plugin's
 		final RouteGroup routes = router.application();
 
 		// The landing page answers localhost only: on a club's host, / is the club's home
-		home = routes.route( "/", Home.class, Host.of( "@" ) );
+		routes.route( "/", Routes.home, Host.of( "@" ) );
 
 		// A group by host alone: every route in it answers {club}.localhost, with "club" a parameter
 		final RouteGroup club = routes.group( "", CLUB_HOST ).named( "club" );
 
-		clubHome = club.route( "/", ClubHome.class );
-		books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
-		newBook = club.route( "/books/new", NewBook.class );
-		book = club.route( "/books/{book}", BookView.class );
-		member = club.route( "/members/{handle}", MemberView.class );
-		search = club.route( "/search", Search.class ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), invocation.parameter( "club", Club.class ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
-		clubText = club.route( "/{name}", ClubText.class );
-		about = club.route( "/about", About.class );
+		club.route( "/", Routes.clubHome );
+		club.route( "/books/", Routes.books, TrailingSlash.REDIRECT );
+		club.route( "/books/new", Routes.newBook );
+		club.route( "/books/{book}", Routes.book );
+		club.route( "/members/{handle}", Routes.member );
+		club.route( "/search", Routes.search ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), invocation.parameter( "club", Club.class ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
+		club.route( "/{name}", Routes.clubText );
+		club.route( "/about", Routes.about );
 
 		// Methods: a form posts here, and its fields' conversion errors are reported to the action (Fields.REPORTED). Other methods at /books are redirected to the list at /books/.
-		createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
-		deleteBook = club.route( "/books/{book}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
+		club.route( "/books", Routes.createBook, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
+		club.route( "/books/{book}/delete", Routes.deleteBook, BookclubRoutes::deleteBook, Method.POST );
 
 		// Trailing slashes: /rules redirects to /rules/ (and /books to /books/, above)
-		rules = club.map( "/rules/", ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
+		club.map( "/rules/", Routes.rules, ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
 
 		// A wildcard: everything beneath /files/
 		club.map( "/files/*", ri -> text( 200, "The file %s of %s".formatted( ri.parameter( "*" ), ri.parameter( "club" ) ) ) );
@@ -270,15 +245,15 @@ public class BookclubRoutes {
 			recordFilter( invocation, "admin" );
 			return "letmein".equals( invocation.request().stringFormValueForKey( "key" ) ) ? next.handle( invocation ) : text( 403, "Admins only: add ?key=letmein" );
 		} );
-		admin = adminGroup.route( "/", Admin.class );
+		adminGroup.route( "/", Routes.admin );
 
 		final RouteGroup dangerGroup = adminGroup.group( "/danger" );
 		dangerGroup.wrap( ( invocation, next ) -> {
 			recordFilter( invocation, "danger" );
 			return next.handle( invocation );
 		} );
-		danger = dangerGroup.route( "/", Danger.class );
-		reset = dangerGroup.route( "/reset", Reset.class, BookclubRoutes::reset, Method.POST );
+		dangerGroup.route( "/", Routes.danger );
+		dangerGroup.route( "/reset", Routes.reset, BookclubRoutes::reset, Method.POST );
 
 		// A JSON API: strict about trailing slashes, and about methods (anything else is 405, with Allow)
 		// An API takes posts from other programs, which may send an Origin (a page's form posting to it, a client
@@ -291,20 +266,6 @@ public class BookclubRoutes {
 		api.map( "/books/{book}", BookclubRoutes::apiDeleteBook, Method.DELETE );
 
 
-	}
-
-	/**
-	 * Declares the routes, at startup
-	 */
-	public static void declare() {
-		_routes = ERXRouter.declare( BookclubRoutes::new );
-	}
-
-	/**
-	 * @return The current routes, for links: read each time, since they're declared again in development
-	 */
-	public static BookclubRoutes instance() {
-		return _routes.get();
 	}
 
 	// ---- Actions for the data-only records ----
@@ -325,7 +286,7 @@ public class BookclubRoutes {
 		}
 
 		final Book book = Library.book( form.club().id(), form.title().strip(), form.author().strip(), form.year() );
-		return instance().book.redirect( new BookView( form.club(), book ), invocation.context() );
+		return Routes.book.redirect( new BookView( form.club(), book ), invocation.context() );
 	}
 
 	private static WOActionResults deleteBook( final DeleteBook delete, final RouteInvocation invocation ) {
@@ -334,12 +295,12 @@ public class BookclubRoutes {
 			return RouteHandler.DECLINED;
 		}
 
-		return instance().books.redirect( new Books( delete.club(), null, null, List.of() ), invocation.context() );
+		return Routes.books.redirect( new Books( delete.club(), null, null, List.of() ), invocation.context() );
 	}
 
 	private static WOActionResults reset( final Reset reset, final RouteInvocation invocation ) {
 		Library.reset();
-		return instance().clubHome.redirect( new ClubHome( reset.club() ), invocation.context() );
+		return Routes.clubHome.redirect( new ClubHome( reset.club() ), invocation.context() );
 	}
 
 	// ---- The JSON API ----

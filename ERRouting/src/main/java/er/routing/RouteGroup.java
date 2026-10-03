@@ -20,15 +20,17 @@ import er.routing.core.TrailingSlash;
  * root group ({@link ERXRouter#table(String)}).
  *
  * <pre>
- * routes.map( "/items/{id}", ri -&gt; ri.page( ItemPage.class ).item( ri.parameter( "id", Item.class ) ) );
+ * routes.route( "/search/{area}", Routes.search );
+ * routes.map( "/books/{book}", Routes.book, BookPage.class );
  * routes.map( "/hooks/github", hooks::github, Method.POST );
  * routes.group( "/manage", manage -&gt; {
  *     manage.wrap( requireLogin );
- *     manage.map( "/users", Users.class );
+ *     manage.map( "/users", Routes.users, UsersPage.class );
  * }, Host.of( "admin.example.com" ) );
- *
- * Route&lt;Search&gt; search = routes.route( "/search/{area}", Search.class );
  * </pre>
+ *
+ * A route a link goes to is a constant ({@link Route#of(Class)}, {@link Route#plain()}), which the group gives its
+ * pattern. One nothing links to can be mapped without one.
  *
  * Routes and groups take options ({@link RouteOption}): conditions, and a trailing slash policy. A group's conditions
  * apply to its routes and nested groups, as does its policy unless a route or nested group sets its own.
@@ -117,11 +119,29 @@ public final class RouteGroup {
 	}
 
 	/**
-	 * Maps a route
+	 * Maps a route nothing links to (an API's, a webhook)
 	 *
-	 * @return The route, for links, forms and redirects to it
+	 * @return The route
 	 */
 	public PlainRoute map( final String pattern, final RouteHandler handler, final RouteOption... options ) {
+		return map( pattern, new PlainRoute( null ), handler, options );
+	}
+
+	/**
+	 * Maps a page nothing links to
+	 */
+	public PlainRoute map( final String pattern, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
+		return map( pattern, new PlainRoute( null ), pageClass, options );
+	}
+
+	/**
+	 * Gives the route its pattern in this group, and what it does
+	 *
+	 * @return The route
+	 */
+	public PlainRoute map( final String pattern, final PlainRoute route, final RouteHandler handler, final RouteOption... options ) {
+		Objects.requireNonNull( route, "A route constant is null: one declared after the constants it's used with (a static field read before it was set?)" );
+		Objects.requireNonNull( handler );
 
 		for( final RouteOption option : options ) {
 			if( option instanceof RouteBehavior behavior && !behavior.appliesToPlainRoutes() ) {
@@ -131,34 +151,64 @@ public final class RouteGroup {
 
 		final List<RouteOption> allOptions = allOptions( options );
 		final Host host = (Host)allOptions.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
-		final PlainRoute route = new PlainRoute( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
+		final PlainBinding binding = new PlainBinding( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
+		_router.bind( route, binding );
 		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, crossSite( allOptions ) ), allOptions );
 		return route;
 	}
 
 	/**
-	 * Maps a route to a page
+	 * Gives the route its pattern in this group, answered with a new instance of the page
+	 *
+	 * @return The route
 	 */
-	public PlainRoute map( final String pattern, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
-		return map( pattern, invocation -> WOApplication.application().pageWithName( pageClass.getName(), invocation.context() ), options );
+	public PlainRoute map( final String pattern, final PlainRoute route, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
+		Objects.requireNonNull( pageClass );
+		return map( pattern, route, invocation -> WOApplication.application().pageWithName( pageClass.getName(), invocation.context() ), options );
 	}
 
 	/**
-	 * @return A typed route mapped in this group, invoked by its parameter record's own {@link Routable#invoke(RouteInvocation)}
+	 * Gives the route its pattern in this group, invoked by its record's own {@link Routable#invoke(RouteInvocation)}
+	 *
+	 * @return The route
+	 */
+	public <P extends Record> Route<P> route( final String pattern, final Route<P> route, final RouteOption... options ) {
+		Objects.requireNonNull( route, "A route constant is null: one declared after the constants it's used with (a static field read before it was set?)" );
+
+		if( !Routable.class.isAssignableFrom( route.parametersClass() ) ) {
+			throw new IllegalArgumentException( "%s isn't Routable, so the route %s does nothing of its own: give it an action, route( pattern, route, ( %s, invocation ) -> … )".formatted( route.parametersClass().getSimpleName(), fullPattern( pattern ), route.parametersClass().getSimpleName().toLowerCase() ) );
+		}
+
+		return route( pattern, route, ( parameters, invocation ) -> ((Routable)parameters).invoke( invocation ), options );
+	}
+
+	/**
+	 * Gives the route its pattern in this group, invoked by the given action: for a record that's only data, or one of
+	 * several routes taking the same record
+	 *
+	 * @return The route
+	 */
+	public <P extends Record> Route<P> route( final String pattern, final Route<P> route, final Route.Action<P> action, final RouteOption... options ) {
+		Objects.requireNonNull( route, "A route constant is null: one declared after the constants it's used with (a static field read before it was set?)" );
+		final List<RouteOption> allOptions = allOptions( options );
+		final RouteBinding<P> binding = new RouteBinding<>( _router, fullPattern( pattern ), allOptions, route.parametersClass(), action );
+		_router.bind( route, binding );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( binding::handle, this, route, route.parametersClass(), crossSite( allOptions ) ), allOptions );
+		return route;
+	}
+
+	/**
+	 * @return A route nothing links to by a constant, invoked by its record's own {@link Routable#invoke(RouteInvocation)}
 	 */
 	public <P extends Record & Routable> Route<P> route( final String pattern, final Class<P> parametersClass, final RouteOption... options ) {
-		return route( pattern, parametersClass, ( parameters, invocation ) -> parameters.invoke( invocation ), options );
+		return route( pattern, Route.unnamed( parametersClass ), options );
 	}
 
 	/**
-	 * @return A typed route mapped in this group, invoked by the given action: for a parameter record that's only data,
-	 *         or one of several routes taking the same parameters
+	 * @return A route nothing links to by a constant, invoked by the given action
 	 */
 	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteOption... options ) {
-		final List<RouteOption> allOptions = allOptions( options );
-		final Route<P> route = new Route<>( _router, fullPattern( pattern ), allOptions, parametersClass, action );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( route::handle, this, route, parametersClass, crossSite( allOptions ) ), allOptions );
-		return route;
+		return route( pattern, Route.unnamed( parametersClass ), action, options );
 	}
 
 	/**

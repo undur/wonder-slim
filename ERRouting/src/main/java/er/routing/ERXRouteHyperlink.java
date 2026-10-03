@@ -11,7 +11,7 @@ import er.extensions.components.patches.ERXWOHyperlink;
  * EXPERIMENTAL (route-links branch). A link to an {@link Route}, as {@code <wo:route>}, see docs/ROUTE_LINKS.md.
  *
  * <pre>
- * &lt;wo:route route="$routes.search" :area="bork" :q="$someString"&gt;Search&lt;/wo:route&gt;
+ * &lt;wo:route to="$search" :area="bork" :q="$someString"&gt;Search&lt;/wo:route&gt;
  * </pre>
  *
  * {@code route} binds an {@link Route}, and each {@code :name} binding one of its parameters. The URL is the

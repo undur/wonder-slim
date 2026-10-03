@@ -3,13 +3,13 @@
 	<h2>Reading</h2>
 	<ul>
 		<wo:repetition list="$books" item="$book">
-			<li><wo:route route="$routes.book" :book="$book"><wo:str value="$book.title" /></wo:route> <span class="muted"><wo:str value="$book.author" /></span></li>
+			<li><wo:route to="$routes.book" :book="$book"><wo:str value="$book.title" /></wo:route> <span class="muted"><wo:str value="$book.author" /></span></li>
 		</wo:repetition>
 	</ul>
 	<h2>Members</h2>
 	<ul>
 		<wo:repetition list="$members" item="$member">
-			<li><wo:route route="$routes.member" :handle="$member.handle"><wo:str value="$member.name" /></wo:route></li>
+			<li><wo:route to="$routes.member" :handle="$member.handle"><wo:str value="$member.name" /></wo:route></li>
 		</wo:repetition>
 	</ul>
 </wo:Frame>

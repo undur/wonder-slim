@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import er.routing.ERXRouter;
 import er.routing.PlainRoute;
+import er.routing.Route;
 import er.routing.RouteGroup;
 import er.routing.core.Method;
 
@@ -21,27 +23,25 @@ public class GuestbookPlugin {
 	private static final Map<String, List<String>> ENTRIES = new ConcurrentHashMap<>();
 
 	/**
-	 * The guestbook's page, for links to it: set once the application names the club group
+	 * The guestbook's page, for links to it: given its pattern once the application names the club group
 	 */
-	private PlainRoute _page;
+	public static final PlainRoute page = Route.plain();
 
 	/**
-	 * Joins the application's groups as they're named, so it works whether the plugin is set up before or after the
-	 * application declares its routes, as a plugin would be
+	 * Declares the plugin's routes in a table of its own, ranked below the application's. It joins the application's
+	 * groups as they're named, so it works whether it's declared before or after the application's routes, as a plugin's
+	 * would be.
 	 */
-	public GuestbookPlugin( final RouteGroup routes ) {
-		routes.join( "club", this::mapClubRoutes );
+	public static void declare( final ERXRouter router ) {
+		final RouteGroup routes = router.table( "guestbook" );
+		routes.join( "club", GuestbookPlugin::mapClubRoutes );
 
 		// In the application's admin group, so behind its admin filter
 		routes.join( "admin", admin -> admin.map( "/guestbook", ri -> BookclubRoutes.text( 200, "Moderating the guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ) ) );
 	}
 
-	public PlainRoute page() {
-		return _page;
-	}
-
-	private void mapClubRoutes( final RouteGroup club ) {
-		_page = club.map( "/guestbook", ri -> BookclubRoutes.text( 200, "Guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ), Method.GET );
+	private static void mapClubRoutes( final RouteGroup club ) {
+		club.map( "/guestbook", page, ri -> BookclubRoutes.text( 200, "Guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ), Method.GET );
 
 		// Post, redirect, get, to the page's URL (no URL written by hand)
 		club.map( "/guestbook", ri -> {
@@ -51,7 +51,7 @@ public class GuestbookPlugin {
 				entries( ri.parameter( "club" ) ).add( entry.strip() );
 			}
 
-			return _page.redirect( ri.context() );
+			return page.redirect( ri.context() );
 		}, Method.POST );
 
 		club.map( "/about", ri -> BookclubRoutes.text( 200, "The guestbook plugin's about page" ) );

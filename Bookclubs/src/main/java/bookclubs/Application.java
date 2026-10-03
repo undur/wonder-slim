@@ -1,6 +1,7 @@
 package bookclubs;
 
 import er.extensions.appserver.ERXApplication;
+import er.routing.ERXRouter;
 
 public class Application extends ERXApplication {
 
@@ -9,6 +10,8 @@ public class Application extends ERXApplication {
 	}
 
 	public Application() {
-		BookclubRoutes.declare();
+		// A plugin declares its routes as the application does, in a table of its own
+		ERXRouter.declare( GuestbookPlugin::declare );
+		ERXRouter.declare( BookclubRoutes::declare );
 	}
 }

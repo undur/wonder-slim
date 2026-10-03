@@ -85,22 +85,22 @@
 		<header>
 			<div class="top">
 				<wo:if condition="$club">
-					<wo:route route="$routes.clubHome" class="club"><wo:str value="$club.name" /></wo:route>
+					<wo:route to="$routes.clubHome" class="club"><wo:str value="$club.name" /></wo:route>
 				</wo:if>
 				<wo:if condition="$club" negate="$true">
 					<span class="club">Book clubs</span>
 				</wo:if>
-				<wo:route route="$routes.home" class="home">All clubs</wo:route>
+				<wo:route to="$routes.home" class="home">All clubs</wo:route>
 			</div>
 			<wo:if condition="$club">
 				<nav>
-					<wo:route route="$routes.books">Books</wo:route>
-					<wo:route route="$routes.newBook">Add a book</wo:route>
-					<wo:route route="$routes.clubText" :name="history">History</wo:route>
-					<wo:route route="$routes.about">About</wo:route>
-					<wo:route route="$routes.rules">Rules</wo:route>
-					<wo:route route="$routes.guestbook.page">Guestbook</wo:route>
-					<wo:route route="$routes.admin" ?key="letmein">Admin</wo:route>
+					<wo:route to="$routes.books">Books</wo:route>
+					<wo:route to="$routes.newBook">Add a book</wo:route>
+					<wo:route to="$routes.clubText" :name="history">History</wo:route>
+					<wo:route to="$routes.about">About</wo:route>
+					<wo:route to="$routes.rules">Rules</wo:route>
+					<wo:route to="$routes.guestbook">Guestbook</wo:route>
+					<wo:route to="$routes.admin" ?key="letmein">Admin</wo:route>
 				</nav>
 			</wo:if>
 		</header>

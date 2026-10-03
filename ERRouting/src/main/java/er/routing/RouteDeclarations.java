@@ -1,10 +1,10 @@
 package er.routing;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -12,9 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * EXPERIMENTAL (route-links branch). The routes an application and its plugins declared, and the router they're in:
- * declared again, in the order they were first declared, into a new router when their classes change (in development),
- * which replaces the current one once they all succeed. Requests during a declaration keep the current routes.
+ * EXPERIMENTAL (route-links branch). The route declarations of an application and its plugins, and the router they
+ * declared into: run again, in the order they were first made, into a new router when their classes change (in
+ * development), which replaces the current one once they all succeed. Requests during a declaration keep the current
+ * routes.
  */
 
 class RouteDeclarations {
@@ -59,13 +60,15 @@ class RouteDeclarations {
 	}
 
 	/**
-	 * Holds the router being declared into, for {@link ERXRouter#defaultRouter()} called by a declaration
+	 * Holds the router being declared into, for {@link ERXRouter#defaultRouter()} called by a declaration, and for the
+	 * routes it gives patterns to
 	 */
 	static final ThreadLocal<ERXRouter> DECLARING = new ThreadLocal<>();
 
 	private final Supplier<ERXRouter> _routerFactory;
 	private final Changes _changes;
-	private final List<Declared<?>> _declared = new CopyOnWriteArrayList<>();
+	private final Function<ERXRouter, List<RouteIdentity<?>>> _undeclaredConstants;
+	private final List<Consumer<ERXRouter>> _declarations = new CopyOnWriteArrayList<>();
 	private final ReentrantLock _lock = new ReentrantLock();
 	private volatile ERXRouter _router;
 
@@ -74,15 +77,24 @@ class RouteDeclarations {
 	 */
 	private volatile RuntimeException _failure;
 
-	/**
-	 * True once it's logged that the routes aren't declared again, since something was added outside a declaration
-	 */
-	private volatile boolean _reloadRefusalLogged;
-
 	RouteDeclarations( final Supplier<ERXRouter> routerFactory, final Changes changes ) {
+		this( routerFactory, changes, RouteIdentity::undeclaredIn );
+	}
+
+	/**
+	 * @param undeclaredConstants The route constants a router doesn't declare, which fail a declaration
+	 */
+	RouteDeclarations( final Supplier<ERXRouter> routerFactory, final Changes changes, final Function<ERXRouter, List<RouteIdentity<?>>> undeclaredConstants ) {
 		_routerFactory = Objects.requireNonNull( routerFactory );
 		_changes = Objects.requireNonNull( changes );
-		_router = routerFactory.get();
+		_undeclaredConstants = Objects.requireNonNull( undeclaredConstants );
+		_router = newRouter();
+	}
+
+	private ERXRouter newRouter() {
+		final ERXRouter router = _routerFactory.get();
+		router.declaredOnly();
+		return router;
 	}
 
 	/**
@@ -93,24 +105,46 @@ class RouteDeclarations {
 	}
 
 	/**
-	 * Declares routes in the current router, and again whenever the routes are declared again
+	 * Runs a declaration in the current router, and again whenever the routes are declared again
+	 *
+	 * @param declaredIn The class making the declaration, whose folder is watched
 	 */
-	<T> Declared<T> declare( final Function<ERXRouter, T> declaration ) {
-		final Declared<T> declared = new Declared<>( declaration );
+	void declare( final Consumer<ERXRouter> declaration, final Class<?> declaredIn ) {
+		Objects.requireNonNull( declaration );
 		_lock.lock();
 
 		try {
-			final T holder = declaring( _router, () -> declared.declare( _router ) );
-			declared.set( holder );
-			_declared.add( declared );
-			watch( holder, _router );
+			declaring( _router, () -> declaration.accept( _router ) );
+			_router.publishBindings();
+			_declarations.add( declaration );
+
+			if( declaredIn != null ) {
+				_changes.watch( declaredIn );
+			}
+
+			watch( _router );
 			_changes.built();
 		}
 		finally {
 			_lock.unlock();
 		}
+	}
 
-		return declared;
+	/**
+	 * Checks that every route constant made is declared, once all the declarations have run (the application launching)
+	 *
+	 * @throws IllegalStateException naming those that aren't
+	 */
+	void checkDeclared() {
+		checkDeclared( _router );
+	}
+
+	private void checkDeclared( final ERXRouter router ) {
+		final List<RouteIdentity<?>> undeclared = _undeclaredConstants.apply( router );
+
+		if( !undeclared.isEmpty() ) {
+			throw new IllegalStateException( "Routes are made that no route declaration gives a pattern to: %s. Map them in ERXRouter.declare( router -> … ), with route( pattern, route ) or map( pattern, route, … )".formatted( undeclared.stream().map( RouteIdentity::name ).toList() ) );
+		}
 	}
 
 	/**
@@ -121,18 +155,6 @@ class RouteDeclarations {
 	 *         the old ones, which a developer would test without knowing
 	 */
 	void declareAgainIfChanged() {
-
-		// A route or a converter added outside a declaration would be lost
-		final String undeclared = _router.undeclared();
-
-		if( undeclared != null ) {
-			if( !_reloadRefusalLogged && _changes.changed() ) {
-				_reloadRefusalLogged = true;
-				logger.warn( "The routes aren't declared again when their classes change: {} outside a declaration (ERXRouter.declare()), which declaring them again would lose", undeclared );
-			}
-
-			return;
-		}
 
 		if( _changes.changed() && _lock.tryLock() ) {
 			try {
@@ -153,23 +175,19 @@ class RouteDeclarations {
 	}
 
 	/**
-	 * Declares every route again in a new router, which becomes the current one if they all succeed
+	 * Runs every declaration again in a new router, which becomes the current one if they all succeed
 	 */
 	void declareAgain() {
 		_lock.lock();
 
 		try {
-			final ERXRouter router = _routerFactory.get();
-			final List<Object> holders = new ArrayList<>();
+			final ERXRouter router = newRouter();
 
 			try {
 				declaring( router, () -> {
-					for( final Declared<?> declared : _declared ) {
-						holders.add( declared.declare( router ) );
-					}
-
+					_declarations.forEach( declaration -> declaration.accept( router ) );
 					router.checkJoins();
-					return null;
+					checkDeclared( router );
 				} );
 			}
 			catch( RuntimeException e ) {
@@ -179,11 +197,8 @@ class RouteDeclarations {
 				return;
 			}
 
-			for( int i = 0; i < holders.size(); i++ ) {
-				_declared.get( i ).set( holders.get( i ) );
-				watch( holders.get( i ), router );
-			}
-
+			router.publishBindings();
+			watch( router );
 			_router = router;
 			_failure = null;
 			_changes.built();
@@ -194,17 +209,20 @@ class RouteDeclarations {
 		}
 	}
 
-	private void watch( final Object holder, final ERXRouter router ) {
-		_changes.watch( holder.getClass() );
+	/**
+	 * Watches the classes of the router's route constants (their constants interfaces) and of its routes' records
+	 */
+	private void watch( final ERXRouter router ) {
+		router.bindings().keySet().stream().map( RouteIdentity::madeIn ).filter( Objects::nonNull ).distinct().forEach( _changes::watch );
 		router.routes().stream().map( RouteDescription::parametersClass ).filter( Objects::nonNull ).distinct().forEach( _changes::watch );
 	}
 
-	private static <T> T declaring( final ERXRouter router, final Supplier<T> declaration ) {
+	private static void declaring( final ERXRouter router, final Runnable declaration ) {
 		final ERXRouter previous = DECLARING.get();
 		DECLARING.set( router );
 
 		try {
-			return declaration.get();
+			declaration.run();
 		}
 		finally {
 			if( previous == null ) {

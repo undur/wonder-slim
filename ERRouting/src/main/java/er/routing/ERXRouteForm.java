@@ -17,7 +17,7 @@ import er.extensions.components.replacements.ERXWOForm;
  * EXPERIMENTAL (route-links branch). A form posting to a typed route, as {@code <wo:routeForm>}, see docs/ROUTING.md.
  *
  * <pre>
- * &lt;wo:routeForm route="$routes.createBook"&gt;
+ * &lt;wo:routeForm to="$createBook"&gt;
  *     &lt;input name="title"&gt; &lt;input name="author"&gt;
  * &lt;/wo:routeForm&gt;
  * </pre>

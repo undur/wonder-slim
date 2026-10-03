@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,10 +65,15 @@ public class ERXRouter {
 	private volatile boolean _joinsChecked;
 
 	/**
-	 * The first thing added outside a declaration ({@link #declare(Function)}), which declaring the routes again wouldn't
-	 * bring back (a route, a converter, a filter), null if there's none
+	 * True for a router whose routes are declared ({@link #declare(Consumer)}): changed outside a declaration, it throws
 	 */
-	private volatile String _undeclared;
+	private volatile boolean _declaredOnly;
+
+	/**
+	 * The routes the router gives patterns to, and how it has each: published to the routes once their declarations
+	 * succeed, so a link goes to the current routes
+	 */
+	private final Map<RouteIdentity<?>, Object> _bindings = new java.util.IdentityHashMap<>();
 	private RouteGroup _application;
 
 	/**
@@ -91,23 +95,26 @@ public class ERXRouter {
 	}
 
 	/**
-	 * Declares routes in the application's router: the declaration maps them, and returns the object holding them, for
-	 * links. In development it runs again when its classes change (or a route's record's), so a changed route is there
-	 * without a restart.
+	 * Declares routes in the application's router: the declaration gives the route constants their patterns. In
+	 * development it runs again when its classes change (the declaring class's folder, a constants interface's, a route's
+	 * record's), so a changed route is there without a restart.
 	 *
 	 * <pre>
-	 * _routes = ERXRouter.declare( BookclubRoutes::new ); // BookclubRoutes( ERXRouter router ) maps the routes
+	 * public interface Routes {
+	 *     Route&lt;Search&gt; search = Route.of( Search.class );
+	 * }
+	 *
+	 * ERXRouter.declare( router -&gt; router.application().route( "/search", Routes.search ) ); // the Application's constructor
 	 * </pre>
 	 *
-	 * Declarations run again in the order they were first made (an application and its plugins), into a new router that
-	 * replaces the current one once all of them succeed. One that fails leaves the current routes in place, and routed
-	 * requests answer with why until the routes are declared again. Set {@value #RELOAD_PROPERTY} to false to declare
-	 * them once.
-	 *
-	 * @return The routes declared: their holder, for links, is {@link Declared#get()}
+	 * The application's routes are changed only in a declaration: outside one, mapping a route, reaching the application's
+	 * routes or a table, or registering a converter throws, since declaring the routes again would lose it. Declarations
+	 * run again in the order they were first made (an application and its plugins), into a new router that replaces the
+	 * current one once all of them succeed. One that fails leaves the current routes in place, and routed requests answer
+	 * with why until the routes are declared again. Set {@value #RELOAD_PROPERTY} to false to declare them once.
 	 */
-	public static <T> Declared<T> declare( final Function<ERXRouter, T> declaration ) {
-		return declarations().declare( declaration );
+	public static void declare( final Consumer<ERXRouter> declaration ) {
+		declarations().declare( declaration, RouteIdentity.caller() );
 	}
 
 	private static synchronized RouteDeclarations declarations() {
@@ -120,6 +127,7 @@ public class ERXRouter {
 			// address is read then too, so a value that isn't one stops the launch.
 			ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver( notification -> {
 				_declarations.router().checkJoins();
+				_declarations.checkDeclared();
 				PublicAddress.configured();
 			} );
 		}
@@ -195,21 +203,66 @@ public class ERXRouter {
 	}
 
 	/**
-	 * @return The first thing added outside a declaration, null if there's none
+	 * Makes the router's routes declared only ({@link #declare(Consumer)})
 	 */
-	String undeclared() {
-		return _undeclared;
+	void declaredOnly() {
+		_declaredOnly = true;
 	}
 
 	/**
-	 * Notes something added to the router (or a way to add to it reached), unless it's a declaration into it doing it.
-	 * Reaching the application's routes or a table outside a declaration counts, since what's added through them (a
-	 * plugin's filter on the application's admin group, say) would be lost if the routes were declared again.
+	 * Refuses a change to a router whose routes are declared, unless a declaration into it makes it. Reaching the
+	 * application's routes or a table counts, since what's added through them (a plugin's filter on the application's
+	 * admin group, say) would be lost when the routes are declared again.
+	 *
+	 * @throws IllegalStateException naming what was done outside a declaration
 	 */
 	void undeclared( final String what ) {
-		if( _undeclared == null && RouteDeclarations.DECLARING.get() != this ) {
-			_undeclared = what;
+		if( _declaredOnly && RouteDeclarations.DECLARING.get() != this ) {
+			throw new IllegalStateException( "%s outside a route declaration: the application's routes are declared in ERXRouter.declare( router -> … ), which runs again when they change in development".formatted( capitalized( what ) ) );
 		}
+	}
+
+	private static String capitalized( final String text ) {
+		return text.isEmpty() ? text : Character.toUpperCase( text.charAt( 0 ) ) + text.substring( 1 );
+	}
+
+	/**
+	 * Gives a route its pattern in this router
+	 *
+	 * @throws IllegalArgumentException if it has one already
+	 */
+	synchronized void bind( final RouteIdentity<?> route, final Object binding ) {
+		if( _bindings.containsKey( route ) ) {
+			throw new IllegalArgumentException( "The route %s is declared twice: as %s, and as %s".formatted( route.name(), _bindings.get( route ), binding ) );
+		}
+
+		_bindings.put( route, binding );
+
+		// Outside a declaration (a router of its own), it's the current routes at once
+		if( RouteDeclarations.DECLARING.get() != this ) {
+			route.publish( binding );
+		}
+	}
+
+	/**
+	 * @return How the router has the route, null if it doesn't
+	 */
+	synchronized Object binding( final RouteIdentity<?> route ) {
+		return _bindings.get( route );
+	}
+
+	/**
+	 * Makes the router's routes the current ones, for links
+	 */
+	synchronized void publishBindings() {
+		_bindings.forEach( RouteIdentity::publish );
+	}
+
+	/**
+	 * @return The router's routes, as constants and as bound
+	 */
+	synchronized Map<RouteIdentity<?>, Object> bindings() {
+		return Map.copyOf( _bindings );
 	}
 
 	/**

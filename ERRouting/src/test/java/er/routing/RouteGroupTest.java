@@ -247,7 +247,7 @@ public class RouteGroupTest {
 		final Route<Query> search = router.application().route( "/search", Query.class, ( query, invocation ) -> found );
 
 		// Without whenInvalid, a record that refuses its values declines
-		assertEquals( RouteHandler.DECLINED, search.handle( invocation( "/search", Map.of(), router ) ) );
+		assertEquals( RouteHandler.DECLINED, search.binding().handle( invocation( "/search", Map.of(), router ) ) );
 
 		final WOActionResults asked = () -> null;
 		assertEquals( search, search.whenInvalid( ( invocation, reason ) -> {
@@ -255,12 +255,12 @@ public class RouteGroupTest {
 			return asked;
 		} ) );
 
-		assertEquals( asked, search.handle( invocation( "/search", Map.of(), router ) ) );
+		assertEquals( asked, search.binding().handle( invocation( "/search", Map.of(), router ) ) );
 		assertEquals( List.of( "Absent: [q]" ), reasons );
-		assertEquals( found, search.handle( invocation( "/search", Map.of( "q", "dune" ), router ) ) );
+		assertEquals( found, search.binding().handle( invocation( "/search", Map.of( "q", "dune" ), router ) ) );
 
 		// An empty value is absent, for text too (?q=)
-		assertEquals( asked, search.handle( invocation( "/search", Map.of( "q", "" ), router ) ) );
+		assertEquals( asked, search.binding().handle( invocation( "/search", Map.of( "q", "" ), router ) ) );
 	}
 
 	public record Listing( Integer page ) {}
@@ -272,14 +272,14 @@ public class RouteGroupTest {
 		final WOActionResults asked = () -> null;
 		final Route<Listing> listing = router.application().route( "/list", Listing.class, ( l, invocation ) -> null );
 
-		assertEquals( RouteHandler.DECLINED, listing.handle( invocation( "/list", Map.of( "page", "abc" ), router ) ) );
+		assertEquals( RouteHandler.DECLINED, listing.binding().handle( invocation( "/list", Map.of( "page", "abc" ), router ) ) );
 
 		listing.whenInvalid( ( invocation, reason ) -> {
 			reasons.add( reason.getMessage() );
 			return asked;
 		} );
 
-		assertEquals( asked, listing.handle( invocation( "/list", Map.of( "page", "abc" ), router ) ) );
+		assertEquals( asked, listing.binding().handle( invocation( "/list", Map.of( "page", "abc" ), router ) ) );
 		assertTrue( reasons.getFirst().contains( "'page' is 'abc'" ) );
 	}
 
@@ -301,16 +301,16 @@ public class RouteGroupTest {
 		} );
 
 		final RouteInvocation invocation = new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of( "genres", List.of( "novel", "drama" ), "years", List.of( "1934", "" ) ), router ).request(), Map.of( "club", "acme" ), router.converters() );
-		shelf.handle( invocation );
+		shelf.binding().handle( invocation );
 		assertEquals( new Shelf( "acme", List.of( Genre.novel, Genre.drama ), List.of( 1934 ), null ), got.getFirst() );
 
 		// None is an empty list
-		shelf.handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of(), router ).request(), Map.of( "club", "acme" ), router.converters() ) );
+		shelf.binding().handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of(), router ).request(), Map.of( "club", "acme" ), router.converters() ) );
 		assertEquals( List.of(), got.get( 1 ).genres() );
 
 		// A value that isn't one declines, as does a second value for one
-		assertEquals( RouteHandler.DECLINED, shelf.handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of( "genres", List.of( "novel", "opera" ) ), router ).request(), Map.of( "club", "acme" ), router.converters() ) ) );
-		assertEquals( RouteHandler.DECLINED, shelf.handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of( "q", List.of( "a", "b" ) ), router ).request(), Map.of( "club", "acme" ), router.converters() ) ) );
+		assertEquals( RouteHandler.DECLINED, shelf.binding().handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of( "genres", List.of( "novel", "opera" ) ), router ).request(), Map.of( "club", "acme" ), router.converters() ) ) );
+		assertEquals( RouteHandler.DECLINED, shelf.binding().handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of( "q", List.of( "a", "b" ) ), router ).request(), Map.of( "club", "acme" ), router.converters() ) ) );
 	}
 
 	@Test
