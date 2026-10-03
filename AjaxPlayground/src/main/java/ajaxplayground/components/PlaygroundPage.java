@@ -2,8 +2,6 @@ package ajaxplayground.components;
 
 import com.webobjects.appserver.WOContext;
 
-import ajaxplayground.Endpoints;
-
 import er.extensions.components.ERXComponent;
 
 /**
@@ -15,12 +13,5 @@ public abstract class PlaygroundPage extends ERXComponent {
 
 	public PlaygroundPage( WOContext context ) {
 		super( context );
-	}
-
-	/**
-	 * EXPERIMENTAL (route-links branch). The endpoints, for links: {@code <wo:link route="$routes.search" …>}
-	 */
-	public Endpoints routes() {
-		return Endpoints.instance();
 	}
 }

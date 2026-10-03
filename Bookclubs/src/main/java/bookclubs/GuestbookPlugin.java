@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import er.extensions.experimental.routing.RouteGroup;
-import er.extensions.experimental.routing.core.Method;
+import er.routing.RouteGroup;
+import er.routing.core.Method;
 
 /**
  * Stands in for a plugin: a framework bringing routes of its own, mapped in its own table, ranked below the

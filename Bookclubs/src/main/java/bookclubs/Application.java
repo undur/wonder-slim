@@ -1,7 +1,7 @@
 package bookclubs;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.experimental.routing.ERXRouter;
+import er.routing.ERXRouter;
 import er.extensions.routes.RouteTable;
 
 public class Application extends ERXApplication {

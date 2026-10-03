@@ -1,7 +1,7 @@
 # Routing
 
-> **Experimental.** This describes the router on the `route-links` branch (`er.extensions.experimental.routing`). Names
-> and details will change before it converges with the existing routes. The design notes are in
+> **Experimental.** This describes the router in the ERRouting framework on the `route-links` branch (package
+> `er.routing`), built beside the existing routes to replace them. Details will change. The design notes are in
 > [ROUTE_LINKS.md](ROUTE_LINKS.md), and the work is tracked in #178.
 >
 > The example application [Bookclubs](../Bookclubs) uses everything described here, and most examples below are taken
@@ -35,7 +35,7 @@ table's other routes, then its fallback and not found handling, so the router an
 
 ## Routes
 
-`map( pattern, handler )` maps a route. The handler gets a `RoutedInvocation`, and answers with a response or a page:
+`map( pattern, handler )` maps a route. The handler gets a `RouteInvocation`, and answers with a response or a page:
 
 ```java
 club.map( "/files/*", ri -> text( 200, "The file %s of %s".formatted( ri.parameter( "*" ), ri.parameter( "club" ) ) ) );
@@ -69,15 +69,15 @@ A route that has no answer for a URL returns `RouteHandler.DECLINED`, and the ne
 club pages decline names they don't have, and the club's catch-all answers with its own not found page:
 
 ```java
-club.endpoint( "/{name}", ClubText.class );        // declines a page the club doesn't have
+club.route( "/{name}", ClubText.class );        // declines a page the club doesn't have
 club.map( "/*", ri -> /* the club's not found page */ );
 ```
 
 A handler never returns null.
 
-## Endpoints
+## Typed routes
 
-An endpoint is a route whose parameters are the components of a record. The record is what a link passes to the route
+A typed route is a route whose parameters are the components of a record. The record is what a link passes to the route
 and what the route receives, with each value converted to its component's type:
 
 ```java
@@ -90,12 +90,12 @@ public record Books( String club, Sort sort, Integer page ) implements Routable 
 	}
 
 	@Override
-	public WOActionResults invoke( final RoutedInvocation invocation ) {
+	public WOActionResults invoke( final RouteInvocation invocation ) {
 		…
 	}
 }
 
-books = club.endpoint( "/books/", Books.class );
+books = club.route( "/books/", Books.class );
 ```
 
 - **Path, host and query parameters:** components named in the pattern (`{id}`) or in a host pattern (`{club}`) come
@@ -111,20 +111,20 @@ books = club.endpoint( "/books/", Books.class );
   ```java
   public record DeleteBook( String club, int id ) {}
 
-  deleteBook = club.endpoint( "/books/{id}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
+  deleteBook = club.route( "/books/{id}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
   ```
 
   Several routes can share a record that way (a page and its JSON, say).
 
-### Reaching endpoints from templates
+### Reaching typed routes from templates
 
-Templates reach endpoints through a key path, which the editor can follow to each endpoint's record. Bookclubs keeps its
-endpoints as fields of one class, and its pages reach it as `$routes`:
+Templates reach typed routes through a key path, which the editor can follow to each typed route's record. Bookclubs keeps its
+typed routes as fields of one class, and its pages reach it as `$routes`:
 
 ```java
 public class BookclubRoutes {
-	public final Endpoint<Books> books;
-	public final Endpoint<BookView> book;
+	public final Route<Books> books;
+	public final Route<BookView> book;
 	…
 }
 
@@ -142,7 +142,7 @@ public abstract class BaseComponent extends ERXComponent {
 
 ### In templates
 
-`<wo:route>` links to an endpoint. Each `:` attribute is one of its parameters:
+`<wo:route>` links to a typed route. Each `:` attribute is one of its parameters:
 
 ```html
 <wo:route route="$routes.book" :club="$club.id" :id="$book.id"><wo:str value="$book.title" /></wo:route>
@@ -151,10 +151,10 @@ public abstract class BaseComponent extends ERXComponent {
 ```
 
 - A constant (`:sort="author"`) is converted to the parameter's type, so `author` becomes the enum value.
-- `?` attributes add query parameters the endpoint doesn't declare, as on any link.
-- A parameter the endpoint doesn't have, a missing path parameter, or a value of the wrong type is an error when the
-  link renders, naming the endpoint and its parameters.
-- `<wo:route>` takes its URL from the endpoint only, so it has no `href`, `action` or `pageName`. Other links are
+- `?` attributes add query parameters the typed route doesn't declare, as on any link.
+- A parameter the typed route doesn't have, a missing path parameter, or a value of the wrong type is an error when the
+  link renders, naming the typed route and its parameters.
+- `<wo:route>` takes its URL from the typed route only, so it has no `href`, `action` or `pageName`. Other links are
   `<wo:link>`.
 
 ### From Java
@@ -168,7 +168,7 @@ final String url = routes.book.url( new BookView( club, book.id() ) );
 
 ### Forms
 
-Forms don't take an endpoint yet. A form posts to a URL generated in Java, and its fields are the record's other
+Forms don't take a typed route yet. A form posts to a URL generated in Java, and its fields are the record's other
 components:
 
 ```java
@@ -195,8 +195,8 @@ return seeOther( routes.book.url( new BookView( form.club(), book.id() ), invoca
 A route can require more of a request than its path. Conditions are declared with the route:
 
 ```java
-createBook = club.endpoint( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
-home = routes.endpoint( "/", Home.class, Host.of( "localhost" ) );
+createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
+home = routes.route( "/", Home.class, Host.of( "localhost" ) );
 ```
 
 ### Methods
@@ -224,7 +224,7 @@ the route isn't there: the router tries the next route.
 Among routes with the same pattern, one with conditions comes before one without, and an exact host before a host
 pattern.
 
-An endpoint with a host pattern takes the host's parameters as components (`ClubHome( String club )`), and links to it
+A typed route with a host pattern takes the host's parameters as components (`ClubHome( String club )`), and links to it
 from another host are complete URLs: `http://acme.localhost:1300/`.
 
 In development, any name ending in `.localhost` is this machine, so host routes need no setup: Bookclubs' clubs are at
@@ -244,7 +244,7 @@ final RouteGroup shop = routes.group( "/shops/{shop}" );        // {shop} reache
 
 `group( prefix, body, conditions )` takes a body mapping the group's routes, and `group( prefix, conditions )` returns
 the group for mapping them afterwards. A group's routes include its prefix in their patterns (`/api` and `/books` give
-`/api/books`) and its conditions in theirs. Its endpoints take its path parameters as components.
+`/api/books`) and its conditions in theirs. Its typed routes take its path parameters as components.
 
 ### Filters
 
@@ -308,9 +308,9 @@ GuestbookPlugin.register( router.table( "guestbook" ) );
 ## Not there yet
 
 - Objects as parameters (#175): records carry ids.
-- Forms taking an endpoint: they post to URLs generated in Java.
-- Static fields in key paths (#172): templates reach endpoints through an instance.
-- Completing and checking an endpoint's parameters in the editor (undur/parslips#12). Until then, link mistakes show
+- Forms taking a typed route: they post to URLs generated in Java.
+- Static fields in key paths (#172): templates reach typed routes through an instance.
+- Completing and checking a typed route's parameters in the editor (undur/parslips#12). Until then, link mistakes show
   when the link renders.
 - Reading a table's routes again on each request in development.
-- An endpoint's link to another host assumes the request's scheme and port.
+- A typed route's link to another host assumes the request's scheme and port.

@@ -20,15 +20,15 @@ import bookclubs.data.Library;
 import bookclubs.data.Library.Book;
 import bookclubs.data.Library.Club;
 import bookclubs.data.Library.Sort;
-import er.extensions.experimental.routing.ERXRouter;
-import er.extensions.experimental.routing.Endpoint;
-import er.extensions.experimental.routing.Routable;
-import er.extensions.experimental.routing.RouteGroup;
-import er.extensions.experimental.routing.RoutedInvocation;
-import er.extensions.experimental.routing.core.Host;
-import er.extensions.experimental.routing.core.Method;
-import er.extensions.experimental.routing.core.TrailingSlash;
-import er.extensions.routes.RouteHandler;
+import er.routing.ERXRouter;
+import er.routing.Route;
+import er.routing.Routable;
+import er.routing.RouteGroup;
+import er.routing.RouteInvocation;
+import er.routing.core.Host;
+import er.routing.core.Method;
+import er.routing.core.TrailingSlash;
+import er.routing.RouteHandler;
 
 /**
  * Every route of the application. Templates reach the endpoints as {@code $routes} (see {@link bookclubs.components.BaseComponent#routes()}).
@@ -53,7 +53,7 @@ public class BookclubRoutes {
 	public record Home() implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			return page( Main.class, invocation.context() );
 		}
 	}
@@ -63,7 +63,7 @@ public class BookclubRoutes {
 	public record ClubHome( String club ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			return Library.club( club ).<WOActionResults>map( c -> page( ClubPage.class, invocation.context() ).club( c ) ).orElse( RouteHandler.DECLINED );
 		}
 	}
@@ -80,7 +80,7 @@ public class BookclubRoutes {
 		}
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			return Library.club( club ).<WOActionResults>map( c -> {
 				final BookListPage page = BookclubRoutes.page( BookListPage.class, invocation.context() ).club( c );
 				page.sort = sort == null ? Sort.title : sort;
@@ -96,7 +96,7 @@ public class BookclubRoutes {
 	public record BookView( String club, int id ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			final Club c = Library.club( club ).orElse( null );
 			final Book book = Library.book( club, id ).orElse( null );
 
@@ -116,7 +116,7 @@ public class BookclubRoutes {
 	public record NewBook( String club ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			return Library.club( club ).<WOActionResults>map( c -> page( NewBookPage.class, invocation.context() ).club( c ) ).orElse( RouteHandler.DECLINED );
 		}
 	}
@@ -131,7 +131,7 @@ public class BookclubRoutes {
 	public record MemberView( String club, String handle ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			final Club c = Library.club( club ).orElse( null );
 
 			if( c == null ) {
@@ -153,7 +153,7 @@ public class BookclubRoutes {
 	public record ClubText( String club, String name ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			final Club c = Library.club( club ).orElse( null );
 			final String text = Library.page( club, name ).orElse( null );
 
@@ -171,7 +171,7 @@ public class BookclubRoutes {
 	public record About( String club ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			return Library.club( club ).<WOActionResults>map( c -> TextPage.create( invocation.context(), c, "About", "%s: %s. (This is the application's /about, overriding the guestbook plugin's.)".formatted( c.name(), c.motto() ) ) ).orElse( RouteHandler.DECLINED );
 		}
 	}
@@ -179,7 +179,7 @@ public class BookclubRoutes {
 	public record Admin( String club ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			return Library.club( club ).<WOActionResults>map( c -> TextPage.create( invocation.context(), c, "Admin", "Filters run, outermost first: " + filtersRun( invocation ) ) ).orElse( RouteHandler.DECLINED );
 		}
 	}
@@ -187,26 +187,26 @@ public class BookclubRoutes {
 	public record Danger( String club ) implements Routable {
 
 		@Override
-		public WOActionResults invoke( final RoutedInvocation invocation ) {
+		public WOActionResults invoke( final RouteInvocation invocation ) {
 			return Library.club( club ).<WOActionResults>map( c -> TextPage.create( invocation.context(), c, "The danger zone", "Filters run, outermost first: " + filtersRun( invocation ) ) ).orElse( RouteHandler.DECLINED );
 		}
 	}
 
 	public record Reset( String club ) {}
 
-	public final Endpoint<Home> home;
-	public final Endpoint<ClubHome> clubHome;
-	public final Endpoint<Books> books;
-	public final Endpoint<BookView> book;
-	public final Endpoint<NewBook> newBook;
-	public final Endpoint<CreateBook> createBook;
-	public final Endpoint<DeleteBook> deleteBook;
-	public final Endpoint<MemberView> member;
-	public final Endpoint<ClubText> clubText;
-	public final Endpoint<About> about;
-	public final Endpoint<Admin> admin;
-	public final Endpoint<Danger> danger;
-	public final Endpoint<Reset> reset;
+	public final Route<Home> home;
+	public final Route<ClubHome> clubHome;
+	public final Route<Books> books;
+	public final Route<BookView> book;
+	public final Route<NewBook> newBook;
+	public final Route<CreateBook> createBook;
+	public final Route<DeleteBook> deleteBook;
+	public final Route<MemberView> member;
+	public final Route<ClubText> clubText;
+	public final Route<About> about;
+	public final Route<Admin> admin;
+	public final Route<Danger> danger;
+	public final Route<Reset> reset;
 
 	private BookclubRoutes( final ERXRouter router ) {
 
@@ -214,22 +214,22 @@ public class BookclubRoutes {
 		final RouteGroup routes = router.table( "application" );
 
 		// The landing page answers localhost only: on a club's host, / is the club's home
-		home = routes.endpoint( "/", Home.class, Host.of( "localhost" ) );
+		home = routes.route( "/", Home.class, Host.of( "localhost" ) );
 
 		// A group by host alone: every route in it answers {club}.localhost, with "club" a parameter
 		final RouteGroup club = routes.group( "", CLUB_HOST );
 
-		clubHome = club.endpoint( "/", ClubHome.class );
-		books = club.endpoint( "/books/", Books.class );
-		newBook = club.endpoint( "/books/new", NewBook.class );
-		book = club.endpoint( "/books/{id}", BookView.class );
-		member = club.endpoint( "/members/{handle}", MemberView.class );
-		clubText = club.endpoint( "/{name}", ClubText.class );
-		about = club.endpoint( "/about", About.class );
+		clubHome = club.route( "/", ClubHome.class );
+		books = club.route( "/books/", Books.class );
+		newBook = club.route( "/books/new", NewBook.class );
+		book = club.route( "/books/{id}", BookView.class );
+		member = club.route( "/members/{handle}", MemberView.class );
+		clubText = club.route( "/{name}", ClubText.class );
+		about = club.route( "/about", About.class );
 
 		// Methods: a form posts here. Any other method at /books gets the list above, since that route takes every method.
-		createBook = club.endpoint( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
-		deleteBook = club.endpoint( "/books/{id}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
+		createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
+		deleteBook = club.route( "/books/{id}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
 
 		// Trailing slashes: /rules redirects to /rules/
 		club.map( "/rules/", TrailingSlash.REDIRECT, ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ) );
@@ -246,15 +246,15 @@ public class BookclubRoutes {
 			recordFilter( invocation, "admin" );
 			return "letmein".equals( invocation.request().stringFormValueForKey( "key" ) ) ? next.handle( invocation ) : text( 403, "Admins only: add ?key=letmein" );
 		} );
-		admin = adminGroup.endpoint( "/", Admin.class );
+		admin = adminGroup.route( "/", Admin.class );
 
 		final RouteGroup dangerGroup = adminGroup.group( "/danger" );
 		dangerGroup.wrap( ( invocation, next ) -> {
 			recordFilter( invocation, "danger" );
 			return next.handle( invocation );
 		} );
-		danger = dangerGroup.endpoint( "/", Danger.class );
-		reset = dangerGroup.endpoint( "/reset", Reset.class, BookclubRoutes::reset, Method.POST );
+		danger = dangerGroup.route( "/", Danger.class );
+		reset = dangerGroup.route( "/reset", Reset.class, BookclubRoutes::reset, Method.POST );
 
 		// A JSON API: strict about trailing slashes, and about methods (anything else is 405, with Allow)
 		final RouteGroup api = club.group( "/api" );
@@ -280,7 +280,7 @@ public class BookclubRoutes {
 	/**
 	 * Post, redirect, get: a new book, then a redirect to its page
 	 */
-	private static WOActionResults createBook( final CreateBook form, final RoutedInvocation invocation ) {
+	private static WOActionResults createBook( final CreateBook form, final RouteInvocation invocation ) {
 
 		if( Library.club( form.club() ).isEmpty() ) {
 			return RouteHandler.DECLINED;
@@ -296,7 +296,7 @@ public class BookclubRoutes {
 		return seeOther( instance().book.url( new BookView( form.club(), book.id() ), invocation.context() ) );
 	}
 
-	private static WOActionResults deleteBook( final DeleteBook delete, final RoutedInvocation invocation ) {
+	private static WOActionResults deleteBook( final DeleteBook delete, final RouteInvocation invocation ) {
 
 		if( !Library.removeBook( delete.club(), delete.id() ) ) {
 			return RouteHandler.DECLINED;
@@ -305,20 +305,20 @@ public class BookclubRoutes {
 		return seeOther( instance().books.url( new Books( delete.club(), null, null ), invocation.context() ) );
 	}
 
-	private static WOActionResults reset( final Reset reset, final RoutedInvocation invocation ) {
+	private static WOActionResults reset( final Reset reset, final RouteInvocation invocation ) {
 		Library.reset();
 		return seeOther( instance().clubHome.url( new ClubHome( reset.club() ), invocation.context() ) );
 	}
 
 	// ---- The JSON API ----
 
-	private static WOActionResults apiBooks( final RoutedInvocation invocation ) {
+	private static WOActionResults apiBooks( final RouteInvocation invocation ) {
 		final List<String> books = new ArrayList<>();
 		Library.books( invocation.parameter( "club" ), Sort.title ).forEach( b -> books.add( json( b ) ) );
 		return jsonResponse( 200, "[" + String.join( ",", books ) + "]" );
 	}
 
-	private static WOActionResults apiBook( final RoutedInvocation invocation ) {
+	private static WOActionResults apiBook( final RouteInvocation invocation ) {
 		try {
 			final int id = Integer.parseInt( invocation.parameter( "id" ) );
 			return Library.book( invocation.parameter( "club" ), id ).<WOActionResults>map( b -> jsonResponse( 200, json( b ) ) ).orElse( RouteHandler.DECLINED );
@@ -328,7 +328,7 @@ public class BookclubRoutes {
 		}
 	}
 
-	private static WOActionResults apiCreateBook( final RoutedInvocation invocation ) {
+	private static WOActionResults apiCreateBook( final RouteInvocation invocation ) {
 		final String title = invocation.request().stringFormValueForKey( "title" );
 		final String author = invocation.request().stringFormValueForKey( "author" );
 
@@ -339,7 +339,7 @@ public class BookclubRoutes {
 		return jsonResponse( 201, json( Library.book( invocation.parameter( "club" ), title, author, null ) ) );
 	}
 
-	private static WOActionResults apiDeleteBook( final RoutedInvocation invocation ) {
+	private static WOActionResults apiDeleteBook( final RouteInvocation invocation ) {
 		try {
 			return Library.removeBook( invocation.parameter( "club" ), Integer.parseInt( invocation.parameter( "id" ) ) ) ? text( 204, "" ) : RouteHandler.DECLINED;
 		}
@@ -358,7 +358,7 @@ public class BookclubRoutes {
 	private static final String FILTERS_KEY = "bookclubs.filters";
 
 	@SuppressWarnings("unchecked")
-	private static void recordFilter( final RoutedInvocation invocation, final String name ) {
+	private static void recordFilter( final RouteInvocation invocation, final String name ) {
 		List<String> filters = (List<String>)invocation.request().userInfoForKey( FILTERS_KEY );
 
 		if( filters == null ) {
@@ -369,7 +369,7 @@ public class BookclubRoutes {
 		filters.add( name );
 	}
 
-	private static String filtersRun( final RoutedInvocation invocation ) {
+	private static String filtersRun( final RouteInvocation invocation ) {
 		return String.valueOf( invocation.request().userInfoForKey( FILTERS_KEY ) );
 	}
 

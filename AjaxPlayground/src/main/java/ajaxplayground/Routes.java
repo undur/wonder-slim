@@ -25,7 +25,6 @@ import ajaxplayground.components.scenario.ScenarioMultiObserve;
 import ajaxplayground.components.scenario.ScenarioMultiUpdate;
 import ajaxplayground.components.scenario.ScenarioNamedField;
 import ajaxplayground.components.scenario.ScenarioNested;
-import ajaxplayground.components.scenario.ScenarioRouteLinks;
 import ajaxplayground.components.scenario.ScenarioRowIdentity;
 import ajaxplayground.components.scenario.ScenarioServerUpdate;
 import ajaxplayground.components.scenario.ScenarioServerUpdateFragments;
@@ -53,14 +52,8 @@ public class Routes {
 	public static void register() {
 		final RouteTable routes = RouteTable.defaultRouteTable();
 
-		// EXPERIMENTAL (route-links branch): the new router, first in the table, declining what it has no route for
-		RouterDemo.register( routes );
-
 		// Index
 		routes.map( "/", Main.class );
-
-		// EXPERIMENTAL (route-links branch): the page linking to the endpoints (declared in RouterDemo)
-		routes.map( "/typed", ScenarioRouteLinks.class );
 
 		// Echoes RouteRequestHandler.routePath() for the request, for the URL-shape probe
 		routes.map( "/echo/route-path/*", ri -> {

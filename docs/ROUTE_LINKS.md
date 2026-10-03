@@ -111,7 +111,7 @@ then sits next to the route's name in the holder.
 routes.search.url( new Search( Area.films, "noir", null ) )   // "/typed/search/films?q=noir"
 ```
 
-- The experiment is kept apart from the existing routes: it lives in its own package, `er.extensions.experimental.routing`
+- The experiment is kept apart from the existing routes: it lives in its own package, `er.routing`
   (ERExtensions), and the routes package is unchanged. "Endpoint" is a working name that keeps the concept separate
   while experimenting. Converging with the existing routes would most likely make it the `Route`, refactoring the
   existing code where needed.
@@ -343,13 +343,16 @@ features slot into an established shape instead of redesigning it. Built one at 
 7. **HTTP methods** (#177): a route accepts every method unless it declares the ones it accepts, through the
    conditions (#179). Declaring them is how a route that changes something keeps out of reach of links.
 
-Built so far (all on the route-links branch, in `er.extensions.experimental.routing`):
+Built so far, on the route-links branch. Everything is in its own framework, **ERRouting** (packages `er.routing` and
+`er.routing.core`), beside ERExtensions, so it can replace routing as a whole and use the names it's converging to:
+`Endpoint` became `Route` (a typed route, declared with `group.route( … )`), and the handler and invocation types are
+`RouteHandler` and `RouteInvocation`. ERExtensions and AjaxPlayground are as on master.
 
 - **The router's core** (`core`, plain Java, unit tested): path patterns with named parameters and wildcards,
   conditions (`Host`, exact or a pattern, and `Method`), trailing slash policies, precedence by specificity, layered
   tables with conflicts refused and overrides recorded, and paths generated from patterns.
 - **`ERXRouter`**, mapped into the existing route table as one route that declines what it has no route for: groups
-  with prefixes, conditions and filters, parameters by name (`RoutedInvocation`), `405` with `Allow`, `308` to the
+  with prefixes, conditions and filters, parameters by name (`RouteInvocation`), `405` with `Allow`, `308` to the
   declared trailing slash form. The host is read in one place (`RequestHost`).
 - **Endpoints declared from groups**, routed by the router: a group's path parameters and a host pattern's are record
   components, and an endpoint with a host pattern links to its host.
