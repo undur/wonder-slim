@@ -20,14 +20,15 @@ public Application() {
 	final RouteGroup routes = ERXRouter.defaultRouter().application();
 
 	routes.map( "/", Main.class );
-	routes.map( "/items/{id}", ri -> ItemPage.page( ri, ri.parameter( "id", Integer.class ) ) );
+	routes.map( "/items/{id}", ri -> ri.page( ItemPage.class ).item( ri.parameter( "id", Item.class ) ) );
 }
 ```
 
 The default router is created on first use and mapped into the existing route table then, as one route. What the
 router has no route for passes on to the table's other routes, then its fallback and not found handling, so the router
 and existing routes work side by side. The table's `hasRouteFor()` answers for the router's routes that answer any host,
-not for every URL.
+not for every URL: a route for one host doesn't claim a path for all of them. (An admin UI mapped under a host isn't
+seen by the welcome page's check, then.)
 
 `ERXRouter.defaultRouter().routes()` describes every route in precedence order (`RouteDescription`): its pattern,
 conditions, trailing slash policy and table, the route itself for linking, and a typed route's record class.
@@ -125,6 +126,10 @@ books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
   ```java
   createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
   ```
+
+  A group's `Fields.REPORTED` reaches its typed routes. A plain route reads its own fields, so it refuses the option.
+  Declining is strict for old URLs too: once an enum value is renamed, a bookmark with the old one (`?sort=year`) is a
+  404 on a route without `Fields.REPORTED`.
 - **Validation:** the record's constructor checks what makes the route's own parameters valid, and a value it refuses
   (an `IllegalArgumentException`) declines the request. A form's fields are checked by the route, which can show the
   form again with what's wrong.
@@ -169,7 +174,8 @@ boolean is `true`, `false`, or `on` (what a checkbox without a `value` posts).
 A route parameter has one URL per value: `/books/007` and `/books/+7` are answered with `308` to `/books/7`, keeping
 the query string, so each object has one URL. A converter whose type is written more than one way says so
 (`canonical()` is false, as for `Double`), and its values aren't redirected. Query parameters and fields aren't held to
-one text.
+one text. The redirect comes while the parameters are converted, before the route decides anything, so a URL the route
+would decline (another club's book) is redirected first, and then declined.
 
 ### Reaching typed routes from templates
 
@@ -211,7 +217,8 @@ public abstract class BaseComponent extends ERXComponent {
 - Building a link's URL doesn't construct the typed route's record: only its route parameters are needed.
 - A plain route's `:` parameters are its pattern's and its host's; another name is an error, as on a typed route. Query
   parameters the route doesn't declare are `?` attributes.
-- A text parameter takes any value: a number's or an object's text, by the converters.
+- A text parameter takes a value the converters convert (a number, an object with a converter) as its text. Another
+  object is an error, rather than its `toString()` in a URL.
 - A host parameter the link leaves out is the current request's: on `acme.localhost`, links to the club's routes don't
   repeat `:club`. A link from another host (the landing page on `localhost`) gives it.
 - `?` attributes add query parameters the typed route doesn't declare, as on any link.
@@ -228,6 +235,14 @@ public abstract class BaseComponent extends ERXComponent {
 final String url = routes.book.url( new BookView( club, book ) );
 final String rules = routes.rules.url( context );
 final String sorted = routes.books.url( Map.of( "sort", Sort.author ), context );
+```
+
+`route.redirect( … )` answers with a `303` to a route, taking what `url( … )` takes, and `invocation.page( PageClass.class )`
+makes a page in the invocation's context:
+
+```java
+return instance().books.redirect( new Books( delete.club(), null, null ), invocation.context() );
+return invocation.page( ClubPage.class ).club( club );
 ```
 
 A typed route takes its record, and any route takes values by name (`url( values, context )`), host parameters taken
@@ -269,7 +284,7 @@ private static WOActionResults createBook( final CreateBook form, final RouteInv
 	}
 
 	final Book book = Library.book( form.club().id(), form.title(), form.author(), form.year() );
-	return seeOther( instance().book.url( new BookView( form.club(), book ), invocation.context() ) );
+	return instance().book.redirect( new BookView( form.club(), book ), invocation.context() );
 }
 ```
 
@@ -399,8 +414,9 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
   ```
 
   A plugin starts before the application declares its groups, so `join( name, body )` maps its routes once the group is
-  named, or now if it is. A route the plugin links to is kept in a field the body sets. `join( name )` joins a group
-  that's named already. A group joined but never named fails the application's startup.
+  named, or now if it is. A route the plugin links to is kept in a field the body sets, which is null until then: the
+  one cost of joining late. `join( name )` joins a group that's named already. A group joined but never named fails the
+  application's startup, before it listens for requests.
 - **Specificity comes first:** a table's rank only decides between the same route. A plugin's `/guestbook` still answers
   `/guestbook` beside an application's catch-all.
 
