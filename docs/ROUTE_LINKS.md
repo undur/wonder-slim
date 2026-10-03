@@ -340,8 +340,8 @@ features slot into an established shape instead of redesigning it. Built one at 
 6. **Composition** (#176). Groups of routes sharing a prefix (`/admin`), preconditions (a host) and whatever wraps every route in the group: access
    control, cache headers, logging. Open: whether a group's parameters (`/shops/{shop}/items/{id}`) are handed to its
    routes, and how that looks as records.
-7. **HTTP methods** (#177): a route declares the methods it accepts, `GET` and `HEAD` by default, through the
-   preconditions (#179). No dispatch beyond that is needed for it.
+7. **HTTP methods** (#177): a route accepts every method unless it declares the ones it accepts, through the
+   conditions (#179). Declaring them is how a route that changes something keeps out of reach of links.
 
 Built so far (all on the route-links branch, in `er.extensions.experimental.routing`):
 
@@ -360,7 +360,5 @@ Not built yet:
 
 - Converters, so objects are parameters (#175).
 - Tables read again on each request in development.
-- The default methods: routes without a `Method` condition accept any method, as routes do today. #177 proposes `GET`
-  and `HEAD` by default.
 - The `.apiext` addition, and the checks and completion in Parslips.
 - Converging with the existing routes.
