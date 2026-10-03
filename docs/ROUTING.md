@@ -4,8 +4,8 @@
 > and details will change before it converges with the existing routes. The design notes are in
 > [ROUTE_LINKS.md](ROUTE_LINKS.md), and the work is tracked in #178.
 >
-> The example application [Bookclubs](../Bookclubs) uses everything described here. Every example below is taken from
-> it.
+> The example application [Bookclubs](../Bookclubs) uses everything described here, and most examples below are taken
+> from it.
 
 A route connects a URL to the code answering it. The router matches a request's path (and, if a route asks for it, its
 host and method) to a route, hands the route the values in the URL as parameters, and generates URLs for links to the

@@ -354,7 +354,8 @@ Built so far (all on the route-links branch, in `er.extensions.experimental.rout
 - **Endpoints declared from groups**, routed by the router: a group's path parameters and a host pattern's are record
   components, and an endpoint with a host pattern links to its host.
 - **`<wo:route>`**, checked at render, and `:` in the template parser.
-- The playground's `/router/` routes and `/typed` page exercise each.
+- The playground's `/router/` routes and `/typed` page exercise each, and so does the example application
+  [Bookclubs](../Bookclubs). The guide is [ROUTING.md](ROUTING.md).
 
 Not built yet:
 
