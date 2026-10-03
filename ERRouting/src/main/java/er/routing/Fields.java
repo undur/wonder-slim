@@ -1,7 +1,5 @@
 package er.routing;
 
-import er.routing.core.RouteOption;
-
 /**
  * EXPERIMENTAL (route-links branch). How a typed route treats query parameters and form fields that don't convert to
  * their components' types (or name objects that don't exist).
@@ -16,10 +14,18 @@ import er.routing.core.RouteOption;
  * </pre>
  */
 
-public enum Fields implements RouteOption {
+public enum Fields implements RouteBehavior {
 
 	/**
 	 * Fields that don't convert are null, and reported in {@link RouteInvocation#conversionErrors()}
 	 */
-	REPORTED
+	REPORTED;
+
+	/**
+	 * A plain route reads its own fields
+	 */
+	@Override
+	public boolean appliesToPlainRoutes() {
+		return false;
+	}
 }

@@ -405,7 +405,6 @@ Not built yet (the guide's "Not there yet" lists them for users):
 - Wildcards in typed routes, and a redirect to a wildcard's own form.
 - Repeated parameters (`List` components).
 - Protection against forms posted from another site (with ngobjects/ng-objects#58).
-- The application's public address, for complete URLs (#187).
 - The bare-URL element and the Ajax elements' URLs.
 - Static fields in key paths (#172).
 - The `.apiext` addition, and the checks and completion in Parslips (undur/parslips#12).

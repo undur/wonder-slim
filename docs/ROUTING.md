@@ -267,6 +267,24 @@ A typed route takes its record, and any route takes values by name (`url( values
 from the request as links do. URLs are short (`/books/6`) when the application's short URLs are on, and a link to
 another host is complete, to that host, in a context generating complete URLs (an email) too.
 
+### The public address
+
+A complete URL needs the address people reach the application at, which the application can't see: behind a front
+end, the request it gets is `http` on its own port, and its own host name is the machine's. Set it:
+
+```
+er.routing.publicAddress=https://bookclubs.example.com
+```
+
+A scheme, a host, and a port if it isn't the scheme's: a path is refused (a base path is #51's). With it set:
+
+- Complete URLs (a context generating them, an email's) have its scheme, host and port.
+- A link to a route on another host has its scheme and port, with the route's host: `https://kronan.bookclubs.example.com/`.
+- `route.completeURL( record )` makes a complete URL without a request, for a background job's email.
+
+Without it, URLs take the request's scheme, host and port, and `completeURL` outside a request fails, naming the
+property. Relative links don't change either way.
+
 ### Forms
 
 `<wo:routeForm>` posts to a typed route. It takes `route` and `:` parameters as `<wo:route>` does, and the record's
@@ -451,8 +469,8 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
 - Completing and checking a route's parameters in the editor (undur/parslips#12), and a form's fields against its
   record. Until then, link mistakes show when the link renders.
 - Reading a table's routes again on each request in development.
-- A link to another host from a request without a complete URL assumes the request's scheme and port.
-- The application's public address (#187): complete URLs of routes without a host have the machine's name.
+- Without the public address, a link to another host assumes the request's scheme and port, and complete URLs of
+  routes without a host have the request's host.
 - Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.
 - Repeated parameters: `?sort=title&sort=year` takes the first value, and a component can't be a `List` (a search form's
   checkboxes, say).

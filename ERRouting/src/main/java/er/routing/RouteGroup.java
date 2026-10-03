@@ -1,7 +1,6 @@
 package er.routing;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -49,9 +48,9 @@ public final class RouteGroup {
 	private final TrailingSlash _trailingSlash;
 
 	/**
-	 * How the group's typed routes treat fields that don't convert ({@link Fields#REPORTED}), null for declining
+	 * The group's behaviors (its own or its parents'), one of each type
 	 */
-	private final Fields _fields;
+	private final List<RouteBehavior> _behaviors;
 	private final List<RouteFilter> _filters = new ArrayList<>();
 
 	RouteGroup( final ERXRouter router, final Router<ERXRouter.Mapped>.Table table, final RouteGroup parent, final String prefix, final List<RouteOption> options ) {
@@ -62,7 +61,7 @@ public final class RouteGroup {
 		_prefix = prefix;
 		_conditions = options.stream().filter( RouteCondition.class::isInstance ).map( RouteCondition.class::cast ).toList();
 		_trailingSlash = options.stream().filter( TrailingSlash.class::isInstance ).map( TrailingSlash.class::cast ).findFirst().orElse( null );
-		_fields = options.stream().filter( Fields.class::isInstance ).map( Fields.class::cast ).findFirst().orElse( null );
+		_behaviors = options.stream().filter( RouteBehavior.class::isInstance ).map( RouteBehavior.class::cast ).toList();
 	}
 
 	/**
@@ -99,9 +98,7 @@ public final class RouteGroup {
 			options.add( named._trailingSlash );
 		}
 
-		if( named._fields != null ) {
-			options.add( named._fields );
-		}
+		options.addAll( named._behaviors );
 
 		// The named group is the parent, so its filters (and its parents') wrap the routes mapped here
 		return new RouteGroup( _router, _table, named, named._prefix, options );
@@ -123,8 +120,10 @@ public final class RouteGroup {
 	 */
 	public PlainRoute map( final String pattern, final RouteHandler handler, final RouteOption... options ) {
 
-		if( Arrays.stream( options ).anyMatch( Fields.class::isInstance ) ) {
-			throw new IllegalArgumentException( "The route %s is a plain route, which reads its fields itself: Fields applies to typed routes".formatted( fullPattern( pattern ) ) );
+		for( final RouteOption option : options ) {
+			if( option instanceof RouteBehavior behavior && !behavior.appliesToPlainRoutes() ) {
+				throw new IllegalArgumentException( "The route %s is a plain route, and %s applies to typed routes only".formatted( fullPattern( pattern ), behavior ) );
+			}
 		}
 
 		final List<RouteOption> allOptions = allOptions( options );
@@ -210,9 +209,12 @@ public final class RouteGroup {
 			all.add( _trailingSlash );
 		}
 
-		// The group's fields option reaches its typed routes (a plain route ignores it)
-		if( _fields != null && all.stream().noneMatch( Fields.class::isInstance ) ) {
-			all.add( _fields );
+		// The group's behaviors reach its routes, unless a route sets its own of the type (a plain route ignores those that
+		// don't apply to it)
+		for( final RouteBehavior behavior : _behaviors ) {
+			if( all.stream().noneMatch( option -> option.getClass() == behavior.getClass() ) ) {
+				all.add( behavior );
+			}
 		}
 
 		return all;

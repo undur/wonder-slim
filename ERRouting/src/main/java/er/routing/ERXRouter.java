@@ -133,7 +133,7 @@ public class ERXRouter {
 	 */
 	void map( final Router<Mapped>.Table table, final String pattern, final Mapped mapped, final List<RouteOption> options ) {
 		refuseHandlerKeyCollision( pattern );
-		table.map( pattern, mapped, options.stream().filter( option -> !(option instanceof Fields) ).toArray( RouteOption[]::new ) );
+		table.map( pattern, mapped, options.stream().filter( option -> !(option instanceof RouteBehavior) ).toArray( RouteOption[]::new ) );
 
 		final var overrides = _router.overrides();
 

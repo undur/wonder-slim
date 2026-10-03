@@ -169,14 +169,28 @@ public final class Route<P extends Record> implements Linkable {
 	 *         has a host other than the request's.
 	 */
 	public String url( final P parameters, final WOContext context ) {
+		return RouteURLs.url( _path, _host, strings( parameters ), _routeParameterNames, context );
+	}
+
+	/**
+	 * @return The complete URL of the route with the given parameters, without a request (a background job's email): at
+	 *         the application's public address ({@link PublicAddress}), which must be set
+	 */
+	public String completeURL( final P parameters ) {
+		return RouteURLs.completeURL( _path, _host, strings( parameters ), _routeParameterNames );
+	}
+
+	/**
+	 * @return The record's values as URL text by name, without those that are null
+	 */
+	private Map<String, String> strings( final P parameters ) {
 		final Map<String, String> strings = new LinkedHashMap<>();
 		values( parameters ).forEach( ( name, value ) -> {
 			if( value != null ) {
 				strings.put( name, _converters.toString( value ) );
 			}
 		} );
-
-		return RouteURLs.url( _path, _host, strings, _routeParameterNames, context );
+		return strings;
 	}
 
 	/**

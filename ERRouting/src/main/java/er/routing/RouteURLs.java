@@ -35,19 +35,55 @@ public class RouteURLs {
 	static String url( final PathPattern path, final Host host, final Map<String, String> values, final Collection<String> routeParameterNames, final WOContext context ) {
 		Objects.requireNonNull( context, "A route URL is generated in a context, and there's none" );
 
-		final String query = values.entrySet().stream()
-				.filter( e -> !routeParameterNames.contains( e.getKey() ) )
-				.map( e -> URLEncoder.encode( e.getKey(), StandardCharsets.UTF_8 ) + "=" + URLEncoder.encode( e.getValue(), StandardCharsets.UTF_8 ) )
-				.collect( Collectors.joining( "&" ) );
-
+		final String query = query( values, routeParameterNames );
 		final String url = url( path.path( values ), query.isEmpty() ? null : query, context );
+		final PublicAddress.Origin publicAddress = PublicAddress.configured();
 
 		if( host == null ) {
-			return url;
+
+			// A complete URL (an email's) has the public address, not the machine's name
+			return publicAddress != null && url.contains( "://" ) ? publicAddress.origin() + pathAndQuery( url ) : url;
 		}
 
 		final String requestHost = context.request() == null ? null : RequestHost.host( context.request() );
-		return toRouteHost( url, host.host( values ), requestHost, context.request() != null && context.request().isSecure() );
+		return toRouteHost( url, host.host( values ), requestHost, context.request() != null && context.request().isSecure(), publicAddress );
+	}
+
+	/**
+	 * @return The complete URL for a route and parameter values as text, without a request: from the application's public
+	 *         address (which must be set), in the application's URL form (short, or with the adaptor prefix)
+	 */
+	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final Collection<String> routeParameterNames ) {
+		final PublicAddress.Origin publicAddress = PublicAddress.required();
+		final String query = query( values, routeParameterNames );
+		final String routePath = path.path( values );
+		final String applicationPath = ERXApplication.erxApplication().shortURLs() ? routePath : ERXApplication.erxApplication().applicationURLPrefix() + "/" + ERXShortURLs.ROUTE_KEY + routePath;
+		final String origin = host == null ? publicAddress.origin() : publicAddress.origin( host.host( values ) );
+		return origin + applicationPath + (query.isEmpty() ? "" : "?" + query);
+	}
+
+	/**
+	 * @return The query string for the values that aren't route parameters, encoded, empty for none
+	 */
+	private static String query( final Map<String, String> values, final Collection<String> routeParameterNames ) {
+		return values.entrySet().stream()
+				.filter( e -> !routeParameterNames.contains( e.getKey() ) )
+				.map( e -> URLEncoder.encode( e.getKey(), StandardCharsets.UTF_8 ) + "=" + URLEncoder.encode( e.getValue(), StandardCharsets.UTF_8 ) )
+				.collect( Collectors.joining( "&" ) );
+	}
+
+	/**
+	 * @return The path and query of a URL, without its scheme and host if it has them
+	 */
+	private static String pathAndQuery( final String url ) {
+		final int schemeEnd = url.indexOf( "://" );
+
+		if( schemeEnd == -1 ) {
+			return url;
+		}
+
+		final int pathStart = url.indexOf( '/', schemeEnd + 3 );
+		return pathStart == -1 ? "/" : url.substring( pathStart );
 	}
 
 	/**
@@ -56,13 +92,47 @@ public class RouteURLs {
 	 *         route's host, since the context's is the machine's
 	 */
 	static String toRouteHost( final String url, final String hostName, final String requestHost, final boolean secure ) {
+		return toRouteHost( url, hostName, requestHost, secure, null );
+	}
+
+	static String toRouteHost( final String url, final String hostName, final String requestHost, final boolean secure, final PublicAddress.Origin publicAddress ) {
 		final boolean complete = url.contains( "://" );
 
 		if( !complete && requestHost != null && new RouteRequest( "GET", requestHost, "/" ).host().equals( hostName ) ) {
 			return url;
 		}
 
-		return toHost( url, hostName, requestHost, secure );
+		return toHost( url, hostName, requestHost, secure, publicAddress );
+	}
+
+	static String toHost( final String url, final String hostName, final String requestHost, final boolean secure ) {
+		return toHost( url, hostName, requestHost, secure, null );
+	}
+
+	/**
+	 * @param url A URL as the context generated it: relative ({@code /books/2}), or complete in a context generating
+	 *        complete URLs (an email)
+	 * @param requestHost The request's host as it sent it (possibly with a port), null if there's none
+	 * @param publicAddress The application's public address, whose scheme and port the URL gets, null for none
+	 * @return The URL to the given host: with the public address's scheme and port if there is one, otherwise a complete
+	 *         URL's own (its host replaced), or the request's for a relative URL
+	 */
+	static String toHost( final String url, final String hostName, final String requestHost, final boolean secure, final PublicAddress.Origin publicAddress ) {
+
+		if( publicAddress != null ) {
+			return publicAddress.origin( hostName ) + pathAndQuery( url );
+		}
+
+		final int schemeEnd = url.indexOf( "://" );
+
+		if( schemeEnd != -1 ) {
+			final int authorityStart = schemeEnd + 3;
+			final int pathStart = url.indexOf( '/', authorityStart ) == -1 ? url.length() : url.indexOf( '/', authorityStart );
+			return url.substring( 0, authorityStart ) + hostName + port( url.substring( authorityStart, pathStart ) ) + url.substring( pathStart );
+		}
+
+		// Without a public address, the request's scheme and port
+		return (secure ? "https" : "http") + "://" + hostName + (requestHost == null ? "" : port( requestHost )) + url;
 	}
 
 	/**
@@ -73,26 +143,6 @@ public class RouteURLs {
 		response.setStatus( 303 );
 		response.setHeader( url, "location" );
 		return response;
-	}
-
-	/**
-	 * @param url A URL as the context generated it: relative ({@code /books/2}), or complete in a context generating
-	 *        complete URLs (an email)
-	 * @param requestHost The request's host as it sent it (possibly with a port), null if there's none
-	 * @return The URL to the given host: a complete URL's host replaced, keeping its scheme and port, or a relative URL
-	 *         made complete with the request's scheme and port
-	 */
-	static String toHost( final String url, final String hostName, final String requestHost, final boolean secure ) {
-		final int schemeEnd = url.indexOf( "://" );
-
-		if( schemeEnd != -1 ) {
-			final int authorityStart = schemeEnd + 3;
-			final int pathStart = url.indexOf( '/', authorityStart ) == -1 ? url.length() : url.indexOf( '/', authorityStart );
-			return url.substring( 0, authorityStart ) + hostName + port( url.substring( authorityStart, pathStart ) ) + url.substring( pathStart );
-		}
-
-		// FIXME: Assumes the request's scheme and port, which a host behind another front end may not share
-		return (secure ? "https" : "http") + "://" + hostName + (requestHost == null ? "" : port( requestHost )) + url;
 	}
 
 	/**
