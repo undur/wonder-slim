@@ -360,7 +360,11 @@ Built so far, on the route-links branch. Everything is in its own framework, **E
 - The playground's `/router/` routes and `/typed` page exercise each, and so does the example application
   [Bookclubs](../Bookclubs). The guide is [ROUTING.md](ROUTING.md).
 
-Found by building Bookclubs, to be tackled:
+Found by building Bookclubs. All but the last are now done on the branch, in ERRouting: host parameters are inherited
+by links (#180), typed routes and groups take a trailing slash policy among their options (#181), `<wo:routeForm>`
+posts to a typed route (#182), the default router needs no setup and ranks the application's table first (#183),
+plugins join the application's named groups (#184), and converters make objects route parameters, plain routes' too
+(#175, #185). The list as found:
 
 1. **Links within a host repeat its parameters** (#180). Every link on a club's pages carries `:club="$club.id"`, though it
    links to the host it's on. Links could take the current request's host parameters unless they're given.
