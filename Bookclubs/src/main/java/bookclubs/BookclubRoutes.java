@@ -23,6 +23,7 @@ import bookclubs.data.Library.Club;
 import bookclubs.data.Library.Sort;
 import er.routing.ERXRouter;
 import er.routing.CrossSite;
+import er.routing.Declared;
 import er.routing.Fields;
 import er.routing.PlainRoute;
 import er.routing.Route;
@@ -46,7 +47,7 @@ import er.routing.RouteHandler;
  */
 public class BookclubRoutes {
 
-	private static BookclubRoutes _instance;
+	private static Declared<BookclubRoutes> _routes;
 
 	/**
 	 * The host every club's routes answer
@@ -215,8 +216,11 @@ public class BookclubRoutes {
 	public final PlainRoute rules;
 	public final GuestbookPlugin guestbook;
 
-	private BookclubRoutes() {
-		final ERXRouter router = ERXRouter.defaultRouter();
+	/**
+	 * Declares the routes in the router: at startup, and again when this class or a route's record changes (in
+	 * development), into a new router and a new instance
+	 */
+	private BookclubRoutes( final ERXRouter router ) {
 
 		// Clubs and books are route parameters: a club in a URL is its id (a host's first label), a book its number
 		router.converters().register( Club.class, Converter.of( id -> Library.club( id ).orElse( null ), Club::id ) );
@@ -293,11 +297,14 @@ public class BookclubRoutes {
 	 * Declares the routes, at startup
 	 */
 	public static void declare() {
-		_instance = new BookclubRoutes();
+		_routes = ERXRouter.declare( BookclubRoutes::new );
 	}
 
+	/**
+	 * @return The current routes, for links: read each time, since they're declared again in development
+	 */
 	public static BookclubRoutes instance() {
-		return _instance;
+		return _routes.get();
 	}
 
 	// ---- Actions for the data-only records ----

@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,8 @@ import er.routing.core.Router;
 import er.routing.core.TrailingSlash;
 import er.extensions.appserver.ERXNotification;
 import er.extensions.routes.RouteClaims;
+import er.extensions.appserver.ERXApplication;
+import er.extensions.foundation.ERXProperties;
 import er.extensions.routes.RouteTable;
 
 /**
@@ -61,29 +64,84 @@ public class ERXRouter {
 	 * True once the joins are checked: at launch for the default router, otherwise on the first request
 	 */
 	private volatile boolean _joinsChecked;
+
+	/**
+	 * The first route mapped outside a declaration ({@link #declare(Function)}), which declaring the routes again
+	 * wouldn't bring back, null if there's none
+	 */
+	private volatile String _undeclaredRoute;
 	private RouteGroup _application;
 
-	private static ERXRouter _defaultRouter;
+	/**
+	 * Whether routes are declared again when their classes change. Development's default.
+	 */
+	public static final String RELOAD_PROPERTY = "er.routing.reload";
+
+	private static RouteDeclarations _declarations;
 
 	/**
 	 * @return The application's router, created on first use and mapped into the default route table then, so an
-	 *         application declares its routes and has nothing to set up
+	 *         application declares its routes and has nothing to set up. Called by a route declaration, the router it's
+	 *         declaring into. The router is replaced when the routes are declared again (in development), so read it
+	 *         each time, don't keep it.
 	 */
-	public static synchronized ERXRouter defaultRouter() {
-		if( _defaultRouter == null ) {
-			_defaultRouter = new ERXRouter();
-			_defaultRouter.mapInto( RouteTable.defaultRouteTable() );
+	public static ERXRouter defaultRouter() {
+		final ERXRouter declaring = RouteDeclarations.DECLARING.get();
+		return declaring != null ? declaring : declarations().router();
+	}
+
+	/**
+	 * Declares routes in the application's router: the declaration maps them, and returns the object holding them, for
+	 * links. In development it runs again when its classes change (or a route's record's), so a changed route is there
+	 * without a restart.
+	 *
+	 * <pre>
+	 * _routes = ERXRouter.declare( BookclubRoutes::new ); // BookclubRoutes( ERXRouter router ) maps the routes
+	 * </pre>
+	 *
+	 * Declarations run again in the order they were first made (an application and its plugins), into a new router that
+	 * replaces the current one once all of them succeed. One that fails leaves the current routes in place, and routed
+	 * requests answer with why until the routes are declared again. Set {@value #RELOAD_PROPERTY} to false to declare
+	 * them once.
+	 *
+	 * @return The routes declared: their holder, for links, is {@link Declared#get()}
+	 */
+	public static <T> Declared<T> declare( final Function<ERXRouter, T> declaration ) {
+		return declarations().declare( declaration );
+	}
+
+	private static synchronized RouteDeclarations declarations() {
+		if( _declarations == null ) {
+			final boolean reload = ERXProperties.booleanForKeyWithDefault( RELOAD_PROPERTY, ERXApplication.isDevelopmentModeSafe() );
+			_declarations = new RouteDeclarations( ERXRouter::new, reload ? new ClassChanges() : RouteDeclarations.Changes.NONE );
+			RouteTable.defaultRouteTable().map( "/*", new DefaultRouter() );
 
 			// By the time the application is about to listen for requests, the groups plugins joined are named. The public
 			// address is read then too, so a value that isn't one stops the launch.
-			final ERXRouter router = _defaultRouter;
 			ERXNotification.ApplicationWillFinishLaunchingNotification.addObserver( notification -> {
-				router.checkJoins();
+				_declarations.router().checkJoins();
 				PublicAddress.configured();
 			} );
 		}
 
-		return _defaultRouter;
+		return _declarations;
+	}
+
+	/**
+	 * The default router in the route table: the current one, its routes declared again first if their classes changed
+	 */
+	private static class DefaultRouter implements er.extensions.routes.RouteHandler, RouteClaims {
+
+		@Override
+		public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
+			_declarations.declareAgainIfChanged();
+			return _declarations.router().handle( invocation );
+		}
+
+		@Override
+		public boolean claims( final String url ) {
+			return _declarations.router()._router.hasRouteFor( url );
+		}
 	}
 
 	/**
@@ -134,6 +192,13 @@ public class ERXRouter {
 	}
 
 	/**
+	 * @return The first route mapped outside a declaration, null if there's none
+	 */
+	String undeclaredRoute() {
+		return _undeclaredRoute;
+	}
+
+	/**
 	 * @return true if one of the routes answers the host (without a port), or it's the public address's
 	 */
 	boolean isOwnHost( final String host ) {
@@ -152,6 +217,10 @@ public class ERXRouter {
 	 */
 	void map( final Router<Mapped>.Table table, final String pattern, final Mapped mapped, final List<RouteOption> options ) {
 		refuseHandlerKeyCollision( pattern );
+
+		if( _undeclaredRoute == null && RouteDeclarations.DECLARING.get() != this ) {
+			_undeclaredRoute = pattern;
+		}
 		table.map( pattern, mapped, options.stream().filter( option -> !(option instanceof RouteBehavior) ).toArray( RouteOption[]::new ) );
 
 		final var overrides = _router.overrides();

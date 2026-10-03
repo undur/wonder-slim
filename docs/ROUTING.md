@@ -13,16 +13,50 @@ route, so templates and Java code link to routes rather than writing URLs by han
 
 ## Setting up
 
-The application's routes are declared in its constructor, in the default router's application table:
+The application's routes are declared in a class of their own, whose constructor maps them in the router's
+application table. The application declares it at startup, and the instance holds the routes, for links:
 
 ```java
-public Application() {
-	final RouteGroup routes = ERXRouter.defaultRouter().application();
+public class AppRoutes {
 
-	routes.map( "/", Main.class );
-	routes.map( "/items/{id}", ri -> ri.page( ItemPage.class ).item( ri.parameter( "id", Item.class ) ) );
+	private static Declared<AppRoutes> _routes;
+
+	public final PlainRoute home;
+
+	private AppRoutes( final ERXRouter router ) {
+		final RouteGroup routes = router.application();
+		home = routes.map( "/", Main.class );
+		routes.map( "/items/{id}", ri -> ri.page( ItemPage.class ).item( ri.parameter( "id", Item.class ) ) );
+	}
+
+	public static void declare() {
+		_routes = ERXRouter.declare( AppRoutes::new );     // in the Application's constructor
+	}
+
+	public static AppRoutes instance() {
+		return _routes.get();
+	}
 }
 ```
+
+### Changing routes while the application runs
+
+In development, routes are declared again when their classes change: the declaring class (and the classes in its
+folder) or a route's record. Change a route, add one, or add a component to a record, and the next request has it, with
+no restart. Every declaration runs again, in the order they were first made (an application and its plugins), into a
+new router that replaces the current one once they all succeed. Building is cheap (5,000 routes take a few
+milliseconds), and the check for changes looks at the class files in those folders only.
+
+- A declaration that fails (two routes matching the same requests, say) leaves the previous routes in place, and routed
+  requests answer with why until the routes are declared again, so the old routes aren't tested by mistake.
+- The holder is made again, so `instance()` is read each time, never kept. State that should outlive a declaration (a
+  plugin's data) is kept elsewhere.
+- A route mapped outside a declaration (`ERXRouter.defaultRouter().application().map( … )` in the application's
+  constructor) would be lost, so then the routes aren't declared again, and the log says which route stopped it.
+- A new class file's code may reach the running application a beat after it's written (the hot swap), so a declaration
+  made within three seconds of a change is made once more after that.
+
+`er.routing.reload` turns it on or off. It's on in development mode, and off otherwise, where routes are declared once.
 
 The default router is created on first use and mapped into the existing route table then, as one route. What the
 router has no route for passes on to the table's other routes, then its fallback and not found handling, so the router
@@ -516,7 +550,6 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
 - Static fields in key paths (#172): templates reach routes through an instance.
 - Completing and checking a route's parameters in the editor (undur/parslips#12), and a form's fields against its
   record. Until then, link mistakes show when the link renders.
-- Reading a table's routes again on each request in development.
 - Without the public address, a link to another host assumes the request's scheme and port, and complete URLs of
   routes without a host have the machine's name (`http://my-macbook.local:1300/…`).
 - Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.

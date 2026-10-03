@@ -40,7 +40,22 @@ public final class Router<H> {
 	private final TrailingSlash _trailingSlash;
 	private final List<Table> _tables = new ArrayList<>();
 	private final List<RouteOverride<H>> _overrides = new ArrayList<>();
-	private List<Entry<H>> _sorted = List.of();
+	/**
+	 * Every table's routes by path shape: only routes of the same shape can match the same requests, so a new route is
+	 * checked against these, not all of them
+	 */
+	private final Map<String, List<Mapped>> _byShape = new HashMap<>();
+
+	/**
+	 * A route and the table it's mapped in
+	 */
+	private record Mapped( Object table, Entry<?> entry ) {}
+
+	/**
+	 * The routes in precedence order, null until they're first needed after a route is mapped: sorting once, not once
+	 * per route, keeps building a large table cheap (as rebuilding one in development is)
+	 */
+	private volatile List<Entry<H>> _sorted = List.of();
 	private int _mappedCount;
 
 	/**
@@ -103,7 +118,7 @@ public final class Router<H> {
 	 * @return Every route, in precedence order
 	 */
 	public List<Entry<H>> routes() {
-		return _sorted;
+		return sorted();
 	}
 
 	/**
@@ -170,24 +185,26 @@ public final class Router<H> {
 
 			final Entry<H> route = new Entry<>( path, List.copyOf( conditionList ), trailingSlash, Objects.requireNonNull( handler ), _name, _rank, _mappedCount++ );
 
-			for( final Entry<H> existing : _routes ) {
-				if( sameRoute( route, existing ) ) {
-					throw new IllegalArgumentException( "The route %s conflicts with %s: they match the same requests".formatted( route, existing ) );
+			final List<Mapped> sameShape = _byShape.computeIfAbsent( path.shape(), shape -> new ArrayList<>() );
+
+			for( final Mapped mapped : sameShape ) {
+				if( mapped.table() == this && sameRoute( route, mapped.entry() ) ) {
+					throw new IllegalArgumentException( "The route %s conflicts with %s: they match the same requests".formatted( route, mapped.entry() ) );
 				}
 			}
 
-			for( final Table table : _tables ) {
-				if( table != this ) {
-					for( final Entry<H> existing : table._routes ) {
-						if( sameRoute( route, existing ) ) {
-							_overrides.add( _rank < table._rank ? new RouteOverride<>( route, existing ) : new RouteOverride<>( existing, route ) );
-						}
-					}
+			for( final Mapped mapped : sameShape ) {
+				@SuppressWarnings("unchecked")
+				final Entry<H> existing = (Entry<H>)mapped.entry();
+
+				if( mapped.table() != this && sameRoute( route, existing ) ) {
+					_overrides.add( _rank < existing.rank() ? new RouteOverride<>( route, existing ) : new RouteOverride<>( existing, route ) );
 				}
 			}
 
 			_routes.add( route );
-			sort();
+			sameShape.add( new Mapped( this, route ) );
+			_sorted = null;
 			return route;
 		}
 	}
@@ -230,11 +247,27 @@ public final class Router<H> {
 		return byType;
 	}
 
-	private void sort() {
-		final List<Entry<H>> all = new ArrayList<>();
-		_tables.forEach( table -> all.addAll( table._routes ) );
-		all.sort( PRECEDENCE );
-		_sorted = List.copyOf( all );
+	/**
+	 * @return The routes in precedence order, sorted when first needed after a route is mapped
+	 */
+	private List<Entry<H>> sorted() {
+		List<Entry<H>> sorted = _sorted;
+
+		if( sorted == null ) {
+			synchronized( this ) {
+				sorted = _sorted;
+
+				if( sorted == null ) {
+					final List<Entry<H>> all = new ArrayList<>();
+					_tables.forEach( table -> all.addAll( table._routes ) );
+					all.sort( PRECEDENCE );
+					sorted = List.copyOf( all );
+					_sorted = sorted;
+				}
+			}
+		}
+
+		return sorted;
 	}
 
 	private static final Comparator<Entry<?>> PRECEDENCE = ( a, b ) -> {
@@ -261,7 +294,7 @@ public final class Router<H> {
 	 */
 	public boolean hasRouteFor( final String path ) {
 		final RequestPath requestPath = RequestPath.parse( path );
-		return requestPath != null && _sorted.stream().anyMatch( entry -> entry.conditions().stream().noneMatch( Host.class::isInstance ) && entry.path().match( requestPath ) != null );
+		return requestPath != null && sorted().stream().anyMatch( entry -> entry.conditions().stream().noneMatch( Host.class::isInstance ) && entry.path().match( requestPath ) != null );
 	}
 
 	/**
@@ -319,7 +352,7 @@ public final class Router<H> {
 		// The shape of the most specific route that matched the path but not the method, while no route has matched yet
 		String notAllowedShape = null;
 
-		for( final Entry<H> route : _sorted ) {
+		for( final Entry<H> route : sorted() ) {
 			final PathPattern.Match match = route.path().match( path );
 
 			if( match == null ) {

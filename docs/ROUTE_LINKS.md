@@ -401,7 +401,6 @@ Also built:
 
 Not built yet (the guide's "Not there yet" lists them for users):
 
-- Tables read again on each request in development.
 - Wildcards in typed routes, and a redirect to a wildcard's own form.
 - The bare-URL element and the Ajax elements' URLs.
 - Static fields in key paths (#172).
