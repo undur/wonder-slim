@@ -250,4 +250,24 @@ public class RouteGroupTest {
 		assertEquals( List.of( "Missing: [q]" ), reasons );
 		assertEquals( found, search.handle( invocation( "/search", Map.of( "q", "dune" ), router ) ) );
 	}
+
+	public record Listing( Integer page ) {}
+
+	@Test
+	public void aFieldThatDoesntConvertGoesToWhenInvalid() {
+		final ERXRouter router = new ERXRouter();
+		final List<String> reasons = new ArrayList<>();
+		final WOActionResults asked = () -> null;
+		final Route<Listing> listing = router.application().route( "/list", Listing.class, ( l, invocation ) -> null );
+
+		assertEquals( RouteHandler.DECLINED, listing.handle( invocation( "/list", Map.of( "page", "abc" ), router ) ) );
+
+		listing.whenInvalid( ( invocation, reason ) -> {
+			reasons.add( reason.getMessage() );
+			return asked;
+		} );
+
+		assertEquals( asked, listing.handle( invocation( "/list", Map.of( "page", "abc" ), router ) ) );
+		assertTrue( reasons.getFirst().contains( "'page' is 'abc'" ) );
+	}
 }

@@ -145,10 +145,11 @@ books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
   The reason names what was wrong: `Objects.requireNonNull( q, "q" )` says so itself, and a `NullPointerException`
   without a message is given one naming the absent components (`Missing: [q]`). A form's fields are checked by the
   route, which can show the form again with what's wrong.
-- **Bad input, three ways:** a value that doesn't convert declines the request; with `Fields.REPORTED`, a query
-  parameter or field that doesn't convert is null instead, reported in `conversionErrors()`, and the record is built;
-  `whenInvalid` answers what the record's constructor refuses (a value that didn't convert reaches it only through
-  `Fields.REPORTED`, as a null). Each decline is logged at debug level (`er.routing.Route`, `er.routing.ERXRouter`),
+- **Bad input, three ways:** with nothing set, bad input declines the request. With `whenInvalid`, the route answers
+  any bad input itself: a query parameter or field that doesn't convert, and values its record's constructor refuses.
+  With `Fields.REPORTED`, the record is built anyway, a field that doesn't convert null and reported in
+  `conversionErrors()`. A route parameter that doesn't convert always declines: the URL is wrong, and another route may
+  answer it. Each decline is logged at debug level (`er.routing.Route`, `er.routing.ERXRouter`),
   naming the route and why: the answer to "why is this a 404".
 - **What the route does:** a record implementing `Routable` does the route's work in `invoke`. A record that's only
   data gets an action instead:

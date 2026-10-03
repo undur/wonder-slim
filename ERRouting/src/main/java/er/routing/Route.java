@@ -180,8 +180,9 @@ public final class Route<P extends Record> implements Linkable {
 	}
 
 	/**
-	 * Has the route handle a request its record can't be built from (its constructor refused the values), instead of
-	 * declining it: to show a form again, say
+	 * Has the route handle a request with bad input, instead of declining it: a query parameter or field that doesn't
+	 * convert (unless the route takes those with its record, {@link Fields#REPORTED}), or values its record's constructor
+	 * refuses. A route parameter that doesn't convert still declines: the URL is wrong, and another route may answer it.
 	 *
 	 * @return The route
 	 */
@@ -316,9 +317,11 @@ public final class Route<P extends Record> implements Linkable {
 			}
 			else if( arguments[i] == null ) {
 
-				// A query parameter or field that doesn't convert declines, unless the route takes the errors (a form)
+				// A query parameter or field that doesn't convert goes to the route's whenInvalid, or declines, unless the route
+				// takes the errors with its record (Fields.REPORTED, a form)
 				if( !_reportFields ) {
-					return declined( invocation, "the query parameter or field '%s' is '%s', which isn't a %s, or names none (Fields.REPORTED hands that to the route)".formatted( name, string, component.getType().getSimpleName() ) );
+					final String reason = "The query parameter or field '%s' is '%s', which isn't a %s, or names none".formatted( name, string, component.getType().getSimpleName() );
+					return _whenInvalid != null ? _whenInvalid.invoke( invocation, new IllegalArgumentException( reason ) ) : declined( invocation, reason );
 				}
 
 				invocation.addConversionError( name, string );
