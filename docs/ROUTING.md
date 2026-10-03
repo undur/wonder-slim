@@ -176,12 +176,15 @@ public abstract class BaseComponent extends ERXComponent {
 `<wo:route>` links to a typed route. Each `:` attribute is one of its parameters:
 
 ```html
-<wo:route route="$routes.book" :club="$club.id" :id="$book.id"><wo:str value="$book.title" /></wo:route>
-<wo:route route="$routes.books" :club="$club.id" :sort="author">Sort by author</wo:route>
-<wo:route route="$routes.admin" :club="$club.id" ?key="letmein">Admin</wo:route>
+<wo:route route="$routes.book" :book="$book"><wo:str value="$book.title" /></wo:route>
+<wo:route route="$routes.books" :sort="author">Sort by author</wo:route>
+<wo:route route="$routes.admin" ?key="letmein">Admin</wo:route>
+<wo:route route="$routes.clubHome" :club="$current.id">Visit</wo:route>    <!-- from localhost, to a club's host -->
 ```
 
 - A constant (`:sort="author"`) is converted to the parameter's type, so `author` becomes the enum value.
+- A host parameter the link leaves out is the current request's: on `acme.localhost`, links to the club's routes don't
+  repeat `:club`. A link from another host (the landing page on `localhost`) gives it.
 - `?` attributes add query parameters the typed route doesn't declare, as on any link.
 - A parameter the typed route doesn't have, a missing path parameter, or a value of the wrong type is an error when the
   link renders, naming the typed route and its parameters.

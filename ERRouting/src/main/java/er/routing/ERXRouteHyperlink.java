@@ -93,7 +93,7 @@ public class ERXRouteHyperlink extends ERXWOHyperlink {
 		}
 
 		private static <P extends Record> String url( final Route<P> route, final Map<String, Object> values, final WOComponent component ) {
-			return route.url( route.parameters( values ), component.context() );
+			return route.url( route.parameters( values, component.context() ), component.context() );
 		}
 
 		@Override

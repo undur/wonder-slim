@@ -20,6 +20,7 @@ import er.extensions.appserver.ERXWOContext;
 import er.routing.core.Converters;
 import er.routing.core.Host;
 import er.routing.core.PathPattern;
+import er.routing.core.RouteCondition;
 import er.routing.core.RouteOption;
 import er.routing.core.RouteRequest;
 
@@ -135,8 +136,38 @@ public final class Route<P extends Record> {
 	}
 
 	/**
-	 * @return The route's parameters built from values by name, as a link element has them. A value given as a string
-	 *         (a constant in a template) is converted to the component's type.
+	 * @return The route's parameters built from values by name, as a link element has them, taking host parameters the
+	 *         values don't have from the context's request (see below). A value given as a string (a constant in a
+	 *         template) is converted to the component's type.
+	 */
+	public P parameters( final Map<String, Object> values, final WOContext context ) {
+		return parameters( withHostParameters( values, context ) );
+	}
+
+	/**
+	 * @return The values, with the host parameters they don't have taken from the request's host, if it matches the
+	 *         route's host pattern: a link within a host doesn't repeat its parameters
+	 */
+	private Map<String, Object> withHostParameters( final Map<String, Object> values, final WOContext context ) {
+
+		if( _host == null || _host.parameterNames().isEmpty() || context == null || context.request() == null || values.keySet().containsAll( _host.parameterNames() ) ) {
+			return values;
+		}
+
+		final String requestHost = RequestHost.host( context.request() );
+
+		if( requestHost == null || !(_host.test( new RouteRequest( "GET", requestHost, "/" ) ) instanceof RouteCondition.Satisfied satisfied) ) {
+			return values;
+		}
+
+		final Map<String, Object> all = new LinkedHashMap<>( values );
+		satisfied.parameters().forEach( all::putIfAbsent );
+		return all;
+	}
+
+	/**
+	 * @return The route's parameters built from values by name. A value given as a string (a constant in a template) is
+	 *         converted to the component's type.
 	 */
 	public P parameters( final Map<String, Object> values ) {
 		final List<String> unknown = values.keySet().stream().filter( name -> !parameterNames().contains( name ) ).toList();

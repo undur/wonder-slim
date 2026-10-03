@@ -85,7 +85,7 @@
 		<header>
 			<div class="top">
 				<wo:if condition="$club">
-					<wo:route route="$routes.clubHome" :club="$club.id" class="club"><wo:str value="$club.name" /></wo:route>
+					<wo:route route="$routes.clubHome" class="club"><wo:str value="$club.name" /></wo:route>
 				</wo:if>
 				<wo:if condition="$club" negate="$true">
 					<span class="club">Book clubs</span>
@@ -94,13 +94,13 @@
 			</div>
 			<wo:if condition="$club">
 				<nav>
-					<wo:route route="$routes.books" :club="$club.id">Books</wo:route>
-					<wo:route route="$routes.newBook" :club="$club.id">Add a book</wo:route>
-					<wo:route route="$routes.clubText" :club="$club.id" :name="history">History</wo:route>
-					<wo:route route="$routes.about" :club="$club.id">About</wo:route>
+					<wo:route route="$routes.books">Books</wo:route>
+					<wo:route route="$routes.newBook">Add a book</wo:route>
+					<wo:route route="$routes.clubText" :name="history">History</wo:route>
+					<wo:route route="$routes.about">About</wo:route>
 					<a href="/rules">Rules</a>
 					<a href="/guestbook">Guestbook</a>
-					<wo:route route="$routes.admin" :club="$club.id" ?key="letmein">Admin</wo:route>
+					<wo:route route="$routes.admin" ?key="letmein">Admin</wo:route>
 				</nav>
 			</wo:if>
 		</header>
