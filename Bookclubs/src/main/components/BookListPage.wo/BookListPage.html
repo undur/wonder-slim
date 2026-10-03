@@ -1,17 +1,24 @@
 <wo:Frame club="$club" title="Books">
 	<h1>Books</h1>
 	<p class="sort">Sort by
-		<wo:route route="$routes.books" :sort="title">title</wo:route>,
-		<wo:route route="$routes.books" :sort="author">author</wo:route> or
-		<wo:route route="$routes.books" :sort="year">year</wo:route>
+		<wo:route route="$routes.books" :sort="title" :author="$authors">title</wo:route>,
+		<wo:route route="$routes.books" :sort="author" :author="$authors">author</wo:route> or
+		<wo:route route="$routes.books" :sort="year" :author="$authors">year</wo:route>
 	</p>
+	<wo:routeForm route="$routes.books" method="get" class="filter">
+		<wo:genericElement elementName="input" type="hidden" name="sort" value="$sort" />
+		<wo:repetition list="$allAuthors" item="$anAuthor">
+			<label><wo:genericElement elementName="input" type="checkbox" name="author" value="$anAuthor" checked="$anAuthorChecked" /> <wo:str value="$anAuthor" /></label>
+		</wo:repetition>
+		<button type="submit">Show</button>
+	</wo:routeForm>
 	<ul>
 		<wo:repetition list="$books" item="$book">
 			<li><wo:route route="$routes.book" :book="$book"><wo:str value="$book.title" /></wo:route> <span class="muted"><wo:str value="$book.author" />, <wo:str value="$book.year" valueWhenEmpty="year unknown" /></span></li>
 		</wo:repetition>
 	</ul>
 	<p class="pager">
-		<wo:if condition="$hasPrevious"><wo:route route="$routes.books" :sort="$sort" :page="$previousPage">← Previous</wo:route></wo:if>
-		<wo:if condition="$hasNext"><wo:route route="$routes.books" :sort="$sort" :page="$nextPage">Next →</wo:route></wo:if>
+		<wo:if condition="$hasPrevious"><wo:route route="$routes.books" :sort="$sort" :page="$previousPage" :author="$authors">← Previous</wo:route></wo:if>
+		<wo:if condition="$hasNext"><wo:route route="$routes.books" :sort="$sort" :page="$nextPage" :author="$authors">Next →</wo:route></wo:if>
 	</p>
 </wo:Frame>

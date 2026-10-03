@@ -220,10 +220,16 @@ public class RouteGroupTest {
 	 * A request whose form values are given, since reading them from a URI needs a running application
 	 */
 	private static RouteInvocation invocation( final String path, final Map<String, String> formValues, final ERXRouter router ) {
+		final Map<String, List<String>> lists = new java.util.HashMap<>();
+		formValues.forEach( ( name, value ) -> lists.put( name, List.of( value ) ) );
+		return invocationWithLists( path, lists, router );
+	}
+
+	private static RouteInvocation invocationWithLists( final String path, final Map<String, List<String>> formValues, final ERXRouter router ) {
 		final com.webobjects.appserver.WORequest request = new com.webobjects.appserver.WORequest( "GET", path, "HTTP/1.1", null, null, null ) {
 			@Override
-			public String stringFormValueForKey( final String key ) {
-				return formValues.get( key );
+			public com.webobjects.foundation.NSArray<Object> formValuesForKey( final String key ) {
+				return formValues.containsKey( key ) ? new com.webobjects.foundation.NSArray<>( formValues.get( key ).toArray() ) : null;
 			}
 		};
 
@@ -269,5 +275,59 @@ public class RouteGroupTest {
 
 		assertEquals( asked, listing.handle( invocation( "/list", Map.of( "page", "abc" ), router ) ) );
 		assertTrue( reasons.getFirst().contains( "'page' is 'abc'" ) );
+	}
+
+	public enum Genre {
+		novel,
+		poetry,
+		drama
+	}
+
+	public record Shelf( String club, List<Genre> genres, List<Integer> years, String q ) {}
+
+	@Test
+	public void aListTakesARepeatedParameter() {
+		final ERXRouter router = new ERXRouter();
+		final List<Shelf> got = new ArrayList<>();
+		final Route<Shelf> shelf = router.application().route( "/{club}/shelf", Shelf.class, ( s, invocation ) -> {
+			got.add( s );
+			return () -> null;
+		} );
+
+		final RouteInvocation invocation = new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of( "genres", List.of( "novel", "drama" ), "years", List.of( "1934", "" ) ), router ).request(), Map.of( "club", "acme" ), router.converters() );
+		shelf.handle( invocation );
+		assertEquals( new Shelf( "acme", List.of( Genre.novel, Genre.drama ), List.of( 1934 ), null ), got.getFirst() );
+
+		// None is an empty list
+		shelf.handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of(), router ).request(), Map.of( "club", "acme" ), router.converters() ) );
+		assertEquals( List.of(), got.get( 1 ).genres() );
+
+		// A value that isn't one declines, as does a second value for one
+		assertEquals( RouteHandler.DECLINED, shelf.handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of( "genres", List.of( "novel", "opera" ) ), router ).request(), Map.of( "club", "acme" ), router.converters() ) ) );
+		assertEquals( RouteHandler.DECLINED, shelf.handle( new RouteInvocation( "/acme/shelf", invocationWithLists( "/acme/shelf", Map.of( "q", List.of( "a", "b" ) ), router ).request(), Map.of( "club", "acme" ), router.converters() ) ) );
+	}
+
+	@Test
+	public void aListsLinkRepeatsTheParameter() {
+		final Route<Shelf> shelf = new ERXRouter().application().route( "/{club}/shelf", Shelf.class, ( s, invocation ) -> null );
+
+		// By name: a collection, or one value
+		assertThrows( IllegalArgumentException.class, () -> shelf.url( Map.of( "club", "acme", "genres", List.of( "novel", "opera" ) ), null ) );
+		assertThrows( IllegalArgumentException.class, () -> shelf.url( Map.of( "club", "acme", "q", List.of( "a", "b" ) ), null ) );
+	}
+
+	public record ListInPath( List<String> tags ) {}
+
+	public record RawList( @SuppressWarnings("rawtypes") List tags ) {}
+
+	public record ListOfObjects( List<Thread> threads ) {}
+
+	@Test
+	public void aListIsAQueryParameterOfAConvertibleType() {
+		final RouteGroup routes = new ERXRouter().application();
+
+		assertThrows( IllegalArgumentException.class, () -> routes.route( "/tags/{tags}", ListInPath.class, ( r, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.route( "/raw", RawList.class, ( r, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.route( "/threads", ListOfObjects.class, ( r, invocation ) -> null ) );
 	}
 }

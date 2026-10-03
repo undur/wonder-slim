@@ -9,7 +9,7 @@ import bookclubs.data.Library.Book;
 import bookclubs.data.Library.Sort;
 
 /**
- * The books, sorted, two to a page
+ * The books, sorted, two to a page, of the authors chosen (all, if none are)
  */
 public class BookListPage extends BaseComponent {
 
@@ -19,12 +19,32 @@ public class BookListPage extends BaseComponent {
 	public int page;
 	public Book book;
 
+	/**
+	 * The authors whose books are shown, all if it's empty: {@code ?author=…&author=…}, a repeated parameter
+	 */
+	public List<String> authors = List.of();
+	public String anAuthor;
+
 	public BookListPage( final WOContext context ) {
 		super( context );
 	}
 
 	private List<Book> all() {
-		return Library.books( club.id(), sort );
+		return Library.books( club.id(), sort ).stream().filter( b -> authors.isEmpty() || authors.contains( b.author() ) ).toList();
+	}
+
+	/**
+	 * @return Every author in the club, for the filter
+	 */
+	public List<String> allAuthors() {
+		return Library.books( club.id(), Sort.author ).stream().map( Book::author ).distinct().toList();
+	}
+
+	/**
+	 * @return {@code checked} for an author whose books are shown, null otherwise (the attribute left out)
+	 */
+	public String anAuthorChecked() {
+		return authors.contains( anAuthor ) ? "checked" : null;
 	}
 
 	public List<Book> books() {

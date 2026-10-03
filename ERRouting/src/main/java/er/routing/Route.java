@@ -2,9 +2,11 @@ package er.routing;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WOResponse;
+import com.webobjects.foundation.NSArray;
 
 import er.extensions.appserver.ERXWOContext;
 import er.routing.core.Converters;
@@ -75,6 +78,11 @@ public final class Route<P extends Record> implements Linkable {
 	private final boolean _reportFields;
 	private volatile Invalid _whenInvalid;
 	private final RecordComponent[] _components;
+
+	/**
+	 * For each component, the type of its values if it's a {@code List} (a repeated parameter), null if it isn't
+	 */
+	private final Class<?>[] _elementTypes;
 	private final Constructor<P> _constructor;
 
 	/**
@@ -111,7 +119,16 @@ public final class Route<P extends Record> implements Linkable {
 			}
 		}
 
-		for( final RecordComponent component : _components ) {
+		_elementTypes = new Class<?>[_components.length];
+
+		for( int i = 0; i < _components.length; i++ ) {
+			final RecordComponent component = _components[i];
+
+			if( component.getType() == List.class ) {
+				_elementTypes[i] = elementType( component );
+				continue;
+			}
+
 			if( !_converters.converts( component.getType() ) ) {
 				throw new IllegalArgumentException( "%s.%s is a %s, which has no converter, so it can't be a route parameter. Register one in the router's converters before declaring the route".formatted( parametersClass.getSimpleName(), component.getName(), component.getType().getSimpleName() ) );
 			}
@@ -169,7 +186,8 @@ public final class Route<P extends Record> implements Linkable {
 	 *         has a host other than the request's.
 	 */
 	public String url( final P parameters, final WOContext context ) {
-		return RouteURLs.url( _path, _host, strings( parameters ), _routeParameterNames, context );
+		final Link link = link( parameters );
+		return RouteURLs.url( _path, _host, link.routeValues(), link.queryValues(), context );
 	}
 
 	/**
@@ -177,20 +195,46 @@ public final class Route<P extends Record> implements Linkable {
 	 *         the application's public address ({@link PublicAddress}), which must be set
 	 */
 	public String completeURL( final P parameters ) {
-		return RouteURLs.completeURL( _path, _host, strings( parameters ), _routeParameterNames );
+		final Link link = link( parameters );
+		return RouteURLs.completeURL( _path, _host, link.routeValues(), link.queryValues() );
 	}
 
 	/**
-	 * @return The record's values as URL text by name, without those that are null
+	 * A link's values as URL text: the route parameters by name, and the query's name and value pairs in order (a list's
+	 * name once for each of its values)
 	 */
-	private Map<String, String> strings( final P parameters ) {
-		final Map<String, String> strings = new LinkedHashMap<>();
+	private record Link( Map<String, String> routeValues, List<Map.Entry<String, String>> queryValues ) {
+
+		Link() {
+			this( new LinkedHashMap<>(), new ArrayList<>() );
+		}
+
+		void add( final String name, final String text, final boolean routeParameter ) {
+			if( routeParameter ) {
+				routeValues.put( name, text );
+			}
+			else {
+				queryValues.add( Map.entry( name, text ) );
+			}
+		}
+	}
+
+	/**
+	 * @return The record's values as URL text, without those that are null
+	 */
+	private Link link( final P parameters ) {
+		final Link link = new Link();
+
 		values( parameters ).forEach( ( name, value ) -> {
-			if( value != null ) {
-				strings.put( name, _converters.toString( value ) );
+			if( value instanceof List<?> list ) {
+				list.stream().filter( Objects::nonNull ).forEach( element -> link.add( name, _converters.toString( element ), false ) );
+			}
+			else if( value != null ) {
+				link.add( name, _converters.toString( value ), _routeParameterNames.contains( name ) );
 			}
 		} );
-		return strings;
+
+		return link;
 	}
 
 	/**
@@ -228,31 +272,50 @@ public final class Route<P extends Record> implements Linkable {
 			throw new IllegalArgumentException( "The route %s has no parameter %s. Its parameters are %s".formatted( description(), unknown, parameterNames() ) );
 		}
 
-		final Map<String, String> strings = new LinkedHashMap<>();
+		final Link link = new Link();
 
-		for( final RecordComponent component : _components ) {
-			final Object value = all.get( component.getName() );
+		for( int i = 0; i < _components.length; i++ ) {
+			final String name = _components[i].getName();
+			final Object value = all.get( name );
 
 			if( value == null ) {
-				if( _routeParameterNames.contains( component.getName() ) ) {
-					throw new IllegalArgumentException( "The route %s needs its parameter '%s'".formatted( description(), component.getName() ) );
+				if( _routeParameterNames.contains( name ) ) {
+					throw new IllegalArgumentException( "The route %s needs its parameter '%s'".formatted( description(), name ) );
 				}
 
 				continue;
 			}
 
-			strings.put( component.getName(), text( component, value ) );
+			if( _elementTypes[i] != null ) {
+
+				// A list takes a collection (an NSArray too), or one value
+				final Collection<?> elements = value instanceof Collection<?> collection ? collection : List.of( value );
+
+				for( final Object element : elements ) {
+					if( element != null ) {
+						link.add( name, text( name, _elementTypes[i], element ), false );
+					}
+				}
+
+				continue;
+			}
+
+			if( value instanceof Collection<?> ) {
+				throw new IllegalArgumentException( "The parameter '%s' of the route %s takes one value, and was given several: %s. A repeated parameter is a List".formatted( name, description(), value ) );
+			}
+
+			link.add( name, text( name, _components[i].getType(), value ), _routeParameterNames.contains( name ) );
 		}
 
-		return RouteURLs.url( _path, _host, strings, _routeParameterNames, context );
+		return RouteURLs.url( _path, _host, link.routeValues(), link.queryValues(), context );
 	}
 
 	/**
 	 * @return The value as URL text, checked against the component's type: a string is converted to the type and back
 	 *         (so it's the canonical text), anything else must be of the type
 	 */
-	private String text( final RecordComponent component, final Object value ) {
-		final Class<?> type = Converters.boxed( component.getType() );
+	private String text( final String name, final Class<?> componentType, final Object value ) {
+		final Class<?> type = Converters.boxed( componentType );
 
 		if( value instanceof InheritedText inherited ) {
 			return inherited.text();
@@ -262,7 +325,7 @@ public final class Route<P extends Record> implements Linkable {
 		// just any object's toString(), which would make a wrong binding a garbage URL
 		if( type == String.class && !(value instanceof String) ) {
 			if( !_converters.converts( value.getClass() ) ) {
-				throw new IllegalArgumentException( "The parameter '%s' of the route %s is text, and was given a %s, which has no converter: %s".formatted( component.getName(), description(), value.getClass().getSimpleName(), value ) );
+				throw new IllegalArgumentException( "The parameter '%s' of the route %s is text, and was given a %s, which has no converter: %s".formatted( name, description(), value.getClass().getSimpleName(), value ) );
 			}
 
 			return _converters.toString( value );
@@ -275,18 +338,18 @@ public final class Route<P extends Record> implements Linkable {
 				converted = _converters.fromString( string, type );
 			}
 			catch( IllegalArgumentException e ) {
-				throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and '%s' isn't one".formatted( component.getName(), description(), type.getSimpleName(), string ), e );
+				throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and '%s' isn't one".formatted( name, description(), type.getSimpleName(), string ), e );
 			}
 
 			if( converted == null ) {
-				throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and there's none for '%s'".formatted( component.getName(), description(), type.getSimpleName(), string ) );
+				throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, and there's none for '%s'".formatted( name, description(), type.getSimpleName(), string ) );
 			}
 
 			return _converters.toString( converted );
 		}
 
 		if( !type.isInstance( value ) ) {
-			throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, but was given a %s: %s".formatted( component.getName(), description(), type.getSimpleName(), value.getClass().getSimpleName(), value ) );
+			throw new IllegalArgumentException( "The parameter '%s' of the route %s is a %s, but was given a %s: %s".formatted( name, description(), type.getSimpleName(), value.getClass().getSimpleName(), value ) );
 		}
 
 		return _converters.toString( value );
@@ -304,20 +367,15 @@ public final class Route<P extends Record> implements Linkable {
 		for( int i = 0; i < _components.length; i++ ) {
 			final RecordComponent component = _components[i];
 			final String name = component.getName();
-			final String string = _routeParameterNames.contains( name ) ? invocation.parameter( name ) : invocation.request().stringFormValueForKey( name );
-
-			if( string == null || (string.isEmpty() && component.getType() != String.class) ) {
-				continue;
-			}
-
-			try {
-				arguments[i] = _converters.fromString( string, component.getType() );
-			}
-			catch( IllegalArgumentException e ) {
-				arguments[i] = null;
-			}
 
 			if( _routeParameterNames.contains( name ) ) {
+				final String string = invocation.parameter( name );
+
+				if( string == null || (string.isEmpty() && component.getType() != String.class) ) {
+					continue;
+				}
+
+				arguments[i] = convert( string, component.getType() );
 
 				// A route parameter that isn't one of the type, or names an object that doesn't exist, means the URL is wrong
 				if( arguments[i] == null ) {
@@ -328,17 +386,65 @@ public final class Route<P extends Record> implements Linkable {
 				if( !_converters.isCanonical( string, arguments[i] ) ) {
 					throw new NotCanonical( name, _converters.toString( arguments[i] ) );
 				}
-			}
-			else if( arguments[i] == null ) {
 
-				// A query parameter or field that doesn't convert goes to the route's whenInvalid, or declines, unless the route
-				// takes the errors with its record (Fields.REPORTED, a form)
-				if( !_reportFields ) {
-					final String reason = "The query parameter or field '%s' is '%s', which isn't a %s, or names none".formatted( name, string, component.getType().getSimpleName() );
-					return _whenInvalid != null ? _whenInvalid.invoke( invocation, new IllegalArgumentException( reason ) ) : declined( invocation, reason );
+				continue;
+			}
+
+			final List<String> texts = formValues( invocation, name );
+
+			// A repeated parameter: every value, an empty list for none
+			if( _elementTypes[i] != null ) {
+				final List<Object> values = new ArrayList<>();
+
+				for( final String text : texts ) {
+					if( text.isEmpty() && _elementTypes[i] != String.class ) {
+						continue;
+					}
+
+					final Object value = convert( text, _elementTypes[i] );
+
+					if( value == null ) {
+						final WOActionResults refused = badInput( invocation, name, text, "The query parameter or field '%s' has the value '%s', which isn't a %s, or names none".formatted( name, text, _elementTypes[i].getSimpleName() ) );
+
+						if( refused != null ) {
+							return refused;
+						}
+
+						continue;
+					}
+
+					values.add( value );
 				}
 
-				invocation.addConversionError( name, string );
+				arguments[i] = List.copyOf( values );
+				continue;
+			}
+
+			// Several values for one is a mistake (two fields of the same name), not a choice to make silently
+			if( texts.size() > 1 ) {
+				final WOActionResults refused = badInput( invocation, name, String.join( ", ", texts ), "The query parameter or field '%s' takes one value, and was given %d: %s. A repeated parameter is a List".formatted( name, texts.size(), texts ) );
+
+				if( refused != null ) {
+					return refused;
+				}
+
+				continue;
+			}
+
+			final String string = texts.isEmpty() ? null : texts.getFirst();
+
+			if( string == null || (string.isEmpty() && component.getType() != String.class) ) {
+				continue;
+			}
+
+			arguments[i] = convert( string, component.getType() );
+
+			if( arguments[i] == null ) {
+				final WOActionResults refused = badInput( invocation, name, string, "The query parameter or field '%s' is '%s', which isn't a %s, or names none".formatted( name, string, component.getType().getSimpleName() ) );
+
+				if( refused != null ) {
+					return refused;
+				}
 			}
 		}
 
@@ -378,6 +484,60 @@ public final class Route<P extends Record> implements Linkable {
 		final NullPointerException named = new NullPointerException( "Missing: " + missing );
 		named.initCause( e );
 		return named;
+	}
+
+	/**
+	 * A query parameter or field that doesn't convert goes to the route's whenInvalid, or declines, unless the route
+	 * takes the errors with its record (Fields.REPORTED, a form)
+	 *
+	 * @return The answer to the request, null if the route takes the error (reported, its value null or left out)
+	 */
+	private WOActionResults badInput( final RouteInvocation invocation, final String name, final String text, final String reason ) {
+
+		if( _reportFields ) {
+			invocation.addConversionError( name, text );
+			return null;
+		}
+
+		return _whenInvalid != null ? _whenInvalid.invoke( invocation, new IllegalArgumentException( reason ) ) : declined( invocation, reason );
+	}
+
+	/**
+	 * @return The value for the text, null if it isn't one of the type or names nothing
+	 */
+	private Object convert( final String text, final Class<?> type ) {
+		try {
+			return _converters.fromString( text, type );
+		}
+		catch( IllegalArgumentException e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * @return The request's values for a query parameter or field, in order, empty for none (a file's content isn't one)
+	 */
+	private static List<String> formValues( final RouteInvocation invocation, final String name ) {
+		final NSArray<Object> values = invocation.request().formValuesForKey( name );
+		return values == null ? List.of() : values.stream().filter( String.class::isInstance ).map( String.class::cast ).toList();
+	}
+
+	/**
+	 * @return The type of a List component's values (a repeated parameter)
+	 * @throws IllegalArgumentException if it's a route parameter (which has one value), or isn't a list of a type with a
+	 *         converter
+	 */
+	private Class<?> elementType( final RecordComponent component ) {
+
+		if( _routeParameterNames.contains( component.getName() ) ) {
+			throw new IllegalArgumentException( "%s.%s is a List, and a route parameter has one value: a repeated parameter is a query parameter".formatted( _parametersClass.getSimpleName(), component.getName() ) );
+		}
+
+		if( component.getGenericType() instanceof ParameterizedType list && list.getActualTypeArguments()[0] instanceof Class<?> type && _converters.converts( type ) ) {
+			return type;
+		}
+
+		throw new IllegalArgumentException( "%s.%s is a %s: a repeated parameter is a List of a type with a converter (List<String>, List<Genre>)".formatted( _parametersClass.getSimpleName(), component.getName(), component.getGenericType().getTypeName() ) );
 	}
 
 	/**

@@ -73,7 +73,7 @@ public final class PlainRoute implements Linkable {
 			}
 		} );
 
-		return RouteURLs.url( _path, _host, strings, _routeParameterNames, context );
+		return RouteURLs.url( _path, _host, strings, List.of(), context );
 	}
 
 	@Override

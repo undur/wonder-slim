@@ -77,13 +77,14 @@ public class BookclubRoutes {
 	/**
 	 * The books, sorted, a page at a time: query parameters with types, absent ones (or ones that don't convert) null
 	 */
-	public record Books( Club club, Sort sort, Integer page ) implements Routable {
+	public record Books( Club club, Sort sort, Integer page, List<String> author ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
 			final BookListPage list = invocation.page( BookListPage.class ).club( club );
 			list.sort = sort == null ? Sort.title : sort;
 			list.page = page == null || page < 1 ? 1 : page;
+			list.authors = author;
 			return list;
 		}
 	}
@@ -322,7 +323,7 @@ public class BookclubRoutes {
 			return RouteHandler.DECLINED;
 		}
 
-		return instance().books.redirect( new Books( delete.club(), null, null ), invocation.context() );
+		return instance().books.redirect( new Books( delete.club(), null, null, List.of() ), invocation.context() );
 	}
 
 	private static WOActionResults reset( final Reset reset, final RouteInvocation invocation ) {

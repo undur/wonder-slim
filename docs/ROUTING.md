@@ -195,6 +195,24 @@ the query string, so each object has one URL. A converter whose type is written 
 one text. The redirect comes while the parameters are converted, before the route decides anything, so a URL the route
 would decline (another club's book) is redirected first, and then declined.
 
+### Repeated parameters
+
+A query parameter or field given several values (`?author=Laxness&author=Undset`, a form's checkboxes) is a `List`
+component of a type with a converter:
+
+```java
+public record Books( Club club, Sort sort, Integer page, List<String> author ) implements Routable { … }
+```
+
+It has every value, in order, and is an empty list when there are none (never null). A value that doesn't convert is bad
+input, as for any query parameter (declined, `whenInvalid`, or reported and left out with `Fields.REPORTED`). A link
+repeats the parameter for each value: `:author="$authors"` takes a list (an `NSArray` too) or one value. A route
+parameter has one value, so a path or host parameter can't be a `List`.
+
+A component that isn't a `List` takes one value: given several (`?sort=title&sort=year`, two fields of the same name),
+it's bad input rather than the first one silently. A checkbox doesn't need the hidden field some frameworks pair it
+with: an absent `Boolean` is null, and a checked one posts `on`.
+
 ### Reaching typed routes from templates
 
 Templates reach typed routes through a key path, which the editor can follow to each typed route's record. Bookclubs keeps its
@@ -259,7 +277,7 @@ final String sorted = routes.books.url( Map.of( "sort", Sort.author ), context )
 makes a page in the invocation's context:
 
 ```java
-return instance().books.redirect( new Books( delete.club(), null, null ), invocation.context() );
+return instance().books.redirect( new Books( delete.club(), null, null, List.of() ), invocation.context() );
 return invocation.page( ClubPage.class ).club( club );
 ```
 
@@ -488,6 +506,4 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
 - Without the public address, a link to another host assumes the request's scheme and port, and complete URLs of
   routes without a host have the request's host.
 - Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.
-- Repeated parameters: `?sort=title&sort=year` takes the first value, and a component can't be a `List` (a search form's
-  checkboxes, say).
 - `/docs` and `/docs/`, both strict, are refused as the same route, though no request matches both.

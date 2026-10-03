@@ -331,7 +331,7 @@ public class ERXRouter {
 
 		final String uri = invocation.request().uri();
 		final int q = uri.indexOf( '?' );
-		final String url = RouteURLs.url( candidate.entry().path(), host, values, values.keySet(), invocation.context() );
+		final String url = RouteURLs.url( candidate.entry().path(), host, values, List.of(), invocation.context() );
 
 		final WOResponse response = new WOResponse();
 		response.setStatus( 308 );

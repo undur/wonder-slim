@@ -2,8 +2,8 @@ package er.routing;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -32,10 +32,10 @@ public class RouteURLs {
 	 *         and the host, the others are the query. Complete, to the route's host, if it has one other than the
 	 *         request's.
 	 */
-	static String url( final PathPattern path, final Host host, final Map<String, String> values, final Collection<String> routeParameterNames, final WOContext context ) {
+	static String url( final PathPattern path, final Host host, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues, final WOContext context ) {
 		Objects.requireNonNull( context, "A route URL is generated in a context, and there's none" );
 
-		final String query = query( values, routeParameterNames );
+		final String query = query( queryValues );
 		final String url = url( path.path( values ), query.isEmpty() ? null : query, context );
 		final PublicAddress.Origin publicAddress = PublicAddress.configured();
 
@@ -53,9 +53,9 @@ public class RouteURLs {
 	 * @return The complete URL for a route and parameter values as text, without a request: from the application's public
 	 *         address (which must be set), in the application's URL form (short, or with the adaptor prefix)
 	 */
-	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final Collection<String> routeParameterNames ) {
+	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues ) {
 		final PublicAddress.Origin publicAddress = PublicAddress.required();
-		final String query = query( values, routeParameterNames );
+		final String query = query( queryValues );
 		final String routePath = path.path( values );
 		final String applicationPath = ERXApplication.erxApplication().shortURLs() ? routePath : ERXApplication.erxApplication().applicationURLPrefix() + "/" + ERXShortURLs.ROUTE_KEY + routePath;
 		final String origin = host == null ? publicAddress.origin() : publicAddress.origin( host.host( values ) );
@@ -63,11 +63,11 @@ public class RouteURLs {
 	}
 
 	/**
-	 * @return The query string for the values that aren't route parameters, encoded, empty for none
+	 * @return The query string for the name and value pairs, in their order (a name repeated for each of a list's values),
+	 *         encoded, empty for none
 	 */
-	private static String query( final Map<String, String> values, final Collection<String> routeParameterNames ) {
-		return values.entrySet().stream()
-				.filter( e -> !routeParameterNames.contains( e.getKey() ) )
+	private static String query( final List<Map.Entry<String, String>> queryValues ) {
+		return queryValues.stream()
 				.map( e -> URLEncoder.encode( e.getKey(), StandardCharsets.UTF_8 ) + "=" + URLEncoder.encode( e.getValue(), StandardCharsets.UTF_8 ) )
 				.collect( Collectors.joining( "&" ) );
 	}
