@@ -54,7 +54,9 @@ A constant no declaration gives a pattern to stops the application's launch, nam
 
 In development, routes are declared again when their classes change: the declaring class's folder, a constants
 interface's, or a route's record's. Change a pattern, add a route (a new constant included), or add a component to a
-record, and the next request has it, with no restart. The constants stay the same objects, and follow the routes. Every
+record, and the next request has it, with no restart. The constants follow the routes. A change to the constants'
+interface makes them new objects (the hot swap runs its initializer again), which templates and `Routes.book` read
+fresh; a constant kept in a field of its own goes stale then. Every
 declaration runs again, in the order they were first made (an application and its plugins), into a new router that
 replaces the current one once they all succeed. Building is cheap (5,000 routes take a few milliseconds), and the check
 for changes reads the class files in those folders at most once a second.
