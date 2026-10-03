@@ -48,7 +48,7 @@ public class ERXRouter {
 	/**
 	 * What the core router routes to: a handler, and the group it was mapped in (for its wrapping)
 	 */
-	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass ) {}
+	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, boolean crossSiteAllowed ) {}
 
 	private final Router<Mapped> _router;
 	private final Converters _converters = new Converters();
@@ -262,8 +262,23 @@ public class ERXRouter {
 
 	private WOActionResults answer( final Router.Matched<Mapped> matched, final er.extensions.routes.RouteInvocation invocation ) {
 
+		Boolean crossSite = null;
+
 		for( final Router.Candidate<Mapped> candidate : matched.candidates() ) {
 			final Mapped mapped = candidate.handler();
+
+			// A post from a page on another site, to a route that doesn't take those
+			if( !mapped.crossSiteAllowed() ) {
+				if( crossSite == null ) {
+					crossSite = CrossSite.refused( invocation.request(), RequestHost.host( invocation.request() ), PublicAddress.configured() );
+				}
+
+				if( crossSite ) {
+					logger.debug( "The route {} refused {} {} from another site (origin {})", candidate.entry(), invocation.request().method(), invocation.url(), invocation.request().headerForKey( "origin" ) );
+					return CrossSite.forbidden();
+				}
+			}
+
 			final RouteInvocation routedInvocation = new RouteInvocation( invocation.url(), invocation.request(), candidate.parameters(), _converters );
 			WOActionResults results;
 

@@ -129,7 +129,7 @@ public final class RouteGroup {
 		final List<RouteOption> allOptions = allOptions( options );
 		final Host host = (Host)allOptions.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
 		final PlainRoute route = new PlainRoute( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null ), allOptions );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, allOptions.contains( CrossSite.ALLOWED ) ), allOptions );
 		return route;
 	}
 
@@ -154,7 +154,7 @@ public final class RouteGroup {
 	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteOption... options ) {
 		final List<RouteOption> allOptions = allOptions( options );
 		final Route<P> route = new Route<>( fullPattern( pattern ), allOptions, parametersClass, action, _router.converters() );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( route::handle, this, route, parametersClass ), allOptions );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( route::handle, this, route, parametersClass, allOptions.contains( CrossSite.ALLOWED ) ), allOptions );
 		return route;
 	}
 

@@ -324,6 +324,22 @@ private static WOActionResults createBook( final CreateBook form, final RouteInv
 }
 ```
 
+### Posts from other sites
+
+A route doesn't take a request that changes things (POST, PUT, PATCH, DELETE) from a page on another site: it's
+answered with `403`, so a page elsewhere can't post a form to the application with the user's cookies. The browser says
+where a request comes from (`Sec-Fetch-Site`, or `Origin`, compared with the request's host and the public address), and
+a request with neither isn't from a browser page (curl, a server's webhook), so it's taken. Another subdomain is another
+site: a page on `kronan.localhost` doesn't post to `acme.localhost`.
+
+A route (or a group) meant to take them says so:
+
+```java
+api.map( "/hooks/payment", BookclubRoutes::paymentHook, Method.POST, CrossSite.ALLOWED );
+```
+
+This covers routes: component actions and the route table's other routes aren't checked.
+
 ## Conditions
 
 A route can require more of a request than its path. Conditions are declared with the route, among its options (as is
@@ -474,6 +490,4 @@ guestbook = new GuestbookPlugin( router.table( "guestbook" ) ); // a plugin's
 - Wildcards in typed routes, and a redirect from `/files` to a wildcard's `/files/`.
 - Repeated parameters: `?sort=title&sort=year` takes the first value, and a component can't be a `List` (a search form's
   checkboxes, say).
-- Protection against forms posted from another site: a route taking a post has none of its own. A stock filter
-  checking the request's origin would cover it (ng-objects has the same question, ngobjects/ng-objects#58).
 - `/docs` and `/docs/`, both strict, are refused as the same route, though no request matches both.
