@@ -407,8 +407,9 @@ Not built yet (the guide's "Not there yet" lists them for users):
 - Converging with the existing routes, and the ng-objects side. The pieces free of WebObjects (the core, the
   declarations and reload, the cross-site decision) are written to move; routes, groups and links still take the WO
   request and context, and move behind the core's request view and a result type when ng-objects gets the router.
-- #67 deployed: the application side is built (ERXRequestOrigin); modulo's half, the check of what Apache passes through
-  (undur/modulo#14), and deploying both together aren't.
+- #67 (where a request came from, forwarded headers from trusted front ends) and #51 (the base path): framework
+  changes, made on `master` first and not on this branch, which keeps its ERExtensions changes to a minimum. The router
+  follows them when they're there.
 - Decisions for convergence: the conditions and converters live in `er.routing.core`, so an application imports from
   two packages; `RouteHandler` and `RouteInvocation` share their names with `er.extensions.routes` until those go.
 - A tree for matching: the router scans its routes, sorted by precedence, which takes about 9 µs per request with 1,000

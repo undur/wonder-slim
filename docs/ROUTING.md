@@ -454,20 +454,11 @@ headers (`RouteRequest`).
 
 ### Where a request came from
 
-The client's address, the host it asked for and whether it came over https are determined in one place for the whole
-framework (`ERXRequestOrigin`, #67): the router's hosts, generated URLs and `ERXRequest` agree. A front end's forwarded
-headers are believed only when the request's connection comes from a trusted front end (loopback and private networks
-by default, `er.extensions.ERXRequest.trustedFrontEnds`), first match wins:
+A route's host is the request's `Host` header. Whether a front end's forwarded host (and scheme) counts is decided for
+the whole framework in one place, with #67, rather than by the router.
 
-- host: `x-webobjects-server-name`, `x-forwarded-host`, then `Host`
-- https: the `https` header, `x-forwarded-proto`, then the port the front end reports
-- client address: `x-webobjects-remote-addr`, the last `x-forwarded-for` entry, then the connection
-
-From anyone else the request is taken as it arrived.
-
-An application served beneath a path of its own (`https://example.com/shop/…`, two applications on one host) sets it
-(#51): `er.extensions.ERXApplication.basePath=/shop`. Generated URLs start with it, and a request's URL has it removed
-before routing, so routes are declared as if the application were at the root. It needs short URLs.
+An application served beneath a path of its own (`https://example.com/shop/…`) is #51, which comes to the framework on
+`master` first; the router's URLs will follow it.
 
 ## Groups
 
