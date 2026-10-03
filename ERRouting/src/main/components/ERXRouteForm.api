@@ -2,7 +2,6 @@
 <wodefinitions>
 	<wo class="ERXRouteForm" wocomponentcontent="true">
 		<binding name="route"/>
-		<binding name="secure"/>
 		<binding name="multipleSubmit"/>
 		<binding name="queryDictionary"/>
 		<binding name="name"/>

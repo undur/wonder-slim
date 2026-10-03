@@ -9,7 +9,6 @@ Attributes prefixed with `?` become further query parameters (`?highlight="yes"`
 		<binding name="route" required="true"><pull><type>er.routing.Linkable</type></pull><doc>Route to link to: a typed route or a plain one. Its parameters are bound with `:` attributes.</doc></binding>
 		<binding name="queryDictionary"><pull><type>java.util.Map</type></pull><doc>Query parameters added to the URL.</doc></binding>
 		<binding name="fragmentIdentifier"><pull><type>java.lang.String</type></pull><doc>Fragment (`#…`) appended to the URL.</doc></binding>
-		<binding name="secure"><pull><type>java.lang.Boolean</type></pull><doc>Generate an https URL.</doc></binding>
 		<binding name="string"><pull><type>java.lang.String</type></pull><doc>Text of the link.</doc></binding>
 		<binding name="target"><pull><type>java.lang.String</type></pull><doc>The link's `target` attribute.</doc></binding>
 		<binding name="disabled"><pull><type interpretation="truthy">java.lang.Object</type></pull><doc>If true, renders the content without a link.</doc></binding>

@@ -80,4 +80,27 @@ public class ConvertersTest {
 		assertTrue( converters.converts( Person.class ) );
 		assertEquals( "sol", converters.toString( new Person( "sol" ) ) );
 	}
+
+	@Test
+	public void oneTextPerValue() {
+		final Converters converters = new Converters();
+
+		assertThrows( IllegalArgumentException.class, () -> converters.fromString( "007", Integer.class ) );
+		assertThrows( IllegalArgumentException.class, () -> converters.fromString( "+5", Integer.class ) );
+		assertEquals( 7, converters.fromString( "7", Integer.class ) );
+
+		// Decimals are written more than one way
+		assertEquals( 1.0, converters.fromString( "1", Double.class ) );
+		assertEquals( 1.5, converters.fromString( "1.50", Double.class ) );
+	}
+
+	@Test
+	public void moreBuiltInTypes() {
+		final Converters converters = new Converters();
+		final java.util.UUID uuid = java.util.UUID.randomUUID();
+
+		assertEquals( uuid, converters.fromString( uuid.toString(), java.util.UUID.class ) );
+		assertEquals( java.time.Instant.parse( "2026-10-03T12:00:00Z" ), converters.fromString( "2026-10-03T12:00:00Z", java.time.Instant.class ) );
+		assertThrows( IllegalArgumentException.class, () -> converters.fromString( "not-a-uuid", java.util.UUID.class ) );
+	}
 }

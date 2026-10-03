@@ -9,7 +9,6 @@ Attributes prefixed with `?` become query parameters. Every other attribute is r
 		<binding name="route" required="true"><pull><type>er.routing.Linkable</type></pull><doc>Route to post to: a typed route or a plain one. Its parameters are bound with `:` attributes.</doc></binding>
 		<binding name="queryDictionary"><pull><type>java.util.Map</type></pull><doc>Query parameters added to the form's URL.</doc></binding>
 		<binding name="fragmentIdentifier"><pull><type>java.lang.String</type></pull><doc>Fragment (`#…`) appended to the form's URL, for example to scroll to error messages after submitting.</doc></binding>
-		<binding name="secure"><pull><type>java.lang.Boolean</type></pull><doc>Submit to an https URL.</doc></binding>
 		<binding name="method"><pull><type>java.lang.String</type></pull><doc>The HTTP method. Defaults to `post`.</doc></binding>
 		<binding name="enctype"><pull><type>java.lang.String</type></pull><doc>The form's encoding. A file upload inside the form requires `multipart/form-data`.</doc></binding>
 		<binding name="name"><pull><type>java.lang.String</type></pull><doc>The form's name, also published to the context for elements inside it.</doc></binding>

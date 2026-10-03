@@ -1,7 +1,9 @@
 package er.routing.core;
 
 import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +33,15 @@ public final class Converters {
 		public String toString( T value );
 
 		/**
+		 * @return true if a value has one text: text converting to a value whose text is different ({@code 007} for 7)
+		 *         isn't accepted, so each value has one URL. False for types written more than one way ({@code 1} and
+		 *         {@code 1.0}).
+		 */
+		public default boolean canonical() {
+			return true;
+		}
+
+		/**
 		 * @return A converter from the two functions
 		 */
 		public static <T> Converter<T> of( final java.util.function.Function<String, T> fromString, final java.util.function.Function<T, String> toString ) {
@@ -56,6 +67,24 @@ public final class Converters {
 		register( Long.class, Converter.of( Long::valueOf, String::valueOf ) );
 		register( Boolean.class, Converter.of( Converters::parseBoolean, String::valueOf ) );
 		register( LocalDate.class, Converter.of( Converters::parseDate, LocalDate::toString ) );
+		register( Instant.class, Converter.of( Converters::parseInstant, Instant::toString ) );
+		register( UUID.class, Converter.of( UUID::fromString, UUID::toString ) );
+		register( Double.class, new Converter<>() {
+			@Override
+			public Double fromString( final String string ) {
+				return Double.valueOf( string );
+			}
+
+			@Override
+			public String toString( final Double value ) {
+				return value.toString();
+			}
+
+			@Override
+			public boolean canonical() {
+				return false;
+			}
+		} );
 	}
 
 	/**
@@ -121,7 +150,15 @@ public final class Converters {
 			return (T)Enum.valueOf( (Class<Enum>)boxed, string );
 		}
 
-		return (T)converter( boxed ).fromString( string );
+		final Converter converter = converter( boxed );
+		final Object value = converter.fromString( string );
+
+		// One text per value: 007 isn't 7's text, so /books/007 isn't another URL of /books/7
+		if( value != null && converter.canonical() && !string.equals( converter.toString( value ) ) ) {
+			throw new IllegalArgumentException( "'%s' isn't how a %s is written: '%s' is".formatted( string, boxed.getSimpleName(), converter.toString( value ) ) );
+		}
+
+		return (T)value;
 	}
 
 	/**
@@ -173,6 +210,15 @@ public final class Converters {
 		}
 
 		return Boolean.valueOf( string );
+	}
+
+	private static Instant parseInstant( final String string ) {
+		try {
+			return Instant.parse( string );
+		}
+		catch( DateTimeException e ) {
+			throw new IllegalArgumentException( e );
+		}
 	}
 
 	private static LocalDate parseDate( final String string ) {

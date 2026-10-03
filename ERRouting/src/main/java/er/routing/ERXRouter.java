@@ -227,7 +227,7 @@ public class ERXRouter {
 
 		return switch( _router.route( routeRequest ) ) {
 			case Router.Matched<Mapped> matched -> answer( matched, invocation );
-			case Router.MethodNotAllowed<Mapped> notAllowed -> methodNotAllowed( notAllowed );
+			case Router.MethodNotAllowed<Mapped> notAllowed -> "OPTIONS".equals( routeRequest.method() ) ? options( notAllowed ) : methodNotAllowed( notAllowed );
 			case Router.Redirect<Mapped> redirect -> redirect( redirect, invocation );
 			case Router.NoMatch<Mapped> noMatch -> RouteHandler.DECLINED;
 		};
@@ -265,6 +265,19 @@ public class ERXRouter {
 		response.setHeader( String.join( ", ", notAllowed.allowedMethods() ), "allow" );
 		response.setHeader( "text/plain; charset=utf-8", "content-type" );
 		response.setContent( "Method not allowed" );
+		return response;
+	}
+
+	/**
+	 * The answer to {@code OPTIONS} at a path whose routes don't take it themselves: the methods they accept
+	 */
+	private static WOResponse options( final Router.MethodNotAllowed<Mapped> notAllowed ) {
+		final java.util.Set<String> allowed = new java.util.TreeSet<>( notAllowed.allowedMethods() );
+		allowed.add( "OPTIONS" );
+
+		final WOResponse response = new WOResponse();
+		response.setStatus( 204 );
+		response.setHeader( String.join( ", ", allowed ), "allow" );
 		return response;
 	}
 
