@@ -116,22 +116,31 @@ public final class Router<H> {
 		}
 
 		/**
-		 * Maps a route with the router's trailing slash policy
-		 */
-		public Entry<H> map( final String pattern, final H handler, final RouteCondition... conditions ) {
-			return map( pattern, null, handler, conditions );
-		}
-
-		/**
 		 * Maps a route
 		 *
-		 * @param trailingSlash The route's trailing slash policy, null for the router's
-		 * @throws IllegalArgumentException if the route conflicts with one of this table's, or a host parameter has the
-		 *         name of a path parameter
+		 * @param options The route's conditions, and its own trailing slash policy if it has one (the router's otherwise)
+		 * @throws IllegalArgumentException if the route conflicts with one of this table's, a host parameter has the
+		 *         name of a path parameter, or the options name two trailing slash policies
 		 */
-		public Entry<H> map( final String pattern, final TrailingSlash trailingSlash, final H handler, final RouteCondition... conditions ) {
+		public Entry<H> map( final String pattern, final H handler, final RouteOption... options ) {
+			TrailingSlash trailingSlash = null;
+			final List<RouteCondition> conditionList = new ArrayList<>();
+
+			for( final RouteOption option : options ) {
+				switch( option ) {
+					case RouteCondition condition -> conditionList.add( condition );
+					case TrailingSlash policy -> {
+						if( trailingSlash != null ) {
+							throw new IllegalArgumentException( "The route %s has two trailing slash policies, %s and %s".formatted( pattern, trailingSlash, policy ) );
+						}
+
+						trailingSlash = policy;
+					}
+					default -> throw new IllegalArgumentException( "Unknown route option " + option );
+				}
+			}
+
 			final PathPattern path = PathPattern.parse( pattern );
-			final List<RouteCondition> conditionList = List.of( conditions );
 
 			for( final RouteCondition condition : conditionList ) {
 				if( condition instanceof Host host ) {
@@ -143,7 +152,7 @@ public final class Router<H> {
 				}
 			}
 
-			final Entry<H> route = new Entry<>( path, conditionList, trailingSlash, Objects.requireNonNull( handler ), _name, _rank, _mappedCount++ );
+			final Entry<H> route = new Entry<>( path, List.copyOf( conditionList ), trailingSlash, Objects.requireNonNull( handler ), _name, _rank, _mappedCount++ );
 
 			for( final Entry<H> existing : _routes ) {
 				if( sameRoute( route, existing ) ) {
@@ -298,6 +307,13 @@ public final class Router<H> {
 				break;
 			}
 
+			final TrailingSlash policy = route.trailingSlash() != null ? route.trailingSlash() : _trailingSlash;
+
+			// Under the strict policy, the other trailing slash form isn't the route's path at all
+			if( !match.exactForm() && policy == TrailingSlash.STRICT ) {
+				continue;
+			}
+
 			final Map<String, String> parameters = new LinkedHashMap<>( match.parameters() );
 			final Set<String> routeAllows = new TreeSet<>();
 			boolean here = true;
@@ -330,12 +346,6 @@ public final class Router<H> {
 			}
 
 			if( !match.exactForm() ) {
-				final TrailingSlash policy = route.trailingSlash() != null ? route.trailingSlash() : _trailingSlash;
-
-				if( policy == TrailingSlash.STRICT ) {
-					continue;
-				}
-
 				if( policy == TrailingSlash.REDIRECT ) {
 					// A more specific route wants the request in its declared form, unless an earlier route took it as it is
 					if( candidates.isEmpty() ) {

@@ -10,7 +10,7 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
-import er.routing.core.RouteCondition;
+import er.routing.core.RouteOption;
 import er.routing.core.RouteRequest;
 import er.routing.core.Router;
 import er.routing.core.TrailingSlash;
@@ -65,8 +65,8 @@ public class ERXRouter {
 	/**
 	 * Maps a route in a table, logging any override it makes
 	 */
-	void map( final Router<Mapped>.Table table, final String pattern, final TrailingSlash trailingSlash, final Mapped mapped, final List<RouteCondition> conditions ) {
-		table.map( pattern, trailingSlash, mapped, conditions.toArray( RouteCondition[]::new ) );
+	void map( final Router<Mapped>.Table table, final String pattern, final Mapped mapped, final List<RouteOption> options ) {
+		table.map( pattern, mapped, options.toArray( RouteOption[]::new ) );
 
 		final var overrides = _router.overrides();
 

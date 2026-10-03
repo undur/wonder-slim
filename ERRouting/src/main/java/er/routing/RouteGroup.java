@@ -9,6 +9,7 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOComponent;
 
 import er.routing.core.RouteCondition;
+import er.routing.core.RouteOption;
 import er.routing.core.Router;
 import er.routing.core.TrailingSlash;
 
@@ -26,6 +27,9 @@ import er.routing.core.TrailingSlash;
  *
  * Route&lt;Search&gt; search = routes.route( "/search/{area}", Search.class );
  * </pre>
+ *
+ * Routes and groups take options ({@link RouteOption}): conditions, and a trailing slash policy. A group's conditions
+ * apply to its routes and nested groups, as does its policy unless a route or nested group sets its own.
  */
 
 public final class RouteGroup {
@@ -35,14 +39,20 @@ public final class RouteGroup {
 	private final RouteGroup _parent;
 	private final String _prefix;
 	private final List<RouteCondition> _conditions;
+
+	/**
+	 * The group's trailing slash policy (its own or its parent's), null for the router's
+	 */
+	private final TrailingSlash _trailingSlash;
 	private final List<RouteFilter> _filters = new ArrayList<>();
 
-	RouteGroup( final ERXRouter router, final Router<ERXRouter.Mapped>.Table table, final RouteGroup parent, final String prefix, final List<RouteCondition> conditions ) {
+	RouteGroup( final ERXRouter router, final Router<ERXRouter.Mapped>.Table table, final RouteGroup parent, final String prefix, final List<RouteOption> options ) {
 		_router = router;
 		_table = table;
 		_parent = parent;
 		_prefix = prefix;
-		_conditions = List.copyOf( conditions );
+		_conditions = options.stream().filter( RouteCondition.class::isInstance ).map( RouteCondition.class::cast ).toList();
+		_trailingSlash = options.stream().filter( TrailingSlash.class::isInstance ).map( TrailingSlash.class::cast ).findFirst().orElse( null );
 	}
 
 	/**
@@ -57,59 +67,52 @@ public final class RouteGroup {
 	/**
 	 * Maps a route
 	 */
-	public void map( final String pattern, final RouteHandler handler, final RouteCondition... conditions ) {
-		map( pattern, null, handler, conditions );
-	}
-
-	/**
-	 * Maps a route with its own trailing slash policy
-	 */
-	public void map( final String pattern, final TrailingSlash trailingSlash, final RouteHandler handler, final RouteCondition... conditions ) {
-		_router.map( _table, fullPattern( pattern ), trailingSlash, new ERXRouter.Mapped( handler, this ), allConditions( conditions ) );
+	public void map( final String pattern, final RouteHandler handler, final RouteOption... options ) {
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this ), allOptions( options ) );
 	}
 
 	/**
 	 * Maps a route to a page
 	 */
-	public void map( final String pattern, final Class<? extends WOComponent> pageClass, final RouteCondition... conditions ) {
-		map( pattern, invocation -> WOApplication.application().pageWithName( pageClass.getName(), invocation.context() ), conditions );
+	public void map( final String pattern, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
+		map( pattern, invocation -> WOApplication.application().pageWithName( pageClass.getName(), invocation.context() ), options );
 	}
 
 	/**
-	 * @return A route mapped in this group, invoked by its parameter record's own {@link Routable#invoke(RouteInvocation)}
+	 * @return A typed route mapped in this group, invoked by its parameter record's own {@link Routable#invoke(RouteInvocation)}
 	 */
-	public <P extends Record & Routable> Route<P> route( final String pattern, final Class<P> parametersClass, final RouteCondition... conditions ) {
-		return route( pattern, parametersClass, ( parameters, invocation ) -> parameters.invoke( invocation ), conditions );
+	public <P extends Record & Routable> Route<P> route( final String pattern, final Class<P> parametersClass, final RouteOption... options ) {
+		return route( pattern, parametersClass, ( parameters, invocation ) -> parameters.invoke( invocation ), options );
 	}
 
 	/**
-	 * @return A route mapped in this group, invoked by the given action: for a parameter record that's only data, or
-	 *         one of several routes taking the same parameters
+	 * @return A typed route mapped in this group, invoked by the given action: for a parameter record that's only data,
+	 *         or one of several routes taking the same parameters
 	 */
-	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteCondition... conditions ) {
-		final List<RouteCondition> allConditions = allConditions( conditions );
-		final Route<P> endpoint = new Route<>( fullPattern( pattern ), allConditions, parametersClass, action );
-		_router.map( _table, fullPattern( pattern ), null, new ERXRouter.Mapped( endpoint::handle, this ), allConditions );
-		return endpoint;
+	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteOption... options ) {
+		final List<RouteOption> allOptions = allOptions( options );
+		final Route<P> route = new Route<>( fullPattern( pattern ), allOptions, parametersClass, action );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( route::handle, this ), allOptions );
+		return route;
 	}
 
 	/**
 	 * @return A nested group, for mapping its routes and declaring its routes afterwards
 	 */
-	public RouteGroup group( final String prefix, final RouteCondition... conditions ) {
-		return group( prefix, group -> {}, conditions );
+	public RouteGroup group( final String prefix, final RouteOption... options ) {
+		return group( prefix, group -> {}, options );
 	}
 
 	/**
 	 * @return A nested group, after the body has mapped its routes
 	 */
-	public RouteGroup group( final String prefix, final Consumer<RouteGroup> body, final RouteCondition... conditions ) {
+	public RouteGroup group( final String prefix, final Consumer<RouteGroup> body, final RouteOption... options ) {
 
 		if( !prefix.isEmpty() && (!prefix.startsWith( "/" ) || prefix.endsWith( "/" )) ) {
 			throw new IllegalArgumentException( "A group's prefix is empty (a group by its conditions alone), or starts with '/' and doesn't end with one: '%s'".formatted( prefix ) );
 		}
 
-		final RouteGroup group = new RouteGroup( _router, _table, this, _prefix + prefix, allConditions( conditions ) );
+		final RouteGroup group = new RouteGroup( _router, _table, this, _prefix + prefix, allOptions( options ) );
 		body.accept( group );
 		return group;
 	}
@@ -127,11 +130,22 @@ public final class RouteGroup {
 	}
 
 	/**
-	 * @return The group's conditions (its parents' included) and the given ones
+	 * @return The group's conditions (its parents' included) and the given options' conditions, and the given options'
+	 *         trailing slash policy, or the group's if they don't name one
 	 */
-	List<RouteCondition> allConditions( final RouteCondition... conditions ) {
-		final List<RouteCondition> all = new ArrayList<>( _conditions );
-		all.addAll( List.of( conditions ) );
+	List<RouteOption> allOptions( final RouteOption... options ) {
+		final List<RouteOption> all = new ArrayList<>( _conditions );
+		boolean ownPolicy = false;
+
+		for( final RouteOption option : options ) {
+			all.add( option );
+			ownPolicy |= option instanceof TrailingSlash;
+		}
+
+		if( !ownPolicy && _trailingSlash != null ) {
+			all.add( _trailingSlash );
+		}
+
 		return all;
 	}
 

@@ -5,7 +5,7 @@ package er.routing.core;
  * for {@code /docs/}). A pattern declares its form, and generated URLs use it. The root ({@code /}) has one form only.
  */
 
-public enum TrailingSlash {
+public enum TrailingSlash implements RouteOption {
 
 	/**
 	 * Both forms match

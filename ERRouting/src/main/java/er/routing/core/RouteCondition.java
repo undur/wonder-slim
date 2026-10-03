@@ -7,7 +7,7 @@ import java.util.Set;
  * A condition a route places on a request, beyond its path: a host, HTTP methods. Declared with the route.
  */
 
-public interface RouteCondition {
+public interface RouteCondition extends RouteOption {
 
 	/**
 	 * @return What the condition says about the request

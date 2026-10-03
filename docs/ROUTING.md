@@ -192,7 +192,8 @@ return seeOther( routes.book.url( new BookView( form.club(), book.id() ), invoca
 
 ## Conditions
 
-A route can require more of a request than its path. Conditions are declared with the route:
+A route can require more of a request than its path. Conditions are declared with the route, among its options (as is
+its trailing slash policy):
 
 ```java
 createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
@@ -211,8 +212,8 @@ listing the methods they do accept. A less specific route, a catch-all say, does
 Routes with the same pattern and different methods are separate routes:
 
 ```java
-api.map( "/books/{id}", TrailingSlash.STRICT, BookclubRoutes::apiBook, Method.GET );
-api.map( "/books/{id}", TrailingSlash.STRICT, BookclubRoutes::apiDeleteBook, Method.DELETE );
+api.map( "/books/{id}", BookclubRoutes::apiBook, Method.GET );
+api.map( "/books/{id}", BookclubRoutes::apiDeleteBook, Method.DELETE );
 ```
 
 ### Hosts
@@ -271,10 +272,12 @@ a policy:
 | `TrailingSlash.REDIRECT` | is answered with `308` to the declared form, keeping the method, body and query string |
 | `TrailingSlash.STRICT` | doesn't match |
 
-`new ERXRouter( TrailingSlash.REDIRECT )` sets the policy for every route, and a route can set its own:
+`new ERXRouter( TrailingSlash.REDIRECT )` sets the policy for every route. A group sets it for its routes, and a route
+sets its own, both among their options:
 
 ```java
-club.map( "/rules/", TrailingSlash.REDIRECT, ri -> … );        // /rules gets 308 to /rules/
+books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );        // /books gets 308 to /books/
+final RouteGroup api = club.group( "/api", TrailingSlash.STRICT );          // /api/books/ isn't /api/books
 ```
 
 `/` has one form only.

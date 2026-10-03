@@ -141,10 +141,28 @@ public class RouterTest {
 	@Test
 	public void trailingSlashStrict() {
 		final Router<String> router = new Router<>();
-		table( router ).map( "/docs/", TrailingSlash.STRICT, "docs" );
+		table( router ).map( "/docs/", "docs", TrailingSlash.STRICT );
 
 		assertInstanceOf( NoMatch.class, get( router, "/docs" ) );
 		assertEquals( List.of( "docs" ), handlers( get( router, "/docs/" ) ) );
+	}
+
+	@Test
+	public void theOtherFormOfAStrictRouteIsNotA405() {
+		final Router<String> router = new Router<>( TrailingSlash.STRICT );
+		final var routes = table( router );
+		routes.map( "/api/books", "list", Method.GET );
+		routes.map( "/api/books", "create", Method.POST );
+
+		assertInstanceOf( NoMatch.class, get( router, "/api/books/" ) );
+		assertEquals( List.of( "list" ), handlers( get( router, "/api/books" ) ) );
+	}
+
+	@Test
+	public void oneTrailingSlashPolicyPerRoute() {
+		final Router<String> router = new Router<>();
+
+		assertThrows( IllegalArgumentException.class, () -> table( router ).map( "/docs/", "docs", TrailingSlash.STRICT, TrailingSlash.REDIRECT ) );
 	}
 
 	@Test
@@ -160,7 +178,7 @@ public class RouterTest {
 	public void aMoreSpecificRouteRedirectsBeforeALessSpecificOneMatches() {
 		final Router<String> router = new Router<>();
 		final var routes = table( router );
-		routes.map( "/docs/", TrailingSlash.REDIRECT, "docs" );
+		routes.map( "/docs/", "docs", TrailingSlash.REDIRECT );
 		routes.map( "/{page}", "page" );
 
 		assertEquals( "/docs/", assertInstanceOf( Redirect.class, get( router, "/docs" ) ).path() );

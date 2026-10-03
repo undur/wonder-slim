@@ -22,7 +22,7 @@ import com.webobjects.appserver.WOContext;
 import er.extensions.appserver.ERXWOContext;
 import er.routing.core.Host;
 import er.routing.core.PathPattern;
-import er.routing.core.RouteCondition;
+import er.routing.core.RouteOption;
 import er.routing.core.RouteRequest;
 
 /**
@@ -71,9 +71,9 @@ public final class Route<P extends Record> {
 	 */
 	private final List<String> _routeParameterNames;
 
-	Route( final String pattern, final List<RouteCondition> conditions, final Class<P> parametersClass, final Action<P> action ) {
+	Route( final String pattern, final List<RouteOption> options, final Class<P> parametersClass, final Action<P> action ) {
 		_path = PathPattern.parse( pattern );
-		_host = (Host)conditions.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
+		_host = (Host)options.stream().filter( Host.class::isInstance ).findFirst().orElse( null );
 		_parametersClass = Objects.requireNonNull( parametersClass );
 		_action = Objects.requireNonNull( action );
 		_components = parametersClass.getRecordComponents();

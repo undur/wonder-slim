@@ -220,19 +220,19 @@ public class BookclubRoutes {
 		final RouteGroup club = routes.group( "", CLUB_HOST );
 
 		clubHome = club.route( "/", ClubHome.class );
-		books = club.route( "/books/", Books.class );
+		books = club.route( "/books/", Books.class, TrailingSlash.REDIRECT );
 		newBook = club.route( "/books/new", NewBook.class );
 		book = club.route( "/books/{id}", BookView.class );
 		member = club.route( "/members/{handle}", MemberView.class );
 		clubText = club.route( "/{name}", ClubText.class );
 		about = club.route( "/about", About.class );
 
-		// Methods: a form posts here. Any other method at /books gets the list above, since that route takes every method.
+		// Methods: a form posts here. Other methods at /books are redirected to the list at /books/.
 		createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
 		deleteBook = club.route( "/books/{id}/delete", DeleteBook.class, BookclubRoutes::deleteBook, Method.POST );
 
-		// Trailing slashes: /rules redirects to /rules/
-		club.map( "/rules/", TrailingSlash.REDIRECT, ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ) );
+		// Trailing slashes: /rules redirects to /rules/ (and /books to /books/, above)
+		club.map( "/rules/", ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );
 
 		// A wildcard: everything beneath /files/
 		club.map( "/files/*", ri -> text( 200, "The file %s of %s".formatted( ri.parameter( "*" ), ri.parameter( "club" ) ) ) );
@@ -257,11 +257,11 @@ public class BookclubRoutes {
 		reset = dangerGroup.route( "/reset", Reset.class, BookclubRoutes::reset, Method.POST );
 
 		// A JSON API: strict about trailing slashes, and about methods (anything else is 405, with Allow)
-		final RouteGroup api = club.group( "/api" );
-		api.map( "/books", TrailingSlash.STRICT, BookclubRoutes::apiBooks, Method.GET );
-		api.map( "/books", TrailingSlash.STRICT, BookclubRoutes::apiCreateBook, Method.POST );
-		api.map( "/books/{id}", TrailingSlash.STRICT, BookclubRoutes::apiBook, Method.GET );
-		api.map( "/books/{id}", TrailingSlash.STRICT, BookclubRoutes::apiDeleteBook, Method.DELETE );
+		final RouteGroup api = club.group( "/api", TrailingSlash.STRICT );
+		api.map( "/books", BookclubRoutes::apiBooks, Method.GET );
+		api.map( "/books", BookclubRoutes::apiCreateBook, Method.POST );
+		api.map( "/books/{id}", BookclubRoutes::apiBook, Method.GET );
+		api.map( "/books/{id}", BookclubRoutes::apiDeleteBook, Method.DELETE );
 
 		// A plugin's table, ranked below the application's
 		GuestbookPlugin.register( router.table( "guestbook" ) );
