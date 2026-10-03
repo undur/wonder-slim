@@ -40,8 +40,11 @@ import er.extensions.routes.RouteTable;
  * it as one route, which declines what the router has no route for, so the table's fallback and not found still apply.
  *
  * <pre>
- * _routes = ERXRouter.declare( AppRoutes::new );  // AppRoutes( ERXRouter router ) maps them:
- * router.application().map( "/items/{id}", ri -&gt; ri.page( ItemPage.class ).item( ri.parameter( "id", Item.class ) ) );
+ * public interface Routes {
+ *     PlainRoute item = Route.plain();
+ * }
+ *
+ * ERXRouter.declare( router -&gt; router.application().map( "/items/{id}", Routes.item, ItemPage.class ) ); // the Application's constructor
  * </pre>
  */
 
@@ -75,6 +78,11 @@ public class ERXRouter {
 	 * succeed, so a link goes to the current routes
 	 */
 	private final Map<RouteIdentity<?>, Object> _bindings = new java.util.IdentityHashMap<>();
+
+	/**
+	 * Checks made once the routes are declared (every route then has its pattern): a redirect's names against its route's
+	 */
+	private final List<Runnable> _checks = new java.util.concurrent.CopyOnWriteArrayList<>();
 	private RouteGroup _application;
 
 	/**
@@ -186,6 +194,7 @@ public class ERXRouter {
 	 */
 	public synchronized RouteGroup application() {
 		undeclared( "the application's routes, reached" );
+		declaredFrom( RouteIdentity.caller() );
 
 		if( _application == null ) {
 			_application = new RouteGroup( this, _router.table( "application", Integer.MIN_VALUE ), null, "", List.of() );
@@ -200,7 +209,33 @@ public class ERXRouter {
 	 */
 	public RouteGroup table( final String name ) {
 		undeclared( "the table " + name + ", created" );
+		declaredFrom( RouteIdentity.caller() );
 		return new RouteGroup( this, _router.table( name ), null, "", List.of() );
+	}
+
+	/**
+	 * The classes declaring into the router (those reaching its tables), whose folders are watched for changes
+	 */
+	private final java.util.Set<Class<?>> _declaringClasses = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+	/**
+	 * Notes a class declaring into the router: a plugin's, whose folder may be another than the application's
+	 */
+	private void declaredFrom( final Class<?> type ) {
+		if( type != null && RouteDeclarations.DECLARING.get() == this ) {
+			_declaringClasses.add( type );
+		}
+	}
+
+	java.util.Set<Class<?>> declaringClasses() {
+		return _declaringClasses;
+	}
+
+	/**
+	 * Runs the check once the routes are declared, with the joins' (see {@link #checkJoins()})
+	 */
+	void checkOnceDeclared( final Runnable check ) {
+		_checks.add( check );
 	}
 
 	/**
@@ -344,6 +379,8 @@ public class ERXRouter {
 			throw new IllegalStateException( "Groups were joined that are never named: %s. The routes mapped in them don't exist. Their names are %s".formatted( _pendingJoins.keySet(), _namedGroups.keySet() ) );
 		}
 
+		_checks.forEach( Runnable::run );
+
 		_joinsChecked = true;
 	}
 
@@ -434,8 +471,8 @@ public class ERXRouter {
 				return mapped.crossOrigin().preflight( request, Set.of( request.header( "access-control-request-method" ).toUpperCase( java.util.Locale.ROOT ) ) );
 			}
 
-			// A post from a page on a site the route doesn't take those from (an origin it allows calls is taken)
-			if( !allowedOrigin && mapped.crossSite().refuses( request, RequestHost.host( invocation.request() ), PublicAddress.configured(), this::isOwnHost ) ) {
+			// A post from a page on a site the route doesn't take those from (a named origin it allows calls is taken)
+			if( !(allowedOrigin && mapped.crossOrigin().waivesCrossSite()) && mapped.crossSite().refuses( request, RequestHost.host( invocation.request() ), PublicAddress.configured(), this::isOwnHost ) ) {
 				logger.debug( "The route {} refused {} {} from another site (origin {})", candidate.entry(), invocation.request().method(), invocation.url(), invocation.request().headerForKey( "origin" ) );
 				return CrossSite.forbidden();
 			}
@@ -468,10 +505,16 @@ public class ERXRouter {
 
 			if( results != RouteHandler.DECLINED ) {
 
-				// Another site's script may read the answer
-				if( allowedOrigin ) {
+				// Another site's script may read the answer. A route answering named origins varies by Origin whatever the
+				// request's, so a cache doesn't hand one origin's answer to another.
+				if( mapped.crossOrigin() != null ) {
 					final WOResponse response = results.generateResponse();
-					mapped.crossOrigin().allow( response, request );
+					mapped.crossOrigin().vary( response );
+
+					if( allowedOrigin ) {
+						mapped.crossOrigin().allow( response, request );
+					}
+
 					return response;
 				}
 

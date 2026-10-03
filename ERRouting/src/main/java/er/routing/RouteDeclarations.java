@@ -213,6 +213,7 @@ class RouteDeclarations {
 	 * Watches the classes of the router's route constants (their constants interfaces) and of its routes' records
 	 */
 	private void watch( final ERXRouter router ) {
+		router.declaringClasses().forEach( _changes::watch );
 		router.bindings().keySet().stream().map( RouteIdentity::madeIn ).filter( Objects::nonNull ).distinct().forEach( _changes::watch );
 		router.routes().stream().map( RouteDescription::parametersClass ).filter( Objects::nonNull ).distinct().forEach( _changes::watch );
 	}

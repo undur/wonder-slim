@@ -38,6 +38,20 @@ final class PlainBinding {
 		_routeParameterNames = List.copyOf( names );
 	}
 
+	/**
+	 * @return The names a link gives values for: the path's parameters and the host's
+	 */
+	List<String> acceptedNames() {
+		return _routeParameterNames;
+	}
+
+	/**
+	 * @return The names a link must give values for: the path's parameters (the host's can be the request's)
+	 */
+	List<String> requiredNames() {
+		return _path.parameterNames();
+	}
+
 	public String pattern() {
 		return _path.source();
 	}

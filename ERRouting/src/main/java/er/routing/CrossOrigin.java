@@ -22,9 +22,10 @@ import er.routing.core.RouteRequest;
  * final RouteGroup api = club.group( "/api", CrossOrigin.allow( "https://partner.example.com" ) );
  * </pre>
  *
- * An origin allowed here may also post to the route, whatever its {@link CrossSite} level: allowing another site's script
- * to call a route is allowing it to change things through it. {@link #ANY} allows every origin, without credentials;
- * {@link #withCredentials()} lets an allowed origin's requests carry the user's cookies.
+ * A named origin allowed here may also post to the route, whatever its {@link CrossSite} level: allowing a partner's
+ * script to call a route is allowing it to change things through it. {@link #ANY} allows every origin's scripts to read,
+ * without credentials, and doesn't waive {@link CrossSite}: a form posted from any site carries the user's cookies by
+ * the browser's rules. {@link #withCredentials()} lets a named origin's requests carry the user's cookies.
  */
 
 public final class CrossOrigin implements RouteBehavior {
@@ -85,6 +86,25 @@ public final class CrossOrigin implements RouteBehavior {
 	}
 
 	/**
+	 * Says the response varies by Origin, for named origins (whose answer names the origin), so a cache keeps them apart
+	 */
+	void vary( final WOResponse response ) {
+		if( !_any && !"Origin".equals( response.headerForKey( "vary" ) ) ) {
+			response.appendHeader( "Origin", "vary" );
+		}
+	}
+
+	/**
+	 * @return true if an origin this allows may also post to the route, whatever its {@link CrossSite} level: a named
+	 *         origin, trusted by name. Not {@link #ANY}: a form posted from any site carries the user's cookies by the
+	 *         browser's rules, whatever CORS says, so allowing any site's scripts to read isn't allowing every site to
+	 *         post.
+	 */
+	boolean waivesCrossSite() {
+		return !_any;
+	}
+
+	/**
 	 * @return true if the request is a browser's preflight for a cross-origin call
 	 */
 	static boolean isPreflight( final RouteRequest request ) {
@@ -96,10 +116,7 @@ public final class CrossOrigin implements RouteBehavior {
 	 */
 	void allow( final WOResponse response, final RouteRequest request ) {
 		response.setHeader( _any ? "*" : request.header( "origin" ), "access-control-allow-origin" );
-
-		if( !_any ) {
-			response.appendHeader( "Origin", "vary" );
-		}
+		vary( response );
 
 		if( _credentials ) {
 			response.setHeader( "true", "access-control-allow-credentials" );

@@ -150,7 +150,36 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation implem
 			return (T)this;
 		}
 
-		return _converters.provided( type, this );
+		return provided( type );
+	}
+
+	/**
+	 * Request userInfo key for the objects provided for the request, by type
+	 */
+	private static final String PROVIDED_KEY = "er.routing.provided";
+
+	/**
+	 * @return The object the application provides of the type, made once per request (the routes a request tries, and the
+	 *         converters and handler of each, share it), null if it provides none. Ending it (an editing context's
+	 *         disposal) is the application's: the request's page renders after the route has answered.
+	 */
+	@SuppressWarnings("unchecked")
+	private <T> T provided( final Class<T> type ) {
+		Map<Class<?>, Object> provided = request() == null ? null : (Map<Class<?>, Object>)request().userInfoForKey( PROVIDED_KEY );
+
+		if( provided == null ) {
+			provided = new java.util.HashMap<>();
+
+			if( request() != null ) {
+				request().setUserInfoForKey( provided, PROVIDED_KEY );
+			}
+		}
+
+		if( !provided.containsKey( type ) ) {
+			provided.put( type, _converters.provided( type, this ) );
+		}
+
+		return (T)provided.get( type );
 	}
 
 	/**

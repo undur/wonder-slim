@@ -374,7 +374,13 @@ public final class PathPattern {
 		final int length = Math.max( a._segments.size(), b._segments.size() ) + 1;
 
 		for( int i = 0; i < length; i++ ) {
-			final int difference = Integer.compare( a.rank( i ), b.rank( i ) );
+			int difference = Integer.compare( a.rank( i ), b.rank( i ) );
+
+			// Two parameters within literal text: the one whose literals contain the other's comes first ({a}.min.json
+			// before {a}.json)
+			if( difference == 0 && i < a._segments.size() && a._segments.get( i ) instanceof Affixed x && b._segments.get( i ) instanceof Affixed y ) {
+				difference = contains( x, y ) && !contains( y, x ) ? -1 : contains( y, x ) && !contains( x, y ) ? 1 : 0;
+			}
 
 			if( difference != 0 ) {
 				return difference;
@@ -382,6 +388,56 @@ public final class PathPattern {
 		}
 
 		return 0;
+	}
+
+	/**
+	 * @return true if x's literals contain y's, on their sides: x matches only elements y matches
+	 */
+	private static boolean contains( final Affixed x, final Affixed y ) {
+		return x.prefix().startsWith( y.prefix() ) && x.suffix().endsWith( y.suffix() );
+	}
+
+	/**
+	 * @return true if the two patterns can match the same path and neither comes first: at a place where both have a
+	 *         parameter within literal text, their literals are on opposite sides ({@code pre-{a}} and {@code {a}.json}
+	 *         both match {@code pre-7.json}), so which answers would be the mapping order
+	 */
+	static boolean ambiguous( final PathPattern a, final PathPattern b ) {
+
+		if( a._segments.size() != b._segments.size() || a._wildcard != b._wildcard || comparePrecedence( a, b ) != 0 || a.shape().equals( b.shape() ) ) {
+			return false;
+		}
+
+		for( int i = 0; i < a._segments.size(); i++ ) {
+			if( !overlap( a._segments.get( i ), b._segments.get( i ) ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * @return true if some path element could match both segments
+	 */
+	private static boolean overlap( final Segment a, final Segment b ) {
+		return switch( a ) {
+			case Literal x -> switch( b ) {
+				case Literal y -> x.text().equals( y.text() );
+				case Parameter y -> true;
+				case Affixed y -> matches( y, x.text() );
+			};
+			case Parameter x -> true;
+			case Affixed x -> switch( b ) {
+				case Literal y -> matches( x, y.text() );
+				case Parameter y -> true;
+				case Affixed y -> (x.prefix().startsWith( y.prefix() ) || y.prefix().startsWith( x.prefix() )) && (x.suffix().endsWith( y.suffix() ) || y.suffix().endsWith( x.suffix() ));
+			};
+		};
+	}
+
+	private static boolean matches( final Affixed affixed, final String text ) {
+		return text.length() > affixed.prefix().length() + affixed.suffix().length() && text.startsWith( affixed.prefix() ) && text.endsWith( affixed.suffix() );
 	}
 
 	/**

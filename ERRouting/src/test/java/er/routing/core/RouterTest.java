@@ -529,4 +529,19 @@ public class RouterTest {
 		assertThrows( IllegalArgumentException.class, () -> files.path( Map.of( "path", "../secret" ) ) );
 		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/files/*" ).path( Map.of( "*", "x" ) ) );
 	}
+
+	@Test
+	public void parametersWithinLiteralTextAtTheSamePlace() {
+		final Router<String> router = new Router<>();
+		final Router<String>.Table table = table( router );
+
+		// The more literal text on the same side comes first, whatever the mapping order
+		table.map( "/x/{a}.json", "json" );
+		table.map( "/x/{a}.min.json", "min" );
+		assertEquals( "min", ((Router.Matched<String>)get( router, "/x/app.min.json" )).candidates().getFirst().handler() );
+		assertEquals( Map.of( "a", "app" ), parameters( get( router, "/x/app.min.json" ) ) );
+
+		// Literal text on opposite sides: both match /x/pre-7.json, and neither comes first
+		assertThrows( IllegalArgumentException.class, () -> table.map( "/x/pre-{a}", "pre" ) );
+	}
 }

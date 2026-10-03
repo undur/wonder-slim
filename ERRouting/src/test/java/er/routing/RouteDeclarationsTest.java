@@ -194,4 +194,28 @@ public class RouteDeclarationsTest {
 		assertEquals( 0, router.routes().size() );
 		assertTrue( router.converters().converts( Page.class ) );
 	}
+
+	public interface Optional {
+		PlainRoute devTools = Route.plain().optional();
+	}
+
+	@Test
+	public void anOptionalConstantMayGoWithoutAPattern() {
+		final RouteDeclarations declarations = new RouteDeclarations( ERXRouter::new, new Switch() );
+		declarations.declare( router -> router.application().map( "/elsewhere", NOTHING ), null );
+
+		assertTrue( RouteIdentity.undeclaredIn( declarations.router() ).stream().noneMatch( identity -> identity == Optional.devTools ) );
+	}
+
+	@Test
+	public void aRedirectsParametersAreTheRoutes() {
+		final RouteDeclarations declarations = declarations( new Switch(), Routes.about );
+
+		// The old URL has {id}, which /about doesn't take: refused once the routes are declared
+		assertThrows( IllegalArgumentException.class, () -> declarations.declare( router -> {
+			router.application().map( "/about", Routes.about, NOTHING );
+			router.application().redirect( "/old/{id}", Routes.about );
+			router.checkJoins();
+		}, null ) );
+	}
 }

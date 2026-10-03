@@ -44,4 +44,10 @@ public class CrossOriginTest {
 		assertThrows( IllegalArgumentException.class, () -> CrossOrigin.allow( "partner.example" ) );
 		assertThrows( IllegalArgumentException.class, () -> CrossOrigin.allow( "https://partner.example/path" ) );
 	}
+
+	@Test
+	public void onlyNamedOriginsMayPost() {
+		assertTrue( CrossOrigin.allow( "https://partner.example" ).waivesCrossSite() );
+		assertFalse( CrossOrigin.ANY.waivesCrossSite() );
+	}
 }

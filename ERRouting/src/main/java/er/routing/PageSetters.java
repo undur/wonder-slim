@@ -67,9 +67,11 @@ final class PageSetters implements RouteHandler {
 
 	@Override
 	public WOActionResults handle( final RouteInvocation invocation ) {
-		final WOComponent page = WOApplication.application().pageWithName( _pageClass.getName(), invocation.context() );
+		final Object[] values = new Object[_setters.size()];
 
-		for( final Setter setter : _setters ) {
+		// Every parameter first, so a request that declines or redirects makes no page
+		for( int i = 0; i < _setters.size(); i++ ) {
+			final Setter setter = _setters.get( i );
 			final String text = invocation.parameter( setter.name() );
 			Object value;
 
@@ -92,8 +94,16 @@ final class PageSetters implements RouteHandler {
 				throw new NotCanonical( setter.name(), _converters.toString( value ) );
 			}
 
+			values[i] = value;
+		}
+
+		final WOComponent page = WOApplication.application().pageWithName( _pageClass.getName(), invocation.context() );
+
+		for( int i = 0; i < _setters.size(); i++ ) {
+			final Setter setter = _setters.get( i );
+
 			try {
-				setter.member().set( page, value );
+				setter.member().set( page, values[i] );
 			}
 			catch( ReflectiveOperationException e ) {
 				throw new IllegalStateException( "Couldn't set {%s} on %s".formatted( setter.name(), _pageClass.getSimpleName() ), e );
@@ -107,11 +117,22 @@ final class PageSetters implements RouteHandler {
 	 * @return How to set the parameter on the page: a method taking it (named as it is, or its setter), or a field
 	 */
 	private static Setter setter( final Class<?> pageClass, final String name ) {
+		final List<Method> methods = new ArrayList<>();
 
 		for( final Method method : pageClass.getMethods() ) {
-			if( method.getParameterCount() == 1 && !Modifier.isStatic( method.getModifiers() ) && (method.getName().equals( name ) || method.getName().equals( "set" + capitalized( name ) )) ) {
-				return new Setter( name, Converters.boxed( method.getParameterTypes()[0] ), ( page, value ) -> method.invoke( page, value ) );
+			if( method.getParameterCount() == 1 && !Modifier.isStatic( method.getModifiers() ) && !method.isBridge() && (method.getName().equals( name ) || method.getName().equals( "set" + capitalized( name ) )) ) {
+				methods.add( method );
 			}
+		}
+
+		// Several (overloads, a setter and a fluent one) take the value as different types: which is meant isn't clear
+		if( methods.stream().map( m -> m.getParameterTypes()[0] ).distinct().count() > 1 ) {
+			throw new IllegalArgumentException( "%s has several methods taking {%s}, of different types: %s. A page route sets a parameter through one".formatted( pageClass.getSimpleName(), name, methods.stream().map( m -> m.getName() + "( " + m.getParameterTypes()[0].getSimpleName() + " )" ).toList() ) );
+		}
+
+		if( !methods.isEmpty() ) {
+			final Method method = methods.getFirst();
+			return new Setter( name, Converters.boxed( method.getParameterTypes()[0] ), ( page, value ) -> method.invoke( page, value ) );
 		}
 
 		try {

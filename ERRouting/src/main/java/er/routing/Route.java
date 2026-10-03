@@ -83,6 +83,15 @@ public final class Route<P extends Record> extends RouteIdentity<RouteBinding<P>
 		return new Route<>( parametersClass, null );
 	}
 
+	/**
+	 * @return The route, which a declaration may leave without a pattern (a route mapped in development only): the
+	 *         application starts without it, and a link to it is an error while it has none
+	 */
+	public Route<P> optional() {
+		markOptional();
+		return this;
+	}
+
 	public Class<P> parametersClass() {
 		return _parametersClass;
 	}
@@ -174,6 +183,16 @@ public final class Route<P extends Record> extends RouteIdentity<RouteBinding<P>
 	 */
 	boolean reportsFields() {
 		return binding().reportsFields();
+	}
+
+	@Override
+	List<String> acceptedNames() {
+		return binding().acceptedNames();
+	}
+
+	@Override
+	List<String> requiredNames() {
+		return binding().requiredNames();
 	}
 
 	@Override

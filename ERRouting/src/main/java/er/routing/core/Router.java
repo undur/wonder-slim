@@ -193,6 +193,13 @@ public final class Router<H> {
 				}
 			}
 
+			// Parameters within literal text on opposite sides match the same paths with no order between them
+			for( final Entry<H> existing : _routes ) {
+				if( PathPattern.ambiguous( path, existing.path() ) && conditionsOverlap( route, existing ) ) {
+					throw new IllegalArgumentException( "The route %s conflicts with %s: they match the same paths (their parameters' literal text is on opposite sides), and neither comes first".formatted( route, existing ) );
+				}
+			}
+
 			for( final Shaped mapped : sameShape ) {
 				@SuppressWarnings("unchecked")
 				final Entry<H> existing = (Entry<H>)mapped.entry();
@@ -214,11 +221,14 @@ public final class Router<H> {
 	 *         condition overlapping its counterpart
 	 */
 	private static boolean sameRoute( final Entry<?> a, final Entry<?> b ) {
+		return a.path().shape().equals( b.path().shape() ) && conditionsOverlap( a, b );
+	}
 
-		if( !a.path().shape().equals( b.path().shape() ) ) {
-			return false;
-		}
-
+	/**
+	 * @return true if a request could satisfy both routes' conditions: the same types of conditions, each overlapping its
+	 *         counterpart
+	 */
+	private static boolean conditionsOverlap( final Entry<?> a, final Entry<?> b ) {
 		final Map<Class<?>, RouteCondition> aConditions = byType( a.conditions() );
 		final Map<Class<?>, RouteCondition> bConditions = byType( b.conditions() );
 

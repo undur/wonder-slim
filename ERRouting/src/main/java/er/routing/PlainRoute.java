@@ -26,6 +26,15 @@ public final class PlainRoute extends RouteIdentity<PlainBinding> implements Lin
 	}
 
 	/**
+	 * @return The route, which a declaration may leave without a pattern (a route mapped in development only): the
+	 *         application starts without it, and a link to it is an error while it has none
+	 */
+	public PlainRoute optional() {
+		markOptional();
+		return this;
+	}
+
+	/**
 	 * @return The whole path pattern, the group's prefix included
 	 */
 	public String pattern() {
@@ -43,6 +52,16 @@ public final class PlainRoute extends RouteIdentity<PlainBinding> implements Lin
 	@Override
 	public String completeURL( final Map<String, Object> values ) {
 		return binding().completeURL( values );
+	}
+
+	@Override
+	java.util.List<String> acceptedNames() {
+		return binding().acceptedNames();
+	}
+
+	@Override
+	java.util.List<String> requiredNames() {
+		return binding().requiredNames();
 	}
 
 	@Override

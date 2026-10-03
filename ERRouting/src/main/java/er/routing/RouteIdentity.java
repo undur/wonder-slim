@@ -31,6 +31,11 @@ abstract sealed class RouteIdentity<B> permits Route, PlainRoute {
 	private volatile B _binding;
 	private volatile String _name;
 
+	/**
+	 * True for a constant a declaration may leave without a pattern (a route mapped in development only)
+	 */
+	private volatile boolean _optional;
+
 	RouteIdentity( final Class<?> madeIn ) {
 		_madeIn = madeIn;
 
@@ -72,6 +77,10 @@ abstract sealed class RouteIdentity<B> permits Route, PlainRoute {
 		return binding;
 	}
 
+	void markOptional() {
+		_optional = true;
+	}
+
 	boolean isBound() {
 		return _binding != null;
 	}
@@ -95,7 +104,7 @@ abstract sealed class RouteIdentity<B> permits Route, PlainRoute {
 			CONSTANTS.removeIf( identity -> identity.heldField() == null );
 
 			for( final RouteIdentity<?> identity : CONSTANTS ) {
-				if( router.binding( identity ) == null ) {
+				if( !identity._optional && router.binding( identity ) == null ) {
 					undeclared.add( identity );
 				}
 			}
@@ -152,6 +161,16 @@ abstract sealed class RouteIdentity<B> permits Route, PlainRoute {
 	 * @return What the route is, for messages, when it isn't a named constant
 	 */
 	abstract String description();
+
+	/**
+	 * @return The names a link to the route gives values for
+	 */
+	abstract List<String> acceptedNames();
+
+	/**
+	 * @return The names a link to the route must give values for (the host's parameters can be the request's)
+	 */
+	abstract List<String> requiredNames();
 
 	/**
 	 * @return The class calling the method that made an identity: two frames up from the factory

@@ -233,6 +233,26 @@ public final class RouteGroup {
 	public PlainRoute redirect( final String pattern, final Linkable to, final RouteOption... options ) {
 		Objects.requireNonNull( to, "A route constant is null: one declared after the constants it's used with (a static field read before it was set?)" );
 
+		// The old URL's parameters are the route's by name: checked once every route has its pattern
+		final String fullPattern = fullPattern( pattern );
+		final Host host = (Host)allOptions( options ).stream().filter( Host.class::isInstance ).findFirst().orElse( null );
+		final List<String> names = new ArrayList<>( PathPattern.parse( fullPattern ).parameterNames() );
+
+		if( host != null ) {
+			names.addAll( host.parameterNames() );
+		}
+
+		if( to instanceof RouteIdentity<?> identity ) {
+			_router.checkOnceDeclared( () -> {
+				final List<String> unknown = names.stream().filter( name -> !identity.acceptedNames().contains( name ) ).toList();
+				final List<String> missing = identity.requiredNames().stream().filter( name -> !names.contains( name ) ).toList();
+
+				if( !unknown.isEmpty() || !missing.isEmpty() ) {
+					throw new IllegalArgumentException( "The redirect from %s to %s doesn't fit it: the route has no parameter %s, and needs %s, which the old URL doesn't have. The old URL's parameters are the route's by name".formatted( fullPattern, identity.name(), unknown, missing ) );
+				}
+			} );
+		}
+
 		return map( pattern, invocation -> {
 			final java.util.Map<String, Object> values = new java.util.LinkedHashMap<>();
 			invocation.parameters().forEach( ( name, value ) -> {
@@ -241,9 +261,20 @@ public final class RouteGroup {
 				}
 			} );
 
+			final String url;
+
+			// A value the route doesn't take (text that isn't one of its type, an object that doesn't exist) means the old
+			// URL names nothing: declined, as the route would decline it
+			try {
+				url = to.url( values, invocation.context() );
+			}
+			catch( IllegalArgumentException e ) {
+				throw new Declined( "the redirect to %s doesn't take its values: %s".formatted( to, e.getMessage() ) );
+			}
+
 			final String uri = invocation.request().uri();
 			final int query = uri.indexOf( '?' );
-			final String location = to.url( values, invocation.context() ) + (query == -1 ? "" : (to.url( values, invocation.context() ).contains( "?" ) ? "&" : "?") + uri.substring( query + 1 ));
+			final String location = url + (query == -1 ? "" : (url.contains( "?" ) ? "&" : "?") + uri.substring( query + 1 ));
 
 			final com.webobjects.appserver.WOResponse response = new com.webobjects.appserver.WOResponse();
 			response.setStatus( 308 );

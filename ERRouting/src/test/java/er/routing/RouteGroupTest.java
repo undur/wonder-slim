@@ -469,4 +469,38 @@ public class RouteGroupTest {
 
 		assertSame( about, invocation.route() );
 	}
+
+	public static class OverloadedPage extends com.webobjects.appserver.WOComponent {
+
+		public OverloadedPage( final com.webobjects.appserver.WOContext context ) {
+			super( context );
+		}
+
+		public void setId( final Integer id ) {}
+
+		public void id( final String id ) {}
+	}
+
+	@Test
+	public void aPageWithOverloadsForAParameterIsRefused() {
+		final IllegalArgumentException e = assertThrows( IllegalArgumentException.class, () -> new ERXRouter().application().map( "/items/{id}", OverloadedPage.class ) );
+		assertTrue( e.getMessage().contains( "several methods" ), e.getMessage() );
+	}
+
+	@Test
+	public void anObjectProvidedIsMadeOncePerRequest() {
+		final ERXRouter router = new ERXRouter();
+		final List<Integer> made = new ArrayList<>();
+		router.converters().provide( StringBuilder.class, scope -> {
+			made.add( 1 );
+			return new StringBuilder();
+		} );
+
+		final com.webobjects.appserver.WORequest request = invocationWithLists( "/x", Map.of(), router ).request();
+		final RouteInvocation first = new RouteInvocation( "/x", request, Map.of(), router.converters() );
+		final RouteInvocation second = new RouteInvocation( "/x", request, Map.of(), router.converters() );
+
+		assertSame( first.get( StringBuilder.class ), second.get( StringBuilder.class ) );
+		assertEquals( 1, made.size() );
+	}
 }

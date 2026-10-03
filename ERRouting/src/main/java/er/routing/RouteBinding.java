@@ -152,6 +152,22 @@ final class RouteBinding<P extends Record> {
 	/**
 	 * @return The whole path pattern, the group's prefix included
 	 */
+	/**
+	 * @return The names a link gives values for: the record's components, and the host's parameters it leaves out
+	 */
+	List<String> acceptedNames() {
+		final List<String> names = new ArrayList<>( parameterNames() );
+		_routeParameterNames.stream().filter( name -> !names.contains( name ) ).forEach( names::add );
+		return names;
+	}
+
+	/**
+	 * @return The names a link must give values for: the path's parameters (the host's can be the request's)
+	 */
+	List<String> requiredNames() {
+		return _path.parameterNames();
+	}
+
 	public String pattern() {
 		return _path.source();
 	}
