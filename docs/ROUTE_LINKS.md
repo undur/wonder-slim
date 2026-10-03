@@ -284,7 +284,13 @@ For a request (method, host, path), in this order:
   Each table refuses its own conflicts. Between tables, the same route is an override, not a conflict: the
   application's table wins, and plugins rank among themselves in dependency order. Specificity still comes first
   across tables, and a table's rank only breaks a tie between equal shapes, so an application's `/*` doesn't hide a
-  plugin's `/admin/users`. Each override is logged at startup. (To check: how ng-objects orders its tables.)
+  plugin's `/admin/users`. Each override is logged at startup.
+- **How ng-objects does it:** tables are tried strictly in rank order, the first table with any match winning, and each
+  plugin's table goes in front as it loads (`NGRouteManager`, `NGApplication.initPlugin`). Rank alone decides there,
+  so an application's catch-all would hide a plugin's literal route. Specificity first is a deliberate difference.
+- **Routes that change while the application runs:** in development, ng-objects reads a plugin's routes again on each
+  request (a route supplier), so editing a route needs no restart. The router should allow the same: a table rebuilt
+  from its source in development, read once in production.
 
 ### Decided
 
