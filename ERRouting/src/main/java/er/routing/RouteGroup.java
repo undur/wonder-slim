@@ -47,6 +47,7 @@ public final class RouteGroup {
 	private final List<RouteFilter> _filters = new ArrayList<>();
 
 	RouteGroup( final ERXRouter router, final Router<ERXRouter.Mapped>.Table table, final RouteGroup parent, final String prefix, final List<RouteOption> options ) {
+		options.forEach( option -> Objects.requireNonNull( option, "A route option is null (a static field read before it was set?)" ) );
 		_router = router;
 		_table = table;
 		_parent = parent;
@@ -164,6 +165,7 @@ public final class RouteGroup {
 		boolean ownPolicy = false;
 
 		for( final RouteOption option : options ) {
+			Objects.requireNonNull( option, "A route option is null (a static field read before it was set?)" );
 			all.add( option );
 			ownPolicy |= option instanceof TrailingSlash;
 		}

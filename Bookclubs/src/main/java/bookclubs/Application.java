@@ -1,8 +1,6 @@
 package bookclubs;
 
 import er.extensions.appserver.ERXApplication;
-import er.routing.ERXRouter;
-import er.extensions.routes.RouteTable;
 
 public class Application extends ERXApplication {
 
@@ -11,8 +9,6 @@ public class Application extends ERXApplication {
 	}
 
 	public Application() {
-		final ERXRouter router = new ERXRouter();
-		BookclubRoutes.create( router );
-		router.mapInto( RouteTable.defaultRouteTable() );
+		BookclubRoutes.declare();
 	}
 }

@@ -209,13 +209,14 @@ public class BookclubRoutes {
 	public final Route<Danger> danger;
 	public final Route<Reset> reset;
 
-	private BookclubRoutes( final ERXRouter router ) {
+	private BookclubRoutes() {
+		final ERXRouter router = ERXRouter.defaultRouter();
 
 		// Books are route parameters: a book in a URL is its id
 		router.converters().register( Book.class, Converter.of( id -> Library.book( Integer.parseInt( id ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
 
 		// The application's table comes first, so its routes override a plugin's
-		final RouteGroup routes = router.table( "application" );
+		final RouteGroup routes = router.application();
 
 		// The landing page answers localhost only: on a club's host, / is the club's home
 		home = routes.route( "/", Home.class, Host.of( "localhost" ) );
@@ -271,8 +272,11 @@ public class BookclubRoutes {
 		GuestbookPlugin.register( router.table( "guestbook" ) );
 	}
 
-	public static void create( final ERXRouter router ) {
-		_instance = new BookclubRoutes( router );
+	/**
+	 * Declares the routes, at startup
+	 */
+	public static void declare() {
+		_instance = new BookclubRoutes();
 	}
 
 	public static BookclubRoutes instance() {

@@ -13,25 +13,20 @@ route, so templates and Java code link to routes rather than writing URLs by han
 
 ## Setting up
 
-Create a router, give it a table for the application's routes, and map the router into the existing route table:
+The application's routes are declared in its constructor, in the default router's application table:
 
 ```java
-public class Application extends ERXApplication {
+public Application() {
+	final RouteGroup routes = ERXRouter.defaultRouter().application();
 
-	public Application() {
-		final ERXRouter router = new ERXRouter();
-		final RouteGroup routes = router.table( "application" );
-
-		routes.map( "/", Main.class );
-		routes.map( "/items/{id}", ri -> ItemPage.page( ri, ri.parameter( "id" ) ) );
-
-		router.mapInto( RouteTable.defaultRouteTable() );
-	}
+	routes.map( "/", Main.class );
+	routes.map( "/items/{id}", ri -> ItemPage.page( ri, ri.parameter( "id", Integer.class ) ) );
 }
 ```
 
-`mapInto` puts the router into the route table as one route. What the router has no route for passes on to the
-table's other routes, then its fallback and not found handling, so the router and existing routes work side by side.
+The default router is created on first use and mapped into the existing route table then, as one route. What the
+router has no route for passes on to the table's other routes, then its fallback and not found handling, so the router
+and existing routes work side by side.
 
 ## Routes
 
@@ -325,13 +320,13 @@ final RouteGroup api = club.group( "/api", TrailingSlash.STRICT );          // /
 
 ## Tables and overrides
 
-A router has tables, ranked in the order they're created: the application's first, then each plugin's, in dependency
-order. A plugin maps its routes in its own table:
+A router has tables: the application's (`application()`) ranks first, whenever it's created, and each plugin's
+(`table( name )`) after it, in the order they're created (dependency order). A plugin maps its routes in its own table:
 
 ```java
-final RouteGroup routes = router.table( "application" );
+final RouteGroup routes = router.application();                 // the application's
 …
-GuestbookPlugin.register( router.table( "guestbook" ) );
+GuestbookPlugin.register( router.table( "guestbook" ) );       // a plugin's
 ```
 
 - **Conflicts:** within one table, two routes matching the same requests (the same pattern, whatever the parameters are

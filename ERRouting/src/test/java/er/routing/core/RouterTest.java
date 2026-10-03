@@ -272,6 +272,16 @@ public class RouterTest {
 	}
 
 	@Test
+	public void theApplicationsTableRanksFirstWhenCreatedLast() {
+		final Router<String> router = new Router<>();
+		router.table( "plugin" ).map( "/login", "pluginLogin" );
+		router.table( "application", Integer.MIN_VALUE ).map( "/login", "applicationLogin" );
+
+		assertEquals( List.of( "applicationLogin", "pluginLogin" ), handlers( get( router, "/login" ) ) );
+		assertEquals( "applicationLogin", router.overrides().getFirst().route().handler() );
+	}
+
+	@Test
 	public void invalidPatterns() {
 		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "items" ) );
 		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/items//edit" ) );

@@ -60,7 +60,15 @@ public final class Router<H> {
 	 * @return A new table, ranked below the tables created before it
 	 */
 	public Table table( final String name ) {
-		final Table table = new Table( name, _tables.size() );
+		return table( name, _tables.size() );
+	}
+
+	/**
+	 * @return A new table of the given rank: a lower rank comes first. The application's table ranks first, whenever
+	 *         it's created ({@link Integer#MIN_VALUE}).
+	 */
+	public Table table( final String name, final int rank ) {
+		final Table table = new Table( name, rank );
 		_tables.add( table );
 		return table;
 	}
@@ -127,7 +135,7 @@ public final class Router<H> {
 			final List<RouteCondition> conditionList = new ArrayList<>();
 
 			for( final RouteOption option : options ) {
-				switch( option ) {
+				switch( Objects.requireNonNull( option, "A route option is null" ) ) {
 					case RouteCondition condition -> conditionList.add( condition );
 					case TrailingSlash policy -> {
 						if( trailingSlash != null ) {

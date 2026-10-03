@@ -21,14 +21,12 @@ import er.extensions.routes.RouteTable;
  * EXPERIMENTAL (route-links branch). The router, see docs/ROUTE_LINKS.md and #178: routes with named parameters,
  * conditions (host, methods), trailing slash policies, groups, and tables ranked so an application overrides a plugin.
  *
- * Kept beside the existing route table until they converge: {@link #mapInto(RouteTable)} maps the router into it as one
- * route, which declines what the router has no route for, so the table's fallback and not found still apply.
+ * Kept beside the existing route table until they converge: the default router ({@link #defaultRouter()}) is mapped into
+ * it as one route, which declines what the router has no route for, so the table's fallback and not found still apply.
  *
  * <pre>
- * final ERXRouter router = new ERXRouter();
- * final RouteGroup routes = router.table( "application" );
+ * final RouteGroup routes = ERXRouter.defaultRouter().application();
  * routes.map( "/items/{id}", ri -&gt; ItemPage.page( ri, ri.parameter( "id" ) ) );
- * router.mapInto( RouteTable.defaultRouteTable() );
  * </pre>
  */
 
@@ -45,6 +43,22 @@ public class ERXRouter {
 	private final Converters _converters = new Converters();
 	private final java.util.Map<String, RouteGroup> _namedGroups = new java.util.concurrent.ConcurrentHashMap<>();
 	private int _loggedOverrides;
+	private RouteGroup _application;
+
+	private static ERXRouter _defaultRouter;
+
+	/**
+	 * @return The application's router, created on first use and mapped into the default route table then, so an
+	 *         application declares its routes and has nothing to set up
+	 */
+	public static synchronized ERXRouter defaultRouter() {
+		if( _defaultRouter == null ) {
+			_defaultRouter = new ERXRouter();
+			_defaultRouter.mapInto( RouteTable.defaultRouteTable() );
+		}
+
+		return _defaultRouter;
+	}
 
 	/**
 	 * A router whose routes ignore the trailing slash unless they set their own policy
@@ -66,8 +80,20 @@ public class ERXRouter {
 	}
 
 	/**
-	 * @return The routes of a new table, ranked below the tables created before it: the application's first, then
-	 *         plugins' in dependency order. The same route in a higher ranked table overrides it.
+	 * @return The application's routes: a table ranked before every other, whenever it's created, so the application's
+	 *         routes override a plugin's
+	 */
+	public synchronized RouteGroup application() {
+		if( _application == null ) {
+			_application = new RouteGroup( this, _router.table( "application", Integer.MIN_VALUE ), null, "", List.of() );
+		}
+
+		return _application;
+	}
+
+	/**
+	 * @return The routes of a new table, for a plugin, ranked below the application's and the tables created before it
+	 *         (plugins in dependency order). The same route in a higher ranked table overrides it.
 	 */
 	public RouteGroup table( final String name ) {
 		return new RouteGroup( this, _router.table( name ), null, "", List.of() );
