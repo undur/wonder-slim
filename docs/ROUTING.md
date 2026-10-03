@@ -202,20 +202,27 @@ final String url = routes.book.url( new BookView( club, book.id() ) );
 
 ### Forms
 
-Forms don't take a typed route yet. A form posts to a URL generated in Java, and its fields are the record's other
-components:
+`<wo:routeForm>` posts to a typed route. It takes `route` and `:` parameters as `<wo:route>` does, and the record's
+other components are the form's fields:
 
 ```java
-public String createURL() {
-	return routes().createBook.url( new CreateBook( club.id(), null, null, null ), context() );
-}
+public record CreateBook( String club, String title, String author, Integer year ) {}
+
+createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST );
 ```
 
 ```html
-<wo:form href="$createURL" method="post">
+<wo:routeForm route="$routes.createBook">
 	<input name="title"> <input name="author">
-</wo:form>
+</wo:routeForm>
+
+<wo:routeForm route="$routes.deleteBook" :book="$book">
+	<button type="submit">Remove</button>
+</wo:routeForm>
 ```
+
+The method is `post` unless the form binds another. `href`, `action` and the direct action bindings aren't accepted:
+other forms are `<wo:form>`.
 
 After a form's post, answer with a redirect to the result (post, redirect, get):
 
@@ -344,7 +351,6 @@ GuestbookPlugin.register( router.table( "guestbook" ) );
 
 ## Not there yet
 
-- Forms taking a typed route: they post to URLs generated in Java.
 - Static fields in key paths (#172): templates reach typed routes through an instance.
 - Completing and checking a typed route's parameters in the editor (undur/parslips#12). Until then, link mistakes show
   when the link renders.

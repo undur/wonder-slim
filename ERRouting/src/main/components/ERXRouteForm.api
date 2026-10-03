@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wodefinitions>
+	<wo class="ERXRouteForm" wocomponentcontent="true">
+		<binding name="route"/>
+		<binding name="secure"/>
+		<binding name="multipleSubmit"/>
+		<binding name="queryDictionary"/>
+		<binding name="name"/>
+		<binding name="id"/>
+		<binding name="enctype"/>
+		<binding name="addDefaultSubmitButton"/>
+		<binding name="method"/>
+		<binding name="disabled"/>
+		<binding name="fragmentIdentifier"/>
+		<binding name="embedded"/>
+		<validation message="'route' must be bound">
+			<unbound name="route"/>
+		</validation>
+	</wo>
+</wodefinitions>
