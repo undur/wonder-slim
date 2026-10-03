@@ -61,34 +61,28 @@ public class BookclubRoutes {
 	}
 
 	// ---- A club's pages, on {club}.localhost ----
+	// The host's {club} is a Club, converted by the converter registered for clubs: an unknown club's host declines
+	// before any of these is invoked.
 
-	public record ClubHome( String club ) implements Routable {
+	public record ClubHome( Club club ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return Library.club( club ).<WOActionResults>map( c -> page( ClubPage.class, invocation.context() ).club( c ) ).orElse( RouteHandler.DECLINED );
+			return page( ClubPage.class, invocation.context() ).club( club );
 		}
 	}
 
 	/**
-	 * The books, sorted, a page at a time: query parameters with types, absent ones null
+	 * The books, sorted, a page at a time: query parameters with types, absent ones (or ones that don't convert) null
 	 */
-	public record Books( String club, Sort sort, Integer page ) implements Routable {
-
-		public Books {
-			if( page != null && page < 1 ) {
-				throw new IllegalArgumentException( "Pages start at 1" );
-			}
-		}
+	public record Books( Club club, Sort sort, Integer page ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return Library.club( club ).<WOActionResults>map( c -> {
-				final BookListPage page = BookclubRoutes.page( BookListPage.class, invocation.context() ).club( c );
-				page.sort = sort == null ? Sort.title : sort;
-				page.page = this.page == null ? 1 : this.page;
-				return page;
-			} ).orElse( RouteHandler.DECLINED );
+			final BookListPage list = BookclubRoutes.page( BookListPage.class, invocation.context() ).club( club );
+			list.sort = sort == null ? Sort.title : sort;
+			list.page = page == null || page < 1 ? 1 : page;
+			return list;
 		}
 	}
 
@@ -96,17 +90,16 @@ public class BookclubRoutes {
 	 * A book, converted from its id in the URL by the converter registered for books. An id that isn't a book's declines
 	 * before the route is invoked, and so does another club's book (here), so the club's own not found page answers.
 	 */
-	public record BookView( String club, Book book ) implements Routable {
+	public record BookView( Club club, Book book ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			final Club c = Library.club( club ).orElse( null );
 
-			if( c == null || !book.club().equals( club ) ) {
+			if( !book.club().equals( club.id() ) ) {
 				return RouteHandler.DECLINED;
 			}
 
-			final BookPage page = page( BookPage.class, invocation.context() ).club( c );
+			final BookPage page = page( BookPage.class, invocation.context() ).club( club );
 			page.book = book;
 			return page;
 		}
@@ -115,33 +108,27 @@ public class BookclubRoutes {
 	/**
 	 * The form for a new book. A literal segment ("new") comes before the parameter ({book}), whatever the mapping order.
 	 */
-	public record NewBook( String club ) implements Routable {
+	public record NewBook( Club club ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return Library.club( club ).<WOActionResults>map( c -> page( NewBookPage.class, invocation.context() ).club( c ) ).orElse( RouteHandler.DECLINED );
+			return page( NewBookPage.class, invocation.context() ).club( club );
 		}
 	}
 
 	/**
 	 * The form's post: the form's fields are the record's components, as query parameters are
 	 */
-	public record CreateBook( String club, String title, String author, Integer year ) {}
+	public record CreateBook( Club club, String title, String author, Integer year ) {}
 
-	public record DeleteBook( String club, Book book ) {}
+	public record DeleteBook( Club club, Book book ) {}
 
-	public record MemberView( String club, String handle ) implements Routable {
+	public record MemberView( Club club, String handle ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			final Club c = Library.club( club ).orElse( null );
-
-			if( c == null ) {
-				return RouteHandler.DECLINED;
-			}
-
-			return Library.member( club, handle ).<WOActionResults>map( m -> {
-				final MemberPage page = page( MemberPage.class, invocation.context() ).club( c );
+			return Library.member( club.id(), handle ).<WOActionResults>map( m -> {
+				final MemberPage page = page( MemberPage.class, invocation.context() ).club( club );
 				page.member = m;
 				return page;
 			} ).orElse( RouteHandler.DECLINED );
@@ -152,49 +139,42 @@ public class BookclubRoutes {
 	 * A club's page by name ({@code /history}): one it doesn't have declines, and the request passes on to the next
 	 * matching route, the club's catch-all
 	 */
-	public record ClubText( String club, String name ) implements Routable {
+	public record ClubText( Club club, String name ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			final Club c = Library.club( club ).orElse( null );
-			final String text = Library.page( club, name ).orElse( null );
-
-			if( c == null || text == null ) {
-				return RouteHandler.DECLINED;
-			}
-
-			return TextPage.create( invocation.context(), c, capitalized( name ), text );
+			return Library.page( club.id(), name ).<WOActionResults>map( text -> TextPage.create( invocation.context(), club, capitalized( name ), text ) ).orElse( RouteHandler.DECLINED );
 		}
 	}
 
 	/**
 	 * Overrides the guestbook plugin's {@code /about}: the same route in a higher ranked table
 	 */
-	public record About( String club ) implements Routable {
+	public record About( Club club ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return Library.club( club ).<WOActionResults>map( c -> TextPage.create( invocation.context(), c, "About", "%s: %s. (This is the application's /about, overriding the guestbook plugin's.)".formatted( c.name(), c.motto() ) ) ).orElse( RouteHandler.DECLINED );
+			return TextPage.create( invocation.context(), club, "About", "%s: %s. (This is the application's /about, overriding the guestbook plugin's.)".formatted( club.name(), club.motto() ) );
 		}
 	}
 
-	public record Admin( String club ) implements Routable {
+	public record Admin( Club club ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return Library.club( club ).<WOActionResults>map( c -> TextPage.create( invocation.context(), c, "Admin", "Filters run, outermost first: " + filtersRun( invocation ) ) ).orElse( RouteHandler.DECLINED );
+			return TextPage.create( invocation.context(), club, "Admin", "Filters run, outermost first: " + filtersRun( invocation ) );
 		}
 	}
 
-	public record Danger( String club ) implements Routable {
+	public record Danger( Club club ) implements Routable {
 
 		@Override
 		public WOActionResults invoke( final RouteInvocation invocation ) {
-			return Library.club( club ).<WOActionResults>map( c -> TextPage.create( invocation.context(), c, "The danger zone", "Filters run, outermost first: " + filtersRun( invocation ) ) ).orElse( RouteHandler.DECLINED );
+			return TextPage.create( invocation.context(), club, "The danger zone", "Filters run, outermost first: " + filtersRun( invocation ) );
 		}
 	}
 
-	public record Reset( String club ) {}
+	public record Reset( Club club ) {}
 
 	public final Route<Home> home;
 	public final Route<ClubHome> clubHome;
@@ -215,7 +195,8 @@ public class BookclubRoutes {
 	private BookclubRoutes() {
 		final ERXRouter router = ERXRouter.defaultRouter();
 
-		// Books are route parameters: a book in a URL is its id
+		// Clubs and books are route parameters: a club in a URL is its id (a host's first label), a book its number
+		router.converters().register( Club.class, Converter.of( id -> Library.club( id ).orElse( null ), Club::id ) );
 		router.converters().register( Book.class, Converter.of( id -> Library.book( Integer.parseInt( id ) ).orElse( null ), book -> String.valueOf( book.id() ) ) );
 
 		// The application's table comes first, so its routes override a plugin's
@@ -246,7 +227,10 @@ public class BookclubRoutes {
 		club.map( "/files/*", ri -> text( 200, "The file %s of %s".formatted( ri.parameter( "*" ), ri.parameter( "club" ) ) ) );
 
 		// The club's catch-all, last in precedence: what nothing else answered, a declined page included
-		club.map( "/*", ri -> Library.club( ri.parameter( "club" ) ).<WOActionResults>map( c -> TextPage.create( ri.context(), c, "Not here", "%s has no page at %s.".formatted( c.name(), ri.url() ) ).status( 404 ) ).orElse( RouteHandler.DECLINED ) );
+		club.map( "/*", ri -> {
+			final Club c = ri.parameter( "club", Club.class );
+			return TextPage.create( ri.context(), c, "Not here", "%s has no page at %s.".formatted( c.name(), ri.url() ) ).status( 404 );
+		} );
 
 		// Nested groups with filters: the admin filter runs, then the danger filter
 		final RouteGroup adminGroup = club.group( "/admin" ).named( "admin" );
@@ -293,27 +277,23 @@ public class BookclubRoutes {
 	 */
 	private static WOActionResults createBook( final CreateBook form, final RouteInvocation invocation ) {
 
-		if( Library.club( form.club() ).isEmpty() ) {
-			return RouteHandler.DECLINED;
-		}
-
 		// The form's fields are checked here, where the form can be shown again with what's wrong
 		final String error = invocation.conversionErrors().containsKey( "year" ) ? "The year is a number, not '%s'".formatted( invocation.conversionErrors().get( "year" ) )
 				: form.title() == null || form.title().isBlank() || form.author() == null || form.author().isBlank() ? "A book has a title and an author" : null;
 
 		if( error != null ) {
-			final NewBookPage page = page( NewBookPage.class, invocation.context() ).club( Library.club( form.club() ).get() );
+			final NewBookPage page = page( NewBookPage.class, invocation.context() ).club( form.club() );
 			page.error = error;
 			return page;
 		}
 
-		final Book book = Library.book( form.club(), form.title().strip(), form.author().strip(), form.year() );
+		final Book book = Library.book( form.club().id(), form.title().strip(), form.author().strip(), form.year() );
 		return seeOther( instance().book.url( new BookView( form.club(), book ), invocation.context() ) );
 	}
 
 	private static WOActionResults deleteBook( final DeleteBook delete, final RouteInvocation invocation ) {
 
-		if( !Library.removeBook( delete.club(), delete.book().id() ) ) {
+		if( !Library.removeBook( delete.club().id(), delete.book().id() ) ) {
 			return RouteHandler.DECLINED;
 		}
 
