@@ -43,8 +43,9 @@ public class GuestbookPlugin {
 
 		club.map( "/about", ri -> BookclubRoutes.text( 200, "The guestbook plugin's about page" ) );
 
-		// In the application's admin group, so behind its admin filter
-		routes.join( "admin" ).map( "/guestbook", ri -> BookclubRoutes.text( 200, "Moderating the guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ) );
+		// In the application's admin group, so behind its admin filter. Joined once the application names the group, so
+		// this works whichever is set up first.
+		routes.join( "admin", admin -> admin.map( "/guestbook", ri -> BookclubRoutes.text( 200, "Moderating the guestbook of %s: %s".formatted( ri.parameter( "club" ), entries( ri.parameter( "club" ) ) ) ) ) );
 	}
 
 	private static List<String> entries( final String club ) {

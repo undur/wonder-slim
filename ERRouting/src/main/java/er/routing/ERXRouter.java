@@ -44,6 +44,7 @@ public class ERXRouter {
 	private final Router<Mapped> _router;
 	private final Converters _converters = new Converters();
 	private final java.util.Map<String, RouteGroup> _namedGroups = new java.util.concurrent.ConcurrentHashMap<>();
+	private final java.util.Map<String, List<java.util.function.Consumer<RouteGroup>>> _pendingJoins = new java.util.LinkedHashMap<>();
 	private int _loggedOverrides;
 	private RouteGroup _application;
 
@@ -71,6 +72,14 @@ public class ERXRouter {
 
 	public ERXRouter( final TrailingSlash trailingSlash ) {
 		_router = new Router<>( trailingSlash );
+	}
+
+	/**
+	 * @return Every route, in precedence order: its pattern, conditions, trailing slash policy and table (for a page
+	 *         listing them, say)
+	 */
+	public List<Router.Entry<?>> routes() {
+		return List.copyOf( _router.routes() );
 	}
 
 	/**
@@ -133,9 +142,30 @@ public class ERXRouter {
 	/**
 	 * Registers a group under a name, for plugins to join ({@link RouteGroup#join(String)})
 	 */
-	void name( final String name, final RouteGroup group ) {
+	synchronized void name( final String name, final RouteGroup group ) {
 		if( _namedGroups.putIfAbsent( name, group ) != null ) {
 			throw new IllegalArgumentException( "A group is already named '%s'".formatted( name ) );
+		}
+
+		// Plugins that joined the group before it was named map their routes now
+		final List<java.util.function.Consumer<RouteGroup>> pending = _pendingJoins.remove( name );
+
+		if( pending != null ) {
+			pending.forEach( join -> join.accept( group ) );
+		}
+	}
+
+	/**
+	 * Runs the action with the named group: now, if it's named, otherwise once it is
+	 */
+	synchronized void whenNamed( final String name, final java.util.function.Consumer<RouteGroup> action ) {
+		final RouteGroup group = _namedGroups.get( name );
+
+		if( group != null ) {
+			action.accept( group );
+		}
+		else {
+			_pendingJoins.computeIfAbsent( name, n -> new java.util.ArrayList<>() ).add( action );
 		}
 	}
 
@@ -168,6 +198,11 @@ public class ERXRouter {
 
 		@Override
 		public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
+
+		if( !_pendingJoins.isEmpty() ) {
+			throw new IllegalStateException( "Groups were joined that are never named: %s. A plugin's routes in them don't exist".formatted( _pendingJoins.keySet() ) );
+		}
+
 			return ERXRouter.this.handle( invocation );
 		}
 
@@ -182,6 +217,11 @@ public class ERXRouter {
 	 *         trailing slash form, or {@link RouteHandler#DECLINED}
 	 */
 	public WOActionResults handle( final er.extensions.routes.RouteInvocation invocation ) {
+
+		if( !_pendingJoins.isEmpty() ) {
+			throw new IllegalStateException( "Groups were joined that are never named: %s. A plugin's routes in them don't exist".formatted( _pendingJoins.keySet() ) );
+		}
+
 		final WORequest request = invocation.request();
 		final RouteRequest routeRequest = new RouteRequest( request.method(), RequestHost.host( request ), invocation.url() );
 

@@ -73,7 +73,19 @@ public final class RouteGroup {
 	 *         apply, not this group's.
 	 */
 	public RouteGroup join( final String name ) {
-		final RouteGroup named = _router.namedGroup( name );
+		return joined( _router.namedGroup( name ) );
+	}
+
+	/**
+	 * Joins the named group as {@link #join(String)} does, once it's named: a plugin starts before the application
+	 * declares its groups, so the body maps its routes in the group when the application names it (or now, if it has).
+	 * A group never named is an error on the first request.
+	 */
+	public void join( final String name, final Consumer<RouteGroup> body ) {
+		_router.whenNamed( name, named -> body.accept( joined( named ) ) );
+	}
+
+	private RouteGroup joined( final RouteGroup named ) {
 		final List<RouteOption> options = new ArrayList<>( named._conditions );
 
 		if( named._trailingSlash != null ) {
