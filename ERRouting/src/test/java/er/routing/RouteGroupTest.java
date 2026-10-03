@@ -3,6 +3,7 @@ package er.routing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -441,5 +442,31 @@ public class RouteGroupTest {
 		// The application provides objects for the scope
 		router.converters().provide( StringBuilder.class, scope -> new StringBuilder( scope.parameter( "club" ) ) );
 		assertEquals( "acme", acme.get( StringBuilder.class ).toString() );
+	}
+
+	public record Buggy( String q ) {
+
+		public Buggy {
+			q.length();
+		}
+	}
+
+	@Test
+	public void aBugsNullPointerExceptionIsntARefusal() {
+		final ERXRouter router = new ERXRouter();
+		final Route<Buggy> buggy = router.application().route( "/buggy", Buggy.class, ( b, invocation ) -> null );
+		buggy.whenInvalid( ( invocation, reason ) -> () -> null );
+
+		// Not "absent": a 500, though the route answers bad input itself
+		assertThrows( NullPointerException.class, () -> buggy.binding().handle( invocation( "/buggy", Map.of(), router ) ) );
+	}
+
+	@Test
+	public void anInvocationKnowsItsRoute() {
+		final ERXRouter router = new ERXRouter();
+		final PlainRoute about = router.application().map( "/about", NOTHING );
+		final RouteInvocation invocation = new RouteInvocation( "/about", null, Map.of(), router.converters(), about );
+
+		assertSame( about, invocation.route() );
 	}
 }

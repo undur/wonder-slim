@@ -32,10 +32,44 @@ public class RouteInvocation extends er.extensions.routes.RouteInvocation implem
 	 */
 	private final java.util.Set<String> _converting = new java.util.HashSet<>();
 
+	/**
+	 * The route invoked, null if the invocation isn't a route's
+	 */
+	private final Linkable _route;
+
+	/**
+	 * Why the route declined the request, null if it didn't say
+	 */
+	private String _declineReason;
+
 	public RouteInvocation( final String url, final WORequest request, final Map<String, String> parameters, final Converters converters ) {
+		this( url, request, parameters, converters, null );
+	}
+
+	public RouteInvocation( final String url, final WORequest request, final Map<String, String> parameters, final Converters converters, final Linkable route ) {
 		super( url, request );
 		_parameters = Map.copyOf( parameters );
 		_converters = converters;
+		_route = route;
+	}
+
+	/**
+	 * @return The route invoked (for a filter deciding by route, navigation marking the current page, a log): the constant
+	 *         for one a declaration gave a pattern to, which compares by identity ({@code ri.route() == Routes.books})
+	 */
+	public Linkable route() {
+		return _route;
+	}
+
+	/**
+	 * Notes why the route declined, for the not found page in development
+	 */
+	void declinedBecause( final String reason ) {
+		_declineReason = reason;
+	}
+
+	String declineReason() {
+		return _declineReason;
 	}
 
 	/**

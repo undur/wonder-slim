@@ -82,7 +82,9 @@ final class PageSetters implements RouteHandler {
 
 			// As for a typed route: a parameter that isn't one of the type, or names nothing, means the URL is wrong
 			if( value == null ) {
-				logger.debug( "The page route to {} declined {}: its parameter '{}' is '{}', which isn't a {}, or names none", _pageClass.getSimpleName(), invocation.url(), setter.name(), text, setter.type().getSimpleName() );
+				final String reason = "its parameter '%s' is '%s', which isn't a %s, or names none".formatted( setter.name(), text, setter.type().getSimpleName() );
+				logger.debug( "The page route to {} declined {}: {}", _pageClass.getSimpleName(), invocation.url(), reason );
+				invocation.declinedBecause( reason );
 				return RouteHandler.DECLINED;
 			}
 

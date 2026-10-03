@@ -53,6 +53,12 @@ final class RouteBinding<P extends Record> {
 	private final Constructor<P> _constructor;
 
 	/**
+	 * The components' indexes in the order they're converted: the host's parameters, the path's, then the query's, so a
+	 * converter looking in the request's other parameters (a club's book) finds those it depends on converted
+	 */
+	private final int[] _conversionOrder;
+
+	/**
 	 * The path and host parameters' names
 	 */
 	private final List<String> _routeParameterNames;
@@ -106,6 +112,24 @@ final class RouteBinding<P extends Record> {
 				throw new IllegalArgumentException( "%s.%s is a query parameter, so it can be absent, and a %s can't be. Use its boxed type".formatted( parametersClass.getSimpleName(), component.getName(), component.getType() ) );
 			}
 		}
+
+		final List<Integer> order = new ArrayList<>();
+
+		for( final List<String> names : List.of( _host == null ? List.<String>of() : _host.parameterNames(), _path.parameterNames() ) ) {
+			for( int i = 0; i < _components.length; i++ ) {
+				if( names.contains( _components[i].getName() ) ) {
+					order.add( i );
+				}
+			}
+		}
+
+		for( int i = 0; i < _components.length; i++ ) {
+			if( !order.contains( i ) ) {
+				order.add( i );
+			}
+		}
+
+		_conversionOrder = order.stream().mapToInt( Integer::intValue ).toArray();
 
 		try {
 			_constructor = parametersClass.getDeclaredConstructor( Arrays.stream( _components ).map( RecordComponent::getType ).toArray( Class<?>[]::new ) );
@@ -390,7 +414,7 @@ final class RouteBinding<P extends Record> {
 	WOActionResults handle( final RouteInvocation invocation ) {
 		final Object[] arguments = new Object[_components.length];
 
-		for( int i = 0; i < _components.length; i++ ) {
+		for( final int i : _conversionOrder ) {
 			final RecordComponent component = _components[i];
 			final String name = component.getName();
 
@@ -484,11 +508,40 @@ final class RouteBinding<P extends Record> {
 			parameters = construct( arguments );
 		}
 		catch( IllegalArgumentException | NullPointerException e ) {
+
+			// A NullPointerException is a refusal (a value it requires) only from Objects.requireNonNull called by the
+			// record's constructor: anywhere else it's a bug, which isn't passed off as the request's
+			if( e instanceof NullPointerException && !thrownByRequireNonNull( e ) ) {
+				throw e;
+			}
+
 			final RuntimeException reason = withAbsentNamed( e, arguments );
 			return _whenInvalid != null ? _whenInvalid.invoke( invocation, reason ) : declined( invocation, "%s refused its values: %s".formatted( _parametersClass.getSimpleName(), reason.getMessage() ) );
 		}
 
 		return _action.invoke( parameters, invocation );
+	}
+
+	/**
+	 * @return true if the exception comes from {@code Objects.requireNonNull…} called by the record's constructor
+	 */
+	private boolean thrownByRequireNonNull( final RuntimeException e ) {
+		final StackTraceElement[] trace = e.getStackTrace();
+
+		for( int i = 0; i + 1 < trace.length; i++ ) {
+			if( trace[i].getClassName().equals( "java.util.Objects" ) && trace[i].getMethodName().startsWith( "requireNonNull" ) ) {
+				final StackTraceElement caller = trace[i + 1];
+
+				// Objects.requireNonNull may call itself (the overload with a message), so the first caller outside it
+				if( caller.getClassName().equals( "java.util.Objects" ) ) {
+					continue;
+				}
+
+				return caller.getClassName().equals( _parametersClass.getName() ) && caller.getMethodName().equals( "<init>" );
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -573,6 +626,7 @@ final class RouteBinding<P extends Record> {
 	 */
 	private WOActionResults declined( final RouteInvocation invocation, final String reason ) {
 		logger.debug( "The route {} declined {}: {}", description(), invocation.url(), reason );
+		invocation.declinedBecause( reason );
 		return RouteHandler.DECLINED;
 	}
 

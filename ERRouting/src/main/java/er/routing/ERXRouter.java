@@ -431,7 +431,7 @@ public class ERXRouter {
 				return CrossSite.forbidden();
 			}
 
-			final RouteInvocation routedInvocation = new RouteInvocation( invocation.url(), invocation.request(), candidate.parameters(), _converters );
+			final RouteInvocation routedInvocation = new RouteInvocation( invocation.url(), invocation.request(), candidate.parameters(), _converters, mapped.route() );
 			WOActionResults results;
 
 			try {
@@ -439,12 +439,14 @@ public class ERXRouter {
 			}
 			catch( Declined declined ) {
 				logger.debug( "The route {} declined {}: {}", candidate.entry(), invocation.url(), declined.getMessage() );
+				routedInvocation.declinedBecause( declined.getMessage() );
 				results = RouteHandler.DECLINED;
 			}
 			catch( NotCanonical notCanonical ) {
 
 				// A wildcard route has no URL of its own to redirect to, so it declines, and the next candidate gets the request
 				if( candidate.entry().path().isWildcard() ) {
+					RouteTable.explainDecline( invocation.request(), "%s: its parameter '%s' isn't in its canonical text, and a wildcard route has no URL to redirect to".formatted( candidate.entry(), notCanonical.name ) );
 					continue;
 				}
 
@@ -458,6 +460,9 @@ public class ERXRouter {
 			if( results != RouteHandler.DECLINED ) {
 				return results;
 			}
+
+			// Why, for the not found page in development
+			RouteTable.explainDecline( invocation.request(), "%s: %s".formatted( candidate.entry(), routedInvocation.declineReason() == null ? "its handler declined" : routedInvocation.declineReason() ) );
 		}
 
 		return RouteHandler.DECLINED;

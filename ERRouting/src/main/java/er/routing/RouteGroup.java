@@ -168,12 +168,14 @@ public final class RouteGroup {
 		Objects.requireNonNull( pageClass );
 		final PathPattern path = PathPattern.parse( fullPattern( pattern ) );
 		final Host host = (Host)allOptions( options ).stream().filter( Host.class::isInstance ).findFirst().orElse( null );
-		final List<String> names = new ArrayList<>( path.parameterNames() );
+		final List<String> names = new ArrayList<>();
 
+		// The host's first, then the path's: a path parameter's converter may look in the host's (a club's book)
 		if( host != null ) {
 			names.addAll( host.parameterNames() );
 		}
 
+		names.addAll( path.parameterNames() );
 		return map( pattern, route, new PageSetters( pageClass, names, _router.converters(), fullPattern( pattern ) ), options );
 	}
 
