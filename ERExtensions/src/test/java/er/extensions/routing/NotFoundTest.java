@@ -57,9 +57,7 @@ public class NotFoundTest {
 
 		assertEquals( "our own", handle( router, "/nothing" ).contentString() );
 
-		// A group's or a plugin's routes don't set it
-		assertThrows( IllegalStateException.class, () -> router.application().group( "/admin" ).notFound( answering( "theirs" ) ) );
-		assertThrows( IllegalStateException.class, () -> router.table( "plugin" ).fallback( answering( "theirs" ) ) );
+		// A group's or a plugin's routes don't set it: only ApplicationRoutes has notFound() and fallback()
 	}
 
 	@Test

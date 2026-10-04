@@ -99,7 +99,22 @@ public class ERXRouter {
 	}
 
 	private final Router<Mapped> _router;
-	private final Converters _converters = new Converters( type -> undeclared( "the converter for " + type.getName() + ", registered" ) );
+	private final Converters _converters = new Converters( type -> {
+		undeclared( "the converter for " + type.getName() + ", registered" );
+		owned( type );
+	} );
+
+	/**
+	 * Who is declaring routes now: the application, or a plugin's table ({@link #declaringAs(String, Runnable)})
+	 */
+	private String _declaring;
+
+	/**
+	 * Who registered each type's converter (or provides its objects)
+	 */
+	private final Map<Class<?>, String> _converterOwners = new java.util.concurrent.ConcurrentHashMap<>();
+
+	private static final String APPLICATION_OWNER = "the application";
 	private final Map<String, RouteGroup> _namedGroups = new ConcurrentHashMap<>();
 	private final Map<String, List<Consumer<RouteGroup>>> _pendingJoins = new LinkedHashMap<>();
 	private int _loggedOverrides;
@@ -124,13 +139,7 @@ public class ERXRouter {
 	 * Checks made once the routes are declared (every route then has its pattern): a redirect's names against its route's
 	 */
 	private final List<Runnable> _checks = new java.util.concurrent.CopyOnWriteArrayList<>();
-	private RouteGroup _application;
-
-	/**
-	 * The groups handed to the application's declarations with options, which are the application's routes as much as
-	 * {@link #_application} is
-	 */
-	private final java.util.Set<RouteGroup> _applicationGroups = java.util.Collections.newSetFromMap( new java.util.IdentityHashMap<>() );
+	private ApplicationRoutes _application;
 
 	/**
 	 * Whether routes are declared again when their classes change. Development's default.
@@ -173,7 +182,7 @@ public class ERXRouter {
 	 * current one once all of them succeed. One that fails leaves the current routes in place, and routed requests answer
 	 * with why until the routes are declared again. Set {@value #RELOAD_PROPERTY} to false to declare them once.
 	 */
-	public static void declare( final Consumer<RouteGroup> declaration ) {
+	public static void declare( final Consumer<? super ApplicationRoutes> declaration ) {
 		declare( declaration, new RouteOption[0] );
 	}
 
@@ -182,8 +191,8 @@ public class ERXRouter {
 	 * declaration declares, as a group's apply to its routes:
 	 * {@code ERXRouter.declare( routes -> … , TrailingSlash.REDIRECT )}
 	 */
-	public static void declare( final Consumer<RouteGroup> declaration, final RouteOption... options ) {
-		declarations().declare( router -> declaration.accept( router.application( options ) ), RouteIdentity.caller() );
+	public static void declare( final Consumer<? super ApplicationRoutes> declaration, final RouteOption... options ) {
+		declarations().declare( router -> router.declaringAs( APPLICATION_OWNER, () -> declaration.accept( router.application( options ) ) ), RouteIdentity.caller() );
 	}
 
 	/**
@@ -204,7 +213,42 @@ public class ERXRouter {
 	 * declaration declares
 	 */
 	public static void declare( final String table, final Consumer<RouteGroup> declaration, final RouteOption... options ) {
-		declarations().declare( router -> declaration.accept( options.length == 0 ? router.table( table ) : router.table( table ).group( "", options ) ), RouteIdentity.caller() );
+		declarations().declare( router -> router.declaringAs( "the table " + table, () -> declaration.accept( options.length == 0 ? router.table( table ) : router.table( table ).group( "", options ) ) ), RouteIdentity.caller() );
+	}
+
+	/**
+	 * Runs a declaration as the given owner of the converters it registers
+	 */
+	void declaringAs( final String owner, final Runnable declaration ) {
+		final String previous = _declaring;
+		_declaring = owner;
+
+		try {
+			declaration.run();
+		}
+		finally {
+			_declaring = previous;
+		}
+	}
+
+	/**
+	 * Records who registered a type's converter: one owner to a type, and only the application replaces a built-in
+	 * converter, so a plugin's converters can't change how the application's routes convert (#199)
+	 *
+	 * @throws IllegalStateException if the type has another owner, or a plugin replaces a built-in converter
+	 */
+	private void owned( final Class<?> type ) {
+		final String owner = _declaring == null ? APPLICATION_OWNER : _declaring;
+
+		if( _converters.isBuiltIn( type ) && !owner.equals( APPLICATION_OWNER ) ) {
+			throw new IllegalStateException( "%s registers a converter for %s, which is built in: only the application replaces a built-in converter, since a plugin's would change how the application's routes convert. Register one for a type of the plugin's own".formatted( owner, type.getName() ) );
+		}
+
+		final String previous = _converterOwners.putIfAbsent( type, owner );
+
+		if( previous != null && !previous.equals( owner ) ) {
+			throw new IllegalStateException( "%s registers a converter for %s, which %s registered: a type has one converter, so routes convert it the same way wherever they are".formatted( owner, type.getName(), previous ) );
+		}
 	}
 
 	private static synchronized RouteDeclarations declarations() {
@@ -272,21 +316,20 @@ public class ERXRouter {
 	 * @return The application's routes with the given options: for a declaration with options, a group of the application's
 	 *         that applies them, and that takes what only the application's routes take (a fallback, a not found handler)
 	 */
-	synchronized RouteGroup application( final RouteOption... options ) {
+	synchronized ApplicationRoutes application( final RouteOption... options ) {
 		if( options.length == 0 ) {
 			return application();
 		}
 
-		final RouteGroup group = application().group( "", options );
-		_applicationGroups.add( group );
-		return group;
+		final ApplicationRoutes application = application();
+		return new ApplicationRoutes( this, application.table(), application, application.allOptions( options ) );
 	}
 
-	synchronized RouteGroup application() {
+	synchronized ApplicationRoutes application() {
 		undeclared( "the application's routes, reached" );
 
 		if( _application == null ) {
-			_application = new RouteGroup( this, _router.table( "application", Integer.MIN_VALUE ), null, "", List.of() );
+			_application = new ApplicationRoutes( this, _router.table( "application", Integer.MIN_VALUE ), null, List.of() );
 		}
 
 		return _application;
@@ -557,13 +600,6 @@ public class ERXRouter {
 
 		final WOActionResults results = answered( notFound(), invocation, "not found handler" );
 		return results != RouteHandler.DECLINED ? results : passedOn();
-	}
-
-	/**
-	 * @return true for the application's routes, the root of its table
-	 */
-	boolean isApplication( final RouteGroup group ) {
-		return group == _application || _applicationGroups.contains( group );
 	}
 
 	/**

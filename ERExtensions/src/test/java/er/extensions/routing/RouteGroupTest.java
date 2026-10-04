@@ -55,7 +55,7 @@ public class RouteGroupTest {
 	@Test
 	public void theApplicationsOptionsReachEveryRouteItDeclares() {
 		final ERXRouter router = new ERXRouter();
-		final RouteGroup routes = router.application( TrailingSlash.REDIRECT );
+		final ApplicationRoutes routes = router.application( TrailingSlash.REDIRECT );
 		routes.map( "/books/", NOTHING );
 		routes.group( "/api" ).map( "/items", NOTHING );
 		routes.map( "/strict", NOTHING, TrailingSlash.STRICT );
@@ -67,7 +67,28 @@ public class RouteGroupTest {
 		// They're still the application's routes: what only those take, they take
 		routes.notFound( invocation -> null );
 		routes.fallback( invocation -> RouteHandler.DECLINED );
-		assertThrows( IllegalStateException.class, () -> routes.group( "/admin" ).notFound( invocation -> null ) );
+	}
+
+	public record Bookcase( String name ) {}
+
+	@Test
+	public void aConvertersTypeHasOneOwner() {
+		final ERXRouter router = new ERXRouter();
+		final Converters.Converter<Bookcase> bookcases = Converters.Converter.of( Bookcase::new, Bookcase::name );
+
+		// A plugin registers its own types, and registering one again is its own business
+		router.declaringAs( "the table library", () -> {
+			router.table( "library" ).converters().register( Bookcase.class, bookcases );
+			router.table( "library" ).converters().register( Bookcase.class, bookcases );
+		} );
+
+		// Another owner can't take the type over, and a plugin can't replace a built-in converter
+		final IllegalStateException taken = assertThrows( IllegalStateException.class, () -> router.declaringAs( "the application", () -> router.application().converters().register( Bookcase.class, bookcases ) ) );
+		assertTrue( taken.getMessage().contains( "the table library" ), taken.getMessage() );
+		assertThrows( IllegalStateException.class, () -> router.declaringAs( "the table guestbook", () -> router.table( "guestbook" ).converters().register( String.class, Converters.Converter.of( s -> s, s -> s ) ) ) );
+
+		// The application may
+		router.declaringAs( "the application", () -> router.application().converters().register( Integer.class, Converters.Converter.of( Integer::valueOf, String::valueOf ) ) );
 	}
 
 	@Test

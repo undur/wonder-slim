@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
@@ -150,6 +151,11 @@ public final class Converters {
 	 */
 	private final Consumer<Class<?>> _registered;
 
+	/**
+	 * The types with a built-in converter
+	 */
+	private final Set<Class<?>> _builtIn;
+
 	public Converters() {
 		this( null );
 	}
@@ -182,7 +188,16 @@ public final class Converters {
 			}
 		} );
 
+		_builtIn = Set.copyOf( _converters.keySet() );
 		_registered = registered;
+	}
+
+	/**
+	 * @return true if the type's converter is one of the built-in ones (strings, numbers, booleans, dates, UUIDs), whether
+	 *         or not it has been replaced since
+	 */
+	public boolean isBuiltIn( final Class<?> type ) {
+		return _builtIn.contains( boxed( type ) );
 	}
 
 	/**

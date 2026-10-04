@@ -8,6 +8,18 @@
 
   Upgrading: `route( … )` is `map( … )`, with the same arguments.
 
+- **The application's routes have a type of their own**
+  `ERXRouter.declare` hands the application `ApplicationRoutes`, which has `fallback` and `notFound`: a group's or a
+  plugin's routes no longer have them, so the compiler says what an exception said before. (#205)
+
+  Upgrading: a declaration in a method of its own that sets a fallback or a not found handler takes `ApplicationRoutes`
+  instead of `RouteGroup`.
+
+- **A converter's type has one owner**
+  The application, or the plugin that registered it first: another registering the type stops the launch, naming both,
+  and only the application replaces a built-in converter. A plugin's converters can no longer change how the
+  application's routes convert. (#199)
+
 - **An optional last path parameter**
   `/search/{text?}` stands for `/search` and `/search/{text}`, one route where two were mapped before. Absent, the
   parameter is null (a record's component, `ri.parameter`), a page keeps its own value, and a link leaves it out when

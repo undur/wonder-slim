@@ -43,7 +43,7 @@ import er.routing.options.TrailingSlash;
  * apply to its routes and nested groups, as does its policy unless a route or nested group sets its own.
  */
 
-public final class RouteGroup {
+public class RouteGroup {
 
 	private final ERXRouter _router;
 	private final Router<ERXRouter.Mapped>.Table _table;
@@ -201,46 +201,26 @@ public final class RouteGroup {
 	}
 
 	/**
-	 * @return The converters for route parameters, the router's: register an application's own types here, before
-	 *         mapping routes taking them
+	 * @return The converters for route parameters, the router's: register your own types here, before mapping routes
+	 *         taking them. A type has one owner: the application, or the plugin table that registered it first. Only the
+	 *         application replaces a built-in converter (#199).
 	 */
 	public Converters converters() {
 		return _router.converters();
 	}
 
 	/**
-	 * Sets what answers a request no route answered, before the not found handler: the application's {@code public}
-	 * folder ({@code new ERXPublicResources()}), say. It may decline, passing the request on to the not found handler.
-	 * Set on the application's routes only.
-	 *
-	 * @return This group
+	 * @return The router the group's routes are in
 	 */
-	public RouteGroup fallback( final RouteHandler fallback ) {
-		applicationOnly( "fallback" );
-		_router.fallback( fallback );
-		return this;
+	ERXRouter router() {
+		return _router;
 	}
 
 	/**
-	 * Sets what answers a request nothing else answered. Without one, the development pages answer in development (a
-	 * welcome page at {@code /}, otherwise a 404 saying why the routes that matched passed the URL on), and a plain 404
-	 * deployed. One that declines passes the request on (to the next handler in the server, with wo-adaptor-jetty). Set on
-	 * the application's routes only.
-	 *
-	 * @return This group
+	 * @return The table the group's routes are in
 	 */
-	public RouteGroup notFound( final RouteHandler notFound ) {
-		applicationOnly( "not found handler" );
-		_router.notFound( notFound );
-		return this;
-	}
-
-	private void applicationOnly( final String what ) {
-		_router.undeclared( "the " + what + ", set" );
-
-		if( !_router.isApplication( this ) ) {
-			throw new IllegalStateException( "The %s is the application's: set it on the routes ERXRouter.declare( routes -> … ) gives the application, not a group's or a plugin's".formatted( what ) );
-		}
+	Router<ERXRouter.Mapped>.Table table() {
+		return _table;
 	}
 
 	/**

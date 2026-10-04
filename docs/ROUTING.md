@@ -128,7 +128,8 @@ ERXRouter.declare( routes -> {
   otherwise a 404 listing the routes and why those that matched passed the URL on. Deployed, it's a plain 404.
 - A not found handler that declines passes the request on: a bare 404 marked unhandled, which wo-adaptor-jetty hands to
   the next handler in the server (an ng-objects application beside this one, say).
-- They're the application's, so a group's or a plugin's routes don't set them.
+- They're the application's: `fallback` and `notFound` are on `ApplicationRoutes`, what the application's declaration
+  gets, and not on a group's or a plugin's routes. A declaration in a method of its own takes `ApplicationRoutes`.
 
 Every routed request is logged at INFO (`Handling URL: /books/7;address;user agent`).
 
@@ -340,6 +341,11 @@ routes.converters().register( Book.class, Converter.scoped( ( id, scope ) -> Lib
 is made once per request, and ending it (an editing context's disposal) is the application's, since the request's page
 renders after the route has answered. Parameters are converted path first (a group's before its routes'), then query, so
 a converter finds those it looks in. Without a request (a link's text), the scope is empty.
+
+The converters are the router's, shared by the application's routes and every plugin's, so a type converts the same way
+wherever its route is. A type has one owner: the application, or the plugin that registered it first. Another
+registering it stops the launch, naming both, and only the application replaces a built-in converter (a plugin's for
+`String` would change the application's routes). A plugin registers converters for its own types.
 
 Parsing takes a type's common forms: `007` is 7, an ISO date may have milliseconds, a UUID may be upper case, and a
 boolean is `true`, `false`, or `on` (what a checkbox without a `value` posts).
