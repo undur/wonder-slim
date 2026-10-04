@@ -66,6 +66,12 @@ public class ERXRouter {
 	public static final String DECLINES_KEY = "er.extensions.routes.declines";
 
 	/**
+	 * true for the application's router (the one its declarations build), which answers with the development pages in
+	 * development; a router made otherwise (a test's) answers the plain 404
+	 */
+	private boolean _applicationRouter;
+
+	/**
 	 * What answers a request no route answered, before the not found handler; null for nothing
 	 */
 	private RouteHandler _fallback;
@@ -179,7 +185,7 @@ public class ERXRouter {
 	private static synchronized RouteDeclarations declarations() {
 		if( _declarations == null ) {
 			final boolean reload = ERXProperties.booleanForKeyWithDefault( RELOAD_PROPERTY, ERXApplication.isDevelopmentModeSafe() );
-			_declarations = new RouteDeclarations( ERXRouter::new, reload ? new ClassChanges() : RouteDeclarations.Changes.NONE );
+			_declarations = new RouteDeclarations( ERXRouter::applicationRouter, reload ? new ClassChanges() : RouteDeclarations.Changes.NONE );
 
 			// By the time the application is about to listen for requests, the groups plugins joined are named. The public
 			// address is read then too, so a value that isn't one stops the launch.
@@ -521,6 +527,15 @@ public class ERXRouter {
 		return group == _application;
 	}
 
+	/**
+	 * @return A router for the application's declarations
+	 */
+	private static ERXRouter applicationRouter() {
+		final ERXRouter router = new ERXRouter();
+		router._applicationRouter = true;
+		return router;
+	}
+
 	void fallback( final RouteHandler fallback ) {
 		_fallback = Objects.requireNonNull( fallback );
 	}
@@ -539,8 +554,7 @@ public class ERXRouter {
 			return _notFound;
 		}
 
-		// The development pages are an application's pages, so a router without one (a test's) answers the plain 404
-		return WOApplication.application() != null && ERXApplication.isDevelopmentModeSafe() ? DevelopmentNotFound.HANDLER : invocation -> {
+		return _applicationRouter && ERXApplication.isDevelopmentModeSafe() ? DevelopmentNotFound.HANDLER : invocation -> {
 			final WOResponse response = new WOResponse();
 			response.setStatus( 404 );
 			response.setContent( "No route found for URL: " + invocation.url() );
