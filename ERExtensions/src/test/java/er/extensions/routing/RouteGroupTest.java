@@ -53,6 +53,24 @@ public class RouteGroupTest {
 	}
 
 	@Test
+	public void theApplicationsOptionsReachEveryRouteItDeclares() {
+		final ERXRouter router = new ERXRouter();
+		final RouteGroup routes = router.application( TrailingSlash.REDIRECT );
+		routes.map( "/books/", NOTHING );
+		routes.group( "/api" ).map( "/items", NOTHING );
+		routes.map( "/strict", NOTHING, TrailingSlash.STRICT );
+
+		assertEquals( TrailingSlash.REDIRECT, entry( router, "/books/" ).trailingSlash() );
+		assertEquals( TrailingSlash.REDIRECT, entry( router, "/api/items" ).trailingSlash() );
+		assertEquals( TrailingSlash.STRICT, entry( router, "/strict" ).trailingSlash() );
+
+		// They're still the application's routes: what only those take, they take
+		routes.notFound( invocation -> null );
+		routes.fallback( invocation -> RouteHandler.DECLINED );
+		assertThrows( IllegalStateException.class, () -> routes.group( "/admin" ).notFound( invocation -> null ) );
+	}
+
+	@Test
 	public void aRouteCantAddAConditionOfATypeItsGroupHas() {
 		final RouteGroup get = new ERXRouter().application().group( "/read", Method.GET );
 

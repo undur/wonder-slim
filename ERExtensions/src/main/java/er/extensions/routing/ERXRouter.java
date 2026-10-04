@@ -110,7 +110,8 @@ public class ERXRouter {
 	private volatile boolean _joinsChecked;
 
 	/**
-	 * True for a router whose routes are declared ({@link #declare(Consumer)}): changed outside a declaration, it throws
+	 * True for a router whose routes are declared ({@link #declare(Consumer, RouteOption...)}): changed outside a
+	 * declaration, it throws
 	 */
 	private volatile boolean _declaredOnly;
 
@@ -125,6 +126,12 @@ public class ERXRouter {
 	 */
 	private final List<Runnable> _checks = new java.util.concurrent.CopyOnWriteArrayList<>();
 	private RouteGroup _application;
+
+	/**
+	 * The groups handed to the application's declarations with options, which are the application's routes as much as
+	 * {@link #_application} is
+	 */
+	private final java.util.Set<RouteGroup> _applicationGroups = java.util.Collections.newSetFromMap( new java.util.IdentityHashMap<>() );
 
 	/**
 	 * Whether routes are declared again when their classes change. Development's default.
@@ -157,7 +164,9 @@ public class ERXRouter {
 	 * ERXRouter.declare( routes -&gt; routes.map( "/search", Routes.search, SearchPage.class ) ); // the Application's constructor
 	 * </pre>
 	 *
-	 * The declaration gets the application's routes, ranked before every plugin's, so its routes override theirs.
+	 * The declaration gets the application's routes, ranked before every plugin's, so its routes override theirs. Options
+ * apply to every route it declares, as a group's apply to its routes:
+ * {@code ERXRouter.declare( routes -> … , TrailingSlash.REDIRECT )}.
 	 *
 	 * The application's routes are changed only in a declaration: outside one, mapping a route, reaching the application's
 	 * routes or a table, or registering a converter throws, since declaring the routes again would lose it. Declarations
@@ -165,21 +174,21 @@ public class ERXRouter {
 	 * current one once all of them succeed. One that fails leaves the current routes in place, and routed requests answer
 	 * with why until the routes are declared again. Set {@value #RELOAD_PROPERTY} to false to declare them once.
 	 */
-	public static void declare( final Consumer<RouteGroup> declaration ) {
-		declarations().declare( router -> declaration.accept( router.application() ), RouteIdentity.caller() );
+	public static void declare( final Consumer<RouteGroup> declaration, final RouteOption... options ) {
+		declarations().declare( router -> declaration.accept( router.application( options ) ), RouteIdentity.caller() );
 	}
 
 	/**
-	 * Declares a plugin's routes, as {@link #declare(Consumer)} does the application's: in a table of the plugin's own,
-	 * ranked below the application's and the tables declared before it (plugins in dependency order). The same route in a
-	 * higher ranked table overrides it.
+	 * Declares a plugin's routes, as {@link #declare(Consumer, RouteOption...)} does the application's: in a table of the
+	 * plugin's own, ranked below the application's and the tables declared before it (plugins in dependency order). The
+	 * same route in a higher ranked table overrides it. Options apply to every route it declares.
 	 *
 	 * <pre>
 	 * ERXRouter.declare( "guestbook", routes -&gt; routes.map( "/guestbook", … ) );
 	 * </pre>
 	 */
-	public static void declare( final String table, final Consumer<RouteGroup> declaration ) {
-		declarations().declare( router -> declaration.accept( router.table( table ) ), RouteIdentity.caller() );
+	public static void declare( final String table, final Consumer<RouteGroup> declaration, final RouteOption... options ) {
+		declarations().declare( router -> declaration.accept( options.length == 0 ? router.table( table ) : router.table( table ).group( "", options ) ), RouteIdentity.caller() );
 	}
 
 	private static synchronized RouteDeclarations declarations() {
@@ -243,6 +252,20 @@ public class ERXRouter {
 	 * @return The application's routes: a table ranked before every other, whenever it's created, so the application's
 	 *         routes override a plugin's
 	 */
+	/**
+	 * @return The application's routes with the given options: for a declaration with options, a group of the application's
+	 *         that applies them, and that takes what only the application's routes take (a fallback, a not found handler)
+	 */
+	synchronized RouteGroup application( final RouteOption... options ) {
+		if( options.length == 0 ) {
+			return application();
+		}
+
+		final RouteGroup group = application().group( "", options );
+		_applicationGroups.add( group );
+		return group;
+	}
+
 	synchronized RouteGroup application() {
 		undeclared( "the application's routes, reached" );
 
@@ -288,7 +311,7 @@ public class ERXRouter {
 	}
 
 	/**
-	 * Makes the router's routes declared only ({@link #declare(Consumer)})
+	 * Makes the router's routes declared only ({@link #declare(Consumer, RouteOption...)})
 	 */
 	void declaredOnly() {
 		_declaredOnly = true;
@@ -524,7 +547,7 @@ public class ERXRouter {
 	 * @return true for the application's routes, the root of its table
 	 */
 	boolean isApplication( final RouteGroup group ) {
-		return group == _application;
+		return group == _application || _applicationGroups.contains( group );
 	}
 
 	/**

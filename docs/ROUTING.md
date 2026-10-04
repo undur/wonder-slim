@@ -570,10 +570,11 @@ a policy:
 | `TrailingSlash.REDIRECT` | is answered with `308` to the declared form, keeping the method, body and query string |
 | `TrailingSlash.STRICT` | doesn't match |
 
-`new ERXRouter( TrailingSlash.REDIRECT )` sets the policy for every route. A group sets it for its routes, and a route
-sets its own, both among their options:
+A declaration sets it for every route it declares, a group for its routes, and a route its own, each among their
+options:
 
 ```java
+ERXRouter.declare( routes -> { … }, TrailingSlash.REDIRECT );                     // every route of the declaration
 club.map( "/books/", Routes.books, BookListPage.class, TrailingSlash.REDIRECT );   // /books gets 308 to /books/
 final RouteGroup api = club.group( "/api", TrailingSlash.STRICT );       // /api/books/ isn't /api/books
 ```

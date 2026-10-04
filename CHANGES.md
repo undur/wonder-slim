@@ -8,6 +8,10 @@
 
   Upgrading: `route( … )` is `map( … )`, with the same arguments.
 
+- **Options for every route of a declaration**
+  `ERXRouter.declare( routes -> … , TrailingSlash.REDIRECT )` applies the options to every route the declaration
+  declares, as a group's apply to its routes. A plugin's declaration takes them too. (#202)
+
 - **A handler knows its route's pattern**
   `ri.route().pattern()` is the whole pattern the route is mapped under, its group's prefix included. (#203)
 
