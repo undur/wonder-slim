@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased
+## 2026-10-04 (8.0.17)
+
+- **An application can be served beneath a path of its own**
+  `er.extensions.ERXApplication.basePath=/shop` serves the application at `https://example.com/shop/…`
+  behind a front end that passes paths on as they arrive: its generated URLs start with the base path,
+  and a request's URL has it removed before anything else reads it. It needs short URLs. (#51)
+
+- **The development not found page says why a route passed a URL on**
+  A route handler that declines a URL can give its reason (`RouteTable.explainDecline( request, … )`),
+  and the not found page in development lists what each handler that matched said, answering "why is
+  this a 404" when a route matched. (#196)
 
 - **A component created while the application runs renders in development**
   A new component's template is found at its first use, as is a template added to a component already
