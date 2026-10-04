@@ -7,7 +7,7 @@
 	-->
 	<groupId>is.rebbi.slim</groupId>
 	<artifactId>ERRouting</artifactId>
-	<version>8.1.0-SNAPSHOT</version>
+	<version>8.1.0</version>
 	<name>ERRouting</name>
 	<description>The routing core: path patterns, matching, conditions and converters, in plain Java</description>
 	<packaging>jar</packaging>
