@@ -37,6 +37,7 @@ public final class PlainRoute extends RouteIdentity<PlainBinding> implements Lin
 	/**
 	 * @return The whole path pattern, the group's prefix included
 	 */
+	@Override
 	public String pattern() {
 		return binding().pattern();
 	}

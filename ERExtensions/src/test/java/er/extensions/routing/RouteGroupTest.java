@@ -475,6 +475,15 @@ public class RouteGroupTest {
 		assertSame( about, invocation.route() );
 	}
 
+	@Test
+	public void anInvocationsRouteKnowsItsWholePattern() {
+		final ERXRouter router = new ERXRouter();
+		final PlainRoute books = router.application().group( "/library" ).map( "/books/*", NOTHING );
+		final RouteInvocation invocation = new RouteInvocation( "/library/books/a/b", null, Map.of(), router.converters(), books );
+
+		assertEquals( "/library/books/*", invocation.route().pattern() );
+	}
+
 	public static class OverloadedPage extends com.webobjects.appserver.WOComponent {
 
 		public OverloadedPage( final com.webobjects.appserver.WOContext context ) {

@@ -8,6 +8,9 @@
 
   Upgrading: `route( … )` is `map( … )`, with the same arguments.
 
+- **A handler knows its route's pattern**
+  `ri.route().pattern()` is the whole pattern the route is mapped under, its group's prefix included. (#203)
+
 ## 2026-10-04 (8.1.0)
 
 - **A router replaces the route table**

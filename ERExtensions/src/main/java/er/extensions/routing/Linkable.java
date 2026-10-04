@@ -15,6 +15,12 @@ import er.extensions.appserver.ERXWOContext;
 public interface Linkable {
 
 	/**
+	 * @return The whole path pattern, the group's prefix included ({@code /clubs/{club}/books/{book}}): what a handler
+	 *         reaches through {@code ri.route().pattern()} to know the pattern it's mapped under
+	 */
+	public String pattern();
+
+	/**
 	 * @return The route's URL for parameter values by name: the route's parameters (path and host), and query parameters.
 	 *         A host parameter the values don't have is the request's, if it's on the route's host. Values are converted
 	 *         to URL text by the router's converters; a string is taken as text, and checked against the parameter's type.
