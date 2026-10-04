@@ -8,6 +8,10 @@
 
   Upgrading: `route( … )` is `map( … )`, with the same arguments.
 
+- **A plainer 404, deployed**
+  A URL nothing answers gets a small HTML page (the path asked for, and a link to the front page) instead of a line of
+  text. In development, the development pages still answer.
+
 - **The application's routes have a type of their own**
   `ERXRouter.declare` hands the application `ApplicationRoutes`, which has `fallback` and `notFound`: a group's or a
   plugin's routes no longer have them, so the compiler says what an exception said before. (#205)

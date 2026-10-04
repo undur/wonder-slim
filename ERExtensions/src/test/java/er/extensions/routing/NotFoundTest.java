@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -42,11 +43,20 @@ public class NotFoundTest {
 	}
 
 	@Test
+	public void thePlain404EscapesTheURLItShows() {
+		final String page = handle( new ERXRouter(), "/<script>alert('x')</script>" ).contentString();
+
+		assertTrue( page.contains( "&lt;script&gt;alert(&#39;x&#39;)&lt;/script&gt;" ), page );
+		assertTrue( !page.contains( "<script>" ), page );
+	}
+
+	@Test
 	public void aURLNothingAnswersGetsThePlain404ByDefault() {
 		final WOResponse response = handle( new ERXRouter(), "/nothing" );
 
 		assertEquals( 404, response.status() );
-		assertEquals( "No route found for URL: /nothing", response.contentString() );
+		assertTrue( response.contentString().contains( "<code>/nothing</code>" ), response.contentString() );
+		assertEquals( "text/html; charset=utf-8", response.headerForKey( "content-type" ) );
 		assertNull( response.userInfoForKey( ERXRouter.UNHANDLED_RESPONSE_KEY ), "The plain 404 is the answer, not passed on" );
 	}
 

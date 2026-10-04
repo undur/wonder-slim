@@ -659,12 +659,56 @@ public class ERXRouter {
 			return _notFound;
 		}
 
-		return _applicationRouter && ERXApplication.isDevelopmentModeSafe() ? DevelopmentNotFound.HANDLER : invocation -> {
-			final WOResponse response = new WOResponse();
-			response.setStatus( 404 );
-			response.setContent( "No route found for URL: " + invocation.url() );
-			return response;
-		};
+		return _applicationRouter && ERXApplication.isDevelopmentModeSafe() ? DevelopmentNotFound.HANDLER : ERXRouter::plainNotFound;
+	}
+
+	/**
+	 * The page a visitor sees for a URL nothing answers, deployed: plain, with nothing about the application's routes
+	 */
+	private static final String NOT_FOUND_PAGE = """
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<title>Not found</title>
+			<style>
+				:root { color-scheme: light dark; }
+				body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: Canvas; color: CanvasText; }
+				main { text-align: center; padding: 2rem; }
+				h1 { font-size: 5rem; font-weight: 300; margin: 0; opacity: 0.35; }
+				p { margin: 0.5rem 0; }
+				code { opacity: 0.6; word-break: break-all; }
+				a { color: inherit; }
+			</style>
+			</head>
+			<body>
+			<main>
+				<h1>404</h1>
+				<p>There's nothing here.</p>
+				<p><code>%s</code></p>
+				<p><a href="/">To the front page</a></p>
+			</main>
+			</body>
+			</html>
+			""";
+
+	/**
+	 * @return The plain 404 for a URL nothing answers
+	 */
+	private static WOActionResults plainNotFound( final RouteInvocation invocation ) {
+		final WOResponse response = new WOResponse();
+		response.setStatus( 404 );
+		response.setHeader( "text/html; charset=utf-8", "content-type" );
+		response.setContent( NOT_FOUND_PAGE.formatted( escaped( invocation.url() ) ) );
+		return response;
+	}
+
+	/**
+	 * @return The text with HTML's special characters escaped, for a value from the request shown in a page
+	 */
+	private static String escaped( final String text ) {
+		return text.replace( "&", "&amp;" ).replace( "<", "&lt;" ).replace( ">", "&gt;" ).replace( "\"", "&quot;" ).replace( "'", "&#39;" );
 	}
 
 	/**
