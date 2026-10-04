@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2026-10-04 (8.1.0)
 
 - **A router replaces the route table**
