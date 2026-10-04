@@ -269,7 +269,7 @@ public class RouteGroup {
 		final PlainBinding binding = new PlainBinding( PathPattern.parse( fullPattern( pattern ) ), host, _router.converters() );
 		_router.bind( route, binding );
 		mapped( fullPattern( pattern ) );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, crossSite( allOptions ), crossOrigin( allOptions ), ERXRouter.answerOf( handler ) ), allOptions );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( handler, this, route, null, crossSite( allOptions ), crossOrigin( allOptions ), ERXRouter.answerOf( handler ), ERXRouter.isPage( handler ) ), allOptions );
 		return route;
 	}
 
@@ -325,7 +325,7 @@ public class RouteGroup {
 		final RouteBinding<P> binding = new RouteBinding<>( _router, fullPattern( pattern ), allOptions, route.parametersClass(), action );
 		_router.bind( route, binding );
 		mapped( fullPattern( pattern ) );
-		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( binding::handle, this, route, route.parametersClass(), crossSite( allOptions ), crossOrigin( allOptions ), ERXRouter.answerOf( action ) ), allOptions );
+		_router.map( _table, fullPattern( pattern ), new ERXRouter.Mapped( binding::handle, this, route, route.parametersClass(), crossSite( allOptions ), crossOrigin( allOptions ), ERXRouter.answerOf( action ), ERXRouter.isPage( action ) ), allOptions );
 		return route;
 	}
 

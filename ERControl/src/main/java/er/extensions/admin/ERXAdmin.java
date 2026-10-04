@@ -59,6 +59,7 @@ public final class ERXAdmin {
 			page( "caches", "Sessions and caches", "Active sessions, what their page caches hold, and how the pressure valve is doing.", ERXAdminCachesPage.class ),
 			page( "threads", "Threads", "A thread dump of this JVM, taken when the page rendered.", ERXAdminThreadsPage.class ),
 			page( "log", "Log", "The tail of what this instance has logged, from an in-memory ring buffer.", ERXAdminLogPage.class ),
+			page( "routes", "Routes", "The application's routes, in the order they're tried. Open one to see what applies to it.", ERXAdminRoutesPage.class ),
 			page( "configuration", "Configuration", "The plugins in the order they run, the sources of properties in the order they're applied, and every property with the source it came from.", ERXAdminConfigurationPage.class ),
 			page( "bundles", "Bundles", "The application's main bundle and the frameworks loaded alongside it.", ERXAdminBundlesPage.class ) );
 

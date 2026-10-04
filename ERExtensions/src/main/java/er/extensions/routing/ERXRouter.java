@@ -84,18 +84,48 @@ public class ERXRouter {
 	/**
 	 * What the core router routes to: a handler, and the group it was mapped in (for its wrapping)
 	 */
-	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, CrossSite crossSite, CrossOrigin crossOrigin, String answer ) {}
+	record Mapped( RouteHandler handler, RouteGroup group, Linkable route, Class<? extends Record> parametersClass, CrossSite crossSite, CrossOrigin crossOrigin, String answer, boolean page ) {}
 
 	/**
 	 * @return What answers a route, for a list of the routes: a page's name, or a handler's class (a lambda's is "a
 	 *         handler")
 	 */
+	static boolean isPage( final Object handlerOrAction ) {
+		return handlerOrAction instanceof PageSetters || handlerOrAction instanceof PageSetters.RecordPage<?>;
+	}
+
 	static String answerOf( final Object handlerOrAction ) {
 		return switch( handlerOrAction ) {
 			case PageSetters pageSetters -> pageSetters.pageClass().getSimpleName();
 			case PageSetters.RecordPage<?> recordPage -> recordPage.pageClass().getSimpleName();
-			default -> handlerOrAction.getClass().isHidden() || handlerOrAction.getClass().isAnonymousClass() || handlerOrAction.getClass().isSynthetic() ? "a handler" : handlerOrAction.getClass().getSimpleName();
+			default -> handlerOrAction.getClass().isHidden() || handlerOrAction.getClass().isAnonymousClass() || handlerOrAction.getClass().isSynthetic() ? lambdaDescription( handlerOrAction.getClass() ) : handlerOrAction.getClass().getSimpleName();
 		};
+	}
+
+	/**
+	 * @return A lambda's or method reference's description: the class it's written in ({@code a handler in BookRoutes})
+	 */
+	private static String lambdaDescription( final Class<?> type ) {
+		final String name = type.getName();
+		final int lambda = name.indexOf( "$$Lambda" );
+		final String declaring = lambda == -1 ? null : name.substring( name.lastIndexOf( '.', lambda ) + 1, lambda );
+		return declaring == null || declaring.isEmpty() ? "a handler" : "a handler in " + declaring.replace( '$', '.' );
+	}
+
+	/**
+	 * @return What answers a request no route answered before not found ({@link ApplicationRoutes#fallback(RouteHandler)}),
+	 *         null for nothing
+	 */
+	public String fallbackAnswer() {
+		return _fallback == null ? null : answerOf( _fallback );
+	}
+
+	/**
+	 * @return What answers a request nothing else answered ({@link ApplicationRoutes#notFound(RouteHandler)}), null for
+	 *         the default (the development pages in development, a plain 404 deployed)
+	 */
+	public String notFoundAnswer() {
+		return _notFound == null ? null : answerOf( _notFound );
 	}
 
 	private final Router<Mapped> _router;
@@ -297,7 +327,7 @@ public class ERXRouter {
 	 *         listing them, say)
 	 */
 	public List<RouteDescription> routes() {
-		return _router.routes().stream().map( e -> new RouteDescription( e.path().source(), e.conditions(), e.trailingSlash(), e.table(), e.handler().route(), e.handler().parametersClass(), e.handler().crossSite(), e.handler().route() instanceof Route<?> r && r.reportsFields(), e.handler().answer() ) ).toList();
+		return _router.routes().stream().map( e -> new RouteDescription( e.path().source(), e.conditions(), e.trailingSlash(), e.table(), e.handler().route(), e.handler().parametersClass(), e.handler().crossSite(), e.handler().route() instanceof Route<?> r && r.reportsFields(), e.handler().answer(), e.handler().page() ) ).toList();
 	}
 
 	/**

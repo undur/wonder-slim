@@ -127,6 +127,14 @@ abstract sealed class RouteIdentity<B> permits Route, PlainRoute {
 		return name;
 	}
 
+	/**
+	 * @return The constant's name ({@code Routes.search}), null for a route no constant holds
+	 */
+	String constantNameOrNull() {
+		final Field field = heldField();
+		return field == null ? null : _madeIn.getSimpleName() + "." + field.getName();
+	}
+
 	private String constantName() {
 		final Field field = heldField();
 		return field == null ? description() : _madeIn.getSimpleName() + "." + field.getName();
