@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>is.rebbi.slim</groupId>
 		<artifactId>wonder-slim-reactor</artifactId>
-		<version>8.0.17-SNAPSHOT</version>
+		<version>8.0.17</version>
 	</parent>
 	<artifactId>ERProjectLayout</artifactId>
 	<name>ERProjectLayout</name>
