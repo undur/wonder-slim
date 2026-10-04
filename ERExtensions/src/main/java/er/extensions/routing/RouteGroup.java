@@ -27,7 +27,7 @@ import er.routing.options.TrailingSlash;
  * root group ({@link ERXRouter#table(String)}).
  *
  * <pre>
- * routes.route( "/search/{area}", Routes.search, SearchPage.class );
+ * routes.map( "/search/{area}", Routes.search, SearchPage.class );
  * routes.map( "/books/{book}", Routes.book, BookPage.class );
  * routes.map( "/hooks/github", hooks::github, Method.POST );
  * routes.group( "/manage", manage -&gt; {
@@ -323,15 +323,15 @@ public final class RouteGroup {
 	 *
 	 * @return The route
 	 */
-	public <P extends Record> Route<P> route( final String pattern, final Route<P> route, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
+	public <P extends Record> Route<P> map( final String pattern, final Route<P> route, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
 		Objects.requireNonNull( route, "A route constant is null: one declared after the constants it's used with (a static field read before it was set?)" );
 
 		// A page can't see the fields that didn't convert
 		if( allOptions( options ).contains( Fields.REPORTED ) ) {
-			throw new IllegalArgumentException( "The route %s reports its fields' errors (Fields.REPORTED), which a page doesn't see: answer it with an action, route( pattern, route, ( %s, invocation ) -> … )".formatted( fullPattern( pattern ), route.parametersClass().getSimpleName().toLowerCase() ) );
+			throw new IllegalArgumentException( "The route %s reports its fields' errors (Fields.REPORTED), which a page doesn't see: answer it with an action, map( pattern, route, ( %s, invocation ) -> … )".formatted( fullPattern( pattern ), route.parametersClass().getSimpleName().toLowerCase() ) );
 		}
 
-		return route( pattern, route, PageSetters.forRecord( pageClass, route.parametersClass(), fullPattern( pattern ), groupParameterNames() ), options );
+		return map( pattern, route, PageSetters.forRecord( pageClass, route.parametersClass(), fullPattern( pattern ), groupParameterNames() ), options );
 	}
 
 	/**
@@ -339,7 +339,7 @@ public final class RouteGroup {
 	 *
 	 * @return The route
 	 */
-	public <P extends Record> Route<P> route( final String pattern, final Route<P> route, final Route.Action<P> action, final RouteOption... options ) {
+	public <P extends Record> Route<P> map( final String pattern, final Route<P> route, final Route.Action<P> action, final RouteOption... options ) {
 		Objects.requireNonNull( route, "A route constant is null: one declared after the constants it's used with (a static field read before it was set?)" );
 		final List<RouteOption> allOptions = allOptions( options );
 		final RouteBinding<P> binding = new RouteBinding<>( _router, fullPattern( pattern ), allOptions, route.parametersClass(), action );
@@ -352,15 +352,15 @@ public final class RouteGroup {
 	/**
 	 * @return A route nothing links to by a constant, answered by the page, the record's components set on it
 	 */
-	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
-		return route( pattern, Route.unnamed( parametersClass ), pageClass, options );
+	public <P extends Record> Route<P> map( final String pattern, final Class<P> parametersClass, final Class<? extends WOComponent> pageClass, final RouteOption... options ) {
+		return map( pattern, Route.unnamed( parametersClass ), pageClass, options );
 	}
 
 	/**
 	 * @return A route nothing links to by a constant, invoked by the given action
 	 */
-	public <P extends Record> Route<P> route( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteOption... options ) {
-		return route( pattern, Route.unnamed( parametersClass ), action, options );
+	public <P extends Record> Route<P> map( final String pattern, final Class<P> parametersClass, final Route.Action<P> action, final RouteOption... options ) {
+		return map( pattern, Route.unnamed( parametersClass ), action, options );
 	}
 
 	/**

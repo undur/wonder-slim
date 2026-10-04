@@ -71,7 +71,7 @@ abstract sealed class RouteIdentity<B> permits Route, PlainRoute {
 		final B binding = _binding;
 
 		if( binding == null ) {
-			throw new IllegalStateException( "The route %s isn't declared: map it in a route declaration (ERXRouter.declare( routes -> … )), with route( pattern, %s, … ) or map( pattern, %s, … )".formatted( name(), name(), name() ) );
+			throw new IllegalStateException( "The route %s isn't declared: map it in a route declaration (ERXRouter.declare( routes -> … )), with map( pattern, %s, … )".formatted( name(), name() ) );
 		}
 
 		return binding;

@@ -113,20 +113,20 @@ public class BookclubRoutes {
 
 		// Pages: a route parameter ({club}) is set on the page by name
 		club.map( "/", Routes.clubHome, ClubPage.class );
-		club.route( "/books/", Routes.books, BookListPage.class, TrailingSlash.REDIRECT );
+		club.map( "/books/", Routes.books, BookListPage.class, TrailingSlash.REDIRECT );
 		club.map( "/books/new", Routes.newBook, NewBookPage.class );
 		club.map( "/books/{book}", Routes.book, BookPage.class );
 
 		// An old URL, redirected to the book's for good
 		club.redirect( "/book/{book}", Routes.book );
-		club.route( "/members/{handle}", Routes.member, BookclubRoutes::member );
-		club.route( "/search", Routes.search, BookclubRoutes::search ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), club( invocation ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
-		club.route( "/{name}", Routes.clubText, BookclubRoutes::clubText );
+		club.map( "/members/{handle}", Routes.member, BookclubRoutes::member );
+		club.map( "/search", Routes.search, BookclubRoutes::search ).whenInvalid( ( invocation, reason ) -> TextPage.create( invocation.context(), club( invocation ), "Search", "What are you searching for? Add ?q=… (%s)".formatted( reason.getMessage() ) ).status( 400 ) );
+		club.map( "/{name}", Routes.clubText, BookclubRoutes::clubText );
 		club.map( "/about", Routes.about, ri -> TextPage.create( ri.context(), club( ri ), "About", "%s: %s. (This is the application's /about, overriding the guestbook plugin's.)".formatted( club( ri ).name(), club( ri ).motto() ) ) );
 
 		// Methods: a form posts here, and its fields' conversion errors are reported to the action (Fields.REPORTED). Other methods at /books are redirected to the list at /books/.
-		club.route( "/books", Routes.createBook, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
-		club.route( "/books/{book}/delete", Routes.deleteBook, BookclubRoutes::deleteBook, Method.POST );
+		club.map( "/books", Routes.createBook, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
+		club.map( "/books/{book}/delete", Routes.deleteBook, BookclubRoutes::deleteBook, Method.POST );
 
 		// Trailing slashes: /rules redirects to /rules/ (and /books to /books/, above)
 		club.map( "/rules/", Routes.rules, ri -> text( 200, "Rules of %s: read the book.".formatted( ri.parameter( "club" ) ) ), TrailingSlash.REDIRECT );

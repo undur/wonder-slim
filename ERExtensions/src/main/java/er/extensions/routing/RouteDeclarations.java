@@ -143,7 +143,7 @@ class RouteDeclarations {
 		final List<RouteIdentity<?>> undeclared = _undeclaredConstants.apply( router );
 
 		if( !undeclared.isEmpty() ) {
-			throw new IllegalStateException( "Routes are made that no route declaration gives a pattern to: %s. Map them in ERXRouter.declare( routes -> … ), with route( pattern, route, … ) or map( pattern, route, … )".formatted( undeclared.stream().map( RouteIdentity::name ).toList() ) );
+			throw new IllegalStateException( "Routes are made that no route declaration gives a pattern to: %s. Map them in ERXRouter.declare( routes -> … ), with map( pattern, route, … )".formatted( undeclared.stream().map( RouteIdentity::name ).toList() ) );
 		}
 	}
 

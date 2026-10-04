@@ -71,7 +71,7 @@ public class RouteDeclarationsTest {
 
 		declarations.declare( router -> {
 			order.add( "app" );
-			router.application().route( pagesAt.get(), Routes.pages, ( p, invocation ) -> null );
+			router.application().map( pagesAt.get(), Routes.pages, ( p, invocation ) -> null );
 			router.application().map( "/about", Routes.about, NOTHING );
 		}, RouteDeclarationsTest.class );
 		declarations.declare( router -> {

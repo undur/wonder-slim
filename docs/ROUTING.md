@@ -43,7 +43,7 @@ public interface Routes {
 ERXRouter.declare( routes -> {
 	routes.map( "/", Routes.home, Main.class );
 	routes.map( "/books/{book}", Routes.book, BookPage.class );
-	routes.route( "/search", Routes.search, SearchPage.class );
+	routes.map( "/search", Routes.search, SearchPage.class );
 } );
 ```
 
@@ -138,16 +138,17 @@ from (`CrossSite`), and whether it reports fields that don't convert (`Fields.RE
 
 ## Routes
 
-A route has parameters and an answer. Its parameters are its pattern's (`map`), or a record's components, which add
-query parameters and a form's fields, typed (`route`). Its answer is a page, or a handler for anything else:
+A route has parameters and an answer. Its parameters are its pattern's, or a record's components, which add query
+parameters and a form's fields, typed. Every route is mapped with `map`, and its constant says which kind it is. Its
+answer is a page, or a handler for anything else:
 
 | | A page answers | A handler answers |
 |---|---|---|
 | **The pattern's parameters** | `map( pattern, route, BookPage.class )` | `map( pattern, route, ri -> … )` |
-| **A record's** | `route( pattern, route, BookListPage.class )` | `route( pattern, route, ( books, ri ) -> … )` |
+| **A record's** | `map( pattern, route, BookListPage.class )` | `map( pattern, route, ( books, ri ) -> … )` |
 
 The route's constant is `Route.plain()` for the pattern's parameters, `Route.of( Record.class )` for a record's. A
-route nothing links to needs no constant: `map( pattern, ri -> … )` and `route( pattern, Record.class, … )` make one of
+route nothing links to needs no constant: `map( pattern, ri -> … )` and `map( pattern, Record.class, … )` make one of
 their own (an API's routes, a webhook).
 
 ### Page routes
@@ -236,7 +237,7 @@ A route that has no answer for a URL declines, and the next matching route gets 
 they don't have, and the club's catch-all answers with its own not found page:
 
 ```java
-club.route( "/{name}", Routes.clubText, BookclubRoutes::clubText );   // declines a page the club doesn't have
+club.map( "/{name}", Routes.clubText, BookclubRoutes::clubText );   // declines a page the club doesn't have
 club.map( "/*", ri -> /* the club's not found page */ );
 ```
 
@@ -254,7 +255,7 @@ route receives, each value converted to its component's type:
 public record Books( Club club, Sort sort, Integer page, List<String> author ) {}
 
 Route<Books> books = Route.of( Books.class );                                        // Routes
-club.route( "/books/", Routes.books, BookListPage.class, TrailingSlash.REDIRECT );   // the declaration
+club.map( "/books/", Routes.books, BookListPage.class, TrailingSlash.REDIRECT );   // the declaration
 ```
 
 - **Path and query parameters:** components named in the pattern (`{club}`, `{id}`) are the path's, and must be
@@ -271,7 +272,7 @@ club.route( "/books/", Routes.books, BookListPage.class, TrailingSlash.REDIRECT 
   ```java
   public record DeleteBook( Club club, Book book ) {}
 
-  club.route( "/books/{book}/delete", Routes.deleteBook, BookclubRoutes::deleteBook, Method.POST );
+  club.map( "/books/{book}/delete", Routes.deleteBook, BookclubRoutes::deleteBook, Method.POST );
   ```
 
   A record is only parameters: what answers is named where the route is declared.
@@ -288,7 +289,7 @@ URL is wrong, and another route may answer it. Other bad input goes one of three
   in the constructor, for a value it requires).
 
   ```java
-  club.route( "/search", Routes.search, BookclubRoutes::search ).whenInvalid( ( invocation, reason ) -> … "What are you searching for?" … );
+  club.map( "/search", Routes.search, BookclubRoutes::search ).whenInvalid( ( invocation, reason ) -> … "What are you searching for?" … );
   ```
 
   The reason names what was wrong: `Objects.requireNonNull( q, "q" )` says so itself, and a `NullPointerException`
@@ -418,7 +419,7 @@ components are the form's fields:
 ```java
 public record CreateBook( Club club, String title, String author, Integer year ) {}
 
-club.route( "/books", Routes.createBook, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
+club.map( "/books", Routes.createBook, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
 ```
 
 ```html
@@ -474,7 +475,7 @@ A route can require more of a request than its path. Conditions are declared wit
 its trailing slash policy):
 
 ```java
-club.route( "/books/{book}/delete", Routes.deleteBook, BookclubRoutes::deleteBook, Method.POST );
+club.map( "/books/{book}/delete", Routes.deleteBook, BookclubRoutes::deleteBook, Method.POST );
 ```
 
 A route has one condition of each type: a route can't add methods its group already has. Among routes with
@@ -573,7 +574,7 @@ a policy:
 sets its own, both among their options:
 
 ```java
-club.route( "/books/", Routes.books, BookListPage.class, TrailingSlash.REDIRECT );   // /books gets 308 to /books/
+club.map( "/books/", Routes.books, BookListPage.class, TrailingSlash.REDIRECT );   // /books gets 308 to /books/
 final RouteGroup api = club.group( "/api", TrailingSlash.STRICT );       // /api/books/ isn't /api/books
 ```
 

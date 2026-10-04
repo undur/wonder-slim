@@ -150,17 +150,17 @@ public class RouteGroupTest {
 	public void aTypedRoutesRecordIsCheckedWhenDeclared() {
 		final RouteGroup routes = new ERXRouter().application();
 
-		routes.route( "/items/{id}", Item.class, ( item, invocation ) -> null );
+		routes.map( "/items/{id}", Item.class, ( item, invocation ) -> null );
 
 		// A pattern parameter the record lacks, a type without a converter, a query parameter that can't be absent
-		assertThrows( IllegalArgumentException.class, () -> routes.route( "/items/{itemId}/more", Item.class, ( item, invocation ) -> null ) );
-		assertThrows( IllegalArgumentException.class, () -> routes.route( "/threads", WithAnObject.class, ( item, invocation ) -> null ) );
-		assertThrows( IllegalArgumentException.class, () -> routes.route( "/pages", PrimitiveQuery.class, ( item, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.map( "/items/{itemId}/more", Item.class, ( item, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.map( "/threads", WithAnObject.class, ( item, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.map( "/pages", PrimitiveQuery.class, ( item, invocation ) -> null ) );
 	}
 
 	@Test
 	public void aLinksValuesAreChecked() {
-		final Route<Item> item = new ERXRouter().application().route( "/items/{id}", Item.class, ( i, invocation ) -> null );
+		final Route<Item> item = new ERXRouter().application().map( "/items/{id}", Item.class, ( i, invocation ) -> null );
 
 		// Unknown parameter, missing route parameter, wrong type, text that isn't one of the type
 		assertThrows( IllegalArgumentException.class, () -> item.url( Map.of( "id", 1, "colour", "red" ), null ) );
@@ -172,7 +172,7 @@ public class RouteGroupTest {
 	@Test
 	public void routesAreDescribed() {
 		final ERXRouter router = new ERXRouter();
-		final Route<Search> search = router.application().route( "/search", Search.class, ( s, invocation ) -> null );
+		final Route<Search> search = router.application().map( "/search", Search.class, ( s, invocation ) -> null );
 		final PlainRoute about = router.table( "plugin" ).map( "/about", NOTHING, Method.GET );
 
 		final RouteDescription searchDescription = router.routes().stream().filter( d -> d.pattern().equals( "/search" ) ).findFirst().orElseThrow();
@@ -204,8 +204,8 @@ public class RouteGroupTest {
 		final ERXRouter router = new ERXRouter();
 		final RouteGroup forms = router.application().group( "/forms", Fields.REPORTED );
 
-		assertTrue( forms.route( "/book", Form.class, ( f, invocation ) -> null, Method.POST ).reportsFields() );
-		assertFalse( router.application().route( "/plain-form", Form.class, ( f, invocation ) -> null ).reportsFields() );
+		assertTrue( forms.map( "/book", Form.class, ( f, invocation ) -> null, Method.POST ).reportsFields() );
+		assertFalse( router.application().map( "/plain-form", Form.class, ( f, invocation ) -> null ).reportsFields() );
 
 		// A plain route reads its own fields, so the option means nothing there
 		assertThrows( IllegalArgumentException.class, () -> router.application().map( "/p", NOTHING, Fields.REPORTED ) );
@@ -213,7 +213,7 @@ public class RouteGroupTest {
 
 	@Test
 	public void aTextParameterTakesOnlyConvertibleValues() {
-		final Route<Member> member = new ERXRouter().application().route( "/members/{handle}", Member.class, ( m, invocation ) -> null );
+		final Route<Member> member = new ERXRouter().application().map( "/members/{handle}", Member.class, ( m, invocation ) -> null );
 
 		assertThrows( IllegalArgumentException.class, () -> member.url( Map.of( "handle", new Object() ), null ) );
 	}
@@ -250,7 +250,7 @@ public class RouteGroupTest {
 		final ERXRouter router = new ERXRouter();
 		final WOActionResults found = () -> null;
 		final List<String> reasons = new ArrayList<>();
-		final Route<Query> search = router.application().route( "/search", Query.class, ( query, invocation ) -> found );
+		final Route<Query> search = router.application().map( "/search", Query.class, ( query, invocation ) -> found );
 
 		// Without whenInvalid, a record that refuses its values declines
 		assertEquals( RouteHandler.DECLINED, search.binding().handle( invocation( "/search", Map.of(), router ) ) );
@@ -276,7 +276,7 @@ public class RouteGroupTest {
 		final ERXRouter router = new ERXRouter();
 		final List<String> reasons = new ArrayList<>();
 		final WOActionResults asked = () -> null;
-		final Route<Listing> listing = router.application().route( "/list", Listing.class, ( l, invocation ) -> null );
+		final Route<Listing> listing = router.application().map( "/list", Listing.class, ( l, invocation ) -> null );
 
 		assertEquals( RouteHandler.DECLINED, listing.binding().handle( invocation( "/list", Map.of( "page", "abc" ), router ) ) );
 
@@ -301,7 +301,7 @@ public class RouteGroupTest {
 	public void aListTakesARepeatedParameter() {
 		final ERXRouter router = new ERXRouter();
 		final List<Shelf> got = new ArrayList<>();
-		final Route<Shelf> shelf = router.application().route( "/{club}/shelf", Shelf.class, ( s, invocation ) -> {
+		final Route<Shelf> shelf = router.application().map( "/{club}/shelf", Shelf.class, ( s, invocation ) -> {
 			got.add( s );
 			return () -> null;
 		} );
@@ -321,7 +321,7 @@ public class RouteGroupTest {
 
 	@Test
 	public void aListsLinkTakesOnlyItsTypesValues() {
-		final Route<Shelf> shelf = new ERXRouter().application().route( "/{club}/shelf", Shelf.class, ( s, invocation ) -> null );
+		final Route<Shelf> shelf = new ERXRouter().application().map( "/{club}/shelf", Shelf.class, ( s, invocation ) -> null );
 
 		// By name: a collection, or one value
 		assertThrows( IllegalArgumentException.class, () -> shelf.url( Map.of( "club", "acme", "genres", List.of( "novel", "opera" ) ), null ) );
@@ -338,9 +338,9 @@ public class RouteGroupTest {
 	public void aListIsAQueryParameterOfAConvertibleType() {
 		final RouteGroup routes = new ERXRouter().application();
 
-		assertThrows( IllegalArgumentException.class, () -> routes.route( "/tags/{tags}", ListInPath.class, ( r, invocation ) -> null ) );
-		assertThrows( IllegalArgumentException.class, () -> routes.route( "/raw", RawList.class, ( r, invocation ) -> null ) );
-		assertThrows( IllegalArgumentException.class, () -> routes.route( "/threads", ListOfObjects.class, ( r, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.map( "/tags/{tags}", ListInPath.class, ( r, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.map( "/raw", RawList.class, ( r, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> routes.map( "/threads", ListOfObjects.class, ( r, invocation ) -> null ) );
 	}
 
 	@Test
@@ -360,7 +360,7 @@ public class RouteGroupTest {
 		assertEquals( CrossSite.SAME_ORIGIN, entry( router, "/api/strict" ).crossSite() );
 
 		final RouteGroup forms = router.application().group( "/forms", Fields.REPORTED );
-		assertFalse( forms.route( "/plain", Form.class, ( f, invocation ) -> null, Fields.DECLINED ).reportsFields() );
+		assertFalse( forms.map( "/plain", Form.class, ( f, invocation ) -> null, Fields.DECLINED ).reportsFields() );
 	}
 
 	@Test
@@ -401,7 +401,7 @@ public class RouteGroupTest {
 	@Test
 	public void aRecordLeavesOutTheGroupsHostParameters() {
 		final RouteGroup tenant = new ERXRouter().application().group( "", Host.of( "{tenant}.example.com" ) );
-		final Route<Order> order = tenant.route( "/orders/{id}", Order.class, ( o, invocation ) -> null );
+		final Route<Order> order = tenant.map( "/orders/{id}", Order.class, ( o, invocation ) -> null );
 
 		// By name, the host's parameter is given; outside a request a record's URL can't take it from one
 		assertThrows( IllegalArgumentException.class, () -> order.url( Map.of( "id", 7 ), null ) );
@@ -409,7 +409,7 @@ public class RouteGroupTest {
 		assertTrue( e.getMessage().contains( "tenant" ), e.getMessage() );
 
 		// A path parameter is the record's
-		assertThrows( IllegalArgumentException.class, () -> tenant.route( "/orders/{id}/{line}", Order.class, ( o, invocation ) -> null ) );
+		assertThrows( IllegalArgumentException.class, () -> tenant.map( "/orders/{id}/{line}", Order.class, ( o, invocation ) -> null ) );
 	}
 
 	@Test
@@ -459,7 +459,7 @@ public class RouteGroupTest {
 	@Test
 	public void aBugsNullPointerExceptionIsntARefusal() {
 		final ERXRouter router = new ERXRouter();
-		final Route<Buggy> buggy = router.application().route( "/buggy", Buggy.class, ( b, invocation ) -> null );
+		final Route<Buggy> buggy = router.application().map( "/buggy", Buggy.class, ( b, invocation ) -> null );
 		buggy.whenInvalid( ( invocation, reason ) -> () -> null );
 
 		// Not "absent": a 500, though the route answers bad input itself
@@ -530,9 +530,9 @@ public class RouteGroupTest {
 		final RouteGroup org = router.application().group( "/orgs/{org}" ).parameter( "org", Org.class );
 
 		// A record has it, as it has the path's other parameters, so a link gives it; a page may leave it out
-		final Route<Project> project = org.route( "/projects/{project}", Project.class, ( p, invocation ) -> () -> null );
+		final Route<Project> project = org.map( "/projects/{project}", Project.class, ( p, invocation ) -> () -> null );
 		org.map( "/projects/{project}/page", ProjectPage.class );
-		final IllegalArgumentException orphan = assertThrows( IllegalArgumentException.class, () -> org.route( "/orphans/{project}", OrphanProject.class, ( p, invocation ) -> () -> null ) );
+		final IllegalArgumentException orphan = assertThrows( IllegalArgumentException.class, () -> org.map( "/orphans/{project}", OrphanProject.class, ( p, invocation ) -> () -> null ) );
 		assertTrue( orphan.getMessage().contains( "{org}" ), orphan.getMessage() );
 
 		// An unknown one declines every route of the group, before its filters
@@ -587,16 +587,16 @@ public class RouteGroupTest {
 		final RouteGroup org = router.application().group( "/orgs/{org}" ).parameter( "org", Org.class );
 
 		// The page has a member for each component, the group's parameter apart
-		org.route( "/listing", OrgListing.class, OrgListingPage.class );
+		org.map( "/listing", OrgListing.class, OrgListingPage.class );
 
 		// A component the page has no member for, or one of another type, is refused
-		final IllegalArgumentException missing = assertThrows( IllegalArgumentException.class, () -> org.route( "/sortless", OrgListing.class, SortlessPage.class ) );
+		final IllegalArgumentException missing = assertThrows( IllegalArgumentException.class, () -> org.map( "/sortless", OrgListing.class, SortlessPage.class ) );
 		assertTrue( missing.getMessage().contains( "OrgListing.sort" ), missing.getMessage() );
-		final IllegalArgumentException mistyped = assertThrows( IllegalArgumentException.class, () -> org.route( "/mistyped", OrgListing.class, MistypedPage.class ) );
+		final IllegalArgumentException mistyped = assertThrows( IllegalArgumentException.class, () -> org.map( "/mistyped", OrgListing.class, MistypedPage.class ) );
 		assertTrue( mistyped.getMessage().contains( "OrgListing.page" ), mistyped.getMessage() );
 
 		// A page doesn't see the fields that didn't convert
-		assertThrows( IllegalArgumentException.class, () -> org.route( "/reported", OrgListing.class, OrgListingPage.class, Fields.REPORTED ) );
+		assertThrows( IllegalArgumentException.class, () -> org.map( "/reported", OrgListing.class, OrgListingPage.class, Fields.REPORTED ) );
 	}
 
 	@Test

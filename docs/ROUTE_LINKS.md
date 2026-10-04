@@ -440,8 +440,9 @@ plugins join the application's named groups (#184), and converters make objects 
 
 Also built:
 
-- **Routes as values.** `map()` returns a `PlainRoute`, `route()` a typed `Route`, and both are `Linkable`: links,
-  forms and redirects take either, and URLs are built from parameter values without constructing a record.
+- **Routes as values.** `map()` returns a `PlainRoute` or a typed `Route`, by the constant it's given, and both are
+  `Linkable`: links, forms and redirects take either, and URLs are built from parameter values without constructing a
+  record.
 - **Conversion.** Parsing is lenient. A route parameter that doesn't convert declines the request, and one in other text
   than its value's is redirected to its canonical URL. A query parameter or field that doesn't convert declines too,
   unless the route declares `Fields.REPORTED`, which hands the errors to it (`conversionErrors()`), for forms.

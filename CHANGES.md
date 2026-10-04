@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **One verb declares every route**
+  A typed route is mapped with `map`, as a plain one is: `club.map( "/books/{book}", Routes.book, BookPage.class )`,
+  whether `Routes.book` is `Route.plain()` or `Route.of( Book.class )`. The route's constant says which kind it is.
+
+  Upgrading: `route( … )` is `map( … )`, with the same arguments.
+
 ## 2026-10-04 (8.1.0)
 
 - **A router replaces the route table**

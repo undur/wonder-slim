@@ -154,7 +154,7 @@ public class ERXRouter {
 	 *     Route&lt;Search&gt; search = Route.of( Search.class );
 	 * }
 	 *
-	 * ERXRouter.declare( routes -&gt; routes.route( "/search", Routes.search, SearchPage.class ) ); // the Application's constructor
+	 * ERXRouter.declare( routes -&gt; routes.map( "/search", Routes.search, SearchPage.class ) ); // the Application's constructor
 	 * </pre>
 	 *
 	 * The declaration gets the application's routes, ranked before every plugin's, so its routes override theirs.

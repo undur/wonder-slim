@@ -10,7 +10,7 @@ package er.routing.options;
  * form again with what's wrong.
  *
  * <pre>
- * createBook = club.route( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
+ * createBook = club.map( "/books", CreateBook.class, BookclubRoutes::createBook, Method.POST, Fields.REPORTED );
  * </pre>
  */
 

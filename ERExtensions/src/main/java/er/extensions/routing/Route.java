@@ -23,7 +23,7 @@ import er.routing.options.Fields;
  * }
  *
  * ERXRouter.declare( routes -&gt; {
- *     routes.route( "/search/{area}", Routes.search, SearchPage.class );
+ *     routes.map( "/search/{area}", Routes.search, SearchPage.class );
  * } );
  * </pre>
  *
