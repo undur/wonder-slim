@@ -472,15 +472,18 @@ Not built yet (the guide's "Not there yet" lists them for users):
 
 ## Packages
 
-ERRouting's packages are by who reads them (decided 2026-10-03):
+By who reads them (decided 2026-10-03), and where they live since the router replaced the route table (8.1.0):
 
-| Package | Holds | Free of WebObjects |
+| Package | Holds | Where |
 |---|---|---|
-| `er.routing` | What an application writes against: `ERXRouter`, `RouteGroup`, `Route`, `PlainRoute`, `RouteKeys`, `RouteInvocation`, `RouteHandler`, `RouteFilter`, `Linkable`, `Declined`, `RouteDescription`. The implementation lives here too, package-private. | no |
-| `er.routing.options` | Everything passed to a route or a group: `Host`, `Method`, `Scheme`, `Header`, `TrailingSlash`, `Fields`, `CrossSite`, `CrossOrigin`, and `RouteOption`, `RouteCondition`, `RouteRequest` for conditions of an application's own | yes |
-| `er.routing.conversion` | `Converters`, `Converter`, `Scope` | yes |
-| `er.routing.matching` | The engine: `Router`, `PathPattern`, `RequestPath`. An application doesn't use it. | yes |
-| `er.routing.components` | `<wo:route>` and `<wo:routeForm>` | no |
+| `er.extensions.routing` | What an application writes against: `ERXRouter`, `RouteGroup`, `Route`, `PlainRoute`, `RouteKeys`, `RouteInvocation`, `RouteHandler`, `RouteFilter`, `Linkable`, `Declined`, `RouteDescription`. The implementation lives here too, package-private. | ERExtensions |
+| `er.extensions.components.additions` | `<wo:route>` and `<wo:routeForm>`, beside ERExtensions' other elements | ERExtensions |
+| `er.routing.options` | Everything passed to a route or a group: `Host`, `Method`, `Scheme`, `Header`, `TrailingSlash`, `Fields`, `CrossSite`, `CrossOrigin`, and `RouteOption`, `RouteCondition`, `RouteRequest` for conditions of an application's own | ERRouting |
+| `er.routing.conversion` | `Converters`, `Converter`, `Scope` | ERRouting |
+| `er.routing.matching` | The engine: `Router`, `PathPattern`, `RequestPath`. An application doesn't use it. | ERRouting |
+
+ERRouting is the routing core: a plain jar for Java 21 with no dependencies, which ERExtensions depends on and
+ng-objects can share. Its packages keep the `er.routing` names until it moves there, renamed once.
 
 - **No `internal` package.** Java hides a class only within its package, so implementation moved to an `internal`
   package would have to be public. Kept package-private beside the API, it's hidden: `er.routing`'s public surface is
@@ -489,8 +492,8 @@ ERRouting's packages are by who reads them (decided 2026-10-03):
   conversion, matching) are what ng-objects can share as they are, and a package holding WebObjects classes can't be
   shared. An application imports from two or three packages, each with one meaning.
 - **Names kept:** `ERXRouter`, the WebObjects-facing class by the house convention, beside the engine's `Router`;
-  `RouteHandler` and `RouteInvocation`, though `er.extensions.routes` has them too, until convergence; the root
-  `er.routing`.
+  `RouteHandler` and `RouteInvocation`, which the route table's went with. `er.extensions.routes` keeps the URL
+  infrastructure: short URLs, the base path, the request handler for routes.
 - Moving the design itself into the shared packages (routes, groups and links behind a request view and a result type)
   is separate work.
 

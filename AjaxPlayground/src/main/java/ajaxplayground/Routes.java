@@ -34,7 +34,9 @@ import ajaxplayground.components.scenario.ScenarioTabs;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
 import ajaxplayground.components.scenario.ScenarioVideo;
 import ajaxplayground.components.scenario.ScenarioWebSocket;
-import er.extensions.routes.RouteTable;
+import er.extensions.resources.ERXPublicResources;
+import er.extensions.routing.ERXRouter;
+import er.extensions.routing.RouteGroup;
 
 /**
  * The playground's URL routes - one clean, flat URL per page, so the navigation between pages shows
@@ -50,7 +52,13 @@ public class Routes {
 	private Routes() {}
 
 	public static void register() {
-		final RouteTable routes = RouteTable.defaultRouteTable();
+		ERXRouter.declare( Routes::declare );
+	}
+
+	private static void declare( final RouteGroup routes ) {
+
+		// The files in webserver-resources/public (robots.txt, ...) at the root of the URL space
+		routes.fallback( new ERXPublicResources() );
 
 		// Index
 		routes.map( "/", Main.class );

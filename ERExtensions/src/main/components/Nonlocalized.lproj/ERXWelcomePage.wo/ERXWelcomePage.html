@@ -12,7 +12,7 @@
 		<h2>Use your own page</h2>
 		<p>Map <code>/</code> to a component in your application's constructor:</p>
 		<pre>public Application() {
-	RouteTable.defaultRouteTable().map( "/", Main.class );
+	ERXRouter.declare( routes -&gt; routes.map( "/", Main.class ) );
 }</pre>
 		<p>
 			Any component will do, and <code>Main</code> is the traditional one. Once <code>/</code> is mapped, it answers

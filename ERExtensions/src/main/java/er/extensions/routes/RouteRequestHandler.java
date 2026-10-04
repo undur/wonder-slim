@@ -7,7 +7,7 @@ import com.webobjects.appserver._private.WODirectActionRequestHandler;
 import com.webobjects.foundation.NSArray;
 
 /**
- * The request handler behind {@link ERXShortURLs#ROUTE_KEY}: hands the request to the default RouteTable through
+ * The request handler behind {@link ERXShortURLs#ROUTE_KEY}: hands the request to the application's router through
  * RouteAction.defaultAction(). Every request that is not a handler URL reaches it, because
  * {@code ERXRoutingApplication.createRequest()} canonicalizes such URLs to {@code <prefix>/route/<path>} before WO parses
  * them - whatever shape the front end delivered (freestyle, adaptor prefix, instance number, or already marked).
@@ -23,7 +23,7 @@ import com.webobjects.foundation.NSArray;
 public class RouteRequestHandler extends WODirectActionRequestHandler {
 
 	public RouteRequestHandler() {
-		super( RouteAction.class.getName(), "default", true );
+		super( er.extensions.routing.RouteAction.class.getName(), "default", true );
 	}
 
 	@Override

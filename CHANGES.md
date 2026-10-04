@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- **A router replaces the route table**
+  Routes are declared, with named parameters, and links are generated from them, checked when they render:
+  `ERXRouter.declare( routes -> routes.map( "/books/{book}", Routes.book, BookPage.class ) )`, linked to with
+  `<wo:route to="$routes.book" :book="$book">`. The most specific route answers, whatever order they're declared in,
+  and a route can decline, passing the request on. Parameters are typed through converters, alone or as a record's
+  components; routes take conditions (methods, hosts) and form groups sharing a prefix, options and filters; a
+  framework declares its routes in a table of its own, which the application's override; posts from other sites are
+  refused unless a route takes them; and in development, routes are declared again when their classes change, without
+  a restart. The development 404 lists the routes and says why those that matched passed the URL on. See
+  `docs/ROUTING.md`. (#178)
+
+  Upgrading: `RouteTable`, its `RouteHandler` and `RouteInvocation`, `RouteURL` and `RouteClaims` are gone.
+  - Routes mapped with `RouteTable.defaultRouteTable().map( … )` are declared:
+    `ERXRouter.declare( routes -> routes.map( "/about", AboutPage.class ) )`. A pattern's `*` is a wildcard as before.
+  - A handler implements `er.extensions.routing.RouteHandler`, and reads named parameters
+    (`invocation.parameter( "id" )`, from `/things/{id}`) instead of positions (`routeURL().getString( 1 )`).
+  - `setFallbackRouteHandler( new ERXPublicResources() )` is `routes.fallback( new ERXPublicResources() )`, and
+    `setNotFoundRouteHandler( … )` is `routes.notFound( … )`, in the application's declaration.
+  - A route taking posts from other sites (an API, a webhook) says so: `CrossSite.ALLOWED`.
+
+- **ERRouting is the routing core, a plain Java library**
+  Path patterns, matching, conditions and converters (`er.routing.matching`, `er.routing.options`,
+  `er.routing.conversion`), with no dependencies, for Java 21. ERExtensions depends on it.
+
+- **Parsley 1.6.3**
+  With ng-objects' template parser 0.1.4, which reads `:` attributes (`:book="$book"`) for route parameters.
+
 ## 2026-10-04 (8.0.17)
 
 - **An application can be served beneath a path of its own**

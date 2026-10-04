@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * the handler keys actually registered, so an application's own routes
  * ({@code /about}, {@code /i/…}) are never mistaken for handler URLs. A
  * handler URL always goes to its handler: mapping a route whose first segment
- * is a handler key is refused (see {@code RouteTable.map}), and a wildcard
+ * is a handler key is refused (see {@code ERXRouter}), and a wildcard
  * route such as a catch-all {@code /*} doesn't take handler URLs. Expansion is skipped for anything already inside the
  * adaptor path so long-form URLs — and other applications' URLs behind the
  * same front end — pass through untouched. The prefix is an exact string,

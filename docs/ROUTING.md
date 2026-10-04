@@ -1,8 +1,7 @@
 # Routing
 
-> **Experimental.** This describes the router in the ERRouting framework on the `route-links` branch (package
-> `er.routing`), built beside the existing routes to replace them. Details will change. The design notes are in
-> [ROUTE_LINKS.md](ROUTE_LINKS.md), and the work is tracked in #178.
+> This describes wonder-slim's router (ERExtensions, from 8.1.0), which replaced the route table of 8.0. The design
+> notes are in [ROUTE_LINKS.md](ROUTE_LINKS.md), and the work is tracked in #178.
 >
 > The example application [Bookclubs](../Bookclubs) uses everything described here, and most examples below are taken
 > from it.
@@ -54,8 +53,9 @@ Pages implement `Routes`, and link to them:
 <wo:route to="$routes.book" :book="$book"><wo:str value="$book.title" /></wo:route>
 ```
 
-An application imports from `er.routing` (the router, groups, routes), `er.routing.options` (what's passed to a route
-or a group: conditions, policies, behaviors) and `er.routing.conversion` (converters).
+An application imports from `er.extensions.routing` (the router, groups, routes), `er.routing.options` (what's passed
+to a route or a group: conditions, policies, behaviors) and `er.routing.conversion` (converters). The last two, with the
+matching engine, are the routing core: ERRouting, a plain Java library with no dependencies, which ERExtensions uses.
 
 `routes()` gathers the constants under one name in templates, clear of a page's own keys (a page's `book` is its
 book, not the route), so `$routes.book` is the constant: key-value coding doesn't read static fields, and `RouteKeys`
@@ -111,12 +111,26 @@ class files in those folders at most once a second.
 
 `er.routing.reload` turns it on or off. It's on in development mode, and off otherwise, where routes are declared once.
 
-### Beside the route table
+### Fallback and not found
 
-The router is mapped into the existing route table as one route, on first use. What the router has no route for passes
-on to the table's other routes, then its fallback and not found handling, so the router and existing routes work side by
-side. The table's `hasRouteFor()` answers for the router's routes that answer any request at their path (whatever its
-method), not for every URL: a route on a host, a scheme or a header doesn't claim a path for all requests.
+A request no route answers goes to the application's fallback, then its not found handler, both set in its declaration:
+
+```java
+ERXRouter.declare( routes -> {
+	routes.map( "/", Main.class );
+	routes.fallback( new ERXPublicResources() );    // the files in the application's public folder (robots.txt, …)
+	routes.notFound( ri -> NotFoundPage.create( ri.context() ) );
+} );
+```
+
+- The fallback may decline (a URL that isn't a file), and the request goes on to not found.
+- Without a not found handler, development has its own pages: a welcome page at `/` while it isn't mapped, and
+  otherwise a 404 listing the routes and why those that matched passed the URL on. Deployed, it's a plain 404.
+- A not found handler that declines passes the request on: a bare 404 marked unhandled, which wo-adaptor-jetty hands to
+  the next handler in the server (an ng-objects application beside this one, say).
+- They're the application's, so a group's or a plugin's routes don't set them.
+
+Every routed request is logged at INFO (`Handling URL: /books/7;address;user agent`).
 
 `ERXRouter.defaultRouter().routes()` describes every route in precedence order (`RouteDescription`): its pattern,
 conditions, trailing slash policy and table, the route itself, a typed route's record class, the sites it takes posts
@@ -224,7 +238,8 @@ club.map( "/*", ri -> /* the club's not found page */ );
 
 When every route that matched declines, the URL passes on, and in development the not found page lists each of them
 with why it passed it on (a parameter naming nothing, a value the record refused, its handler declining). Any route
-handler can add a line with `RouteTable.explainDecline( request, … )`. A handler never returns null.
+handler can add a line with `ERXRouter.explainDecline( request, … )`, or throw `Declined` with the reason. A handler
+never returns null.
 
 ## Typed routes
 
@@ -430,8 +445,8 @@ A route or a group says which sites it takes them from:
   [Routing by host](#routing-by-host)).
 - `CrossSite.ALLOWED`: any site.
 
-A route's own setting wins over its group's. This covers routes: component actions and the route table's other routes
-aren't checked.
+A route's own setting wins over its group's. This covers routes: component actions and direct actions aren't
+checked.
 
 ### Other sites' scripts (CORS)
 
@@ -652,7 +667,7 @@ routes.map( "/", Routes.overview, ri -> …, Host.of( "admin.@" ) );
 2. `405` with `Allow`, if routes at the path don't accept the method (`204` with `Allow`, or a preflight's answer, for
    `OPTIONS`).
 3. `308`, if the path matched a redirecting route only in its other trailing slash form.
-4. Otherwise the router declines, and the route table's other routes, fallback and not found handling get the URL.
+4. Otherwise the fallback, then the not found handler (see [Fallback and not found](#fallback-and-not-found)).
 
 ## Not there yet
 
@@ -663,4 +678,4 @@ The routing work's open items, in full, are in `docs/ROUTE_LINKS.md` (and #178).
   renders.
 - `/docs` and `/docs/`, both strict, are refused as the same route, though no request matches both.
 - An element rendering a route's bare URL (for a script), and route URLs for the Ajax elements: when they're needed.
-- Converging with the existing route table (`er.extensions.routes`), and the same router in ng-objects.
+- The same router in ng-objects, sharing the routing core.

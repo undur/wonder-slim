@@ -5,7 +5,7 @@ import com.webobjects.foundation.NSBundle;
 
 import er.extensions.components.ERXComponent;
 import er.extensions.projectlayout.ERXProjectLayoutBundle;
-import er.extensions.routes.RouteTable;
+import er.extensions.routing.ERXRouter;
 
 /**
  * What {@code /} shows in development while the application hasn't mapped it: what's running, and how to map a page of
@@ -40,6 +40,6 @@ public class ERXWelcomePage extends ERXComponent {
 	 * @return true if the control panel (ERXControl) is mapped
 	 */
 	public boolean hasControlPanel() {
-		return RouteTable.defaultRouteTable().hasRouteFor( "/wonder/admin" );
+		return ERXRouter.defaultRouter().routes().stream().anyMatch( route -> route.pattern().equals( "/wonder/admin" ) );
 	}
 }

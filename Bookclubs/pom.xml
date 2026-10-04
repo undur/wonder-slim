@@ -24,8 +24,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>is.rebbi.slim</groupId>
-			<artifactId>ERRouting</artifactId>
-			<version>8.0.17-SNAPSHOT</version>
+			<artifactId>ERExtensions</artifactId>
+			<version>8.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>is.rebbi</groupId>

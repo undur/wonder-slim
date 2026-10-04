@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>is.rebbi.slim</groupId>
 		<artifactId>wonder-slim-reactor</artifactId>
-		<version>8.0.18-SNAPSHOT</version>
+		<version>8.1.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ERExtensions</artifactId>
@@ -26,6 +26,12 @@
 			<artifactId>ERProjectLayout</artifactId>
 			<version>${wonder.version}</version>
 		</dependency>
+		<!-- The routing core, which the router (er.extensions.routing) is built on -->
+		<dependency>
+			<groupId>${wonder.core.group}</groupId>
+			<artifactId>ERRouting</artifactId>
+			<version>${wonder.version}</version>
+		</dependency>
 		<!-- Closed source fixes and patches from Apple -->
 		<dependency>
 			<groupId>wonder.core</groupId>
@@ -35,7 +41,7 @@
 		<dependency>
 			<groupId>is.rebbi.parsley</groupId>
 			<artifactId>parsley</artifactId>
-			<version>1.6.2</version>
+			<version>1.6.3</version>
 		</dependency>
 		<!--
 			We compile directly against ng-core's ng.dev classes (NGDevLoopback, NGDevJson,
@@ -45,7 +51,7 @@
 		<dependency>
 			<groupId>is.rebbi.ng</groupId>
 			<artifactId>ng-core</artifactId>
-			<version>0.1.3</version>
+			<version>0.1.4</version>
 		</dependency>
 		<!--
 			Dependency declared since JavaWebObjects needs it but fails to declare it as a

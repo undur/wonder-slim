@@ -12,7 +12,7 @@ import com.webobjects.appserver.sse.SSEHub;
 import com.webobjects.appserver.sse.SSEStream;
 
 import ajaxplayground.components.PlaygroundPage;
-import er.extensions.routes.RouteInvocation;
+import er.extensions.routing.RouteInvocation;
 
 /**
  * Scenario: server-sent events end to end.

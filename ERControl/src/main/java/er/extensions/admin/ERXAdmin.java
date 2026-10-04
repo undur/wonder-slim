@@ -17,8 +17,8 @@ import er.extensions.appserver.ERXApplication;
 import er.extensions.control.ERXControlPages;
 import er.extensions.control.ERXControlPages.Page;
 import er.extensions.foundation.ERXProperties;
-import er.extensions.routes.RouteInvocation;
-import er.extensions.routes.RouteTable;
+import er.extensions.routing.RouteGroup;
+import er.extensions.routing.RouteInvocation;
 
 /**
  * The framework's admin UI: one gate, one set of routes, and the pages registered with {@link ERXControlPages}.
@@ -83,17 +83,10 @@ public final class ERXAdmin {
 	}
 
 	/**
-	 * Maps the admin routes, unless the application has claimed {@link #PATH} for itself.
+	 * Declares the admin routes, {@link #PATH} and everything beneath it, in the control panel's own table: an
+	 * application's route at the same path overrides them (and the override is logged)
 	 */
-	public static void registerRoutes() {
-		final RouteTable routes = RouteTable.defaultRouteTable();
-
-		if( routes.hasRouteFor( PATH ) ) {
-			logger.warn( "The application maps a route of its own at {}, so the framework's admin UI is not available", PATH );
-			return;
-		}
-
-		routes.map( PATH, ERXAdmin::handle );
+	public static void declareRoutes( final RouteGroup routes ) {
 		routes.map( PATH + "/*", ERXAdmin::handle );
 	}
 

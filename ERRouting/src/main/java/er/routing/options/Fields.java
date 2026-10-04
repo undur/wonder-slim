@@ -1,7 +1,7 @@
 package er.routing.options;
 
 /**
- * EXPERIMENTAL (route-links branch). How a typed route treats query parameters and form fields that don't convert to
+ * How a typed route treats query parameters and form fields that don't convert to
  * their components' types (or name objects that don't exist).
  *
  * By default such a request is declined: a URL is input, and a value that isn't one of its type means the URL is wrong,

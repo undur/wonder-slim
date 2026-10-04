@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wodefinitions>
+	<wo class="ERXRouteForm" content="expected" unknownAttributes="passthrough">
+
+		<doc><![CDATA[Renders a `<form>` posting to a route (`<wo:routeForm>`): `to` binds the route, and attributes prefixed with `:` are its parameters, as on `<wo:route>`. Host parameters it doesn't bind are the current request's, and the route's other parameters are the form's fields, filled when it's posted. The method is `post` unless bound; a `get` form's query parameters (`:sort`) are rendered as hidden fields, since a browser replaces a get form's action query with its fields. Otherwise as `<wo:form>`, whose other bindings it takes. For forms to anything other than a route, use `<wo:form>`.
+
+Attributes prefixed with `?` become query parameters. Every other attribute is rendered on the tag.]]></doc>
+
+		<binding name="to" required="true"><pull><type>er.extensions.routing.Linkable</type></pull><doc>Route to post to: a typed route or a plain one. Its parameters are bound with `:` attributes.</doc></binding>
+		<binding name="queryDictionary"><pull><type>java.util.Map</type></pull><doc>Query parameters added to the form's URL.</doc></binding>
+		<binding name="fragmentIdentifier"><pull><type>java.lang.String</type></pull><doc>Fragment (`#…`) appended to the form's URL, for example to scroll to error messages after submitting.</doc></binding>
+		<binding name="method"><pull><type>java.lang.String</type></pull><doc>The HTTP method. Defaults to `post`. With `get`, the route's query parameters are hidden fields.</doc></binding>
+		<binding name="enctype"><pull><type>java.lang.String</type></pull><doc>The form's encoding. A file upload inside the form requires `multipart/form-data`.</doc></binding>
+		<binding name="name"><pull><type>java.lang.String</type></pull><doc>The form's name, also published to the context for elements inside it.</doc></binding>
+		<binding name="id"><pull><type>java.lang.String</type></pull><doc>The form's `id`. With `er.extensions.ERXWOForm.useIdInsteadOfNameTag`, used as the form's name, rendered as `id`.</doc></binding>
+		<binding name="multipleSubmit"><pull><type>java.lang.Boolean</type></pull><doc>Whether the form has several submit buttons, each with its own action. Defaults to `er.extensions.ERXWOForm.multipleSubmitDefault`.</doc></binding>
+		<binding name="addDefaultSubmitButton"><pull><type>java.lang.Boolean</type></pull><doc>Add an off-screen submit button at the start of the form, so pressing return submits it. Defaults to `er.extensions.ERXWOForm.addDefaultSubmitButtonDefault`.</doc></binding>
+		<binding name="disabled"><pull><type>java.lang.Boolean</type></pull><doc>If true, the form's tags are left out and only its content renders.</doc></binding>
+		<binding name="embedded"><pull><type>java.lang.Boolean</type></pull><doc>Render the form even inside another form, for forms that are nested in the markup but independent for the user, such as in a modal container.</doc></binding>
+
+
+	</wo>
+</wodefinitions>

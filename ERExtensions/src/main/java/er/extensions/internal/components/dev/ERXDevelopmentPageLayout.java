@@ -5,9 +5,8 @@ import java.util.List;
 import com.webobjects.appserver.WOContext;
 
 import er.extensions.components.ERXComponent;
-import er.extensions.routes.RouteTable;
-import er.extensions.routes.RouteTable.ComponentClassRouteHandler;
-import er.extensions.routes.RouteTable.Route;
+import er.extensions.routing.ERXRouter;
+import er.extensions.routing.RouteDescription;
 
 /**
  * The page around {@link ERXWelcomePage} and {@link ERXRouteNotFoundPage}: the look, and the list of mapped routes.
@@ -17,14 +16,17 @@ import er.extensions.routes.RouteTable.Route;
 public class ERXDevelopmentPageLayout extends ERXComponent {
 
 	public String title;
-	public Route currentRoute;
+	public RouteDescription currentRoute;
 
 	public ERXDevelopmentPageLayout( final WOContext context ) {
 		super( context );
 	}
 
-	public List<Route> routes() {
-		return RouteTable.defaultRouteTable().routes();
+	/**
+	 * @return The router's routes, in precedence order
+	 */
+	public List<RouteDescription> routes() {
+		return ERXRouter.defaultRouter().routes();
 	}
 
 	public boolean hasRoutes() {
@@ -32,15 +34,19 @@ public class ERXDevelopmentPageLayout extends ERXComponent {
 	}
 
 	/**
-	 * @return What the current route answers with: its component's name, or what kind of handler it is
+	 * @return What the current route answers with (its page's name, or what kind of handler it is), its conditions, and
+	 *         the table it's in when it's a plugin's
 	 */
 	public String currentRouteTarget() {
+		final StringBuilder b = new StringBuilder( currentRoute.answer() );
 
-		if( currentRoute.routeHandler() instanceof ComponentClassRouteHandler handler ) {
-			return handler.componentClass().getSimpleName();
+		// Its conditions tell apart routes at the same path (GET and POST)
+		currentRoute.conditions().forEach( condition -> b.append( ", " ).append( condition ) );
+
+		if( !"application".equals( currentRoute.table() ) ) {
+			b.append( " (" ).append( currentRoute.table() ).append( ")" );
 		}
 
-		final Class<?> handlerClass = currentRoute.routeHandler().getClass();
-		return handlerClass.isHidden() || handlerClass.isAnonymousClass() ? "a handler" : handlerClass.getSimpleName();
+		return b.toString();
 	}
 }

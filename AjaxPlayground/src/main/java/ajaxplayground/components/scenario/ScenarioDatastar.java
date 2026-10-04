@@ -17,7 +17,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.sse.SSEHub;
 
 import ajaxplayground.components.PlaygroundPage;
-import er.extensions.routes.RouteInvocation;
+import er.extensions.routing.RouteInvocation;
 
 /**
  * Scenario: a Datastar-driven page, entirely fed by server-sent events.

@@ -12,6 +12,7 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation._NSUtilities;
 
 import er.extensions.ERXP;
+import er.extensions.routing.RouteAction;
 
 /**
  * The application's URL handling, as one layer of the inheritance chain:

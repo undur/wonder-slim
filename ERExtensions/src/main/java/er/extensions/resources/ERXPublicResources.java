@@ -19,9 +19,8 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.foundation.NSBundle;
 
 import er.extensions.appserver.ERXApplication;
-import er.extensions.routes.RouteHandler;
-import er.extensions.routes.RouteInvocation;
-import er.extensions.routes.RouteTable;
+import er.extensions.routing.RouteHandler;
+import er.extensions.routing.RouteInvocation;
 
 /**
  * The application's public resources: the files in the {@value #FOLDER} folder of its web server resources
@@ -33,11 +32,11 @@ import er.extensions.routes.RouteTable;
  * Off unless the application turns it on, in its constructor:
  *
  * <pre>
- * RouteTable.defaultRouteTable().setFallbackRouteHandler( new ERXPublicResources() );
+ * ERXRouter.declare( routes -> routes.fallback( new ERXPublicResources() ) );
  * </pre>
  *
  * A URL is then looked up here only once no request handler and no route has claimed it, so a route always wins over a
- * file, and a URL that isn't a file goes on to the route table's not found handler (see {@link RouteTable}).
+ * file, and a URL that isn't a file goes on to the not found handler.
  *
  * Only files in the folder are served. The folder is indexed on first use, and a path that isn't in the index is a miss
  * without any lookup: finding a resource through the resource manager takes most of a millisecond when it isn't there,

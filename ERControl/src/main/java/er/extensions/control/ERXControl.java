@@ -6,6 +6,7 @@ import er.extensions.ERXExtensions;
 import er.extensions.ERXPlugin;
 import er.extensions.admin.ERXAdmin;
 import er.extensions.appserver.ERXApplication;
+import er.extensions.routing.ERXRouter;
 
 /**
  * ERControl's plugin, for the framework's control panel. Registers the framework's own pages before anything else can
@@ -26,6 +27,6 @@ public class ERXControl implements ERXPlugin {
 
 	@Override
 	public void finishInitialization( final ERXApplication application ) {
-		ERXAdmin.registerRoutes();
+		ERXRouter.declare( "control", ERXAdmin::declareRoutes );
 	}
 }

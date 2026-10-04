@@ -6,12 +6,12 @@ import bookclubs.BookclubRoutes.CreateBook;
 import bookclubs.BookclubRoutes.DeleteBook;
 import bookclubs.BookclubRoutes.MemberView;
 import bookclubs.BookclubRoutes.Search;
-import er.routing.PlainRoute;
-import er.routing.Route;
-import er.routing.RouteKeys;
+import er.extensions.routing.PlainRoute;
+import er.extensions.routing.Route;
+import er.extensions.routing.RouteKeys;
 
 /**
- * The application's routes: what links go to. {@link BookclubRoutes#declare(er.routing.RouteGroup)} gives each its
+ * The application's routes: what links go to. {@link BookclubRoutes#declare(er.extensions.routing.RouteGroup)} gives each its
  * pattern. The pages implement this, so a template links with {@code <wo:route to="$routes.book" :book="$book">}, and
  * Java code with {@code Routes.book.url( … )}.
  */

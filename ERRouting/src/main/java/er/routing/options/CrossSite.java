@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 
 
 /**
- * EXPERIMENTAL (route-links branch). Which sites a route takes requests that change things (POST, PUT, PATCH, DELETE)
+ * Which sites a route takes requests that change things (POST, PUT, PATCH, DELETE)
  * from. By default only its own origin ({@link #SAME_ORIGIN}): such a request from a page elsewhere is answered with
  * {@code 403}, so another site can't post a form to the application with the user's cookies. {@link #OWN_HOSTS} also
  * takes the application's other hosts (a form on the landing page posting to a club's host), and {@link #ALLOWED} any

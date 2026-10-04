@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * EXPERIMENTAL (route-links branch). Which other sites' scripts may call a route from a browser (CORS): their requests
+ * Which other sites' scripts may call a route from a browser (CORS): their requests
  * are answered with {@code Access-Control-Allow-Origin}, and the browser's preflight ({@code OPTIONS} with
  * {@code Access-Control-Request-Method}) with what the route takes, so a page elsewhere can read the answer. A route or a
  * group says so:

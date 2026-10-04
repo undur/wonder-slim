@@ -73,8 +73,6 @@ import er.extensions.foundation.ERXThreadStorage;
 import er.extensions.projectlayout.ERXProjectLayout;
 import er.extensions.resources.ERXAppBasedResourceManager;
 import er.extensions.resources.ERXAppBasedResourceRequestHandler;
-import er.extensions.routes.ERXDevelopmentNotFoundRouteHandler;
-import er.extensions.routes.RouteTable;
 import er.extensions.statistics.ERXStats;
 import parsley.ParsleyConfiguration;
 
@@ -253,11 +251,6 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			// /ng/dev/eval and /ng/dev/problems routes.
 			registerRequestHandler( new ERXEvalRequestHandler(), ERXEvalRequestHandler.KEY );
 			registerRequestHandler( new ERXRuntimeProblemsRequestHandler(), ERXRuntimeProblemsRequestHandler.KEY );
-
-			// A URL nothing claims gets a page showing the mapped routes, and an unmapped / a welcome page, instead of the
-			// plain 404. Set before the application's own constructor runs, so it can set a handler of its own, or the
-			// plain one back. See ERXDevelopmentNotFoundRouteHandler.
-			RouteTable.defaultRouteTable().setNotFoundRouteHandler( new ERXDevelopmentNotFoundRouteHandler() );
 		}
 
 

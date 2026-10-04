@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import er.routing.PlainRoute;
-import er.routing.Route;
-import er.routing.RouteGroup;
+import er.extensions.routing.PlainRoute;
+import er.extensions.routing.Route;
+import er.extensions.routing.RouteGroup;
 import er.routing.options.Method;
 
 
