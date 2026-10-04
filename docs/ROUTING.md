@@ -169,6 +169,10 @@ club.map( "/rules/", Routes.rules, ri -> text( 200, "Rules of %s: read the book.
 ```
 
 The handler gets a `RouteInvocation`, and answers with a response or a page (`ri.page( PageClass.class )` makes one).
+Pages are made in the request's context (`ri.page( … )`, or `pageWithName( name, ri.context() )`), the one the request
+handler finishes. A direct action constructed in a handler (`new SomeAction( ri.request() )`) has a context of its own,
+which the request handler never finishes: a session it makes is never saved, so the component actions on its pages
+find no session. Make the pages in `ri.context()` instead.
 
 - `ri.parameter( "id" )` is a route parameter's text, and `ri.parameter( "book", Book.class )` its value, with the
   router's converters (see [Parameter types](#parameter-types)). A value that doesn't convert, or names nothing,
