@@ -110,8 +110,7 @@ public class ERXRouter {
 	private volatile boolean _joinsChecked;
 
 	/**
-	 * True for a router whose routes are declared ({@link #declare(Consumer, RouteOption...)}): changed outside a
-	 * declaration, it throws
+	 * True for a router whose routes are declared ({@link #declare(Consumer)}): changed outside a declaration, it throws
 	 */
 	private volatile boolean _declaredOnly;
 
@@ -174,18 +173,35 @@ public class ERXRouter {
 	 * current one once all of them succeed. One that fails leaves the current routes in place, and routed requests answer
 	 * with why until the routes are declared again. Set {@value #RELOAD_PROPERTY} to false to declare them once.
 	 */
+	public static void declare( final Consumer<RouteGroup> declaration ) {
+		declare( declaration, new RouteOption[0] );
+	}
+
+	/**
+	 * Declares the application's routes as {@link #declare(Consumer)} does, the options applying to every route the
+	 * declaration declares, as a group's apply to its routes:
+	 * {@code ERXRouter.declare( routes -> … , TrailingSlash.REDIRECT )}
+	 */
 	public static void declare( final Consumer<RouteGroup> declaration, final RouteOption... options ) {
 		declarations().declare( router -> declaration.accept( router.application( options ) ), RouteIdentity.caller() );
 	}
 
 	/**
-	 * Declares a plugin's routes, as {@link #declare(Consumer, RouteOption...)} does the application's: in a table of the
+	 * Declares a plugin's routes, as {@link #declare(Consumer)} does the application's: in a table of the
 	 * plugin's own, ranked below the application's and the tables declared before it (plugins in dependency order). The
 	 * same route in a higher ranked table overrides it. Options apply to every route it declares.
 	 *
 	 * <pre>
 	 * ERXRouter.declare( "guestbook", routes -&gt; routes.map( "/guestbook", … ) );
 	 * </pre>
+	 */
+	public static void declare( final String table, final Consumer<RouteGroup> declaration ) {
+		declare( table, declaration, new RouteOption[0] );
+	}
+
+	/**
+	 * Declares a plugin's routes as {@link #declare(String, Consumer)} does, the options applying to every route the
+	 * declaration declares
 	 */
 	public static void declare( final String table, final Consumer<RouteGroup> declaration, final RouteOption... options ) {
 		declarations().declare( router -> declaration.accept( options.length == 0 ? router.table( table ) : router.table( table ).group( "", options ) ), RouteIdentity.caller() );
@@ -311,7 +327,7 @@ public class ERXRouter {
 	}
 
 	/**
-	 * Makes the router's routes declared only ({@link #declare(Consumer, RouteOption...)})
+	 * Makes the router's routes declared only ({@link #declare(Consumer)})
 	 */
 	void declaredOnly() {
 		_declaredOnly = true;
