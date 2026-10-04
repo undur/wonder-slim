@@ -26,7 +26,7 @@ annotation:
 
 ```java
 @RoutePattern( "/search/{area}" )
-public record Search( String area, String q, Boolean more ) implements RouteAction {
+public record Search( String area, String q, Boolean more ) implements Routable {
 
 	@Override
 	public WOActionResults invoke( RouteInvocation ri ) {
@@ -52,12 +52,13 @@ new Search( "bork", someString, true ).url()
   the record constructed (its compact constructor is a natural place for validation). Then `invoke` runs. A value that
   doesn't convert declines the URL (`RouteHandler.DECLINED`, #166), as `RouteURL.getInteger` answers its default for
   one that isn't a number (#169).
-- **One routing system**: a mapped `RouteAction` is a `RouteHandler` in the route table's chain, so declining, the
+- **One routing system**: a mapped `Routable` is a `RouteHandler` in the route table's chain, so declining, the
   fallback and not found all work as they do now.
 - **URLs in their context**: `url()` uses the current context, `url( context )` a given one. URLs are generated in the
   one place that already shapes short URLs, which is where the base path and complete URLs belong too.
-- **The name**: `RouteTable.Route` exists already (a mapped pattern and its handler), hence `RouteAction` and
-  `@RoutePattern` above. Names aren't settled.
+- **The name**: `RouteAction` (the direct action handing requests to the route table) and `RouteTable.Route` (a mapped
+  pattern and its handler) exist already, hence `Routable`: a record you can route to, as a `Runnable` is one you can
+  run. The experiment below takes the pattern as an argument instead of the `@RoutePattern` annotation.
 
 ### Checking in the editor
 
@@ -74,6 +75,79 @@ editor knows to check them. That's an addition to the format (apiext-format).
 Parsley's template parser accepts `?` as the start of a binding name, but not `:`: `parseBindings()` in ng-objects'
 `NGTemplateParser` throws "Expected binding key" at `:id`. Accepting `:` the way `?` is accepted is a small change
 there, then a Parsley release. ng-objects' own link element could adopt the same syntax.
+
+## The experiment (route-links branch)
+
+A first take on the mechanism, to see how it feels. The route is referenced by a key path, so the editor can resolve it
+statically (`route="$routes.search"`), rather than by class name.
+
+```java
+public record Search( Area area, String q, Boolean more ) implements Routable {
+
+	@Override
+	public WOActionResults invoke( RouteInvocation invocation ) {
+		...
+	}
+}
+
+public final Endpoint<Search> search = Endpoint.of( "/typed/search/{area}", Search.class );
+```
+
+A record that's only data gets its action as a lambda instead, which is also how several routes share one parameter
+record (a page and its JSON, say):
+
+```java
+public final Endpoint<ItemParameters> item = Endpoint.of( "/typed/item/{id}", ItemParameters.class, Endpoints::show );
+```
+
+The pattern is an argument rather than an annotation on the record: annotations are a last resort, and the pattern
+then sits next to the route's name in the holder.
+
+```html
+<wo:route route="$routes.search" :area="books" :q="$query" :more="$true">Search books</wo:route>
+```
+
+```java
+routes.search.url( new Search( Area.films, "noir", null ) )   // "/typed/search/films?q=noir"
+```
+
+- The experiment is kept apart from the existing routes: it lives in its own package, `er.routing`
+  (ERExtensions), and the routes package is unchanged. "Endpoint" is a working name that keeps the concept separate
+  while experimenting. Converging with the existing routes would most likely make it the `Route`, refactoring the
+  existing code where needed.
+- `Endpoint<P extends Record>`: a `RouteHandler`. `endpoint.mapInto( routes )` maps it under the part of its pattern
+  before the first parameter (`/typed/search/*`), since the route table matches exact paths and prefixes, and the
+  endpoint declines a URL that doesn't match its whole pattern. It builds URLs, builds its parameter record from
+  values by name, and answers with the page the record's components are set on, or the action it was given. A URL whose values don't
+  convert, or that the record's constructor refuses, is declined.
+- `ERXRouteHyperlink` subclasses `ERXWOHyperlink`, registered as its own tag, `<wo:route>`, so `<wo:link>` is untouched
+  and the experiment stays apart. `route` is required, and its `route` and `:` bindings become a computed `href`. `?`
+  bindings are still added to the query. `href`, `action`, `pageName` and the direct action bindings aren't accepted:
+  the URL comes from the endpoint. (`<wo:route route="…">` repeats itself; a binding named `to` would read better.)
+- KVC doesn't read static fields, so templates reach routes through an instance: the playground's base page has
+  `routes()`, returning the object whose fields are the routes. Every step of `$routes.search` has a declared type, so
+  the editor can follow it to `Endpoint<Search>` and from there to the record's components.
+- The template parser accepts `:` binding keys on ng-objects' master (not yet released). ERExtensions depends on
+  that parser (0.1.4-SNAPSHOT) directly on this branch.
+- The playground's `/typed` page links to two routes and shows what a route received when it rendered the page.
+
+Checked in the playground:
+
+- Links render the route's URL, short, with path values encoded as path segments and query values as query values.
+  Absent query parameters are left out.
+- Invocation converts values to the components' types: strings, ints, booleans and an enum. Wrong values decline
+  (404), and so does a value the record's compact constructor refuses.
+- An unknown parameter, a missing path parameter, a value of the wrong type, `route` together with `href`, and `:`
+  bindings without `route` are each an error when the link renders, naming the route and its parameters.
+- Ordinary links, component actions included, work through the new element.
+
+Found along the way:
+
+- Parslips reads `:id` as `id`, so a link with both `:id` and an HTML `id` is reported as a duplicate binding.
+- `WOHyperlink` doesn't escape `&` in `href`, so a route URL with two query parameters renders a raw `&` in the
+  attribute. Browsers accept it, but it isn't strictly valid HTML.
+- Removing the `route` key from short URLs happens in `Endpoint` for now. It belongs in `ERXShortURLs`, as the reverse
+  of `canonicalize()`.
 
 ## Other approaches considered
 
@@ -102,21 +176,321 @@ Phoenix's verified routes (links checked at compile time).
    as a check.
 2. **Required and optional.** Path parameters are always required. Query parameters could be optional by being boxed
    (null when absent), or primitives with defaults.
-3. **Registration.** An explicit `routes.map( Search.class )`, or found by scanning. Either way, a link to a route
-   that isn't mapped is an error at render, not a dead URL.
-4. **Types.** Which component types convert (strings, numbers, booleans, enums, dates), and whether there's a way to add
-   more.
+3. **Registration.** Answered: explicit, routes declared from a group (`group.route( pattern, Record.class )`), which
+   maps them.
+4. **Types.** Answered: the router's converters, built in for the common types, and registered by the application for
+   its own (#175).
 5. **Routes beyond pages**: a JSON endpoint or a redirect is linked to the same way, presumably.
-6. **Which elements take `route`**: `wo:link`, `wo:form` (a GET form to a route, its fields named after the
-   components), an element rendering a bare URL for scripts, the Ajax elements' URLs.
+6. **Which elements take `route`**: answered for links (`<wo:route>`) and forms (`<wo:routeForm>`), both taking a
+   typed or a plain route. Still open: an element rendering a bare URL for scripts, and the Ajax elements' URLs.
 
-## A possible order
+## Compared with other frameworks
 
-1. Named parameters in patterns (`/items/{id}`). `RouteTable` matches exact paths and `*` prefixes only today, and
-   ng-objects has the same gap (ng-objects #16–#19). The plain-Java core (matching a pattern, building a record from
-   a URL, building a URL from a record) could be shared with ng-objects.
-2. `RouteAction` records: `map`, invocation and `url()`.
-3. `wo:link route=… :area=…` at run time, with errors for unknown routes and parameters. Usable with checks at render
-   only.
-4. `:` in the template parser (ng-objects, then Parsley).
-5. The `.apiext` addition, and the checks and completion in Parslips.
+From memory, not checked against each framework's current documentation.
+
+- **Ktor Resources** is nearly the same design: a class is the route (`@Resource("/search/{area}") class Search(…)`),
+  its properties are the parameters, `{name}` segments are path parameters and the rest query parameters, and a link
+  is built by constructing the class (`href(Search("books"))`). The pattern is an annotation, handlers are registered
+  apart (`get<Search> { }`), conversion goes through a serialization library, and resources nest through a parent
+  property.
+- **TanStack Router** is the closest on the linking side: `<Link to="/posts/$postId" params={…} search={…}>`, path
+  and query ("search") parameters apart, query values validated by a schema, and every link checked by the TypeScript
+  compiler.
+- **Play** declares routes in a routes file and generates a typed reverse router (`@routes.Clients.show(42)`),
+  checked at compile time. **Phoenix**'s verified routes (`~p"/users/#{user}"`) are checked at compile time too,
+  paths only.
+- **ASP.NET Core**'s `<a asp-action="Details" asp-route-id="5">` marks route parameters with an attribute prefix, as
+  `:id` does here, checked at run time (and by Rider in the editor).
+- **Rails** (`user_path(@user)`) and **Django** (`{% url 'item' id %}`) find a bad link at run time. **Spring**'s
+  template URLs are strings, and its `fromMethodCall(…)` is typed in Java only. **Wicket** links to page classes, with
+  string parameters.
+
+- **Javalin** declares a route and its handler in one line (`app.get( "/books/{id}", ctx -> … )`), with typed access
+  (`ctx.pathParamAsClass( "id", Integer.class )`), groups (`path( "api", () -> … )`) and before/after handlers. It has
+  no named routes or URL generation (links are strings), matches in the order routes were added, has no declining and
+  no host, scheme or header conditions.
+
+Where this is strong: one declaration in plain Java (no routes file, code generation or annotation), one conversion
+for both directions so `url()` and invocation can't disagree, validation in the record's constructor for both
+directions, and links from Java checked by the compiler.
+
+Where it's behind: template links aren't checked in the editor yet (parslips#12), templates reach routes through an
+instance, there's no HTTP method handling, no composition, a fixed list of parameter types, and matching is a prefix
+plus "decline what isn't mine", with no precedence rules or conflict detection.
+
+### Gaps
+
+What other routers have that this doesn't, kept here until each is built or decided against. None needs anything
+outside ERRouting.
+
+- **Request bodies:** JSON read into an object (Javalin's `ctx.bodyAsClass`) and JSON answers (`ctx.json`). Routes read
+  form fields and query parameters only, and an API answers JSON by hand.
+- **Exceptions by type:** an exception mapped to an answer (Javalin's `app.exception( Type.class, … )`), and handlers
+  by status (`app.error( 404, … )`). Here, `whenInvalid` per route and WebObjects' own handling.
+- **Validation chains:** `.check( v -> v > 0, "must be positive" )` on a parameter. Here, the record's constructor.
+- **After filters:** something run after a route has answered (logging, headers). A filter wrapping the route does it
+  today, with more ceremony.
+- **Access by role:** a route declaring who may call it (Javalin's `app.get( path, handler, Role.ADMIN )`). Filters
+  do it today.
+- **Matching options:** case-insensitive paths, and repeated slashes taken as one.
+- **Optional path elements:** `/archive/{year}/{month?}`, answering `/archive/2026` and `/archive/2026/10`, for digging
+  into data a level at a time. Planned as the last element only: one route and one constant, a link leaving the
+  element out for a null value, the component nullable like a query parameter. It's then exactly two patterns, which
+  the conflict checks and precedence treat as such. In the middle of a pattern (`/a/{x?}/b`) URLs become ambiguous.
+  Today: a query parameter, or two routes with two constants.
+- **WebSockets, server-sent events, async answers, OpenAPI:** out of scope for now.
+- **Declaring in one place:** a route something links to has a constant and a pattern, in two places; Javalin's one
+  line has neither. A tradeoff for checked links rather than a gap.
+
+## The router API (proposal)
+
+Covering #173 (matching), #179 (conditions), #174 (conflicts), #176 (groups) and #177 (methods) in one shape, so the
+parts built later slot in. Nothing here is built yet.
+
+### Routes carry their conditions
+
+A method or a host is a fact about a route, so it's declared with the route, not configured on the table. The table
+iterates over its routes, and each says what it requires of a request:
+
+```java
+routes.map( "/", Main.class );                                   // any host, any method (today's behaviour)
+routes.map( "/items/{id}", ri -> ItemPage.page( ri, ri.parameter( "id" ) ) );
+routes.map( "/news/*", news );                                   // wildcard: everything beneath /news/
+routes.map( "/hooks/github", hooks::github, Method.POST );
+routes.map( "/", TenantHome.class, Host.of( "{tenant}.example.com" ) );
+
+Endpoint.of( "/hooks/github", Hook.class, Method.POST );
+```
+
+- **`RouteCondition`** is an interface. Testing a request gives one of three outcomes:
+  - **match**, possibly contributing parameters (a host pattern's `{tenant}`)
+  - **not here**: the route doesn't exist for this request (a host mismatch)
+  - **not allowed**: the path is there, but not for this request (a method mismatch, which is what turns into a 405)
+- **Built-in conditions:** `Host` (exact, or a pattern with parameters, case-insensitive) and `Method` (`HEAD` is accepted
+  wherever `GET` is). Others (`Scheme`, `Header`) and an application's own conditions use the same interface.
+- **Parameters by name:** `invocation.parameter( "id" )`, and `invocation.parameters()` for all of them, host parameters
+  included. A host parameter and a path parameter with the same name are refused when mapped.
+- **The trailing slash policy** is set for the table, and a route can override it: **ignore** by default, **redirect**
+  (`308` to the declared form, keeping method and body) or **strict**.
+
+### Groups
+
+A group is a set of routes sharing a prefix, conditions and wrapping:
+
+```java
+routes.group( "/manage", manage -> {
+	manage.wrap( requireLogin );
+	manage.map( "/users", Users.class );
+	manage.map( "/users/{id}", User.class );
+}, Host.of( "admin.example.com" ) );
+```
+
+- **Wrapping:** a `RouteFilter` gets the invocation and the next handler, and either answers itself (a redirect to a
+  login page, a 403) or passes on. A nested group's filters run inside its parent's.
+- **Endpoints are declared from a group** (`manage.endpoint( "/users/{id}", User.class )`), so an endpoint knows its full
+  pattern and conditions from the start. A group's path parameters (`/shops/{shop}`) are components of the record,
+  checked when it's declared. An endpoint with a host pattern generates a complete URL to that host, its host
+  parameters taken from the record.
+
+### Outcomes
+
+For a request (method, host, path), in this order:
+
+1. **Match:** the candidates are the routes whose path matches and whose conditions don't say "not here", in
+   precedence order: a literal segment before a parameter before a wildcard, then, for the same path shape, a route
+   with conditions before one without. The first that answers wins. One that declines (`RouteHandler.DECLINED`) passes
+   the URL to the next candidate.
+2. **405:** a path matched, but every route there said "not allowed". The answer is `405` with an `Allow` header.
+3. **308:** under the redirect policy, the path matched only in its other trailing-slash form.
+4. **Declined:** nothing matched, or every candidate declined. What comes after the router (the fallback, not found)
+   gets the URL.
+
+### Conflicts and overrides
+
+- **Conflicts:** within one table, two routes with the same path shape (regardless of parameter names) and equal
+  conditions are a conflict, refused when mapped, naming both.
+- **Overrides:** as in ng-objects, routes come in layered tables: the application's, and one per framework or plugin.
+  Each table refuses its own conflicts. Between tables, the same route is an override, not a conflict: the
+  application's table wins, and plugins rank among themselves in dependency order. Specificity still comes first
+  across tables, and a table's rank only breaks a tie between equal shapes, so an application's `/*` doesn't hide a
+  plugin's `/admin/users`. Each override is logged at startup.
+- **How ng-objects does it:** tables are tried strictly in rank order, the first table with any match winning, and each
+  plugin's table goes in front as it loads (`NGRouteManager`, `NGApplication.initPlugin`). Rank alone decides there,
+  so an application's catch-all would hide a plugin's literal route. Specificity first is a deliberate difference.
+- **Routes that change while the application runs:** in development, ng-objects reads a plugin's routes again on each
+  request (a route supplier), so editing a route needs no restart. The router should allow the same: a table rebuilt
+  from its source in development, read once in production.
+
+### Decided
+
+- Paths are case-sensitive, hosts aren't. Segments are percent-decoded after splitting, so `%2F` stays in its segment.
+  A parameter never matches an empty segment. `/` never changes form.
+- `/x` is exact, and `/x/*` matches `/x/` and anything beneath it, but not `/x`, as today.
+- **Where the router lives:** beside `RouteTable`, in the experimental package, mapped into the existing table as one
+  handler that declines when nothing matches. `er.extensions.routes` stays as it is until convergence.
+- The router's core takes plain strings (method, host, path) and returns plain values: no WebObjects types, so
+  ng-objects could use the same code.
+- **The host is the `Host` header**, for now. The framework must determine the host in exactly one place, used by
+  everything that needs it (routing, URL generation, `ERXRequest`), and whether a forwarded header counts is decided
+  there, with #67.
+- **A link gives its route's path parameters**, a group's included: none are taken from the route answering the request.
+  A page keeps its values as it keeps any other, so a page rendered again after a component action links the same way.
+  A host parameter left out is the request's host, as a relative URL keeps its host.
+- **One way to declare:** `ERXRouter.declare( routes -> … )`, the application's routes handed to the declaration, and
+  `declare( "name", routes -> … )` for a plugin's table. The smallest application maps a page; a route something links
+  to adds a constant to the same call.
+- **A record is only parameters.** What answers a typed route is named where it's declared: a page, which gets the
+  record's components by name, or an action. This reverses the first design, where the record answered itself
+  (`Routable.invoke`): pages can then take typed query parameters without a record copying them across, and `route(…)`
+  has the same shape as `map(…)`.
+- **Replacing the route table (the clean cut).** The router takes over everything `RouteTable` does, and the old
+  routing goes (8.1.0; 8.0.17 is the last release with it). What the table did, and where it goes:
+  - Routes in mapping order: the router, by precedence.
+  - The fallback (`ERXPublicResources`): `routes.fallback( handler )` in the application's declaration, after every
+    route declined and before not found. It may decline.
+  - Not found: `routes.notFound( handler )` in the application's declaration; without one, the development pages
+    (welcome at `/`, the 404 listing the declines) or a plain 404 deployed. A not found handler that declines passes
+    the request on (the unhandled 404 wo-adaptor-jetty hands to the next handler in the server).
+  - Claims (`hasRouteFor`, `RouteClaims`): gone. ERControl declares into a table of its own, as helium does, so an
+    application's same route overrides it.
+  - The legacy entry (`url` parameter, Apache's `redirect_url` header) and the access log line ("Handling URL") stay,
+    feeding the router.
+  - Settings are made in a declaration, never through static setters: a reload builds a new router from the
+    declarations, so anything outside them would be lost or need carrying over.
+  - Applications lose `RouteTable.map`, the old `RouteHandler`/`RouteInvocation` and `RouteURL`'s positional reading,
+    at compile time. Short URLs, the base path and `RouteRequestHandler` are URL infrastructure, and stay.
+
+## Next steps
+
+Tracked in #178. The whole API is designed in the first round, host patterns, methods and groups included, so later
+features slot into an established shape instead of redesigning it. Built one at a time.
+
+1. **Constants in templates** (#172). Key-value coding doesn't read static fields, so the pages' interface gives
+   templates its constants itself, through one default method returning them by name (`RouteKeys`), rather than a key
+   path rule for every application. Routes can then be static: constants on an interface the pages implement reach
+   templates as `$routes.search`, with no holder object.
+   ```java
+   public interface PlaygroundRoutes {
+   	Endpoint<Search> search = Endpoint.of( "/typed/search/{area}", Search.class );
+   }
+   ```
+2. **Matching** (#173). A real router: path segments matched as a tree, a literal before a parameter before a
+   wildcard, so the result doesn't depend on the order of `map()` calls, with parameters by name. Declining works as
+   now: the next candidate in precedence order, then the fallback, then not found. Existing patterns keep their
+   meaning (`/x` exact, `/x/*` everything beneath it). Trailing slashes: a route's pattern declares its form, and
+   generated URLs use it. A request in the other form is handled by a policy, for the application and per route:
+   **ignore** (the default, both forms match), **redirect** (`308` to the declared form, keeping method and body) or
+   **strict**. `/` never changes form. Paths are case-sensitive, segments are percent-decoded after splitting, and a
+   parameter never matches an empty segment. ng-objects has the same gaps (ng-objects #16–#19), so the router is a
+   candidate for plain Java shared by both.
+3. **Preconditions** (#179): a route can require a host, exact or a pattern (`{tenant}.example.com`, its parameters
+   reaching the route like path parameters), or a set of HTTP methods. Failing a host precondition means the route
+   isn't there for this request. Failing a method means the path is there, so with no route at the path accepting the
+   method the answer is `405` with an `Allow` header. Among routes with the same path shape, one with preconditions
+   comes first. Host routing (#59) and declared methods (#177) are its use cases.
+4. **Conflict checks at startup** (#174). With the router, a route whose shape another route already has (the same literals
+   and parameters in the same places) is refused when it's mapped.
+5. **Objects as parameters** (#175). Converters, both ways (a value to URL text, and back), registered per type, so an
+   application can register its own: `record ItemPage( Item item )` with `{item}` gets an `Item`, and a link passes
+   `:item="$item"`. An object that isn't found declines, so a missing record is a 404.
+6. **Composition** (#176). Groups of routes sharing a prefix (`/admin`), preconditions (a host) and whatever wraps every route in the group: access
+   control, cache headers, logging. Open: whether a group's parameters (`/shops/{shop}/items/{id}`) are handed to its
+   routes, and how that looks as records.
+7. **HTTP methods** (#177): a route accepts every method unless it declares the ones it accepts, through the
+   conditions (#179). Declaring them is how a route that changes something keeps out of reach of links.
+
+Built so far, on the route-links branch. Everything is in its own framework, **ERRouting** (see "Packages" below),
+beside ERExtensions, so it can replace routing as a whole and use the names it's converging to:
+`Endpoint` became `Route` (a typed route, declared with `group.route( … )`), and the handler and invocation types are
+`RouteHandler` and `RouteInvocation`. ERExtensions and AjaxPlayground are as on master.
+
+- **The router's core** (`core`, plain Java, unit tested): path patterns with named parameters and wildcards,
+  conditions (`Host`, exact or a pattern, and `Method`), trailing slash policies, precedence by specificity, layered
+  tables with conflicts refused and overrides recorded, and paths generated from patterns.
+- **`ERXRouter`**, mapped into the existing route table as one route that declines what it has no route for: groups
+  with prefixes, conditions and filters, parameters by name (`RouteInvocation`), `405` with `Allow`, `308` to the
+  declared trailing slash form. The host is read in one place (`RequestHost`).
+- **Endpoints declared from groups**, routed by the router: a group's path parameters and a host pattern's are record
+  components, and an endpoint with a host pattern links to its host.
+- **`<wo:route>`**, checked at render, and `:` in the template parser.
+- The playground's `/router/` routes and `/typed` page exercise each, and so does the example application
+  [Bookclubs](../Bookclubs). The guide is [ROUTING.md](ROUTING.md).
+
+Found by building Bookclubs. All but the last are now done on the branch, in ERRouting: host parameters are inherited
+by links (#180), typed routes and groups take a trailing slash policy among their options (#181), `<wo:routeForm>`
+posts to a typed route (#182), the default router needs no setup and ranks the application's table first (#183),
+plugins join the application's named groups (#184), and converters make objects route parameters, plain routes' too
+(#175, #185). The list as found:
+
+1. **Links within a host repeat its parameters** (#180). Every link on a club's pages carries `:club="$club.id"`, though it
+   links to the host it's on. Links could take the current request's host parameters unless they're given.
+2. **Endpoints have no trailing slash policy** (#181). `group.endpoint(…)` takes none, so the redirect and strict examples
+   are plain routes.
+3. **Forms can't take an endpoint** (#182). A form posts to a URL generated in Java, which takes building a record of nulls
+   (`new CreateBook( club, null, null, null )`) just for the route's own parameters.
+4. **Setting up takes ceremony** (#183): a holder class with a static `create`/`instance`, and a `routes()` accessor in the
+   pages' base class. `RouteKeys` (#172) makes it one default method on the pages' interface.
+5. **A plugin can't map into the application's groups** (#184), so the guestbook repeats the club host condition
+   (`CLUB_HOST`) that the application's club group has.
+6. **Plain routes' parameters are strings** (#185), so the JSON API parses ids itself: objects as parameters (#175) and
+   converters for plain routes too.
+7. **Seen once, not reproduced** (#186): a running Bookclubs kept serving the old templates of two pages after an edit, until
+   a restart. That run had been through several hot swaps of ERExtensions; template edits reloaded normally after the
+   restart.
+
+Also built:
+
+- **Routes as values.** `map()` returns a `PlainRoute`, `route()` a typed `Route`, and both are `Linkable`: links,
+  forms and redirects take either, and URLs are built from parameter values without constructing a record.
+- **Conversion.** Parsing is lenient. A route parameter that doesn't convert declines the request, and one in other text
+  than its value's is redirected to its canonical URL. A query parameter or field that doesn't convert declines too,
+  unless the route declares `Fields.REPORTED`, which hands the errors to it (`conversionErrors()`), for forms.
+- **Hosts.** A host pattern has no port, parameter names keep their case, matching and generation take one label per
+  parameter, and a link to another host is complete, to that host, in a context generating complete URLs too.
+- **The route table.** The router claims only the URLs of its routes answering any host, through `RouteClaims` (the one
+  addition to ERExtensions), and refuses a route a request handler's key would hide.
+- **Plugins** join the application's groups as they're named (`join( name, body )`), and a group never named fails at
+  launch.
+- **The rest.** `OPTIONS` is answered with `Allow`, `routes()` describes every route, and two conditions of one type
+  are refused. Methods are checked before a group's filters run: a `405` reveals that a route exists, which is correct
+  HTTP.
+
+Not built yet (the guide's "Not there yet" lists them for users):
+
+- The bare-URL element and the Ajax elements' URLs (when they're needed).
+- The editor: what `$routes` answers, and the checks and completion
+  (undur/parslips#12), with the `.apiext` addition.
+- Converging with the existing routes, and the ng-objects side. The pieces free of WebObjects (the core, the
+  declarations and reload, the cross-site decision) are written to move; routes, groups and links still take the WO
+  request and context, and move behind the core's request view and a result type when ng-objects gets the router.
+- #67 (where a request came from, forwarded headers from trusted front ends): a framework change, made on `master` and
+  not on this branch, which keeps its ERExtensions changes to a minimum. The router follows it when it's there.
+- Decisions for convergence: `RouteHandler` and `RouteInvocation` share their names with `er.extensions.routes` until
+  those go; the root package stays `er.routing` until then.
+- A tree for matching: the router scans its routes, sorted by precedence, which takes about 9 µs per request with 1,000
+  routes. That's fine at any realistic size, and a segment tree (#173's title) can replace the scan when one isn't.
+
+## Packages
+
+ERRouting's packages are by who reads them (decided 2026-10-03):
+
+| Package | Holds | Free of WebObjects |
+|---|---|---|
+| `er.routing` | What an application writes against: `ERXRouter`, `RouteGroup`, `Route`, `PlainRoute`, `RouteKeys`, `RouteInvocation`, `RouteHandler`, `RouteFilter`, `Linkable`, `Declined`, `RouteDescription`. The implementation lives here too, package-private. | no |
+| `er.routing.options` | Everything passed to a route or a group: `Host`, `Method`, `Scheme`, `Header`, `TrailingSlash`, `Fields`, `CrossSite`, `CrossOrigin`, and `RouteOption`, `RouteCondition`, `RouteRequest` for conditions of an application's own | yes |
+| `er.routing.conversion` | `Converters`, `Converter`, `Scope` | yes |
+| `er.routing.matching` | The engine: `Router`, `PathPattern`, `RequestPath`. An application doesn't use it. | yes |
+| `er.routing.components` | `<wo:route>` and `<wo:routeForm>` | no |
+
+- **No `internal` package.** Java hides a class only within its package, so implementation moved to an `internal`
+  package would have to be public. Kept package-private beside the API, it's hidden: `er.routing`'s public surface is
+  the 11 types above.
+- **Conditions aren't in `er.routing`.** One import would be convenient, but the WebObjects-free packages (options,
+  conversion, matching) are what ng-objects can share as they are, and a package holding WebObjects classes can't be
+  shared. An application imports from two or three packages, each with one meaning.
+- **Names kept:** `ERXRouter`, the WebObjects-facing class by the house convention, beside the engine's `Router`;
+  `RouteHandler` and `RouteInvocation`, though `er.extensions.routes` has them too, until convergence; the root
+  `er.routing`.
+- Moving the design itself into the shared packages (routes, groups and links behind a request view and a result type)
+  is separate work.
+

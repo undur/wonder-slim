@@ -1,0 +1,7 @@
+<wo:Frame title="Book clubs">
+	<ul>
+		<wo:repetition list="$clubs" item="$current">
+			<li><wo:route to="$routes.clubHome" :club="$current"><wo:str value="$current.name" /></wo:route> <span class="muted"><wo:str value="$current.motto" /></span></li>
+		</wo:repetition>
+	</ul>
+</wo:Frame>

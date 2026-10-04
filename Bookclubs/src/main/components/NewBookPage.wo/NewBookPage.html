@@ -1,0 +1,10 @@
+<wo:Frame club="$club" title="Add a book">
+	<h1>Add a book</h1>
+	<wo:if condition="$error"><p class="error"><wo:str value="$error" /></p></wo:if>
+	<wo:routeForm to="$routes.createBook" :club="$club">
+		<p><label>Title <input name="title"></label></p>
+		<p><label>Author <input name="author"></label></p>
+		<p><label>Year <input name="year" type="number"></label></p>
+		<button type="submit">Add</button>
+	</wo:routeForm>
+</wo:Frame>

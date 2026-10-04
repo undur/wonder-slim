@@ -205,7 +205,7 @@ public class RouteTable {
 	 *         its handler answers it when asked. Lets other URL handling — short URLs — defer to explicit routes.
 	 */
 	public boolean hasRouteFor( final String url ) {
-		return _routes.stream().anyMatch( route -> matches( route.pattern(), url ) );
+		return _routes.stream().anyMatch( route -> route.routeHandler() instanceof RouteClaims claims ? claims.claims( url ) : matches( route.pattern(), url ) );
 	}
 
 	public void map( final String pattern, final RouteHandler routeHandler ) {

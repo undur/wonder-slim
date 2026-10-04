@@ -1,0 +1,7 @@
+<wo:Frame club="$club" title="$book.title">
+	<h1><wo:str value="$book.title" /></h1>
+	<p class="lead"><wo:str value="$book.author" />, <wo:str value="$book.year" valueWhenEmpty="year unknown" /></p>
+	<wo:routeForm to="$routes.deleteBook" :club="$club" :book="$book">
+		<button type="submit">Remove from the club's list</button>
+	</wo:routeForm>
+</wo:Frame>

@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>is.rebbi.slim</groupId>
+		<artifactId>wonder-slim-reactor</artifactId>
+		<version>8.0.17-SNAPSHOT</version>
+	</parent>
+	<artifactId>ERRouting</artifactId>
+	<name>ERRouting Framework</name>
+	<packaging>woframework</packaging>
+
+	<!--
+		EXPERIMENTAL (route-links branch): the router, built beside the existing routes to replace them
+		(docs/ROUTING.md, #178). Not a reactor module, so a release never builds it, and never deployed.
+	-->
+	<properties>
+		<maven.deploy.skip>true</maven.deploy.skip>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>${wonder.core.group}</groupId>
+			<artifactId>ERExtensions</artifactId>
+			<version>${wonder.version}</version>
+		</dependency>
+		<!-- The template parser accepting ':' bindings (ng-objects master, unreleased). Nearer than Parsley's, so it wins. -->
+		<dependency>
+			<groupId>is.rebbi.ng</groupId>
+			<artifactId>ng-template-parser</artifactId>
+			<version>0.1.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>6.1.3</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
