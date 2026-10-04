@@ -214,9 +214,12 @@ request handler would get every request for it.
   `pre-7.json`) is refused as a conflict, since neither comes first.
 - An optional parameter is the last element, a whole one, and stands for the two patterns, ranked and checked for
   conflicts as two: `/search/new` still comes before `/search/{text?}`, and mapping `/search` beside it is a conflict.
-  Absent, it's null: `ri.parameter( "text" )` answers null, a record's component is null (so a boxed type, not a
-  primitive), and a page's member is left as it was. A link leaves it out when its value is null (`/search`). Each form
-  is in the pattern's trailing slash form (`/reports/{year?}/` stands for `/reports/` and `/reports/{year}/`).
+- Absent, it's null: `ri.parameter( "text" )` and `ri.parameter( "text", Type.class )` answer null, a record's
+  component is null (so a boxed type, not a primitive), and a page's member is left as it was. A link leaves it out
+  when its value is null (`/search`).
+- Present, it's a value like any other: one that isn't of its type, or names nothing, declines the request (a 404),
+  rather than answering as the shorter form would. Absent and wrong aren't the same.
+- Each form is in the pattern's trailing slash form (`/reports/{year?}/` stands for `/reports/` and `/reports/{year}/`).
 - `/files` is the wildcard's other trailing slash form, which the route's policy decides: matched with nothing beneath
   (the default), redirected to `/files/`, or not matched (see [Trailing slashes](#trailing-slashes)).
 - A link to a named wildcard gives its remainder (`:path="minutes/2026.txt"`), each element encoded.

@@ -10,6 +10,7 @@ import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 
 import er.routing.conversion.Converters;
+import er.routing.matching.PathPattern;
 
 
 
@@ -110,6 +111,8 @@ public class RouteInvocation implements Converters.Scope {
 	 * @return The named parameter's value converted to the type, by the router's converters
 	 * @throws Declined if the value isn't one of the type, or names an object that doesn't exist: the request passes on
 	 *         to the next matching route
+	 * @return null for the route's optional parameter ({@code {cartoon?}}) when the request leaves it out: absent isn't
+	 *         wrong, while a value naming nothing declines
 	 * @throws IllegalArgumentException if the route has no parameter of that name
 	 */
 	@Override
@@ -118,6 +121,10 @@ public class RouteInvocation implements Converters.Scope {
 		final String string = parameter( name );
 
 		if( string == null ) {
+			if( _route != null && name.equals( PathPattern.parse( _route.pattern() ).optionalParameter() ) ) {
+				return null;
+			}
+
 			throw new IllegalArgumentException( "The route has no parameter '%s'. Its parameters are %s".formatted( name, _parameters.keySet() ) );
 		}
 

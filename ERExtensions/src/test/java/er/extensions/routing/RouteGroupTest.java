@@ -197,6 +197,25 @@ public class RouteGroupTest {
 		assertThrows( IllegalArgumentException.class, () -> routes.map( "/pages", PrimitiveQuery.class, ( item, invocation ) -> null ) );
 	}
 
+	@Test
+	public void anAbsentOptionalParameterIsNullAndABadOneDeclines() {
+		final ERXRouter router = new ERXRouter();
+		final PlainRoute cartoons = router.application().map( "/cartoons/{cartoon?}", NOTHING );
+
+		final RouteInvocation absent = new RouteInvocation( "/cartoons", null, Map.of(), router.converters(), cartoons );
+		assertNull( absent.parameter( "cartoon", Integer.class ) );
+
+		final RouteInvocation given = new RouteInvocation( "/cartoons/7", null, Map.of( "cartoon", "7" ), router.converters(), cartoons );
+		assertEquals( 7, given.parameter( "cartoon", Integer.class ) );
+
+		// A value that isn't one is the URL being wrong, not the parameter being absent
+		final RouteInvocation bad = new RouteInvocation( "/cartoons/nosuch", null, Map.of( "cartoon", "nosuch" ), router.converters(), cartoons );
+		assertThrows( Declined.class, () -> bad.parameter( "cartoon", Integer.class ) );
+
+		// A name the route doesn't have is still a mistake
+		assertThrows( IllegalArgumentException.class, () -> absent.parameter( "carton", Integer.class ) );
+	}
+
 	public record Cartoon( Integer cartoon ) {}
 
 	public record PrimitiveCartoon( int cartoon ) {}
