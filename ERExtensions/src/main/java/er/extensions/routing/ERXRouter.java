@@ -63,7 +63,7 @@ public class ERXRouter {
 	 * Request userInfo key for why routes that matched a URL passed it on (a {@code List<String>}, one line per route),
 	 * which the not found page in development shows: "why is this a 404"
 	 */
-	public static final String DECLINES_KEY = "er.extensions.routes.declines";
+	public static final String DECLINES_KEY = "er.extensions.routing.declines";
 
 	/**
 	 * true for the application's router (the one its declarations build), which answers with the development pages in
@@ -569,7 +569,7 @@ public class ERXRouter {
 	 *         exist. Checked for the default router before the application listens for requests, so it fails at startup,
 	 *         and by any router on its first request. A failed check fails again on every request.
 	 */
-	public synchronized void checkJoins() {
+	synchronized void checkJoins() {
 		if( !_pendingJoins.isEmpty() ) {
 			throw new IllegalStateException( "Groups were joined that are never named: %s. The routes mapped in them don't exist. Their names are %s".formatted( _pendingJoins.keySet(), _namedGroups.keySet() ) );
 		}

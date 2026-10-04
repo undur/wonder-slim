@@ -20,14 +20,14 @@ import er.extensions.foundation.ERXProperties;
 
 final class PublicAddress {
 
-	public static final String PROPERTY = "er.routing.publicAddress";
+	static final String PROPERTY = "er.routing.publicAddress";
 
 	/**
 	 * @param scheme {@code http} or {@code https}
 	 * @param host The host name, lower case
 	 * @param port The port, -1 for the scheme's own
 	 */
-	public record Origin( String scheme, String host, int port ) {
+	record Origin( String scheme, String host, int port ) {
 
 		/**
 		 * @return The port as written after a host ({@code :1300}), empty for the scheme's own
@@ -63,7 +63,7 @@ final class PublicAddress {
 	 *         finishes launching, so a value that isn't an address stops the launch rather than the first page.
 	 * @throws IllegalStateException if it's set to something that isn't one, naming the property
 	 */
-	public static Origin configured() {
+	static Origin configured() {
 		Optional<Origin> configured = _configured;
 
 		if( configured == null ) {
@@ -80,7 +80,7 @@ final class PublicAddress {
 	 *         {@code localhost} without one in development (where any {@code *.localhost} is this machine)
 	 * @throws IllegalStateException without a public address outside development, naming the property
 	 */
-	public static String domain() {
+	static String domain() {
 		final Origin origin = configured();
 
 		if( origin != null ) {
@@ -99,7 +99,7 @@ final class PublicAddress {
 	 * @return The configured public address
 	 * @throws IllegalStateException if none is set, naming the property
 	 */
-	public static Origin required() {
+	static Origin required() {
 		final Origin origin = configured();
 
 		if( origin == null ) {
