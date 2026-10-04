@@ -202,6 +202,7 @@ request handler would get every request for it.
 | `/books/new` | exactly that path |
 | `/books/{id}` | one path element in place of `{id}` |
 | `/books/{id}.json`, `/book-{id}` | a parameter within an element, the text around it literal |
+| `/search/{text?}` | `/search` and `/search/{text}`: an optional last element, absent from the shorter |
 | `/files/*` | `/files/` and everything beneath it, the rest available as `ri.parameter( "*" )` |
 | `/files/{path*}` | the same, the rest named, so a record takes it and links give it |
 
@@ -210,6 +211,11 @@ request handler would get every request for it.
 - Two parameters within literal text at the same place: the one with more literal text comes first (`{a}.min.json`
   before `{a}.json`). Literal text on opposite sides (`pre-{a}` and `{a}.json`, which both match
   `pre-7.json`) is refused as a conflict, since neither comes first.
+- An optional parameter is the last element, a whole one, and stands for the two patterns, ranked and checked for
+  conflicts as two: `/search/new` still comes before `/search/{text?}`, and mapping `/search` beside it is a conflict.
+  Absent, it's null: `ri.parameter( "text" )` answers null, a record's component is null (so a boxed type, not a
+  primitive), and a page's member is left as it was. A link leaves it out when its value is null (`/search`). Each form
+  is in the pattern's trailing slash form (`/reports/{year?}/` stands for `/reports/` and `/reports/{year}/`).
 - `/files` is the wildcard's other trailing slash form, which the route's policy decides: matched with nothing beneath
   (the default), redirected to `/files/`, or not matched (see [Trailing slashes](#trailing-slashes)).
 - A link to a named wildcard gives its remainder (`:path="minutes/2026.txt"`), each element encoded.

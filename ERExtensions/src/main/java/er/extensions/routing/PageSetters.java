@@ -84,11 +84,19 @@ final class PageSetters implements RouteHandler {
 	@Override
 	public WOActionResults handle( final RouteInvocation invocation ) {
 		final Object[] values = new Object[_setters.size()];
+		final boolean[] absent = new boolean[_setters.size()];
 
 		// Every parameter first, so a request that declines or redirects makes no page
 		for( int i = 0; i < _setters.size(); i++ ) {
 			final Setter setter = _setters.get( i );
 			final String text = invocation.parameter( setter.name() );
+
+			// An optional parameter the request leaves out ({cartoon?}): the page keeps its own value
+			if( text == null ) {
+				absent[i] = true;
+				continue;
+			}
+
 			Object value;
 
 			// Converted once per request (a group's parameter is converted before its filters), redirected to its own text
@@ -115,6 +123,10 @@ final class PageSetters implements RouteHandler {
 
 		for( int i = 0; i < _setters.size(); i++ ) {
 			final Setter setter = _setters.get( i );
+
+			if( absent[i] ) {
+				continue;
+			}
 
 			try {
 				setter.member().set( page, values[i] );

@@ -569,4 +569,58 @@ public class RouterTest {
 		// More literal text first, whatever the tables: a total order
 		assertEquals( List.of( "min", "json", "pre" ), router.routes().stream().map( Router.Entry::handler ).toList() );
 	}
+
+	@Test
+	public void anOptionalLastParameterStandsForTwoPatterns() {
+		final PathPattern cartoons = PathPattern.parse( "/cartoons/{cartoon?}" );
+
+		assertEquals( "cartoon", cartoons.optionalParameter() );
+		assertEquals( List.of( "/cartoons", "/cartoons/{cartoon}" ), cartoons.forms().stream().map( PathPattern::source ).toList() );
+		assertEquals( List.of( "/reports/", "/reports/{year}/" ), PathPattern.parse( "/reports/{year?}/" ).forms().stream().map( PathPattern::source ).toList() );
+		assertEquals( List.of( "/", "/{page}" ), PathPattern.parse( "/{page?}" ).forms().stream().map( PathPattern::source ).toList() );
+
+		// Either form matches, the parameter absent from the shorter
+		assertEquals( Map.of( "cartoon", "42" ), cartoons.match( RequestPath.parse( "/cartoons/42" ) ).parameters() );
+		assertEquals( Map.of(), cartoons.match( RequestPath.parse( "/cartoons" ) ).parameters() );
+
+		// A path for either: the shorter when the value is null
+		assertEquals( "/cartoons/42", cartoons.path( Map.of( "cartoon", "42" ) ) );
+		assertEquals( "/cartoons", cartoons.path( Map.of() ) );
+	}
+
+	@Test
+	public void anOptionalParameterIsTheLastWholeElement() {
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/cartoons/{cartoon?}/edit" ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/cartoons/{cartoon?}/*" ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/cartoons/{cartoon?}.png" ) );
+		assertThrows( IllegalArgumentException.class, () -> PathPattern.parse( "/cartoons/{cartoon}/{cartoon?}" ) );
+	}
+
+	@Test
+	public void anOptionalParameterRanksAsBothItsPatterns() {
+		final Router<String> router = new Router<>();
+		final Router<String>.Table routes = table( router );
+		routes.map( "/cartoons/{cartoon?}", "cartoon" );
+		routes.map( "/cartoons/new", "new" );
+
+		assertEquals( List.of( "cartoon" ), handlers( get( router, "/cartoons" ) ) );
+		assertEquals( Map.of(), parameters( get( router, "/cartoons" ) ) );
+		assertEquals( "cartoon", handlers( get( router, "/cartoons/42" ) ).getFirst() );
+		assertEquals( Map.of( "cartoon", "42" ), parameters( get( router, "/cartoons/42" ) ) );
+
+		// A literal comes before a parameter, as for the pattern with it
+		assertEquals( "new", handlers( get( router, "/cartoons/new" ) ).getFirst() );
+	}
+
+	@Test
+	public void anOptionalParameterConflictsWithEitherOfItsPatterns() {
+		final Router<String>.Table withShorter = table( new Router<>() );
+		withShorter.map( "/cartoons", "list" );
+		assertThrows( IllegalArgumentException.class, () -> withShorter.map( "/cartoons/{cartoon?}", "cartoon" ) );
+
+		final Router<String>.Table withLonger = table( new Router<>() );
+		withLonger.map( "/cartoons/{id}", "one" );
+		assertThrows( IllegalArgumentException.class, () -> withLonger.map( "/cartoons/{cartoon?}", "cartoon" ) );
+	}
+
 }

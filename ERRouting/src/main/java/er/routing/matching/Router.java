@@ -173,6 +173,18 @@ public final class Router<H> {
 			}
 
 			final PathPattern path = PathPattern.parse( pattern );
+
+			// An optional last parameter is mapped as the two patterns it stands for, ranked and checked for conflicts as such
+			if( path.optionalParameter() != null ) {
+				Entry<H> entry = null;
+
+				for( final PathPattern form : path.forms() ) {
+					entry = map( form.source(), handler, options );
+				}
+
+				return entry;
+			}
+
 			final Set<Class<?>> conditionTypes = new HashSet<>();
 
 			for( final RouteCondition condition : conditionList ) {

@@ -114,6 +114,10 @@ final class RouteBinding<P extends Record> {
 			if( component.getType().isPrimitive() && !_routeParameterNames.contains( component.getName() ) ) {
 				throw new IllegalArgumentException( "%s.%s is a query parameter, so it can be absent, and a %s can't be. Use its boxed type".formatted( parametersClass.getSimpleName(), component.getName(), component.getType() ) );
 			}
+
+			if( component.getType().isPrimitive() && component.getName().equals( _path.optionalParameter() ) ) {
+				throw new IllegalArgumentException( "%s.%s is an optional route parameter ({%s?}), so it can be absent, and a %s can't be. Use its boxed type".formatted( parametersClass.getSimpleName(), component.getName(), component.getName(), component.getType() ) );
+			}
 		}
 
 		final List<Integer> order = new ArrayList<>();
@@ -223,8 +227,10 @@ final class RouteBinding<P extends Record> {
 	public String completeURL( final P parameters ) {
 		final Link link = link( parameters );
 
-		if( !link.routeValues().keySet().containsAll( _routeParameterNames ) ) {
-			throw new IllegalArgumentException( "%s leaves out the route's parameters %s, which a complete URL outside a request has no request to take from: give them by name, completeURL( values )".formatted( _parametersClass.getSimpleName(), _routeParameterNames.stream().filter( name -> !link.routeValues().containsKey( name ) ).toList() ) );
+		final List<String> leftOut = _routeParameterNames.stream().filter( name -> !link.routeValues().containsKey( name ) && !name.equals( _path.optionalParameter() ) ).toList();
+
+		if( !leftOut.isEmpty() ) {
+			throw new IllegalArgumentException( "%s leaves out the route's parameters %s, which a complete URL outside a request has no request to take from: give them by name, completeURL( values )".formatted( _parametersClass.getSimpleName(), leftOut ) );
 		}
 
 		return RouteURLs.completeURL( _path, _host, link.routeValues(), link.queryValues() );
@@ -347,7 +353,7 @@ final class RouteBinding<P extends Record> {
 			final Object value = all.get( name );
 
 			if( value == null ) {
-				if( _routeParameterNames.contains( name ) ) {
+				if( _routeParameterNames.contains( name ) && !name.equals( _path.optionalParameter() ) ) {
 					throw new IllegalArgumentException( "The route %s needs its parameter '%s'".formatted( description(), name ) );
 				}
 

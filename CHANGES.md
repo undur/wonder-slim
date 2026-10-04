@@ -8,6 +8,11 @@
 
   Upgrading: `route( … )` is `map( … )`, with the same arguments.
 
+- **An optional last path parameter**
+  `/search/{text?}` stands for `/search` and `/search/{text}`, one route where two were mapped before. Absent, the
+  parameter is null (a record's component, `ri.parameter`), a page keeps its own value, and a link leaves it out when
+  its value is null. It ranks and conflicts as the two patterns it stands for. (#204)
+
 - **Options for every route of a declaration**
   `ERXRouter.declare( routes -> … , TrailingSlash.REDIRECT )` applies the options to every route the declaration
   declares, as a group's apply to its routes. A plugin's declaration takes them too. (#202)

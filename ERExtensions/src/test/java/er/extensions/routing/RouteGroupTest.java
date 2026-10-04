@@ -176,6 +176,29 @@ public class RouteGroupTest {
 		assertThrows( IllegalArgumentException.class, () -> routes.map( "/pages", PrimitiveQuery.class, ( item, invocation ) -> null ) );
 	}
 
+	public record Cartoon( Integer cartoon ) {}
+
+	public record PrimitiveCartoon( int cartoon ) {}
+
+	@Test
+	public void anOptionalParametersComponentIsNullWhenAbsent() {
+		final ERXRouter router = new ERXRouter();
+		final java.util.concurrent.atomic.AtomicReference<Cartoon> received = new java.util.concurrent.atomic.AtomicReference<>();
+		final Route<Cartoon> cartoons = router.application().map( "/cartoons/{cartoon?}", Cartoon.class, ( cartoon, invocation ) -> {
+			received.set( cartoon );
+			return null;
+		} );
+
+		cartoons.binding().handle( new RouteInvocation( "/cartoons", null, Map.of(), router.converters(), cartoons ) );
+		assertEquals( new Cartoon( null ), received.get() );
+
+		cartoons.binding().handle( new RouteInvocation( "/cartoons/7", null, Map.of( "cartoon", "7" ), router.converters(), cartoons ) );
+		assertEquals( new Cartoon( 7 ), received.get() );
+
+		// It can be absent, so a primitive can't hold it
+		assertThrows( IllegalArgumentException.class, () -> router.application().map( "/strips/{cartoon?}", PrimitiveCartoon.class, ( cartoon, invocation ) -> null ) );
+	}
+
 	@Test
 	public void aLinksValuesAreChecked() {
 		final Route<Item> item = new ERXRouter().application().map( "/items/{id}", Item.class, ( i, invocation ) -> null );

@@ -21,6 +21,8 @@ import er.routing.options.TrailingSlash;
  * <li>{@code /items/{id}} has a parameter: one non-empty path element, available by name.</li>
  * <li>{@code /items/{id}.json} and {@code /book-{id}} have a parameter within an element: the element's text around it
  * is literal. One parameter to an element.</li>
+ * <li>{@code /cartoons/{cartoon?}} has an optional last parameter: it stands for {@code /cartoons} and
+ * {@code /cartoons/{cartoon}}, and the parameter is absent when the first matched. Only the last element, a whole one.</li>
  * <li>{@code /news/*} is a wildcard: {@code /news/} and everything beneath it. What it matched is available as the
  * parameter {@code *}, or by a name of its own: {@code /files/{path*}}. {@code /news} itself is the wildcard's other
  * trailing slash form, which the route's policy decides (redirected, matched with nothing beneath, or not matched).</li>
@@ -60,12 +62,22 @@ public final class PathPattern {
 	private final String _wildcardName;
 	private final boolean _trailingSlash;
 
+	/**
+	 * The optional last parameter's name ({@code {cartoon?}}), null for a pattern without one
+	 */
+	private final String _optional;
+
 	private PathPattern( final String source, final List<Segment> segments, final boolean wildcard, final String wildcardName, final boolean trailingSlash ) {
+		this( source, segments, wildcard, wildcardName, trailingSlash, null );
+	}
+
+	private PathPattern( final String source, final List<Segment> segments, final boolean wildcard, final String wildcardName, final boolean trailingSlash, final String optional ) {
 		_source = source;
 		_segments = List.copyOf( segments );
 		_wildcard = wildcard;
 		_wildcardName = wildcardName;
 		_trailingSlash = trailingSlash;
+		_optional = optional;
 	}
 
 	/**
@@ -92,6 +104,7 @@ public final class PathPattern {
 		final String body = withoutWildcard.equals( "/" ) ? "" : withoutWildcard.substring( 1, trailingSlash ? withoutWildcard.length() - 1 : withoutWildcard.length() );
 		final List<Segment> segments = new ArrayList<>();
 		final Set<String> names = new HashSet<>();
+		String optional = null;
 
 		if( !body.isEmpty() ) {
 			for( final String segment : body.split( "/", -1 ) ) {
@@ -99,7 +112,25 @@ public final class PathPattern {
 					throw new IllegalArgumentException( "A path pattern has no empty segments ('//'): '%s'".formatted( pattern ) );
 				}
 
-				if( segment.startsWith( "{" ) && segment.endsWith( "}" ) ) {
+				if( segment.startsWith( "{" ) && segment.endsWith( "?}" ) ) {
+					final String name = segment.substring( 1, segment.length() - 2 );
+
+					if( !PARAMETER_NAME.matcher( name ).matches() ) {
+						throw new IllegalArgumentException( "'%s' isn't a valid parameter name in the path pattern '%s'".formatted( name, pattern ) );
+					}
+
+					if( wildcard || segments.size() + 1 != body.split( "/", -1 ).length ) {
+						throw new IllegalArgumentException( "An optional parameter ({%s?}) is the last element of a path pattern, with no wildcard: '%s'".formatted( name, pattern ) );
+					}
+
+					if( !names.add( name ) ) {
+						throw new IllegalArgumentException( "The parameter {%s} appears twice in the path pattern '%s'".formatted( name, pattern ) );
+					}
+
+					optional = name;
+					segments.add( new Parameter( name ) );
+				}
+				else if( segment.startsWith( "{" ) && segment.endsWith( "}" ) ) {
 					final String name = segment.substring( 1, segment.length() - 1 );
 
 					if( !PARAMETER_NAME.matcher( name ).matches() ) {
@@ -144,7 +175,31 @@ public final class PathPattern {
 			throw new IllegalArgumentException( "The parameter {%s} appears twice in the path pattern '%s'".formatted( wildcardName, pattern ) );
 		}
 
-		return new PathPattern( pattern, segments, wildcard, wildcardName, trailingSlash || wildcard );
+		return new PathPattern( pattern, segments, wildcard, wildcardName, trailingSlash || wildcard, optional );
+	}
+
+	/**
+	 * @return The optional last parameter's name ({@code cartoon} for {@code /cartoons/{cartoon?}}), null for none
+	 */
+	public String optionalParameter() {
+		return _optional;
+	}
+
+	/**
+	 * @return The patterns this one stands for: itself, or for an optional last parameter the pattern without it and the
+	 *         pattern with it ({@code /cartoons} and {@code /cartoons/{cartoon}} for {@code /cartoons/{cartoon?}}), each in
+	 *         this pattern's trailing slash form
+	 */
+	public List<PathPattern> forms() {
+		if( _optional == null ) {
+			return List.of( this );
+		}
+
+		final String element = "/{" + _optional + "?}";
+		final int at = _source.lastIndexOf( element );
+		final String without = _source.substring( 0, at ) + (_trailingSlash ? "/" : "");
+		final String with = _source.substring( 0, at ) + "/{" + _optional + "}" + _source.substring( at + element.length() );
+		return List.of( parse( without.isEmpty() ? "/" : without ), parse( with ) );
 	}
 
 	public String source() {
@@ -199,6 +254,14 @@ public final class PathPattern {
 	 * @return The match, or null if the path doesn't match (in either trailing slash form)
 	 */
 	public Match match( final RequestPath path ) {
+		final Match match = matchSegments( path );
+		return match != null || _optional == null ? match : forms().get( 0 ).match( path );
+	}
+
+	/**
+	 * @return The match of the pattern's segments (an optional parameter's included), null if the path doesn't match
+	 */
+	private Match matchSegments( final RequestPath path ) {
 		final List<String> requestSegments = path.segments();
 		final int count = _segments.size();
 
@@ -279,6 +342,11 @@ public final class PathPattern {
 	 * @return The path for the given parameter values, as {@link #path(Map)}
 	 */
 	public String path( final Map<String, String> values, final boolean strict ) {
+
+		// An optional parameter without a value: the pattern without it
+		if( _optional != null && values.get( _optional ) == null ) {
+			return forms().get( 0 ).path( values, strict );
+		}
 
 		if( _wildcard && _wildcardName.equals( WILDCARD_PARAMETER ) ) {
 			throw new IllegalArgumentException( "A path can't be generated for the wildcard pattern %s, whose remainder has no name: name it ({path*}) to link to it".formatted( _source ) );
