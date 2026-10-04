@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2026-10-04 (8.1.0)
 
 - **A router replaces the route table**
   Routes are declared, with named parameters, and links are generated from them, checked when they render:
