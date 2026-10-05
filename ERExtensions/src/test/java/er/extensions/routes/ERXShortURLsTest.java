@@ -1,6 +1,7 @@
 package er.extensions.routes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 
@@ -187,4 +188,41 @@ public class ERXShortURLsTest {
 		org.junit.jupiter.api.Assertions.assertThrows( IllegalStateException.class, () -> ERXRoutingApplication.basePath( "/App/", true ) );
 		org.junit.jupiter.api.Assertions.assertThrows( IllegalStateException.class, () -> ERXRoutingApplication.basePath( "/App", false ) );
 	}
+
+	/**
+	 * The prefix is removed by a plain scan; this is the regular expression it replaced, as the oracle
+	 */
+	private static String withoutPrefixByRegex( final String url, final String prefix ) {
+		return java.util.regex.Pattern.compile( java.util.regex.Pattern.quote( prefix ) + "(?:/-?\\d+)?(?=/|\\?|$)" ).matcher( url ).replaceFirst( "" );
+	}
+
+	@Test
+	public void removingThePrefixMatchesTheRegularExpressionItReplaced() {
+		final java.util.List<String> prefixes = java.util.List.of( "/cgi-bin/WebObjects/App.woa", "/Apps/WebObjects/App.woa", "/App.woa", "/App" );
+		final java.util.List<String> befores = java.util.List.of( "", "https://example.com", "http://h:1300", "/x" );
+		final java.util.List<String> instances = java.util.List.of( "", "/2", "/-1", "/12", "/2a", "/-", "/", "/0" );
+		final java.util.List<String> afters = java.util.List.of( "", "/", "/wa/default", "?a=1", "/wo/1.2?x=/App.woa/3", "x", "/App.woa", ".json", "/route/books/7" );
+		int compared = 0;
+
+		for( final String prefix : prefixes ) {
+			for( final String before : befores ) {
+				for( final String instance : instances ) {
+					for( final String after : afters ) {
+						for( final String url : java.util.List.of( before + prefix + instance + after, before + prefix + "x" + prefix + instance + after, before + after ) ) {
+							final String expected = withoutPrefixByRegex( url, prefix );
+							final String actual = ERXShortURLs.withoutPrefix( url, prefix );
+							assertEquals( expected, actual, () -> "'%s' without '%s'".formatted( url, prefix ) );
+
+							// Unchanged is the same object, which shortening relies on
+							assertEquals( expected == url, actual == url, () -> "identity of '%s' without '%s'".formatted( url, prefix ) );
+							compared++;
+						}
+					}
+				}
+			}
+		}
+
+		assertTrue( compared > 1000, "compared " + compared );
+	}
+
 }

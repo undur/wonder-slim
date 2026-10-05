@@ -115,7 +115,7 @@ public final class ERXShortURLs {
 
 			final String maybeInstance = firstSegment( rest );
 
-			if( maybeInstance.matches( "-?\\d+" ) ) {
+			if( INSTANCE_NUMBER.matcher( maybeInstance ).matches() ) {
 				carriedPrefix = carriedPrefix + "/" + maybeInstance;
 				rest = orRoot( rest.substring( maybeInstance.length() + 1 ) );
 			}
@@ -153,13 +153,77 @@ public final class ERXShortURLs {
 		return shortened == url || basePath == null || basePath.isEmpty() ? shortened : withBasePath( shortened, basePath );
 	}
 
+	/**
+	 * An instance number, as a path element ({@code 2}, {@code -1})
+	 */
+	private static final Pattern INSTANCE_NUMBER = Pattern.compile( "-?\\d+" );
+
+	/**
+	 * A complete URL with no path (an origin, perhaps a query)
+	 */
+	private static final Pattern ORIGIN_ONLY = Pattern.compile( "^[a-zA-Z][a-zA-Z0-9+.-]*://[^/?]*(\\?.*)?$" );
+
+	/**
+	 * @return The URL without the first occurrence of the prefix that ends a path element (followed by {@code /}, {@code ?}
+	 *         or the end), together with an instance number following it ({@code /2}); the URL itself (the same object)
+	 *         if the prefix doesn't occur so. Runs for every URL the application generates, so it's a plain scan, not a
+	 *         regular expression.
+	 */
+	static String withoutPrefix( final String url, final String prefix ) {
+		final int length = url.length();
+		int at = url.indexOf( prefix );
+
+		while( at != -1 ) {
+			final int afterPrefix = at + prefix.length();
+			int end = -1;
+
+			// An instance number: /, an optional -, digits, then the end of the element
+			if( afterPrefix < length && url.charAt( afterPrefix ) == '/' ) {
+				int digits = afterPrefix + 1;
+
+				if( digits < length && url.charAt( digits ) == '-' ) {
+					digits++;
+				}
+
+				int i = digits;
+
+				while( i < length && url.charAt( i ) >= '0' && url.charAt( i ) <= '9' ) {
+					i++;
+				}
+
+				if( i > digits && endsElement( url, i ) ) {
+					end = i;
+				}
+			}
+
+			if( end == -1 && endsElement( url, afterPrefix ) ) {
+				end = afterPrefix;
+			}
+
+			if( end != -1 ) {
+				return url.substring( 0, at ) + url.substring( end );
+			}
+
+			at = url.indexOf( prefix, at + 1 );
+		}
+
+		return url;
+	}
+
+	/**
+	 * @return true if a path element ends at the position: the end of the URL, a slash or a query
+	 */
+	private static boolean endsElement( final String url, final int position ) {
+		return position == url.length() || url.charAt( position ) == '/' || url.charAt( position ) == '?';
+	}
+
 	private static String shortenWithoutBasePath( final String url, final String applicationPrefix ) {
 
 		if( url == null || applicationPrefix == null || applicationPrefix.isEmpty() || !url.contains( applicationPrefix ) ) {
 			return url;
 		}
 
-		final String shortened = Pattern.compile( Pattern.quote( applicationPrefix ) + "(?:/-?\\d+)?(?=/|\\?|$)" ).matcher( url ).replaceFirst( "" );
+		final String shortened = withoutPrefix( url, applicationPrefix );
 
 		// The prefix alone (or followed only by a query) shortens to the root
 		if( shortened.isEmpty() || shortened.startsWith( "?" ) ) {
@@ -167,7 +231,7 @@ public final class ERXShortURLs {
 		}
 
 		// A complete URL whose path was exactly the prefix: keep the root slash
-		if( shortened.matches( "^[a-zA-Z][a-zA-Z0-9+.-]*://[^/?]*(\\?.*)?$" ) ) {
+		if( shortened.contains( "://" ) && ORIGIN_ONLY.matcher( shortened ).matches() ) {
 			final int q = shortened.indexOf( '?' );
 			return q == -1 ? shortened + "/" : shortened.substring( 0, q ) + "/" + shortened.substring( q );
 		}
