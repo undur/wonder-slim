@@ -73,10 +73,9 @@ final class PlainBinding {
 	 * @return The values as URL text, host parameters they don't have taken from the context's request (if there's one)
 	 */
 	private Map<String, String> strings( final Map<String, Object> values, final WOContext context ) {
-		final List<String> unknown = values.keySet().stream().filter( name -> !_routeParameterNames.contains( name ) ).toList();
-
 		// Free query parameters are ?-attributes on a link, so a name that isn't a parameter is a mistake, not a query
-		if( !unknown.isEmpty() ) {
+		if( !_routeParameterNames.containsAll( values.keySet() ) ) {
+			final List<String> unknown = values.keySet().stream().filter( name -> !_routeParameterNames.contains( name ) ).toList();
 			throw new IllegalArgumentException( "The route %s has no parameter %s. Its parameters are %s".formatted( _path, unknown, _routeParameterNames ) );
 		}
 

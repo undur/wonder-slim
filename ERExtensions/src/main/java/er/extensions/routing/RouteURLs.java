@@ -8,12 +8,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 import com.webobjects.appserver.WOResponse;
 
-import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXProperties;
+import er.extensions.routes.ERXRoutingApplication;
 import er.extensions.routes.ERXShortURLs;
 import er.routing.matching.PathPattern;
 import er.routing.options.Host;
@@ -79,7 +80,7 @@ final class RouteURLs {
 	 *         address (which must be set), in the application's URL form (short, or with the adaptor prefix)
 	 */
 	static String completeURL( final PathPattern path, final Host host, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues ) {
-		final ERXApplication application = ERXApplication.erxApplication();
+		final ERXRoutingApplication application = application();
 		return completeURL( path, host, values, queryValues, PublicAddress.required(), application.shortURLs() ? null : application.applicationURLPrefix(), application.basePath(), strictPathValues() );
 	}
 
@@ -88,7 +89,7 @@ final class RouteURLs {
 	 *         the base path, or with the adaptor prefix), as a link within the application has it
 	 */
 	private static String withoutRequest( final PathPattern path, final Map<String, String> values, final List<Map.Entry<String, String>> queryValues ) {
-		final ERXApplication application = ERXApplication.erxApplication();
+		final ERXRoutingApplication application = application();
 		final String query = query( queryValues );
 		final String routePath = path.path( values, strictPathValues() );
 		final String applicationPath = application.shortURLs() ? application.basePath() + routePath : application.applicationURLPrefix() + "/" + ERXShortURLs.ROUTE_KEY + routePath;
@@ -119,6 +120,10 @@ final class RouteURLs {
 	 *         encoded, empty for none
 	 */
 	private static String query( final List<Map.Entry<String, String>> queryValues ) {
+		if( queryValues.isEmpty() ) {
+			return "";
+		}
+
 		return queryValues.stream()
 				.map( e -> URLEncoder.encode( e.getKey(), StandardCharsets.UTF_8 ) + "=" + URLEncoder.encode( e.getValue(), StandardCharsets.UTF_8 ) )
 				.collect( Collectors.joining( "&" ) );
@@ -236,7 +241,23 @@ final class RouteURLs {
 	 */
 	public static String url( final String path, final String query, final WOContext context ) {
 		Objects.requireNonNull( context, "A route URL is generated in a context, and there's none" );
+		final ERXRoutingApplication application = application();
+
+		// The usual link, relative with short URLs, is the path beneath the base path: what composing it under the route
+		// key and shortening it gives, without composing it (a page may have thousands)
+		if( application.shortURLs() && isRelative( context ) ) {
+			return application.basePath() + path + (query == null ? "" : "?" + query);
+		}
+
 		return withoutRouteKey( context.urlWithRequestHandlerKey( ERXShortURLs.ROUTE_KEY, path.substring( 1 ), query ) );
+	}
+
+	/**
+	 * @return true if the context composes relative URLs, as WOContext decides: not when it's asked for complete ones, or
+	 *         when its secure mode isn't the request's
+	 */
+	private static boolean isRelative( final WOContext context ) {
+		return !context.doesGenerateCompleteURLs() && (context.request() == null || context.secureMode() == context.request().isSecure());
 	}
 
 	/**
@@ -244,8 +265,16 @@ final class RouteURLs {
 	 *         {@link ERXShortURLs#withoutRouteKey(String, String)}
 	 */
 	private static String withoutRouteKey( final String url ) {
-		final ERXApplication application = ERXApplication.erxApplication();
+		final ERXRoutingApplication application = application();
 		return application.shortURLs() ? ERXShortURLs.withoutRouteKey( url, application.basePath() ) : url;
+	}
+
+
+	/**
+	 * @return The application, as far as its URLs go (short or long, its base path and prefix)
+	 */
+	private static ERXRoutingApplication application() {
+		return (ERXRoutingApplication)WOApplication.application();
 	}
 
 }

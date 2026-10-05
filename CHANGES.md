@@ -8,6 +8,11 @@
 
   Upgrading: `route( … )` is `map( … )`, with the same arguments.
 
+- **Faster links**
+  With short URLs, a route's link is its path, composed directly rather than composed under the route key and shortened,
+  and shortening a generated URL no longer compiles a regular expression for each. A page of thousands of links renders
+  noticeably faster.
+
 - **A plainer 404, deployed**
   A URL nothing answers gets a small HTML page (the path asked for, and a link to the front page) instead of a line of
   text. In development, the development pages still answer.

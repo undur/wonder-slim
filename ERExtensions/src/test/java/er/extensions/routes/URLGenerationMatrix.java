@@ -16,11 +16,11 @@ import com.webobjects.appserver.WORequest;
  * Each subclass constructs an application of its own, the property set as a deployment would set it. WebObjects keeps
  * the application in a static field, so the most recently constructed one is the one every context sees.
  */
-abstract class URLGenerationMatrix {
+public abstract class URLGenerationMatrix {
 
 	static final String NAME = "App";
 
-	static class App extends ERXRoutingApplication {
+	public static class App extends ERXRoutingApplication {
 
 		@Override
 		public WOContext createContextForRequest( final WORequest request ) {
@@ -31,7 +31,7 @@ abstract class URLGenerationMatrix {
 	/**
 	 * @return An application named {@value #NAME}, with short URLs on or off
 	 */
-	static App application( final boolean shortURLs ) {
+	public static App application( final boolean shortURLs ) {
 		System.setProperty( "WOApplicationName", NAME );
 		System.setProperty( "er.extensions.ERXApplication.shortURLs", String.valueOf( shortURLs ) );
 
@@ -44,12 +44,12 @@ abstract class URLGenerationMatrix {
 		}
 	}
 
-	abstract App app();
+	protected abstract App app();
 
 	/**
 	 * @return A fresh context for a request to the given URL, so no URL generated in it creates a session another one would then carry
 	 */
-	WOContext context( final String requestURL ) {
+	protected WOContext context( final String requestURL ) {
 		return app().createContextForRequest( app().createRequest( "GET", requestURL, "HTTP/1.1", null, null, null ) );
 	}
 

@@ -18,7 +18,7 @@ public class URLGenerationShortTest extends URLGenerationMatrix {
 	}
 
 	@Override
-	App app() {
+	protected App app() {
 		return app;
 	}
 

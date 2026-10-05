@@ -19,7 +19,7 @@ public class URLGenerationLongTest extends URLGenerationMatrix {
 	}
 
 	@Override
-	App app() {
+	protected App app() {
 		return app;
 	}
 
