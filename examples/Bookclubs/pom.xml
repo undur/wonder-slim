@@ -1,58 +1,45 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>bookclubs</groupId>
+	<parent>
+		<groupId>is.rebbi.slim</groupId>
+		<artifactId>wonder-slim-reactor</artifactId>
+		<version>8.1.1-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
 	<artifactId>Bookclubs</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<name>Bookclubs</name>
 	<packaging>woapplication</packaging>
 
 	<description>
-		EXPERIMENTAL (route-links branch): book clubs, each on its own host, built to exercise the
-		router (docs/ROUTING.md). It depends on unreleased code, so it isn't a reactor module and is
-		never released.
+		Book clubs, each on a host of its own: the example application for the router (docs/ROUTING.md),
+		using every feature of it.
 	</description>
 
 	<properties>
-		<maven.compiler.release>25</maven.compiler.release>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!--
+			An example application, not a release artifact: it must NOT be published to the WOCommunity
+			repository alongside the frameworks. It is a reactor module so it builds with them, and a change
+			to the router that breaks it shows; deployment is skipped.
+		-->
 		<maven.deploy.skip>true</maven.deploy.skip>
 	</properties>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+	</build>
 
 	<dependencies>
 		<dependency>
 			<groupId>is.rebbi.slim</groupId>
 			<artifactId>ERExtensions</artifactId>
-			<version>8.1.1-SNAPSHOT</version>
+			<version>${wonder.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>is.rebbi</groupId>
 			<artifactId>wo-adaptor-jetty</artifactId>
 			<version>0.12.2</version>
 		</dependency>
-		<dependency>
-			<groupId>com.webobjects</groupId>
-			<artifactId>JavaWebObjects</artifactId>
-			<version>5.4.3</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.webobjects</groupId>
-					<artifactId>JavaXML</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>is.rebbi</groupId>
-				<artifactId>vermilingua-maven-plugin</artifactId>
-				<version>1.1.11</version>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 </project>

@@ -18,6 +18,7 @@
 		<module>AjaxSlim</module>
 		<module>ERControl</module>
 		<module>examples/AjaxPlayground</module>
+		<module>examples/Bookclubs</module>
 	</modules>
 
 	<properties>
