@@ -17,7 +17,7 @@
 		<module>Ajax</module>
 		<module>AjaxSlim</module>
 		<module>ERControl</module>
-		<module>AjaxPlayground</module>
+		<module>examples/AjaxPlayground</module>
 	</modules>
 
 	<properties>

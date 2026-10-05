@@ -6,6 +6,7 @@
 		<groupId>is.rebbi.slim</groupId>
 		<artifactId>wonder-slim-reactor</artifactId>
 		<version>8.1.1-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>AjaxPlayground</artifactId>
 	<name>Ajax Playground</name>
