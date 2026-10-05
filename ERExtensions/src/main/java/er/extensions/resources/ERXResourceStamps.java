@@ -23,9 +23,7 @@ import java.util.regex.Pattern;
  * exactly {@value #LENGTH} hex digits is a stamp, so a density variant such as {@code logo@2x.png} stays a name (and is
  * stamped as {@code logo@2x@3f9c1e07ab.png}).
  *
- * Parsing also accepts {@code %40}, the marker as some tools encode it in a path, and the period form stamps had before
- * ({@code site.3f9c1e07ab.css}), which a page rendered by an instance not yet updated may still reference during a
- * deploy.
+ * Parsing also accepts {@code %40}, the marker as some tools encode it in a path.
  */
 public final class ERXResourceStamps {
 
@@ -44,12 +42,6 @@ public final class ERXResourceStamps {
 	 * there is one
 	 */
 	private static final Pattern STAMPED_FILE_NAME = Pattern.compile( "^(.+)(?:@|%40)([0-9a-f]{" + LENGTH + "})(\\.[^.]+)?$" );
-
-	/**
-	 * A file name stamped in the form stamps had before the marker, with a period: still accepted, see the class
-	 * description. It can go once no deployed instance generates it.
-	 */
-	private static final Pattern PERIOD_STAMPED_FILE_NAME = Pattern.compile( "^(.+)\\.([0-9a-f]{" + LENGTH + "})(\\.[^.]+)?$" );
 
 	/**
 	 * A stamped resource path, and the path it names without the stamp
@@ -114,14 +106,10 @@ public final class ERXResourceStamps {
 	public static Stamped parse( final String path ) {
 		final int lastSlash = path.lastIndexOf( '/' );
 		final String fileName = path.substring( lastSlash + 1 );
-		Matcher matcher = STAMPED_FILE_NAME.matcher( fileName );
+		final Matcher matcher = STAMPED_FILE_NAME.matcher( fileName );
 
 		if( !matcher.matches() ) {
-			matcher = PERIOD_STAMPED_FILE_NAME.matcher( fileName );
-
-			if( !matcher.matches() ) {
-				return null;
-			}
+			return null;
 		}
 
 		final String extension = matcher.group( 3 ) == null ? "" : matcher.group( 3 );

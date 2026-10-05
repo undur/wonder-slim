@@ -8,6 +8,10 @@
 
   Upgrading: `route( … )` is `map( … )`, with the same arguments.
 
+- **The period form of stamped resource URLs is gone**
+  Only the `@` form (`css/site@3f9c1e07ab.css`) is a stamped URL now: `css/site.3f9c1e07ab.css` names a file of that
+  name. Every deployed instance has generated the `@` form since 8.0.16. (#168)
+
 - **Faster links**
   With short URLs, a route's link is its path, composed directly rather than composed under the route key and shortened,
   and shortening a generated URL no longer compiles a regular expression for each. A page of thousands of links renders

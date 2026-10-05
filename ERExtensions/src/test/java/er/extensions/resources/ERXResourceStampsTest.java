@@ -70,10 +70,10 @@ public class ERXResourceStampsTest {
 	}
 
 	@Test
-	public void theFormerPeriodFormIsStillAccepted() {
-		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse( "app/css/site.3f9c1e07ab.css" );
-		assertEquals( "app/css/site.css", stamped.unstampedPath() );
-		assertEquals( STAMP, stamped.stamp() );
+	public void theFormerPeriodFormIsAName() {
+		// A file whose own name is a period and ten hex digits is that file, not a stamped one
+		assertNull( ERXResourceStamps.parse( "app/css/site.3f9c1e07ab.css" ) );
+		assertNull( ERXResourceStamps.parse( "app/js/chart.0123456789.js" ) );
 	}
 
 	@Test
