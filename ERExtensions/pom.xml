@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>is.rebbi.parsley</groupId>
 			<artifactId>parsley</artifactId>
-			<version>1.6.3</version>
+			<version>1.6.4</version>
 		</dependency>
 		<!--
 			We compile directly against ng-core's ng.dev classes (NGDevLoopback, NGDevJson,
