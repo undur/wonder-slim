@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2026-10-07 (8.1.1)
 
 - **One verb declares every route**
