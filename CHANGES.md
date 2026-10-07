@@ -1,25 +1,12 @@
 # Changelog
 
-## Unreleased
+## 2026-10-07 (8.1.1)
 
 - **One verb declares every route**
   A typed route is mapped with `map`, as a plain one is: `club.map( "/books/{book}", Routes.book, BookPage.class )`,
   whether `Routes.book` is `Route.plain()` or `Route.of( Book.class )`. The route's constant says which kind it is.
 
   Upgrading: `route( … )` is `map( … )`, with the same arguments.
-
-- **The period form of stamped resource URLs is gone**
-  Only the `@` form (`css/site@3f9c1e07ab.css`) is a stamped URL now: `css/site.3f9c1e07ab.css` names a file of that
-  name. Every deployed instance has generated the `@` form since 8.0.16. (#168)
-
-- **Faster links**
-  With short URLs, a route's link is its path, composed directly rather than composed under the route key and shortened,
-  and shortening a generated URL no longer compiles a regular expression for each. A page of thousands of links renders
-  noticeably faster.
-
-- **A plainer 404, deployed**
-  A URL nothing answers gets a small HTML page (the path asked for, and a link to the front page) instead of a line of
-  text. In development, the development pages still answer.
 
 - **The application's routes have a type of their own**
   `ERXRouter.declare` hands the application `ApplicationRoutes`, which has `fallback` and `notFound`: a group's or a
@@ -39,12 +26,33 @@
   leaves it out when its value is null; a value naming nothing declines, as any parameter's does. It ranks and
   conflicts as the two patterns it stands for. (#204)
 
+- **A plainer 404, deployed**
+  A URL nothing answers gets a small HTML page (the path asked for, and a link to the front page) instead of a line of
+  text. In development, the development pages still answer.
+
+- **Faster links**
+  With short URLs, a route's link is its path, composed directly rather than composed under the route key and shortened,
+  and shortening a generated URL no longer compiles a regular expression for each. A page of thousands of links renders
+  noticeably faster.
+
+- **A page of the application's routes**
+  ERControl shows how the application routes as a whole (trailing slashes, bad input, the fallback and the not found
+  handler), then every route in the order they're tried. Each opens to what applies to it, in words: what it matches,
+  what it answers with, its parameters, conditions and linking, with the routing guide's section for each.
+
 - **Options for every route of a declaration**
   `ERXRouter.declare( routes -> … , TrailingSlash.REDIRECT )` applies the options to every route the declaration
   declares, as a group's apply to its routes. A plugin's declaration takes them too. (#202)
 
 - **A handler knows its route's pattern**
   `ri.route().pattern()` is the whole pattern the route is mapped under, its group's prefix included. (#203)
+
+- **The period form of stamped resource URLs is gone**
+  Only the `@` form (`css/site@3f9c1e07ab.css`) is a stamped URL now: `css/site.3f9c1e07ab.css` names a file of that
+  name. Every deployed instance has generated the `@` form since 8.0.16. (#168)
+
+- **Parsley 1.6.4**
+  Parsley no longer brings in WebObjects as a dependency of its own.
 
 ## 2026-10-04 (8.1.0)
 
