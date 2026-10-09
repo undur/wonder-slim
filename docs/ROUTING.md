@@ -109,6 +109,9 @@ class files in those folders at most once a second.
 - A new class file's code may reach the running application a beat after it's written (the hot swap), so a declaration
   made within three seconds of a change is made once more after that.
 
+- Only the declarations the application made when it started are made again. A new `ERXRouter.declare` call (one added
+  to the code that runs at launch) isn't, so it takes a restart.
+
 `er.routing.reload` turns it on or off. It's on in development mode, and off otherwise, where routes are declared once.
 
 ### Fallback and not found
@@ -135,7 +138,9 @@ Every routed request is logged at INFO (`Handling URL: /books/7;address;user age
 
 `ERXRouter.defaultRouter().routes()` describes every route in precedence order (`RouteDescription`): its pattern,
 conditions, trailing slash policy and table, the route itself, a typed route's record class, the sites it takes posts
-from (`CrossSite`), and whether it reports fields that don't convert (`Fields.REPORTED`).
+from (`CrossSite`), and whether it reports fields that don't convert (`Fields.REPORTED`). ERControl shows the same at
+`/wonder/admin/routes`: how the application routes as a whole, then every route by table, in the order they're tried,
+each with its parameters and the options it sets.
 
 ## Routes
 
