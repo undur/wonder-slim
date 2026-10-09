@@ -3,6 +3,7 @@
 	.routes-table > tbody > tr > td:first-child { padding-left: 1.25rem; }
 	.routes-table code.route-pattern { font-size: 0.95rem; padding: 0.15rem 0.4rem; }
 	.routes-table .badge { margin: 0.1rem 0.25rem 0.1rem 0; }
+	.route-expandable { cursor: pointer; }
 	.route-details { display: none; }
 	.route-open .route-details { display: table-row; }
 	.route-open > tr:first-child > td { border-bottom-width: 0; }
@@ -44,16 +45,16 @@
 						</thead>
 						<wo:repetition list="$currentTable.rows" item="$currentRow" index="$currentIndex">
 							<tbody>
-								<tr style="cursor: pointer" onclick="this.parentNode.classList.toggle('route-open')">
+								<wo:genericContainer elementName="tr" class="$currentRow.rowClass" onclick="this.parentNode.classList.toggle('route-open')">
 									<td class="text-secondary"><wo:str value="$currentPosition" /></td>
 									<td><code class="route-pattern"><wo:str value="$currentRow.pattern" /></code></td>
 									<td class="text-nowrap"><wo:str value="$currentRow.route.answer" /></td>
 									<td><wo:repetition list="$currentRow.conditions" item="$currentCondition"><span class="badge bg-azure-lt"><wo:str value="$currentCondition" /></span></wo:repetition></td>
 									<td class="font-monospace small text-secondary text-nowrap"><wo:str value="$currentRow.route.constant" /></td>
 									<td class="text-nowrap"><span class="badge bg-secondary-lt"><wo:str value="$currentRow.kind" /></span></td>
-									<td class="text-secondary"><span class="route-caret">▸</span></td>
-								</tr>
-								<tr class="route-details">
+									<td class="text-secondary"><wo:if condition="$currentRow.hasDetails"><span class="route-caret">▸</span></wo:if></td>
+								</wo:genericContainer>
+								<wo:if condition="$currentRow.hasDetails"><tr class="route-details">
 									<td colspan="7">
 										<dl class="row mb-0">
 											<wo:repetition list="$currentRow.details" item="$currentDetail">
@@ -66,7 +67,7 @@
 											</wo:repetition>
 										</dl>
 									</td>
-								</tr>
+								</tr></wo:if>
 							</tbody>
 						</wo:repetition>
 					</table>

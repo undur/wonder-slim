@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.webobjects.appserver.WOContext;
 
@@ -16,16 +15,13 @@ import er.extensions.routing.ERXRouter;
 import er.extensions.routing.RouteDescription;
 import er.routing.matching.PathPattern;
 import er.routing.options.CrossSite;
-import er.routing.options.Header;
 import er.routing.options.Host;
 import er.routing.options.Method;
 import er.routing.options.RouteCondition;
-import er.routing.options.Scheme;
-import er.routing.options.TrailingSlash;
 
 /**
  * The application's routes: how the application routes as a whole, then every route by table, in the order they're
- * tried. Each route opens to what applies to it, in words, with the guide's section for each.
+ * tried. A route with parameters or options of its own opens to them.
  */
 public class ERXAdminRoutesPage extends ERXComponent {
 
@@ -51,6 +47,17 @@ public class ERXAdminRoutesPage extends ERXComponent {
 
 		public String pattern() {
 			return declaredPattern( route );
+		}
+
+		public boolean hasDetails() {
+			return !details.isEmpty();
+		}
+
+		/**
+		 * @return The row's class: one with details opens to them
+		 */
+		public String rowClass() {
+			return hasDetails() ? "route-expandable" : null;
 		}
 	}
 
@@ -96,42 +103,17 @@ public class ERXAdminRoutesPage extends ERXComponent {
 	public List<Detail> settings() {
 		final List<Detail> settings = new ArrayList<>();
 		final ERXRouter router = router();
-
 		final String fallback = router.fallbackAnswer();
-		settings.add( new Detail( "Fallback", fallback != null
-				? "A request no route answers goes to %s first. It may decline (a URL that isn't one of its files, say), passing the request on to not found.".formatted( fallback )
-				: "None: a request no route answers goes straight to not found. An application's public folder is served with routes.fallback( new ERXPublicResources() ).",
-				fallback != null ? null : "routes.fallback( new ERXPublicResources() );", GUIDE + "fallback-and-not-found" ) );
-
 		final String notFound = router.notFoundAnswer();
-		settings.add( new Detail( "Not found", notFound != null
-				? "A request nothing else answered goes to %s. Declining passes it on to the server's next handler, with wo-adaptor-jetty.".formatted( notFound )
-				: ERXApplication.isDevelopmentModeSafe()
-						? "The development pages: a welcome page at / while nothing is mapped there, and a 404 listing why the routes that matched passed the URL on. Deployed, a plain 404."
-						: "A plain 404. In development, the development pages instead.",
-				null, GUIDE + "fallback-and-not-found" ) );
-
-		settings.add( new Detail( "Trailing slashes", "Ignored unless a route says otherwise: /books and /books/ both match a route for either. A declaration, a group or a route can redirect the other form instead, or refuse it.",
-				"ERXRouter.declare( routes -> …, TrailingSlash.REDIRECT );", GUIDE + "trailing-slashes" ) );
-
-		final boolean reload = ERXProperties.booleanForKeyWithDefault( ERXRouter.RELOAD_PROPERTY, ERXApplication.isDevelopmentModeSafe() );
-		settings.add( new Detail( "Declared again on change", reload
-				? "On: when a class declaring routes changes, the routes are declared again, without a restart."
-				: "Off: the routes are declared once, at launch. It's on in development by default (%s).".formatted( ERXRouter.RELOAD_PROPERTY ),
-				null, GUIDE + "changing-routes-while-the-application-runs" ) );
-
 		final String publicAddress = ERXProperties.stringForKey( "er.routing.publicAddress" );
-		settings.add( new Detail( "Public address", publicAddress != null
-				? "%s: complete URLs (an email's links) and links to a route on another host are made with it.".formatted( publicAddress )
-				: "Not set: complete URLs take the request's address, and routes on a host relative to the application's (admin.@) need one deployed.",
-				publicAddress != null ? null : "er.routing.publicAddress=https://www.example.com", GUIDE + "the-public-address" ) );
-
+		final boolean reload = ERXProperties.booleanForKeyWithDefault( ERXRouter.RELOAD_PROPERTY, ERXApplication.isDevelopmentModeSafe() );
 		final boolean strict = ERXProperties.booleanForKeyWithDefault( "er.routing.strictPathValues", false );
-		settings.add( new Detail( "Path values", strict
-				? "Strict: generating a link with a %, \\ or control character in a path value is an error, for a server or adaptor that refuses them."
-				: "Encoded: a %, \\ or control character in a path value is encoded (50% is 50%25). Some servers refuse those; er.routing.strictPathValues=true makes generating such a link an error instead.",
-				null, GUIDE + "patterns" ) );
 
+		settings.add( new Detail( "Fallback", fallback != null ? fallback : "None", null, GUIDE + "fallback-and-not-found" ) );
+		settings.add( new Detail( "Not found", notFound != null ? notFound : ERXApplication.isDevelopmentModeSafe() ? "Development pages" : "Plain 404", null, GUIDE + "fallback-and-not-found" ) );
+		settings.add( new Detail( "Declared again on change", reload ? "On" : "Off", null, GUIDE + "changing-routes-while-the-application-runs" ) );
+		settings.add( new Detail( "Public address", publicAddress != null ? publicAddress : "Not set", null, GUIDE + "the-public-address" ) );
+		settings.add( new Detail( "Path values", strict ? "Strict" : "Encoded", null, GUIDE + "patterns" ) );
 		return settings;
 	}
 
@@ -154,10 +136,10 @@ public class ERXAdminRoutesPage extends ERXComponent {
 			final List<Row> application = byTable.remove( "application" );
 
 			if( application != null ) {
-				tables.add( new Table( "application", "The application's own routes. They come before every plugin's, so one here overrides a plugin's route for the same requests.", application ) );
+				tables.add( new Table( "application", null, application ) );
 			}
 
-			byTable.forEach( ( name, rows ) -> tables.add( new Table( name, "A plugin's routes, declared by the framework itself (ERXRouter.declare( \"%s\", … )). A route of the application's for the same requests overrides one here.".formatted( name ), rows ) ) );
+			byTable.forEach( ( name, rows ) -> tables.add( new Table( name, "plugin", rows ) ) );
 			_tables = tables;
 		}
 
@@ -187,172 +169,72 @@ public class ERXAdminRoutesPage extends ERXComponent {
 	}
 
 	/**
-	 * @return What applies to a route, in words
+	 * @return What a route declares beyond its row: its parameters, and the options it sets
 	 */
 	private static List<Detail> details( final RouteDescription route, final PathPattern path ) {
 		final List<Detail> details = new ArrayList<>();
-		details.add( new Detail( "Matches", matches( path ), null, GUIDE + "patterns" ) );
-		details.add( new Detail( "Which one answers", "Where two routes could match, the more specific answers, whatever order they're declared in: a literal path element before a parameter within literal text, that before a whole-element parameter, and that before a wildcard. A route can also decline, passing the request on to the next route that matches.", null, GUIDE + "which-route-answers" ) );
-		details.add( parameters( route, path ) );
-		details.add( answer( route ) );
-		details.add( conditions( route ) );
-		details.add( trailingSlash( route, path ) );
-		details.add( crossSite( route ) );
+		final String parameters = parameters( route, path );
 
-		if( route.parametersClass() != null ) {
-			details.add( new Detail( "Bad input", route.fieldsReported()
-					? "A query parameter or field that doesn't convert is null, and reported to the route (ri.conversionErrors()), so a form can be shown again with what's wrong (Fields.REPORTED)."
-					: "A query parameter or field that doesn't convert declines the request, as a wrong URL does, unless the route answers bad input itself (whenInvalid). A form opts into seeing the errors with Fields.REPORTED.",
-					null, GUIDE + "bad-input" ) );
+		if( parameters != null ) {
+			details.add( new Detail( "Parameters", parameters, null, null ) );
 		}
 
-		details.add( linking( route, path ) );
-		details.add( new Detail( "Table", "application".equals( route.table() )
-				? "The application's: it overrides a plugin's route for the same requests."
-				: "The plugin table %s: a route of the application's for the same requests overrides it.".formatted( route.table() ),
-				null, GUIDE + "tables-and-plugins" ) );
+		if( route.trailingSlash() != null ) {
+			details.add( new Detail( "Trailing slash", route.trailingSlash().toString().toLowerCase(), null, GUIDE + "trailing-slashes" ) );
+		}
+
+		if( route.crossSite() != CrossSite.SAME_ORIGIN ) {
+			details.add( new Detail( "Posts from other sites", route.crossSite() == CrossSite.ALLOWED ? "Allowed" : "From the application's other hosts", null, GUIDE + "posts-from-other-sites" ) );
+		}
+
+		if( route.parametersClass() != null && route.fieldsReported() ) {
+			details.add( new Detail( "Bad input", "Reported to the route", null, GUIDE + "bad-input" ) );
+		}
+
 		return details;
 	}
 
-	private static String matches( final PathPattern path ) {
-		final List<String> parts = new ArrayList<>();
-
-		for( final String name : path.parameterNames() ) {
-			if( name.equals( path.optionalParameter() ) ) {
-				parts.add( "{%s} is optional: the route matches with or without it, and it's absent from the shorter path".formatted( name ) );
-			}
-			else if( name.equals( path.wildcardName() ) ) {
-				parts.add( "{%s*} takes everything beneath, as one value".formatted( name ) );
-			}
-			else {
-				parts.add( "{%s} is one path element (it never matches an empty one)".formatted( name ) );
-			}
-		}
-
-		if( path.isWildcard() && PathPattern.WILDCARD_PARAMETER.equals( path.wildcardName() ) ) {
-			parts.add( "* takes everything beneath, available as ri.parameter( \"*\" )" );
-		}
-
-		final String exact = "Requests whose path is %s.".formatted( path.source() );
-		return parts.isEmpty() ? exact + " Paths are case-sensitive." : exact + " " + String.join( "; ", parts ) + ".";
-	}
-
-	private static Detail parameters( final RouteDescription route, final PathPattern path ) {
+	/**
+	 * @return The route's parameters, each with where it comes from, null for none
+	 */
+	private static String parameters( final RouteDescription route, final PathPattern path ) {
 		final List<String> hostParameters = route.conditions().stream().filter( Host.class::isInstance ).flatMap( condition -> ((Host)condition).parameterNames().stream() ).toList();
+		final List<String> parameters = new ArrayList<>();
 
 		if( route.parametersClass() != null ) {
-			final List<String> components = new ArrayList<>();
-
 			for( final RecordComponent component : route.parametersClass().getRecordComponents() ) {
-				final String name = component.getName();
-				final String from = path.parameterNames().contains( name ) ? (name.equals( path.optionalParameter() ) ? "the path, optional" : "the path") : hostParameters.contains( name ) ? "the host" : component.getType() == List.class ? "the query or form, repeated" : "the query or form";
-				components.add( "%s %s (%s)".formatted( component.getType().getSimpleName(), name, from ) );
+				parameters.add( "%s %s (%s)".formatted( component.getType().getSimpleName(), component.getName(), source( component.getName(), path, hostParameters ) ) );
 			}
 
-			return new Detail( "Parameters", "A record, %s, converted from the request before the route answers: %s. One that doesn't convert declines the request (the URL is wrong), so the route never sees a value that isn't of its type.".formatted( route.parametersClass().getSimpleName(), String.join( ", ", components ) ), null, GUIDE + "typed-routes" );
+			return route.parametersClass().getSimpleName() + ": " + String.join( ", ", parameters );
 		}
 
-		final List<String> names = new ArrayList<>( path.parameterNames() );
-		names.addAll( hostParameters );
-
-		if( names.isEmpty() && !path.isWildcard() ) {
-			return new Detail( "Parameters", "None. A query string is the request's own (ri.query( \"name\" ) reads a value, converted with ri.query( \"name\", Integer.class ) and the like).", null, GUIDE + "handlers" );
+		for( final String name : path.parameterNames() ) {
+			parameters.add( "%s (%s)".formatted( name, source( name, path, hostParameters ) ) );
 		}
+
+		hostParameters.forEach( name -> parameters.add( name + " (host)" ) );
 
 		if( path.isWildcard() && PathPattern.WILDCARD_PARAMETER.equals( path.wildcardName() ) ) {
-			names.add( PathPattern.WILDCARD_PARAMETER );
+			parameters.add( "* (path, everything beneath)" );
 		}
 
-		final String calls = names.stream().map( name -> "ri.parameter( \"" + name + "\" )" ).collect( Collectors.joining( ", " ) );
-		return new Detail( "Parameters", "By name, as text: %s. Converted, ri.parameter( \"%s\", Integer.class ) and the like, declining what doesn't convert. A page route sets them on the page's fields or setters of those names, converted to their types.".formatted( calls, names.get( 0 ) ), null, GUIDE + "handlers" );
+		return parameters.isEmpty() ? null : String.join( ", ", parameters );
 	}
 
-	private static Detail answer( final RouteDescription route ) {
-		if( route.page() ) {
-			return new Detail( "Answers with", "A new %s, made in the request's context, its parameters set on it by name. A page's component actions work as on any page.".formatted( route.answer() ), null, GUIDE + "page-routes" );
+	private static String source( final String name, final PathPattern path, final List<String> hostParameters ) {
+		if( name.equals( path.optionalParameter() ) ) {
+			return "path, optional";
 		}
 
-		return new Detail( "Answers with", "%s: code that answers with a response, a page made in the request's context (ri.page( SomePage.class )), or declines (RouteHandler.DECLINED). Making a page in another context, such as constructing a direct action, loses the session it creates.".formatted( capitalized( route.answer() ) ), null, GUIDE + "handlers" );
-	}
-
-	private static Detail conditions( final RouteDescription route ) {
-		if( route.conditions().isEmpty() ) {
-			return new Detail( "Conditions", "None: any host, any method, any scheme. Routes take them as options: Method.POST, Host.of( \"admin.@\" ), Scheme.HTTPS, Header.of( … ).", null, GUIDE + "conditions" );
+		if( name.equals( path.wildcardName() ) ) {
+			return "path, everything beneath";
 		}
 
-		final List<String> words = new ArrayList<>();
-
-		for( final RouteCondition condition : route.conditions() ) {
-			words.add( switch( condition ) {
-				case Host host -> "only requests to the host %s (another host's request goes on to the next route)".formatted( host.pattern() );
-				case Method method -> "only %s requests (another method gets 405 Method Not Allowed)".formatted( method.toString().replace( "Method ", "" ) );
-				case Scheme scheme -> "only %s requests".formatted( scheme );
-				case Header header -> "only requests with the header %s".formatted( header.toString().replace( "Header ", "" ) );
-				default -> condition.toString();
-			} );
+		if( path.parameterNames().contains( name ) ) {
+			return "path";
 		}
 
-		return new Detail( "Conditions", capitalized( String.join( "; ", words ) ) + ".", null, GUIDE + (route.conditions().stream().anyMatch( Host.class::isInstance ) ? "routing-by-host" : "conditions") );
-	}
-
-	private static Detail trailingSlash( final RouteDescription route, final PathPattern path ) {
-		final TrailingSlash policy = route.trailingSlash() == null ? TrailingSlash.IGNORE : route.trailingSlash();
-		final String declared = path.source();
-
-		if( declared.equals( "/" ) ) {
-			return new Detail( "Trailing slash", "The root has one form only.", null, GUIDE + "trailing-slashes" );
-		}
-
-		// An optional parameter's two forms, each in the pattern's trailing slash form
-		if( path.optionalParameter() != null ) {
-			final List<String> forms = path.forms().stream().map( form -> trailingSlash( route, form ).text() ).toList();
-			return new Detail( "Trailing slash", "For each of the two forms. " + String.join( " ", forms ), null, GUIDE + "trailing-slashes" );
-		}
-
-		if( path.isWildcard() ) {
-			final String prefix = declared.substring( 0, declared.lastIndexOf( '/' ) );
-			final String wildcardText = switch( policy ) {
-				case IGNORE -> "%s itself matches, with nothing beneath.".formatted( prefix );
-				case REDIRECT -> "%s itself is answered with 308 to %s/.".formatted( prefix, prefix );
-				case STRICT -> "%s itself doesn't match, only %s/ and what's beneath.".formatted( prefix, prefix );
-			};
-
-			return new Detail( "Trailing slash", wildcardText, null, GUIDE + "trailing-slashes" );
-		}
-
-		final String other = declared.endsWith( "/" ) ? declared.substring( 0, declared.length() - 1 ) : declared + "/";
-		final String text = switch( policy ) {
-			case IGNORE -> "Ignored: %s matches as %s does.".formatted( other, declared );
-			case REDIRECT -> "Redirected: %s is answered with 308 to %s, keeping the method and the query string.".formatted( other, declared );
-			case STRICT -> "Strict: %s doesn't match, only %s does.".formatted( other, declared );
-		};
-
-		return new Detail( "Trailing slash", text, null, GUIDE + "trailing-slashes" );
-	}
-
-	private static Detail crossSite( final RouteDescription route ) {
-		final String text = route.crossSite() == CrossSite.SAME_ORIGIN
-				? "Requests that change things (a POST, say) are taken from this application's own pages only: another site's form posting here is refused with 403. An API or a webhook takes them with CrossSite.ALLOWED."
-				: "Taken from %s (%s), as an API or a webhook takes them.".formatted( route.crossSite() == CrossSite.ALLOWED ? "any site" : "the application's other hosts", route.crossSite() );
-		return new Detail( "Posts from other sites", text, null, GUIDE + "posts-from-other-sites" );
-	}
-
-	private static Detail linking( final RouteDescription route, final PathPattern path ) {
-		if( path.isWildcard() && PathPattern.WILDCARD_PARAMETER.equals( path.wildcardName() ) ) {
-			return new Detail( "Linking", "A wildcard whose remainder has no name has no URL of its own. Name it ({path*}) to link to it.", null, GUIDE + "patterns" );
-		}
-
-		if( route.constant() == null ) {
-			return new Detail( "Linking", "Nothing links to it by name: it was mapped without a constant (an API's route, a webhook). Give it one, PlainRoute books = Route.plain(), to link to it with a checked link.", "routes.map( \"%s\", Routes.something, … );".formatted( declaredPattern( route ) ), GUIDE + "links" );
-		}
-
-		final String key = route.constant().substring( route.constant().lastIndexOf( '.' ) + 1 );
-		final String attributes = path.parameterNames().stream().map( name -> " :%s=\"$%s\"".formatted( name, name ) ).collect( Collectors.joining() );
-		return new Detail( "Linking", "By its constant, %s: a link is generated from the route, so it's always one the route answers, and its parameters are checked when it renders.%s".formatted( route.constant(), path.optionalParameter() != null ? " A link leaves the optional parameter out when its value is null." : "" ),
-				"<wo:route to=\"$routes.%s\"%s>…</wo:route>".formatted( key, attributes ), GUIDE + "in-templates" );
-	}
-
-	private static String capitalized( final String text ) {
-		return text.isEmpty() ? text : Character.toUpperCase( text.charAt( 0 ) ) + text.substring( 1 );
+		return hostParameters.contains( name ) ? "host" : "query or form";
 	}
 }
