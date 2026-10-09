@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Routes are declared again when the application's own classes change**
+  In development, a change to the class that declares the application's routes declares them again, as it did
+  before 8.1.1. In 8.1.1 only a change to a class holding a route's constant or its parameters' record did.
+
 ## 2026-10-07 (8.1.1)
 
 - **One verb declares every route**

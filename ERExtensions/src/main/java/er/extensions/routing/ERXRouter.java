@@ -222,7 +222,7 @@ public class ERXRouter {
 	 * {@code ERXRouter.declare( routes -> … , TrailingSlash.REDIRECT )}
 	 */
 	public static void declare( final Consumer<? super ApplicationRoutes> declaration, final RouteOption... options ) {
-		declarations().declare( router -> router.declaringAs( APPLICATION_OWNER, () -> declaration.accept( router.application( options ) ) ), RouteIdentity.caller() );
+		declarations().declare( router -> router.declaringAs( APPLICATION_OWNER, () -> declaration.accept( router.application( options ) ) ), RouteIdentity.callerOf( ERXRouter.class ) );
 	}
 
 	/**
@@ -243,7 +243,7 @@ public class ERXRouter {
 	 * declaration declares
 	 */
 	public static void declare( final String table, final Consumer<RouteGroup> declaration, final RouteOption... options ) {
-		declarations().declare( router -> router.declaringAs( "the table " + table, () -> declaration.accept( options.length == 0 ? router.table( table ) : router.table( table ).group( "", options ) ) ), RouteIdentity.caller() );
+		declarations().declare( router -> router.declaringAs( "the table " + table, () -> declaration.accept( options.length == 0 ? router.table( table ) : router.table( table ).group( "", options ) ) ), RouteIdentity.callerOf( ERXRouter.class ) );
 	}
 
 	/**

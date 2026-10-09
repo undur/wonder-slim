@@ -188,6 +188,14 @@ abstract sealed class RouteIdentity<B> permits Route, PlainRoute {
 	}
 
 	/**
+	 * @return The first class on the stack outside an API: who called into it, however many of its own methods (an
+	 *         overload delegating to another) the call went through
+	 */
+	static Class<?> callerOf( final Class<?> api ) {
+		return StackWalker.getInstance( StackWalker.Option.RETAIN_CLASS_REFERENCE ).walk( frames -> frames.map( StackWalker.StackFrame::getDeclaringClass ).filter( type -> type != RouteIdentity.class && type != api ).findFirst().orElse( null ) );
+	}
+
+	/**
 	 * @return The class calling the method that made an identity: two frames up from the factory
 	 */
 	static Class<?> caller() {
