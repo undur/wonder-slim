@@ -1,4 +1,4 @@
-package er.extensions.components.additions;
+package er.extensions.components.routing;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

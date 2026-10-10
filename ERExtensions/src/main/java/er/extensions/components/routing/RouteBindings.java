@@ -1,4 +1,4 @@
-package er.extensions.components.additions;
+package er.extensions.components.routing;
 
 import java.util.LinkedHashMap;
 import java.util.List;
