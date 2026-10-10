@@ -94,6 +94,26 @@ public  class ERXRequest extends WORequest {
     }
 
     /**
+     * Every WOContext sets itself as its request's context when it's constructed. A second context for a request that
+     * already has one is a second request cycle inside the first (a direct action constructed from the request, another
+     * handler's handleRequest(), createContextForRequest()): the request handler finishes only the context it created,
+     * so whatever happens in the other one, such as a session created or logged in, is lost (#198).
+     *
+     * TODO: This should probably fail rather than log. It logs for now, so applications that do this can be found and
+     * fixed before it does // Hugi 2026-10-10
+     */
+    @Override
+    protected void _setContext(final WOContext context) {
+    	final WOContext existing = _context();
+
+    	if (context != null && existing != null && existing != context) {
+    		log.error("A second context was created for {}, which already has one. The request handler finishes only its own, so a session created or changed in the other is lost (#198)", uri(), new IllegalStateException("Second context for request"));
+    	}
+
+    	super._setContext(context);
+    }
+
+    /**
      * This method is used by WOContext when generating full URLs for form actions in secure mode, etc.
      *
      * Overriding this because WORequest checks 'server_name' before 'Host' by default and it does not cut it for generating full secure

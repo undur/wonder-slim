@@ -776,7 +776,9 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		final boolean contextWasMissing = context == null;
 
 		if (contextWasMissing) {
-			context = createContextForRequest(aRequest);
+			// An action whose constructor threw after WOAction's has left its context on the request: render into that one, not a second (#198)
+			final WOContext attached = aRequest.context();
+			context = attached != null ? attached : createContextForRequest(aRequest);
 		}
 
 		final WOResponse response = handleException(exception, context);

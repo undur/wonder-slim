@@ -11,6 +11,12 @@
   `/route/…` paths, and the application logs a warning saying so. Front ends that forward bare paths (modulo, Jetty
   directly) need no change.
 
+- **A second context for a request is logged**
+  Code that starts a request cycle inside another (constructing a direct action from the current request, calling
+  another request handler's `handleRequest`, `createContextForRequest` while handling a request) gives the request a
+  second context, and a session created or logged in there is lost. That's logged as an error now, with the stack
+  trace that shows where. (#198)
+
 - **Routes are declared again when the application's own classes change**
   In development, a change to the class that declares the application's routes declares them again, as it did
   before 8.1.1. In 8.1.1 only a change to a class holding a route's constant or its parameters' record did.
