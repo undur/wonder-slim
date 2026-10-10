@@ -15,28 +15,28 @@ import ajaxplayground.components.scenario.InvoiceSimple;
 import ajaxplayground.components.scenario.ScenarioAccumulation;
 import ajaxplayground.components.scenario.ScenarioCheckbox;
 import ajaxplayground.components.scenario.ScenarioComponentInstance;
-import ajaxplayground.components.scenario.ScenarioLocaleFormatting;
 import ajaxplayground.components.scenario.ScenarioDatastar;
 import ajaxplayground.components.scenario.ScenarioDropdownViewport;
 import ajaxplayground.components.scenario.ScenarioExpansion;
 import ajaxplayground.components.scenario.ScenarioFocus;
 import ajaxplayground.components.scenario.ScenarioInvoice;
+import ajaxplayground.components.scenario.ScenarioLocaleFormatting;
 import ajaxplayground.components.scenario.ScenarioMultiObserve;
 import ajaxplayground.components.scenario.ScenarioMultiUpdate;
 import ajaxplayground.components.scenario.ScenarioNamedField;
 import ajaxplayground.components.scenario.ScenarioNested;
 import ajaxplayground.components.scenario.ScenarioRowIdentity;
+import ajaxplayground.components.scenario.ScenarioSSE;
+import ajaxplayground.components.scenario.ScenarioScripts;
 import ajaxplayground.components.scenario.ScenarioServerUpdate;
 import ajaxplayground.components.scenario.ScenarioServerUpdateFragments;
-import ajaxplayground.components.scenario.ScenarioScripts;
-import ajaxplayground.components.scenario.ScenarioSSE;
 import ajaxplayground.components.scenario.ScenarioTabs;
 import ajaxplayground.components.scenario.ScenarioUuidIds;
 import ajaxplayground.components.scenario.ScenarioVideo;
 import ajaxplayground.components.scenario.ScenarioWebSocket;
 import er.extensions.resources.ERXPublicResources;
-import er.extensions.routing.ERXRouter;
 import er.extensions.routing.ApplicationRoutes;
+import er.extensions.routing.ERXRouter;
 
 /**
  * The playground's URL routes - one clean, flat URL per page, so the navigation between pages shows

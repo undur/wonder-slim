@@ -5,9 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import er.routing.matching.PathPattern;
-import er.routing.options.Host;
-
 
 /**
  * Links to another host: what a link to a route on a host pattern becomes

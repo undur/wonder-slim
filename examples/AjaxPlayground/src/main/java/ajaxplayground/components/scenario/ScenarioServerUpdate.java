@@ -7,8 +7,8 @@ import com.webobjects.appserver.WOActionResults;
 import com.webobjects.appserver.WOContext;
 
 import ajaxplayground.components.PlaygroundPage;
-import er.ajax.AjaxUpdater;
 import er.ajax.AjaxUpdateProtocol;
+import er.ajax.AjaxUpdater;
 
 /**
  * Scenario: SERVER-SIDE update targeting via {@link AjaxUpdater#update(String, com.webobjects.appserver.WOContext)}.

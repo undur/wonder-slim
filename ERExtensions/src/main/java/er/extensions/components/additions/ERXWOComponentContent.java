@@ -15,8 +15,6 @@ import com.webobjects.appserver._private.WOHTMLBareString;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableArray;
 
-import er.extensions.components.additions.ERXWOTemplate;
-
 /**
  * Allows for multiple Component Contents.
  * 

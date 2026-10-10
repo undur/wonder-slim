@@ -3,8 +3,8 @@ package er.extensions.appserver;
 import java.net.HttpCookie;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 import org.slf4j.Logger;

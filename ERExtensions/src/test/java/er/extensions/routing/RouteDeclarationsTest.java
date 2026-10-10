@@ -13,8 +13,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
-import er.routing.conversion.Converters;
-
 
 /**
  * Route constants given patterns by declarations, and declared again when their classes change: a new router, the

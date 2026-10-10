@@ -7,8 +7,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 
-import er.extensions.components.replacements.ERXWOForm;
-
 /**
  * Invisible form submit button that can be included as the first element in an Ajax submitted form so that hitting
  * enter performs the action bound to this button.

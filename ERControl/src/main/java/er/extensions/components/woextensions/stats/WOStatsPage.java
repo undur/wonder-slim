@@ -24,9 +24,9 @@ import com.webobjects.foundation.NSDictionary;
 import com.webobjects.foundation.NSMutableDictionary;
 import com.webobjects.foundation.NSTimestamp;
 
+import er.extensions.foundation.ERXUtilities;
 import er.extensions.statistics.ERXStats;
 import er.extensions.statistics.ERXStats.LogEntry;
-import er.extensions.foundation.ERXUtilities;
 
 public class WOStatsPage extends WOComponent {
 

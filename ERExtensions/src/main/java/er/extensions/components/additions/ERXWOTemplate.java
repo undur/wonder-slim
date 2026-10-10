@@ -11,8 +11,6 @@ import com.webobjects.appserver.WOResponse;
 import com.webobjects.appserver._private.WONoContentElement;
 import com.webobjects.foundation.NSDictionary;
 
-import er.extensions.components.additions.ERXWOComponentContent;
-
 /**
  * Allows for multiple contents in a component. For every of one of these, when 
  * you have ERXWOComponentContent in your wrapper, then they will append in their stead.

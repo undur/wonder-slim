@@ -29,6 +29,7 @@ import com.webobjects.foundation.development.NSProjectBundle;
 import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.components.ERXComponent;
+import er.extensions.components.errorpages.WOExceptionPage.ContextSnapshot;
 import er.extensions.components.errorpages.WOExceptionPage.WOExceptionParser.WOParsedErrorLine;
 import er.extensions.foundation.ERXProperties;
 import er.extensions.foundation.ERXThreadStorage;

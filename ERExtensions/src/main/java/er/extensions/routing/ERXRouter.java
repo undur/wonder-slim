@@ -20,8 +20,8 @@ import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXNotification;
-import er.extensions.foundation.ERXProperties;
 import er.extensions.appserver.ERXRequest;
+import er.extensions.foundation.ERXProperties;
 import er.routing.conversion.Converters;
 import er.routing.matching.Router;
 import er.routing.options.CrossOrigin;

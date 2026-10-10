@@ -3,7 +3,6 @@ package er.extensions.formatters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-
 import org.junit.jupiter.api.Test;
 
 import com.webobjects.foundation.NSTimeZone;

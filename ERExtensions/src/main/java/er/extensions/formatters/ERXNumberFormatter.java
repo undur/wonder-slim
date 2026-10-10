@@ -16,8 +16,8 @@ import java.util.Locale;
 import com.webobjects.foundation.NSNumberFormatter;
 
 import er.extensions.ERXP;
-import er.extensions.foundation.ERXProperties;
 import er.extensions.appserver.ERXLocale;
+import er.extensions.foundation.ERXProperties;
 
 /**
  * An extension to the number formatter. It
