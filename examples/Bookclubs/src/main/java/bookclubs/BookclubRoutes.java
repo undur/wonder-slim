@@ -218,7 +218,7 @@ public class BookclubRoutes {
 			return RouteHandler.DECLINED;
 		}
 
-		return Routes.books.redirect( new Books( delete.club(), null, null, List.of() ), invocation.context() );
+		return Routes.books.redirect( Map.of( "club", delete.club() ), invocation.context() );
 	}
 
 	private static WOActionResults reset( final RouteInvocation invocation ) {
