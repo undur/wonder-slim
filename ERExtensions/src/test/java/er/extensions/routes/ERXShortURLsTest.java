@@ -29,8 +29,8 @@ public class ERXShortURLsTest {
 	public void theQueryStringIsNeverTouched() {
 		assertEquals( PREFIX + "/wa/AppAction/search?s=S%C3%A6la&x=1", canonical( "/wa/AppAction/search?s=S%C3%A6la&x=1" ) );
 		assertEquals( PREFIX + "/wa/x?u=/wo/y", canonical( "/wa/x?u=/wo/y" ) );
-		assertEquals( PREFIX + "/route/about?u=/wa/y", canonical( "/about?u=/wa/y" ) );
-		assertEquals( PREFIX + "/route/?x=1", canonical( "/?x=1" ) );
+		assertEquals( PREFIX + "/_erxroute_/about?u=/wa/y", canonical( "/about?u=/wa/y" ) );
+		assertEquals( PREFIX + "/_erxroute_/?x=1", canonical( "/?x=1" ) );
 	}
 
 	@Test
@@ -50,52 +50,54 @@ public class ERXShortURLsTest {
 
 	@Test
 	public void everythingElseIsARoute() {
-		assertEquals( PREFIX + "/route/", canonical( "/" ) );
-		assertEquals( PREFIX + "/route/about", canonical( "/about" ) );
-		assertEquals( PREFIX + "/route/a/b/c", canonical( "/a/b/c" ) );
-		assertEquals( PREFIX + "/route/2/", canonical( "/2/" ) );           // trailing slash kept
-		assertEquals( PREFIX + "/route/1234", canonical( "/1234" ) );       // a freestyle number is a path
-		assertEquals( PREFIX + "/route/wax/y", canonical( "/wax/y" ) );     // not a key, merely starts like one
-		assertEquals( PREFIX + "/route/WA/y", canonical( "/WA/y" ) );       // keys are case-sensitive, like WO's
+		assertEquals( PREFIX + "/_erxroute_/", canonical( "/" ) );
+		assertEquals( PREFIX + "/_erxroute_/about", canonical( "/about" ) );
+		assertEquals( PREFIX + "/_erxroute_/a/b/c", canonical( "/a/b/c" ) );
+		assertEquals( PREFIX + "/_erxroute_/2/", canonical( "/2/" ) );           // trailing slash kept
+		assertEquals( PREFIX + "/_erxroute_/1234", canonical( "/1234" ) );       // a freestyle number is a path
+		assertEquals( PREFIX + "/_erxroute_/wax/y", canonical( "/wax/y" ) );     // not a key, merely starts like one
+		assertEquals( PREFIX + "/_erxroute_/WA/y", canonical( "/WA/y" ) );       // keys are case-sensitive, like WO's
 	}
 
 	@Test
 	public void routesUnderAnAdaptorPrefixKeepThePrefixTheyCarried() {
-		assertEquals( PREFIX + "/route/", canonical( PREFIX ) );
-		assertEquals( PREFIX + "/route/", canonical( PREFIX + "/" ) );
-		assertEquals( PREFIX + "/route/a/b", canonical( PREFIX + "/a/b" ) );
-		assertEquals( PREFIX + "/1/route/", canonical( PREFIX + "/1" ) );
-		assertEquals( PREFIX + "/1/route/a/b", canonical( PREFIX + "/1/a/b" ) );
-		assertEquals( PREFIX + "/-3/route/a/b?x=1", canonical( PREFIX + "/-3/a/b?x=1" ) );
-		assertEquals( ADAPTOR + "/App/1/route/a", canonical( ADAPTOR + "/App/1/a" ) );
-		assertEquals( PREFIX + "/1234/route/", canonical( PREFIX + "/1234" ) ); // WO's grammar: a number after .woa is the instance
+		assertEquals( PREFIX + "/_erxroute_/", canonical( PREFIX ) );
+		assertEquals( PREFIX + "/_erxroute_/", canonical( PREFIX + "/" ) );
+		assertEquals( PREFIX + "/_erxroute_/a/b", canonical( PREFIX + "/a/b" ) );
+		assertEquals( PREFIX + "/1/_erxroute_/", canonical( PREFIX + "/1" ) );
+		assertEquals( PREFIX + "/1/_erxroute_/a/b", canonical( PREFIX + "/1/a/b" ) );
+		assertEquals( PREFIX + "/-3/_erxroute_/a/b?x=1", canonical( PREFIX + "/-3/a/b?x=1" ) );
+		assertEquals( ADAPTOR + "/App/1/_erxroute_/a", canonical( ADAPTOR + "/App/1/a" ) );
+		assertEquals( PREFIX + "/1234/_erxroute_/", canonical( PREFIX + "/1234" ) ); // WO's grammar: a number after .woa is the instance
 	}
 
 	@Test
 	public void theCarriedAdaptorPathNeedNotBeTheApplicationsOwn() {
 		final String foreign = "/Apps/WebObjects/App.woa";
-		assertEquals( foreign + "/route/", canonical( foreign ) );
-		assertEquals( foreign + "/1/route/a/b", canonical( foreign + "/1/a/b" ) );
-		assertEquals( foreign + "/1/route/a/b", canonical( foreign + "/1/route/a/b" ) );
-		assertEquals( foreign + "/1/res/app/x.css", canonical( foreign + "/1/route/res/app/x.css" ) );
+		assertEquals( foreign + "/_erxroute_/", canonical( foreign ) );
+		assertEquals( foreign + "/1/_erxroute_/a/b", canonical( foreign + "/1/a/b" ) );
+		assertEquals( foreign + "/1/_erxroute_/a/b", canonical( foreign + "/1/_erxroute_/a/b" ) );
+		assertEquals( foreign + "/1/res/app/x.css", canonical( foreign + "/1/_erxroute_/res/app/x.css" ) );
 		assertEquals( foreign + "/wa/x?y=1", canonical( foreign + "/wa/x?y=1" ) );
 		assertEquals( "/Apps/WebObjects/Other.woa/a/b", canonical( "/Apps/WebObjects/Other.woa/a/b" ) );
 	}
 
 	@Test
 	public void aRequestAlreadyMarkedAsARouteIsCanonical() {
-		assertEquals( PREFIX + "/route/a/b", canonical( PREFIX + "/route/a/b" ) );
-		assertEquals( PREFIX + "/1/route/1234", canonical( PREFIX + "/1/route/1234" ) );
-		assertEquals( PREFIX + "/1/route/2/", canonical( PREFIX + "/1/route/2/" ) );
-		assertEquals( PREFIX + "/route/", canonical( PREFIX + "/route" ) );
-		assertEquals( PREFIX + "/route/", canonical( "/route/" ) );
-		assertEquals( PREFIX + "/route/routes/x", canonical( "/routes/x" ) ); // not the marker, merely starts like it
+		assertEquals( PREFIX + "/_erxroute_/a/b", canonical( PREFIX + "/_erxroute_/a/b" ) );
+		assertEquals( PREFIX + "/1/_erxroute_/1234", canonical( PREFIX + "/1/_erxroute_/1234" ) );
+		assertEquals( PREFIX + "/1/_erxroute_/2/", canonical( PREFIX + "/1/_erxroute_/2/" ) );
+		assertEquals( PREFIX + "/_erxroute_/", canonical( PREFIX + "/_erxroute_" ) );
+		assertEquals( PREFIX + "/_erxroute_/", canonical( "/_erxroute_/" ) );
+		assertEquals( PREFIX + "/_erxroute_/_erxroute_s/x", canonical( "/_erxroute_s/x" ) );
+		assertEquals( PREFIX + "/_erxroute_/route/x", canonical( "/route/x" ) );            // the former key is an ordinary path (#197)
+		assertEquals( PREFIX + "/_erxroute_/route/x", canonical( PREFIX + "/route/x" ) );   // also forwarded by a front end configured for it // not the marker, merely starts like it
 	}
 
 	@Test
 	public void aMarkedHandlerKeyURLGoesToItsHandler() {
-		assertEquals( PREFIX + "/1/res/app/x.css", canonical( PREFIX + "/1/route/res/app/x.css" ) );
-		assertEquals( PREFIX + "/wa/page?name=Main", canonical( PREFIX + "/route/wa/page?name=Main" ) );
+		assertEquals( PREFIX + "/1/res/app/x.css", canonical( PREFIX + "/1/_erxroute_/res/app/x.css" ) );
+		assertEquals( PREFIX + "/wa/page?name=Main", canonical( PREFIX + "/_erxroute_/wa/page?name=Main" ) );
 	}
 
 	@Test
@@ -154,12 +156,12 @@ public class ERXShortURLsTest {
 	@Test
 	public void theBasePathIsRemovedFromARequestsURL() {
 		assertEquals( PREFIX + "/wo/123.4.5.6", canonicalBeneath( "/App/wo/123.4.5.6" ) );
-		assertEquals( PREFIX + "/route/about?x=1", canonicalBeneath( "/App/about?x=1" ) );
-		assertEquals( PREFIX + "/route/", canonicalBeneath( "/App/" ) );
-		assertEquals( PREFIX + "/route/", canonicalBeneath( "/App" ) );
+		assertEquals( PREFIX + "/_erxroute_/about?x=1", canonicalBeneath( "/App/about?x=1" ) );
+		assertEquals( PREFIX + "/_erxroute_/", canonicalBeneath( "/App/" ) );
+		assertEquals( PREFIX + "/_erxroute_/", canonicalBeneath( "/App" ) );
 
 		// A path merely starting with the same letters isn't beneath it
-		assertEquals( PREFIX + "/route/Apple", canonicalBeneath( "/Apple" ) );
+		assertEquals( PREFIX + "/_erxroute_/Apple", canonicalBeneath( "/Apple" ) );
 	}
 
 	@Test
@@ -174,9 +176,9 @@ public class ERXShortURLsTest {
 
 	@Test
 	public void aRoutesShortURLLosesTheRouteKeyBeneathTheBasePath() {
-		assertEquals( "/App/search/bork", ERXShortURLs.withoutRouteKey( "/App/route/search/bork", "/App" ) );
-		assertEquals( "/search/bork", ERXShortURLs.withoutRouteKey( "/route/search/bork", "" ) );
-		assertEquals( "https://example.com/App/?q=1", ERXShortURLs.withoutRouteKey( "https://example.com/App/route?q=1", "/App" ) );
+		assertEquals( "/App/search/bork", ERXShortURLs.withoutRouteKey( "/App/_erxroute_/search/bork", "/App" ) );
+		assertEquals( "/search/bork", ERXShortURLs.withoutRouteKey( "/_erxroute_/search/bork", "" ) );
+		assertEquals( "https://example.com/App/?q=1", ERXShortURLs.withoutRouteKey( "https://example.com/App/_erxroute_?q=1", "/App" ) );
 	}
 
 	@Test
@@ -201,7 +203,7 @@ public class ERXShortURLsTest {
 		final java.util.List<String> prefixes = java.util.List.of( "/cgi-bin/WebObjects/App.woa", "/Apps/WebObjects/App.woa", "/App.woa", "/App" );
 		final java.util.List<String> befores = java.util.List.of( "", "https://example.com", "http://h:1300", "/x" );
 		final java.util.List<String> instances = java.util.List.of( "", "/2", "/-1", "/12", "/2a", "/-", "/", "/0" );
-		final java.util.List<String> afters = java.util.List.of( "", "/", "/wa/default", "?a=1", "/wo/1.2?x=/App.woa/3", "x", "/App.woa", ".json", "/route/books/7" );
+		final java.util.List<String> afters = java.util.List.of( "", "/", "/wa/default", "?a=1", "/wo/1.2?x=/App.woa/3", "x", "/App.woa", ".json", "/_erxroute_/books/7" );
 		int compared = 0;
 
 		for( final String prefix : prefixes ) {

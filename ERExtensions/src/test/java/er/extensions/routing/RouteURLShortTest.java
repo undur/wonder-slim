@@ -47,6 +47,6 @@ public class RouteURLShortTest extends URLGenerationMatrix {
 		final WOContext complete = context( "/about" );
 		complete.generateCompleteURLs();
 		final String url = book.url( Map.of( "book", 7 ), complete );
-		assertTrue( url.startsWith( "http://" ) && url.endsWith( "/books/7" ) && !url.contains( "/route/" ), url );
+		assertTrue( url.startsWith( "http://" ) && url.endsWith( "/books/7" ) && !url.contains( "/_erxroute_/" ), url );
 	}
 }

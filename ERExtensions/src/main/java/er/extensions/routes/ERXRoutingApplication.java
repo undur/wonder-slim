@@ -49,7 +49,7 @@ public abstract class ERXRoutingApplication extends WOApplication {
 		// RouteAction is a very generic name for a direct action class, so we register it explicitly to prevent problems
 		_NSUtilities.setClassForName( RouteAction.class, "RouteAction" );
 
-		// Routes: createRequest() canonicalizes every URL that is not a handler URL to /route/<path>, which is how routes
+		// Routes: createRequest() canonicalizes every URL that is not a handler URL to /_erxroute_/<path>, which is how routes
 		// get here. The same handler is the default request handler as well, so that a request which somehow arrives
 		// uncanonicalized with an unknown handler key gets the route table's answer rather than WO's component request
 		// handler. See ERXShortURLs.canonicalize and RouteRequestHandler.
@@ -60,7 +60,7 @@ public abstract class ERXRoutingApplication extends WOApplication {
 
 	/**
 	 * Every inbound URL is turned into the canonical WO URL for it here, before the request exists: handler-key URLs
-	 * get the application prefix, everything else becomes /route/<path> under the same prefix. WO then parses a
+	 * get the application prefix, everything else becomes /_erxroute_/<path> under the same prefix. WO then parses a
 	 * well-formed URL every time, whatever shape the front end delivered (freestyle, adaptor prefix, instance number,
 	 * or already marked as a route). See {@link ERXShortURLs#canonicalize}. The request itself is built by
 	 * {@link #newRequest}, which subclasses override to construct a request class of their own.

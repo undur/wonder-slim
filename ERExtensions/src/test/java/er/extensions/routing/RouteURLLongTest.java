@@ -40,15 +40,15 @@ public class RouteURLLongTest extends URLGenerationMatrix {
 		// The adaptor prefix the request carries, without its instance number, and the route key
 		for( final String request : List.of( "/about", "/cgi-bin/WebObjects/App.woa/wa/x", "/cgi-bin/WebObjects/App.woa/3/about", "/Apps/WebObjects/App.woa/wa/x", "/cgi-bin/WebObjects/" ) ) {
 			final String prefix = request.startsWith( "/Apps/" ) ? "/Apps/WebObjects/App.woa" : "/cgi-bin/WebObjects/App.woa";
-			assertEquals( prefix + "/route/books/7", book.url( Map.of( "book", 7 ), context( request ) ), request );
-			assertEquals( prefix + "/route/books/a%20b", book.url( Map.of( "book", "a b" ), context( request ) ), request );
-			assertEquals( prefix + "/route/books/", books.url( context( request ) ), request );
-			assertEquals( prefix + "/route", front.url( context( request ) ), request );
+			assertEquals( prefix + "/_erxroute_/books/7", book.url( Map.of( "book", 7 ), context( request ) ), request );
+			assertEquals( prefix + "/_erxroute_/books/a%20b", book.url( Map.of( "book", "a b" ), context( request ) ), request );
+			assertEquals( prefix + "/_erxroute_/books/", books.url( context( request ) ), request );
+			assertEquals( prefix + "/_erxroute_", front.url( context( request ) ), request );
 		}
 
 		final WOContext complete = context( "/about" );
 		complete.generateCompleteURLs();
 		final String url = book.url( Map.of( "book", 7 ), complete );
-		assertTrue( url.startsWith( "http://" ) && url.endsWith( "/cgi-bin/WebObjects/App.woa/route/books/7" ), url );
+		assertTrue( url.startsWith( "http://" ) && url.endsWith( "/cgi-bin/WebObjects/App.woa/_erxroute_/books/7" ), url );
 	}
 }

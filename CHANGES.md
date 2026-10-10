@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Routes can start with `route`**
+  The request handler key routes travel under inside the application is `_erxroute_` now, so `route` is free for an
+  application's own URLs (`/route/42`, a driving route). The key never appears in a generated URL. (#197)
+
+  Upgrading: an Apache configuration that forwards routes into the adaptor URL space forwards under the new key,
+  `/Apps/WebObjects/App.woa/_erxroute_/$1` rather than `…/App.woa/route/$1`. Until it does, requests are routed as
+  `/route/…` paths, and the application logs a warning saying so. Front ends that forward bare paths (modulo, Jetty
+  directly) need no change.
+
 - **Routes are declared again when the application's own classes change**
   In development, a change to the class that declares the application's routes declares them again, as it did
   before 8.1.1. In 8.1.1 only a change to a class holding a route's constant or its parameters' record did.

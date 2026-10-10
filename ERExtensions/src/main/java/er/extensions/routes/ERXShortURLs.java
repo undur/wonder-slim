@@ -3,6 +3,9 @@ package er.extensions.routes;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Short URLs: a request handler key as a top-level route. On by default
  * ({@code er.extensions.ERXApplication.shortURLs}); the application accepts
@@ -38,9 +41,19 @@ public final class ERXShortURLs {
 	private ERXShortURLs() {}
 
 	/**
-	 * The request handler key every route travels under once a URL has been canonicalized. Hardcoded on purpose; make it configurable when a need shows up.
+	 * The request handler key every route travels under once a URL has been canonicalized. Internal (it never appears in
+	 * a generated URL) and named so no application wants it as the first element of a route of its own (#197).
 	 */
-	public static final String ROUTE_KEY = "route";
+	public static final String ROUTE_KEY = "_erxroute_";
+
+	/**
+	 * The key before {@link #ROUTE_KEY}, which a front end configured for an earlier version still forwards under
+	 */
+	private static final String FORMER_ROUTE_KEY = "route";
+
+	private static final Logger logger = LoggerFactory.getLogger( ERXShortURLs.class );
+
+	private static volatile boolean _warnedOfFormerKey;
 
 	/**
 	 * Turns any inbound URL into the canonical WebObjects URL for it, so that WO parses a well-formed URL every time
@@ -48,7 +61,7 @@ public final class ERXShortURLs {
 	 *
 	 * <ul>
 	 * <li>{@code /wa/x}, {@code /App.woa/wa/x}, {@code /App.woa/1/wa/x} - the first path segment names a registered request handler: {@code <prefix>[/N]/wa/x}</li>
-	 * <li>{@code /a/b}, {@code /App.woa/a/b}, {@code /App.woa/1/a/b}, {@code /App.woa/route/a/b} - anything else is a route: {@code <prefix>[/N]/route/a/b}</li>
+	 * <li>{@code /a/b}, {@code /App.woa/a/b}, {@code /App.woa/1/a/b}, {@code /App.woa/_erxroute_/a/b} - anything else is a route: {@code <prefix>[/N]/_erxroute_/a/b}</li>
 	 * </ul>
 	 *
 	 * The prefix is the one the request carried ({@code <adaptor path>/App[.woa]} plus the instance number the adaptor
@@ -119,6 +132,13 @@ public final class ERXShortURLs {
 				carriedPrefix = carriedPrefix + "/" + maybeInstance;
 				rest = orRoot( rest.substring( maybeInstance.length() + 1 ) );
 			}
+		}
+
+		// A front end forwarding under the former key, inside the adaptor path, is configured for an earlier version: the
+		// request is still routed, as /route/…, which is now an ordinary path. Said once, so the configuration is fixed.
+		if( carriedPrefix != null && !_warnedOfFormerKey && FORMER_ROUTE_KEY.equals( firstSegment( rest ) ) ) {
+			_warnedOfFormerKey = true;
+			logger.warn( "A request arrived as {}: the front end forwards routes under '{}', the route key before 8.1.2. It's '{}' now, so the request is routed as {}. Change the front end's configuration (the Apache rewrite target, say) to forward under {}/{}/.", path, FORMER_ROUTE_KEY, ROUTE_KEY, rest, carriedPrefix, ROUTE_KEY );
 		}
 
 		// A front end that already marked the request as a route handed us the canonical form
@@ -290,8 +310,8 @@ public final class ERXShortURLs {
 	}
 
 	/**
-	 * @return A short URL to a route without the route key it was composed under ({@code /route/search/bork} is
-	 *         {@code /search/bork}, {@code /App/route/search} is {@code /App/search}): the reverse of canonicalize()
+	 * @return A short URL to a route without the route key it was composed under ({@code /_erxroute_/search/bork} is
+	 *         {@code /search/bork}, {@code /App/_erxroute_/search} is {@code /App/search}): the reverse of canonicalize()
 	 */
 	public static String withoutRouteKey( final String url, final String basePath ) {
 		final int schemeEnd = url.indexOf( "://" );
