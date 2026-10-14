@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2026-10-14 (8.1.2)
 
 - **A development instance takes its port from whatever ng or WO app holds it**
   When a development instance finds its port held, the application holding it is asked to stop, and killed if it
@@ -12,14 +12,9 @@
   Upgrading: `er.extensions.ERXApplication.allowMultipleDevInstances` is gone. Instances on different ports never
   collide, and two can't share one.
 
-- **Routes can start with `route`**
-  The request handler key routes travel under inside the application is `_erxroute_` now, so `route` is free for an
-  application's own URLs (`/route/42`, a driving route). The key never appears in a generated URL. (#197)
-
-  Upgrading: an Apache configuration that forwards routes into the adaptor URL space forwards under the new key,
-  `/Apps/WebObjects/App.woa/_erxroute_/$1` rather than `…/App.woa/route/$1`. Until it does, requests are routed as
-  `/route/…` paths, and the application logs a warning saying so. Front ends that forward bare paths (modulo, Jetty
-  directly) need no change.
+- **Routes are declared again when the application's own classes change**
+  In development, a change to the class that declares the application's routes declares them again, as it did
+  before 8.1.1. In 8.1.1 only a change to a class holding a route's constant or its parameters' record did.
 
 - **A second context for a request is logged**
   Code that starts a request cycle inside another (constructing a direct action from the current request, calling
@@ -27,9 +22,16 @@
   second context, and a session created or logged in there is lost. That's logged as an error now, with the stack
   trace that shows where. (#198)
 
-- **Routes are declared again when the application's own classes change**
-  In development, a change to the class that declares the application's routes declares them again, as it did
-  before 8.1.1. In 8.1.1 only a change to a class holding a route's constant or its parameters' record did.
+- **The routes page shows what's declared**
+  ERControl's routes page lists each setting and route option by its value, linking to the routing guide for what it
+  means, rather than explaining it inline. A route opens only when it has parameters or options of its own, and each
+  route table is headed by its name.
+
+- **Routes can start with `route`**
+  Routes travel under the request handler key `_erxroute_` inside the application now, so `route` is free for an
+  application's own URLs. An Apache configuration forwarding into the adaptor URL space forwards to `…/App.woa/_erxroute_/$1`. (#197)
+
+- **Parsley 1.6.5, ng-core 0.1.5**
 
 ## 2026-10-07 (8.1.1)
 
