@@ -959,7 +959,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 	}
 
 	/**
-	 * Overridden to check for (and optionally kill) an existing running instance on the same port
+	 * Overridden to take the port, in development, from an ng or WO application already holding it (see {@link ERXDevelopmentInstanceStopper})
 	 */
 	@Override
 	public WOAdaptor adaptorWithName(String adaptorClassName, NSDictionary<String, Object> args) {

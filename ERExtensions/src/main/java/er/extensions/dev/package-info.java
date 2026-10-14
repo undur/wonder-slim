@@ -17,8 +17,8 @@
  *       as data ({@code …woa/problems}).</li>
  *   <li>{@link er.extensions.dev.ERXDevServerRegistration} — announce this instance to the Parslips
  *       dev server so tools can discover its port.</li>
- *   <li>{@link er.extensions.dev.ERXDevelopmentInstanceStopper} — stop a previous dev instance so a
- *       relaunch can take the port.</li>
+ *   <li>{@link er.extensions.dev.ERXDevelopmentInstanceStopper} — take the port from the ng or WO
+ *       application holding it, killing one that won't stop.</li>
  * </ul>
  *
  * The eval / runtime-problems endpoints share one engine with ng-objects (in {@code ng.dev}, from

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **A development instance takes its port from whatever ng or WO app holds it**
+  When a development instance finds its port held, the application holding it is asked to stop, and killed if it
+  doesn't let go (a JVM wedged after a failed hot swap ignores the request). It used to send the stop request under its
+  own application name, so another application on the port wasn't stopped, and a hung one made the new instance's
+  startup hang with it. The work is ng-objects' `ng.dev.NGDevInstanceStopper`, shared with ng: a process that isn't an
+  ng or WO application is never touched. If the port can't be freed, startup fails with the bind error.
+
+  Upgrading: `er.extensions.ERXApplication.allowMultipleDevInstances` is gone. Instances on different ports never
+  collide, and two can't share one.
+
 - **Routes can start with `route`**
   The request handler key routes travel under inside the application is `_erxroute_` now, so `route` is free for an
   application's own URLs (`/route/42`, a driving route). The key never appears in a generated URL. (#197)

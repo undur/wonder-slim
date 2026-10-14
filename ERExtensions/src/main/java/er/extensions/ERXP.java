@@ -113,12 +113,6 @@ public enum ERXP {
 	 */
 	ALLOW_CONTEXT_PAGE_RESPONSE( "er.extensions.ERXAjaxApplication.allowContextPageResponse" ),
 
-	// ERXDevelopmentInstanceStopper
-	/**
-	 * If true, starting a development instance doesn't stop one already running on the same port. Defaults to false.
-	 */
-	ALLOW_MULTIPLE_DEV_INSTANCES( "er.extensions.ERXApplication.allowMultipleDevInstances" ),
-
 	// ERXShutdownHook
 	/**
 	 * If true, ERXShutdownHook is installed so registered hooks run when the JVM shuts down. Must be a {@code -D} JVM argument. Defaults to true.
