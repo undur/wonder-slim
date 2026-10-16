@@ -209,6 +209,14 @@ public enum ERXP {
 	 */
 	X_FORWARDED_PROTO_HEADER_KEY_FOR_SSL( "er.extensions.appserver.ERXRequest.xForwardedProtoHeaderKeyForSsl" ),
 
+	/**
+	 * The front ends (web servers, proxies, load balancers) whose headers about the client's address, the requested host
+	 * and the scheme are believed, as a comma separated list of addresses ({@code 203.0.113.7}), networks
+	 * ({@code 203.0.113.0/24}), {@code loopback}, {@code private} (10/8, 172.16/12, 192.168/16, fc00::/7) or {@code all}.
+	 * A request from anywhere else is taken at its connection's word. Defaults to {@code loopback, private}.
+	 */
+	TRUSTED_FRONT_ENDS( "er.extensions.ERXRequest.trustedFrontEnds" ),
+
 	// ERXAppBasedResourceRequestHandler
 	/**
 	 * Megabytes of resource content the resource request handler holds in memory at most, in production; past it, the resource requested least recently is forgotten. Defaults to 64. 0 holds none, reading every resource from its bundle for each request.

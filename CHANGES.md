@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **The client's address, the host and https come from trusted front ends only**
+  A front end (Apache with the WO adaptor, modulo, a proxy or load balancer) tells the application the client's
+  address, the host it asked for and whether it used https in headers. A client can send the same headers, and they
+  used to be believed from anyone. Now they're read only when the request comes from a trusted front end: by default
+  loopback and private networks, where web servers and proxies usually are. Otherwise the connection's own address is
+  the client's, the request isn't secure, and complete URLs use the public host. The first request with such headers
+  from elsewhere is logged. In `x-forwarded-for`, the client is now the last address that isn't a trusted front end's,
+  not the first, which is whatever the client sent. `x-webobjects-servlet-server-name` and
+  `x-webobjects-servlet-server-port`, from servlet deployments, are no longer read. (#67)
+
+  A front end still passes on headers it doesn't set itself. modulo removes all of them. Behind Apache, a header it
+  doesn't set (such as `x-forwarded-host`) can still come from the client unless the virtual host removes it.
+
+  Upgrading: if your front end connects from a public address, or you're behind a CDN, list its addresses or networks
+  in `er.extensions.ERXRequest.trustedFrontEnds` (for example `loopback, private, 203.0.113.0/24`), or the application
+  sees the front end as the client and every request as plain http.
+
 ## 2026-10-14 (8.1.2)
 
 - **A development instance takes its port from whatever ng or WO app holds it**

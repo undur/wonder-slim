@@ -3,9 +3,12 @@ package er.extensions.appserver;
 import java.net.HttpCookie;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +51,18 @@ public  class ERXRequest extends WORequest {
      * Fallback headers such as server_name will screw up your complete URL generation for secure domains that have wildcard subdomains since it returns sth like *.domain.com for host name
      */
     private static final String[] HOST_NAME_HEADERS = {"x-forwarded-host", "Host", "x-webobjects-server-name", "server_name", "http_host"};
-    
+
+	/**
+	 * Headers a front end sets to tell the application about the client, the host it asked for and the scheme: believed only
+	 * from a trusted front end, see {@link #isFromTrustedFrontEnd(WORequest)}
+	 */
+	private static final String[] FORWARDING_HEADERS = {"x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "x-webobjects-adaptor-version", "x-webobjects-remote-addr", "remote_addr", "remote_host", "pc-remote-addr", "x-webobjects-server-name", "x-webobjects-server-port", "server_name", "server_port", "https"};
+
+	/**
+	 * Whether forwarding headers from a front end that isn't trusted have been reported, which happens once
+	 */
+	private static final AtomicBoolean _untrustedForwardingReported = new AtomicBoolean();
+
     /**
      * Specifies whether https should be overridden to be enabled or disabled app-wide. This is 
      * useful if you are developing with DirectConnect and you want to be able to specify secure 
@@ -133,22 +147,20 @@ public  class ERXRequest extends WORequest {
      */
 	@Override
 	public String _serverName() {
-		String serverName = headerForKey("x-webobjects-servlet-server-name");
 
-		if(serverName == null || serverName.length() == 0) {
-			if (isUsingWebServer()) {
-				serverName = requestedHostFromHeaders(); // Checks host name keys in our preferred order instead of Apple WO 5.4.3's default header check logic
+		// The request's own headers name the host only when it came through a web server we trust. A request claiming to
+		// have (an adaptor version header) from anywhere else is answered like one that didn't: with the public host.
+		if (isUsingWebServer() && isFromTrustedFrontEnd(this)) {
+			final String serverName = requestedHostFromHeaders(); // Checks host name keys in our preferred order instead of Apple WO 5.4.3's default header check logic
 
-				if ((serverName == null) || (serverName.length() == 0) || serverName.equals(UNKNOWN_HOST)) {
-					throw new NSForwardException(new WOURLFormatException("<" + super.getClass().getName() + ">: Unable to build complete url as no server name was provided in the headers of the request."));
-				}
+			if ((serverName == null) || (serverName.length() == 0) || serverName.equals(UNKNOWN_HOST)) {
+				throw new NSForwardException(new WOURLFormatException("<" + super.getClass().getName() + ">: Unable to build complete url as no server name was provided in the headers of the request."));
 			}
-			else {
-				serverName = ERXApplication.erxApplication().publicHost();
-			}
+
+			return serverName;
 		}
 
-		return serverName;
+		return ERXApplication.erxApplication().publicHost();
 	}
 
     /**
@@ -160,36 +172,34 @@ public  class ERXRequest extends WORequest {
     }
 
 	/**
-	 * The address of the client that sent the request, for logging and display. In order:
+	 * The address of the client that sent the request. From a trusted front end ({@link #isFromTrustedFrontEnd(WORequest)}), in order:
 	 *
 	 * <ol>
 	 * <li>The address a WO adaptor passes on (the <code>x-webobjects-remote-addr</code>, <code>remote_addr</code>, <code>remote_host</code> or <code>pc-remote-addr</code> header)</li>
-	 * <li>The first address in <code>x-forwarded-for</code>, the client as a reverse proxy saw it</li>
-	 * <li>The address of the connection the request came in on (when the application is reached directly)</li>
+	 * <li>The last address in <code>x-forwarded-for</code> that isn't a trusted front end's: the client, as the outermost proxy we trust saw it</li>
+	 * <li>The address of the connection the request came in on</li>
 	 * </ol>
 	 *
-	 * Headers come from whoever sends the request, so when the application can be reached without passing through the adaptor or proxy
-	 * that sets them, the client can put any address there. Don't base access decisions on this.
+	 * From anywhere else, the connection's address. A front end that passes on a header the client sent can still be
+	 * fooled by it, so don't base access decisions on this.
 	 *
 	 * @return The client's address, or null if none is found
 	 */
 	public static String remoteAddress( final WORequest request ) {
 
-		for( final String headerName : ADAPTOR_ADDRESS_HEADERS ) {
-			final String headerValue = request.headerForKey( headerName );
+		if( isFromTrustedFrontEnd( request ) ) {
+			for( final String headerName : ADAPTOR_ADDRESS_HEADERS ) {
+				final String headerValue = request.headerForKey( headerName );
 
-			if( headerValue != null && !headerValue.isBlank() ) {
-				return headerValue.strip();
+				if( headerValue != null && !headerValue.isBlank() ) {
+					return headerValue.strip();
+				}
 			}
-		}
 
-		final String forwardedFor = request.headerForKey( "x-forwarded-for" );
+			final String forwardedFor = clientFromForwardedFor( request.headersForKey( "x-forwarded-for" ) );
 
-		if( forwardedFor != null ) {
-			final String firstAddress = forwardedFor.split( "," )[0].strip();
-
-			if( !firstAddress.isEmpty() ) {
-				return firstAddress;
+			if( forwardedFor != null ) {
+				return forwardedFor;
 			}
 		}
 
@@ -200,6 +210,76 @@ public  class ERXRequest extends WORequest {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Each proxy appends the address it received the request from, so the entries are trustworthy only from the right,
+	 * as far as the proxies are ours: the first entry from the right that isn't a trusted front end is the client.
+	 *
+	 * @param headerValues The <code>x-forwarded-for</code> headers, in the order they came, null for none
+	 * @return The client's address, null when there's none
+	 */
+	static String clientFromForwardedFor( final List<String> headerValues ) {
+
+		if( headerValues == null ) {
+			return null;
+		}
+
+		final List<String> entries = new ArrayList<>();
+
+		for( final String headerValue : headerValues ) {
+			for( final String entry : headerValue.split( "," ) ) {
+				if( !entry.isBlank() ) {
+					entries.add( entry.strip() );
+				}
+			}
+		}
+
+		final ERXTrustedFrontEnds frontEnds = ERXTrustedFrontEnds.current();
+
+		for( int i = entries.size() - 1; i >= 0; i-- ) {
+			final InetAddress address = ERXTrustedFrontEnds.literalAddress( entries.get( i ) );
+
+			if( i == 0 || address == null || !frontEnds.contains( address ) ) {
+				return entries.get( i );
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * A front end tells the application about the client's address, the host it asked for and the scheme in headers. A
+	 * client can send the same headers, so they're believed only when the request's connection comes from a front end
+	 * configured as trusted ({@link ERXP#TRUSTED_FRONT_ENDS}, loopback and private networks by default).
+	 *
+	 * The first request from elsewhere that carries such headers is logged, since it's either a client trying them or a
+	 * front end that needs adding.
+	 *
+	 * @return true if the request came from a trusted front end, or was made by the application itself (it has no connection)
+	 */
+	public static boolean isFromTrustedFrontEnd( final WORequest request ) {
+		final InetAddress address = request._originatingAddress();
+
+		if( address == null || ERXTrustedFrontEnds.current().contains( address ) ) {
+			return true;
+		}
+
+		if( !_untrustedForwardingReported.get() ) {
+			final List<String> sent = new ArrayList<>();
+
+			for( final String header : FORWARDING_HEADERS ) {
+				if( request.headerForKey( header ) != null ) {
+					sent.add( header );
+				}
+			}
+
+			if( !sent.isEmpty() && _untrustedForwardingReported.compareAndSet( false, true ) ) {
+				log.warn( "Ignored the headers {} of a request from {}, which isn't a trusted front end. If it's your web server or proxy, add it to {} (now '{}'). Logged once.", sent, address.getHostAddress(), ERXP.TRUSTED_FRONT_ENDS.id(), ERXProperties.stringForKeyWithDefault( ERXP.TRUSTED_FRONT_ENDS.id(), ERXTrustedFrontEnds.DEFAULT ) );
+			}
+		}
+
+		return false;
 	}
 
     /**
@@ -337,21 +417,20 @@ public  class ERXRequest extends WORequest {
     }
     
     /**
-     * MS: I found this somewhere else a while ago, but I have no idea where or I'd give attribution.
-     * 
+     * The application never terminates TLS itself, so a request is secure when a trusted front end
+     * ({@link #isFromTrustedFrontEnd(WORequest)}) says it received it over https: with the <code>https: on</code> header,
+     * port 443, or <code>x-forwarded-proto</code>. From anywhere else, it isn't.
+     *
      * @param request the request to check
      * @return whether or not the given request is secure.
      */
     public static boolean isRequestSecure(WORequest request) {
         boolean isRequestSecure = false;
-        
+
         // Depending on the adaptor the incoming port can be found in one of two places
-        if (request != null) {
-        	
+        if (request != null && isFromTrustedFrontEnd(request)) {
+
 	        String serverPort = request.headerForKey("SERVER_PORT");
-	        if (serverPort == null) {
-	        	serverPort = request.headerForKey("x-webobjects-servlet-server-port");
-	        }
 	        if (serverPort == null) {
 	        	serverPort = request.headerForKey("x-webobjects-server-port");
 	        }
