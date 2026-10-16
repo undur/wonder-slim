@@ -148,8 +148,8 @@ public  class ERXRequest extends WORequest {
 	@Override
 	public String _serverName() {
 
-		// The request's own headers name the host only when it came through a web server we trust. A request claiming to
-		// have (an adaptor version header) from anywhere else is answered like one that didn't: with the public host.
+		// The request's own headers name the host only when it came through a web server we trust. A request from anywhere
+		// else that claims to (with an adaptor version header) is answered like one that didn't: with the public host.
 		if (isUsingWebServer() && isFromTrustedFrontEnd(this)) {
 			final String serverName = requestedHostFromHeaders(); // Checks host name keys in our preferred order instead of Apple WO 5.4.3's default header check logic
 
