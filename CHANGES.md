@@ -13,6 +13,10 @@
   trusted front end's, not the first, which is whatever the client sent. `x-webobjects-servlet-server-name` and
   `x-webobjects-servlet-server-port`, from servlet deployments, are no longer read. (#67, #215)
 
+  Of the address headers a WO adaptor sends, `remote_addr` and `remote_host` are now read first: mod_WebObjects sets
+  those itself but passes on a `x-webobjects-remote-addr` the client sent, which used to be read first, so a client
+  behind Apache could choose its own address. (#218)
+
   A front end still passes on headers it doesn't set itself. modulo removes all of them. Behind Apache, a header it
   doesn't set (such as `x-forwarded-host`) can still come from the client unless the virtual host removes it.
 

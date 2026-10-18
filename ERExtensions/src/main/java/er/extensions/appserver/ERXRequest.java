@@ -44,7 +44,11 @@ public  class ERXRequest extends WORequest {
     /**
      * Headers carrying the client's address as set by a WO adaptor, in the order they're checked
      */
-    private static final String[] ADAPTOR_ADDRESS_HEADERS = {"x-webobjects-remote-addr", "remote_addr", "remote_host", "pc-remote-addr"};
+    /**
+     * The headers a WO adaptor passes the client's address in. mod_WebObjects sets remote_addr and remote_host itself, but
+     * passes on a x-webobjects-remote-addr the client sent, so those two are read first (#218). modulo sets all of them.
+     */
+    private static final String[] ADAPTOR_ADDRESS_HEADERS = {"remote_addr", "remote_host", "x-webobjects-remote-addr", "pc-remote-addr"};
 
     /**
      * 'Host' is the official HTTP 1.1 header for the host name in the request URL, so this should be checked first. @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
@@ -191,7 +195,7 @@ public  class ERXRequest extends WORequest {
 	 * The address of the client that sent the request. From a trusted front end ({@link #isFromTrustedFrontEnd(WORequest)}), in order:
 	 *
 	 * <ol>
-	 * <li>The address a WO adaptor passes on (the <code>x-webobjects-remote-addr</code>, <code>remote_addr</code>, <code>remote_host</code> or <code>pc-remote-addr</code> header)</li>
+	 * <li>The address a WO adaptor passes on (the <code>remote_addr</code>, <code>remote_host</code>, <code>x-webobjects-remote-addr</code> or <code>pc-remote-addr</code> header)</li>
 	 * <li>The last address in <code>x-forwarded-for</code> that isn't a trusted front end's: the client, as the outermost proxy we trust saw it</li>
 	 * <li>The address of the connection the request came in on</li>
 	 * </ol>

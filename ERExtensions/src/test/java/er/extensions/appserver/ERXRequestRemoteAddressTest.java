@@ -33,7 +33,17 @@ public class ERXRequestRemoteAddressTest {
 	@Test
 	public void adaptorHeadersInOrder() throws Exception {
 		final Map<String, List<String>> headers = Map.of( "remote_host", List.of( "10.0.0.7" ), "x-webobjects-remote-addr", List.of( "10.0.0.6" ) );
-		assertEquals( "10.0.0.6", ERXRequest.remoteAddress( request( null, headers ) ) );
+		assertEquals( "10.0.0.7", ERXRequest.remoteAddress( request( null, headers ) ) );
+	}
+
+	/**
+	 * As a request through mod_WebObjects arrives when the client sent x-webobjects-remote-addr itself: Apache sets
+	 * remote_addr and remote_host, and passes the client's header on (#218)
+	 */
+	@Test
+	public void throughApacheTheClientCantChooseItsAddress() throws Exception {
+		final Map<String, List<String>> headers = Map.of( "remote_addr", List.of( "198.51.100.66" ), "remote_host", List.of( "198.51.100.66" ), "x-webobjects-remote-addr", List.of( "6.6.6.6" ), "x-webobjects-adaptor-version", List.of( "Apache" ) );
+		assertEquals( "198.51.100.66", ERXRequest.remoteAddress( request( "127.0.0.1", headers ) ) );
 	}
 
 	@Test
