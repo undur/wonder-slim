@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webobjects.appserver.WOAdaptor;
 import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
@@ -163,6 +164,21 @@ public  class ERXRequest extends WORequest {
 		return ERXApplication.erxApplication().publicHost();
 	}
 
+	/**
+	 * The port the request was received on, for complete URLs. Like the host, from the web server's header only when the
+	 * request came through one we trust; otherwise the port the application listens on. Differs from WO's, which reads
+	 * the header from any request with an adaptor version header, and reads {@code x-webobjects-servlet-server-port}.
+	 */
+	@Override
+	public String _serverPort() {
+		if (isUsingWebServer() && isFromTrustedFrontEnd(this)) {
+			return headerForKey("x-webobjects-server-port");
+		}
+
+		final NSArray<WOAdaptor> adaptors = WOApplication.application().adaptors();
+		return adaptors.count() == 0 ? null : WOShared.unsignedIntString(adaptors.objectAtIndex(0).port());
+	}
+
     /**
      * @return The remote client host address, see {@link #remoteAddress(WORequest)}. Returns "UNKNOWN" if no address is found.
      */
@@ -251,7 +267,7 @@ public  class ERXRequest extends WORequest {
 	/**
 	 * A front end tells the application about the client's address, the host it asked for and the scheme in headers. A
 	 * client can send the same headers, so they're believed only when the request's connection comes from a front end
-	 * configured as trusted ({@link ERXP#TRUSTED_FRONT_ENDS}, loopback and private networks by default).
+	 * configured as trusted ({@link ERXP#TRUSTED_FRONT_ENDS}, this machine and private networks by default).
 	 *
 	 * The first request from elsewhere that carries such headers is logged, since it's either a client trying them or a
 	 * front end that needs adding.

@@ -6,11 +6,12 @@
   A front end (Apache with the WO adaptor, modulo, a proxy or load balancer) tells the application the client's
   address, the host it asked for and whether it used https in headers. A client can send the same headers, and they
   used to be believed from anyone. Now they're read only when the request comes from a trusted front end: by default
-  loopback and private networks, where web servers and proxies usually are. Otherwise the connection's own address is
-  the client's, the request isn't secure, and complete URLs use the public host. The first request with such headers
-  from elsewhere is logged. In `x-forwarded-for`, the client is now the last address that isn't a trusted front end's,
-  not the first, which is whatever the client sent. `x-webobjects-servlet-server-name` and
-  `x-webobjects-servlet-server-port`, from servlet deployments, are no longer read. (#67)
+  this machine (loopback and its own addresses, as when an instance listens on the machine's public address) and
+  private networks, where web servers and proxies usually are. Otherwise the connection's own address is the client's,
+  the request isn't secure, and complete URLs use the public host and the application's own port. The first request
+  with such headers from elsewhere is logged. In `x-forwarded-for`, the client is now the last address that isn't a
+  trusted front end's, not the first, which is whatever the client sent. `x-webobjects-servlet-server-name` and
+  `x-webobjects-servlet-server-port`, from servlet deployments, are no longer read. (#67, #215)
 
   A front end still passes on headers it doesn't set itself. modulo removes all of them. Behind Apache, a header it
   doesn't set (such as `x-forwarded-host`) can still come from the client unless the virtual host removes it.

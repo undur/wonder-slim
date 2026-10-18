@@ -98,6 +98,21 @@ public class ERXRequestRemoteAddressTest {
 		assertEquals( true, ERXTrustedFrontEnds.parse( "all" ).contains( InetAddress.getByName( "203.0.113.9" ) ) );
 	}
 
+	/**
+	 * A front end on this machine connects from one of its addresses when the application listens on a public one
+	 */
+	@Test
+	public void localIsThisMachinesAddresses() throws Exception {
+		final ERXTrustedFrontEnds local = ERXTrustedFrontEnds.parse( "local" );
+
+		for( final InetAddress address : ERXTrustedFrontEnds.localAddresses() ) {
+			assertEquals( true, local.contains( address ), address.toString() );
+			assertEquals( true, ERXTrustedFrontEnds.parse( ERXTrustedFrontEnds.DEFAULT ).contains( address ), address.toString() );
+		}
+
+		assertEquals( false, local.contains( InetAddress.getByName( "203.0.113.9" ) ) );
+	}
+
 	@Test
 	public void trustedFrontEndsRefusesWhatIsntAnAddress() {
 		assertThrows( IllegalArgumentException.class, () -> ERXTrustedFrontEnds.parse( "proxy.example.com" ) );

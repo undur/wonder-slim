@@ -1,8 +1,15 @@
 package er.extensions.appserver;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import er.extensions.ERXP;
 import er.extensions.foundation.ERXProperties;
@@ -13,7 +20,9 @@ import er.extensions.foundation.ERXProperties;
  */
 final class ERXTrustedFrontEnds {
 
-	static final String DEFAULT = "loopback, private";
+	private static final Logger log = LoggerFactory.getLogger( ERXTrustedFrontEnds.class );
+
+	static final String DEFAULT = "loopback, local, private";
 
 	/**
 	 * The last configuration read, kept until the property changes
@@ -23,6 +32,7 @@ final class ERXTrustedFrontEnds {
 	private final String _configuration;
 	private final boolean _all;
 	private final boolean _loopback;
+	private final boolean _local;
 	private final boolean _private;
 	private final List<Network> _networks;
 
@@ -62,6 +72,7 @@ final class ERXTrustedFrontEnds {
 
 		boolean all = false;
 		boolean loopback = false;
+		boolean local = false;
 		boolean privateNetworks = false;
 		final List<Network> networks = new ArrayList<>();
 
@@ -70,6 +81,7 @@ final class ERXTrustedFrontEnds {
 				case "" -> {}
 				case "all" -> all = true;
 				case "loopback" -> loopback = true;
+				case "local" -> local = true;
 				case "private" -> privateNetworks = true;
 				default -> networks.add( network( entry ) );
 			}
@@ -77,6 +89,7 @@ final class ERXTrustedFrontEnds {
 
 		_all = all;
 		_loopback = loopback;
+		_local = local;
 		_private = privateNetworks;
 		_networks = List.copyOf( networks );
 	}
@@ -108,7 +121,7 @@ final class ERXTrustedFrontEnds {
 		final InetAddress address = literalAddress( slash == -1 ? entry : entry.substring( 0, slash ) );
 
 		if( address == null ) {
-			throw new IllegalArgumentException( "'%s' in %s is not an address, a network (address/bits), 'loopback', 'private' or 'all'".formatted( entry, ERXP.TRUSTED_FRONT_ENDS.id() ) );
+			throw new IllegalArgumentException( "'%s' in %s is not an address, a network (address/bits), 'loopback', 'local', 'private' or 'all'".formatted( entry, ERXP.TRUSTED_FRONT_ENDS.id() ) );
 		}
 
 		final int maximum = address.getAddress().length * 8;
@@ -154,6 +167,10 @@ final class ERXTrustedFrontEnds {
 			return true;
 		}
 
+		if( _local && LocalAddresses.ALL.contains( address ) ) {
+			return true;
+		}
+
 		if( _private && isPrivate( address ) ) {
 			return true;
 		}
@@ -178,5 +195,33 @@ final class ERXTrustedFrontEnds {
 		}
 
 		return address.isSiteLocalAddress();
+	}
+
+	/**
+	 * The addresses of this machine's network interfaces. A front end on the same machine connects from one of them when
+	 * the application listens on the machine's public address (an instance registered under the machine's host name).
+	 * Read once, the first time they're needed: not again for an address that isn't among them, or any client could
+	 * have the interfaces listed on every request.
+	 */
+	private static final class LocalAddresses {
+
+		static final Set<InetAddress> ALL = read();
+
+		private static Set<InetAddress> read() {
+			try {
+				return NetworkInterface.networkInterfaces().flatMap( NetworkInterface::inetAddresses ).collect( Collectors.toUnmodifiableSet() );
+			}
+			catch( final SocketException e ) {
+				log.warn( "Unable to list this machine's network interfaces, so '{}' in {} matches no address", "local", ERXP.TRUSTED_FRONT_ENDS.id(), e );
+				return Set.of();
+			}
+		}
+	}
+
+	/**
+	 * @return The addresses 'local' stands for
+	 */
+	static Set<InetAddress> localAddresses() {
+		return LocalAddresses.ALL;
 	}
 }

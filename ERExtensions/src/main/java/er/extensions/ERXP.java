@@ -212,8 +212,9 @@ public enum ERXP {
 	/**
 	 * The front ends (web servers, proxies, load balancers) whose headers about the client's address, the requested host
 	 * and the scheme are believed, as a comma separated list of addresses ({@code 203.0.113.7}), networks
-	 * ({@code 203.0.113.0/24}), {@code loopback}, {@code private} (10/8, 172.16/12, 192.168/16, fc00::/7) or {@code all}.
-	 * A request from anywhere else is taken at its connection's word. Defaults to {@code loopback, private}.
+	 * ({@code 203.0.113.0/24}), {@code loopback}, {@code local} (the addresses of this machine's network interfaces),
+	 * {@code private} (10/8, 172.16/12, 192.168/16, fc00::/7) or {@code all}. A request from anywhere else is taken at its
+	 * connection's word. Defaults to {@code loopback, local, private}.
 	 */
 	TRUSTED_FRONT_ENDS( "er.extensions.ERXRequest.trustedFrontEnds" ),
 
