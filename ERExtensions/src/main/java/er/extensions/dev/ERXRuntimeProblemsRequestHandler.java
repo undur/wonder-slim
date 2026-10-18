@@ -7,6 +7,7 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.appserver.ERXRequest;
 import ng.dev.NGDevJson;
 import ng.dev.NGRuntimeProblems;
 
@@ -42,7 +43,7 @@ public class ERXRuntimeProblemsRequestHandler extends WORequestHandler {
 			return response;
 		}
 
-		if (!ERXDevAccess.isFromLoopback(request)) {
+		if (!ERXRequest.isFromLoopback(request)) {
 			response.setStatus(403);
 			response.setContent("{\"problems\":[],\"count\":0,\"error\":\"only available to requests from this machine\"}");
 			return response;

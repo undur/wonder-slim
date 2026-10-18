@@ -5,6 +5,7 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.appserver.ERXRequest;
 import ng.dev.NGDevJson;
 import ng.dev.NGEvalSession;
 
@@ -49,7 +50,7 @@ public class ERXEvalRequestHandler extends WORequestHandler {
 			return response;
 		}
 
-		if (!ERXDevAccess.isFromLoopback(request)) {
+		if (!ERXRequest.isFromLoopback(request)) {
 			response.setStatus(403);
 			response.setContent("{\"status\":\"error\",\"diagnostics\":[\"/eval is restricted to loopback clients\"]}");
 			return response;

@@ -175,6 +175,41 @@ public class ERXRequestRemoteAddressTest {
 	}
 
 	@Test
+	public void fromLoopback() throws Exception {
+		assertEquals( true, ERXRequest.isFromLoopback( request( "127.0.0.1", Map.of() ) ) );
+		assertEquals( true, ERXRequest.isFromLoopback( request( "::1", Map.of() ) ) );
+	}
+
+	@Test
+	public void notFromLoopback() throws Exception {
+		assertEquals( false, ERXRequest.isFromLoopback( request( "172.16.1.111", Map.of() ) ) );
+		assertEquals( false, ERXRequest.isFromLoopback( request( null, Map.of() ) ), "unknown address" );
+
+		for( final InetAddress address : ERXTrustedFrontEnds.localAddresses() ) {
+			if( !address.isLoopbackAddress() ) {
+				final WORequest request = new WORequest( "GET", "/", "HTTP/1.1", Map.of(), null, null );
+				request._setOriginatingAddress( address );
+				assertEquals( false, ERXRequest.isFromLoopback( request ), "this machine, but not loopback: " + address );
+			}
+		}
+	}
+
+	@Test
+	public void headersDontMakeARequestLoopback() throws Exception {
+		final Map<String, List<String>> headers = Map.of( "remote_host", List.of( "127.0.0.1" ), "x-webobjects-remote-addr", List.of( "127.0.0.1" ), "x-forwarded-for", List.of( "127.0.0.1" ) );
+		assertEquals( false, ERXRequest.isFromLoopback( request( "172.16.1.111", headers ) ) );
+		assertEquals( false, ERXRequest.isFromLoopback( request( null, headers ) ) );
+	}
+
+	@Test
+	public void forwardedOverLoopbackIsNotLoopback() throws Exception {
+		assertEquals( false, ERXRequest.isFromLoopback( request( "127.0.0.1", Map.of( "x-forwarded-for", List.of( "203.0.113.4" ) ) ) ) );
+		assertEquals( false, ERXRequest.isFromLoopback( request( "127.0.0.1", Map.of( "remote_addr", List.of( "203.0.113.4" ) ) ) ) );
+		assertEquals( false, ERXRequest.isFromLoopback( request( "127.0.0.1", Map.of( "x-webobjects-remote-addr", List.of( "127.0.0.1" ) ) ) ) );
+		assertEquals( false, ERXRequest.isFromLoopback( request( "::1", Map.of( "forwarded", List.of( "for=203.0.113.4" ) ) ) ) );
+	}
+
+	@Test
 	public void trustedFrontEndsRefusesWhatIsntAnAddress() {
 		assertThrows( IllegalArgumentException.class, () -> ERXTrustedFrontEnds.parse( "proxy.example.com" ) );
 		assertThrows( IllegalArgumentException.class, () -> ERXTrustedFrontEnds.parse( "10.0.0.0/33" ) );

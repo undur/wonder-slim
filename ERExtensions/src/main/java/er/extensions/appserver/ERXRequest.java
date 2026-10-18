@@ -319,18 +319,40 @@ public  class ERXRequest extends WORequest {
 	 */
 	public static boolean isFromThisMachine( final WORequest request ) {
 		final InetAddress address = request._originatingAddress();
+		return address != null && ERXTrustedFrontEnds.isThisMachine( address ) && !carriesFrontEndHeaders( request );
+	}
 
-		if( address == null || !ERXTrustedFrontEnds.isThisMachine( address ) ) {
-			return false;
-		}
+	/**
+	 * Whether the request came in on a loopback connection, not through a web server or proxy: the strictest origin
+	 * check, for what must only answer someone on this machine (the development endpoints: eval, the captured console
+	 * log, runtime problems). Stricter than {@link #isFromThisMachine(WORequest)}, which also accepts this machine's
+	 * other addresses, to which an instance listening on a public address is open.
+	 *
+	 * Decided from the address of the connection the request came in on, as the adaptor recorded it, never from request
+	 * headers, which the client controls. Headers can only make the check stricter: a request carrying the headers a
+	 * front end adds is refused, so a client adding them locks itself out. A forwarder on this machine that adds no
+	 * headers, such as an ssh tunnel, can't be told apart.
+	 *
+	 * @return true if the request came in on a loopback connection, not forwarded. False when the connection's address
+	 *         isn't known
+	 */
+	public static boolean isFromLoopback( final WORequest request ) {
+		final InetAddress address = request._originatingAddress();
+		return address != null && address.isLoopbackAddress() && !carriesFrontEndHeaders( request );
+	}
 
+	/**
+	 * @return true if the request carries any of the headers a front end adds (an adaptor version, forwarding headers):
+	 *         it came through a web server or proxy, even over a connection from this machine
+	 */
+	private static boolean carriesFrontEndHeaders( final WORequest request ) {
 		for( final String header : FORWARDING_HEADERS ) {
 			if( request.headerForKey( header ) != null ) {
-				return false;
+				return true;
 			}
 		}
 
-		return request.headerForKey( "forwarded" ) == null && request.headerForKey( "x-real-ip" ) == null;
+		return request.headerForKey( "forwarded" ) != null || request.headerForKey( "x-real-ip" ) != null;
 	}
 
 	/**

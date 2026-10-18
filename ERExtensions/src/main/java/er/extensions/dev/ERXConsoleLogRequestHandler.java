@@ -7,6 +7,7 @@ import com.webobjects.appserver.WORequestHandler;
 import com.webobjects.appserver.WOResponse;
 
 import er.extensions.appserver.ERXApplication;
+import er.extensions.appserver.ERXRequest;
 
 /**
  * A development-only request handler that returns the application's recently
@@ -50,7 +51,7 @@ public class ERXConsoleLogRequestHandler extends WORequestHandler {
 			return response;
 		}
 
-		if (!ERXDevAccess.isFromLoopback(request)) {
+		if (!ERXRequest.isFromLoopback(request)) {
 			response.setStatus(403);
 			response.setContent("The console log is only available to requests from this machine.");
 			return response;
