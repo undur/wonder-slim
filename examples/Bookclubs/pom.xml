@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>is.rebbi</groupId>
 			<artifactId>wo-adaptor-jetty</artifactId>
-			<version>0.12.2</version>
+			<version>0.12.3</version>
 		</dependency>
 	</dependencies>
 </project>
