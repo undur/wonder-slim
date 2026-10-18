@@ -114,6 +114,33 @@ public class ERXRequestRemoteAddressTest {
 	}
 
 	@Test
+	public void fromThisMachine() throws Exception {
+		assertEquals( true, ERXRequest.isFromThisMachine( request( "127.0.0.1", Map.of() ) ) );
+		assertEquals( true, ERXRequest.isFromThisMachine( request( "::1", Map.of() ) ) );
+
+		for( final InetAddress address : ERXTrustedFrontEnds.localAddresses() ) {
+			final WORequest request = new WORequest( "GET", "/", "HTTP/1.1", Map.of(), null, null );
+			request._setOriginatingAddress( address );
+			assertEquals( true, ERXRequest.isFromThisMachine( request ), address.toString() );
+		}
+	}
+
+	@Test
+	public void notFromThisMachine() throws Exception {
+		assertEquals( false, ERXRequest.isFromThisMachine( request( "203.0.113.9", Map.of() ) ) );
+		assertEquals( false, ERXRequest.isFromThisMachine( request( "10.0.0.2", Map.of() ) ), "a private network is other machines" );
+		assertEquals( false, ERXRequest.isFromThisMachine( request( null, Map.of() ) ), "a request the application built itself" );
+	}
+
+	@Test
+	public void throughAFrontEndOnThisMachine() throws Exception {
+		assertEquals( false, ERXRequest.isFromThisMachine( request( "127.0.0.1", Map.of( "x-webobjects-adaptor-version", List.of( "Apache" ) ) ) ) );
+		assertEquals( false, ERXRequest.isFromThisMachine( request( "127.0.0.1", Map.of( "x-forwarded-for", List.of( "198.51.100.66" ) ) ) ) );
+		assertEquals( false, ERXRequest.isFromThisMachine( request( "127.0.0.1", Map.of( "forwarded", List.of( "for=198.51.100.66" ) ) ) ) );
+		assertEquals( false, ERXRequest.isFromThisMachine( request( "127.0.0.1", Map.of( "x-real-ip", List.of( "198.51.100.66" ) ) ) ) );
+	}
+
+	@Test
 	public void trustedFrontEndsRefusesWhatIsntAnAddress() {
 		assertThrows( IllegalArgumentException.class, () -> ERXTrustedFrontEnds.parse( "proxy.example.com" ) );
 		assertThrows( IllegalArgumentException.class, () -> ERXTrustedFrontEnds.parse( "10.0.0.0/33" ) );

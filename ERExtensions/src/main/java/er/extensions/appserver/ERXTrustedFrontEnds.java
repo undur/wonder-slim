@@ -219,6 +219,13 @@ final class ERXTrustedFrontEnds {
 	}
 
 	/**
+	 * @return true for an address of this machine: loopback, or one of its network interfaces
+	 */
+	static boolean isThisMachine( final InetAddress address ) {
+		return address.isLoopbackAddress() || LocalAddresses.ALL.contains( address );
+	}
+
+	/**
 	 * @return The addresses 'local' stands for
 	 */
 	static Set<InetAddress> localAddresses() {

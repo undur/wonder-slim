@@ -21,6 +21,12 @@
   sees the front end as the client and every request as plain http. A value it doesn't understand (a host name, say)
   stops the application at startup.
 
+- **`ERXRequest.isFromThisMachine()`**
+  Tells a request made on the server itself (wotaskd controlling the instance, a health check, a script) from one that
+  came through the web server: its connection comes from this machine, and it carries none of the headers a front end
+  adds. For exempting the server's own requests from an IP allow-list, where the client address can't tell them apart.
+  (#217)
+
 - **`directActionURLForActionNamed(name, dictionary)` follows the request's scheme**
   On a request received over https it returned a complete `http://` URL instead of a relative one, as WebObjects'
   always has: a detour through the front end's redirect to https, a POST turned into a GET, and fetches (EventSource,

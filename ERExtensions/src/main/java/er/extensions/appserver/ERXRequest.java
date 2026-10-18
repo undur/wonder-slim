@@ -265,6 +265,33 @@ public  class ERXRequest extends WORequest {
 	}
 
 	/**
+	 * Whether the request was made on this machine directly, not through a web server or proxy: wotaskd controlling the
+	 * instance, a health check, a script on the server. Its connection comes from loopback or one of this machine's
+	 * addresses, and it carries none of the headers a front end adds (an adaptor version, forwarding headers).
+	 *
+	 * A proxy on this machine that adds none of those headers can't be told apart from a local client, so behind one,
+	 * every request it forwards is from this machine as far as this method can tell.
+	 *
+	 * @return true if the request came from this machine directly. False for a request the application built itself
+	 *         (with no connection)
+	 */
+	public static boolean isFromThisMachine( final WORequest request ) {
+		final InetAddress address = request._originatingAddress();
+
+		if( address == null || !ERXTrustedFrontEnds.isThisMachine( address ) ) {
+			return false;
+		}
+
+		for( final String header : FORWARDING_HEADERS ) {
+			if( request.headerForKey( header ) != null ) {
+				return false;
+			}
+		}
+
+		return request.headerForKey( "forwarded" ) == null && request.headerForKey( "x-real-ip" ) == null;
+	}
+
+	/**
 	 * A front end tells the application about the client's address, the host it asked for and the scheme in headers. A
 	 * client can send the same headers, so they're believed only when the request's connection comes from a front end
 	 * configured as trusted ({@link ERXP#TRUSTED_FRONT_ENDS}, this machine and private networks by default).
