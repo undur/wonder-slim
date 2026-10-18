@@ -28,9 +28,12 @@ public class ERXDevAccess {
 	private ERXDevAccess() {}
 
 	/**
-	 * @return true if the request came in on a connection from this machine (a loopback address), not forwarded by a proxy
+	 * Stricter than {@link er.extensions.appserver.ERXRequest#isFromThisMachine(WORequest)}, which also accepts this
+	 * machine's other addresses: the development endpoints never answer a connection to a public address.
+	 *
+	 * @return true if the request came in on a loopback connection, not forwarded by a proxy
 	 */
-	public static boolean isFromThisMachine( final WORequest request ) {
+	public static boolean isFromLoopback( final WORequest request ) {
 		final InetAddress address = request._originatingAddress();
 
 		if( address == null || !address.isLoopbackAddress() ) {

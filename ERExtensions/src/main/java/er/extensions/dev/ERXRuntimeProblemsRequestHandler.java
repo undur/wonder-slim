@@ -42,7 +42,7 @@ public class ERXRuntimeProblemsRequestHandler extends WORequestHandler {
 			return response;
 		}
 
-		if (!ERXDevAccess.isFromThisMachine(request)) {
+		if (!ERXDevAccess.isFromLoopback(request)) {
 			response.setStatus(403);
 			response.setContent("{\"problems\":[],\"count\":0,\"error\":\"only available to requests from this machine\"}");
 			return response;

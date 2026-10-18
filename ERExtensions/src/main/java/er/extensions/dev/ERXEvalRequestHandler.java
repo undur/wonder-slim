@@ -49,7 +49,7 @@ public class ERXEvalRequestHandler extends WORequestHandler {
 			return response;
 		}
 
-		if (!ERXDevAccess.isFromThisMachine(request)) {
+		if (!ERXDevAccess.isFromLoopback(request)) {
 			response.setStatus(403);
 			response.setContent("{\"status\":\"error\",\"diagnostics\":[\"/eval is restricted to loopback clients\"]}");
 			return response;

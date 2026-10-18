@@ -50,7 +50,7 @@ public class ERXConsoleLogRequestHandler extends WORequestHandler {
 			return response;
 		}
 
-		if (!ERXDevAccess.isFromThisMachine(request)) {
+		if (!ERXDevAccess.isFromLoopback(request)) {
 			response.setStatus(403);
 			response.setContent("The console log is only available to requests from this machine.");
 			return response;
