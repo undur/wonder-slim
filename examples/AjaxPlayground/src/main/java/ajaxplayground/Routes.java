@@ -71,6 +71,9 @@ public class Routes {
 			return response;
 		} );
 
+		// Echoes the client address, host and scheme the application resolved, and the headers it resolved them from
+		routes.map( "/echo/origin", ri -> OriginEcho.response( ri.request() ) );
+
 		// Invoice editors
 		routes.map( "/invoice", InvoiceSimple.class );
 		routes.map( "/invoice-stress", ScenarioInvoice.class );
