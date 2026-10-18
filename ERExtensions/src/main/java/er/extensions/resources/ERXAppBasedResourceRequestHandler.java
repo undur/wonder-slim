@@ -21,6 +21,7 @@ import com.webobjects.appserver.WOResponse;
 import er.extensions.ERXP;
 import er.extensions.appserver.ERXApplication;
 import er.extensions.foundation.ERXProperties;
+import ng.resources.NGResourceStamps;
 
 /**
  * Request handler for serving web server resources through the application (rather than the web server "split install").
@@ -111,7 +112,7 @@ public class ERXAppBasedResourceRequestHandler extends WORequestHandler {
 
 		// A stamped name (css/site@3f9c1e07ab.css, as the resource manager generates it) names the resource without the
 		// stamp. If there's nothing by that name, the name may be a file's own, and is looked up as it is.
-		final ERXResourceStamps.Stamped stamped = ERXResourceStamps.parse(path);
+		final NGResourceStamps.Stamped stamped = NGResourceStamps.parse(path);
 		String resourcePath = stamped != null ? stamped.unstampedPath() : path;
 		String requestedStamp = stamped != null ? stamped.stamp() : null;
 		Resource resource = find(resourcePath);

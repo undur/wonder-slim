@@ -15,9 +15,9 @@ Effort is to bring the wonder-slim behaviour into ng-objects; "Share" says wheth
 | Routing chain | Routes, then a fallback, then a not found handler; any handler can decline (`RouteHandler.DECLINED`); passing on to the next server handler | First match wins; no declining (a null response throws); public resources hard-wired as the no-route case | Small | The chain logic, yes |
 | Route parameters | Positional (`RouteURL`); named parameters designed (`route-links` branch) | Positional (`NGParsedURI`); `:name` advertised in the javadoc but not implemented; typed routes designed (`docs/routing.md`) | Small | Yes: one URL class, one design |
 | Development 404 and welcome page | Welcome page at an unmapped `/`, a 404 page listing the mapped routes, development only | A static welcome page at `/` in every mode, production included; a plain-text 404 | Small | The design; the pages are framework components |
-| Resource responses | ETag and `304`, single ranges (`206`/`416`/`If-Range`), files over 1 MB streamed | Whole file read into memory, `max-age=3600` for everything, no ETag, no ranges | Small | Yes: plain HTTP logic over bytes and streams |
+| Resource responses | ETag and `304`, single ranges (`206`/`416`/`If-Range`), files over 1 MB streamed | Whole file read into memory, no ranges; webserver resources have ETags and `304` (since 2026-10-18), public resources `max-age=3600` | Small | Yes: plain HTTP logic over bytes and streams |
 | Resource cache | LRU of 64 MB (configurable), missing paths remembered, bounded | Unbounded map in production, missing paths remembered | Small | Yes |
-| Content stamps | `site@3f9c1e07ab.css`, cached `immutable` for a year | None | Small | Yes: `ERXResourceStamps` is plain Java |
+| Content stamps | `site@3f9c1e07ab.css`, cached `immutable` for a year | The same, for webserver resources (since 2026-10-18) | Done | Shared: `NGResourceStamps` in ng-core |
 | Public resources | The fallback, indexed, re-indexed on a miss in development | Experimental, the `app` namespace hard-coded | Small | Mostly |
 | Logging | Console logger, reload4j or logback; `er.logging.*` levels and pattern; log capture at the appender | slf4j API only (slf4j-simple in tests); stdout tee for `/ng/dev/log` | Medium | Yes, the backends are slf4j-level (#153) |
 | Stack traces | One formatter for every backend: wrappers unwrapped, plumbing frames skippable | `printStackTrace()` | Small | Yes: `ERXStackTraces` is plain Java |
@@ -41,7 +41,7 @@ These wonder-slim pieces could join them. Each is plain Java already, or close t
 
 | Piece | wonder-slim class | What separating it takes |
 | --- | --- | --- |
-| Content stamps | `ERXResourceStamps` | Nothing: no framework types |
+| Content stamps | `NGResourceStamps` (ng-core) | Done: both frameworks use it |
 | Stack trace formatting | `ERXStackTraces` | Its settings read through ERXP; pass them in instead |
 | Conditional and range responses | inside `ERXAppBasedResourceRequestHandler` | Lift the `If-None-Match`, `Range` and `If-Range` logic out of `WOResponse` into a neutral result (status, headers, byte range) |
 | Bounded resource cache | `ResourceCache`, `BoundedPathSet` | Nothing beyond the resource type |

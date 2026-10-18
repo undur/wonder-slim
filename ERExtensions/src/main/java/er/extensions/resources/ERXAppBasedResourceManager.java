@@ -15,6 +15,7 @@ import com.webobjects.foundation.NSArray;
 
 import er.extensions.appserver.ERXApplication;
 import er.extensions.appserver.ERXWOContext;
+import ng.resources.NGResourceStamps;
 
 /**
  * ResourceManager implementation for serving web server resources through the application (rather than the web server "split install")
@@ -41,7 +42,7 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 	 * Generates a URL for the given resource. Format: .../App.woa/res/[framework]/[resourceName]
 	 *
 	 * In production, the resource name carries a stamp of the resource's content ({@code css/site@3f9c1e07ab.css}, see
-	 * {@link ERXResourceStamps}), so the URL changes whenever the content does and the resource request handler can let
+	 * {@link NGResourceStamps}), so the URL changes whenever the content does and the resource request handler can let
 	 * browsers cache it for good. Not in development, where files change while the application runs.
 	 *
 	 * Localized resources aren't supported: {@code languages} is ignored and resources are resolved without languages, so a
@@ -60,7 +61,7 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 			final String stamp = stamp( resourceName, frameworkName );
 
 			if( stamp != null ) {
-				path = frameworkName + "/" + ERXResourceStamps.stampedPath( resourceName, stamp );
+				path = frameworkName + "/" + NGResourceStamps.stampedPath( resourceName, stamp );
 			}
 		}
 
@@ -97,7 +98,7 @@ public class ERXAppBasedResourceManager extends ERXResourceManagerBase {
 		}
 
 		try( InputStream content = inputStreamForResourceNamed( resourceName, frameworkName, null ) ) {
-			return content == null ? null : ERXResourceStamps.stamp( content );
+			return content == null ? null : NGResourceStamps.stamp( content );
 		}
 		catch( IOException e ) {
 			throw new UncheckedIOException( e );

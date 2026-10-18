@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Resource stamps come from ng-core**
+  Stamped resource URLs are made and read by ng-core's `ng.resources.NGResourceStamps`, which ng-objects uses too, so
+  both frameworks stamp resources the same way. The stamps and URLs are unchanged. Depends on ng-core 0.1.7-SNAPSHOT
+  until ng-objects 0.1.7 is released.
+
+  Upgrading: `er.extensions.resources.ERXResourceStamps` is gone; use `ng.resources.NGResourceStamps`, which has the
+  same methods.
+
 ## 2026-10-18 (8.1.3)
 
 - **The client's address, the host and https come from trusted front ends only**
