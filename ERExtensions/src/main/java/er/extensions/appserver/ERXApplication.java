@@ -1027,6 +1027,7 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 			checkERXApplicationMainInvoked();
 			checkMainBundleIsNotJavaFoundation();
 			checkClasspathValidity();
+			checkTrustedFrontEnds();
 		}
 		catch (Exception e) {
 			logImportantMessage(e.getMessage());
@@ -1056,6 +1057,14 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		if (value != null && !NSPropertyListSerialization.booleanForString(value)) {
 			log.warn("WODisplayExceptionPages is set to '{}', but slim routes action request errors through handleException() regardless, so this property has no effect here. To hide stack traces from end users, override handleException() to return a friendly error page in production.", value);
 		}
+	}
+
+	/**
+	 * Ensure the trusted front ends are configured as something we understand, so a mistake in them stops the application
+	 * here rather than failing every request
+	 */
+	private static void checkTrustedFrontEnds() {
+		ERXTrustedFrontEnds.current();
 	}
 
 	/**

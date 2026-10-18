@@ -18,7 +18,8 @@
 
   Upgrading: if your front end connects from a public address, or you're behind a CDN, list its addresses or networks
   in `er.extensions.ERXRequest.trustedFrontEnds` (for example `loopback, private, 203.0.113.0/24`), or the application
-  sees the front end as the client and every request as plain http.
+  sees the front end as the client and every request as plain http. A value it doesn't understand (a host name, say)
+  stops the application at startup.
 
 - **`directActionURLForActionNamed(name, dictionary)` follows the request's scheme**
   On a request received over https it returned a complete `http://` URL instead of a relative one, as WebObjects'
