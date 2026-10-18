@@ -46,6 +46,30 @@ public class ERXRequestRemoteAddressTest {
 		assertEquals( "198.51.100.66", ERXRequest.remoteAddress( request( "127.0.0.1", headers ) ) );
 	}
 
+	/**
+	 * As a request through mod_WebObjects arrives when the client sent remote_addr itself: two values, in no reliable
+	 * order (#219)
+	 */
+	@Test
+	public void severalAddressesInAnAdaptorHeaderAreUnknown() throws Exception {
+		assertNull( ERXRequest.remoteAddress( request( "127.0.0.1", Map.of( "remote_addr", List.of( "6.6.6.6", "198.51.100.66" ) ) ) ) );
+		assertNull( ERXRequest.remoteAddress( request( "127.0.0.1", Map.of( "remote_addr", List.of( "198.51.100.66", "6.6.6.6" ) ) ) ) );
+		assertNull( ERXRequest.remoteAddress( request( "127.0.0.1", Map.of( "remote_addr", List.of( "6.6.6.6, 198.51.100.66" ) ) ) ), "joined into one value" );
+	}
+
+	/**
+	 * Apache's own remote_addr, alone, is read before a remote_host the client doubled up
+	 */
+	@Test
+	public void aSingleAddressInTheFirstHeaderIsTheAddress() throws Exception {
+		assertEquals( "198.51.100.66", ERXRequest.remoteAddress( request( "127.0.0.1", Map.of( "remote_addr", List.of( "198.51.100.66" ), "remote_host", List.of( "6.6.6.6", "198.51.100.66" ) ) ) ) );
+	}
+
+	@Test
+	public void theSameAddressTwiceIsThatAddress() throws Exception {
+		assertEquals( "198.51.100.66", ERXRequest.remoteAddress( request( "127.0.0.1", Map.of( "remote_addr", List.of( "198.51.100.66", "198.51.100.66" ) ) ) ) );
+	}
+
 	@Test
 	public void lastForwardedForAddress() throws Exception {
 		final Map<String, List<String>> headers = Map.of( "x-forwarded-for", List.of( "198.51.100.66, 203.0.113.4" ) );

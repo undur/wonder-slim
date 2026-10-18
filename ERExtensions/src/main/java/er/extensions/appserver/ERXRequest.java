@@ -5,9 +5,11 @@ import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -67,6 +69,11 @@ public  class ERXRequest extends WORequest {
 	 * Whether forwarding headers from a front end that isn't trusted have been reported, which happens once
 	 */
 	private static final AtomicBoolean _untrustedForwardingReported = new AtomicBoolean();
+
+	/**
+	 * Whether a request with several addresses in an adaptor's address header has been logged
+	 */
+	private static final AtomicBoolean _conflictingAddressReported = new AtomicBoolean();
 
     /**
      * Specifies whether https should be overridden to be enabled or disabled app-wide. This is 
@@ -200,19 +207,31 @@ public  class ERXRequest extends WORequest {
 	 * <li>The address of the connection the request came in on</li>
 	 * </ol>
 	 *
-	 * From anywhere else, the connection's address. A front end that passes on a header the client sent can still be
-	 * fooled by it, so don't base access decisions on this.
+	 * From anywhere else, the connection's address.
 	 *
-	 * @return The client's address, or null if none is found
+	 * An adaptor header naming more than one address is a client's attempt to choose its own (mod_WebObjects passes the
+	 * client's header on next to its own), and the address is then unknown: null, which an access check must refuse.
+	 *
+	 * @return The client's address, or null if it isn't known
 	 */
 	public static String remoteAddress( final WORequest request ) {
 
 		if( isFromTrustedFrontEnd( request ) ) {
 			for( final String headerName : ADAPTOR_ADDRESS_HEADERS ) {
-				final String headerValue = request.headerForKey( headerName );
+				final Set<String> addresses = addressesIn( request.headersForKey( headerName ) );
 
-				if( headerValue != null && !headerValue.isBlank() ) {
-					return headerValue.strip();
+				// mod_WebObjects passes on a header the client sent and adds its own next to it, in no reliable order
+				// (#219). Two different addresses mean one is the client's invention, and there's no telling which.
+				if( addresses.size() > 1 ) {
+					if( _conflictingAddressReported.compareAndSet( false, true ) ) {
+						log.warn( "A request's {} header names several addresses {}, so its client's address isn't known: the client sent one of them itself. Logged once.", headerName, addresses );
+					}
+
+					return null;
+				}
+
+				if( addresses.size() == 1 ) {
+					return addresses.iterator().next();
 				}
 			}
 
@@ -230,6 +249,25 @@ public  class ERXRequest extends WORequest {
 		}
 
 		return null;
+	}
+
+	/**
+	 * @return The distinct addresses in the values of a header, one or several per value (comma separated)
+	 */
+	private static Set<String> addressesIn( final List<String> headerValues ) {
+		final Set<String> addresses = new LinkedHashSet<>();
+
+		if( headerValues != null ) {
+			for( final String headerValue : headerValues ) {
+				for( final String address : headerValue.split( "," ) ) {
+					if( !address.isBlank() ) {
+						addresses.add( address.strip() );
+					}
+				}
+			}
+		}
+
+		return addresses;
 	}
 
 	/**

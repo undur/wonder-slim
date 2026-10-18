@@ -15,7 +15,9 @@
 
   Of the address headers a WO adaptor sends, `remote_addr` and `remote_host` are now read first: mod_WebObjects sets
   those itself but passes on a `x-webobjects-remote-addr` the client sent, which used to be read first, so a client
-  behind Apache could choose its own address. (#218)
+  behind Apache could choose its own address. (#218) mod_WebObjects also passes on a `remote_addr` the client sent,
+  next to its own; a request whose address header names more than one address has no known address (`remoteAddress()`
+  is null, which an access check refuses). (#219)
 
   A front end still passes on headers it doesn't set itself. modulo removes all of them. Behind Apache, a header it
   doesn't set (such as `x-forwarded-host`) can still come from the client unless the virtual host removes it.
