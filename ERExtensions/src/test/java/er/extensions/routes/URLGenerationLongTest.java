@@ -59,6 +59,14 @@ public class URLGenerationLongTest extends URLGenerationMatrix {
 		assertURLs( "/Apps/WebObjects/App.woa/3/wa/x", prefix + "/wa/act", prefix + "/3/wo/SID/0.", prefix + "/res/app/x.css", "/Apps/WebObjects/App" );
 	}
 
+	/**
+	 * Over https, in the request's own scheme: relative, not a complete http URL (#216)
+	 */
+	@Test
+	public void aSecureRequest() {
+		assertSecureRequestURLs( "/cgi-bin/WebObjects/App.woa/wa/x", PREFIX + "/wa/act", PREFIX + "/wo/SID/0." );
+	}
+
 	@Test
 	public void routes() {
 		assertURLs( "/", PREFIX + "/wa/act", PREFIX + "/wo/SID/0.", PREFIX + "/res/app/x.css", "/cgi-bin/WebObjects/App" );

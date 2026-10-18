@@ -20,6 +20,11 @@
   in `er.extensions.ERXRequest.trustedFrontEnds` (for example `loopback, private, 203.0.113.0/24`), or the application
   sees the front end as the client and every request as plain http.
 
+- **`directActionURLForActionNamed(name, dictionary)` follows the request's scheme**
+  On a request received over https it returned a complete `http://` URL instead of a relative one, as WebObjects'
+  always has: a detour through the front end's redirect to https, a POST turned into a GET, and fetches (EventSource,
+  fetch) blocked as mixed content. It now uses the request's scheme, as component action URLs do. (#216)
+
 ## 2026-10-14 (8.1.2)
 
 - **A development instance takes its port from whatever ng or WO app holds it**

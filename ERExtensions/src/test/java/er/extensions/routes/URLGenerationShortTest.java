@@ -51,6 +51,14 @@ public class URLGenerationShortTest extends URLGenerationMatrix {
 		assertURLs( "/Apps/WebObjects/App.woa/3/wa/x", "/wa/act", "/wo/SID/0.", "/res/app/x.css", "/" );
 	}
 
+	/**
+	 * Over https, in the request's own scheme: relative, not a complete http URL (#216)
+	 */
+	@Test
+	public void aSecureRequest() {
+		assertSecureRequestURLs( "/wa/x", "/wa/act", "/wo/SID/0." );
+	}
+
 	@Test
 	public void routes() {
 		assertURLs( "/", "/wa/act", "/wo/SID/0.", "/res/app/x.css", "/" );

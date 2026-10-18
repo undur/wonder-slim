@@ -4,6 +4,7 @@ import com.webobjects.appserver.WOApplication;
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WODynamicURL;
 import com.webobjects.appserver.WORequest;
+import com.webobjects.foundation.NSDictionary;
 
 /**
  * The context's half of the application's URL handling (see {@link ERXRoutingApplication}), as one layer of the
@@ -71,6 +72,16 @@ public class ERXRoutingContext extends WOContext {
 	@Override
 	public String _urlWithRequestHandlerKey( final String requestHandlerKey, final String requestHandlerPath, final String queryString, final boolean isSecure, final int somePort ) {
 		return shortened( super._urlWithRequestHandlerKey( requestHandlerKey, requestHandlerPath, queryString, isSecure, somePort ) );
+	}
+
+	/**
+	 * In the request's own scheme, like {@link #componentActionURL()}. WOContext's asks for plain http, so on a secure
+	 * request it generated a complete {@code http://} URL instead of a relative one: an extra trip through the front
+	 * end's redirect to https, a POST turned into a GET by it, and fetches blocked as mixed content.
+	 */
+	@Override
+	public String directActionURLForActionNamed( final String actionName, final NSDictionary<String, Object> queryDictionary ) {
+		return directActionURLForActionNamed( actionName, queryDictionary, secureMode(), 0, false );
 	}
 
 	/**

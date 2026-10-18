@@ -3,6 +3,9 @@ package er.extensions.routes;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+import java.util.Map;
+
 import com.webobjects.appserver.WOContext;
 import com.webobjects.appserver.WORequest;
 
@@ -81,6 +84,23 @@ public abstract class URLGenerationMatrix {
 					context.generateCompleteURLs();
 					assertEquals( completeDirectAction, withoutHost( context.directActionURLForActionNamed( "act", null ) ), "complete direct action" );
 				} );
+	}
+
+	/**
+	 * Asserts that on a request received over https, a direct action URL asked for without a scheme is relative, as a
+	 * component action's is: not a complete http URL
+	 */
+	void assertSecureRequestURLs( final String requestURL, final String directAction, final String componentAction ) {
+		assertAll( requestURL,
+				() -> assertEquals( directAction, secureContext( requestURL ).directActionURLForActionNamed( "act", null ), "direct action" ),
+				() -> {
+					final WOContext context = secureContext( requestURL );
+					assertEquals( componentAction, context.componentActionURL().replace( context.session().sessionID(), "SID" ), "component action" );
+				} );
+	}
+
+	private WOContext secureContext( final String requestURL ) {
+		return app().createContextForRequest( app().createRequest( "GET", requestURL, "HTTP/1.1", Map.of( "https", List.of( "on" ) ), null, null ) );
 	}
 
 	private String componentActionURL( final String requestURL ) {
