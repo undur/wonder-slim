@@ -17,7 +17,7 @@ Carried over from JavaWOExtensions.]]></doc>
 		</binding>
 
 		<binding name="action">
-			<pull><type>com.webobjects.appserver.WOComponent</type></pull>
+			<pull><type>com.webobjects.appserver.WOActionResults</type></pull>
 			<doc>The action whose result is shown after the refresh.</doc>
 		</binding>
 
