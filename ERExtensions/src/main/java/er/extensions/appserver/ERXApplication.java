@@ -52,6 +52,7 @@ import er.extensions.ERXObsoleteProperties;
 import er.extensions.ERXP;
 import er.extensions.ERXPlugin;
 import er.extensions.ERXPlugins;
+import er.extensions.ERXTimeZoneHack;
 import er.extensions.appserver.ajax.ERXAjaxApplication;
 import er.extensions.components.errorpages.WOExceptionPage;
 import er.extensions.dev.ERXConsoleCapture;
@@ -184,6 +185,10 @@ public abstract class ERXApplication extends ERXAjaxApplication {
 		// The configuration, composed from all its sources before the application is constructed, so the constructor
 		// sees the properties the application runs with. See ERXConfigurationManager.
 		ERXConfigurationManager.compose(argv);
+
+		// NSTimeZone's system time zone, set before anything uses it (WOApplication.main() does, when WOOutputPath is
+		// set) and once the configuration can have set user.timezone. See ERXTimeZoneHack.
+		ERXTimeZoneHack.enable();
 
 		// Logging from the configuration, replacing the console appender above, before any plugin or the application
 		// runs: everything logged from here on reaches the configured log. Configured again when a logging property
