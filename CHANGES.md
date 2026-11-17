@@ -1,11 +1,22 @@
 # Changelog
 
-## Unreleased
+## 2026-11-17 (8.1.4)
+
+- **On the released ng-objects 0.1.7**
+  wonder-slim now uses ng-core 0.1.7 and Parsley 1.6.6, which is built on the same ng-core, so the two frameworks and
+  the template parser are on one ng release. Also logback 1.6.7 (ERLoggingLogback) and reload4j 1.2.27
+  (ERLoggingReload4j), built with vermilingua 1.2.0.
+
+- **NSTimeZone works on current JDKs without a stand-in class**
+  WebObjects' NSTimeZone finds the system time zone through `sun.security.action.GetPropertyAction`, which is gone
+  from the JDK, and `AccessController`, which is deprecated for removal. wonder-slim shipped its own
+  `GetPropertyAction` in place of the missing class. Now `ERXTimeZoneHack` sets NSTimeZone's system time zone at
+  startup, to the zone NSTimeZone would have found (`user.timezone`, set in the configuration or with `-D`), so it never
+  reaches either class and keeps working once `AccessController` is gone too. Based on Markus Stoll's fix.
 
 - **Resource stamps come from ng-core**
   Stamped resource URLs are made and read by ng-core's `ng.resources.NGResourceStamps`, which ng-objects uses too, so
-  both frameworks stamp resources the same way. The stamps and URLs are unchanged. Depends on ng-core 0.1.7-SNAPSHOT
-  until ng-objects 0.1.7 is released.
+  both frameworks stamp resources the same way. The stamps and URLs are unchanged.
 
   Upgrading: `er.extensions.resources.ERXResourceStamps` is gone; use `ng.resources.NGResourceStamps`, which has the
   same methods.
