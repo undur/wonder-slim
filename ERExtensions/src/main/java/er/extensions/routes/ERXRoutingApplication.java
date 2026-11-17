@@ -12,6 +12,7 @@ import com.webobjects.foundation.NSPropertyListSerialization;
 import com.webobjects.foundation._NSUtilities;
 
 import er.extensions.ERXP;
+import er.extensions.ERXTimeZoneHack;
 import er.extensions.routing.RouteAction;
 
 /**
@@ -25,10 +26,19 @@ import er.extensions.routing.RouteAction;
  * handler URL is handed to the route table through {@link RouteRequestHandler}. Outbound, generated URLs lose the
  * adaptor prefix when short URLs are on ({@link #shortURLs()}; the context's half lives in {@link ERXRoutingContext}).
  *
- * This layer sees only WebObjects, {@link ERXShortURLs} and the routes package. Nothing above it may be required
- * for URL handling to work.
+ * This layer sees only WebObjects, {@link ERXShortURLs} and the routes package (and {@link ERXTimeZoneHack}, which
+ * WebObjects itself needs on current JDKs). Nothing above it may be required for URL handling to work.
  */
 public abstract class ERXRoutingApplication extends WOApplication {
+
+	/*
+	 * NSTimeZone's system time zone, set before any application is constructed: WOApplication's constructor uses the
+	 * default time zone (WOStatisticsStore formats timestamps), also when an application is constructed without
+	 * ERXApplication.main(), as tests do. See ERXTimeZoneHack.
+	 */
+	static {
+		ERXTimeZoneHack.enable();
+	}
 
 	/**
 	 * Short URLs: request handler keys as top-level routes. See {@link #shortURLs()}.

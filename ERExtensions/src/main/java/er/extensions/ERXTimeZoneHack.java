@@ -15,9 +15,13 @@ import com.webobjects.foundation.NSTimeZone;
  * for example) fails.
  *
  * This sets that field before anything asks, with the zone systemTimeZone() would have found, so systemTimeZone()
- * returns it without reaching either class. It must run before NSTimeZone's default time zone is first used: in
- * ERXApplication.main(), once the configuration is composed (so a user.timezone set in the configuration applies, as it
- * did) and before WOApplication.main() (which formats a timestamp when WOOutputPath is set).
+ * returns it without reaching either class. It must run before NSTimeZone's default time zone is first used, and it
+ * runs twice:
+ *
+ * - When ERXRoutingApplication is loaded, before any application is constructed (WOApplication's constructor uses the
+ *   default time zone), however the application is started: tests construct one without ERXApplication.main().
+ * - In ERXApplication.main(), once the configuration is composed, so a user.timezone set in the configuration applies,
+ *   as it did. Nothing uses the default time zone between the two, so the second takes effect.
  *
  * NSTimeZone.resetSystemTimeZone() clears the field, and the next use of the default time zone would then fail. Nothing
  * in WebObjects calls it.
