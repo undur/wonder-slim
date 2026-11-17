@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2026-11-17 (8.1.4)
 
 - **On the released ng-objects 0.1.7**
